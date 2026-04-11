@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+// Lint — enforce ≤100 lines per file
+// Usage: node scripts/lint.js
+
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.resolve(__dirname, '..');
+const LIMIT = 100;
+
+const IGNORE = [
+  'node_modules', '.git', 'playwright-report',
+  'test-results', 'package-lock.json'
+];
+
+const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
+
+function walk(dir) {
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (IGNORE.includes(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...walk(full));
+    } else if (EXTS.includes(path.extname(entry.name))) {
+      files.push(full);
+    }
+  }
+  return files;
+}
+
+let violations = 0;
+let total = 0;
+
+for (const file of walk(ROOT)) {
+  const lines = fs.readFileSync(file, 'utf8').split('\n').length;
+  const rel = path.relative(ROOT, file);
+  total++;
+  if (lines > LIMIT) {
+    console.error(`❌ ${rel}: ${lines} lines (limit ${LIMIT})`);
+    violations++;
+  }
+}
+
+console.log(`\nScanned ${total} files.`);
+if (violations > 0) {
+  console.error(`${violations} file(s) exceed ${LIMIT}-line limit.`);
+  process.exit(1);
+} else {
+  console.log(`✅ All files within ${LIMIT}-line limit.`);
+}

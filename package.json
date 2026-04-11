@@ -1,0 +1,26 @@
+{
+  "name": "devenv-ops",
+  "version": "0.1.0",
+  "description": "Development environment operations: skills, monitoring, research",
+  "private": true,
+  "scripts": {
+    "start": "npx http-server dashboard -p 8090 -c-1",
+    "lint": "node scripts/lint.js",
+    "sync:skills": "bash scripts/sync-skills.sh",
+    "deploy:skills": "bash scripts/deploy-skills.sh",
+    "health": "node scripts/health-check.js",
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed"
+  },
+  "keywords": [
+    "devops",
+    "copilot-skills",
+    "monitoring",
+    "dashboard"
+  ],
+  "author": "Curtis Franks",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

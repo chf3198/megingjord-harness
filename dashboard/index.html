@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevEnv Ops — Fleet Dashboard</title>
+    <link rel="stylesheet" href="css/app.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+    <script src="js/health-check.js"></script>
+    <script src="js/quota-tracker.js"></script>
+    <script src="js/device-monitor.js"></script>
+    <script src="js/app.js"></script>
+</head>
+
+<body x-data="dashboardApp()" x-init="init()">
+    <header class="header">
+        <h1>🖥️ DevEnv Ops</h1>
+        <div class="header-actions">
+            <span class="status-badge" :class="overallStatus">
+                <span x-text="overallStatus"></span>
+            </span>
+            <button @click="refreshAll()" :disabled="loading">
+                ↻ Refresh
+            </button>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Device Cards -->
+        <section class="panel">
+            <h2>🏗️ Fleet Devices</h2>
+            <template x-for="device in devices" :key="device.id">
+                <div class="card device-card" :class="device.status">
+                    <div class="card-header">
+                        <strong x-text="device.alias"></strong>
+                        <span class="badge" :class="device.status" x-text="device.status"></span>
+                    </div>
+                    <div class="card-body">
+                        <p><span class="label">Role:</span>
+                            <span x-text="device.role"></span>
+                        </p>
+                        <p><span class="label">RAM:</span>
+                            <span x-text="device.ram"></span>
+                        </p>
+                        <p><span class="label">Models:</span>
+                            <span x-text="device.modelCount + ' loaded'"></span>
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        <!-- Service Status -->
+        <section class="panel">
+            <h2>⚡ Services</h2>
+            <template x-for="svc in services" :key="svc.id">
+                <div class="card service-card" :class="svc.status">
+                    <div class="card-header">
+                        <strong x-text="svc.name"></strong>
+                        <span class="badge" :class="svc.status" x-text="svc.status"></span>
+                    </div>
+                    <div class="card-body">
+                        <p><span class="label">Type:</span>
+                            <span x-text="svc.type"></span>
+                        </p>
+                        <p><span class="label">Cost:</span>
+                            <span x-text="svc.cost"></span>
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </section>
+
+        <!-- Quota Overview -->
+        <section class="panel">
+            <h2>📊 Quotas</h2>
+            <template x-for="q in quotas" :key="q.id">
+                <div class="card quota-card">
+                    <div class="card-header">
+                        <strong x-text="q.name"></strong>
+                        <span x-text="q.usage + '/' + q.limit"></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" :style="'width:' + q.percent + '%'"
+                            :class="q.percent > 80 ? 'warn' : 'ok'">
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <span>Last refresh: <span x-text="lastRefresh"></span></span>
+        <span>devenv-ops v0.1.0</span>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+// Device Monitor — load inventory JSONs for dashboard
+// Fetches from /inventory/ directory
+
+async function loadDevices() {
+  try {
+    const r = await fetch('../inventory/devices.json');
+    const data = await r.json();
+    return data.devices.map(d => ({
+      id: d.id,
+      alias: d.alias,
+      role: d.role,
+      ram: d.ram?.total || 'unknown',
+      modelCount: (d.ollamaModels || []).length,
+      tailscaleIP: d.tailscaleIP || null,
+      ollama: d.ollama,
+      openclaw: !!d.openclaw,
+      status: 'unknown'
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function loadServices() {
+  try {
+    const r = await fetch('../inventory/services.json');
+    const data = await r.json();
+    return data.services.map(s => ({
+      id: s.id,
+      name: s.name,
+      type: s.type,
+      cost: s.cost,
+      quotas: s.quotas,
+      status: s.status
+    }));
+  } catch {
+    return [];
+  }
+}
