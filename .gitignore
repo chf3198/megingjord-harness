@@ -1,0 +1,18 @@
+# Python caches
+__pycache__/
+*.pyc
+
+# Ephemeral hook state (runtime-only)
+hooks/state/
+
+# Node
+node_modules/
+package-lock.json
+
+# Playwright
+playwright-report/
+test-results/
+
+# OS
+.DS_Store
+Thumbs.db
