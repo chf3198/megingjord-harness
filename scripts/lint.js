@@ -39,7 +39,8 @@ let violations = 0;
 let total = 0;
 
 for (const file of walk(ROOT)) {
-  const lines = fs.readFileSync(file, 'utf8').split('\n').length;
+  const content = fs.readFileSync(file, 'utf8');
+  const lines = content.endsWith('\n') ? content.split('\n').length - 1 : content.split('\n').length;
   const rel = path.relative(ROOT, file);
   total++;
   if (lines > LIMIT) {

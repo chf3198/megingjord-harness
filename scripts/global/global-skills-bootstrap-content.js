@@ -1,14 +1,15 @@
 function contractBody(label) {
   return `Global skills routing contract for this repository (${label}):
 
-1. Run \`repo-standards-router\` first for task classification and gates.
-2. Load \`openclaw-universal-system\` as the machine-global OpenClaw baseline.
-3. For tasks that could benefit from remote execution or offloading, load \`network-platform-resources\`.
-4. For OpenClaw-backed execution, load \`openclaw-availability-utilization\` and enforce preflight + utilization checks.
-5. For runtime/UI changes, run \`web-regression-governance\` before final validation.
-6. For GitHub governance controls, hand off to \`github-ops-tree-router\`.
-7. Run \`workflow-self-anneal\` only after failures or process drift.
-8. Keep changes additive and preserve existing repository instructions.`;
+1. Run \`role-baton-orchestrator\` at task start: Manager → Collaborator → Admin → Consultant. Emit handoff artifacts at each transition. Skip only for trivial tasks (single Q&A, no state changes).
+2. Run \`repo-standards-router\` for task classification and gates.
+3. Load \`openclaw-universal-system\` as the machine-global OpenClaw baseline.
+4. For tasks that could benefit from remote execution or offloading, load \`network-platform-resources\`.
+5. For OpenClaw-backed execution, load \`openclaw-availability-utilization\` and enforce preflight + utilization checks.
+6. For runtime/UI changes, run \`web-regression-governance\` before final validation.
+7. For GitHub governance controls, hand off to \`github-ops-tree-router\`.
+8. Run \`workflow-self-anneal\` only after failures or process drift.
+9. Keep changes additive and preserve existing repository instructions.`;
 }
 
 function skillRoutingBody() {
@@ -17,8 +18,9 @@ function skillRoutingBody() {
 1. Read .github/copilot-instructions.md first.
 2. Apply nearest AGENTS.md instructions.
 3. Prefer reusable global skills from ~/.copilot/skills before ad-hoc reasoning.
-4. For repository workflow routing, invoke:
-   - \`repo-standards-router\` first
+4. For every task, invoke \`role-baton-orchestrator\` first (Manager → Collaborator → Admin → Consultant).
+5. For repository workflow routing, invoke:
+   - \`repo-standards-router\` for task classification and gates
    - \`openclaw-universal-system\` as the machine-global OpenClaw baseline when OpenClaw might help
    - \`network-platform-resources\` when task could benefit from remote execution or offloading
    - \`openclaw-availability-utilization\` when OpenClaw lane is expected or preferred

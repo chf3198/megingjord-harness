@@ -69,6 +69,10 @@ def main() -> int:
         )
 
     context_parts = [
+        "MANDATORY: Begin with Manager role. Emit MANAGER_HANDOFF "
+        "(objective, constraints, acceptance_criteria, gates) before any "
+        "implementation. Then Collaborator → Admin → Consultant. "
+        "Skip baton only for trivial tasks (single Q&A, no state changes).",
         "Global standards active: root-cause first, evidence before claims, "
         "secret-safe packaging, version integrity, docs-sync on behavior/config changes.",
         f"Project type detected: {repo_type}.",

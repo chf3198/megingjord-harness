@@ -2,11 +2,10 @@
 
 **devenv-ops**: Development workbench for `~/.copilot/` global resources (v0.1.0). Skills, instructions, hooks, scripts developed here. Fleet dashboard. Research archive.
 
-## The Loop (execute on every task)
+## Execution Model
 
-```
-DESIGN → TEST → CODE → VERIFY → REFLECT → COMMIT
-```
+Every task follows the **role baton sequence**: Manager → Collaborator → Admin → Consultant.
+See `role-baton-routing` instruction for rules. Local repos may override via `.github/copilot-instructions.md`.
 
 ## Repo Purpose
 

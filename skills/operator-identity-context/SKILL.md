@@ -97,9 +97,9 @@ When starting any task in this workspace:
 - [ ] Confirm `git status` is clean or understand current WIP state
 - [ ] Confirm active branch per repository policy (never bypass protected branch rules)
 - [ ] Review open issues for ticket context
+- [ ] Run `role-baton-orchestrator` — emit `MANAGER_HANDOFF` before implementation
 - [ ] Run `repo-standards-router` for standards/gate routing
 - [ ] If this is a post-failure or process drift situation: run `workflow-self-anneal`
-- [ ] For multi-step implementation: run `role-baton-orchestrator`
 - [ ] Never ask user to do anything before attempting all automation options
 
 ---

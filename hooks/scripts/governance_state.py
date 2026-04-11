@@ -182,8 +182,9 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     flags = state.setdefault("flags", {})
     ops = state.setdefault("admin_ops", {})
 
-    # Once tools are being used, planning/manager phase has happened.
-    roles["manager"] = True
+    # Do NOT auto-mark manager=True. Manager phase is enforced by
+    # instructions and SessionStart hook. Only mark it when the
+    # agent has actually emitted planning evidence.
 
     if tool in {"apply_patch", "create_file", "edit_notebook_file", "create_new_jupyter_notebook"}:
         roles["collaborator"] = True

@@ -35,8 +35,8 @@ Load and apply the `operator-identity-context` skill at the start of every task.
    - If global and repository instructions differ, apply repository instructions for that workspace.
 
 5. **Role router requirement:**
-   - For non-trivial tasks, invoke `role-baton-orchestrator` first.
-   - Use role skills for handoff clarity: `role-manager-execution`, `role-collaborator-execution`, `role-admin-execution`, `role-consultant-critique`.
+   - Invoke `role-baton-orchestrator` at task start. Skip only for trivial tasks (single Q&A, read-only lookup, no state-changing tool calls).
+   - Each role emits a named handoff artifact (`MANAGER_HANDOFF`, `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`) before the next role begins.
 
 6. **Self-anneal check:** If you catch yourself writing "you will need to…", "please manually…", or "Hayden must…" — stop, invoke the research protocol from the `operator-identity-context` skill, and find the automation path instead.
 
