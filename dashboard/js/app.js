@@ -6,6 +6,8 @@ function dashboardApp() {
     devices: [],
     services: [],
     quotas: [],
+    liveQuotas: [],
+    fleetStats: {},
     loading: false,
     lastRefresh: 'never',
 
@@ -31,12 +33,22 @@ function dashboardApp() {
     async refreshAll() {
       this.loading = true;
       try {
-        const checks = await runHealthChecks(this.devices);
+        const ids = this.devices
+          .filter(d => d.ollama).map(d => d.id);
+        const [checks, stats, lq] = await Promise.all([
+          runHealthChecks(this.devices),
+          fetchAllFleetStats(ids),
+          fetchAllLiveQuotas()
+        ]);
         this.devices = mergeHealthStatus(this.devices, checks);
+        this.fleetStats = stats;
+        if (lq.length) this.liveQuotas = lq;
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
         this.loading = false;
       }
-    }
+    },
+
+    startTour() { startDashboardTour(); }
   };
 }

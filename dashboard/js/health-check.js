@@ -1,9 +1,9 @@
 // Health Check — ping Ollama and OpenClaw endpoints
 // Returns status objects for each device
 
-async function checkOllama(host) {
+async function checkOllama(deviceId) {
   try {
-    const r = await fetch(`http://${host}:11434/api/tags`, {
+    const r = await fetch(`/api/fleet/${deviceId}/api/tags`, {
       signal: AbortSignal.timeout(5000)
     });
     if (!r.ok) return { status: 'error', models: [] };
@@ -15,9 +15,10 @@ async function checkOllama(host) {
   }
 }
 
-async function checkOpenClaw(host) {
+async function checkOpenClaw(deviceId) {
   try {
-    const r = await fetch(`http://${host}:4000/health`, {
+    const url = `/api/fleet/${deviceId}/openclaw/health`;
+    const r = await fetch(url, {
       signal: AbortSignal.timeout(5000)
     });
     return r.ok
@@ -31,15 +32,14 @@ async function checkOpenClaw(host) {
 async function runHealthChecks(devices) {
   const results = {};
   for (const d of devices) {
-    if (!d.tailscaleIP) {
+    if (!d.ollama && !d.openclaw) {
       results[d.id] = { status: 'unknown' };
       continue;
     }
-    const host = d.tailscaleIP;
     const ollama = d.ollama
-      ? await checkOllama(host) : null;
+      ? await checkOllama(d.id) : null;
     const openclaw = d.openclaw
-      ? await checkOpenClaw(host) : null;
+      ? await checkOpenClaw(d.id) : null;
 
     if (ollama?.status === 'healthy') {
       results[d.id] = { status: 'healthy', ...ollama };
