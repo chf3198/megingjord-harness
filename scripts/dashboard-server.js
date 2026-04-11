@@ -21,8 +21,12 @@ const FLEET = {
 const OPENCLAW = 'http://100.78.22.13:4000';
 
 function serveStatic(req, res) {
-  const fp = path.join(ROOT, req.url === '/' ? '/dashboard/index.html' : req.url);
+  if (req.url === '/') {
+    res.writeHead(302, { Location: '/dashboard/' }); res.end(); return;
+  }
+  let fp = path.join(ROOT, req.url);
   if (!fp.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
+  if (fp.endsWith('/') || fp.endsWith(path.sep)) fp = path.join(fp, 'index.html');
   const ext = path.extname(fp);
   fs.readFile(fp, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }
@@ -88,11 +92,9 @@ async function handleApi(req, res) {
   jsonRes(res, 404, { error: 'not found' });
 }
 
-const server = http.createServer((req, res) => {
+http.createServer((req, res) => {
   if (req.url.startsWith('/api/')) return handleApi(req, res);
   serveStatic(req, res);
-});
-server.listen(PORT, () => {
-  console.log(`Dashboard server: http://localhost:${PORT}`);
-  console.log(`Fleet proxy: ${Object.keys(FLEET).join(', ')}`);
+}).listen(PORT, () => {
+  console.log(`Dashboard: http://localhost:${PORT}  Fleet: ${Object.keys(FLEET).join(', ')}`);
 });
