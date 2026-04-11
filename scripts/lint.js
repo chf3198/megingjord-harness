@@ -10,8 +10,12 @@ const LIMIT = 100;
 
 const IGNORE = [
   'node_modules', '.git', 'playwright-report',
-  'test-results', 'package-lock.json'
+  'test-results', 'package-lock.json',
+  // Global resources have their own governance
+  'skills', 'hooks'
 ];
+
+const IGNORE_PATHS = ['scripts/global', 'instructions'];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
 
@@ -20,6 +24,8 @@ function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (IGNORE.includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
+    const rel = path.relative(ROOT, full);
+    if (IGNORE_PATHS.some(p => rel.startsWith(p))) continue;
     if (entry.isDirectory()) {
       files.push(...walk(full));
     } else if (EXTS.includes(path.extname(entry.name))) {

@@ -6,8 +6,10 @@
   "scripts": {
     "start": "npx http-server dashboard -p 8090 -c-1",
     "lint": "node scripts/lint.js",
-    "sync:skills": "bash scripts/sync-skills.sh",
-    "deploy:skills": "bash scripts/deploy-skills.sh",
+    "sync": "bash scripts/sync.sh",
+    "sync:dry": "bash scripts/sync.sh --dry-run",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:apply": "bash scripts/deploy.sh --apply",
     "health": "node scripts/health-check.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed"

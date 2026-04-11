@@ -1,32 +1,42 @@
 ---
-applyTo: "skills/**"
+applyTo: "skills/**,instructions/**,hooks/**,scripts/global/**"
 ---
 
-# Skills Development Instructions
+# Global Resource Development Instructions
 
-## Skill File Structure
+## This Repo vs Runtime
 
-Each skill lives in `skills/<skill-name>/SKILL.md`.
+- **This repo** (`skills/`, `instructions/`, `hooks/`, `scripts/global/`): development source
+- **`~/.copilot/`**: deployed runtime — VS Code reads skills/instructions from here
+- All edits happen in this repo first, then deploy with `npm run deploy:apply`
 
-## Editing Skills
+## Editing Workflow
 
-1. Branch: `git checkout -b skill/<name>-change`
-2. Edit the SKILL.md file
-3. Test in a Copilot Chat session to verify behavior
+1. Branch: `git checkout -b skill/<name>-change` (or `hook/`, `instruction/`)
+2. Edit the file in this repo
+3. Test: verify agent behavior in a Copilot Chat session
 4. Merge to main after validation
-5. Deploy: `npm run deploy:skills`
+5. Deploy: `npm run deploy:apply`
 
-## Skill Format
+## Skill Format (SKILL.md)
 
-Every SKILL.md must contain:
-- **Name** — Short identifier
-- **Description** — One-line purpose
-- **When to use** — Trigger conditions
-- **Instructions** — The actual skill content
+Every skill must contain:
+- **Frontmatter** — name, description, argument-hint, user-invocable, disable-model-invocation
+- **Purpose** — What the skill does
+- **Scope boundary** — What it owns vs hands off
+- **Hard constraints** — Bounded rules
+- **Instructions** — Step-by-step execution logic
 - **Verification** — How to confirm it worked
+
+## Instruction Format (*.instructions.md)
+
+- Frontmatter with `applyTo` glob pattern
+- Clear scope and when-to-apply conditions
+- Additive to repo-local instructions (never override)
 
 ## Deploy Safety
 
-- Never deploy directly from an unmerged branch
-- Always diff before deploy: `diff -r skills/ ~/.copilot/skills/`
-- Keep a backup: deploy script creates timestamped backup
+- Never deploy from an unmerged branch
+- `npm run deploy` (dry-run) first, review the diff
+- `npm run deploy:apply` creates timestamped backup automatically
+- Refresh dev copies: `npm run sync` after any direct runtime changes

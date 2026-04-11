@@ -1,130 +1,51 @@
 {
   "lastUpdated": "2026-04-11",
-  "services": [
+  "subscriptions": [
     {
       "id": "copilot-pro",
       "name": "GitHub Copilot Pro",
-      "type": "subscription",
       "cost": "$10/mo",
-      "quotas": {
-        "premiumRequests": {
-          "limit": 300,
-          "period": "monthly"
-        },
-        "completions": "unlimited"
-      },
-      "models": [
-        "Claude Opus 4.5/4.6",
-        "Claude Sonnet 4/4.5/4.6",
-        "Gemini 2.5 Pro",
-        "Gemini 3 Flash",
-        "Gemini 3.1 Pro",
-        "GPT-4.1",
-        "GPT-5 mini",
-        "GPT-5.1",
-        "GPT-5.2"
-      ],
-      "features": [
-        "agent-mode",
-        "cloud-agent",
-        "mcp",
-        "code-review",
-        "cli-byok"
-      ],
+      "quotas": { "premiumRequests": 300, "period": "monthly" },
+      "models": ["Claude Opus 4.5/4.6", "Claude Sonnet 4/4.5/4.6", "Gemini 2.5 Pro", "GPT-4.1", "GPT-5 mini", "GPT-5.1"],
+      "features": ["agent-mode", "cloud-agent", "mcp", "code-review", "cli-byok"],
       "status": "active"
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare Workers",
-      "type": "subscription",
       "cost": "$10/mo",
-      "quotas": {
-        "neuronsPerDay": {
-          "limit": 10000,
-          "period": "daily"
-        }
-      },
-      "features": [
-        "pages",
-        "workers-ai",
-        "d1",
-        "r2",
-        "kv"
-      ],
+      "quotas": { "neuronsPerDay": 10000, "period": "daily" },
+      "features": ["pages", "workers-ai", "d1", "r2", "kv"],
       "visionModel": "@cf/meta/llama-3.2-11b-vision-instruct",
       "status": "active"
-    },
+    }
+  ],
+  "freeTier": [
     {
       "id": "google-ai-studio",
       "name": "Google AI Studio",
-      "type": "free",
-      "cost": "$0",
-      "quotas": {
-        "searchGrounding": {
-          "limit": 500,
-          "period": "daily"
-        }
-      },
-      "models": [
-        "Gemini 2.5 Pro",
-        "Gemini 2.5 Flash",
-        "Gemini 3 Flash",
-        "Gemma 4"
-      ],
-      "features": [
-        "vision",
-        "audio",
-        "code-execution",
-        "embeddings"
-      ],
-      "status": "not-configured",
-      "apiKey": null
+      "quotas": { "searchGrounding": 500, "period": "daily" },
+      "models": ["Gemini 2.5 Pro", "Gemini 2.5 Flash", "Gemini 3 Flash", "Gemma 4"],
+      "features": ["vision", "audio", "code-execution", "embeddings"],
+      "status": "not-configured"
     },
     {
       "id": "groq",
       "name": "Groq",
-      "type": "free",
-      "cost": "$0",
-      "quotas": {
-        "rpm": {
-          "limit": 30,
-          "period": "minute"
-        },
-        "rpd": {
-          "limit": 14400,
-          "period": "daily",
-          "model": "llama-3.1-8b"
-        }
-      },
-      "status": "not-configured",
-      "apiKey": null
+      "quotas": { "rpm": 30, "rpd": 14400 },
+      "status": "not-configured"
     },
     {
       "id": "cerebras",
       "name": "Cerebras Inference",
-      "type": "free",
-      "cost": "$0",
-      "quotas": {
-        "note": "Rate-limited free tier, details TBD"
-      },
-      "models": [
-        "GPT-OSS-120B",
-        "Llama 3.1-8B",
-        "Qwen3-235B"
-      ],
-      "status": "not-configured",
-      "apiKey": null
+      "models": ["GPT-OSS-120B", "Llama 3.1-8B", "Qwen3-235B"],
+      "status": "not-configured"
     },
     {
       "id": "openrouter",
       "name": "OpenRouter",
-      "type": "free",
-      "cost": "$0 (free models only)",
-      "quotas": {
-        "note": "Varies by model provider"
-      },
-      "status": "active",
-      "apiKey": "configured"
+      "quotas": { "note": "Varies by model provider" },
+      "status": "active"
     }
   ]
 }

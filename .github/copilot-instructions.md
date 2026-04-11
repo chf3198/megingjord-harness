@@ -1,6 +1,6 @@
 # Copilot Instructions — devenv-ops
 
-**devenv-ops**: Development environment operations hub (v0.1.0). Skills versioning, fleet monitoring dashboard, infrastructure research. Alpine.js frontend + static deployment.
+**devenv-ops**: Development workbench for `~/.copilot/` global resources (v0.1.0). Skills, instructions, hooks, scripts developed here. Fleet dashboard. Research archive.
 
 ## The Loop (execute on every task)
 
@@ -10,81 +10,79 @@ DESIGN → TEST → CODE → VERIFY → REFLECT → COMMIT
 
 ## Repo Purpose
 
-This repo manages the **meta-layer** of our development environment:
-1. **Skills** — Copilot agent skills versioned as code with deploy pipeline
-2. **Dashboard** — Alpine.js web app monitoring fleet health and quotas
-3. **Research** — Living docs tracking free-tier services, hardware, architecture
-4. **Inventory** — JSON-structured fleet state (devices, models, services)
+This repo is the **source of truth** for all global Copilot resources:
+1. **skills/** → 31 skills, deployed to `~/.copilot/skills/`
+2. **instructions/** → 9 global instructions, deployed to `~/.copilot/instructions/`
+3. **hooks/** → Hook scripts, deployed to `~/.copilot/hooks/`
+4. **scripts/global/** → 9 bootstrap scripts, deployed to `~/.copilot/scripts/`
+5. **dashboard/** → Fleet monitoring web app (Alpine.js)
+6. **research/** → ADRs, service evaluations, hardware inventory
+7. **inventory/** → JSON device/service state
 
 ## Architecture
 
-### Three Concern Areas
-
 ```
-Skills Layer (skills/, instructions/, hooks/)
-  ├─ Versioned skill sources (SKILL.md per skill)
-  ├─ Sync: pull from ~/.copilot/skills/ into repo
-  └─ Deploy: push from repo to ~/.copilot/skills/
-
-Dashboard (dashboard/)
-  ├─ Alpine.js frontend — monitors fleet health
-  ├─ Checks: Ollama instances, OpenClaw, API quotas
-  └─ Deploy: Cloudflare Pages (static)
-
-Research & Inventory (research/, inventory/)
-  ├─ ADRs for infrastructure decisions
-  ├─ Free-tier service evaluations
-  └─ JSON inventory of devices and services
+This Repo (develop)          ~/.copilot/ (runtime)
+skills/          ──deploy──▶  skills/
+instructions/    ──deploy──▶  instructions/
+hooks/           ──deploy──▶  hooks/
+scripts/global/  ──deploy──▶  scripts/
 ```
 
-### Fleet Topology
+**Rule**: Never edit `~/.copilot/` directly. All changes flow through this repo.
+
+## Fleet Topology
 
 ```
-penguin-1 (SML)          windows-laptop (OpenClaw)     chromebook-2
-  Ollama: tiny models      Ollama: 7B models            Dev/staging
-  Tailscale mesh           OpenClaw gateway              Tailscale mesh
-  2.7GB RAM                16GB RAM                      TBD
-       └──────── Tailscale VPN mesh ────────┘
+penguin-1 (SML Chromebook)   windows-laptop (OpenClaw)   chromebook-2
+  Ollama: tiny models          Ollama: 7B models           TBD
+  2.7GB RAM                    16GB RAM
+         └──────── Tailscale VPN mesh ────────┘
 ```
 
 ## Constraints
 
-- **≤100 lines per file** (lint-enforced, no exceptions)
-- **JSON for structured data** (inventory, config)
-- **Markdown for prose** (research, ADRs, skill docs)
+- **≤100 lines per file** (lint-enforced)
+- **JSON for structured data** (inventory/, config)
+- **Markdown for prose** (research/, ADRs, skills)
 - **No build step** — dashboard is static HTML/JS/CSS
-- **Test skill changes on a branch** before deploying
+- **Branch before editing global resources**
 
 ## Commands
 
 ```bash
-npm start             # Dashboard on :8090
-npm run lint          # 100-line file check
-npm run sync:skills   # Pull skills from ~/.copilot/skills/
-npm run deploy:skills # Push skills to ~/.copilot/skills/
-npm run health        # Fleet health check
-npm test              # E2E tests
+npm start              # Dashboard on :8090
+npm run lint           # 100-line file check
+npm run sync           # Pull ~/.copilot/ → repo
+npm run sync:dry       # Preview sync
+npm run deploy         # Preview deploy (dry-run)
+npm run deploy:apply   # Deploy repo → ~/.copilot/
+npm run health         # Fleet health check
+npm test               # E2E tests
 ```
 
 ## Git Workflow
 
-1. `git checkout -b feat/description` or `skill/skill-name`
-2. Make changes, test
+1. `git checkout -b skill/<name>` or `feat/<topic>`
+2. Make changes, test behavior in Copilot Chat
 3. `git checkout main && git merge feat/... --no-ff`
-4. Delete feature branch after merge
+4. `npm run deploy:apply` after merge
+5. Delete feature branch
 
 ## File Organization
 
 | Path | Content | Format |
 |---|---|---|
 | `skills/<name>/SKILL.md` | Skill definition | Markdown |
-| `research/adr/NNN-title.md` | Architecture decision | Markdown |
-| `research/*.md` | Evaluation docs | Markdown |
-| `inventory/devices.json` | Machine specs | JSON |
-| `inventory/services.json` | API service config | JSON |
-| `dashboard/js/*.js` | Dashboard modules | ES modules |
-| `scripts/*.js` | Node.js utilities | CommonJS |
-| `scripts/*.sh` | Shell utilities | Bash |
+| `instructions/*.instructions.md` | Global instructions | Markdown |
+| `hooks/scripts/*.py` | Hook scripts | Python |
+| `hooks/*.json` | Hook config | JSON |
+| `scripts/global/*.js` | Bootstrap scripts | Node.js |
+| `scripts/*.sh` | Sync/deploy utilities | Bash |
+| `scripts/*.js` | Repo utilities | Node.js |
+| `research/adr/NNN-title.md` | ADRs | Markdown |
+| `inventory/*.json` | Fleet state | JSON |
+| `dashboard/js/*.js` | Dashboard modules | JS |
 
 ## Environment
 
