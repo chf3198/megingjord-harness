@@ -31,12 +31,11 @@ async function checkOpenClaw(host) {
 async function runHealthChecks(devices) {
   const results = {};
   for (const d of devices) {
-    if (!d.tailscaleIP && d.id !== 'penguin-1') {
+    if (!d.tailscaleIP) {
       results[d.id] = { status: 'unknown' };
       continue;
     }
-    const host = d.id === 'penguin-1'
-      ? 'localhost' : d.tailscaleIP;
+    const host = d.tailscaleIP;
     const ollama = d.ollama
       ? await checkOllama(host) : null;
     const openclaw = d.openclaw

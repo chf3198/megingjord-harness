@@ -5,7 +5,7 @@
 const http = require('http');
 
 const DEVICES = [
-  { id: 'penguin-1', host: 'localhost', port: 11434 },
+  { id: 'penguin-1', host: '100.86.248.35', port: 11434 },
   { id: 'windows-laptop', host: '100.78.22.13', port: 11434 }
 ];
 

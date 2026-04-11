@@ -18,6 +18,7 @@
       },
       "swap": "none (kernel-blocked)",
       "tailscale": true,
+      "tailscaleIP": "100.86.248.35",
       "ollama": true,
       "ollamaModels": [
         "tinyllama:latest",

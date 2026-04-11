@@ -4,7 +4,7 @@
   "description": "Development environment operations: skills, monitoring, research",
   "private": true,
   "scripts": {
-    "start": "npx http-server dashboard -p 8090 -c-1",
+    "start": "npx http-server . -p 8090 -c-1",
     "lint": "node scripts/lint.js",
     "sync": "bash scripts/sync.sh",
     "sync:dry": "bash scripts/sync.sh --dry-run",
