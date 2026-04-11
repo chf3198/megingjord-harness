@@ -21,10 +21,12 @@
       "tailscaleIP": "100.86.248.35",
       "ollama": true,
       "ollamaModels": [
+        "qwen3.5:0.8b",
+        "gemma3:270m",
         "tinyllama:latest",
-        "lfm2.5-thinking:1.2b",
-        "gemma3:270m"
+        "lfm2.5-thinking:1.2b"
       ],
+      "ollamaHost": "0.0.0.0",
       "services": [
         "ollama"
       ],
@@ -47,7 +49,9 @@
       },
       "tailscale": true,
       "tailscaleIP": "100.78.22.13",
+      "sshUser": "admin",
       "ollama": true,
+      "ollamaHost": "0.0.0.0",
       "ollamaModels": [
         "mistral:latest",
         "phi3:mini",
