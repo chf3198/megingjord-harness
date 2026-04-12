@@ -47,5 +47,16 @@
       "quotas": { "note": "Varies by model provider" },
       "status": "active"
     }
+  ],
+  "selfHosted": [
+    {
+      "id": "openclaw",
+      "name": "OpenClaw (LiteLLM proxy)",
+      "host": "windows-laptop",
+      "port": 4000,
+      "requires": "python + litellm",
+      "status": "not-installed",
+      "note": "Python not present on windows-laptop. Needs provisioning."
+    }
   ]
 }
