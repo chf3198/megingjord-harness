@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-11",
+  "lastUpdated": "2026-04-12",
   "subscriptions": [
     {
       "id": "copilot-pro",
@@ -53,10 +53,13 @@
       "id": "openclaw",
       "name": "OpenClaw (LiteLLM proxy)",
       "host": "windows-laptop",
+      "tailscaleIp": "100.78.22.13",
       "port": 4000,
-      "requires": "python + litellm",
-      "status": "not-installed",
-      "note": "Python not present on windows-laptop. Needs provisioning."
+      "endpoint": "http://100.78.22.13:4000",
+      "runtime": "Python 3.12.10 + LiteLLM 1.83.4",
+      "models": ["ollama/mistral", "ollama/phi3:mini", "ollama/qwen2.5:7b-instruct"],
+      "persistence": "LiteLLMServe scheduled task (SYSTEM, ONSTART)",
+      "status": "active"
     }
   ]
 }

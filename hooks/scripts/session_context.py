@@ -48,46 +48,41 @@ def main() -> int:
 
     if repo_type == "vscode-extension":
         profile = (
-            "Profile=vscode-extension: enforce role baton with hard admin gates "
+            "Profile=vscode-extension: hard admin gates "
             "(commit/push/PR/CI/merge) plus release gates "
             "(vsce publish, release-integrity, GitHub release)."
         )
     elif repo_type in {"web-app", "website-static"}:
         profile = (
-            "Profile=web: enforce role baton with hard admin gates "
-            "(commit/push/PR/CI/merge) and strict docs-drift checks before closeout."
+            "Profile=web: hard admin gates "
+            "(commit/push/PR/CI/merge) and strict docs-drift checks."
         )
     elif repo_type == "infra-automation":
         profile = (
-            "Profile=infra-automation: enforce role baton with hard admin gates "
+            "Profile=infra-automation: hard admin gates "
             "and governance checks before merge."
         )
     else:
         profile = (
-            "Profile=generic: enforce role baton with hard admin gates "
+            "Profile=generic: hard admin gates "
             "(commit/push/PR/CI/merge) for code-changing sessions."
         )
 
+    baton_msg = ("MANDATORY: Begin with Manager role. Emit MANAGER_HANDOFF "
+        "(objective, constraints, acceptance_criteria, gates) before implementation. "
+        "Then Collaborator → Admin → Consultant. Skip for trivial tasks only.")
+    standards_msg = ("Global standards: root-cause first, evidence before claims, "
+        "secret-safe packaging, version integrity, docs-sync on changes.")
+    postmerge_msg = ("Post-merge: after merges changing behavior, run checklist "
+        "(CHANGELOG, README, repo-profile-governance, docs-drift, learnings).")
     context_parts = [
-        "MANDATORY: Begin with Manager role. Emit MANAGER_HANDOFF "
-        "(objective, constraints, acceptance_criteria, gates) before any "
-        "implementation. Then Collaborator → Admin → Consultant. "
-        "Skip baton only for trivial tasks (single Q&A, no state changes).",
-        "Global standards active: root-cause first, evidence before claims, "
-        "secret-safe packaging, version integrity, docs-sync on behavior/config changes.",
-        f"Project type detected: {repo_type}.",
-        profile,
-        f"Repo signals: {', '.join(signals) if signals else 'none-detected'}.",
+        baton_msg, standards_msg,
+        f"Project type: {repo_type}.", profile,
+        f"Signals: {', '.join(signals) if signals else 'none'}.",
     ]
-
     if gaps:
-        context_parts.append(f"Community health gaps: {', '.join(gaps)}.")
-
-    context_parts.append(
-        "Post-merge governance: after any PR merge or deploy that changes behavior, "
-        "run the post-merge checklist (CHANGELOG, README sync, repo-profile-governance, "
-        "docs-drift-maintenance, learnings). Do not end the task until these are addressed."
-    )
+        context_parts.append(f"Health gaps: {', '.join(gaps)}.")
+    context_parts.append(postmerge_msg)
 
     out = {
         "hookSpecificOutput": {

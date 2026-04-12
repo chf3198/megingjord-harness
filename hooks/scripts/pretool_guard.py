@@ -1,38 +1,72 @@
 #!/usr/bin/env python3
+"""PreToolUse hook: pre-tool guards and admin sequencing gates."""
 import json
-import re
 import sys
 from pathlib import Path
-from typing import Any, Iterable
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from admin_patterns import (
+    DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE,
+    RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
+    RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH,
+    SECRET_FILE_RE, iter_strings,
+)
 from governance_state import ensure_state
 
-SECRET_FILE_RE = re.compile(r"(^|/)(\.env(\..*)?|id_rsa|id_ed25519|.*\.pem|.*\.key)$")
-DANGEROUS_CMD_RE = re.compile(r"\brm\s+-rf\s+/(\s|$)|\bmkfs\b|\bdd\s+if=|\bDROP\s+TABLE\b", re.IGNORECASE)
-GIT_COMMIT_RE = re.compile(r"\bgit\s+commit\b")
-GIT_PUSH_RE = re.compile(r"\bgit\s+push\b")
-PR_CREATE_RE = re.compile(r"\bgh\s+pr\s+create\b")
-PR_CHECKS_RE = re.compile(r"\bgh\s+pr\s+checks\b")
-PR_MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
-VSCE_PUBLISH_RE = re.compile(r"\b(vsce\s+publish|npx\s+vsce\s+publish)\b")
-RELEASE_INTEGRITY_RE = re.compile(r"release-integrity-check\.sh\s+--post-publish")
-GH_RELEASE_CREATE_RE = re.compile(r"\bgh\s+release\s+create\b")
-GH_ISSUE_CLOSE_RE = re.compile(r"\bgh\s+issue\s+close\b")
+
+def emit(decision: str, reason: str, extra: str | None = None) -> int:
+    """Emit a PreToolUse permission decision and exit."""
+    hook = {"hookEventName": "PreToolUse", "permissionDecision": decision,
+            "permissionDecisionReason": reason}
+    if extra:
+        hook["additionalContext"] = extra
+    print(json.dumps({"hookSpecificOutput": hook}))
+    return 0
 
 
-def iter_strings(value: Any) -> Iterable[str]:
-    if isinstance(value, str):
-        yield value
-    elif isinstance(value, dict):
-        for v in value.values():
-            yield from iter_strings(v)
-    elif isinstance(value, list):
-        for v in value:
-            yield from iter_strings(v)
+def check_terminal(joined: str, state: dict) -> int | None:
+    """Check terminal commands for dangerous ops and sequencing."""
+    flags = state.get("flags", {})
+    ops = state.get("admin_ops", {})
+    repo_type = state.get("repo_type", "generic")
+    if DANGEROUS_CMD_RE.search(joined):
+        return emit("deny", "Blocked dangerous terminal command.")
+    if ".copilot/hooks/scripts" in joined:
+        return emit("ask", "Hook script mutation detected. Manual approval required.",
+                     "Review for policy weakening or bypass logic.")
+    if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
+        return emit("deny", "Push blocked: commit step first (Admin sequencing).")
+    if RE_PR_MERGE.search(joined):
+        if not ops.get("pr_create"):
+            return emit("deny", "Merge blocked: PR creation not recorded.")
+        if not ops.get("ci_green"):
+            return emit("deny", "Merge blocked: CI-green not recorded.")
+    if RE_VSCE_PUBLISH.search(joined):
+        if repo_type == "vscode-extension" and flags.get("extension_touched"):
+            if not ops.get("merge"):
+                return emit("deny", "Publish blocked: merge not recorded.")
+    if RE_GH_RELEASE_CREATE.search(joined):
+        if repo_type == "vscode-extension" and flags.get("extension_touched"):
+            if not ops.get("publish"):
+                return emit("deny", "Release blocked: publish not recorded.")
+    if RE_GH_ISSUE_CLOSE.search(joined):
+        if flags.get("code_touched") and not ops.get("merge"):
+            return emit("deny", "Issue close blocked: merge not recorded.")
+        if repo_type == "vscode-extension" and flags.get("extension_touched"):
+            if not ops.get("release_integrity"):
+                return emit("deny", "Issue close blocked: integrity check not recorded.")
+    if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined):
+        if not ops.get("commit"):
+            return emit("ask", "PR creation before commit. Confirm intentional.")
+    if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):
+        return emit("ask", "CI checks before PR creation. Confirm intentional.")
+    if RE_RELEASE_INTEGRITY.search(joined):
+        if repo_type == "vscode-extension" and not ops.get("publish"):
+            return emit("ask", "Integrity check before publish. Confirm intentional.")
+    return None
 
 
 def main() -> int:
@@ -42,84 +76,20 @@ def main() -> int:
         return 0
 
     tool = str(payload.get("tool_name", ""))
-    tool_input = payload.get("tool_input", {})
-    values = list(iter_strings(tool_input))
-    cwd = str(payload.get("cwd", "")) or None
-
-    state = ensure_state(cwd or str(Path.cwd()))
-    flags = state.get("flags", {})
-    ops = state.get("admin_ops", {})
-    repo_type = state.get("repo_type", "generic")
-
-    def emit(decision: str, reason: str, additional: str | None = None) -> int:
-        out = {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": decision,
-                "permissionDecisionReason": reason,
-            }
-        }
-        if additional:
-            out["hookSpecificOutput"]["additionalContext"] = additional
-        print(json.dumps(out))
-        return 0
+    values = list(iter_strings(payload.get("tool_input", {})))
+    cwd = str(payload.get("cwd", "")) or str(Path.cwd())
+    state = ensure_state(cwd)
 
     if tool in {"run_in_terminal", "terminal", "runTerminalCommand"}:
-        joined = "\n".join(values)
-        if DANGEROUS_CMD_RE.search(joined):
-            return emit("deny", "Blocked dangerous terminal command by global policy.")
+        result = check_terminal("\n".join(values), state)
+        if result is not None:
+            return result
 
-        # Block self-modifying hook changes unless explicitly approved.
-        if ".copilot/hooks/scripts" in joined or "~/.copilot/hooks/scripts" in joined:
-            return emit(
-                "ask",
-                "Hook-policy script mutation detected. Manual approval required.",
-                "Review for policy weakening, self-approval paths, or hidden bypass logic.",
-            )
-
-        # Hard role-baton admin sequencing gates.
-        if GIT_PUSH_RE.search(joined) and not ops.get("commit", False):
-            return emit("deny", "Push blocked: run commit step first (Admin baton sequencing).")
-
-        if PR_MERGE_RE.search(joined):
-            if not ops.get("pr_create", False):
-                return emit("deny", "Merge blocked: PR creation step not recorded.")
-            if not ops.get("ci_green", False):
-                return emit("deny", "Merge blocked: CI-green verification step not recorded.")
-
-        if VSCE_PUBLISH_RE.search(joined):
-            if repo_type == "vscode-extension" and flags.get("extension_touched", False):
-                if not ops.get("merge", False):
-                    return emit("deny", "Publish blocked: merge step not recorded.")
-
-        if GH_RELEASE_CREATE_RE.search(joined):
-            if repo_type == "vscode-extension" and flags.get("extension_touched", False):
-                if not ops.get("publish", False):
-                    return emit("deny", "Release blocked: extension publish step not recorded.")
-
-        if GH_ISSUE_CLOSE_RE.search(joined):
-            if flags.get("code_touched", False) and not ops.get("merge", False):
-                return emit("deny", "Issue close blocked: merge step not recorded.")
-            if repo_type == "vscode-extension" and flags.get("extension_touched", False):
-                if not ops.get("release_integrity", False):
-                    return emit("deny", "Issue close blocked: post-publish release integrity check not recorded.")
-
-        # Encourage the right next step with ask-mode when sequencing is likely off.
-        if PR_CREATE_RE.search(joined) and not GIT_COMMIT_RE.search(joined) and not ops.get("commit", False):
-            return emit("ask", "PR creation before commit detected. Confirm this is intentional.")
-        if PR_CHECKS_RE.search(joined) and not ops.get("pr_create", False):
-            return emit("ask", "CI checks requested before PR creation was recorded. Confirm this is intentional.")
-        if RELEASE_INTEGRITY_RE.search(joined) and repo_type == "vscode-extension" and not ops.get("publish", False):
-            return emit("ask", "Post-publish integrity check requested before publish was recorded. Confirm this is intentional.")
-
-    suspicious_paths = [v for v in values if "/" in v or "." in v]
-    if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example") for p in suspicious_paths):
-        return emit(
-            "ask",
-            "Sensitive file path detected (.env/key material). Manual approval required.",
-            "Use secret-safe patterns and avoid committing or packaging sensitive files.",
-        )
-
+    suspicious = [v for v in values if "/" in v or "." in v]
+    if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example")
+           for p in suspicious):
+        return emit("ask", "Sensitive file path detected. Manual approval required.",
+                     "Use secret-safe patterns; avoid committing sensitive files.")
     return 0
 
 
