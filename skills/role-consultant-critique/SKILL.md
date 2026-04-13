@@ -26,6 +26,12 @@ Before emitting `CONSULTANT_CLOSEOUT`, verify:
 
 If any check fails, add it to `risk_register` as `process: ticket-hygiene-gap`.
 
+## Ticket baton protocol (CLOSEOUT)
+
+1. Write CLOSEOUT comment: `## 🔍 Consultant — CLOSEOUT` with confidence, risks, follow-ups.
+2. Transition labels: `status:review` → `status:done`, remove all `role:*` labels.
+3. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
+
 ## Entry criteria
 
 - `ADMIN_HANDOFF` exists (or explicit N/A with reason).

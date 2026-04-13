@@ -6,12 +6,21 @@ applyTo: "**"
 
 # Role Baton Routing
 
-Execute every task through a single active role at a time:
+The GitHub issue **is** the baton. Execute every task through a single active role at a time. Each role writes a structured comment on the ticket and transitions the status label.
 
-1. **Manager**: scope, constraints, acceptance criteria, gate plan → **create/link GitHub issue** → emit `MANAGER_HANDOFF` with `issue: #N`.
-2. **Collaborator**: implementation and validation → emit `COLLABORATOR_HANDOFF`.
-3. **Admin**: operational execution (services, git/PR/release ops) → emit `ADMIN_HANDOFF`.
-4. **Consultant**: independent critique and residual-risk assessment → emit `CONSULTANT_CLOSEOUT`.
+## Status workflow
+
+```
+status:backlog → status:ready → status:in-progress → status:review → status:done
+  (create)        (Manager)       (Collaborator)       (Admin)         (Consultant)
+```
+
+## Sequence
+
+1. **Manager**: scope, AC, gates → create/link issue → set `status:ready`, `role:manager` → emit `MANAGER_HANDOFF` → swap to `role:collaborator`.
+2. **Collaborator**: implement + validate → set `status:in-progress` → emit `COLLABORATOR_HANDOFF` → swap to `role:admin`.
+3. **Admin**: commit/PR/merge ops → set `status:review` → emit `ADMIN_HANDOFF` → swap to `role:consultant`.
+4. **Consultant**: critique + CLOSEOUT → set `status:done`, remove `role:*` labels, close issue → emit `CONSULTANT_CLOSEOUT`.
 
 ## Hard rules
 

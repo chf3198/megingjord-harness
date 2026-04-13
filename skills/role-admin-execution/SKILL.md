@@ -14,6 +14,12 @@ disable-model-invocation: false
 - Perform git/PR/release administration consistent with policy.
 - Execute required post-merge/post-deploy governance checklist items.
 
+## Ticket baton protocol
+
+1. Transition labels: `status:in-progress` → `status:review`, confirm `role:admin`.
+2. Write ops comment: `## ⚙️ Admin — Operations Evidence` listing commit/PR/CI/merge.
+3. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`.
+
 ## Entry criteria
 
 - `COLLABORATOR_HANDOFF` validation evidence is present.
@@ -29,61 +35,22 @@ disable-model-invocation: false
 - Do not re-scope implementation.
 - Do not skip required validation evidence.
 
-## Escalation triggers
-
-- Operational preconditions fail.
-- Release/governance integrity checks fail.
-
 ---
 
-## Feature Completion Checklist (required for any feature/bugfix work)
+## Feature completion steps (required for feature/bugfix)
 
-**"All validation gates pass" = Collaborator done. It does NOT mean Admin done.**
+"All gates pass" = Collaborator done, NOT Admin done. Execute in order:
 
-When COLLABORATOR_HANDOFF is received for feature or bugfix work, execute these steps in order. Do not stop after gates pass; do not ask the user to do any of these steps.
+1. **Version check** — If extension changed: confirm version not already published
+2. **Commit** — `git add -A && git commit` with `Closes #N` and "why" context
+3. **Push** — `git push -u origin <branch-name>`
+4. **PR** — `gh pr create` with `Closes #N`, gate evidence, labels, milestone
+5. **CI green** — `gh pr checks <PR> --watch`; fix failures before merge
+6. **Merge** — `gh pr merge --merge` (or `--squash`); never push to main directly
+7. **Publish/release** — If applicable: build, publish, create GH release
+8. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
 
-1. **Version collision check**
-   - If `vscode-extension/` changed: confirm `package.json` version is not already published to Marketplace
-   - If collision: bump patch version in `package.json` and both CHANGELOGs before committing
-   - Command: `npx vsce show CurtisFranks.mem-watchdog-status --json 2>/dev/null | node -e "..."`
-
-2. **Commit**
-   - `git add -A && git commit -m "type(scope): imperative description"`
-   - Commit body must include `Closes #N` for the linked issue
-   - Include "why" (failure mode or root cause) per repo commit format
-
-3. **Push**
-   - `git push -u origin <branch-name>`
-
-4. **PR creation**
-   - `gh pr create --title "..." --body "..." --label "..." --milestone "..."`
-   - Body must include: `Closes #N`, gate-suite evidence (test counts, shellcheck, docs-integrity results)
-   - Assign labels: type label + domain label + priority label
-
-5. **Wait for CI green**
-   - Poll: `gh pr checks <PR-number> --watch`
-   - Do NOT merge with any failing check — fix root cause first
-
-6. **Merge**
-   - `gh pr merge <PR-number> --merge` (or `--squash` per repo policy)
-   - Never push directly to main; always go through PR + CI
-
-7. **Extension publish** (if `vscode-extension/` changed)
-   - `cd vscode-extension && npm run build && source ../.env && npx vsce publish --pat "$VSCE_PAT"`
-   - Confirm Marketplace version matches `package.json` after publish
-
-8. **Release integrity check**
-   - `bash scripts/release-integrity-check.sh --post-publish`
-   - Must pass all checks; fix any failures before proceeding
-
-9. **GitHub Release object**
-   - `gh release create vX.Y.Z --title "vX.Y.Z — <feature title>" --notes "..."`
-   - Releases must exist for every published Marketplace version
-
-10. **Close source issue**
-    - `gh issue close N --comment "Released in vX.Y.Z (Marketplace) — <brief summary>"`
-
-**A feature is NOT complete until all applicable steps above are done.**
+**Feature is NOT complete until all applicable steps are done.**
 
 ---
 

@@ -1,20 +1,20 @@
-name: Task
-description: Request a feature, improvement, or work item
-labels: ["type:task", "status:backlog"]
+name: Story
+description: User-facing feature or capability
+labels: ["type:story", "status:backlog"]
 body:
   - type: input
     id: summary
     attributes:
-      label: Task summary
+      label: Story summary
       description: Imperative verb phrase (≤72 chars)
-      placeholder: "Add LLM router log panel to dashboard"
+      placeholder: "Add fleet health dashboard panel"
     validations:
       required: true
   - type: textarea
-    id: context
+    id: user_story
     attributes:
-      label: Context and motivation
-      description: Why this work is needed
+      label: User story
+      description: "As a [role], I want [capability], so that [benefit]"
     validations:
       required: true
   - type: textarea
@@ -29,6 +29,12 @@ body:
         - [ ] Tests pass
     validations:
       required: true
+  - type: input
+    id: parent_epic
+    attributes:
+      label: Parent Epic
+      description: "Issue number of parent epic (e.g. #11)"
+      placeholder: "#11"
   - type: dropdown
     id: area
     attributes:
@@ -53,3 +59,9 @@ body:
         - P3 — nice to have
     validations:
       required: true
+  - type: input
+    id: story_points
+    attributes:
+      label: Story points
+      description: Estimation (1, 2, 3, 5, 8, 13)
+      placeholder: "5"

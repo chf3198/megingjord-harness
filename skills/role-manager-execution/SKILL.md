@@ -21,11 +21,17 @@ disable-model-invocation: false
 Before emitting `MANAGER_HANDOFF`, the Manager **must**:
 
 1. Run `gh issue list` to check for an existing issue matching the task.
-2. If none exists: `gh issue create --title "<imperative>" --body "..." --label "type: ..."`.
+2. If none exists: `gh issue create --title "<imperative>" --label "type:..." --label "status:backlog" --label "priority:..." --label "area:..."`.
 3. Record the issue number in `MANAGER_HANDOFF` as `issue: #N`.
 4. All subsequent commits must reference `#N` in the commit message.
 
 **Skip condition**: trivial-task escape (read-only, no file edits, no state changes).
+
+## Ticket baton protocol
+
+1. Write scope comment: `## 🎯 Manager — Scope Definition` with objective, AC, constraints.
+2. Set labels: `status:ready`, `role:manager`.
+3. On MANAGER_HANDOFF: swap `role:manager` → `role:collaborator`.
 
 ## Entry criteria
 
