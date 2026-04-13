@@ -14,9 +14,10 @@ This repo is the **source of truth** for all global Copilot resources:
 2. **instructions/** → 9 global instructions, deployed to `~/.copilot/instructions/`
 3. **hooks/** → Hook scripts, deployed to `~/.copilot/hooks/`
 4. **scripts/global/** → 9 bootstrap scripts, deployed to `~/.copilot/scripts/`
-5. **dashboard/** → Fleet monitoring web app (Alpine.js)
-6. **research/** → ADRs, service evaluations, hardware inventory
-7. **inventory/** → JSON device/service state
+5. **agents/** → 8 custom agents, deployed to `~/.copilot/agents/`
+6. **dashboard/** → Fleet monitoring web app (Alpine.js)
+7. **research/** → ADRs, service evaluations, hardware inventory
+8. **inventory/** → JSON device/service state
 
 ## Architecture
 
@@ -26,6 +27,7 @@ skills/          ──deploy──▶  skills/
 instructions/    ──deploy──▶  instructions/
 hooks/           ──deploy──▶  hooks/
 scripts/global/  ──deploy──▶  scripts/
+agents/          ──deploy──▶  agents/
 ```
 
 **Rule**: Never edit `~/.copilot/` directly. All changes flow through this repo.
@@ -79,6 +81,7 @@ npm test               # E2E tests
 | `scripts/global/*.js` | Bootstrap scripts | Node.js |
 | `scripts/*.sh` | Sync/deploy utilities | Bash |
 | `scripts/*.js` | Repo utilities | Node.js |
+| `agents/*.agent.md` | Custom agent definitions | Markdown |
 | `research/adr/NNN-title.md` | ADRs | Markdown |
 | `inventory/*.json` | Fleet state | JSON |
 | `dashboard/js/*.js` | Dashboard modules | JS |

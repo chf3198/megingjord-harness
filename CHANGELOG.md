@@ -3,7 +3,11 @@
 ## [Unreleased]
 
 ### Added
-- (none yet)
+- **Model routing agents**: 8 custom agents with pinned models
+  override AUTO (ADR-004). Router → Architect (Opus), Implementer
+  (Sonnet), Quick (GPT-5 mini), Planner (Opus), 4 audit agents
+- **VS Code settings**: planAgent→Opus, implementAgent→Sonnet,
+  inlineChat→Sonnet; agents/ dir with deploy/sync support
 
 ## [1.5.0] - 2026-04-13
 

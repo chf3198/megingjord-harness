@@ -65,6 +65,7 @@ if ! $APPLY; then
   deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
   deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
   deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
+  deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
   echo "Re-run with --apply to deploy changes."
   exit 0
 fi
@@ -76,6 +77,7 @@ echo ""
 deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
 deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
 deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
+deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
 
 # Hooks: deploy excluding pycache/state
 rsync -a --exclude='__pycache__' \
