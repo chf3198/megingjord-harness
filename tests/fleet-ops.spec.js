@@ -13,6 +13,9 @@ test.describe('Fleet Operations Center', () => {
     // Should have labels
     const labels = await svg.locator('.topo-label').count();
     expect(labels).toBeGreaterThanOrEqual(1);
+    // Should have topology legend
+    await expect(page.locator('.topo-legend')).toBeVisible();
+    await expect(page.locator('.topo-legend')).toContainText('Connected');
     await page.screenshot({ path: 'test-results/fleet-topology.png' });
   });
 
@@ -67,5 +70,6 @@ test.describe('Fleet Operations Center', () => {
     // Fleet panels restored
     await expect(page.locator('#panel-topology')).toBeVisible();
     await expect(page.locator('#panel-baton')).toBeVisible();
+    await expect(page.locator('#panel-activity')).toBeVisible();
   });
 });

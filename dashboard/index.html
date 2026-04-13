@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/views.css">
     <link rel="stylesheet" href="css/topology.css">
     <link rel="stylesheet" href="css/baton.css">
+    <link rel="stylesheet" href="css/activity.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
     <script src="js/health-check.js"></script>
     <script src="js/quota-tracker.js"></script>
@@ -23,6 +24,7 @@
     <script src="js/fleet-topology.js"></script>
     <script src="js/baton-flow.js"></script>
     <script src="js/resource-monitor.js"></script>
+    <script src="js/activity-feed.js"></script>
     <script src="js/render-panels.js"></script>
     <script src="js/config-panel.js"></script>
     <script src="js/stress-test.js"></script>
@@ -32,25 +34,26 @@
     <script src="js/app.js"></script>
 </head>
 <body x-cloak x-data="dashboardApp()" x-init="init()">
-    <a href="#main-content" class="skip-link">Skip to dashboard content</a>
     <header class="header">
-        <h1>🖥️ DevEnv Ops — Fleet Ops Center</h1>
-        <div class="header-actions">
+        <div class="header-brand">
+            <h1>🖥️ DevEnv Ops</h1>
             <span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span>
-            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh">↻ Refresh</button>
-            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto">⏱️ Auto</button>
-            <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test">🧪 Test</button>
-            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips">💡 Tips</button>
-            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast">◐ Contrast</button>
-            <button id="btn-help" @click="startTour()" title="Help">❓</button>
+        </div>
+        <nav class="header-nav" aria-label="Dashboard views">
+            <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
+            <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">📊 Ops</button>
+            <button @click="setView('resources')" :class="{active:isView('resources')}" data-tip="view-resources">📦 Resources</button>
+            <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">📘 Help</button>
+        </nav>
+        <div class="header-actions">
+            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh all endpoints">↻</button>
+            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" title="Toggle auto-refresh">⏱️</button>
+            <button id="btn-test" @click="setView('ops'); runQuickTest()" :disabled="testRun.running" data-tip="test" title="Run stress test (Ops view)">🧪</button>
+            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Toggle tooltips">💡</button>
+            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="High contrast">◐</button>
+            <button id="btn-help" @click="startTour()" title="Guided tour">❓</button>
         </div>
     </header>
-    <nav class="view-tabs" aria-label="Dashboard views">
-        <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
-        <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">📊 Ops</button>
-        <button @click="setView('resources')" :class="{active:isView('resources')}" data-tip="view-resources">📦 Resources</button>
-        <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">📘 Help</button>
-    </nav>
     <main id="main-content" class="dashboard-grid">
         <template x-if="isView('fleet')"><section id="panel-topology" class="panel full-width" data-tip="topology">
             <h2>🌐 Fleet Topology</h2><div x-html="renderFleetTopology(devices)"></div>
@@ -58,27 +61,24 @@
         <template x-if="isView('fleet')"><section id="panel-baton" class="panel full-width" data-tip="baton">
             <h2>🔄 Agent Baton Workflow</h2><div x-html="renderBatonFlow(batonState)"></div>
         </section></template>
+        <template x-if="isView('fleet')"><section id="panel-activity" class="panel full-width" data-tip="activity">
+            <h2>📡 Live Activity</h2><div x-html="renderActivityFeed(activityLog)"></div>
+        </section></template>
         <template x-if="isView('fleet')"><section id="panel-resources" class="panel full-width" data-tip="resource-mon">
             <h2>⚡ Remote Resources</h2><div x-html="renderResourceMonitor(devices, services)"></div>
         </section></template>
         <section id="panel-quotas" class="panel" x-show="isView('ops')" data-tip="quotas">
-            <h2>📊 Quotas</h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div>
-        </section>
+            <h2>📊 Quotas</h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
         <section id="panel-stats" class="panel" x-show="isView('ops')" data-tip="stats">
-            <h2>📡 Live Fleet Stats</h2><div x-html="renderFleetStats(fleetStats)"></div>
-        </section>
+            <h2>📡 Live Fleet Stats</h2><div x-html="renderFleetStats(fleetStats)"></div></section>
         <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
-            <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div>
-        </section>
+            <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div></section>
         <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
-            <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div>
-        </section>
+            <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div></section>
         <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
-            <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div>
-        </section>
+            <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section>
         <section id="panel-test" class="panel" x-show="isView('ops')" data-tip="test-panel">
-            <h2>🧪 Quick Stress Test</h2><div x-html="renderStressPanel(testRun)"></div>
-        </section>
+            <h2>🧪 Quick Stress Test</h2><div x-html="renderStressPanel(testRun)"></div></section>
         <template x-if="isView('resources')"><section id="panel-devices" class="panel" data-tip="devices">
             <h2>🏗️ Fleet Devices</h2><div x-html="renderDeviceCards(devices)"></div>
         </section></template>
@@ -91,7 +91,7 @@
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v2.0.0</span>
+        <span>devenv-ops v2.1.0</span>
     </footer>
     <aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
 </body>

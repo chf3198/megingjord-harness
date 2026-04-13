@@ -17,7 +17,7 @@ function renderBatonFlow(batonState) {
     if (r.id === active) cls += ' active';
     else if (roles.findIndex(x => x.id === active) > i) cls += ' done';
     const arrow = i < roles.length - 1
-      ? '<div class="baton-arrow"><svg width="24" height="16" viewBox="0 0 24 16"><path d="M0 8h20m-6-6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>'
+      ? '<div class="baton-arrow"><svg width="20" height="14" viewBox="0 0 20 14"><path d="M0 7h16m-5-5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div>'
       : '';
     return `<div class="${cls}">
       <div class="baton-icon">${r.icon}</div>

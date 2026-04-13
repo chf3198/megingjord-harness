@@ -21,6 +21,7 @@ async function runDashboardQuickTest(app) {
     running: true, rounds: 0, ok: 0, fail: 0,
     last: 'warming up', startedAt: new Date().toLocaleTimeString()
   };
+  addActivity(app.activityLog, 'test', 'Stress test started');
   const targets = buildStressTargets(app.devices);
   const rounds = 12;
   for (let i = 0; i < rounds; i++) {
@@ -32,4 +33,6 @@ async function runDashboardQuickTest(app) {
   }
   app.testRun.running = false;
   app.testRun.last = app.testRun.fail ? 'completed with warnings' : 'pass';
+  addActivity(app.activityLog, 'test',
+    `Test done: ${app.testRun.ok} ok, ${app.testRun.fail} fail`);
 }

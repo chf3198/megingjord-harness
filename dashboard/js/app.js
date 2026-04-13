@@ -1,32 +1,23 @@
 // Dashboard App — Alpine.js root component
-// Loads inventory data and manages refresh cycle
 
 function dashboardApp() {
   return {
-    devices: [],
-    services: [],
-    quotas: [],
-    liveQuotas: [],
-    fleetStats: {},
-    routerStats: {},
+    devices: [], services: [], quotas: [], liveQuotas: [],
+    fleetStats: {}, routerStats: {},
     config: { refreshSec: 60, highContrast: false },
     currentView: 'fleet',
     batonState: { activeRole: 'idle', issue: null, status: 'idle' },
-    tooltipsEnabled: false,
-    autoRefreshEnabled: true,
-    refreshTimer: null,
-    testTimer: null,
+    activityLog: [],
+    tooltipsEnabled: false, autoRefreshEnabled: true,
+    refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
-    activeTip: '',
-    loading: false,
-    lastRefresh: 'never',
+    activeTip: '', loading: false, lastRefresh: 'never',
 
     get overallStatus() {
-      if (this.devices.some(d => d.status === 'offline'))
-        return 'degraded';
+      if (!this.devices.length) return 'loading';
       if (this.devices.every(d => d.status === 'healthy'))
         return 'healthy';
-      return 'unknown';
+      return 'degraded';
     },
 
     async init() {
@@ -38,6 +29,8 @@ function dashboardApp() {
       await this.refreshAll();
       this.scheduleRefresh();
       this.lastRefresh = new Date().toLocaleTimeString();
+      addActivity(this.activityLog, 'system', 'Dashboard initialized',
+        `${this.devices.length} devices loaded`);
     },
 
     async loadInventory() {
@@ -49,13 +42,10 @@ function dashboardApp() {
     async refreshAll() {
       this.loading = true;
       try {
-        const ids = this.devices
-          .filter(d => d.ollama).map(d => d.id);
+        const ids = this.devices.filter(d => d.ollama).map(d => d.id);
         const [checks, stats, lq, rs] = await Promise.all([
-          runHealthChecks(this.devices),
-          fetchAllFleetStats(ids),
-          fetchAllLiveQuotas(),
-          fetchRouterLaneStats()
+          runHealthChecks(this.devices), fetchAllFleetStats(ids),
+          fetchAllLiveQuotas(), fetchRouterLaneStats()
         ]);
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
@@ -63,6 +53,9 @@ function dashboardApp() {
         this.batonState = buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.lastRefresh = new Date().toLocaleTimeString();
+        const h = this.devices.filter(d => d.status === 'healthy').length;
+        addActivity(this.activityLog, 'refresh', 'Fleet refreshed',
+          `${h}/${this.devices.length} healthy`);
       } finally {
         this.loading = false;
       }
@@ -78,6 +71,8 @@ function dashboardApp() {
     toggleAutoRefresh() {
       this.autoRefreshEnabled = !this.autoRefreshEnabled;
       this.scheduleRefresh();
+      addActivity(this.activityLog, 'system',
+        this.autoRefreshEnabled ? 'Auto-refresh on' : 'Auto-refresh off');
     },
 
     setHighContrast(on) {

@@ -45,6 +45,7 @@ test.describe('Google quality checks', () => {
     // On Fleet view (default), fleet panels should exist via x-if
     await expect(page.locator('#panel-topology')).toBeVisible();
     await expect(page.locator('#panel-baton')).toBeVisible();
+    await expect(page.locator('#panel-activity')).toBeVisible();
     // Resources panels should not exist (x-if removes them)
     const devicesCount = await page.locator('#panel-devices').count();
     expect(devicesCount).toBe(0);
