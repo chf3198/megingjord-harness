@@ -12,7 +12,7 @@ function toggleDashboardTips(app) {
   app.tooltipsEnabled = !app.tooltipsEnabled;
   app.config.tooltipsEnabled = app.tooltipsEnabled;
   saveDashboardConfig(app.config);
-  if (!app.tooltipsEnabled) hideTooltip();
+  if (!app.tooltipsEnabled) clearTooltip(app);
 }
 
 async function runDashboardQuickTest(app) {

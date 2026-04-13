@@ -5,6 +5,18 @@
 ### Added
 - (none yet)
 
+## [1.5.0] - 2026-04-13
+
+### Fixed
+- **x-if architecture**: Resources/Help use `<template x-if>` for true DOM removal;
+  Ops uses `x-show` to eliminate CLS on default view
+- **HTML escaping**: `esc()` now covers `"`, `'`, backtick (XSS hardening)
+- **Tooltips pure Alpine**: `activeTip` reactive state replaces imperative DOM
+- **CDP tests substantive**: `Runtime.getHeapUsage`, DOM nodes, TaskDuration,
+  LayoutCount assertions; x-if panel-removal verification test
+- **CLS/perf**: `x-cloak`, `content-visibility:auto`, preconnect, deferred CDN
+  scripts; Lighthouse median 85-87 (was 82-83), `rel="noopener"` on links
+
 ## [1.4.0] - 2026-04-13
 
 ### Added
@@ -67,33 +79,18 @@
 ## [1.1.0] - 2026-04-13
 
 ### Added
-- Ticket-driven work management: every task gets a GitHub issue
-- Manager creates tickets before work begins (Epic/Story/Task/Bug/Doc)
-- Branch and commit validation gates enforce ticket linkage
-- Ticket helper utilities and Manager ticket lifecycle skill
-- `npm run ticket:create` command for Scrum-compliant issue creation
-- ADR-005: Ticket-Driven Work Management
+- Ticket-driven work management: GitHub issue per task, branch/commit gates
+- `npm run ticket:create` for Scrum-compliant issue creation (ADR-005)
 
 ## [1.0.0] - 2026-04-13
 
 ### Added
-- Tiered agent architecture research and proposal
-- Research findings: 8 topics covering cost optimization,
-  model benchmarks, multi-agent patterns, routing rules
-- Cynefin-based complexity scoring for tier routing
-- Prompt reduction playbook with 8 optimization techniques
-- VS Code settings: auto-compact, thinking tool, autopilot,
-  code search, git-based file suggestions, request queuing
-- Global task router scaffold across instructions, skill,
-  classifier script, and hook-backed routing state
-- Router dispatcher and smoke-test scripts for lane execution
+- Tiered agent architecture, Cynefin complexity scoring, prompt reduction
+- Global task router: instructions, skill, classifier, hook-backed routing
+- VS Code settings: auto-compact, thinking tool, autopilot, code search
 
 ## [0.1.0] - 2026-04-11
 
 ### Added
-- Genesis: repo structure, governance files, instructions
-- Dashboard scaffold (Alpine.js, health monitoring UI)
-- Skills framework with sync/deploy scripts
-- Research archive with free-tier inventory
-- Device and service inventory (JSON)
-- Utility scripts: lint, health-check, sync, deploy
+- Genesis: repo structure, governance, dashboard, skills framework
+- Research archive, device/service inventory, utility scripts

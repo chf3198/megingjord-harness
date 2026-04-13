@@ -1,4 +1,4 @@
-// Tooltips + Help panel
+// Tooltips + Help panel — pure Alpine reactive state
 
 const TIP_COPY = {
   refresh: ['Manual refresh', 'Polls all endpoints immediately.', '#panel-router'],
@@ -21,29 +21,23 @@ const TIP_COPY = {
 
 function renderHelpPanel() {
   return `<div class="config-grid"><p><strong>Half-screen target:</strong> 960×1080</p>
-  <p><strong>Views:</strong> Ops, Resources, Help (reduced active DOM).</p>
+  <p><strong>Views:</strong> Ops, Resources, Help (x-if removes inactive DOM).</p>
   <p><strong>Google QA:</strong> Use Lighthouse, DevTools Performance, Memory, Issues.</p>
-  <p><a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank">Lighthouse docs</a></p>
-  <p><a href="https://developer.chrome.com/docs/devtools/memory-problems" target="_blank">DevTools memory guide</a></p></div>`;
+  <p><a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank" rel="noopener">Lighthouse docs</a></p>
+  <p><a href="https://developer.chrome.com/docs/devtools/memory-problems" target="_blank" rel="noopener">DevTools memory guide</a></p></div>`;
 }
 
 function initTooltips(app) {
-  const host = document.getElementById('app-tip');
   document.addEventListener('mouseover', e => {
     if (!app.tooltipsEnabled) return;
     const node = e.target.closest('[data-tip]');
-    if (!node || !host) return hideTooltip();
-    const [t, d, h] = TIP_COPY[node.dataset.tip] || ['Info', 'No detail', '#panel-help'];
-    host.innerHTML = `<strong>${t}</strong><p>${d}</p><a href="${h}">More info</a>`;
-    host.style.display = 'block';
+    if (!node) { app.activeTip = ''; return; }
+    const [t, d, h] = TIP_COPY[node.dataset.tip] || ['Info', 'No detail', '#'];
+    app.activeTip = `<strong>${esc(t)}</strong><p>${esc(d)}</p><a href="${esc(h)}">More info</a>`;
   });
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('[data-tip]')) hideTooltip();
+    if (e.target.closest('[data-tip]')) app.activeTip = '';
   });
 }
 
-function hideTooltip() {
-  const host = document.getElementById('app-tip');
-  if (!host) return;
-  host.style.display = 'none';
-}
+function clearTooltip(app) { app.activeTip = ''; }

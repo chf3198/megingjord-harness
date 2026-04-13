@@ -9,9 +9,12 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+[x-cloak] { display: none !important; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg); color: var(--text); min-height: 100vh;
+  display: flex; flex-direction: column;
 }
 
 .skip-link {
@@ -48,6 +51,8 @@ body {
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem; padding: 1.5rem;
+  min-height: calc(100vh - 140px);
+  align-content: start;
 }
 
 .panel h2 {
@@ -58,6 +63,7 @@ body {
   display: flex; justify-content: space-between;
   padding: 0.75rem 1.5rem; font-size: 0.8rem;
   color: var(--text-muted); border-top: 1px solid var(--border);
+  margin-top: auto;
 }
 
 body.high-contrast {

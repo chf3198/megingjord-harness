@@ -16,6 +16,7 @@ function dashboardApp() {
     refreshTimer: null,
     testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
+    activeTip: '',
     loading: false,
     lastRefresh: 'never',
 
