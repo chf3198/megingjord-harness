@@ -21,17 +21,17 @@ function jsonRes(res, status, body) {
 
 async function handleApi(req, res) {
   const u = req.url;
+  // OpenClaw proxy (must precede fleet regex)
+  if (u === '/api/fleet/windows-laptop/openclaw/health') {
+    const r = await proxyGet(`${OPENCLAW}/health`);
+    return jsonRes(res, r.status, r.body);
+  }
   // Fleet proxy: /api/fleet/<device>/<path>
   const fm = u.match(/^\/api\/fleet\/([^/]+)\/(.+)$/);
   if (fm) {
     const base = FLEET[fm[1]];
     if (!base) return jsonRes(res, 404, { error: 'unknown device' });
     const r = await proxyGet(`${base}/${fm[2]}`);
-    return jsonRes(res, r.status, r.body);
-  }
-  // OpenClaw proxy
-  if (u === '/api/fleet/windows-laptop/openclaw/health') {
-    const r = await proxyGet(`${OPENCLAW}/health`);
     return jsonRes(res, r.status, r.body);
   }
   // OpenRouter credits
