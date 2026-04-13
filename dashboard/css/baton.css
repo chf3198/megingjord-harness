@@ -1,0 +1,88 @@
+/* Baton Flow — Agent role pipeline visualization */
+
+.baton-flow {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.baton-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.baton-issue {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.baton-idle {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.baton-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.baton-step {
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  min-width: 90px;
+  transition: all 0.3s ease;
+  opacity: 0.5;
+}
+
+.baton-step.done {
+  border-color: var(--green);
+  opacity: 0.7;
+}
+
+.baton-step.active {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 12%, var(--bg));
+  opacity: 1;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--blue) 25%, transparent);
+}
+
+.baton-icon { font-size: 1.5rem; }
+
+.baton-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.baton-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.baton-arrow {
+  color: var(--border);
+  padding: 0 0.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.baton-step.done + .baton-arrow { color: var(--green); }
+.baton-step.active + .baton-arrow { color: var(--blue); }
+
+@media (max-width: 640px) {
+  .baton-pipeline { flex-direction: column; }
+  .baton-arrow { transform: rotate(90deg); }
+  .baton-step { min-width: 80px; }
+}

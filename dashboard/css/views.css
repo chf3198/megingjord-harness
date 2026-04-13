@@ -5,6 +5,10 @@
   contain-intrinsic-size: auto 250px;
 }
 
+.panel.full-width {
+  grid-column: 1 / -1;
+}
+
 .view-tabs {
   display: flex;
   gap: 0.5rem;
