@@ -10,7 +10,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from admin_patterns import (
     DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE,
-    RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
+    RE_GIT_COMMIT, RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE,
     RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH,
     SECRET_FILE_RE, iter_strings,
 )
@@ -66,6 +66,11 @@ def check_terminal(joined: str, state: dict) -> int | None:
     if RE_RELEASE_INTEGRITY.search(joined):
         if repo_type == "vscode-extension" and not ops.get("publish"):
             return emit("ask", "Integrity check before publish. Confirm intentional.")
+    if RE_GIT_TAG.search(joined):
+        if repo_type in ("website-static", "web-app") and not ops.get("visual_qa"):
+            return emit("deny",
+                        "Tag blocked: visual QA not recorded for web repo. "
+                        "Run Playwright screenshot + visual inspection first.")
     return None
 
 

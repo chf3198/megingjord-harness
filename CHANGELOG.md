@@ -5,6 +5,24 @@
 ### Added
 - (none yet)
 
+## [1.3.0] - 2025-07-16
+
+### Added
+- Visual QA governance gate: `git tag` blocked on web repos until visual inspection recorded
+- `visual_qa_record.py` helper to record inspection evidence in governance state
+- `visual-qa-governance.instructions.md` mandating visual QA for web releases
+- EPIC-002: Visual QA self-annealing (diagnosis, research, enforcement)
+- ADR-006: Visual QA gate for web releases
+
+### Fixed
+- `state_store.py` deep-merge: new governance fields now propagate to existing state files
+- `repo_detection.py`: repos with `package.json` + HTML/CSS now correctly classified as `website-static`
+
+### Changed
+- `pretool_guard.py`: added `git tag` denial gate for web repos without visual QA
+- `stop_checks.py`: added `visual_qa` to admin completion checklist for web repos
+- `admin_patterns.py`: added `RE_GIT_TAG` regex pattern
+
 ## [1.2.0] - 2026-04-13
 
 ### Added

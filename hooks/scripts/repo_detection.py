@@ -37,6 +37,8 @@ def detect_repo_type(cwd: str) -> str:
             return "web-app"
         if pkg.get("engines", {}).get("vscode"):
             return "vscode-extension"
+        if any(p.glob("**/*.html")) and any(p.glob("**/*.css")):
+            return "website-static"
         return "library-sdk"
     has_workflows = (p / ".github" / "workflows").exists()
     has_many_shell = len(list(p.glob("**/*.sh"))) >= 3

@@ -51,6 +51,8 @@ def check_admin_ops(
     ext: list[str] = []
     if repo_type == "vscode-extension" and flags.get("extension_touched"):
         ext = ["publish", "release_integrity", "gh_release"]
+    if repo_type in ("website-static", "web-app") and flags.get("code_touched"):
+        ext.append("visual_qa")
     missing = [k for k in base + ext if not ops.get(k)]
     if missing:
         reason = f"Stop blocked: missing Admin steps ({', '.join(missing)})."
