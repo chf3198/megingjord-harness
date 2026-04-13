@@ -12,6 +12,14 @@ When asked to "complete" a feature-add (or equivalent language), completion requ
 Each role must emit its named artifact before the next role begins.
 Do not stop at "tests pass". Tests passing only closes Collaborator.
 
+## Ticket-first requirement
+
+Before any implementation begins, a GitHub issue **must** exist:
+- Manager creates via `gh issue create` or links to an existing issue.
+- All commits reference the issue (`#N` or `Closes #N`).
+- PR links to the issue with `Closes #N` in the body.
+- Issue is closed only after merge + verification evidence.
+
 ## Admin completion contract (required before claiming done)
 
 - Version collision check (Marketplace/tag/package alignment)

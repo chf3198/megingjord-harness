@@ -1,0 +1,46 @@
+name: Epic
+description: Large initiative spanning multiple issues
+labels: ["type: epic"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Epic summary
+      description: High-level objective (≤72 chars)
+      placeholder: "Implement model routing agent system"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and business value
+      description: Why this initiative matters
+    validations:
+      required: true
+  - type: textarea
+    id: sub_issues
+    attributes:
+      label: Sub-issues (planned)
+      description: Break down into trackable tasks
+      value: |
+        - [ ] #N — Sub-task 1
+        - [ ] #N — Sub-task 2
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: When is the epic complete?
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P1 — blocks release
+        - P2 — important
+        - P3 — nice to have
+    validations:
+      required: true

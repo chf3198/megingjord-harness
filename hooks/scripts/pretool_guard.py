@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """PreToolUse hook: pre-tool guards and admin sequencing gates."""
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -8,17 +9,16 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from admin_patterns import (
-    DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE,
-    RE_GIT_COMMIT, RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE,
-    RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH,
-    SECRET_FILE_RE, iter_strings,
-)
+from admin_patterns import (  # noqa: E501
+    DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE, RE_GIT_COMMIT,
+    RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
+    RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
 from governance_state import ensure_state
+
+RE_ISSUE_REF = re.compile(r"#\d+")
 
 
 def emit(decision: str, reason: str, extra: str | None = None) -> int:
-    """Emit a PreToolUse permission decision and exit."""
     hook = {"hookEventName": "PreToolUse", "permissionDecision": decision,
             "permissionDecisionReason": reason}
     if extra:
@@ -28,15 +28,15 @@ def emit(decision: str, reason: str, extra: str | None = None) -> int:
 
 
 def check_terminal(joined: str, state: dict) -> int | None:
-    """Check terminal commands for dangerous ops and sequencing."""
-    flags = state.get("flags", {})
-    ops = state.get("admin_ops", {})
+    flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     if DANGEROUS_CMD_RE.search(joined):
         return emit("deny", "Blocked dangerous terminal command.")
     if ".copilot/hooks/scripts" in joined:
         return emit("ask", "Hook script mutation detected. Manual approval required.",
                      "Review for policy weakening or bypass logic.")
+    if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
+        return emit("ask", "Commit has no issue ref (#N). Create/link issue first.")
     if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
         return emit("deny", "Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
@@ -68,9 +68,7 @@ def check_terminal(joined: str, state: dict) -> int | None:
             return emit("ask", "Integrity check before publish. Confirm intentional.")
     if RE_GIT_TAG.search(joined):
         if repo_type in ("website-static", "web-app") and not ops.get("visual_qa"):
-            return emit("deny",
-                        "Tag blocked: visual QA not recorded for web repo. "
-                        "Run Playwright screenshot + visual inspection first.")
+            return emit("deny", "Tag blocked: visual QA not recorded for web repo.")
     return None
 
 
@@ -93,8 +91,7 @@ def main() -> int:
     suspicious = [v for v in values if "/" in v or "." in v]
     if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example")
            for p in suspicious):
-        return emit("ask", "Sensitive file path detected. Manual approval required.",
-                     "Use secret-safe patterns; avoid committing sensitive files.")
+        return emit("ask", "Sensitive file path detected. Manual approval required.")
     return 0
 
 

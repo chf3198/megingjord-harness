@@ -44,7 +44,7 @@ def _default_state(cwd: str) -> dict[str, Any]:
             "ci_green": False, "merge": False,
             "publish": False, "release_integrity": False,
             "gh_release": False, "issue_close": False,
-            "visual_qa": False,
+            "issue_linked": False, "visual_qa": False,
         },
     }
 

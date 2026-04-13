@@ -38,4 +38,5 @@ RE_RELEASE_INTEGRITY = re.compile(
 )
 RE_GH_RELEASE_CREATE = re.compile(r"\bgh\s+release\s+create\b")
 RE_GH_ISSUE_CLOSE = re.compile(r"\bgh\s+issue\s+close\b")
+RE_GH_ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+create\b")
 RE_GIT_TAG = re.compile(r"\bgit\s+tag\b")

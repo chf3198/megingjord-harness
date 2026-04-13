@@ -12,7 +12,19 @@ disable-model-invocation: false
 
 - Perform independent quality/risk review.
 - Score confidence and identify residual risk.
+- **Audit ticket hygiene** (required — see below).
 - Recommend follow-up actions with priority.
+
+## Ticket hygiene audit (mandatory)
+
+Before emitting `CONSULTANT_CLOSEOUT`, verify:
+
+1. A GitHub issue exists for the work (`gh issue list`).
+2. All commits reference an issue number (`git log --oneline | grep '#'`).
+3. The issue has role evidence (Manager scope, Collaborator validation, Admin ops).
+4. PR is linked to the issue with `Closes #N`.
+
+If any check fails, add it to `risk_register` as `process: ticket-hygiene-gap`.
 
 ## Entry criteria
 
