@@ -10,10 +10,10 @@ See `role-baton-routing` instruction for rules. Local repos may override via `.g
 ## Repo Purpose
 
 This repo is the **source of truth** for all global Copilot resources:
-1. **skills/** → 31 skills, deployed to `~/.copilot/skills/`
-2. **instructions/** → 9 global instructions, deployed to `~/.copilot/instructions/`
+1. **skills/** → 33 skills, deployed to `~/.copilot/skills/`
+2. **instructions/** → 12 global instructions, deployed to `~/.copilot/instructions/`
 3. **hooks/** → Hook scripts, deployed to `~/.copilot/hooks/`
-4. **scripts/global/** → 9 bootstrap scripts, deployed to `~/.copilot/scripts/`
+4. **scripts/global/** → 17 bootstrap scripts, deployed to `~/.copilot/scripts/`
 5. **agents/** → 8 custom agents, deployed to `~/.copilot/agents/`
 6. **dashboard/** → Fleet monitoring web app (Alpine.js)
 7. **research/** → ADRs, service evaluations, hardware inventory

@@ -14,6 +14,7 @@ const TIP_COPY = {
   quotas: ['Quota tracking', 'Live and static usage bars.', '#panel-quotas'],
   stats: ['Live stats', 'Running model/process snapshots.', '#panel-stats'],
   router: ['Task lanes', 'Free/Fleet/Premium lane mix.', '#panel-router'],
+  'router-log': ['Router log', 'Recent LLM agent/model choices.', '#panel-router-log'],
   config: ['Settings', 'Refresh, contrast, and tooltip prefs.', '#panel-config'],
   'test-panel': ['Stress test output', 'Per-round pass/fail summary.', '#panel-test'],
   help: ['Help center', 'Open detailed operational guidance.', '#panel-help']
@@ -28,15 +29,48 @@ function renderHelpPanel() {
 }
 
 function initTooltips(app) {
+  const tip = document.getElementById('app-tip');
+  let hideTimer = null;
+
+  function showTip(node) {
+    if (!app.tooltipsEnabled) return;
+    const key = node.dataset.tip;
+    const [t, d, h] = TIP_COPY[key] || ['Info', 'No detail', '#'];
+    app.activeTip = `<strong>${esc(t)}</strong><p>${esc(d)}</p>`
+      + `<a href="${esc(h)}">More info</a>`;
+    const rect = node.getBoundingClientRect();
+    const tw = 260;
+    let left = rect.left + rect.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    let top = rect.bottom + 6;
+    if (top + 100 > window.innerHeight) top = rect.top - 106;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+    tip.style.right = 'auto';
+    tip.style.bottom = 'auto';
+  }
+
   document.addEventListener('mouseover', e => {
     if (!app.tooltipsEnabled) return;
+    if (e.target.closest('#app-tip')) {
+      clearTimeout(hideTimer); return;
+    }
     const node = e.target.closest('[data-tip]');
-    if (!node) { app.activeTip = ''; return; }
-    const [t, d, h] = TIP_COPY[node.dataset.tip] || ['Info', 'No detail', '#'];
-    app.activeTip = `<strong>${esc(t)}</strong><p>${esc(d)}</p><a href="${esc(h)}">More info</a>`;
+    if (!node) return;
+    clearTimeout(hideTimer);
+    showTip(node);
   });
+
   document.addEventListener('mouseout', e => {
-    if (e.target.closest('[data-tip]')) app.activeTip = '';
+    const leaving = e.target.closest('[data-tip]');
+    const entering = e.relatedTarget;
+    if (!leaving) return;
+    if (entering && entering.closest('#app-tip')) return;
+    hideTimer = setTimeout(() => { app.activeTip = ''; }, 200);
+  });
+
+  tip?.addEventListener('mouseleave', () => {
+    hideTimer = setTimeout(() => { app.activeTip = ''; }, 150);
   });
 }
 

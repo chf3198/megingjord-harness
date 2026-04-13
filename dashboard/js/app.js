@@ -50,7 +50,7 @@ function dashboardApp() {
       try {
         const ids = this.devices
           .filter(d => d.ollama).map(d => d.id);
-        const [checks, stats, lq, routerStats] = await Promise.all([
+        const [checks, stats, lq, rs] = await Promise.all([
           runHealthChecks(this.devices),
           fetchAllFleetStats(ids),
           fetchAllLiveQuotas(),
@@ -58,7 +58,7 @@ function dashboardApp() {
         ]);
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
-        this.routerStats = routerStats;
+        this.routerStats = rs;
         if (lq.length) this.liveQuotas = lq;
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {

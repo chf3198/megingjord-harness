@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="css/router.css">
     <link rel="stylesheet" href="css/config.css">
     <link rel="stylesheet" href="css/views.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.js.iife.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
     <script src="js/health-check.js"></script>
     <script src="js/quota-tracker.js"></script>
@@ -62,6 +60,9 @@
         </section>
         <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
             <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div>
+        </section>
+        <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
+            <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div>
         </section>
         <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
             <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div>
