@@ -27,10 +27,15 @@ body {
 
 .header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem; border-bottom: 1px solid var(--border);
+  gap: 0.75rem;
 }
 
-.header h1 { font-size: 1.4rem; }
+.header-brand {
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.header-brand h1 { font-size: 1.1rem; white-space: nowrap; }
 
 .header-actions {
   display: flex; gap: 0.75rem; align-items: center;
@@ -38,8 +43,8 @@ body {
 
 .header-actions button {
   background: var(--surface); color: var(--text);
-  border: 1px solid var(--border); padding: 0.4rem 0.8rem;
-  border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); padding: 0.25rem 0.5rem;
+  border-radius: 6px; cursor: pointer; font-size: 0.85rem;
 }
 
 .header-actions button:hover { border-color: var(--blue); }
@@ -49,19 +54,19 @@ body {
 }
 
 .dashboard-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem; padding: 1.5rem;
-  min-height: calc(100vh - 140px);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.75rem; padding: 0.75rem;
+  min-height: calc(100vh - 90px);
   align-content: start;
 }
 
 .panel h2 {
-  font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--text-muted);
+  font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--text-muted);
 }
 
 .footer {
   display: flex; justify-content: space-between;
-  padding: 0.75rem 1.5rem; font-size: 0.8rem;
+  padding: 0.4rem 1rem; font-size: 0.75rem;
   color: var(--text-muted); border-top: 1px solid var(--border);
   margin-top: auto;
 }

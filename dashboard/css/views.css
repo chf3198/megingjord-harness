@@ -1,32 +1,30 @@
-/* Views + half-screen responsive UX + tooltips */
+/* Header nav + responsive + tooltips */
 
-.panel {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 250px;
-}
-
-.panel.full-width {
-  grid-column: 1 / -1;
-}
-
-.view-tabs {
+.header-nav {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem 0;
+  gap: 0.25rem;
 }
 
-.view-tabs button {
+.header-nav button {
   background: var(--surface);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.view-tabs button.active {
-  border-color: var(--blue);
-  color: var(--blue);
+.header-nav button:hover { border-color: var(--blue); }
+.header-nav button.active { border-color: var(--blue); color: var(--blue); }
+
+.panel {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 180px;
 }
+
+.panel.full-width { grid-column: 1 / -1; }
 
 .app-tip {
   position: fixed;
@@ -35,43 +33,24 @@
   background: var(--surface);
   border: 1px solid var(--blue);
   border-radius: 8px;
-  padding: 0.6rem 0.7rem;
+  padding: 0.5rem 0.6rem;
   pointer-events: auto;
 }
 
-.app-tip p {
-  color: var(--text-muted);
-  margin: 0.3rem 0;
-  font-size: 0.82rem;
+.app-tip p { color: var(--text-muted); margin: 0.2rem 0; font-size: 0.78rem; }
+
+.tip-nav {
+  color: var(--blue); font-size: 0.78rem; cursor: pointer;
+  background: none; border: none; padding: 0; text-decoration: none;
 }
 
+.tip-nav:hover { text-decoration: underline; }
+
 @media (max-width: 1024px) {
-  .header {
-    padding: 0.7rem 0.9rem;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-  }
-
-  .header h1 { font-size: 1.1rem; }
-
-  .header-actions {
-    width: 100%;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-  }
-
-  .header-actions button {
-    padding: 0.35rem 0.55rem;
-    font-size: 0.82rem;
-  }
-
-  .view-tabs,
-  .dashboard-grid {
-    padding: 0.8rem;
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 0.8rem;
-  }
+  .header { flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.75rem; }
+  .header-brand h1 { font-size: 0.95rem; }
+  .header-nav { flex-wrap: wrap; }
+  .header-actions { flex-wrap: wrap; gap: 0.3rem; }
+  .header-actions button { padding: 0.25rem 0.4rem; font-size: 0.78rem; }
+  .dashboard-grid { padding: 0.5rem; grid-template-columns: 1fr; gap: 0.5rem; }
 }

@@ -35,15 +35,14 @@ test.describe('DevEnv Ops Dashboard', () => {
     await page.click('#btn-tips');
     await page.hover('#btn-refresh');
     await expect(page.locator('#app-tip')).toBeVisible();
-    await expect(page.locator('#app-tip')).toContainText('More info');
+    await expect(page.locator('#app-tip')).toContainText('Go to');
     // Switch to Help view — panel should appear
     await page.click('button:has-text("Help")');
-    await expect(page.locator('#panel-help')).toContainText('Half-screen target');
+    await expect(page.locator('#panel-help')).toContainText('Target viewport');
   });
 
   test('quick stress test starts and updates status', async ({ page }) => {
     await page.goto('http://localhost:8090/dashboard/');
-    await page.click('button:has-text("Ops")');
     await page.click('#btn-test');
     await expect(page.locator('#panel-test')).toContainText('round 1/12');
   });

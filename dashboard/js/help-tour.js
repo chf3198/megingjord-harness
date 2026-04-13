@@ -20,7 +20,12 @@ async function loadDriverJS() {
 }
 
 async function startDashboardTour() {
-  await loadDriverJS();
+  try {
+    await loadDriverJS();
+  } catch {
+    alert('Tour library failed to load. Check your connection.');
+    return;
+  }
   if (typeof driver === 'undefined') return;
   const tour = driver({
     showProgress: true,
@@ -31,24 +36,24 @@ async function startDashboardTour() {
     steps: [
       { element: '.status-badge', popover: {
         title: 'Fleet Status',
-        description: 'Shows overall health: healthy, degraded, or offline.',
+        description: 'Overall health: healthy, degraded, or loading.',
         side: 'bottom' }},
       { element: '#panel-topology', popover: {
         title: 'Fleet Topology',
-        description: 'Live SVG network graph of your Tailscale mesh.',
+        description: 'SVG network graph with Tailscale mesh and legend.',
         side: 'bottom' }},
       { element: '#panel-baton', popover: {
         title: 'Agent Baton Flow',
         description: 'Manager→Collaborator→Admin→Consultant pipeline.',
         side: 'bottom' }},
+      { element: '#panel-activity', popover: {
+        title: 'Live Activity',
+        description: 'Real-time events: refreshes, tests, transitions.',
+        side: 'top' }},
       { element: '#panel-resources', popover: {
         title: 'Remote Resources',
-        description: 'OpenClaw gateway, Tailscale mesh, and Ollama fleet.',
-        side: 'top' }},
-      { element: '#btn-refresh', popover: {
-        title: 'Refresh',
-        description: 'Polls all devices and services immediately.',
-        side: 'bottom' }}
+        description: 'OpenClaw, Tailscale mesh, and Ollama fleet.',
+        side: 'top' }}
     ]
   });
   tour.drive();
