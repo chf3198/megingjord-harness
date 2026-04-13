@@ -1,6 +1,6 @@
 # EPIC-002: Visual QA Self-Annealing
 
-**Status**: In Progress  
+**Status**: Complete  
 **Priority**: Critical  
 **Created**: 2025-07-16  
 **Owner**: Agent
@@ -36,18 +36,18 @@ but the requirement was documentary only — not enforced in code.
 
 ## Acceptance Criteria
 
-- [ ] `git tag` blocked when visual_qa not recorded on web repos
-- [ ] Stop hook warns when visual_qa missing for web repos
-- [ ] `visual_qa_record.py` sets flag and appends evidence
-- [ ] Lint passes on all modified files
-- [ ] All Python files compile without errors
-- [ ] ADR-006 documents decision
-- [ ] Release tagged and changelog updated
+- [x] `git tag` blocked when visual_qa not recorded on web repos
+- [x] Stop hook warns when visual_qa missing for web repos
+- [x] `visual_qa_record.py` sets flag and appends evidence
+- [x] Lint passes on all modified files
+- [x] All Python files compile without errors
+- [x] ADR-006 documents decision
+- [x] Release tagged and changelog updated
 
 ## Phases
 
 1. **Diagnose** — Root cause analysis ✅
 2. **Research** — Identify enforcement points ✅
 3. **Develop** — Build guards and docs ✅
-4. **Test** — Validate enforcement end-to-end
-5. **Release** — Tag, changelog, deploy
+4. **Test** — Validate enforcement end-to-end ✅
+5. **Release** — Tag, changelog, deploy ✅
