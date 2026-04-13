@@ -8,7 +8,7 @@ applyTo: "**"
 
 Execute every task through a single active role at a time:
 
-1. **Manager**: scope, constraints, acceptance criteria, gate plan → emit `MANAGER_HANDOFF`.
+1. **Manager**: scope, constraints, acceptance criteria, gate plan → **create/link GitHub issue** → emit `MANAGER_HANDOFF` with `issue: #N`.
 2. **Collaborator**: implementation and validation → emit `COLLABORATOR_HANDOFF`.
 3. **Admin**: operational execution (services, git/PR/release ops) → emit `ADMIN_HANDOFF`.
 4. **Consultant**: independent critique and residual-risk assessment → emit `CONSULTANT_CLOSEOUT`.

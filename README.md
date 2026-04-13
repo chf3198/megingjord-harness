@@ -1,80 +1,70 @@
 # devenv-ops
 
-Development environment operations: global Copilot resources developed here, deployed to `~/.copilot/` on any machine.
+Development environment operations hub — global Copilot resources, LLM task router, fleet monitoring dashboard.
 
-## What This Repo Does
+## How It Works
 
-1. **Global Resources as Code** — Skills, instructions, hooks, and scripts developed with branch→test→merge→deploy workflow
-2. **Research Archive** — Free-tier inventories, hardware evaluations, architecture decisions (ADRs)
-3. **Environment Dashboard** — Web app monitoring Ollama, OpenClaw, API quotas, Tailscale mesh
-4. **Device Inventory** — Structured JSON of machines, models, services, and costs
+```
+ User Prompt ──▶ @router (Sonnet) ──▶ classifies ──┐
+                                                    │
+         ┌──────────────────────────────────────────┘
+         │
+         ├─▶ 🧠 @architect   (Opus 4.6)   complex / architecture
+         ├─▶ ⚡ @implementer (Sonnet 4.6)  standard coding
+         ├─▶ 🏎️ @quick       (GPT-5 mini)  fast lookups
+         └─▶ 📋 @planner     (Opus 4.6)   read-only research
+```
+
+Custom agents override VS Code Copilot AUTO model selection via
+`model` frontmatter — each pinned to the optimal model for its tier.
+
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| AI Runtime | VS Code Copilot + 8 custom agents | LLM task routing |
+| Dashboard | Alpine.js, vanilla JS/CSS | Fleet monitoring (≤50 MB) |
+| Fleet | Ollama, OpenClaw (LiteLLM) | Local/remote inference |
+| Network | Tailscale VPN mesh | Cross-device connectivity |
+| APIs | OpenRouter, Cloudflare AI, Google AI | Free-tier access |
+| QA | Playwright + Chrome DevTools Protocol | E2E + perf tests |
+| Deploy | Bash rsync scripts | `~/.copilot/` deployment |
 
 ## Architecture
 
 ```
-devenv-ops (this repo — development source)
-  ├─ skills/          31 Copilot skill definitions
-  ├─ instructions/     9 global instruction files
-  ├─ hooks/            Hook scripts + config
-  ├─ scripts/global/   9 bootstrap/preflight scripts
-  ├─ dashboard/        Fleet monitoring web app
-  ├─ research/         ADRs + evaluations
-  └─ inventory/        Device/service JSON
-          │
-          │  npm run deploy:apply
-          ▼
-~/.copilot/ (machine-local runtime)
-  ├─ skills/          ← VS Code Copilot reads from here
-  ├─ instructions/    ← Global instruction layer
-  ├─ hooks/           ← Runtime hooks
-  └─ scripts/         ← Bootstrap utilities
+devenv-ops (source of truth)          ~/.copilot/ (runtime)
+  skills/          (33) ──deploy──▶   skills/
+  instructions/    (12) ──deploy──▶   instructions/
+  agents/           (8) ──deploy──▶   agents/
+  hooks/           (19) ──deploy──▶   hooks/
+  scripts/global/  (17) ──deploy──▶   scripts/
 ```
 
 ## Quick Start
 
 ```bash
-npm install                # Install dependencies
-npm start                  # Serve dashboard on :8090
-npm run lint               # 100-line file check
-npm run sync               # Pull ~/.copilot/ → repo (refresh dev copies)
-npm run sync:dry           # Preview sync without changes
-npm run deploy             # Preview what would deploy (dry-run)
-npm run deploy:apply       # Deploy repo → ~/.copilot/ (with backup)
-npm run health             # Fleet health check
-npm test                   # E2E tests
+npm start              # Dashboard on :8090
+npm run deploy:apply   # Deploy repo → ~/.copilot/
+npm run sync           # Pull ~/.copilot/ → repo
+npm test               # Playwright E2E tests
+npm run lint           # ≤100-line file check
 ```
 
-## Folder Structure
+## Enable for Other Repos
 
-| Folder | Purpose |
-|---|---|
-| `skills/` | Dev copies of global Copilot skills (31) |
-| `instructions/` | Dev copies of global instruction files (9) |
-| `hooks/` | Dev copies of global hooks |
-| `scripts/global/` | Dev copies of bootstrap/preflight scripts (9) |
-| `scripts/` | Repo utilities: sync, deploy, lint, health-check |
-| `dashboard/` | Alpine.js fleet monitoring web app |
-| `research/` | Infrastructure research and ADRs |
-| `inventory/` | Device specs, service configs (JSON) |
-
-## Subscriptions & Budget
-
-| Service | Cost | Value |
-|---|---|---|
-| GitHub Copilot Pro | $10/mo | 300 premium req, agent mode |
-| Cloudflare Workers | $10/mo | Pages, Workers AI, D1 |
-| Google AI Studio | $0 | Gemini 2.5 Pro/Flash, vision |
-| Groq | $0 | Fast inference, rate-limited |
-| Cerebras | $0 | Ultra-fast inference |
-| OpenRouter | $0 | Free models only |
+```bash
+npm run repo:scope -- enable /path/to/repo
+npm run repo:scope -- disable /path/to/repo
+npm run repo:scope -- list
+```
 
 ## Hardware Fleet
 
-| Machine | Role | RAM | Key Services |
-|---|---|---|---|
-| penguin-1 | SML agent | 2.7GB | Ollama (tiny), Tailscale |
-| windows-laptop | OpenClaw host | 16GB | Ollama (7B), OpenClaw |
-| chromebook-2 | Dev/staging | TBD | Tailscale |
+| Machine | Role | RAM | Services |
+|---------|------|-----|----------|
+| penguin-1 | SML agent | 2.7 GB | Ollama (tiny), Tailscale |
+| windows-laptop | OpenClaw host | 16 GB | Ollama 7B, LiteLLM |
 
 ## License
 

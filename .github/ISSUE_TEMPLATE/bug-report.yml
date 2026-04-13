@@ -1,0 +1,55 @@
+name: Bug Report
+description: Report a defect in dashboard, hooks, scripts, or agents
+labels: ["type: bug-fix"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Bug summary
+      description: One-line imperative description
+      placeholder: "Fix tooltip disappearing before user can click More Info"
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What actually happens
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to trigger the bug
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - dashboard
+        - hooks
+        - skills
+        - instructions
+        - agents
+        - scripts
+        - infrastructure
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P1 — blocks release
+        - P2 — important
+        - P3 — nice to have
+    validations:
+      required: true

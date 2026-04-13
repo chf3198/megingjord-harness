@@ -25,6 +25,11 @@ def _default_state(cwd: str) -> dict[str, Any]:
     return {
         "cwd": cwd,
         "repo_type": detect_repo_type(cwd),
+        "routing": {
+            "lane": "free", "backend": "auto",
+            "recommended_model": "Auto",
+            "confidence": "medium", "rationale": "default",
+        },
         "roles": {
             "manager": False, "collaborator": False,
             "admin": False, "consultant": False,
@@ -39,6 +44,7 @@ def _default_state(cwd: str) -> dict[str, Any]:
             "ci_green": False, "merge": False,
             "publish": False, "release_integrity": False,
             "gh_release": False, "issue_close": False,
+            "issue_linked": False, "visual_qa": False,
         },
     }
 
@@ -54,8 +60,12 @@ def load_state(cwd: str) -> dict[str, Any]:
         defaults = _default_state(cwd)
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
-        for key in ("roles", "flags", "admin_ops"):
-            data.setdefault(key, defaults[key])
+        for key in ("routing", "roles", "flags", "admin_ops"):
+            if key not in data:
+                data[key] = defaults[key]
+            elif isinstance(defaults[key], dict):
+                for sk, sv in defaults[key].items():
+                    data[key].setdefault(sk, sv)
         return data
     except Exception:
         return _default_state(cwd)

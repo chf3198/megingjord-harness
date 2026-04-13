@@ -4,10 +4,15 @@
 function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
 }
 
 function renderDeviceCards(devices) {
+  if (!devices.length) {
+    return '<div class="card"><p>No devices loaded yet.</p></div>';
+  }
   return devices.map(d => `<div class="card device-card ${d.status}">
     <div class="card-header"><strong>${esc(d.alias)}</strong>
       <span class="badge ${d.status}">${d.status}</span></div>
@@ -19,6 +24,9 @@ function renderDeviceCards(devices) {
 }
 
 function renderServiceCards(services) {
+  if (!services.length) {
+    return '<div class="card"><p>No services loaded yet.</p></div>';
+  }
   return services.map(s => `<div class="card service-card ${s.status}">
     <div class="card-header"><strong>${esc(s.name)}</strong>
       <span class="badge ${s.status}">${s.status}</span></div>
@@ -29,6 +37,9 @@ function renderServiceCards(services) {
 }
 
 function renderQuotaPanel(live, statics) {
+  if (!live.length && !statics.length) {
+    return '<div class="card"><p>Quota sources unavailable.</p></div>';
+  }
   const a = live.map(q => `<div class="quota-live-card">
     <div class="card-header"><strong>${esc(q.name)}</strong>
       <span>${q.used}/${q.limit}</span></div>
@@ -47,7 +58,9 @@ function renderQuotaPanel(live, statics) {
 }
 
 function renderFleetStats(stats) {
-  return Object.entries(stats).map(([id, st]) => {
+  const rows = Object.entries(stats);
+  if (!rows.length) return '<div class="stat-card"><p class="stat-offline">No live stats yet.</p></div>';
+  return rows.map(([id, st]) => {
     if (!st.online) return `<div class="stat-card">
       <div class="stat-header"><strong>${esc(id)}</strong></div>
       <p class="stat-offline">Device offline</p></div>`;

@@ -6,9 +6,9 @@ import re
 from typing import Any
 
 from admin_patterns import (
-    RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE, RE_GIT_COMMIT,
-    RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
-    RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, RE_VSCE_SHOW,
+    RE_GH_ISSUE_CLOSE, RE_GH_ISSUE_CREATE, RE_GH_RELEASE_CREATE,
+    RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
+    RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, RE_VSCE_SHOW,
     iter_strings,
 )
 from repo_detection import classify_path
@@ -68,6 +68,7 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
         (RE_RELEASE_INTEGRITY, "release_integrity"),
         (RE_GH_RELEASE_CREATE, "gh_release"),
         (RE_GH_ISSUE_CLOSE, "issue_close"),
+        (RE_GH_ISSUE_CREATE, "issue_linked"),
     ]
     for pattern, key in _match_ops:
         if pattern.search(joined):

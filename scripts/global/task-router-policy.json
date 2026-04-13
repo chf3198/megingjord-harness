@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "defaultLane": "free",
+  "lanes": {
+    "free": {
+      "backend": "auto",
+      "recommendedModel": "Auto",
+      "keywords": [
+        "search", "grep", "find", "explain", "read", "docs",
+        "rename", "boilerplate", "simple", "small", "single-file"
+      ]
+    },
+    "fleet": {
+      "backend": "openclaw",
+      "recommendedModel": "qwen2.5:7b",
+      "keywords": [
+        "multi-file", "tests", "refactor", "implement", "migration",
+        "pattern", "transform", "integration", "batch", "known"
+      ]
+    },
+    "premium": {
+      "backend": "sonnet",
+      "recommendedModel": "Claude Sonnet 4.6",
+      "keywords": [
+        "architecture", "ambiguous", "complex", "hard", "risk",
+        "security", "performance", "concurrency", "incident", "design"
+      ]
+    }
+  },
+  "escalation": {
+    "premiumOn": ["failed", "stuck", "unclear", "cross-system", "trade-off"],
+    "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
+  }
+}

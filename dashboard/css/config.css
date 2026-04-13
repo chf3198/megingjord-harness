@@ -1,0 +1,10 @@
+.config-grid {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.config-note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}

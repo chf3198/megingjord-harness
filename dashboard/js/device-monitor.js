@@ -25,11 +25,16 @@ async function loadServices() {
   try {
     const r = await fetch('../inventory/services.json');
     const data = await r.json();
-    return data.services.map(s => ({
+    const all = [
+      ...(data.subscriptions || []),
+      ...(data.freeTier || []),
+      ...(data.selfHosted || []),
+    ];
+    return all.map(s => ({
       id: s.id,
       name: s.name,
-      type: s.type,
-      cost: s.cost,
+      type: s.type || s.cost ? 'paid' : 'free',
+      cost: s.cost || 'free',
       quotas: s.quotas,
       status: s.status
     }));

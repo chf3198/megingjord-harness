@@ -4,58 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevEnv Ops — Fleet Dashboard</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="css/help.css">
     <link rel="stylesheet" href="css/stats.css">
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.css">
-    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.js.iife.js">
-    </script>
-    <script defer
-        src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="css/router.css">
+    <link rel="stylesheet" href="css/config.css">
+    <link rel="stylesheet" href="css/views.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
     <script src="js/health-check.js"></script>
     <script src="js/quota-tracker.js"></script>
     <script src="js/device-monitor.js"></script>
+    <script src="js/router-tracker.js"></script>
     <script src="js/live-stats.js"></script>
     <script src="js/quota-live.js"></script>
     <script src="js/render-panels.js"></script>
+    <script src="js/config-panel.js"></script>
+    <script src="js/stress-test.js"></script>
+    <script src="js/tooltips.js"></script>
+    <script src="js/app-actions.js"></script>
     <script src="js/help-tour.js"></script>
     <script src="js/app.js"></script>
 </head>
-<body x-data="dashboardApp()" x-init="init()">
+<body x-cloak x-data="dashboardApp()" x-init="init()">
+    <a href="#main-content" class="skip-link">Skip to dashboard content</a>
     <header class="header">
         <h1>🖥️ DevEnv Ops</h1>
         <div class="header-actions">
-            <span class="status-badge" :class="overallStatus">
-                <span x-text="overallStatus"></span>
-            </span>
-            <button id="btn-refresh" @click="refreshAll()"
-                :disabled="loading">↻ Refresh</button>
-            <button id="btn-help" @click="startTour()"
-                title="Help">❓</button>
+            <span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span>
+            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh">↻ Refresh</button>
+            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto">⏱️ Auto</button>
+            <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test">🧪 Test</button>
+            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips">💡 Tips</button>
+            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast">◐ Contrast</button>
+            <button id="btn-help" @click="startTour()" title="Help">❓</button>
         </div>
     </header>
-    <main class="dashboard-grid">
-        <section id="panel-devices" class="panel">
-            <h2>🏗️ Fleet Devices</h2>
-            <div x-html="renderDeviceCards(devices)"></div>
+    <nav class="view-tabs" aria-label="Dashboard views">
+        <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">Ops</button>
+        <button @click="setView('resources')" :class="{active:isView('resources')}" data-tip="view-resources">Resources</button>
+        <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">Help</button>
+    </nav>
+    <main id="main-content" class="dashboard-grid">
+        <template x-if="isView('resources')"><section id="panel-devices" class="panel" data-tip="devices">
+            <h2>🏗️ Fleet Devices</h2><div x-html="renderDeviceCards(devices)"></div>
+        </section></template>
+        <template x-if="isView('resources')"><section id="panel-services" class="panel" data-tip="services">
+            <h2>⚡ Services</h2><div x-html="renderServiceCards(services)"></div>
+        </section></template>
+        <section id="panel-quotas" class="panel" x-show="isView('ops')" data-tip="quotas">
+            <h2>📊 Quotas</h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div>
         </section>
-        <section id="panel-services" class="panel">
-            <h2>⚡ Services</h2>
-            <div x-html="renderServiceCards(services)"></div>
+        <section id="panel-stats" class="panel" x-show="isView('ops')" data-tip="stats">
+            <h2>📡 Live Fleet Stats</h2><div x-html="renderFleetStats(fleetStats)"></div>
         </section>
-        <section id="panel-quotas" class="panel">
-            <h2>📊 Quotas</h2>
-            <div x-html="renderQuotaPanel(liveQuotas, quotas)"></div>
+        <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
+            <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div>
         </section>
-        <section id="panel-stats" class="panel">
-            <h2>📡 Live Fleet Stats</h2>
-            <div x-html="renderFleetStats(fleetStats)"></div>
+        <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
+            <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div>
         </section>
+        <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
+            <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div>
+        </section>
+        <section id="panel-test" class="panel" x-show="isView('ops')" data-tip="test-panel">
+            <h2>🧪 Quick Stress Test</h2><div x-html="renderStressPanel(testRun)"></div>
+        </section>
+        <template x-if="isView('help')"><section id="panel-help" class="panel" data-tip="help">
+            <h2>📘 Help</h2><div x-html="renderHelpPanel()"></div>
+        </section></template>
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v0.1.0</span>
+        <span>devenv-ops v1.5.0</span>
     </footer>
+    <aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
 </body>
 </html>

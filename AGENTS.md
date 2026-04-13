@@ -14,6 +14,7 @@ This repo is the **development workbench** for the entire `~/.copilot/` system:
 - `instructions/` → develop global instructions here, deploy to `~/.copilot/instructions/`
 - `hooks/` → develop hooks here, deploy to `~/.copilot/hooks/`
 - `scripts/global/` → develop scripts here, deploy to `~/.copilot/scripts/`
+- `agents/` → develop custom agents here, deploy to `~/.copilot/agents/`
 - `dashboard/` is a standalone web app — treat with full web-app rigor.
 - `research/` docs are living — update when new services or hardware are evaluated.
 

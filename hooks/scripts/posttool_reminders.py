@@ -70,6 +70,11 @@ def main() -> int:
         missing = [k for k in ("commit", "push", "pr_create", "ci_green", "merge") if not ops.get(k)]
         if missing:
             messages.append(f"Admin baton incomplete — missing: {', '.join(missing)}.")
+        if not ops.get("issue_linked"):
+            messages.append(
+                "Ticket gate: code was touched but no GitHub issue is linked. "
+                "Run `gh issue create` or reference an existing issue."
+            )
 
     if repo_type == "vscode-extension" and flags.get("extension_touched"):
         ext_missing = [k for k in ("publish", "release_integrity", "gh_release") if not ops.get(k)]

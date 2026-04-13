@@ -10,10 +10,22 @@ disable-model-invocation: false
 
 ## Responsibilities
 
+- Create or link a GitHub issue **before any other action**.
 - Clarify objective and non-objectives.
 - Identify constraints from instructions and repository policy.
 - Define objective acceptance criteria.
 - Select required gates/tests/checks.
+
+## Ticket-first gate (mandatory)
+
+Before emitting `MANAGER_HANDOFF`, the Manager **must**:
+
+1. Run `gh issue list` to check for an existing issue matching the task.
+2. If none exists: `gh issue create --title "<imperative>" --body "..." --label "type: ..."`.
+3. Record the issue number in `MANAGER_HANDOFF` as `issue: #N`.
+4. All subsequent commits must reference `#N` in the commit message.
+
+**Skip condition**: trivial-task escape (read-only, no file edits, no state changes).
 
 ## Entry criteria
 
@@ -22,6 +34,7 @@ disable-model-invocation: false
 
 ## Exit criteria
 
+- A GitHub issue exists and is referenced in `MANAGER_HANDOFF`.
 - `MANAGER_HANDOFF` is complete and testable.
 - Scope boundaries are explicit enough for implementation without reinterpretation.
 
@@ -43,6 +56,7 @@ disable-model-invocation: false
 
 ```text
 MANAGER_HANDOFF
+issue: #N
 objective:
 non_objectives:
 constraints:

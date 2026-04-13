@@ -3,17 +3,19 @@
 
 function buildQuotaList(services) {
   const quotas = [];
+  const META = new Set(['period', 'note']);
   for (const svc of services) {
     if (!svc.quotas) continue;
+    const period = svc.quotas.period || 'unknown';
     for (const [key, val] of Object.entries(svc.quotas)) {
-      if (key === 'note' || !val.limit) continue;
+      if (META.has(key) || typeof val !== 'number') continue;
       quotas.push({
         id: `${svc.id}-${key}`,
         name: `${svc.name}: ${formatKey(key)}`,
-        limit: val.limit,
+        limit: val,
         usage: 0,
         percent: 0,
-        period: val.period || 'unknown'
+        period
       });
     }
   }
