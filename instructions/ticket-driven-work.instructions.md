@@ -1,6 +1,6 @@
 ---
 name: Ticket-Driven Work Management
-description: Every task is tracked by a GitHub issue. Manager creates tickets before work begins. All changes link to tickets.
+description: The GitHub issue is the baton. Every task is tracked by an issue with standardized labels and status transitions.
 applyTo: "**"
 ---
 
@@ -10,46 +10,33 @@ applyTo: "**"
 
 ## Ticket Types
 
-| Type | Purpose | Example | Estimate |
-|---|---|---|---|
-| **Epic** | Major feature or initiative | "Global task router" | Story points |
-| **Story** | User-facing feature | "Add router lane visualization to dashboard" | 5–13 pts |
-| **Task** | Internal/technical work | "Refactor router module to export classifyPrompt" | 2–8 pts |
-| **Bug** | Defect fix | "Router misclassifies edge prompts" | 3–5 pts |
-| **Doc** | Documentation | "Write README for router" | 2–3 pts |
+| Type | Purpose | Label |
+|---|---|---|
+| Epic | Major feature or initiative | `type:epic` |
+| Story | User-facing feature | `type:story` |
+| Task | Internal/technical work | `type:task` |
+| Bug | Defect fix | `type:bug` |
+| Doc | Documentation | `type:doc` |
+| Research | Investigation/spike | `type:research` |
 
-## Labels (Scrum)
+## Label taxonomy
 
-- `scrum:epic` — Epic
-- `scrum:story` — Story
-- `scrum:task` — Task
-- `scrum:bug` — Bug
-- `scrum:doc` — Documentation
-- `status:backlog` — Not started
-- `status:ready` — Ready to pull
-- `status:in-progress` — Assigned and work begun
-- `status:review` — PR open
-- `status:done` — Merged/closed
+- **Status**: `status:backlog` → `status:ready` → `status:in-progress` → `status:review` → `status:done`
+- **Priority**: `priority:P1` (urgent) · `priority:P2` (normal) · `priority:P3` (low)
+- **Area**: `area:dashboard` · `area:hooks` · `area:skills` · `area:instructions` · `area:agents` · `area:scripts` · `area:infra`
+- **Role** (current baton holder): `role:manager` · `role:collaborator` · `role:admin` · `role:consultant`
 
 ## Manager Responsibilities
 
 1. **Create tickets before work starts** — never code first.
-2. **Validate ticket completeness** — title, description, type, labels, estimation.
-3. **Link ticket to branch** — branch naming: `<issue>#<number>-<slug>`.
-4. **Link ticket to PR** — PR body includes `Closes #N`.
-5. **Enforce ticket closure** — close issue only after merge + validation.
+2. **Apply full label set** — type + status:backlog + priority + area.
+3. **Write scope comment** — objective, AC, constraints.
+4. **Link ticket to branch** — branch: `<type>/<issue#>-<slug>`.
+5. **Link ticket to PR** — PR body includes `Closes #N`.
+6. **Enforce ticket closure** — close only after merge + Consultant CLOSEOUT.
 
 ## Linking Rules
 
-- Branch: `#2-add-router-dashboard` or `#2-add-dashboard-panel`
-- Commit: `git commit -m "feat(dashboard): add router panel (closes #2)"`
-- PR: Body must include `Closes #2` + link to merge evidence
-
-## Manager Automation
-
-Manager CLI creates tickets with:
-- Title, description, type
-- Auto-assigned labels
-- Story point estimation (prompt for user input)
-- Link to related tickets (if any)
-- Default milestone (current sprint or backlog)
+- Branch: `feat/11-ticket-baton-system`
+- Commit: `feat(skills): implement ticket-as-baton governance #11`
+- PR: Body must include `Closes #11` + validation evidence

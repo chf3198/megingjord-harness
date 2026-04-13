@@ -27,6 +27,12 @@ disable-model-invocation: false
 - Do not declare the feature complete at Collaborator exit; "all gates pass" means implementation is validated, not released.
 - Any scope drift is explicitly flagged for manager re-handoff.
 
+## Ticket baton protocol
+
+1. Write implementation comment: `## 🔧 Collaborator — Validation Evidence`.
+2. Transition labels: `status:ready` → `status:in-progress`, confirm `role:collaborator`.
+3. On COLLABORATOR_HANDOFF: swap `role:collaborator` → `role:admin`.
+
 ## Must not do
 
 - Do not alter scope without manager handoff update.

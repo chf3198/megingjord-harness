@@ -1,6 +1,6 @@
 name: Epic
 description: Large initiative spanning multiple issues
-labels: ["type: epic"]
+labels: ["type:epic", "status:backlog"]
 body:
   - type: input
     id: summary

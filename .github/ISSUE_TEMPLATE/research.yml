@@ -1,0 +1,50 @@
+name: Research
+description: Investigation, evaluation, or spike
+labels: ["type:research", "status:backlog"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Research summary
+      description: Imperative verb phrase (≤72 chars)
+      placeholder: "Evaluate free-tier LLM providers for fleet routing"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and questions
+      description: What needs to be investigated and why
+    validations:
+      required: true
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Expected deliverables
+      description: What the research should produce
+      value: |
+        - [ ] ADR or research document
+        - [ ] Recommendation with evidence
+        - [ ] Follow-up tickets created if action needed
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - dashboard
+        - hooks
+        - skills
+        - instructions
+        - agents
+        - scripts
+        - infrastructure
+    validations:
+      required: true
+  - type: input
+    id: timebox
+    attributes:
+      label: Timebox
+      description: Maximum effort before reporting findings
+      placeholder: "2 hours"
