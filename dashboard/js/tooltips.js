@@ -6,9 +6,13 @@ const TIP_COPY = {
   test: ['Quick stress test', 'Runs 12 lightweight endpoint rounds.', '#panel-test'],
   tips: ['Tooltip mode', 'Toggle contextual UX help.', '#panel-help'],
   contrast: ['Contrast mode', 'Switches high-contrast theme.', '#panel-config'],
+  'view-fleet': ['Fleet view', 'Topology, baton flow, and remote resources.', '#panel-topology'],
   'view-ops': ['Ops view', 'Runtime health, quotas, and router.', '#panel-router'],
   'view-resources': ['Resources view', 'Devices and services inventory.', '#panel-devices'],
   'view-help': ['Help view', 'Detailed guidance and links.', '#panel-help'],
+  topology: ['Fleet topology', 'SVG network graph of Tailscale mesh.', '#panel-topology'],
+  baton: ['Agent baton', 'Manager→Collaborator→Admin→Consultant flow.', '#panel-baton'],
+  'resource-mon': ['Remote resources', 'OpenClaw, Tailscale, and Ollama status.', '#panel-resources'],
   devices: ['Fleet devices', 'Tailscale + Ollama/OpenClaw status cards.', '#panel-devices'],
   services: ['Service inventory', 'Paid, free-tier, and self-hosted services.', '#panel-services'],
   quotas: ['Quota tracking', 'Live and static usage bars.', '#panel-quotas'],
@@ -22,8 +26,8 @@ const TIP_COPY = {
 
 function renderHelpPanel() {
   return `<div class="config-grid"><p><strong>Half-screen target:</strong> 960×1080</p>
-  <p><strong>Views:</strong> Ops, Resources, Help (x-if removes inactive DOM).</p>
-  <p><strong>Google QA:</strong> Use Lighthouse, DevTools Performance, Memory, Issues.</p>
+  <p><strong>Views:</strong> Fleet (topology + baton + resources), Ops (quotas + router), Resources (inventory), Help.</p>
+  <p><strong>Fleet view:</strong> SVG topology, agent baton workflow, OpenClaw/Tailscale/Ollama status.</p>
   <p><a href="https://developer.chrome.com/docs/lighthouse/overview" target="_blank" rel="noopener">Lighthouse docs</a></p>
   <p><a href="https://developer.chrome.com/docs/devtools/memory-problems" target="_blank" rel="noopener">DevTools memory guide</a></p></div>`;
 }

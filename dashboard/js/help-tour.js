@@ -33,18 +33,18 @@ async function startDashboardTour() {
         title: 'Fleet Status',
         description: 'Shows overall health: healthy, degraded, or offline.',
         side: 'bottom' }},
-      { element: '#panel-quotas', popover: {
-        title: 'Live Quotas',
-        description: 'Real-time usage from OpenRouter, Cloudflare, GitHub.',
-        side: 'left' }},
-      { element: '#panel-router', popover: {
-        title: 'Task Router',
-        description: 'Free/Fleet/Premium lane distribution.',
-        side: 'right' }},
-      { element: '#panel-router-log', popover: {
-        title: 'Router Log',
-        description: 'Recent LLM agent and model routing decisions.',
-        side: 'left' }},
+      { element: '#panel-topology', popover: {
+        title: 'Fleet Topology',
+        description: 'Live SVG network graph of your Tailscale mesh.',
+        side: 'bottom' }},
+      { element: '#panel-baton', popover: {
+        title: 'Agent Baton Flow',
+        description: 'Manager→Collaborator→Admin→Consultant pipeline.',
+        side: 'bottom' }},
+      { element: '#panel-resources', popover: {
+        title: 'Remote Resources',
+        description: 'OpenClaw gateway, Tailscale mesh, and Ollama fleet.',
+        side: 'top' }},
       { element: '#btn-refresh', popover: {
         title: 'Refresh',
         description: 'Polls all devices and services immediately.',

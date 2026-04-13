@@ -10,7 +10,8 @@ function dashboardApp() {
     fleetStats: {},
     routerStats: {},
     config: { refreshSec: 60, highContrast: false },
-    currentView: 'ops',
+    currentView: 'fleet',
+    batonState: { activeRole: 'idle', issue: null, status: 'idle' },
     tooltipsEnabled: false,
     autoRefreshEnabled: true,
     refreshTimer: null,
@@ -59,6 +60,7 @@ function dashboardApp() {
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
         this.routerStats = rs;
+        this.batonState = buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
