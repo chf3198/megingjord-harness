@@ -11,6 +11,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from governance_state import ensure_state, save_state
+from repo_scope import is_repo_enabled
 from task_router import apply_route, classify_prompt
 
 
@@ -25,6 +26,10 @@ def main() -> int:
 
     prompt = str(payload.get("prompt", ""))
     cwd = str(payload.get("cwd") or os.getcwd())
+
+    if not is_repo_enabled(cwd):
+        return 0
+
     state = ensure_state(cwd)
     route = classify_prompt(prompt)
     apply_route(state, route)

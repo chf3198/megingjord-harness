@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/help.css">
     <link rel="stylesheet" href="css/stats.css">
     <link rel="stylesheet" href="css/router.css">
+    <link rel="stylesheet" href="css/config.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.css">
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.js.iife.js">
@@ -21,10 +22,12 @@
     <script src="js/live-stats.js"></script>
     <script src="js/quota-live.js"></script>
     <script src="js/render-panels.js"></script>
+    <script src="js/config-panel.js"></script>
     <script src="js/help-tour.js"></script>
     <script src="js/app.js"></script>
 </head>
 <body x-data="dashboardApp()" x-init="init()">
+    <a href="#main-content" class="skip-link">Skip to dashboard content</a>
     <header class="header">
         <h1>🖥️ DevEnv Ops</h1>
         <div class="header-actions">
@@ -33,11 +36,15 @@
             </span>
             <button id="btn-refresh" @click="refreshAll()"
                 :disabled="loading">↻ Refresh</button>
+            <button id="btn-auto" @click="toggleAutoRefresh()"
+                :aria-pressed="autoRefreshEnabled">⏱️ Auto</button>
+            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)"
+                :aria-pressed="config.highContrast">◐ Contrast</button>
             <button id="btn-help" @click="startTour()"
                 title="Help">❓</button>
         </div>
     </header>
-    <main class="dashboard-grid">
+    <main id="main-content" class="dashboard-grid">
         <section id="panel-devices" class="panel">
             <h2>🏗️ Fleet Devices</h2>
             <div x-html="renderDeviceCards(devices)"></div>
@@ -58,10 +65,14 @@
             <h2>🛣️ Task Router Lanes</h2>
             <div x-html="renderRouterPanel(routerStats)"></div>
         </section>
+        <section id="panel-config" class="panel">
+            <h2>⚙️ Dashboard Settings</h2>
+            <div x-html="renderConfigPanel(config, autoRefreshEnabled)"></div>
+        </section>
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v1.0.0</span>
+        <span>devenv-ops v1.2.0</span>
     </footer>
 </body>
 </html>

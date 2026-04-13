@@ -9,6 +9,9 @@ function dashboardApp() {
     liveQuotas: [],
     fleetStats: {},
     routerStats: {},
+    config: { refreshSec: 60, highContrast: false },
+    autoRefreshEnabled: true,
+    refreshTimer: null,
     loading: false,
     lastRefresh: 'never',
 
@@ -21,7 +24,11 @@ function dashboardApp() {
     },
 
     async init() {
+      this.config = loadDashboardConfig();
+      document.body.classList.toggle('high-contrast', this.config.highContrast);
       await this.loadInventory();
+      await this.refreshAll();
+      this.scheduleRefresh();
       this.lastRefresh = new Date().toLocaleTimeString();
     },
 
@@ -50,6 +57,24 @@ function dashboardApp() {
       } finally {
         this.loading = false;
       }
+    },
+
+    scheduleRefresh() {
+      if (this.refreshTimer) clearInterval(this.refreshTimer);
+      if (!this.autoRefreshEnabled) return;
+      const ms = Math.max(15, Number(this.config.refreshSec || 60)) * 1000;
+      this.refreshTimer = setInterval(() => this.refreshAll(), ms);
+    },
+
+    toggleAutoRefresh() {
+      this.autoRefreshEnabled = !this.autoRefreshEnabled;
+      this.scheduleRefresh();
+    },
+
+    setHighContrast(on) {
+      this.config.highContrast = !!on;
+      saveDashboardConfig(this.config);
+      document.body.classList.toggle('high-contrast', this.config.highContrast);
     },
 
     startTour() { startDashboardTour(); }

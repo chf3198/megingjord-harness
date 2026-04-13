@@ -40,9 +40,24 @@ npm run sync               # Pull ~/.copilot/ → repo (refresh dev copies)
 npm run sync:dry           # Preview sync without changes
 npm run deploy             # Preview what would deploy (dry-run)
 npm run deploy:apply       # Deploy repo → ~/.copilot/ (with backup)
+npm run repo:scope -- list # Show repos where routing workflow is enabled
 npm run health             # Fleet health check
 npm test                   # E2E tests
 ```
+
+## Optional Workflow Scope (No Cross-Repo Dependency)
+
+The Agile role workflow + LLM router is opt-in per repository.
+
+- Default behavior: disabled for all repos
+- Enable only where you want it:
+  - `npm run repo:scope -- enable /abs/path/to/repo`
+- Disable for a repo:
+  - `npm run repo:scope -- disable /abs/path/to/repo`
+- View current scope:
+  - `npm run repo:scope -- list`
+
+This keeps public repos independent from this project unless a user opts in.
 
 ## Folder Structure
 

@@ -10,6 +10,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from governance_state import ensure_state, save_state
+from repo_scope import is_repo_enabled
 from ticket_helpers import extract_issue_num
 
 
@@ -21,6 +22,9 @@ def main() -> int:
 
     prompt = str(payload.get("prompt", "")).lower()
     cwd = str(payload.get("cwd") or ".")
+
+    if not is_repo_enabled(cwd):
+        return 0
 
     if not any(
         w in prompt

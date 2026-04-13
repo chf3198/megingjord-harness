@@ -5,6 +5,26 @@
 ### Added
 - (none yet)
 
+## [1.2.0] - 2026-04-13
+
+### Added
+- Dashboard revamp epic with phased delivery plan for UAT
+- Router metrics API endpoint (`/api/router/metrics`) served by dashboard backend
+- Dashboard settings panel (auto-refresh state + high-contrast preference)
+- Accessibility upgrades: skip-link, focus-visible controls, dark-safe router panel
+- Playwright dashboard E2E tests with screenshot artifact (`test-results/dashboard-home.png`)
+- Research brief on world-class dashboard practices and implementation checklist
+
+### Changed
+- Router metrics fetch now uses server API instead of client `file://` reads
+
+## [1.1.1] - 2026-04-13
+
+### Added
+- Repo-scoped opt-in for Agile workflow + task routing gates
+- `npm run repo:scope` CLI to enable/disable workflow per repo
+- Default-off scope policy via `hooks/repo-scope.json`
+
 ## [1.1.0] - 2026-04-13
 
 ### Added

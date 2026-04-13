@@ -5,18 +5,11 @@ let routerMetrics = {
 };
 
 async function loadRouterMetrics() {
-  const stateDir = `${process.env.HOME}/.copilot/hooks/state`;
   try {
-    const files = await fetch(`file://${stateDir}`).then(r => r.json());
-    let free = 0, fleet = 0, premium = 0;
-    for (const file of files || []) {
-      const state = JSON.parse(file);
-      const lane = state.routing?.lane || 'free';
-      if (lane === 'free') free++;
-      else if (lane === 'fleet') fleet++;
-      else premium++;
-    }
-    return { free, fleet, premium };
+    const r = await fetch('/api/router/metrics');
+    if (!r.ok) return { free: 0, fleet: 0, premium: 0 };
+    const data = await r.json();
+    return data.lanes || { free: 0, fleet: 0, premium: 0 };
   } catch {
     return { free: 0, fleet: 0, premium: 0 };
   }

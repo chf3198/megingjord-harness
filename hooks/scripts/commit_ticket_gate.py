@@ -11,6 +11,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from repo_scope import is_repo_enabled
 from ticket_helpers import extract_issue_num, extract_from_branch
 
 
@@ -44,6 +45,11 @@ def main() -> int:
         return 0
 
     tool = str(payload.get("tool_name", ""))
+    cwd = str(payload.get("cwd") or os.getcwd())
+
+    if not is_repo_enabled(cwd):
+        return 0
+
     values = list(payload.get("tool_input", {}).values() if isinstance(
         payload.get("tool_input"), dict) else [])
     joined = "\n".join(str(v) for v in values)
