@@ -1,0 +1,70 @@
+/* Views + half-screen responsive UX + tooltips */
+
+.view-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem 0;
+}
+
+.view-tabs button {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+}
+
+.view-tabs button.active {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.app-tip {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  max-width: 280px;
+  background: var(--surface);
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+  display: none;
+}
+
+.app-tip p {
+  color: var(--text-muted);
+  margin: 0.3rem 0;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 1024px) {
+  .header {
+    padding: 0.7rem 0.9rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .header h1 { font-size: 1.1rem; }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .header-actions button {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.82rem;
+  }
+
+  .view-tabs,
+  .dashboard-grid {
+    padding: 0.8rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+}

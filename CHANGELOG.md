@@ -5,6 +5,27 @@
 ### Added
 - (none yet)
 
+## [1.4.0] - 2026-04-13
+
+### Added
+- Half-screen optimized UX target (960×1080) with responsive view tabs
+- Multi-view dashboard organization (Ops, Resources, Help) to reduce active DOM
+- Optional contextual tooltip system with "More info" links into Help view
+- Built-in quick stress test button (12 lightweight rounds, ~1 minute)
+- Expanded Playwright E2E checks for view switching, tooltips, and test runner
+- Google-tooling quality suite via Playwright CDP metrics (`test:quality`)
+
+### Changed
+- Dashboard config now persists tooltip preference
+- Panel renderers now include explicit empty/fallback states for reliability
+
+### Validation
+- Lighthouse audit (`test-results/lighthouse-dashboard.json`):
+    - Performance 83
+    - Accessibility 100
+    - Best Practices 96
+    - SEO 90
+
 ## [1.3.0] - 2025-07-16
 
 ### Added

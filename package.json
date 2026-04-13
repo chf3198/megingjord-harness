@@ -1,6 +1,6 @@
 {
   "name": "devenv-ops",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Development environment operations: skills, monitoring, research",
   "private": true,
   "scripts": {
@@ -16,7 +16,8 @@
     "repo:scope": "node scripts/global/repo-scope.js",
     "ticket:create": "node scripts/global/ticket-create.js",
     "test": "npx playwright test",
-    "test:headed": "npx playwright test --headed"
+    "test:headed": "npx playwright test --headed",
+    "test:quality": "npx playwright test tests/google-quality.spec.js"
   },
   "keywords": [
     "devops",

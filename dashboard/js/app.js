@@ -10,8 +10,12 @@ function dashboardApp() {
     fleetStats: {},
     routerStats: {},
     config: { refreshSec: 60, highContrast: false },
+    currentView: 'ops',
+    tooltipsEnabled: false,
     autoRefreshEnabled: true,
     refreshTimer: null,
+    testTimer: null,
+    testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
     loading: false,
     lastRefresh: 'never',
 
@@ -26,6 +30,8 @@ function dashboardApp() {
     async init() {
       this.config = loadDashboardConfig();
       document.body.classList.toggle('high-contrast', this.config.highContrast);
+      this.tooltipsEnabled = !!this.config.tooltipsEnabled;
+      initTooltips(this);
       await this.loadInventory();
       await this.refreshAll();
       this.scheduleRefresh();
@@ -76,6 +82,11 @@ function dashboardApp() {
       saveDashboardConfig(this.config);
       document.body.classList.toggle('high-contrast', this.config.highContrast);
     },
+
+    setView(view) { setDashboardView(this, view); },
+    isView(view) { return isDashboardView(this, view); },
+    toggleTips() { toggleDashboardTips(this); },
+    runQuickTest() { return runDashboardQuickTest(this); },
 
     startTour() { startDashboardTour(); }
   };
