@@ -8,6 +8,7 @@ function dashboardApp() {
     quotas: [],
     liveQuotas: [],
     fleetStats: {},
+    routerStats: {},
     loading: false,
     lastRefresh: 'never',
 
@@ -35,13 +36,15 @@ function dashboardApp() {
       try {
         const ids = this.devices
           .filter(d => d.ollama).map(d => d.id);
-        const [checks, stats, lq] = await Promise.all([
+        const [checks, stats, lq, routerStats] = await Promise.all([
           runHealthChecks(this.devices),
           fetchAllFleetStats(ids),
-          fetchAllLiveQuotas()
+          fetchAllLiveQuotas(),
+          fetchRouterLaneStats()
         ]);
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
+        this.routerStats = routerStats;
         if (lq.length) this.liveQuotas = lq;
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {

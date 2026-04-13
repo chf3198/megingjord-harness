@@ -10,7 +10,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from governance_state import ensure_state
+from governance_state import ensure_state, save_state
+from task_router import apply_route, classify_prompt
 
 
 FINISH_RE = re.compile(r"\b(done|finish|finished|complete|completed|close out|wrap up|ship|release)\b", re.IGNORECASE)
@@ -23,11 +24,34 @@ def main() -> int:
         return 0
 
     prompt = str(payload.get("prompt", ""))
-    if not FINISH_RE.search(prompt):
-        return 0
-
     cwd = str(payload.get("cwd") or os.getcwd())
     state = ensure_state(cwd)
+    route = classify_prompt(prompt)
+    apply_route(state, route)
+    save_state(state)
+
+    route_msg = None
+    if route and len(prompt.split()) >= 6:
+        route_msg = (
+            "Task router: lane={lane}, backend={backend}, model={model}, "
+            "confidence={confidence}."
+        ).format(
+            lane=route.get("lane", "free"),
+            backend=route.get("backend", "auto"),
+            model=route.get("recommendedModel", "Auto"),
+            confidence=route.get("confidence", "medium"),
+        )
+
+    if not FINISH_RE.search(prompt):
+        if route_msg:
+            print(json.dumps({
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": route_msg,
+                }
+            }))
+        return 0
+
     flags = state.get("flags", {})
     ops = state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
@@ -41,13 +65,16 @@ def main() -> int:
     if not missing:
         return 0
 
+    extra = (
+        "Finish intent detected, but Admin baton is incomplete. "
+        "Missing required steps: " + ", ".join(missing) + "."
+    )
+    if route_msg:
+        extra = route_msg + " " + extra
     out = {
         "hookSpecificOutput": {
             "hookEventName": "UserPromptSubmit",
-            "additionalContext": (
-                "Finish intent detected, but Admin baton is incomplete. "
-                "Missing required steps: " + ", ".join(missing) + "."
-            ),
+            "additionalContext": extra,
         },
         "systemMessage": "Governance gate: completion requested before required Admin steps were recorded.",
     }

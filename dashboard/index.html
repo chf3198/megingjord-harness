@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="css/help.css">
     <link rel="stylesheet" href="css/stats.css">
+    <link rel="stylesheet" href="css/router.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.css">
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.4.0/dist/driver.js.iife.js">
@@ -16,6 +17,7 @@
     <script src="js/health-check.js"></script>
     <script src="js/quota-tracker.js"></script>
     <script src="js/device-monitor.js"></script>
+    <script src="js/router-tracker.js"></script>
     <script src="js/live-stats.js"></script>
     <script src="js/quota-live.js"></script>
     <script src="js/render-panels.js"></script>
@@ -52,10 +54,14 @@
             <h2>📡 Live Fleet Stats</h2>
             <div x-html="renderFleetStats(fleetStats)"></div>
         </section>
+        <section id="panel-router" class="panel">
+            <h2>🛣️ Task Router Lanes</h2>
+            <div x-html="renderRouterPanel(routerStats)"></div>
+        </section>
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v0.1.0</span>
+        <span>devenv-ops v1.0.0</span>
     </footer>
 </body>
 </html>

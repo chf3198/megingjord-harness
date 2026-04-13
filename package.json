@@ -1,6 +1,6 @@
 {
   "name": "devenv-ops",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Development environment operations: skills, monitoring, research",
   "private": true,
   "scripts": {
@@ -11,6 +11,9 @@
     "deploy": "bash scripts/deploy.sh",
     "deploy:apply": "bash scripts/deploy.sh --apply",
     "health": "node scripts/health-check.js",
+    "router:smoke": "node scripts/global/task-router-smoke.js",
+    "router:dispatch": "node scripts/global/task-router-dispatch.js",
+    "ticket:create": "node scripts/global/ticket-create.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed"
   },

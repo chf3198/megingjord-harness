@@ -25,6 +25,11 @@ def _default_state(cwd: str) -> dict[str, Any]:
     return {
         "cwd": cwd,
         "repo_type": detect_repo_type(cwd),
+        "routing": {
+            "lane": "free", "backend": "auto",
+            "recommended_model": "Auto",
+            "confidence": "medium", "rationale": "default",
+        },
         "roles": {
             "manager": False, "collaborator": False,
             "admin": False, "consultant": False,
@@ -54,7 +59,7 @@ def load_state(cwd: str) -> dict[str, Any]:
         defaults = _default_state(cwd)
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
-        for key in ("roles", "flags", "admin_ops"):
+        for key in ("routing", "roles", "flags", "admin_ops"):
             data.setdefault(key, defaults[key])
         return data
     except Exception:
