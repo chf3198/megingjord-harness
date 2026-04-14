@@ -54,6 +54,7 @@ async function handleApi(req, res) {
   }
   if (u === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
+  if (u === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   jsonRes(res, 404, { error: 'not found' });
 }
@@ -85,6 +86,10 @@ function getWikiHealth() {
     issues: broken.length + orphans.length + fmIssues.length + idxIssues.length,
     broken, orphans, frontmatter: fmIssues, indexSync: idxIssues,
     lastCheck: new Date().toISOString() };
+}
+
+function getWikiPages() {
+  return require('./wiki-pages-api')(WIKI_DIR, WIKI_CATS);
 }
 
 http.createServer((req,res)=>{ if(req.url.startsWith('/api/')) return handleApi(req,res); serveStatic(req,res); }).listen(PORT,()=>{ console.log(`Dashboard: http://localhost:${PORT} Fleet: ${Object.keys(FLEET).join(', ')}`); });

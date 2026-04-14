@@ -28,7 +28,7 @@ function dashboardApp() {
       document.body.classList.toggle('high-contrast', this.config.highContrast);
       this.tooltipsEnabled = !!this.config.tooltipsEnabled;
       initTooltips(this);
-      this.wikiPages = typeof getWikiPages === 'function' ? getWikiPages() : [];
+      this.wikiPages = typeof loadWikiPages === 'function' ? await loadWikiPages() : [];
       await this.loadInventory();
       await this.refreshAll();
       this.scheduleRefresh();
