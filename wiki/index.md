@@ -24,10 +24,14 @@ _No source summaries yet._
 
 - [[karpathy-llm-wiki-pattern]] — "Karpathy LLM Wiki Pattern"
 
+- [[devenv-fleet-topology]] — DevEnv Fleet Topology
+
+- [[copilot-skills-system]] — Copilot Skills System
+
 ## Syntheses
 
 _No synthesis pages yet._
 
 ---
 
-**Pages**: 1 | **Last updated**: 2026-04-14
+**Pages**: 3 | **Last updated**: 2026-04-14
