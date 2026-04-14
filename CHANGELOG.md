@@ -39,6 +39,11 @@
 ## [Unreleased]
 
 ### Added
+- **LLM Wiki Phase 4 — Bootstrap + Skill** (#30, #31):
+  Ingested 3 raw sources via OpenClaw (fleet, skills, Karpathy pattern).
+  Created `llm-wiki-ops` maintenance skill (34th skill).
+- **LLM Wiki Phase 3 — Integration** (#28, #29):
+  Foam VS Code extension, dashboard wiki health panel, /api/wiki-health.
 - **LLM Wiki Phase 2 — Core Ops** (#25, #26, #27):
   `ingest.js` ingests raw sources via OpenClaw LLM compilation.
   `lint.js` checks broken wikilinks, orphans, frontmatter, index sync.
@@ -87,12 +92,9 @@
 ### Validation
 - Lighthouse: Performance 83, Accessibility 100, Best Practices 96, SEO 90
 
-## [1.3.0] - Visual QA governance gate, self-annealing epic
-
+## [1.3.0] - Visual QA, self-annealing epic
 ## [1.2.0] - Dashboard revamp, router metrics, accessibility
-
 ## [1.1.1] – Repo-scoped Agile workflow opt-in
 ## [1.1.0] – Ticket-driven work: issue per task, branch/commit gates
 ## [1.0.0] – Tiered agent architecture, Cynefin scoring, global task router
 ## [0.1.0] – Genesis: repo structure, governance, dashboard, skills
-- Research archive, device/service inventory, utility scripts
