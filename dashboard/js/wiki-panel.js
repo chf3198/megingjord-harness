@@ -48,10 +48,15 @@ function formatWikiTime(iso) {
 }
 
 async function fetchWikiHealth() {
-  if (typeof getWikiHealth === 'function') return getWikiHealth();
-  return {
-    loaded: true, pages: 0, dirs: 0, issues: 0,
-    broken: [], orphans: [], frontmatter: [], indexSync: [],
-    lastCheck: new Date().toISOString(),
-  };
+  try {
+    const r = await fetch('/api/wiki-health');
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch {
+    return {
+      loaded: false, pages: 0, dirs: 0, issues: 0,
+      broken: [], orphans: [], frontmatter: [], indexSync: [],
+      lastCheck: null,
+    };
+  }
 }
