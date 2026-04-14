@@ -61,10 +61,11 @@ Before merging/deploying, verify:
 3. **PR** — `gh pr create` with `Closes #N`, gate evidence, labels
 4. **CI green** — `gh pr checks <PR> --watch`; fix failures before merge
 5. **Merge** — `gh pr merge --squash --delete-branch`
-6. **Publish/release** — If applicable: build, publish, create GH release
-7. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
+6. **Event** — `emit-event.js '{"type":"pr:merged","ticket":"#N"}'`
+7. **Publish/release** — If applicable: build, publish, create GH release
+8. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
 
-**Feature is NOT complete until all applicable steps are done.**
+**Feature is NOT complete until all steps are done, including event.**
 
 ---
 
