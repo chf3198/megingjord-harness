@@ -35,10 +35,10 @@ test.describe('DevEnv Ops Dashboard', () => {
     await page.click('#btn-tips');
     await page.hover('#btn-refresh');
     await expect(page.locator('#app-tip')).toBeVisible();
-    await expect(page.locator('#app-tip')).toContainText('Go to');
-    // Switch to Help view — panel should appear
+    await expect(page.locator('#app-tip')).toContainText('Help:');
+    // Switch to Help view — panel should show searchable help sections
     await page.click('button:has-text("Help")');
-    await expect(page.locator('#panel-help')).toContainText('Target viewport');
+    await expect(page.locator('#panel-help')).toContainText('Fleet Topology');
   });
 
   test('quick stress test starts and updates status', async ({ page }) => {

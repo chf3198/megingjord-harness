@@ -30,6 +30,9 @@ async function runDashboardQuickTest(app) {
     app.testRun.ok += res.ok;
     app.testRun.fail += res.fail;
     app.testRun.last = `round ${i + 1}/${rounds} • ${res.ms}ms`;
+    const tag = res.fail ? 'warn' : 'test';
+    addActivity(app.activityLog, tag,
+      `Round ${i + 1}: ${res.ok} ok, ${res.fail} fail (${res.ms}ms)`);
   }
   app.testRun.running = false;
   app.testRun.last = app.testRun.fail ? 'completed with warnings' : 'pass';
