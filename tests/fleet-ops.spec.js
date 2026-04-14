@@ -61,16 +61,21 @@ test.describe('Fleet Operations Center', () => {
 
   test('view switching preserves fleet panel state', async ({ page }) => {
     await page.goto('http://localhost:8090/dashboard/');
-    // Verify fleet view
     await expect(page.locator('#panel-topology')).toBeVisible();
-    // Switch to ops then back
     await page.click('button:has-text("Ops")');
     await page.waitForTimeout(300);
     await page.click('button:has-text("Fleet")');
     await page.waitForTimeout(300);
-    // Fleet panels restored
     await expect(page.locator('#panel-topology')).toBeVisible();
     await expect(page.locator('#panel-baton')).toBeVisible();
     await expect(page.locator('#panel-activity')).toBeVisible();
+  });
+
+  test('service cards include dashboard links', async ({ page }) => {
+    await page.goto('http://localhost:8090/dashboard/');
+    await page.click('button:has-text("Resources")');
+    await page.waitForTimeout(300);
+    const links = await page.locator('.svc-link').count();
+    expect(links).toBeGreaterThanOrEqual(1);
   });
 });

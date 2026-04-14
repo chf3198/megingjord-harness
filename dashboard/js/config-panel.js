@@ -3,15 +3,15 @@
 function loadDashboardConfig() {
   try {
     const raw = localStorage.getItem('devenv-dashboard-config');
-    if (!raw) return { refreshSec: 60, highContrast: false, tooltipsEnabled: false };
+    if (!raw) return { refreshSec: 5, highContrast: false, tooltipsEnabled: false };
     const cfg = JSON.parse(raw);
     return {
-      refreshSec: Number(cfg.refreshSec || 60),
+      refreshSec: Number(cfg.refreshSec || 5),
       highContrast: !!cfg.highContrast,
       tooltipsEnabled: !!cfg.tooltipsEnabled
     };
   } catch {
-    return { refreshSec: 60, highContrast: false, tooltipsEnabled: false };
+    return { refreshSec: 5, highContrast: false, tooltipsEnabled: false };
   }
 }
 
@@ -22,9 +22,13 @@ function saveDashboardConfig(config) {
 function renderConfigPanel(config, enabled, tips) {
   const status = enabled ? 'Enabled' : 'Paused';
   return `<div class="config-grid">
-    <p><strong>Auto refresh:</strong> ${status} (${config.refreshSec}s)</p>
+    <p><strong>Auto refresh:</strong> ${status}
+      <label class="refresh-ctl">
+        <input type="range" min="3" max="60" value="${config.refreshSec}"
+          oninput="setRefreshSec(this.value)"/>
+        <span>${config.refreshSec}s</span></label></p>
     <p><strong>High contrast:</strong> ${config.highContrast ? 'On' : 'Off'}</p>
     <p><strong>Tooltips:</strong> ${tips ? 'On' : 'Off'}</p>
-    <p class="config-note">Use ⏱️ Auto button to pause/resume.</p>
+    <p class="config-note">Drag slider to set refresh interval (3–60s).</p>
   </div>`;
 }

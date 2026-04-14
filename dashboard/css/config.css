@@ -8,3 +8,13 @@
   color: var(--text-muted);
   font-size: 0.8rem;
 }
+
+.refresh-ctl {
+  display: inline-flex; align-items: center; gap: 0.3rem; margin-left: 0.4rem;
+}
+
+.refresh-ctl input[type=range] {
+  width: 80px; accent-color: var(--blue); cursor: pointer;
+}
+
+.refresh-ctl span { font-size: 0.8rem; color: var(--blue); min-width: 2em; }

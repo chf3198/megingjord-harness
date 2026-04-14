@@ -4,8 +4,8 @@ function dashboardApp() {
   return {
     devices: [], services: [], quotas: [], liveQuotas: [],
     fleetStats: {}, routerStats: {},
-    config: { refreshSec: 60, highContrast: false },
-    currentView: 'fleet',
+    config: { refreshSec: 5, highContrast: false },
+    currentView: 'fleet', helpDevMode: false,
     batonState: { activeRole: 'idle', issue: null, status: 'idle' },
     activityLog: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
@@ -64,7 +64,7 @@ function dashboardApp() {
     scheduleRefresh() {
       if (this.refreshTimer) clearInterval(this.refreshTimer);
       if (!this.autoRefreshEnabled) return;
-      const ms = Math.max(15, Number(this.config.refreshSec || 60)) * 1000;
+      const ms = Math.max(3, Number(this.config.refreshSec || 5)) * 1000;
       this.refreshTimer = setInterval(() => this.refreshAll(), ms);
     },
 
@@ -84,6 +84,7 @@ function dashboardApp() {
     setView(view) { setDashboardView(this, view); },
     isView(view) { return isDashboardView(this, view); },
     toggleTips() { toggleDashboardTips(this); },
+    toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
     runQuickTest() { return runDashboardQuickTest(this); },
 
     startTour() { startDashboardTour(); }

@@ -36,14 +36,16 @@ test.describe('DevEnv Ops Dashboard', () => {
     await page.hover('#btn-refresh');
     await expect(page.locator('#app-tip')).toBeVisible();
     await expect(page.locator('#app-tip')).toContainText('Help:');
-    // Switch to Help view — panel should show searchable help sections
+    // Switch to Help view — panel should show searchable help sections + dev toggle
     await page.click('button:has-text("Help")');
     await expect(page.locator('#panel-help')).toContainText('Fleet Topology');
+    await expect(page.locator('.help-toggle')).toBeVisible();
   });
 
   test('quick stress test starts and updates status', async ({ page }) => {
     await page.goto('http://localhost:8090/dashboard/');
     await page.click('#btn-test');
-    await expect(page.locator('#panel-test')).toContainText('round 1/12');
+    // Test shows Agile Epic phases, not round numbers
+    await expect(page.locator('#panel-test')).toContainText('Epic scoping');
   });
 });
