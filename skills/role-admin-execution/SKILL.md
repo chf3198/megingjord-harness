@@ -14,6 +14,14 @@ disable-model-invocation: false
 - Perform git/PR/release administration consistent with policy.
 - Execute required post-merge/post-deploy governance checklist items.
 
+## Upstream verification (from Collaborator)
+
+Before merging/deploying, verify:
+- Validation evidence exists for EVERY gate in Manager's scope.
+- Scope compliance: implementation matches Manager's criteria list.
+- No un-flagged scope drift from Collaborator.
+- Admin checks process, NOT solution quality (that's Consultant).
+
 ## Ticket baton protocol
 
 1. Transition labels: `status:in-progress` → `status:review`, confirm `role:admin`.

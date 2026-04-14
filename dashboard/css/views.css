@@ -86,12 +86,15 @@
 .help-toggle:hover { border-color: var(--blue); color: var(--blue); }
 .svc-link { color: var(--blue); font-size: 0.78rem; text-decoration: none; }
 .svc-link:hover { text-decoration: underline; }
-
+.help-cat-title { font-size: 0.88rem; color: var(--blue); margin: 0.5rem 0 0.25rem; }
+.help-category:first-child .help-cat-title { margin-top: 0; }
+.help-feedback { display: flex; gap: 1rem; padding: 0.5rem 0; }
+.help-empty { color: var(--text-muted); font-style: italic; }
 @media (max-width: 640px) {
   .header { flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.75rem; }
   .header-brand h1 { font-size: 0.95rem; }
-  .header-nav { flex-wrap: wrap; }
-  .header-actions { flex-wrap: wrap; gap: 0.3rem; }
+  .header-nav, .header-actions { flex-wrap: wrap; }
+  .header-actions { gap: 0.3rem; }
   .header-actions button { padding: 0.25rem 0.4rem; font-size: 0.78rem; }
-  .dashboard-grid { padding: 0.5rem; grid-template-columns: 1fr; gap: 0.5rem; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.5rem; }
 }

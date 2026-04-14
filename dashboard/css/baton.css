@@ -7,7 +7,10 @@
   padding: 0.5rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .baton-empty {
@@ -40,18 +43,21 @@
   display: flex;
   align-items: center;
   gap: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .baton-step {
   text-align: center;
-  padding: 0.2rem 0.4rem;
+  padding: 0.15rem 0.25rem;
   border-radius: 4px;
   border: 1.5px solid var(--border);
   background: var(--bg);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   opacity: 0.4;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .baton-step.done { border-color: var(--green); opacity: 0.65; }
@@ -63,19 +69,19 @@
   box-shadow: 0 0 6px color-mix(in srgb, var(--blue) 20%, transparent);
 }
 
-.baton-lbl { font-size: 0.65rem; font-weight: 600; margin-left: 0.15rem; }
+.baton-lbl { font-size: 0.58rem; font-weight: 600; margin-left: 0.1rem; }
 
 .baton-arrow {
   color: var(--border);
-  padding: 0 0.1rem;
-  font-size: 0.7rem;
+  padding: 0 0.05rem;
+  font-size: 0.6rem;
 }
 
 .baton-step.done + .baton-arrow { color: var(--green); }
 .baton-step.active + .baton-arrow { color: var(--blue); }
 
 @media (max-width: 640px) {
-  .baton-pipeline { flex-wrap: wrap; gap: 0.15rem; }
-  .baton-step { font-size: 0.75rem; padding: 0.15rem 0.3rem; }
+  .baton-pipeline { overflow-x: auto; }
+  .baton-step { font-size: 0.65rem; padding: 0.1rem 0.2rem; }
   .baton-agent { margin-left: 0; }
 }

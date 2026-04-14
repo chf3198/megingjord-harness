@@ -15,6 +15,14 @@ disable-model-invocation: false
 - Run required validation gates and capture outcomes.
 - Update docs/changelog when behavior changes.
 
+## Upstream verification (from Manager)
+
+Before implementing, verify Manager's scope:
+- Are acceptance criteria testable and complete (binary pass/fail)?
+- Are constraints realistic given available resources?
+- Are verification gates achievable? If not, push back early.
+- If scope is vague, request `MANAGER_HANDOFF` revision.
+
 ## Entry criteria
 
 - Valid `MANAGER_HANDOFF` exists.

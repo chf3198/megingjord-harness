@@ -1,4 +1,4 @@
-// Wiki Health Panel — clean card with relative timestamps
+// Wiki Health Panel — card with link to wiki reader view
 
 function renderWikiPanel(wikiHealth) {
   if (!wikiHealth || !wikiHealth.loaded) {
@@ -29,7 +29,10 @@ function renderWikiPanel(wikiHealth) {
       <span class="badge ${cls}">${h.pages}p</span></div>
     ${stats}
     <div class="wiki-issues">${issues}</div>
-    <div class="wiki-ts">🕐 ${esc(ts)}</div>
+    <div class="wiki-actions">
+      <button class="wiki-view-btn" onclick="document.querySelector('[x-data]').__x.$data.setView('wiki')">📖 View Wiki</button>
+      <span class="wiki-ts">🕐 ${esc(ts)}</span>
+    </div>
   </div>`;
 }
 
@@ -45,12 +48,9 @@ function formatWikiTime(iso) {
 }
 
 async function fetchWikiHealth() {
-  try {
-    const resp = await fetch('/api/wiki-health');
-    if (resp.ok) return await resp.json();
-  } catch { /* fall through */ }
+  if (typeof getWikiHealth === 'function') return getWikiHealth();
   return {
-    loaded: true, pages: 0, dirs: 4, issues: 0,
+    loaded: true, pages: 0, dirs: 0, issues: 0,
     broken: [], orphans: [], frontmatter: [], indexSync: [],
     lastCheck: new Date().toISOString(),
   };
