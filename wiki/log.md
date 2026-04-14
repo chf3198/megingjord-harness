@@ -23,3 +23,17 @@ Schema: WIKI.md. No sources ingested yet.
 ## [2026-04-14] ingest | DevEnv Fleet Topology
 
 ## [2026-04-14] ingest | Copilot Skills System
+
+## [2026-04-14] bulk-ingest | 20 research files → wiki/sources/
+Batch ingest of all research/*.md files into wiki source pages.
+Files: agent-drift (7), agile-roles (2), copilot-governance,
+dashboard-research, free-tier-inventory, hardware-evaluation,
+help (2), prompt-reduction, tiered-architecture (2), workflow (2).
+Epic #85 ticket #86. Total wiki pages now: 23.
+
+## [2026-04-14] create | 5 entity pages + 5 concept pages
+Entities: penguin-1, windows-laptop, openclaw, tailscale-mesh,
+copilot-pro. Concepts: baton-protocol, agent-drift,
+self-annealing, wiki-pattern, governance-enforcement.
+Cross-linked with [[wikilinks]]. Epic #85 ticket #87.
+Total wiki pages now: 33.
