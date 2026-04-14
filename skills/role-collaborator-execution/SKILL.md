@@ -19,12 +19,20 @@ disable-model-invocation: false
 
 - Valid `MANAGER_HANDOFF` exists.
 - Required gates are defined.
+- Active GitHub issue linked to work.
+
+## Branch and commit rules
+
+- Create branch: `<type>/<issue#>-<slug>` (e.g., `feat/62-baton-redesign`).
+- Every commit references `#N` in message.
+- Pull latest `main` into branch before PR: `git pull origin main`.
+- Research tickets: no branch — post findings as ticket comment.
 
 ## Exit criteria
 
 - `COLLABORATOR_HANDOFF` includes concrete validation evidence.
-- `COLLABORATOR_HANDOFF` explicitly enumerates `admin_required_ops` for the Admin role baton.
-- Do not declare the feature complete at Collaborator exit; "all gates pass" means implementation is validated, not released.
+- `COLLABORATOR_HANDOFF` explicitly enumerates `admin_required_ops`.
+- Do not declare complete at exit; "all gates pass" = validated, not released.
 - Any scope drift is explicitly flagged for manager re-handoff.
 
 ## Ticket baton protocol
