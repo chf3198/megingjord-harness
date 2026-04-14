@@ -27,19 +27,20 @@
       "quotas": { "searchGrounding": 500, "period": "daily" },
       "models": ["Gemini 2.5 Pro", "Gemini 2.5 Flash", "Gemini 3 Flash", "Gemma 4"],
       "features": ["vision", "audio", "code-execution", "embeddings"],
-      "status": "not-configured"
+      "balance": "$10",
+      "status": "active"
     },
     {
       "id": "groq",
       "name": "Groq",
       "quotas": { "rpm": 30, "rpd": 14400 },
-      "status": "not-configured"
+      "status": "active"
     },
     {
       "id": "cerebras",
       "name": "Cerebras Inference",
       "models": ["GPT-OSS-120B", "Llama 3.1-8B", "Qwen3-235B"],
-      "status": "not-configured"
+      "status": "active"
     },
     {
       "id": "openrouter",

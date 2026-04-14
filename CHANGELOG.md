@@ -39,6 +39,13 @@
 ## [Unreleased]
 
 ### Added
+- **LLM Wiki Phase 1 — Foundation**: Directory scaffold (`raw/`, `wiki/`,
+  `scripts/wiki/`), `WIKI.md` governance schema, `wiki/index.md`,
+  `wiki/log.md`. Based on Karpathy's LLM Wiki pattern.
+- **ADR-007**: LLM Wiki knowledge system adoption decision recorded.
+- **area:knowledge label**: New GitHub label for wiki-related issues.
+
+### Added
 - **Model routing agents**: 8 custom agents with pinned models
   override AUTO (ADR-004). Router → Architect (Opus), Implementer
   (Sonnet), Quick (GPT-5 mini), Planner (Opus), 4 audit agents
