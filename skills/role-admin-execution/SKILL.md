@@ -37,18 +37,24 @@ disable-model-invocation: false
 
 ---
 
+## Merge verification checklist
+
+1. Branch matches `<type>/<issue#>-<slug>` convention.
+2. Collaborator pulled latest `main` before PR (no stale base).
+3. Commit messages reference `#N` (issue number).
+4. Research tickets: no merge needed — verify findings posted as comment.
+
 ## Feature completion steps (required for feature/bugfix)
 
 "All gates pass" = Collaborator done, NOT Admin done. Execute in order:
 
-1. **Version check** — If extension changed: confirm version not already published
-2. **Commit** — `git add -A && git commit` with `Closes #N` and "why" context
-3. **Push** — `git push -u origin <branch-name>`
-4. **PR** — `gh pr create` with `Closes #N`, gate evidence, labels, milestone
-5. **CI green** — `gh pr checks <PR> --watch`; fix failures before merge
-6. **Merge** — `gh pr merge --merge` (or `--squash`); never push to main directly
-7. **Publish/release** — If applicable: build, publish, create GH release
-8. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
+1. **Commit** — `git add -A && git commit` with `Closes #N` and context
+2. **Push** — `git push -u origin <branch-name>`
+3. **PR** — `gh pr create` with `Closes #N`, gate evidence, labels
+4. **CI green** — `gh pr checks <PR> --watch`; fix failures before merge
+5. **Merge** — `gh pr merge --squash --delete-branch`
+6. **Publish/release** — If applicable: build, publish, create GH release
+7. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
 
 **Feature is NOT complete until all applicable steps are done.**
 
