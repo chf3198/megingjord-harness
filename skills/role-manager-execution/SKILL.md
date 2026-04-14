@@ -13,8 +13,15 @@ disable-model-invocation: false
 - Create or link a GitHub issue **before any other action**.
 - Clarify objective and non-objectives.
 - Identify constraints from instructions and repository policy.
-- Define objective acceptance criteria.
+- Define **testable** acceptance criteria (binary pass/fail only).
 - Select required gates/tests/checks.
+- Provide context, not step-by-step instructions (autonomy principle).
+
+## Upstream verification (from Consultant)
+
+Before starting new work, check if prior Consultant CLOSEOUT had recommendations:
+- Incorporate feedback from `recommended_follow_ups`.
+- Address any `process: ticket-hygiene-gap` findings.
 
 ## Ticket-first gate (mandatory)
 

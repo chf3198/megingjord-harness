@@ -15,7 +15,6 @@ function toggleDashboardTips(app) {
   if (!app.tooltipsEnabled) clearTooltip(app);
 }
 
-// Global — called from config panel range slider
 function setRefreshSec(val) {
   const el = document.querySelector('[x-data]');
   const app = el._x_dataStack?.[0] || Alpine.$data(el);
@@ -27,37 +26,71 @@ function setRefreshSec(val) {
 async function runDashboardQuickTest(app) {
   if (app.testRun.running) return;
   const tickets = buildParallelTickets();
+  const t0 = performance.now();
   app.testRun = {
     running: true, rounds: 0, ok: 0, fail: 0,
-    last: 'warming up', phase: '', tickets,
+    last: 'warming up', tickets, elapsed: 0,
     startedAt: new Date().toLocaleTimeString()
   };
-  addActivity(app.activityLog, 'test', 'Parallel ticket stress test started',
-    `${tickets.length} tickets`);
-  const maxRounds = 15;
+  addActivity(app.activityLog, 'test', '🧪 Stress test started',
+    `${tickets.length} tickets · 60s`);
+
+  const DURATION_MS = 60000, INTERVAL_MS = 1500;
+  const maxRounds = Math.ceil(DURATION_MS / INTERVAL_MS);
+
   for (let i = 0; i < maxRounds; i++) {
-    await new Promise(r => setTimeout(r, 200 + Math.random() * 150));
-    // Advance a random non-done ticket
+    await new Promise(r => setTimeout(r, INTERVAL_MS));
+    const elapsed = (performance.now() - t0) / 1000;
+    if (elapsed > 62) break;
+
+    // Advance random non-done ticket
     const active = tickets.filter(t => t.status !== 'done');
-    if (!active.length) break;
-    const t = active[Math.floor(Math.random() * active.length)];
-    advanceTicket(t);
+    if (active.length) {
+      const t = active[Math.floor(Math.random() * active.length)];
+      advanceTicket(t);
+      const agent = AGENT_NAMES[t.role] || 'system';
+      addActivity(app.activityLog, 'baton',
+        `[${agent}] ${t.id}: ${t.label}`, t.role);
+    }
+
+    // Mock router log entry every round
+    const mock = mockRouterEntry();
+    addRouterLogEntry(mock.agent, mock.model, `[test] ${mock.lane} lane`);
+    addActivity(app.activityLog, 'router',
+      `${mock.agent} → ${mock.model}`, mock.lane);
+
+    // Update baton state with all active tickets
+    app.batonState = tickets.filter(t => t.status !== 'done')
+      .map(t => ({
+        activeRole: t.role, issue: t.id,
+        status: t.status === 'done' ? 'done' : 'in-progress',
+        agent: AGENT_NAMES[t.role] || ''
+      }));
+
     app.testRun.rounds = i + 1;
-    app.testRun.ok += t.skills.length;
-    app.testRun.last = `${t.id}: ${t.role}`;
+    app.testRun.ok += 2;
+    app.testRun.elapsed = elapsed;
+    app.testRun.last = active.length
+      ? `${active[0].id}: ${active[0].role}` : 'completing';
     app.testRun.tickets = [...tickets];
-    const agent = AGENT_NAMES[t.role] || 'system';
-    app.batonState = {
-      activeRole: t.role === 'done' ? 'idle' : t.role,
-      issue: t.id, status: t.role === 'done' ? 'done' : 'in-progress',
-      agent
-    };
-    addActivity(app.activityLog, 'baton',
-      `[${agent}] ${t.id}: ${t.label}`, t.role);
+
+    // Cycle device status for topology exercise
+    if (i % 4 === 0 && app.devices.length > 1) {
+      const d = app.devices[i % app.devices.length];
+      const states = ['healthy', 'degraded', 'offline'];
+      d.status = states[i % states.length];
+    }
+
+    // All tickets done? Keep going for router/activity exercise
+    if (!active.length && elapsed > 30) break;
   }
+
   app.testRun.running = false;
-  app.testRun.last = `pass — ${tickets.length} tickets complete`;
-  app.batonState = { activeRole: 'idle', issue: null, status: 'idle' };
+  app.testRun.elapsed = (performance.now() - t0) / 1000;
+  app.testRun.last = `✅ ${tickets.length} tickets · ${app.testRun.rounds} rounds`;
+  app.batonState = [];
+  // Restore device status
+  app.devices.forEach(d => { d.status = d._origStatus || d.status; });
   addActivity(app.activityLog, 'test',
-    `All tickets complete: ${app.testRun.ok} skills verified`);
+    `Stress test complete: ${app.testRun.ok} checks`);
 }

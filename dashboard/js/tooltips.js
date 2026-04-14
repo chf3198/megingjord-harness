@@ -9,6 +9,9 @@ const TIP_COPY = {
   'view-ops': ['Ops', 'Quotas and router.', 'ops', 'quotas'],
   'view-resources': ['Resources', 'Device/service cards.', 'resources', 'data'],
   'view-help': ['Help', 'Full documentation.', 'help', 'views'],
+  'view-wiki': ['Wiki', 'Research wiki browser.', 'wiki', 'views'],
+  wiki: ['Wiki health', 'Page stats.', 'ops', 'views'],
+  'wiki-reader': ['Wiki reader', 'Browse research.', 'wiki', 'views'],
   topology: ['Topology', 'SVG mesh graph.', 'fleet', 'fleet'],
   baton: ['Baton flow', 'Role pipeline.', 'fleet', 'baton'],
   'resource-mon': ['Resources', 'OpenClaw+Tailscale.', 'fleet', 'resources'],
@@ -24,24 +27,10 @@ const TIP_COPY = {
   help: ['Help center', 'Documentation.', 'help', 'views']
 };
 
-function renderHelpPanel(devMode) {
-  const items = getHelpSections(devMode).map(s =>
-    `<details class="help-section" id="help-${s.id}">
-      <summary>${s.title}</summary><div class="help-body">${s.body}</div></details>`).join('');
-  const btn = devMode ? '🔧 Developer' : '👤 User';
-  return `<div class="help-toolbar"><input type="search" class="help-search"
-    placeholder="Search help…" oninput="filterHelp(this.value)"/>
-    <button class="help-toggle" onclick="toggleHelpMode()">${btn}</button>
-  </div><div class="help-sections">${items}</div>`;
-}
+// renderHelpPanel is in help-content.js — removed from here
 
 function filterHelp(q) {
-  const lc = q.toLowerCase();
-  document.querySelectorAll('.help-section').forEach(d => {
-    const hit = d.textContent.toLowerCase().includes(lc);
-    d.style.display = hit ? '' : 'none';
-    if (lc && hit) d.open = true;
-  });
+  filterHelpSections(q);
 }
 
 function initTooltips(app) {

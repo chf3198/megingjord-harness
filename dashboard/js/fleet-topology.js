@@ -1,15 +1,15 @@
 // Fleet Topology — compact SVG network graph
-// Only shows routable devices; legend inline
+// Shows all routable devices with offline legend + reasons
 
 function renderFleetTopology(devices) {
   if (!devices.length) return '<p class="topo-empty">No fleet devices.</p>';
   const routable = devices.filter(d => d.tailscaleIP);
-  const unroutable = devices.filter(d => !d.tailscaleIP);
-  const W = 400, H = 120, CY = 55;
-  const nodes = routable.map((d, i) => {
-    const x = 80 + i * ((W - 160) / Math.max(routable.length - 1, 1));
-    return { ...d, x, y: CY };
-  });
+  const W = 440, H = 130, CY = 55;
+  const gap = routable.length > 1
+    ? (W - 160) / (routable.length - 1) : 0;
+  const nodes = routable.map((d, i) => ({
+    ...d, x: 80 + i * gap, y: CY
+  }));
   const links = [];
   for (let i = 0; i < nodes.length; i++)
     for (let j = i + 1; j < nodes.length; j++)
@@ -27,16 +27,17 @@ function renderFleetTopology(devices) {
 
   const nodesSvg = nodes.map(n => {
     const col = statusColor(n.status);
-    const icon = n.openclaw ? '⚡' : n.ollama ? '🤖' : '💻';
-    return `<circle cx="${n.x}" cy="${n.y}" r="18" fill="var(--surface)"
+    const icon = n.local ? '⭐' : n.openclaw ? '⚡' : n.ollama ? '🤖' : '💻';
+    const reason = n.status === 'offline' ? topoOfflineReason(n) : '';
+    return `<circle cx="${n.x}" cy="${n.y}" r="16" fill="var(--surface)"
         stroke="${col}" stroke-width="2" class="topo-node"/>
       <text x="${n.x}" y="${n.y + 4}" text-anchor="middle"
         class="topo-icon">${icon}</text>
-      <text x="${n.x}" y="${n.y + 32}" text-anchor="middle"
-        class="topo-label">${esc(n.alias)}${n.local ? ' ⭐' : ''}</text>
-      <text x="${n.x}" y="${n.y + 42}" text-anchor="middle"
-        class="topo-sub">${esc(n.tailscaleIP)}</text>
-      <circle cx="${n.x + 13}" cy="${n.y - 13}" r="4"
+      <text x="${n.x}" y="${n.y + 30}" text-anchor="middle"
+        class="topo-label">${esc(n.alias)}</text>
+      <text x="${n.x}" y="${n.y + 40}" text-anchor="middle"
+        class="topo-sub">${esc(n.tailscaleIP)}${reason}</text>
+      <circle cx="${n.x + 11}" cy="${n.y - 11}" r="4"
         fill="${col}" class="topo-dot"/>`;
   }).join('');
 
@@ -46,20 +47,28 @@ function renderFleetTopology(devices) {
       .mesh-link{stroke:var(--border);stroke-width:1.5;stroke-dasharray:5,3}
       .mesh-link.active{stroke:var(--green);stroke-width:2;
         stroke-dasharray:none;opacity:.6}
-      .link-label{font-size:8px;fill:var(--text-muted);font-style:italic}
-      .topo-icon{font-size:14px;fill:var(--text);pointer-events:none}
-      .topo-label{font-size:9px;fill:var(--text);font-weight:600}
-      .topo-sub{font-size:7px;fill:var(--text-muted)}
+      .link-label{font-size:7px;fill:var(--text-muted);font-style:italic}
+      .topo-icon{font-size:12px;fill:var(--text);pointer-events:none}
+      .topo-label{font-size:8px;fill:var(--text);font-weight:600}
+      .topo-sub{font-size:6px;fill:var(--text-muted)}
     </style></defs>${linksSvg}${nodesSvg}</svg>`;
 
-  const unr = unroutable.length
-    ? `<span class="topo-unr">${unroutable.map(
-        d => esc(d.alias)).join(', ')} (no route)</span>` : '';
-  const legend = `<div class="topo-legend">
+  return `<div class="topo-wrap">${svg}${topoLegend(devices)}</div>`;
+}
+
+function topoOfflineReason(d) {
+  if (!d.tailscale) return ' (no TS)';
+  if (d.notes?.includes('Not yet')) return ' (pending)';
+  return ' (unreachable)';
+}
+
+function topoLegend(devices) {
+  const hasOffline = devices.some(d => d.status === 'offline');
+  return `<div class="topo-legend">
     <span><span class="dot green"></span> Online</span>
+    ${hasOffline ? '<span><span class="dot red"></span> Offline</span>' : ''}
     <span><span class="line green"></span> Mesh</span>
-    ${unr}</div>`;
-  return `<div class="topo-wrap">${svg}${legend}</div>`;
+    <span>⭐ Primary</span></div>`;
 }
 
 function statusColor(s) {

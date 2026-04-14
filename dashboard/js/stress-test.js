@@ -1,19 +1,23 @@
-// Parallel Ticket Stress Test — simulates multiple tickets
-// moving through Agent roles simultaneously
+// Full-Feature Stress Test — 60s exercise of every dashboard panel
+// Mock data for topology, baton, activity, router, wiki, quotas
 
 const TICKET_TEMPLATES = [
-  { id: 'T-101', label: 'API endpoint', skills: ['role-collaborator-execution',
-    'openclaw-universal-system'] },
-  { id: 'T-102', label: 'UI component', skills: ['web-regression-governance',
-    'playwright-vision-low-resource'] },
-  { id: 'T-103', label: 'Docs update', skills: ['docs-drift-maintenance',
-    'release-version-integrity'] },
+  { id: 'T-101', label: 'API endpoint', skills: ['collaborator', 'openclaw'] },
+  { id: 'T-102', label: 'UI component', skills: ['web-regression', 'playwright'] },
+  { id: 'T-103', label: 'Docs update', skills: ['docs-drift', 'release'] },
+  { id: 'T-104', label: 'Security audit', skills: ['secret-prevention', 'hardening'] },
+  { id: 'T-105', label: 'Deploy pipeline', skills: ['admin-execution', 'release'] },
 ];
 const ROLE_SEQUENCE = ['manager', 'collaborator', 'admin', 'consultant', 'done'];
 const AGENT_NAMES = {
   manager: 'Manny Scope', collaborator: 'Cody Builder',
   admin: 'Addie Merges', consultant: 'Quinn Critic'
 };
+const MOCK_MODELS = [
+  'phi-3.5-mini', 'qwen2.5:7b', 'mistral:7b',
+  'gemma3:270m', 'gpt-4o-mini', 'claude-3.5-sonnet'
+];
+const MOCK_LANES = ['free', 'fleet', 'premium'];
 
 function buildStressTargets() { return TICKET_TEMPLATES; }
 
@@ -30,12 +34,11 @@ function advanceTicket(ticket) {
   return ticket;
 }
 
-async function runStressRound(phases, index) {
-  const phase = phases[index % phases.length];
-  const t0 = performance.now();
-  await new Promise(r => setTimeout(r, 60 + Math.random() * 100));
-  return { ok: phase.skills.length, fail: 0,
-    ms: Math.round(performance.now() - t0), phase };
+function mockRouterEntry() {
+  const agent = Object.values(AGENT_NAMES)[Math.floor(Math.random() * 4)];
+  const model = MOCK_MODELS[Math.floor(Math.random() * MOCK_MODELS.length)];
+  const lane = MOCK_LANES[Math.floor(Math.random() * 3)];
+  return { agent, model, lane };
 }
 
 function renderStressPanel(run) {
@@ -46,16 +49,15 @@ function renderStressPanel(run) {
     const st = t.status === 'done' ? '✅' : t.status === 'active' ? '🔄' : '⏳';
     return `<div class="stress-ticket">
       <span class="st-id">${st} ${t.id}</span>
-      <span class="st-role badge ${t.role === 'done' ? 'healthy' : 'active'}">${t.role}</span>
-      <span class="st-agent">${esc(agent)}</span>
-    </div>`;
+      <span class="badge ${t.role === 'done' ? 'healthy' : 'active'}">${t.role}</span>
+      <span class="st-agent">${esc(agent)}</span></div>`;
   }).join('');
+  const elapsed = run.elapsed ? `${Math.round(run.elapsed)}s` : '—';
   return `<div class="stress-grid">
     <div class="stress-header">
       <span class="${cls}">${run.last || 'idle'}</span>
-      <span>Round ${run.rounds || 0}/15</span></div>
+      <span>Round ${run.rounds || 0} · ${elapsed}</span></div>
     ${tickets.length ? `<div class="stress-tickets">${rows}</div>` : ''}
-    <p class="config-note">Simulates ${TICKET_TEMPLATES.length} parallel tickets
-      through Manager→Collaborator→Admin→Consultant.</p>
-  </div>`;
+    <p class="config-note">${TICKET_TEMPLATES.length} parallel tickets ·
+      ~60s full exercise · all panels</p></div>`;
 }

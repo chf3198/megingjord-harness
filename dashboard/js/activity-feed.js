@@ -1,6 +1,6 @@
 // Live Activity Feed — Agile lifecycle event log
 
-const MAX_ACTIVITY = 20;
+const MAX_ACTIVITY = 30;
 
 function addActivity(log, type, message, detail) {
   log.unshift({

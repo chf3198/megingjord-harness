@@ -73,22 +73,24 @@
     {
       "id": "chromebook-2",
       "alias": "Dev Chromebook",
-      "role": "dev-staging",
+      "role": "primary-dev",
       "os": "ChromeOS Linux (LXC)",
-      "arch": "unknown",
+      "arch": "x86_64",
       "ram": {
-        "total": "unknown",
-        "available": "unknown"
+        "total": "~6.3GB",
+        "available": "~2.1GB"
       },
       "disk": {
-        "total": "unknown",
-        "free": "unknown"
+        "total": "~25GB",
+        "free": "~8GB"
       },
-      "tailscale": "unknown",
+      "tailscale": true,
+      "tailscaleIP": "100.115.92.2",
+      "local": true,
       "ollama": false,
       "ollamaModels": [],
-      "services": [],
-      "notes": "Not yet inventoried"
+      "services": ["vscode", "copilot"],
+      "notes": "Primary dev workstation. Runs this dashboard."
     }
   ]
 }

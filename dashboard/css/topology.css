@@ -24,6 +24,7 @@
 }
 
 .topo-legend .dot.green { background: var(--green); }
+.topo-legend .dot.red { background: var(--red); }
 
 .topo-legend .line {
   display: inline-block; width: 12px; height: 2px;

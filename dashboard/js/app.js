@@ -9,6 +9,7 @@ function dashboardApp() {
     batonState: [],
     activityLog: [],
     wikiHealth: { loaded: false },
+    wikiPages: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -27,6 +28,7 @@ function dashboardApp() {
       document.body.classList.toggle('high-contrast', this.config.highContrast);
       this.tooltipsEnabled = !!this.config.tooltipsEnabled;
       initTooltips(this);
+      this.wikiPages = typeof getWikiPages === 'function' ? getWikiPages() : [];
       await this.loadInventory();
       await this.refreshAll();
       this.scheduleRefresh();

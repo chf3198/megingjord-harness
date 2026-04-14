@@ -6,31 +6,21 @@
     <title>DevEnv Ops — Fleet Operations Center</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="css/help.css"><link rel="stylesheet" href="css/stats.css">
-    <link rel="stylesheet" href="css/router.css"><link rel="stylesheet" href="css/config.css">
-    <link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
-    <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/activity.css">
-    <link rel="stylesheet" href="css/wiki.css">
+    <link rel="stylesheet" href="css/help.css"><link rel="stylesheet" href="css/stats.css"><link rel="stylesheet" href="css/router.css">
+    <link rel="stylesheet" href="css/config.css"><link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
+    <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/activity.css"><link rel="stylesheet" href="css/wiki.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
-    <script src="js/health-check.js"></script>
-    <script src="js/quota-tracker.js"></script>
-    <script src="js/device-monitor.js"></script>
-    <script src="js/router-tracker.js"></script>
-    <script src="js/live-stats.js"></script>
-    <script src="js/quota-live.js"></script>
-    <script src="js/fleet-topology.js"></script>
-    <script src="js/baton-flow.js"></script>
-    <script src="js/resource-monitor.js"></script>
-    <script src="js/activity-feed.js"></script><script src="js/event-bus.js"></script>
-    <script src="js/render-panels.js"></script>
-    <script src="js/config-panel.js"></script>
-    <script src="js/stress-test.js"></script>
-    <script src="js/help-content.js"></script>
-    <script src="js/wiki-panel.js"></script>
-    <script src="js/tooltips.js"></script>
-    <script src="js/app-actions.js"></script>
-    <script src="js/help-tour.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/health-check.js"></script><script src="js/quota-tracker.js"></script>
+    <script src="js/device-monitor.js"></script><script src="js/router-tracker.js"></script>
+    <script src="js/live-stats.js"></script><script src="js/quota-live.js"></script>
+    <script src="js/fleet-topology.js"></script><script src="js/baton-flow.js"></script>
+    <script src="js/resource-monitor.js"></script><script src="js/activity-feed.js"></script>
+    <script src="js/event-bus.js"></script><script src="js/render-panels.js"></script>
+    <script src="js/config-panel.js"></script><script src="js/stress-test.js"></script>
+    <script src="js/help-content.js"></script><script src="js/help-user.js"></script><script src="js/help-dev.js"></script>
+    <script src="js/wiki-panel.js"></script><script src="js/wiki-reader.js"></script>
+    <script src="js/tooltips.js"></script><script src="js/app-actions.js"></script>
+    <script src="js/help-tour.js"></script><script src="js/app.js"></script>
 </head>
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <header class="header">
@@ -41,6 +31,7 @@
         <nav class="header-nav" aria-label="Dashboard views">
             <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
             <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">📊 Ops</button>
+            <button @click="setView('wiki')" :class="{active:isView('wiki')}" data-tip="view-wiki">📚 Wiki</button>
             <button @click="setView('resources')" :class="{active:isView('resources')}" data-tip="view-resources">📦 Resources</button>
             <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">📘 Help</button>
         </nav>
@@ -68,8 +59,6 @@
         </section></template>
         <section id="panel-quotas" class="panel" x-show="isView('ops')" data-tip="quotas">
             <h2>📊 Quotas</h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
-        <section id="panel-stats" class="panel" x-show="isView('ops')" data-tip="stats">
-            <h2>📡 Live Fleet Stats</h2><div x-html="renderFleetStats(fleetStats)"></div></section>
         <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
             <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div></section>
         <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
@@ -80,6 +69,9 @@
             <h2>🧪 Quick Stress Test</h2><div x-html="renderStressPanel(testRun)"></div></section>
         <section id="panel-wiki" class="panel" x-show="isView('ops')" data-tip="wiki">
             <h2>📚 Wiki Health</h2><div x-html="renderWikiPanel(wikiHealth)"></div></section>
+        <template x-if="isView('wiki')"><section id="panel-wiki-reader" class="panel full-width" data-tip="wiki-reader">
+            <h2>📚 Research Wiki</h2><div x-html="renderWikiReader(wikiPages)"></div>
+        </section></template>
         <template x-if="isView('resources')"><section id="panel-devices" class="panel" data-tip="devices">
             <h2>🏗️ Fleet Devices</h2><div x-html="renderDeviceCards(devices)"></div>
         </section></template>
@@ -92,7 +84,7 @@
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v2.4.0</span>
+        <span>devenv-ops v2.5.0</span>
     </footer>
     <aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
 </body>
