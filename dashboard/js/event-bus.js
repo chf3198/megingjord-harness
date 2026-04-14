@@ -13,11 +13,14 @@ async function fetchEvents(since) {
 
 function eventToActivity(e) {
   const map = {
-    'baton:': 'baton', 'ticket:': 'system',
-    'git:': 'system', 'test:': 'test'
+    'baton:': 'baton', 'ticket:created': 'ticket',
+    'ticket:status': 'ticket', 'ticket:role': 'role',
+    'git:branch': 'branch', 'git:pr': 'pr',
+    'git:commit': 'commit', 'git:merge': 'merge',
+    'deploy:': 'deploy', 'test:': 'test'
   };
-  const prefix = Object.keys(map).find(k => e.type.startsWith(k));
-  const type = prefix ? map[prefix] : 'info';
+  const key = Object.keys(map).find(k => e.type.startsWith(k));
+  const type = key ? map[key] : 'system';
   const msg = e.agent
     ? `[${e.agent}] ${e.detail || e.type}`
     : (e.detail || e.type);

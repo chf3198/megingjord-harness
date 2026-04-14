@@ -40,3 +40,13 @@
   font-style: italic;
   padding: 0.3rem;
 }
+
+/* Agile event type colors */
+.activity-row.ticket .activity-icon { color: var(--blue); }
+.activity-row.role .activity-icon { color: #a78bfa; }
+.activity-row.branch .activity-icon,
+.activity-row.commit .activity-icon { color: var(--green); }
+.activity-row.pr .activity-icon,
+.activity-row.merge .activity-icon { color: #f59e0b; }
+.activity-row.deploy .activity-icon { color: #06b6d4; }
+.activity-row.error .activity-msg { color: var(--red); }

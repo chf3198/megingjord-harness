@@ -56,3 +56,26 @@ if (require.main === module) {
 
 // Module mode — importable by other scripts
 module.exports = { emit, findRepoRoot };
+
+// Convenience helpers for Agile lifecycle events
+function emitTicket(issue, detail, agent) {
+  return emit({ type: 'ticket:created', issue, detail, agent });
+}
+function emitStatus(issue, status, agent) {
+  return emit({ type: 'ticket:status', issue, detail: status, agent });
+}
+function emitRole(issue, role, agent) {
+  return emit({ type: 'ticket:role', issue, role, agent, detail: role });
+}
+function emitBranch(issue, branch, agent) {
+  return emit({ type: 'git:branch', issue, detail: branch, agent });
+}
+function emitPR(issue, pr, agent) {
+  return emit({ type: 'git:pr', issue, detail: `PR #${pr}`, agent });
+}
+function emitMerge(issue, pr, agent) {
+  return emit({ type: 'git:merge', issue, detail: `Merged #${pr}`, agent });
+}
+Object.assign(module.exports, {
+  emitTicket, emitStatus, emitRole, emitBranch, emitPR, emitMerge
+});
