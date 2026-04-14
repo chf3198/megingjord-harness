@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0] - 2026-04-14
+
+### Added — Epic 1: Live Event System (#35)
+- **Event emitter** (`scripts/global/emit-event.js`): CLI + module that
+  appends structured JSONL to `.dashboard/events.jsonl`
+- **Event reader** (`scripts/global/event-reader.js`): Server-side reader
+  with `?since=<ts>` filtering for the dashboard API
+- **Event bus client** (`dashboard/js/event-bus.js`): Polls `/api/events`,
+  converts to activity entries and baton state
+- **`/api/events` endpoint**: Dashboard server serves events from JSONL
+- **Agent names in baton**: Panel shows 🎭 agent name from event data
+- **`.dashboard/` gitignored**: Runtime event log excluded from commits
+
 ## [2.3.0] - 2026-04-13
 
 ### Changed
@@ -75,23 +88,7 @@
 - **CLS/perf**: `x-cloak`, `content-visibility:auto`, preconnect, deferred CDN
   scripts; Lighthouse median 85-87 (was 82-83), `rel="noopener"` on links
 
-## [1.4.0] - 2026-04-13
-
-### Added
-- Half-screen optimized UX target (960×1080) with responsive view tabs
-- Multi-view dashboard organization (Ops, Resources, Help) to reduce active DOM
-- Optional contextual tooltip system with "More info" links into Help view
-- Built-in quick stress test button (12 lightweight rounds, ~1 minute)
-- Expanded Playwright E2E checks for view switching, tooltips, and test runner
-- Google-tooling quality suite via Playwright CDP metrics (`test:quality`)
-
-### Changed
-- Dashboard config now persists tooltip preference
-- Panel renderers now include explicit empty/fallback states for reliability
-
-### Validation
-- Lighthouse: Performance 83, Accessibility 100, Best Practices 96, SEO 90
-
+## [1.4.0] - Half-screen UX, multi-view tabs, stress test, CDP quality suite
 ## [1.3.0] - Visual QA, self-annealing epic
 ## [1.2.0] - Dashboard revamp, router metrics, accessibility
 ## [1.1.1] – Repo-scoped Agile workflow opt-in
