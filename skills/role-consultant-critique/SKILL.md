@@ -67,6 +67,7 @@ CONSULTANT_CLOSEOUT
 manager_grade: <A-F> <justification>
 collaborator_grade: <A-F> <justification>
 admin_grade: <A-F> <justification>
+drift_score: <0-10> <evidence: events emitted / expected>
 strengths:
 findings:
 risk_register:

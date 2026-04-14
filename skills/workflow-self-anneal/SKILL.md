@@ -44,6 +44,7 @@ Collect: execution artifacts (logs, errors, checks), instructions/workflow docs,
 4. **Detect Agile drift signals**: carryover, blocked age, review/merge latency, reopen rate.
    - **Ticket linkage**: `git log --oneline | wc -l` vs `--grep='#'`. If <80%, flag `ticket-linkage-drift`.
    - **PR coverage**: commits vs `gh pr list --state all`. If 0 PRs, flag `pr-coverage-drift`.
+   - **Event gaps**: count events in `.dashboard/events.jsonl` per role transition. If <1 event per baton handoff, flag `event-emission-drift`.
 5. **Propose minimal fix**: smallest docs/workflow delta preventing recurrence.
 6. **Define verification gate**: objective checks confirming the fix.
 
