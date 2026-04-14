@@ -61,9 +61,6 @@ function dashboardApp() {
         this.wikiHealth = await fetchWikiHealth();
         if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
         this.lastRefresh = new Date().toLocaleTimeString();
-        const h = this.devices.filter(d => d.status === 'healthy').length;
-        addActivity(this.activityLog, 'refresh', 'Fleet refreshed',
-          `${h}/${this.devices.length} healthy`);
       } finally {
         this.loading = false;
       }
@@ -93,8 +90,6 @@ function dashboardApp() {
     isView(view) { return isDashboardView(this, view); },
     toggleTips() { toggleDashboardTips(this); },
     toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
-    runQuickTest() { return runDashboardQuickTest(this); },
-
-    startTour() { startDashboardTour(); }
+    runQuickTest() { return runDashboardQuickTest(this); }
   };
 }

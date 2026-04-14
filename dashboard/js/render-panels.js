@@ -2,10 +2,9 @@
 
 function esc(s) {
   if (s == null) return '';
-  return String(s).replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-    .replace(/`/g, '&#96;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;').replace(/`/g, '&#96;');
 }
 
 function renderDeviceCards(devices) {
@@ -47,19 +46,26 @@ function renderServiceCards(services) {
 }
 
 function renderQuotaPanel(live, statics) {
-  if (!live.length && !statics.length) {
-    return '<div class="card"><p>Quota sources unavailable.</p></div>';
-  }
-  const renderRow = q => `<div class="quota-row">
-    <span class="quota-name">${esc(q.name)}</span>
-    <div class="quota-bar"><div class="progress-fill
-      ${q.percent > 80 ? 'warn' : 'ok'}"
-      style="width:${q.percent}%"></div></div>
-    <span class="quota-val">${q.used ?? q.usage ?? 0}/${q.limit}</span>
-  </div>`;
+  const costs = typeof buildServiceCosts === 'function' ? buildServiceCosts() : [];
+  const costHtml = costs.length ? `<div class="quota-costs">${costs.map(c =>
+    `<div class="quota-cost"><a href="${esc(c.link)}" target="_blank" rel="noopener">${esc(c.name)}</a>
+      <span class="quota-price">${esc(c.cost)}</span>
+      <span class="quota-detail">${esc(c.detail)}</span></div>`
+  ).join('')}</div>` : '';
+  const renderRow = q => {
+    const note = q.note ? `<span class="quota-note">${esc(q.note)}</span>` : '';
+    const link = q.link ? `<a href="${esc(q.link)}" target="_blank" class="quota-ext">↗</a>` : '';
+    return `<div class="quota-row">
+      <span class="quota-name">${esc(q.name)}${link}</span>
+      <div class="quota-bar"><div class="progress-fill
+        ${q.percent > 80 ? 'warn' : 'ok'}"
+        style="width:${Math.max(q.percent, 2)}%"></div></div>
+      <span class="quota-val">${note || `${q.used ?? q.usage ?? 0}/${q.limit}`}</span>
+    </div>`;
+  };
   const a = live.map(renderRow).join('');
   const b = statics.map(renderRow).join('');
-  return `<div class="quota-grid">${a}${b}</div>`;
+  return `${costHtml}<div class="quota-grid">${a}${b}</div>`;
 }
 
 function renderFleetStats(stats) {

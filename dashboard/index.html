@@ -22,7 +22,7 @@
     <script src="js/wiki-panel.js"></script><script src="js/wiki-reader.js"></script>
     <script src="js/context-flow.js"></script><script src="js/llm-context.js"></script><script src="js/github-monitor.js"></script>
     <script src="js/tooltips.js"></script><script src="js/app-actions.js"></script>
-    <script src="js/help-tour.js"></script><script src="js/app.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <header class="header">
@@ -43,7 +43,6 @@
             <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Run stress test">🧪</button>
             <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Toggle tooltips">💡</button>
             <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="High contrast">◐</button>
-            <button id="btn-help" @click="startTour()" title="Guided tour">❓</button>
         </div>
     </header>
     <main id="main-content" class="dashboard-grid">

@@ -1,13 +1,22 @@
 // Live Activity Feed — Agile lifecycle event log
+// Shows only meaningful events, suppresses repetitive noise
 
 const MAX_ACTIVITY = 30;
+const SUPPRESS_TYPES = new Set(['refresh']);
 
 function addActivity(log, type, message, detail) {
+  if (SUPPRESS_TYPES.has(type)) return;
+  // Deduplicate: skip if same message in last 10 seconds
+  if (log.length && log[0].message === message) {
+    const prev = log[0]._ts || 0;
+    if (Date.now() - prev < 10000) return;
+  }
   log.unshift({
     time: new Date().toLocaleTimeString(),
     type: type || 'info',
     message: message || '',
-    detail: detail || ''
+    detail: detail || '',
+    _ts: Date.now()
   });
   if (log.length > MAX_ACTIVITY) log.length = MAX_ACTIVITY;
 }
