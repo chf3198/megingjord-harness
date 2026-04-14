@@ -1,5 +1,28 @@
 # Changelog
 
+## [2.2.0] - 2026-04-14
+
+### Changed
+- **2-column grid**: Fleet view uses 2×2 panel layout instead of stacked
+  full-width sections — everything visible without scrolling at 960×1080
+- **Compact topology**: SVG shrunk from 680×200 to 400×120; unroutable
+  devices (no Tailscale IP) filtered from graph, noted in legend
+- **Resource cards**: 3-column card grid replaced with compact single-line
+  stack that fits half-width column
+- **Tooltips proximity**: Gap reduced 6→2px, hide timers increased to
+  500ms/400ms — tooltips stay visible while user moves mouse to them
+- **Tooltip width**: Reduced 260→220px for tighter fit
+- **Test stays on Fleet**: Stress test no longer switches to Ops view;
+  per-round activity events feed live to Fleet activity panel
+- **Help Center**: Collapsible `<details>` sections with search input;
+  10 detailed documentation sections covering all dashboard features
+- **Responsive breakpoint**: Media query lowered from 1024→640px so
+  2-column grid works at 960px target viewport
+
+### Added
+- `help-content.js`: 10 structured help sections with data source docs
+- Per-round activity logging during stress test
+
 ## [Unreleased]
 
 ### Added
@@ -61,40 +84,12 @@
 - `admin_patterns.py`: added `RE_GIT_TAG` regex pattern
 
 ## [1.2.0] - 2026-04-13
+- Dashboard revamp epic, router metrics API, settings panel
+- Accessibility: skip-link, focus-visible, dark-safe router
+- Playwright E2E tests with screenshot artifacts
 
-### Added
-- Dashboard revamp epic with phased delivery plan for UAT
-- Router metrics API endpoint (`/api/router/metrics`) served by dashboard backend
-- Dashboard settings panel (auto-refresh state + high-contrast preference)
-- Accessibility upgrades: skip-link, focus-visible controls, dark-safe router panel
-- Playwright dashboard E2E tests with screenshot artifact (`test-results/dashboard-home.png`)
-- Research brief on world-class dashboard practices and implementation checklist
-
-### Changed
-- Router metrics fetch now uses server API instead of client `file://` reads
-
-## [1.1.1] - 2026-04-13
-
-### Added
-- Repo-scoped opt-in for Agile workflow + task routing gates
-- `npm run repo:scope` CLI to enable/disable workflow per repo
-- Default-off scope policy via `hooks/repo-scope.json`
-
-## [1.1.0] - 2026-04-13
-
-### Added
-- Ticket-driven work management: GitHub issue per task, branch/commit gates
-- `npm run ticket:create` for Scrum-compliant issue creation (ADR-005)
-
-## [1.0.0] - 2026-04-13
-
-### Added
-- Tiered agent architecture, Cynefin complexity scoring, prompt reduction
-- Global task router: instructions, skill, classifier, hook-backed routing
-- VS Code settings: auto-compact, thinking tool, autopilot, code search
-
-## [0.1.0] - 2026-04-11
-
-### Added
-- Genesis: repo structure, governance, dashboard, skills framework
+## [1.1.1] – Repo-scoped Agile workflow opt-in
+## [1.1.0] – Ticket-driven work: issue per task, branch/commit gates
+## [1.0.0] – Tiered agent architecture, Cynefin scoring, global task router
+## [0.1.0] – Genesis: repo structure, governance, dashboard, skills
 - Research archive, device/service inventory, utility scripts

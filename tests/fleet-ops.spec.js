@@ -15,7 +15,7 @@ test.describe('Fleet Operations Center', () => {
     expect(labels).toBeGreaterThanOrEqual(1);
     // Should have topology legend
     await expect(page.locator('.topo-legend')).toBeVisible();
-    await expect(page.locator('.topo-legend')).toContainText('Connected');
+    await expect(page.locator('.topo-legend')).toContainText('Online');
     await page.screenshot({ path: 'test-results/fleet-topology.png' });
   });
 
@@ -40,8 +40,8 @@ test.describe('Fleet Operations Center', () => {
     await page.goto('http://localhost:8090/dashboard/');
     const resources = page.locator('#panel-resources');
     await expect(resources).toBeVisible();
-    // Should have resource cards
-    const cards = await resources.locator('.resource-card').count();
+    // Should have compact resource cards
+    const cards = await resources.locator('.res-card').count();
     expect(cards).toBeGreaterThanOrEqual(2);
     // Should mention Tailscale
     await expect(resources).toContainText('Tailscale');
@@ -50,12 +50,13 @@ test.describe('Fleet Operations Center', () => {
     await page.screenshot({ path: 'test-results/fleet-resources.png' });
   });
 
-  test('fleet view full-width panels span grid', async ({ page }) => {
+  test('fleet panels use 2-column grid layout', async ({ page }) => {
     await page.goto('http://localhost:8090/dashboard/');
     const topo = page.locator('#panel-topology');
     const box = await topo.boundingBox();
-    // Full-width panel should be wider than 600px at 960 viewport
-    expect(box.width).toBeGreaterThan(600);
+    // Half-width panels should be less than 600px at 960 viewport
+    expect(box.width).toBeLessThan(600);
+    expect(box.width).toBeGreaterThan(200);
   });
 
   test('view switching preserves fleet panel state', async ({ page }) => {

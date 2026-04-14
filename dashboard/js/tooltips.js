@@ -1,73 +1,75 @@
 // Tooltips + Help panel — pure Alpine reactive state
 
 const TIP_COPY = {
-  refresh: ['Refresh', 'Polls all endpoints immediately.', 'ops', 'panel-router'],
-  auto: ['Auto refresh', 'Pauses or resumes polling.', 'ops', 'panel-config'],
-  test: ['Stress test', 'Runs 12 lightweight endpoint rounds.', 'ops', 'panel-test'],
-  tips: ['Tooltips', 'Toggle contextual UX help.', 'help', 'panel-help'],
-  contrast: ['Contrast', 'Switches high-contrast theme.', 'ops', 'panel-config'],
-  'view-fleet': ['Fleet', 'Topology, baton, activity, resources.', 'fleet', 'panel-topology'],
-  'view-ops': ['Ops', 'Health, quotas, and router.', 'ops', 'panel-router'],
-  'view-resources': ['Resources', 'Devices and services inventory.', 'resources', 'panel-devices'],
-  'view-help': ['Help', 'Guidance and external links.', 'help', 'panel-help'],
-  topology: ['Topology', 'SVG network graph of Tailscale mesh.', 'fleet', 'panel-topology'],
-  baton: ['Baton flow', 'Manager→Collaborator→Admin→Consultant.', 'fleet', 'panel-baton'],
-  'resource-mon': ['Resources', 'OpenClaw, Tailscale, Ollama.', 'fleet', 'panel-resources'],
-  activity: ['Activity', 'Real-time role transitions and events.', 'fleet', 'panel-activity'],
-  devices: ['Devices', 'Tailscale + Ollama/OpenClaw cards.', 'resources', 'panel-devices'],
-  services: ['Services', 'Paid, free-tier, self-hosted.', 'resources', 'panel-services'],
-  quotas: ['Quotas', 'Live and static usage bars.', 'ops', 'panel-quotas'],
-  stats: ['Live stats', 'Running model snapshots.', 'ops', 'panel-stats'],
-  router: ['Task lanes', 'Free/Fleet/Premium lane mix.', 'ops', 'panel-router'],
-  'router-log': ['Router log', 'Recent LLM agent choices.', 'ops', 'panel-router-log'],
-  config: ['Settings', 'Refresh, contrast, tooltip prefs.', 'ops', 'panel-config'],
-  'test-panel': ['Stress test', 'Per-round pass/fail summary.', 'ops', 'panel-test'],
-  help: ['Help center', 'Operational guidance.', 'help', 'panel-help']
+  refresh: ['Refresh', 'Polls all endpoints now.', 'fleet', 'controls'],
+  auto: ['Auto refresh', 'Toggle 60s polling.', 'fleet', 'controls'],
+  test: ['Stress test', '12 lightweight rounds.', 'fleet', 'controls'],
+  tips: ['Tooltips', 'Toggle hover help.', 'help', 'controls'],
+  contrast: ['Contrast', 'High-contrast theme.', 'fleet', 'controls'],
+  'view-fleet': ['Fleet', 'Topology, baton, activity.', 'fleet', 'fleet'],
+  'view-ops': ['Ops', 'Quotas and router.', 'ops', 'quotas'],
+  'view-resources': ['Resources', 'Device/service cards.', 'resources', 'data'],
+  'view-help': ['Help', 'Full documentation.', 'help', 'views'],
+  topology: ['Topology', 'SVG mesh graph.', 'fleet', 'fleet'],
+  baton: ['Baton flow', 'Role pipeline.', 'fleet', 'baton'],
+  'resource-mon': ['Resources', 'OpenClaw+Tailscale.', 'fleet', 'resources'],
+  activity: ['Activity', 'Live event log.', 'fleet', 'activity'],
+  devices: ['Devices', 'Fleet inventory.', 'resources', 'data'],
+  services: ['Services', 'API services.', 'resources', 'data'],
+  quotas: ['Quotas', 'Usage bars.', 'ops', 'quotas'],
+  stats: ['Live stats', 'Model snapshots.', 'ops', 'router'],
+  router: ['Task lanes', 'Lane distribution.', 'ops', 'router'],
+  'router-log': ['Router log', 'LLM choices.', 'ops', 'router'],
+  config: ['Settings', 'Preferences.', 'ops', 'controls'],
+  'test-panel': ['Stress test', 'Results.', 'ops', 'controls'],
+  help: ['Help center', 'Documentation.', 'help', 'views']
 };
 
 function renderHelpPanel() {
-  return `<div class="config-grid">
-  <p><strong>Target viewport:</strong> 960×1080 (half-screen)</p>
-  <p><strong>Views:</strong> Fleet (topology + baton + activity +
-    resources), Ops (quotas + router), Resources, Help.</p>
-  <p><a href="https://developer.chrome.com/docs/lighthouse/overview"
-    target="_blank" rel="noopener">Lighthouse docs</a></p>
-  <p><a href="https://developer.chrome.com/docs/devtools/memory-problems"
-    target="_blank" rel="noopener">DevTools memory guide</a></p></div>`;
+  const items = getHelpSections().map(s =>
+    `<details class="help-section" id="help-${s.id}">
+      <summary>${s.title}</summary><p>${s.body}</p></details>`).join('');
+  return `<input type="search" class="help-search" placeholder="Search help…"
+    oninput="filterHelp(this.value)"/><div class="help-sections">${items}</div>`;
+}
+
+function filterHelp(q) {
+  const lc = q.toLowerCase();
+  document.querySelectorAll('.help-section').forEach(d => {
+    const hit = d.textContent.toLowerCase().includes(lc);
+    d.style.display = hit ? '' : 'none';
+    if (lc && hit) d.open = true;
+  });
 }
 
 function initTooltips(app) {
   const tip = document.getElementById('app-tip');
   let hideTimer = null;
 
-  window._tipNav = (view, panelId) => {
-    app.currentView = view;
+  window._tipNav = (view, helpId) => {
+    app.currentView = 'help';
     app.activeTip = '';
     setTimeout(() => {
-      document.getElementById(panelId)
-        ?.scrollIntoView({ behavior: 'smooth' });
-    }, 150);
+      const el = document.getElementById('help-' + helpId);
+      if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth' }); }
+    }, 200);
   };
 
   function showTip(node) {
     if (!app.tooltipsEnabled) return;
     const key = node.dataset.tip;
-    const [t, d, view, panel] = TIP_COPY[key]
-      || ['Info', 'No detail', 'fleet', ''];
+    const [t, d, view, helpId] = TIP_COPY[key] || ['Info', '', 'fleet', ''];
     app.activeTip = `<strong>${esc(t)}</strong><p>${esc(d)}</p>`
-      + `<button class="tip-nav"
-          onclick="_tipNav('${view}','${panel}')"
-          >Go to ${esc(t)} →</button>`;
-    const rect = node.getBoundingClientRect();
-    const tw = 260;
-    let left = rect.left + rect.width / 2 - tw / 2;
-    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
-    let top = rect.bottom + 6;
-    if (top + 100 > window.innerHeight) top = rect.top - 106;
-    tip.style.left = left + 'px';
-    tip.style.top = top + 'px';
-    tip.style.right = 'auto';
-    tip.style.bottom = 'auto';
+      + `<button class="tip-nav" onclick="_tipNav('${view}','${helpId}')"
+          >Help: ${esc(t)} →</button>`;
+    const rect = node.getBoundingClientRect(), tw = 220;
+    let left = Math.max(4, Math.min(
+      rect.left + rect.width / 2 - tw / 2, innerWidth - tw - 4));
+    let top = rect.bottom + 2;
+    if (top + 80 > innerHeight) top = rect.top - 80;
+    Object.assign(tip.style, {
+      left: left + 'px', top: top + 'px', right: 'auto', bottom: 'auto'
+    });
   }
 
   document.addEventListener('mouseover', e => {
@@ -86,11 +88,11 @@ function initTooltips(app) {
     const entering = e.relatedTarget;
     if (!leaving) return;
     if (entering && entering.closest('#app-tip')) return;
-    hideTimer = setTimeout(() => { app.activeTip = ''; }, 200);
+    hideTimer = setTimeout(() => { app.activeTip = ''; }, 500);
   });
 
   tip?.addEventListener('mouseleave', () => {
-    hideTimer = setTimeout(() => { app.activeTip = ''; }, 150);
+    hideTimer = setTimeout(() => { app.activeTip = ''; }, 400);
   });
 }
 
