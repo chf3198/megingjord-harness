@@ -25,14 +25,18 @@ function eventToActivity(e) {
 }
 
 function batonFromEvents(events) {
-  const last = [...events].reverse().find(e => e.role);
-  if (!last) return null;
-  return {
-    activeRole: last.role || 'idle',
-    issue: last.issue || null,
-    status: 'in-progress',
-    agent: last.agent || ''
-  };
+  const tickets = {};
+  for (const e of events) {
+    if (!e.role || !e.issue) continue;
+    tickets[e.issue] = {
+      activeRole: e.role,
+      issue: e.issue,
+      status: e.status || 'in-progress',
+      agent: e.agent || ''
+    };
+  }
+  const arr = Object.values(tickets);
+  return arr.length ? arr : null;
 }
 
 async function pollEventBus(activityLog) {

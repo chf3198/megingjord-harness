@@ -6,7 +6,7 @@ function dashboardApp() {
     fleetStats: {}, routerStats: {},
     config: { refreshSec: 5, highContrast: false },
     currentView: 'fleet', helpDevMode: false,
-    batonState: { activeRole: 'idle', issue: null, status: 'idle' },
+    batonState: [],
     activityLog: [],
     wikiHealth: { loaded: false },
     tooltipsEnabled: false, autoRefreshEnabled: true,
