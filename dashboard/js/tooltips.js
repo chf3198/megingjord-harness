@@ -93,5 +93,7 @@ function initTooltips(app) {
 
 function clearTooltip(app) { app.activeTip = ''; }
 function toggleHelpMode() {
-  document.querySelector('[x-data]').__x.$data.helpDevMode ^= true;
+  const el = document.querySelector('[x-data]');
+  const d = el._x_dataStack?.[0] || Alpine.$data(el);
+  d.helpDevMode = !d.helpDevMode;
 }

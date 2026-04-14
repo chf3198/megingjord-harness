@@ -16,8 +16,9 @@ function dashboardApp() {
 
     get overallStatus() {
       if (!this.devices.length) return 'loading';
-      if (this.devices.every(d => d.status === 'healthy'))
-        return 'healthy';
+      const checked = this.devices.filter(d => d.status !== 'unknown');
+      if (!checked.length) return 'loading';
+      if (checked.every(d => d.status === 'healthy')) return 'healthy';
       return 'degraded';
     },
 

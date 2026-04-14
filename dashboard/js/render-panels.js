@@ -50,21 +50,16 @@ function renderQuotaPanel(live, statics) {
   if (!live.length && !statics.length) {
     return '<div class="card"><p>Quota sources unavailable.</p></div>';
   }
-  const a = live.map(q => `<div class="quota-live-card">
-    <div class="card-header"><strong>${esc(q.name)}</strong>
-      <span>${q.used}/${q.limit}</span></div>
-    <div class="progress-bar"><div class="progress-fill
+  const renderRow = q => `<div class="quota-row">
+    <span class="quota-name">${esc(q.name)}</span>
+    <div class="quota-bar"><div class="progress-fill
       ${q.percent > 80 ? 'warn' : 'ok'}"
       style="width:${q.percent}%"></div></div>
-    <span class="quota-meta">${esc(q.period)}</span></div>`).join('');
-  const b = statics.map(q => `<div class="card quota-card">
-    <div class="card-header"><strong>${esc(q.name)}</strong>
-      <span>${q.usage}/${q.limit}</span></div>
-    <div class="progress-bar"><div class="progress-fill
-      ${q.percent > 80 ? 'warn' : 'ok'}"
-      style="width:${q.percent}%"></div></div>
-    </div>`).join('');
-  return a + b;
+    <span class="quota-val">${q.used ?? q.usage ?? 0}/${q.limit}</span>
+  </div>`;
+  const a = live.map(renderRow).join('');
+  const b = statics.map(renderRow).join('');
+  return `<div class="quota-grid">${a}${b}</div>`;
 }
 
 function renderFleetStats(stats) {

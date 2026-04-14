@@ -1,59 +1,61 @@
-// Agile Epic Stress Test — simulates full baton workflow
-// Exercises: skills, instructions, hooks, agents, routing
+// Parallel Ticket Stress Test — simulates multiple tickets
+// moving through Agent roles simultaneously
 
-const EPIC_PHASES = [
-  { role: 'manager', label: 'Epic scoping', skills: ['role-manager-execution',
-    'github-ticket-lifecycle-orchestrator', 'manager-ticket-lifecycle'] },
-  { role: 'manager', label: 'Task decomposition', skills: ['global-task-router',
-    'repo-standards-router', 'github-projects-agile-linkage'] },
-  { role: 'collaborator', label: 'Implement (free lane)', skills: [
-    'role-collaborator-execution', 'repo-structure-conventions',
-    'openclaw-universal-system', 'openrouter-free-failover'] },
-  { role: 'collaborator', label: 'Implement (fleet lane)', skills: [
-    'openclaw-availability-utilization', 'network-platform-resources',
-    'mem-watchdog-ops', 'playwright-vision-low-resource'] },
-  { role: 'collaborator', label: 'Implement (premium lane)', skills: [
-    'github-actions-security-hardening', 'secret-exposure-prevention',
-    'web-regression-governance', 'docs-drift-maintenance'] },
-  { role: 'collaborator', label: 'E2E test + visual QA', skills: [
-    'global-skills-bootstrap', 'repo-onboarding-standards',
-    'release-version-integrity', 'repo-profile-governance'] },
-  { role: 'admin', label: 'Code review gate', skills: ['role-admin-execution',
-    'github-review-merge-admin', 'github-ruleset-architecture'] },
-  { role: 'admin', label: 'Merge + deploy', skills: [
-    'github-release-incident-flow', 'github-capability-resolver',
-    'github-ops-excellence', 'github-ops-tree-router'] },
-  { role: 'consultant', label: 'Post-merge critique', skills: [
-    'role-consultant-critique', 'workflow-self-anneal',
-    'operator-identity-context', 'role-baton-orchestrator'] },
-  { role: 'consultant', label: 'Governance audit', skills: [
-    'docs-drift-maintenance', 'repo-profile-governance'] },
-  { role: 'consultant', label: 'Self-anneal + close', skills: [
-    'workflow-self-anneal'] },
-  { role: 'idle', label: 'Epic complete', skills: [] }
+const TICKET_TEMPLATES = [
+  { id: 'T-101', label: 'API endpoint', skills: ['role-collaborator-execution',
+    'openclaw-universal-system'] },
+  { id: 'T-102', label: 'UI component', skills: ['web-regression-governance',
+    'playwright-vision-low-resource'] },
+  { id: 'T-103', label: 'Docs update', skills: ['docs-drift-maintenance',
+    'release-version-integrity'] },
 ];
+const ROLE_SEQUENCE = ['manager', 'collaborator', 'admin', 'consultant', 'done'];
+const AGENT_NAMES = {
+  manager: 'Manny Scope', collaborator: 'Cody Builder',
+  admin: 'Addie Merges', consultant: 'Quinn Critic'
+};
 
-const MOCK_AGENTS = ['router','architect','implementer','planner',
-  'quick','governance-auditor','release-reviewer','security-scanner'];
+function buildStressTargets() { return TICKET_TEMPLATES; }
 
-function buildStressTargets() { return EPIC_PHASES; }
+function buildParallelTickets() {
+  return TICKET_TEMPLATES.map(t => ({
+    ...t, roleIdx: 0, role: ROLE_SEQUENCE[0], status: 'pending'
+  }));
+}
+
+function advanceTicket(ticket) {
+  ticket.roleIdx = Math.min(ticket.roleIdx + 1, ROLE_SEQUENCE.length - 1);
+  ticket.role = ROLE_SEQUENCE[ticket.roleIdx];
+  ticket.status = ticket.role === 'done' ? 'done' : 'active';
+  return ticket;
+}
 
 async function runStressRound(phases, index) {
-  const phase = phases[index] || phases[phases.length - 1];
+  const phase = phases[index % phases.length];
   const t0 = performance.now();
   await new Promise(r => setTimeout(r, 60 + Math.random() * 100));
-  const ok = phase.skills.length || 1;
-  const agent = MOCK_AGENTS[index % MOCK_AGENTS.length];
-  return { ok, fail: 0, ms: Math.round(performance.now() - t0), phase, agent };
+  return { ok: phase.skills.length, fail: 0,
+    ms: Math.round(performance.now() - t0), phase };
 }
 
 function renderStressPanel(run) {
   const cls = run.running ? 'badge active' : 'badge healthy';
-  return `<div class="config-grid">
-    <p><strong>Status:</strong> <span class="${cls}">${run.last||'idle'}</span></p>
-    <p><strong>Phase:</strong> ${esc(run.phase || 'idle')}</p>
-    <p><strong>Rounds:</strong> ${run.rounds||0}/12 (Agile Epic)</p>
-    <p><strong>Skills verified:</strong> ✅ ${run.ok||0}</p>
-    <p class="config-note">Simulates Manager→Collaborator→Admin→Consultant.</p>
+  const tickets = run.tickets || [];
+  const rows = tickets.map(t => {
+    const agent = AGENT_NAMES[t.role] || '—';
+    const st = t.status === 'done' ? '✅' : t.status === 'active' ? '🔄' : '⏳';
+    return `<div class="stress-ticket">
+      <span class="st-id">${st} ${t.id}</span>
+      <span class="st-role badge ${t.role === 'done' ? 'healthy' : 'active'}">${t.role}</span>
+      <span class="st-agent">${esc(agent)}</span>
+    </div>`;
+  }).join('');
+  return `<div class="stress-grid">
+    <div class="stress-header">
+      <span class="${cls}">${run.last || 'idle'}</span>
+      <span>Round ${run.rounds || 0}/15</span></div>
+    ${tickets.length ? `<div class="stress-tickets">${rows}</div>` : ''}
+    <p class="config-note">Simulates ${TICKET_TEMPLATES.length} parallel tickets
+      through Manager→Collaborator→Admin→Consultant.</p>
   </div>`;
 }
