@@ -25,6 +25,9 @@ The LLM updates this on every ingest operation.
 - [[self-annealing]] — Self-Annealing Protocol
 - [[wiki-pattern]] — Karpathy LLM Wiki Pattern
 - [[governance-enforcement]] — Governance Enforcement
+- [[context-flow]] — LLM Context Flow Through Fleet
+- [[model-routing]] — AUTO Selection & Fleet Distribution
+- [[github-integration]] — GitHub API Integration & Dashboard Monitoring
 
 ## Source Summaries
 
@@ -58,4 +61,4 @@ _No synthesis pages yet._
 
 ---
 
-**Pages**: 33 | **Last updated**: 2026-04-14
+**Pages**: 36 | **Last updated**: 2026-04-14

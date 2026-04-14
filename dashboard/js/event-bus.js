@@ -34,6 +34,8 @@ function batonFromEvents(events) {
     tickets[e.issue] = {
       activeRole: e.role,
       issue: e.issue,
+      title: e.title || tickets[e.issue]?.title || '',
+      epic: e.epic || tickets[e.issue]?.epic || null,
       status: e.status || 'in-progress',
       agent: e.agent || ''
     };

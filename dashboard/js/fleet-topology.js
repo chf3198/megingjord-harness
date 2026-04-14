@@ -63,12 +63,18 @@ function topoOfflineReason(d) {
 }
 
 function topoLegend(devices) {
-  const hasOffline = devices.some(d => d.status === 'offline');
+  const hasDeg = devices.some(d => d.status === 'degraded');
+  const hasOff = devices.some(d => d.status === 'offline');
+  const hasUnk = devices.some(d => d.status === 'unknown');
   return `<div class="topo-legend">
-    <span><span class="dot green"></span> Online</span>
-    ${hasOffline ? '<span><span class="dot red"></span> Offline</span>' : ''}
-    <span><span class="line green"></span> Mesh</span>
-    <span>⭐ Primary</span></div>`;
+    <span><span class="dot green"></span> Healthy</span>
+    ${hasDeg ? '<span><span class="dot yellow"></span> Degraded</span>' : ''}
+    ${hasOff ? '<span><span class="dot red"></span> Offline</span>' : ''}
+    ${hasUnk ? '<span><span class="dot grey"></span> Unknown</span>' : ''}
+    <span><span class="line green"></span> Active</span>
+    <span><span class="line grey"></span> Inactive</span>
+    <span>⭐ Primary</span> <span>⚡ OpenClaw</span>
+    <span>🤖 Ollama</span> <span>💻 Device</span></div>`;
 }
 
 function statusColor(s) {

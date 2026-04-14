@@ -56,6 +56,7 @@ async function handleApi(req, res) {
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
   if (u === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
+  if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
   jsonRes(res, 404, { error: 'not found' });
 }
 

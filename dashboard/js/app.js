@@ -10,6 +10,7 @@ function dashboardApp() {
     activityLog: [],
     wikiHealth: { loaded: false },
     wikiPages: [],
+    githubData: null,
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -58,6 +59,7 @@ function dashboardApp() {
         this.batonState = evBaton || buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
+        if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
         this.lastRefresh = new Date().toLocaleTimeString();
         const h = this.devices.filter(d => d.status === 'healthy').length;
         addActivity(this.activityLog, 'refresh', 'Fleet refreshed',
