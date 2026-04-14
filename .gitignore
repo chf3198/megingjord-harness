@@ -5,6 +5,9 @@ __pycache__/
 # Ephemeral hook state (runtime-only)
 hooks/state/
 
+# Event bus runtime log
+.dashboard/
+
 # Node
 node_modules/
 package-lock.json

@@ -44,14 +44,15 @@ function dashboardApp() {
       this.loading = true;
       try {
         const ids = this.devices.filter(d => d.ollama).map(d => d.id);
-        const [checks, stats, lq, rs] = await Promise.all([
+        const [checks, stats, lq, rs, evBaton] = await Promise.all([
           runHealthChecks(this.devices), fetchAllFleetStats(ids),
-          fetchAllLiveQuotas(), fetchRouterLaneStats()
+          fetchAllLiveQuotas(), fetchRouterLaneStats(),
+          pollEventBus(this.activityLog)
         ]);
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
         this.routerStats = rs;
-        this.batonState = buildBatonState(getRouterLog());
+        this.batonState = evBaton || buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
         this.lastRefresh = new Date().toLocaleTimeString();

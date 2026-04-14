@@ -54,6 +54,7 @@ async function handleApi(req, res) {
   }
   if (u === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
+  if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   jsonRes(res, 404, { error: 'not found' });
 }
 

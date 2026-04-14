@@ -18,6 +18,7 @@
 
 .baton-issue { font-size: 0.95rem; font-weight: 700; color: var(--blue); }
 .baton-idle { color: var(--text-muted); font-style: italic; font-size: 0.82rem; }
+.baton-agent { font-size: 0.78rem; color: var(--text); padding: 0.15rem 0; }
 
 .baton-pipeline {
   display: flex;

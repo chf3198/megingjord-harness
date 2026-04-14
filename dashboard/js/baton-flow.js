@@ -28,6 +28,7 @@ function renderBatonFlow(batonState) {
 
   const header = issue
     ? `<div class="baton-header"><span class="baton-issue">#${issue}</span><span class="baton-status badge ${statusBadge(status)}">${status}</span></div>`
+    + (batonState?.agent ? `<div class="baton-agent">🎭 ${esc(batonState.agent)}</div>` : '')
     : '<div class="baton-header"><span class="baton-idle">No active baton</span></div>';
 
   return `<div class="baton-flow">${header}<div class="baton-pipeline">${steps}</div></div>`;
