@@ -85,11 +85,7 @@
 - Panel renderers now include explicit empty/fallback states for reliability
 
 ### Validation
-- Lighthouse audit (`test-results/lighthouse-dashboard.json`):
-    - Performance 83
-    - Accessibility 100
-    - Best Practices 96
-    - SEO 90
+- Lighthouse: Performance 83, Accessibility 100, Best Practices 96, SEO 90
 
 ## [1.3.0] - Visual QA governance gate, self-annealing epic
 

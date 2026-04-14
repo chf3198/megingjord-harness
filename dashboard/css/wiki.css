@@ -1,0 +1,23 @@
+/* Wiki Health Panel Styles */
+
+.wiki-card { border-left: 3px solid var(--green); }
+.wiki-card.degraded { border-left-color: var(--yellow); }
+
+.wiki-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.wiki-issue { margin: 0.3rem 0; font-size: 0.8rem; }
+.wiki-issue .badge { font-size: 0.7rem; margin: 0.1rem; }
+
+.wiki-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.stat-ok { color: var(--green); font-size: 0.85rem; }

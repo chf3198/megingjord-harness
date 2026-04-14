@@ -1,0 +1,21 @@
+{
+  "foam.edit.linkReferenceDefinitions": "withExtensions",
+  "foam.files.ignore": [
+    "node_modules/**",
+    "dashboard/**",
+    "scripts/**",
+    ".git/**",
+    "test-results/**"
+  ],
+  "foam.files.noteExtensions": ["md"],
+  "foam.graph.style": {
+    "node": { "source": "#4ecdc4", "concept": "#ff6b6b", "entity": "#ffe66d", "synthesis": "#a8e6cf" }
+  },
+  "foam.openDailyNote.directory": "wiki",
+  "foam.orphans.exclude": ["raw/**", "research/**", "instructions/**"],
+  "foam.placeholders.exclude": ["raw/**"],
+  "editor.wordWrap": "on",
+  "[markdown]": {
+    "editor.quickSuggestions": { "other": true, "comments": false, "strings": false }
+  }
+}

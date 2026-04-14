@@ -8,6 +8,7 @@ function dashboardApp() {
     currentView: 'fleet', helpDevMode: false,
     batonState: { activeRole: 'idle', issue: null, status: 'idle' },
     activityLog: [],
+    wikiHealth: { loaded: false },
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -52,6 +53,7 @@ function dashboardApp() {
         this.routerStats = rs;
         this.batonState = buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
+        this.wikiHealth = await fetchWikiHealth();
         this.lastRefresh = new Date().toLocaleTimeString();
         const h = this.devices.filter(d => d.status === 'healthy').length;
         addActivity(this.activityLog, 'refresh', 'Fleet refreshed',
