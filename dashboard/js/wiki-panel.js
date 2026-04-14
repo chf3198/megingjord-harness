@@ -1,46 +1,47 @@
-// Wiki Health Panel — dashboard wiki status display
-// Runs wiki:lint locally and renders structural health
+// Wiki Health Panel — clean card with relative timestamps
 
 function renderWikiPanel(wikiHealth) {
   if (!wikiHealth || !wikiHealth.loaded) {
-    return '<div class="card"><p>Wiki health not loaded yet.</p></div>';
+    return '<div class="wiki-empty">Wiki health loading…</div>';
   }
   const h = wikiHealth;
-  const statusCls = h.issues === 0 ? 'healthy' : 'degraded';
-  const icon = h.issues === 0 ? '✅' : '⚠️';
+  const ok = h.issues === 0;
+  const cls = ok ? 'healthy' : 'degraded';
+  const ts = formatWikiTime(h.lastCheck);
+
+  const stats = `<div class="wiki-row">
+    <span class="wiki-stat">${h.pages}<small>pages</small></span>
+    <span class="wiki-stat">${h.dirs}<small>cats</small></span>
+    <span class="wiki-stat ${cls}">${h.issues}<small>issues</small></span>
+  </div>`;
 
   const sections = [
-    ['🔗 Broken Links', h.broken],
-    ['🏝️ Orphans', h.orphans],
-    ['📝 Frontmatter', h.frontmatter],
-    ['📇 Index Sync', h.indexSync],
+    ['🔗 Broken', h.broken], ['🏝️ Orphans', h.orphans],
+    ['📝 FM', h.frontmatter], ['📇 Index', h.indexSync]
   ];
+  const issues = sections
+    .filter(([, a]) => a?.length)
+    .map(([l, a]) => `<span class="wiki-tag">${l}: ${a.length}</span>`)
+    .join('') || '<span class="wiki-ok">All checks pass</span>';
 
-  const issueRows = sections
-    .filter(([, items]) => items && items.length > 0)
-    .map(([label, items]) =>
-      `<div class="wiki-issue"><strong>${label}</strong>:
-       ${items.map(i => `<span class="badge degraded">${esc(i)}</span>`).join(' ')}
-       </div>`
-    ).join('');
+  return `<div class="wiki-card ${cls}">
+    <div class="wiki-head">${ok ? '✅' : '⚠️'} <strong>Wiki</strong>
+      <span class="badge ${cls}">${h.pages}p</span></div>
+    ${stats}
+    <div class="wiki-issues">${issues}</div>
+    <div class="wiki-ts">🕐 ${esc(ts)}</div>
+  </div>`;
+}
 
-  const noIssues = h.issues === 0
-    ? '<p class="stat-ok">All structural checks pass.</p>' : '';
-
-  return `<div class="card wiki-card ${statusCls}">
-    <div class="card-header">
-      <strong>${icon} Wiki Health</strong>
-      <span class="badge ${statusCls}">${h.pages} pages</span>
-    </div>
-    <div class="card-body">
-      <div class="wiki-stats">
-        <span>📄 ${h.pages} pages</span>
-        <span>📂 ${h.dirs} categories</span>
-        <span>⚠️ ${h.issues} issues</span>
-      </div>
-      ${noIssues}${issueRows}
-      <p class="wiki-meta">Last check: ${esc(h.lastCheck)}</p>
-    </div></div>`;
+function formatWikiTime(iso) {
+  if (!iso) return 'never';
+  try {
+    const d = new Date(iso), sec = Math.floor((Date.now() - d) / 1000);
+    if (sec < 5) return 'just now';
+    if (sec < 60) return `${sec}s ago`;
+    if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch { return 'unknown'; }
 }
 
 async function fetchWikiHealth() {
@@ -48,13 +49,9 @@ async function fetchWikiHealth() {
     const resp = await fetch('/api/wiki-health');
     if (resp.ok) return await resp.json();
   } catch { /* fall through */ }
-  return buildLocalWikiHealth();
-}
-
-function buildLocalWikiHealth() {
   return {
     loaded: true, pages: 0, dirs: 4, issues: 0,
     broken: [], orphans: [], frontmatter: [], indexSync: [],
-    lastCheck: new Date().toLocaleTimeString(),
+    lastCheck: new Date().toISOString(),
   };
 }

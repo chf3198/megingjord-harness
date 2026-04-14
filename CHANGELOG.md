@@ -1,5 +1,20 @@
 # Changelog
 
+## [2.4.1] - 2025-07-14
+
+### Fixed — Dashboard UX Polish (11 issues from v2.4.0 UAT)
+- **Header status**: Exclude unknown devices from `overallStatus`
+- **Tailscale count**: Filter un-inventoried devices (2/2 not 2/3)
+- **Fleet topology**: ⭐ marker on local Copilot Chromebook
+- **Help toggle**: Fix Alpine v3 API (`_x_dataStack` not `__x.$data`)
+- **Refresh slider**: Live value display while dragging
+- **Activity log**: Height doubled (150→320px) for more entries
+- **Quotas**: Compact row layout, no scroll needed
+- **Router Lanes**: Empty state with ring + lane chip visualization
+- **Router Log**: Entries now fed from event bus agent+model data
+- **Wiki panel**: Relative timestamps, stat boxes, compact tags
+- **Stress test**: Parallel 3-ticket simulation through roles
+
 ## [2.4.0] - 2026-04-14
 
 ### Added — Epic 1: Live Event System (#35)
@@ -70,24 +85,10 @@
 - **area:knowledge label**: New GitHub label for wiki-related issues.
 
 ### Added
-- **Model routing agents**: 8 custom agents with pinned models
-  override AUTO (ADR-004). Router → Architect (Opus), Implementer
-  (Sonnet), Quick (GPT-5 mini), Planner (Opus), 4 audit agents
-- **VS Code settings**: planAgent→Opus, implementAgent→Sonnet,
-  inlineChat→Sonnet; agents/ dir with deploy/sync support
+- **Model routing agents**: 8 custom agents with pinned models (ADR-004)
+- **VS Code settings**: planAgent→Opus, implementAgent→Sonnet
 
-## [1.5.0] - 2026-04-13
-
-### Fixed
-- **x-if architecture**: Resources/Help use `<template x-if>` for true DOM removal;
-  Ops uses `x-show` to eliminate CLS on default view
-- **HTML escaping**: `esc()` now covers `"`, `'`, backtick (XSS hardening)
-- **Tooltips pure Alpine**: `activeTip` reactive state replaces imperative DOM
-- **CDP tests substantive**: `Runtime.getHeapUsage`, DOM nodes, TaskDuration,
-  LayoutCount assertions; x-if panel-removal verification test
-- **CLS/perf**: `x-cloak`, `content-visibility:auto`, preconnect, deferred CDN
-  scripts; Lighthouse median 85-87 (was 82-83), `rel="noopener"` on links
-
+## [1.5.0] - x-if architecture, XSS hardening, pure Alpine tooltips, CDP tests
 ## [1.4.0] - Half-screen UX, multi-view tabs, stress test, CDP quality suite
 ## [1.3.0] - Visual QA, self-annealing epic
 ## [1.2.0] - Dashboard revamp, router metrics, accessibility

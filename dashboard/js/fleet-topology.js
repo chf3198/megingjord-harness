@@ -33,7 +33,7 @@ function renderFleetTopology(devices) {
       <text x="${n.x}" y="${n.y + 4}" text-anchor="middle"
         class="topo-icon">${icon}</text>
       <text x="${n.x}" y="${n.y + 32}" text-anchor="middle"
-        class="topo-label">${esc(n.alias)}</text>
+        class="topo-label">${esc(n.alias)}${n.local ? ' ⭐' : ''}</text>
       <text x="${n.x}" y="${n.y + 42}" text-anchor="middle"
         class="topo-sub">${esc(n.tailscaleIP)}</text>
       <circle cx="${n.x + 13}" cy="${n.y - 13}" r="4"

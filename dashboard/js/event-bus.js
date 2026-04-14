@@ -42,6 +42,9 @@ async function pollEventBus(activityLog) {
   for (const e of events) {
     const a = eventToActivity(e);
     addActivity(activityLog, a.type, a.message, a.detail);
+    if (e.agent && e.model) {
+      addRouterLogEntry(e.agent, e.model, e.detail || e.type);
+    }
   }
   return batonFromEvents(events);
 }

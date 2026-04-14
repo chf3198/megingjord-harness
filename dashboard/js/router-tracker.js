@@ -45,23 +45,31 @@ function getRouterLog() { return routerLog; }
 function renderRouterPanel(stats) {
   if (!stats) stats = { lanes: { free: 0, fleet: 0, premium: 0 } };
   const { free = 0, fleet = 0, premium = 0 } = stats.lanes || {};
-  const total = free + fleet + premium || 1;
-  return `<div class="router-stats">
-    <div class="lane-row"><span class="lane-label">🟢 Free</span>
-      <span class="lane-count">${free}</span>
-      <div class="lane-bar"><div class="lane-fill free"
-        style="width:${(free/total)*100}%"></div></div></div>
-    <div class="lane-row"><span class="lane-label">🟡 Fleet</span>
-      <span class="lane-count">${fleet}</span>
-      <div class="lane-bar"><div class="lane-fill fleet"
-        style="width:${(fleet/total)*100}%"></div></div></div>
-    <div class="lane-row"><span class="lane-label">🔴 Premium</span>
-      <span class="lane-count">${premium}</span>
-      <div class="lane-bar"><div class="lane-fill premium"
-        style="width:${(premium/total)*100}%"></div></div></div>
-    <p class="router-timestamp">Updated:
-      ${new Date(stats.timestamp).toLocaleTimeString()}</p>
-  </div>`;
+  const total = free + fleet + premium;
+  const lanes = [
+    { k: 'free', icon: '🟢', label: 'Free (Local)', n: free, cls: 'free' },
+    { k: 'fleet', icon: '🟡', label: 'Fleet (OpenClaw)', n: fleet, cls: 'fleet' },
+    { k: 'premium', icon: '🔴', label: 'Premium (Copilot)', n: premium, cls: 'premium' }
+  ];
+  if (!total) {
+    return `<div class="router-empty">
+      <div class="router-ring"><span>0</span><small>tasks</small></div>
+      <div class="router-lanes">${lanes.map(l =>
+        `<div class="lane-chip ${l.cls}">${l.icon} ${l.label}</div>`
+      ).join('')}</div>
+      <p class="router-note">Lanes populate as tasks route through agents.</p>
+    </div>`;
+  }
+  const rows = lanes.map(l => {
+    const pct = total ? Math.round((l.n / total) * 100) : 0;
+    return `<div class="lane-row"><span class="lane-label">${l.icon} ${l.label}</span>
+      <div class="lane-bar"><div class="lane-fill ${l.cls}"
+        style="width:${pct}%"></div></div>
+      <span class="lane-count">${l.n}</span></div>`;
+  }).join('');
+  return `<div class="router-stats">${rows}
+    <p class="router-timestamp">${new Date(stats.timestamp)
+      .toLocaleTimeString()}</p></div>`;
 }
 
 function renderRouterLog() {

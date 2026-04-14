@@ -25,7 +25,7 @@ function renderConfigPanel(config, enabled, tips) {
     <p><strong>Auto refresh:</strong> ${status}
       <label class="refresh-ctl">
         <input type="range" min="3" max="60" value="${config.refreshSec}"
-          oninput="setRefreshSec(this.value)"/>
+          oninput="this.nextElementSibling.textContent=this.value+'s';setRefreshSec(this.value)"/>
         <span>${config.refreshSec}s</span></label></p>
     <p><strong>High contrast:</strong> ${config.highContrast ? 'On' : 'Off'}</p>
     <p><strong>Tooltips:</strong> ${tips ? 'On' : 'Off'}</p>

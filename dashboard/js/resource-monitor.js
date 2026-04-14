@@ -21,11 +21,12 @@ function renderOpenClawCard(svc, devices) {
 }
 
 function renderTailscaleCard(devices) {
-  const up = devices.filter(d => d.tailscaleIP);
+  const known = devices.filter(d => d.status !== 'unknown');
+  const up = known.filter(d => d.tailscaleIP);
   return `<div class="res-card">
     <span class="resource-icon">🔗</span>
     <strong>Tailscale</strong>
-    <span class="badge ${up.length === devices.length ? 'healthy' : 'degraded'}">${up.length}/${devices.length}</span>
+    <span class="badge ${up.length === known.length ? 'healthy' : 'degraded'}">${up.length}/${known.length}</span>
     <span class="res-detail">${up.map(d => esc(d.alias)).join(', ')}</span>
   </div>`;
 }
