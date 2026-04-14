@@ -15,6 +15,9 @@
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
     "repo:scope": "node scripts/global/repo-scope.js",
     "ticket:create": "node scripts/global/ticket-create.js",
+    "wiki:ingest": "node scripts/wiki/ingest.js",
+    "wiki:lint": "node scripts/wiki/lint.js",
+    "wiki:search": "node scripts/wiki/search.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:quality": "npx playwright test tests/google-quality.spec.js"

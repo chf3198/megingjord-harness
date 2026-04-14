@@ -17,3 +17,5 @@ Brief description of what happened.
 ## [2026-04-13] init | Wiki system scaffolded
 Phase 1 foundation created. Directories: raw/, wiki/, scripts/wiki/.
 Schema: WIKI.md. No sources ingested yet.
+
+## [2026-04-14] ingest | "Karpathy LLM Wiki Pattern"

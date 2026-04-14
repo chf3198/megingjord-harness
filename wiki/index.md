@@ -22,10 +22,12 @@ _No concept pages yet._
 
 _No source summaries yet._
 
+- [[karpathy-llm-wiki-pattern]] — "Karpathy LLM Wiki Pattern"
+
 ## Syntheses
 
 _No synthesis pages yet._
 
 ---
 
-**Pages**: 0 | **Sources ingested**: 0 | **Last updated**: 2026-04-13
+**Pages**: 1 | **Last updated**: 2026-04-14

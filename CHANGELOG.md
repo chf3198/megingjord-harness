@@ -39,6 +39,12 @@
 ## [Unreleased]
 
 ### Added
+- **LLM Wiki Phase 2 — Core Ops** (#25, #26, #27):
+  `ingest.js` ingests raw sources via OpenClaw LLM compilation.
+  `lint.js` checks broken wikilinks, orphans, frontmatter, index sync.
+  `search.js` keyword scoring + LLM synthesis for wiki queries.
+  `wiki-llm.js` failover: OpenClaw→Groq→Cerebras. `wiki-io.js` I/O.
+  `npm run wiki:ingest|wiki:lint|wiki:search` scripts added.
 - **LLM Wiki Phase 1 — Foundation**: Directory scaffold (`raw/`, `wiki/`,
   `scripts/wiki/`), `WIKI.md` governance schema, `wiki/index.md`,
   `wiki/log.md`. Based on Karpathy's LLM Wiki pattern.
