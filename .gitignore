@@ -16,6 +16,11 @@ test-results/
 # Secrets
 .env
 
+# Raw sources (large/copyrighted — keep locally, don't push)
+raw/articles/*.pdf
+raw/papers/*.pdf
+raw/**/*.epub
+
 # OS
 .DS_Store
 Thumbs.db
