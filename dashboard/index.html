@@ -48,7 +48,7 @@
         </nav>
         <div class="header-actions">
             <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh all endpoints">↻</button>
-            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" title="Toggle auto-refresh">⏱️</button>
+            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" :title="'Auto-refresh: ' + config.refreshSec + 's'">⏱️</button>
             <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Run stress test">🧪</button>
             <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Toggle tooltips">💡</button>
             <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="High contrast">◐</button>
@@ -87,12 +87,12 @@
             <h2>⚡ Services</h2><div x-html="renderServiceCards(services)"></div>
         </section></template>
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width" data-tip="help">
-            <h2>📘 Help Center</h2><div x-html="renderHelpPanel()"></div>
+            <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div>
         </section></template>
     </main>
     <footer class="footer">
         <span>Last refresh: <span x-text="lastRefresh"></span></span>
-        <span>devenv-ops v2.2.0</span>
+        <span>devenv-ops v2.3.0</span>
     </footer>
     <aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
 </body>

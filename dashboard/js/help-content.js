@@ -1,64 +1,41 @@
-// Help Content — collapsible sections with search
+// Help Content — user + developer views with search
 
 const HELP_SECTIONS = [
-  { id: 'fleet', title: '🌐 Fleet Topology', body:
-    'Compact SVG network graph showing all inventoried devices. '
-    + 'Green status dots = reachable via Tailscale. Grey = no route. '
-    + 'Solid green lines = active mesh link between healthy nodes. '
-    + 'Dashed lines = no Tailscale route. Only devices with a '
-    + 'tailscaleIP in inventory/devices.json participate in mesh links. '
-    + 'Data source: inventory/devices.json merged with live '
-    + 'health-check pings to each device\'s Ollama /api/tags endpoint.' },
-  { id: 'baton', title: '🔄 Agent Baton Flow', body:
-    'Visualizes the Agile role workflow: Manager → Collaborator → '
-    + 'Admin → Consultant. The active role is derived from the most '
-    + 'recent LLM Router Log entry. Manager scopes tickets, '
-    + 'Collaborator implements, Admin merges/deploys, Consultant '
-    + 'reviews. When no routing decisions exist, baton shows idle.' },
-  { id: 'activity', title: '📡 Live Activity Feed', body:
-    'Timestamped event log of dashboard actions. Captures: refresh '
-    + 'cycles (with healthy/total counts), stress test rounds '
-    + '(per-round ok/fail/ms), auto-refresh toggles, and system init. '
-    + 'Max 20 entries, newest first. Scrollable when full.' },
-  { id: 'resources', title: '⚡ Remote Resources', body:
-    'Three cards: OpenClaw Gateway (LiteLLM proxy on windows-laptop '
-    + 'port 4000), Tailscale Mesh (connected node count + IPs), and '
-    + 'Ollama Fleet (model counts per node). Data comes from '
-    + 'inventory/services.json + live health checks.' },
-  { id: 'quotas', title: '📊 Quotas (Ops view)', body:
-    'Shows API quota usage for free-tier services. Live quotas poll '
-    + 'provider APIs (OpenRouter /api/v1/auth/key, etc). Static quotas '
-    + 'come from inventory/services.json rate limits. Bars turn yellow '
-    + 'above 80% usage.' },
-  { id: 'router', title: '🛣️ Task Router (Ops view)', body:
-    'Lane distribution bar chart: Free (local Ollama), Fleet '
-    + '(OpenClaw/Tailscale), Premium (Copilot/paid APIs). Fetched '
-    + 'from /api/router/metrics. Router Log shows recent LLM routing '
-    + 'decisions with agent, model, and timestamp.' },
-  { id: 'controls', title: '🎛️ Header Controls', body:
-    '↻ Refresh: polls all endpoints immediately. ⏱️ Auto: toggles '
-    + '60s auto-refresh cycle. 🧪 Test: runs 12 lightweight stress '
-    + 'rounds with live activity feed updates. 💡 Tips: toggles '
-    + 'contextual tooltips on hover. ◐ Contrast: high-contrast mode. '
-    + '❓ Tour: guided walkthrough (loads Driver.js from CDN).' },
-  { id: 'views', title: '📋 View Navigation', body:
-    'Fleet: topology + baton + activity + resources (2×2 grid). '
-    + 'Ops: quotas, stats, router, settings, stress test. '
-    + 'Resources: device + service inventory cards. '
-    + 'Help: this searchable reference. Views using x-if remove '
-    + 'panels from DOM when inactive to save memory.' },
-  { id: 'data', title: '🗄️ Data Sources', body:
-    'inventory/devices.json: 3 fleet devices with Tailscale IPs, '
-    + 'Ollama configs, and hardware specs. inventory/services.json: '
-    + '7 services (Copilot Pro, Cloudflare, OpenRouter, OpenClaw, '
-    + 'Google AI Studio, Groq, Cerebras). Health checks: fetch() to '
-    + 'each device\'s Ollama API with 2.5s timeout. All data loaded '
-    + 'on init, refreshed on 60s cycle or manual refresh.' },
-  { id: 'perf', title: '⚡ Performance Budgets', body:
-    'DOM nodes < 2000, JS heap < 50 MB, script duration < 3s, '
-    + 'task duration < 5s, layout recalcs < 50. Target viewport: '
-    + '960×1080 (half-screen). No build step — static files served '
-    + 'directly. Alpine.js for state, vanilla JS for logic.' }
+  { id: 'fleet', title: '🌐 Fleet Topology',
+    user: 'Network graph of fleet devices. Green = reachable. Mesh lines show Tailscale connections between healthy nodes.',
+    dev: 'Rendered by renderFleetTopology() in fleet-topology.js. SVG 400×120 viewBox. Filters devices without tailscaleIP. Data: inventory/devices.json merged with health-check.js ping results. statusColor() maps health→CSS var.' },
+  { id: 'baton', title: '🔄 Agent Baton Flow',
+    user: 'Shows the Agile workflow: Manager → Collaborator → Admin → Consultant. Active role lights up during work.',
+    dev: 'renderBatonFlow() in baton-flow.js. State from buildBatonState(getRouterLog()) in app.js refreshAll(). During stress test, app-actions.js directly sets app.batonState per phase. 4 roles with done/active/pending CSS states.' },
+  { id: 'activity', title: '📡 Live Activity Feed',
+    user: 'Timestamped log of dashboard events: refreshes, test rounds, baton transitions. Max 15 entries.',
+    dev: 'addActivity() in activity-feed.js, capped at MAX_ACTIVITY=15. Rendered by renderActivityFeed(). Types: refresh, test, baton, router, system, error, warn. Each has icon mapping in activityIcon().' },
+  { id: 'resources', title: '⚡ Remote Resources',
+    user: 'OpenClaw gateway, Tailscale mesh, and Ollama fleet status cards.',
+    dev: 'resource-monitor.js renders 3 res-card elements in a resource-stack. Data: inventory/services.json (openclaw entry) + devices array. Compact single-line layout for half-width column.' },
+  { id: 'quotas', title: '📊 Quotas (Ops)',
+    user: 'API quota usage bars for free-tier services. Yellow above 80%.',
+    dev: 'renderQuotaPanel() in render-panels.js. Live quotas from quota-live.js fetchAllLiveQuotas(). Static from buildQuotaList() in quota-tracker.js. Progress bars use .progress-fill.warn CSS class.' },
+  { id: 'router', title: '🛣️ Task Router (Ops)',
+    user: 'Lane distribution: Free (local), Fleet (OpenClaw), Premium (Copilot). Shows recent LLM routing decisions.',
+    dev: 'renderRouterPanel() + renderRouterLog() in render-panels.js. Stats from router-tracker.js fetchRouterLaneStats(). Log from live-stats.js getRouterLog(). 8 agents defined in agents/*.agent.md.' },
+  { id: 'controls', title: '🎛️ Header Controls',
+    user: '↻ Refresh all · ⏱️ Auto-refresh (configurable interval) · 🧪 Agile Epic test · 💡 Tooltips · ◐ Contrast · ❓ Tour',
+    dev: 'Buttons in index.html header-actions. Handlers in app-actions.js. Config persisted via config-panel.js loadDashboardConfig()/saveDashboardConfig() to localStorage. Tour uses Driver.js CDN in help-tour.js.' },
+  { id: 'views', title: '📋 View Navigation',
+    user: 'Fleet (2×2 grid), Ops (quotas+router+settings), Resources (device/service cards), Help (this page).',
+    dev: 'Alpine x-if for Fleet/Resources/Help (DOM removal). x-show for Ops (no CLS). setDashboardView()/isDashboardView() in app-actions.js. 2-col grid in app.css.' },
+  { id: 'data', title: '🗄️ Data Sources',
+    user: '3 devices, 7 services from JSON inventory. Health checks with 2.5s timeout. Auto-refresh cycle.',
+    dev: 'inventory/devices.json + inventory/services.json loaded by device-monitor.js loadDevices()/loadServices(). Health via health-check.js runHealthChecks(). 33 skills in skills/*, 12 instructions, 18 hooks, 17 global scripts, 8 agents.' },
+  { id: 'perf', title: '⚡ Performance',
+    user: 'Targets: DOM < 2000 nodes, heap < 50 MB, 960×1080 viewport. No build step.',
+    dev: 'Playwright CDP tests in google-quality.spec.js. ScriptDuration < 3s, TaskDuration < 5s, LayoutCount < 50. Alpine.js deferred from CDN. content-visibility:auto on .panel elements.' }
 ];
 
-function getHelpSections() { return HELP_SECTIONS; }
+function getHelpSections(devMode) {
+  return HELP_SECTIONS.map(s => ({
+    id: s.id, title: s.title,
+    body: devMode ? s.user + '<br><br><strong>🔧 Dev:</strong> ' + s.dev : s.user
+  }));
+}

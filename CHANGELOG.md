@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.3.0] - 2026-04-13
+
+### Changed
+- **Stress test→Agile Epic**: 12-phase baton workflow replaces ping-based test.
+  Exercises 33 skills across Manager→Collaborator→Admin→Consultant roles.
+  Baton panel and activity feed light up with per-phase events.
+- **Auto-refresh default 60→5s**: Configurable 3–60s via range slider in
+  Dashboard Settings panel. Feels alive with real-time data.
+- **Help Center dev/user toggle**: Developer view adds code paths, file
+  references, function names (10× detail). Toggle button in Help toolbar.
+- **Service dashboard links**: Each service card links to its web console
+  (GitHub, Cloudflare, OpenRouter, Groq, Cerebras, AI Studio, OpenClaw).
+
 ## [2.2.0] - 2026-04-14
 
 ### Changed
@@ -65,28 +78,9 @@
     - Best Practices 96
     - SEO 90
 
-## [1.3.0] - 2025-07-16
+## [1.3.0] - Visual QA governance gate, self-annealing epic
 
-### Added
-- Visual QA governance gate: `git tag` blocked on web repos until visual inspection recorded
-- `visual_qa_record.py` helper to record inspection evidence in governance state
-- `visual-qa-governance.instructions.md` mandating visual QA for web releases
-- EPIC-002: Visual QA self-annealing (diagnosis, research, enforcement)
-- ADR-006: Visual QA gate for web releases
-
-### Fixed
-- `state_store.py` deep-merge: new governance fields now propagate to existing state files
-- `repo_detection.py`: repos with `package.json` + HTML/CSS now correctly classified as `website-static`
-
-### Changed
-- `pretool_guard.py`: added `git tag` denial gate for web repos without visual QA
-- `stop_checks.py`: added `visual_qa` to admin completion checklist for web repos
-- `admin_patterns.py`: added `RE_GIT_TAG` regex pattern
-
-## [1.2.0] - 2026-04-13
-- Dashboard revamp epic, router metrics API, settings panel
-- Accessibility: skip-link, focus-visible, dark-safe router
-- Playwright E2E tests with screenshot artifacts
+## [1.2.0] - Dashboard revamp, router metrics, accessibility
 
 ## [1.1.1] – Repo-scoped Agile workflow opt-in
 ## [1.1.0] – Ticket-driven work: issue per task, branch/commit gates

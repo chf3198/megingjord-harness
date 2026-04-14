@@ -33,7 +33,7 @@ function renderActivityFeed(log) {
 function activityIcon(type) {
   const icons = {
     refresh: '↻', test: '🧪', baton: '🔄',
-    router: '🛣️', system: '⚙️', error: '❌'
+    router: '🛣️', system: '⚙️', error: '❌', warn: '⚠️'
   };
   return icons[type] || '📌';
 }

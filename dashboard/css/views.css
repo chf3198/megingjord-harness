@@ -73,6 +73,20 @@
   color: var(--text-muted); line-height: 1.4;
 }
 
+/* Help toolbar + service links */
+.help-toolbar {
+  display: flex; gap: 0.4rem; margin-bottom: 0.5rem; align-items: center;
+}
+.help-toolbar .help-search { flex: 1; margin-bottom: 0; }
+.help-toggle {
+  background: var(--surface); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.78rem;
+  cursor: pointer; white-space: nowrap;
+}
+.help-toggle:hover { border-color: var(--blue); color: var(--blue); }
+.svc-link { color: var(--blue); font-size: 0.78rem; text-decoration: none; }
+.svc-link:hover { text-decoration: underline; }
+
 @media (max-width: 640px) {
   .header { flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.75rem; }
   .header-brand h1 { font-size: 0.95rem; }

@@ -1,5 +1,4 @@
-// Tooltips + Help panel — pure Alpine reactive state
-
+// Tooltips + Help panel
 const TIP_COPY = {
   refresh: ['Refresh', 'Polls all endpoints now.', 'fleet', 'controls'],
   auto: ['Auto refresh', 'Toggle 60s polling.', 'fleet', 'controls'],
@@ -25,12 +24,15 @@ const TIP_COPY = {
   help: ['Help center', 'Documentation.', 'help', 'views']
 };
 
-function renderHelpPanel() {
-  const items = getHelpSections().map(s =>
+function renderHelpPanel(devMode) {
+  const items = getHelpSections(devMode).map(s =>
     `<details class="help-section" id="help-${s.id}">
-      <summary>${s.title}</summary><p>${s.body}</p></details>`).join('');
-  return `<input type="search" class="help-search" placeholder="Search help…"
-    oninput="filterHelp(this.value)"/><div class="help-sections">${items}</div>`;
+      <summary>${s.title}</summary><div class="help-body">${s.body}</div></details>`).join('');
+  const btn = devMode ? '🔧 Developer' : '👤 User';
+  return `<div class="help-toolbar"><input type="search" class="help-search"
+    placeholder="Search help…" oninput="filterHelp(this.value)"/>
+    <button class="help-toggle" onclick="toggleHelpMode()">${btn}</button>
+  </div><div class="help-sections">${items}</div>`;
 }
 
 function filterHelp(q) {
@@ -74,26 +76,22 @@ function initTooltips(app) {
 
   document.addEventListener('mouseover', e => {
     if (!app.tooltipsEnabled) return;
-    if (e.target.closest('#app-tip')) {
-      clearTimeout(hideTimer); return;
-    }
+    if (e.target.closest('#app-tip')) { clearTimeout(hideTimer); return; }
     const node = e.target.closest('[data-tip]');
-    if (!node) return;
-    clearTimeout(hideTimer);
-    showTip(node);
+    if (node) { clearTimeout(hideTimer); showTip(node); }
   });
-
   document.addEventListener('mouseout', e => {
     const leaving = e.target.closest('[data-tip]');
-    const entering = e.relatedTarget;
     if (!leaving) return;
-    if (entering && entering.closest('#app-tip')) return;
+    if (e.relatedTarget?.closest('#app-tip')) return;
     hideTimer = setTimeout(() => { app.activeTip = ''; }, 500);
   });
-
   tip?.addEventListener('mouseleave', () => {
     hideTimer = setTimeout(() => { app.activeTip = ''; }, 400);
   });
 }
 
 function clearTooltip(app) { app.activeTip = ''; }
+function toggleHelpMode() {
+  document.querySelector('[x-data]').__x.$data.helpDevMode ^= true;
+}

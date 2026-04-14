@@ -1,5 +1,4 @@
 // Render Panels — JS template functions for Alpine x-html
-// Returns HTML strings, re-evaluated reactively by Alpine
 
 function esc(s) {
   if (s == null) return '';
@@ -23,17 +22,28 @@ function renderDeviceCards(devices) {
     </div></div>`).join('');
 }
 
+const SERVICE_URLS = {
+  'copilot-pro': 'https://github.com/settings/copilot',
+  'cloudflare': 'https://dash.cloudflare.com/',
+  'google-ai-studio': 'https://aistudio.google.com/',
+  'groq': 'https://console.groq.com/',
+  'cerebras': 'https://cloud.cerebras.ai/',
+  'openrouter': 'https://openrouter.ai/activity',
+  'openclaw': 'http://100.78.22.13:4000/ui/'
+};
+
 function renderServiceCards(services) {
-  if (!services.length) {
-    return '<div class="card"><p>No services loaded yet.</p></div>';
-  }
-  return services.map(s => `<div class="card service-card ${s.status}">
-    <div class="card-header"><strong>${esc(s.name)}</strong>
-      <span class="badge ${s.status}">${s.status}</span></div>
-    <div class="card-body">
-      <p><span class="label">Type:</span> ${esc(s.type)}</p>
-      <p><span class="label">Cost:</span> ${esc(s.cost)}</p>
-    </div></div>`).join('');
+  if (!services.length) return '<div class="card"><p>No services loaded yet.</p></div>';
+  return services.map(s => {
+    const url = SERVICE_URLS[s.id] || '';
+    const link = url ? `<p><a href="${esc(url)}" target="_blank" rel="noopener" class="svc-link">Open dashboard ↗</a></p>` : '';
+    return `<div class="card service-card ${s.status}">
+      <div class="card-header"><strong>${esc(s.name)}</strong>
+        <span class="badge ${s.status}">${s.status}</span></div>
+      <div class="card-body">
+        <p><span class="label">Cost:</span> ${esc(s.cost)}</p>${link}
+      </div></div>`;
+  }).join('');
 }
 
 function renderQuotaPanel(live, statics) {
