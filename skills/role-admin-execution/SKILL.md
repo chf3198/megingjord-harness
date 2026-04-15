@@ -24,9 +24,18 @@ Before merging/deploying, verify:
 
 ## Ticket baton protocol
 
-1. Transition labels: `status:in-progress` → `status:review`, confirm `role:admin`.
-2. Write ops comment: `## ⚙️ Admin — Operations Evidence` listing commit/PR/CI/merge.
+1. Transition labels: `status:in-progress` → `status:in-review`, confirm `role:admin`.
+2. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)`.
 3. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`.
+4. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
+
+## Review-failed flow
+
+If AC verification fails: swap `status:in-review` → `status:review-failed`, swap `role:admin` → `role:collaborator`, uncheck failing ACs, comment reason. Collaborator re-implements.
+
+## Post-merge AC failure policy
+
+Never revert a merge. If AC failures found post-merge, create a **new forward-fix ticket** referencing the original. Close the original as-is.
 
 ## Entry criteria
 

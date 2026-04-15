@@ -45,9 +45,13 @@ Before implementing, verify Manager's scope:
 
 ## Ticket baton protocol
 
-1. Write implementation comment: `## 🔧 Collaborator — Validation Evidence`.
-2. Transition labels: `status:ready` → `status:in-progress`, confirm `role:collaborator`.
-3. On COLLABORATOR_HANDOFF: swap `role:collaborator` → `role:admin`.
+1. Write comment: `## 🔧 Collaborator — Validation Evidence (<persona>, #N)`.
+2. Transition labels: `status:todo` → `status:in-progress`, confirm `role:collaborator`.
+3. **AC confirmation gate**: Before COLLABORATOR_HANDOFF, mark each AC checkbox ✅ or ❌ with evidence. All must be ✅ to proceed.
+4. On COLLABORATOR_HANDOFF: swap `role:collaborator` → `role:admin`.
+5. **Emit event**: `emit-event.js --type baton:collaborator --issue N --role collaborator --agent "<persona>"`.
+
+**Persona roster**: see `agents/roster.json`. Select persona matching task specialty.
 
 ## Must not do
 
