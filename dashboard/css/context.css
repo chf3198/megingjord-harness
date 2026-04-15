@@ -7,7 +7,7 @@
   padding: 0.4rem;
 }
 
-.cf-svg { width: 100%; height: auto; max-height: 200px; }
+.cf-svg { width: 100%; height: auto; max-height: 240px; }
 
 .cb-bar {
   display: flex; height: 8px; border-radius: 4px;
@@ -52,11 +52,18 @@
 .ctx-row {
   display: flex; align-items: center; gap: 0.3rem;
   margin-bottom: 0.15rem; font-size: 0.72rem;
+  padding: 0.1rem 0.2rem; border-radius: 3px;
+  transition: background 0.15s;
+}
+
+.ctx-row:hover {
+  background: color-mix(in srgb, var(--blue) 6%, transparent);
 }
 
 .ctx-name {
-  min-width: 110px; font-weight: 500; white-space: nowrap;
+  min-width: 110px; font-weight: 600; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
 }
 
 .ctx-dev {

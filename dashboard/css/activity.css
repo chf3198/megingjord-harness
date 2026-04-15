@@ -17,11 +17,17 @@
 
 .activity-row:last-child { border-bottom: none; }
 
+.activity-row:hover {
+  background: color-mix(in srgb, var(--blue) 6%, transparent);
+  border-radius: 4px;
+}
+
 .activity-time {
   color: var(--text-muted);
   font-size: 0.72rem;
   min-width: 5.5em;
   font-family: monospace;
+  letter-spacing: -0.02em;
 }
 
 .activity-icon { font-size: 0.85rem; }

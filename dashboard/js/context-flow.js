@@ -2,13 +2,13 @@
 // Renders in the Fleet view as a visual architecture map
 
 function renderContextFlow() {
-  const W = 460, H = 200;
+  const W = 500, H = 220;
   const nodes = [
-    { x: 50, y: 40, icon: '💻', label: 'VS Code', sub: 'Copilot Agent' },
-    { x: 170, y: 40, icon: '🧠', label: 'AUTO', sub: 'Model Select' },
-    { x: 300, y: 40, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API' },
-    { x: 300, y: 140, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM Proxy' },
-    { x: 430, y: 140, icon: '🤖', label: 'Ollama', sub: 'Local Models' },
+    { x: 55, y: 45, icon: '💻', label: 'VS Code', sub: 'Copilot Agent' },
+    { x: 185, y: 45, icon: '🧠', label: 'AUTO', sub: 'Model Select' },
+    { x: 325, y: 45, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API' },
+    { x: 325, y: 155, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM Proxy' },
+    { x: 460, y: 155, icon: '🤖', label: 'Ollama', sub: 'Local Models' },
   ];
   const arrows = [
     { from: 0, to: 1, label: 'prompt + context' },
@@ -28,13 +28,13 @@ function renderContextFlow() {
   }).join('');
 
   const nodesSvg = nodes.map(n => `
-    <rect x="${n.x - 30}" y="${n.y - 18}" width="60" height="36"
+    <rect x="${n.x - 38}" y="${n.y - 22}" width="76" height="44"
       rx="6" class="cf-node"/>
-    <text x="${n.x}" y="${n.y - 3}" text-anchor="middle"
+    <text x="${n.x}" y="${n.y - 5}" text-anchor="middle"
       class="cf-icon">${n.icon}</text>
     <text x="${n.x}" y="${n.y + 10}" text-anchor="middle"
       class="cf-name">${n.label}</text>
-    <text x="${n.x}" y="${n.y + 26}" text-anchor="middle"
+    <text x="${n.x}" y="${n.y + 22}" text-anchor="middle"
       class="cf-sub">${n.sub}</text>`).join('');
 
   return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
@@ -49,9 +49,9 @@ function renderContextFlow() {
         .cf-arrow.dashed{stroke-dasharray:4,3;stroke:var(--yellow)}
         .cf-node{fill:var(--surface);stroke:var(--border);stroke-width:1}
         .cf-icon{font-size:14px;fill:var(--text)}
-        .cf-name{font-size:7px;fill:var(--text);font-weight:600}
-        .cf-sub{font-size:5.5px;fill:var(--text-muted)}
-        .cf-lbl{font-size:5.5px;fill:var(--text-muted);font-style:italic}
+        .cf-name{font-size:10px;fill:var(--text);font-weight:600}
+        .cf-sub{font-size:8px;fill:var(--text-muted)}
+        .cf-lbl{font-size:8px;fill:var(--text-muted);font-style:italic}
       </style>
     </defs>${arrowsSvg}${nodesSvg}</svg>
     ${contextBudgetLegend()}</div>`;

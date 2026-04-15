@@ -35,10 +35,14 @@ function renderOllamaCard(devices) {
   const nodes = devices.filter(d => d.ollama);
   const online = nodes.filter(d => d.status === 'healthy').length;
   const models = nodes.reduce((s, d) => s + d.modelCount, 0);
+  const label = online === nodes.length ? 'healthy' : (nodes.length ? 'degraded' : 'unknown');
+  const detail = nodes.length
+    ? `${models} model${models!==1?'s':''} · ${online} of ${nodes.length} online`
+    : 'No Ollama nodes configured';
   return `<div class="res-card">
     <span class="resource-icon">🤖</span>
     <strong>Ollama</strong>
-    <span class="badge ${online === nodes.length ? 'healthy' : 'degraded'}">${online}/${nodes.length}</span>
-    <span class="res-detail">${models} models · ${online} online</span>
+    <span class="badge ${label}">${online}/${nodes.length}</span>
+    <span class="res-detail">${detail}</span>
   </div>`;
 }

@@ -7,8 +7,9 @@
 .gh-stat {
   text-align: center; padding: 0.5rem;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 6px; transition: border-color 0.15s;
 }
+.gh-stat:hover { border-color: var(--blue); }
 .gh-num { display: block; font-size: 1.5rem; font-weight: 700; color: var(--blue, #3b82f6); }
 .gh-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
 .gh-tables {
@@ -32,4 +33,7 @@
   display: inline-block; padding: 0.15rem 0.5rem; margin: 0.15rem;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; font-size: 0.7rem; font-family: monospace;
+  transition: border-color 0.15s;
+}
+.gh-branch:hover { border-color: var(--blue); }
 }

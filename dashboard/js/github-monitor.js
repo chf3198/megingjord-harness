@@ -22,7 +22,10 @@ function ghIcon(conclusion) {
 }
 
 function renderGitHubMonitor(gh) {
-  if (!gh) return '<p class="gh-empty">Loading GitHub data…</p>';
+  if (!gh) return `<div class="gh-empty">
+    <span style="font-size:1.5rem">🔄</span>
+    <p>Connecting to GitHub API…</p>
+    <p style="font-size:0.72rem;color:var(--text-muted)">Data loads on first refresh cycle</p></div>`;
   const { issues, pulls, actions, branches } = gh;
   const statsHtml = `<div class="gh-stats">
     <div class="gh-stat"><span class="gh-num">${issues.open}</span><span class="gh-lbl">Open Issues</span></div>

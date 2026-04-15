@@ -8,6 +8,12 @@
 .lane-row {
   display: flex; align-items: center; gap: 0.5rem;
   margin-bottom: 0.4rem; font-size: 0.82rem;
+  padding: 0.15rem 0.25rem; border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.lane-row:hover {
+  background: color-mix(in srgb, var(--blue) 6%, transparent);
 }
 
 .lane-label { flex: 0 0 120px; font-weight: 500; white-space: nowrap; }
