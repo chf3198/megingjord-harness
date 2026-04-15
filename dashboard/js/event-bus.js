@@ -3,6 +3,7 @@
 
 let _lastEventTs = null;
 const _batonTickets = {};   // issue → ticket, persists across polls
+const _batonHistory = {};   // issue → [{role, ts}] for timeline
 const BATON_TTL_MS = 90000; // keep tickets visible 90s after last update
 
 async function fetchEvents(since) {
@@ -40,8 +41,11 @@ function mergeBatonEvents(events) {
       title: e.title || prev?.title || '',
       epic: e.epic || prev?.epic || null,
       status: e.status || 'in-progress',
-      agent: e.agent || '', _updated: now
+      agent: e.agent || '', model: e.model || prev?.model || '',
+      _updated: now
     };
+    if (!_batonHistory[e.issue]) _batonHistory[e.issue] = [];
+    _batonHistory[e.issue].push({ role: e.role, ts: e.ts || new Date(now).toISOString() });
   }
   // Expire stale done tickets beyond TTL
   for (const [id, t] of Object.entries(_batonTickets)) {
@@ -51,6 +55,23 @@ function mergeBatonEvents(events) {
 }
 
 function getBatonState() { return Object.values(_batonTickets); }
+function getTicketTimeline(issue) { return _batonHistory[issue] || []; }
+
+/** Detect governance gaps: skipped baton roles */
+function detectMissingEvents(issue) {
+  const expected = ['manager', 'collaborator', 'admin', 'consultant'];
+  const hist = _batonHistory[issue] || [];
+  const roles = hist.map(h => h.role);
+  const gaps = [];
+  for (let i = 0; i < roles.length - 1; i++) {
+    const from = expected.indexOf(roles[i]);
+    const to = expected.indexOf(roles[i + 1]);
+    if (to > from + 1) {
+      for (let j = from + 1; j < to; j++) gaps.push(expected[j]);
+    }
+  }
+  return gaps;
+}
 
 async function pollEventBus(activityLog) {
   const events = await fetchEvents(_lastEventTs);

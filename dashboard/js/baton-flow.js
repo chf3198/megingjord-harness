@@ -33,17 +33,24 @@ function renderBatonRow(t) {
 
   const badge = statusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
+  const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
   const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
   const epic = t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
+  const gaps = typeof detectMissingEvents === 'function'
+    ? detectMissingEvents(t.issue) : [];
+  const gapWarn = gaps.length
+    ? `<span class="baton-gap">⚠️ Skipped: ${gaps.join(', ')}</span>` : '';
+  const tl = renderTimeline(t.issue);
   return `<div class="baton-row">
     <div class="baton-meta">
       ${epic}
       <span class="baton-issue">#${t.issue || '?'}</span>
       ${title}
       <span class="badge ${badge}">${t.status || 'idle'}</span>
-      ${agent}
+      ${agent} ${model} ${gapWarn}
     </div>
     <div class="baton-pipeline">${steps}</div>
+    ${tl}
   </div>`;
 }
 
@@ -58,6 +65,18 @@ function normalizeBaton(state) {
   if (Array.isArray(state)) return state.filter(t => t.issue);
   if (state.issue) return [state];
   return [];
+}
+
+function renderTimeline(issue) {
+  const tl = typeof getTicketTimeline === 'function'
+    ? getTicketTimeline(issue) : [];
+  if (!tl.length) return '';
+  const items = tl.map(h => {
+    const r = BATON_ROLES.find(x => x.id === h.role);
+    const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '';
+    return `<span class="tl-step">${r?.icon || '?'} ${t}</span>`;
+  }).join(' → ');
+  return `<div class="baton-timeline">${items}</div>`;
 }
 
 function buildBatonState(routerLog) {

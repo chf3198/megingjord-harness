@@ -29,13 +29,16 @@ disable-model-invocation: false
 | Evidence completeness | Each gate has artifact | Missing gate results |
 | Process adherence | Branch, commit, PR, merge per protocol | Skipped steps |
 | Ticket governance | Issue exists, linked, labeled | No issue, orphan commits |
+| Comment protocol | Each role posted structured comment | Missing role comments |
 | Wiki growth | Research → wiki pages generated | Research with 0 wiki pages |
 | Fleet routing | Tasks use appropriate devices | All tasks on one device |
 
 ## Ticket baton protocol (CLOSEOUT)
 
-1. Write CLOSEOUT: `## 🔍 Consultant — CLOSEOUT` with grades, risks, follow-ups.
-2. Transition labels: `status:review` → `status:done`, remove `role:*`.
+1. Write CLOSEOUT: `## 🔍 Consultant — CLOSEOUT (Quinn Critic, #N)` with grades, risks, follow-ups.
+2. Transition labels: `status:in-review` → `status:done`, remove `role:*`.
+3. **Audit**: Verify each role posted a structured comment (Manager scope, Collaborator evidence, Admin ops).
+4. **Emit event**: `emit-event.js --type baton:consultant --issue N --role consultant --agent "Quinn Critic"`.
 3. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
 
 ## Entry criteria
@@ -54,11 +57,12 @@ disable-model-invocation: false
 - Do not silently re-open implementation scope.
 - Do not claim certainty without evidence.
 
-## Cross-verification checks
+## Drift detection checklist (mandatory)
 
-- Manager: Was scope well-defined? Were constraints realistic?
-- Collaborator: Was evidence complete? Any scope drift unflaged?
-- Admin: Were all feature-completion steps executed? Clean merge?
+- [ ] **Labels**: Issue has correct type/status/priority/area/role labels.
+- [ ] **Comments**: Each role posted structured comment (Mgr/Collab/Admin).
+- [ ] **Events**: Baton transitions emitted via emit-event.js at each handoff.
+- [ ] **ACs**: All acceptance criteria checked ✅ with evidence.
 
 ## Output contract
 

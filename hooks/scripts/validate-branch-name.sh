@@ -20,10 +20,10 @@ fi
 # If feat/ or fix/, require a ticket number prefix
 if echo "$BRANCH" | grep -qE "^(feat|fix|hotfix)/"; then
   if ! echo "$BRANCH" | grep -qE "^(feat|fix|hotfix)/[0-9]+-"; then
-    echo "⚠️  Branch '$BRANCH' should include ticket number."
+    echo "❌ Branch '$BRANCH' must include ticket number."
     echo "   Pattern: feat/<ticket#>-<description>"
     echo "   Example: feat/86-wiki-ingest"
-    # Warning only — don't block commits
+    exit 1
   fi
 fi
 

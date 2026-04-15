@@ -36,9 +36,13 @@ Before emitting `MANAGER_HANDOFF`, the Manager **must**:
 
 ## Ticket baton protocol
 
-1. Write scope comment: `## 🎯 Manager — Scope Definition` with objective, AC, constraints.
-2. Set labels: `status:ready`, `role:manager`.
-3. On MANAGER_HANDOFF: swap `role:manager` → `role:collaborator`.
+1. Write scope comment: `## 🎯 Manager — Scope Definition (Manny Scope, #N)` with objective, AC, constraints.
+2. Each AC **must** be a binary pass/fail checkbox: `- [ ] AC1: <testable statement>`.
+3. Set labels: `status:todo`, `role:manager`.
+4. On MANAGER_HANDOFF: swap `role:manager` → `role:collaborator`.
+5. **Emit event**: `emit-event.js --type baton:manager --issue N --role manager --agent "Manny Scope"`.
+
+**Persona roster**: see `agents/roster.json` for all 9 named agents.
 
 ## Entry criteria
 
