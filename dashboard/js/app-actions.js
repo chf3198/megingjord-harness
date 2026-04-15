@@ -17,7 +17,7 @@ function toggleDashboardTips(app) {
 
 function setRefreshSec(val) {
   const el = document.querySelector('[x-data]');
-  const app = el._x_dataStack?.[0] || Alpine.$data(el);
+  const app = Alpine.$data(el);
   app.config.refreshSec = Math.max(3, Math.min(60, Number(val)));
   saveDashboardConfig(app.config);
   app.scheduleRefresh();

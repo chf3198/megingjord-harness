@@ -18,7 +18,7 @@ async function pollGitHub() {
 function ghIcon(conclusion) {
   const map = { success: '✅', failure: '❌', cancelled: '⚫',
     skipped: '⏭️', in_progress: '🔄', queued: '⏳' };
-  return map[conclusion] || map[conclusion] || '⬜';
+  return map[conclusion] || '⬜';
 }
 
 function renderGitHubMonitor(gh) {
@@ -31,19 +31,19 @@ function renderGitHubMonitor(gh) {
     <div class="gh-stat"><span class="gh-num">${branches.count}</span><span class="gh-lbl">Branches</span></div>
   </div>`;
   const issueRows = (issues.recent || []).slice(0, 5).map(i =>
-    `<tr><td>#${i.number}</td><td>${i.title.substring(0, 40)}</td>` +
-    `<td><span class="gh-badge gh-${i.state}">${i.state}</span></td></tr>`
+    `<tr><td>#${i.number}</td><td>${esc(i.title).substring(0, 40)}</td>` +
+    `<td><span class="gh-badge gh-${esc(i.state)}">${esc(i.state)}</span></td></tr>`
   ).join('');
   const runRows = (actions.recent || []).slice(0, 4).map(r =>
-    `<tr><td>${ghIcon(r.conclusion || r.status)}</td><td>${r.name}</td>` +
-    `<td>${r.branch || ''}</td><td>${r.conclusion || r.status}</td></tr>`
+    `<tr><td>${ghIcon(r.conclusion || r.status)}</td><td>${esc(r.name)}</td>` +
+    `<td>${esc(r.branch || '')}</td><td>${esc(r.conclusion || r.status)}</td></tr>`
   ).join('');
   const prRows = (pulls.recent || []).slice(0, 4).map(p =>
-    `<tr><td>#${p.number}</td><td>${p.title.substring(0, 35)}</td>` +
-    `<td><span class="gh-badge gh-${p.merged ? 'merged' : p.state}">${p.merged ? 'merged' : p.state}</span></td></tr>`
+    `<tr><td>#${p.number}</td><td>${esc(p.title).substring(0, 35)}</td>` +
+    `<td><span class="gh-badge gh-${p.merged ? 'merged' : esc(p.state)}">${p.merged ? 'merged' : esc(p.state)}</span></td></tr>`
   ).join('');
   const branchList = (branches.active || []).slice(0, 6).map(b =>
-    `<span class="gh-branch">${b}</span>`).join(' ');
+    `<span class="gh-branch">${esc(b)}</span>`).join(' ');
   return `${statsHtml}
     <div class="gh-tables">
       <div><h4>Recent Issues</h4><table class="gh-tbl">${issueRows || '<tr><td colspan=3>None</td></tr>'}</table></div>
