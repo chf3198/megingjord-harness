@@ -55,7 +55,9 @@ async function handleApi(req, res) {
   if (u === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
   if (u === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
+  if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
+  if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
   jsonRes(res, 404, { error: 'not found' });
 }
 
@@ -74,10 +76,12 @@ function getWikiHealth() {
       const content = fs.readFileSync(path.join(dp, f), 'utf-8');
       const links = [...content.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
       linkGraph[slug] = links;
-      links.forEach(l => { if (!allSlugs.has(l)) broken.push(`${slug}→${l}`); inbound.add(l); });
+      links.forEach(l => inbound.add(l));
       if (!content.startsWith('---')) fmIssues.push(slug);
     }
   }
+  for (const [slug, links] of Object.entries(linkGraph))
+    links.forEach(l => { if (!allSlugs.has(l)) broken.push(`${slug}→${l}`); });
   for (const s of allSlugs) if (!inbound.has(s)) orphans.push(s);
   const idxPath = path.join(WIKI_DIR, 'index.md');
   const idx = fs.existsSync(idxPath) ? fs.readFileSync(idxPath, 'utf-8') : '';

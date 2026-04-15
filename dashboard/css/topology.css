@@ -24,7 +24,9 @@
 }
 
 .topo-legend .dot.green { background: var(--green); }
+.topo-legend .dot.yellow { background: var(--yellow); }
 .topo-legend .dot.red { background: var(--red); }
+.topo-legend .dot.grey { background: var(--text-muted); }
 
 .topo-legend .line {
   display: inline-block; width: 12px; height: 2px;
@@ -32,6 +34,7 @@
 }
 
 .topo-legend .line.green { background: var(--green); }
+.topo-legend .line.grey { background: var(--text-muted); border-top: 1px dashed var(--text-muted); height: 0; }
 .topo-unr { color: var(--text-muted); font-style: italic; }
 
 /* Resource Monitor — compact stack */

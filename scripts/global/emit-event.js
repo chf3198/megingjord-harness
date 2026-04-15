@@ -16,6 +16,10 @@ function findRepoRoot(start) {
 }
 
 function parseArgs(argv) {
+  // Support JSON as first argument: node emit-event.js '{"type":...}'
+  if (argv[2] && argv[2].startsWith('{')) {
+    try { return JSON.parse(argv[2]); } catch { /* fall through */ }
+  }
   const args = {};
   for (let i = 2; i < argv.length; i += 2) {
     const key = argv[i].replace(/^--/, '');
@@ -38,6 +42,8 @@ function emit(args) {
     role: args.role || null,
     agent: args.agent || null,
     model: args.model || null,
+    title: args.title || null,
+    epic: args.epic ? Number(args.epic) : null,
     detail: args.detail || '',
   };
 

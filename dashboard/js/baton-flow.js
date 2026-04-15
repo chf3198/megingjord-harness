@@ -33,9 +33,13 @@ function renderBatonRow(t) {
 
   const badge = statusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
+  const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
+  const epic = t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
   return `<div class="baton-row">
     <div class="baton-meta">
+      ${epic}
       <span class="baton-issue">#${t.issue || '?'}</span>
+      ${title}
       <span class="badge ${badge}">${t.status || 'idle'}</span>
       ${agent}
     </div>

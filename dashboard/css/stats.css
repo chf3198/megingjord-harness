@@ -40,6 +40,19 @@
 .stat-offline { color: var(--text-muted); font-style: italic; font-size: 0.85rem; }
 
 /* Compact quota rows */
+.quota-costs {
+    display: flex; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap;
+}
+.quota-cost {
+    flex: 1; min-width: 120px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.4rem 0.5rem; font-size: 0.75rem;
+}
+.quota-cost a { color: var(--blue); text-decoration: none; font-weight: 600; display: block; }
+.quota-cost a:hover { text-decoration: underline; }
+.quota-price { display: block; font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.quota-detail { font-size: 0.65rem; color: var(--text-muted); }
+.quota-ext { color: var(--blue); text-decoration: none; font-size: 0.65rem; margin-left: 0.2rem; }
+.quota-note { color: var(--yellow); font-size: 0.65rem; font-style: italic; }
 .quota-grid { display: flex; flex-direction: column; gap: 0.3rem; }
 .quota-row {
     display: flex; align-items: center; gap: 0.4rem;

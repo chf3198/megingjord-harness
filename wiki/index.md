@@ -25,6 +25,10 @@ The LLM updates this on every ingest operation.
 - [[self-annealing]] — Self-Annealing Protocol
 - [[wiki-pattern]] — Karpathy LLM Wiki Pattern
 - [[governance-enforcement]] — Governance Enforcement
+- [[protocol-enforcement]] — Protocol Enforcement Architecture
+- [[context-flow]] — LLM Context Flow Through Fleet
+- [[model-routing]] — AUTO Selection & Fleet Distribution
+- [[github-integration]] — GitHub API Integration & Dashboard Monitoring
 
 ## Source Summaries
 
@@ -51,11 +55,12 @@ The LLM updates this on every ingest operation.
 - [[tiered-research-findings]] — Tiered Architecture Research Findings
 - [[workflow-design]] — Development Workflow Design
 - [[workflow-diagrams]] — Workflow Diagrams
+- [[copilot-hooks-api]] — Copilot Chat Hooks API Research
 
 ## Syntheses
 
-_No synthesis pages yet._
+- [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
 
 ---
 
-**Pages**: 33 | **Last updated**: 2026-04-14
+**Pages**: 39 | **Last updated**: 2026-07-13

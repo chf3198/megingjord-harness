@@ -10,6 +10,7 @@ function dashboardApp() {
     activityLog: [],
     wikiHealth: { loaded: false },
     wikiPages: [],
+    githubData: null,
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -32,6 +33,7 @@ function dashboardApp() {
       await this.loadInventory();
       await this.refreshAll();
       this.scheduleRefresh();
+      if (typeof connectSSE === 'function') connectSSE(this);
       this.lastRefresh = new Date().toLocaleTimeString();
       addActivity(this.activityLog, 'system', 'Dashboard initialized',
         `${this.devices.length} devices loaded`);
@@ -55,13 +57,11 @@ function dashboardApp() {
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
         this.routerStats = rs;
-        this.batonState = evBaton || buildBatonState(getRouterLog());
+        this.batonState = evBaton.length ? evBaton : buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
+        if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
         this.lastRefresh = new Date().toLocaleTimeString();
-        const h = this.devices.filter(d => d.status === 'healthy').length;
-        addActivity(this.activityLog, 'refresh', 'Fleet refreshed',
-          `${h}/${this.devices.length} healthy`);
       } finally {
         this.loading = false;
       }
@@ -91,8 +91,6 @@ function dashboardApp() {
     isView(view) { return isDashboardView(this, view); },
     toggleTips() { toggleDashboardTips(this); },
     toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
-    runQuickTest() { return runDashboardQuickTest(this); },
-
-    startTour() { startDashboardTour(); }
+    runQuickTest() { return runDashboardQuickTest(this); }
   };
 }

@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Stop hook checking logic: admin completion and post-merge governance."""
 from __future__ import annotations
+import sys
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from wiki_wisdom import admin_steps, post_merge_checklist
 
 CODE_UNCOMMITTED_EXTS = (".sh", ".js", ".py", ".ts", ".json", ".md")
 
@@ -70,14 +78,7 @@ def post_merge_messages(
 ) -> list[str]:
     """Generate post-merge governance checklist messages."""
     if "code-changed" in signals or "extension-changed" in signals:
-        return [
-            "Post-merge checklist:\n"
-            "1. CHANGELOG updated\n"
-            "2. README/docs reflect new behavior\n"
-            "3. repo-profile-governance: health files, metadata\n"
-            "4. docs-drift-maintenance: no stale docs\n"
-            "5. Learnings entry if significant discovery"
-        ]
+        return [post_merge_checklist()]
     if not has_messages:
         return [
             "Before ending: confirm checks/releases are evidence-backed "

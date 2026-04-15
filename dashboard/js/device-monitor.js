@@ -14,7 +14,7 @@ async function loadDevices() {
       tailscaleIP: d.tailscaleIP || null,
       ollama: d.ollama,
       openclaw: !!d.openclaw,
-      local: d.role === 'sml-agent' || d.id === 'penguin-1',
+      local: !!d.local,
       status: 'unknown'
     }));
   } catch {

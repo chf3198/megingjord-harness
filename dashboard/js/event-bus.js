@@ -1,7 +1,9 @@
 // Event Bus Client — polls /api/events for live dashboard updates
-// Converts JSONL events into activity log entries and baton state
+// Persistent baton map so tickets stay visible through full workflow
 
 let _lastEventTs = null;
+const _batonTickets = {};   // issue → ticket, persists across polls
+const BATON_TTL_MS = 90000; // keep tickets visible 90s after last update
 
 async function fetchEvents(since) {
   const url = since
@@ -27,31 +29,37 @@ function eventToActivity(e) {
   return { type, message: msg, detail: e.issue ? `#${e.issue}` : '' };
 }
 
-function batonFromEvents(events) {
-  const tickets = {};
+/** Merge events into persistent baton ticket map */
+function mergeBatonEvents(events) {
+  const now = Date.now();
   for (const e of events) {
     if (!e.role || !e.issue) continue;
-    tickets[e.issue] = {
-      activeRole: e.role,
-      issue: e.issue,
+    const prev = _batonTickets[e.issue];
+    _batonTickets[e.issue] = {
+      activeRole: e.role, issue: e.issue,
+      title: e.title || prev?.title || '',
+      epic: e.epic || prev?.epic || null,
       status: e.status || 'in-progress',
-      agent: e.agent || ''
+      agent: e.agent || '', _updated: now
     };
   }
-  const arr = Object.values(tickets);
-  return arr.length ? arr : null;
+  // Expire stale done tickets beyond TTL
+  for (const [id, t] of Object.entries(_batonTickets)) {
+    if (t.status === 'done' && now - t._updated > BATON_TTL_MS) delete _batonTickets[id];
+  }
+  return Object.values(_batonTickets);
 }
+
+function getBatonState() { return Object.values(_batonTickets); }
 
 async function pollEventBus(activityLog) {
   const events = await fetchEvents(_lastEventTs);
-  if (!events.length) return null;
+  if (!events.length) return getBatonState();
   _lastEventTs = events[events.length - 1].ts;
   for (const e of events) {
     const a = eventToActivity(e);
     addActivity(activityLog, a.type, a.message, a.detail);
-    if (e.agent && e.model) {
-      addRouterLogEntry(e.agent, e.model, e.detail || e.type);
-    }
+    if (e.agent && e.model) addRouterLogEntry(e.agent, e.model, e.detail || e.type);
   }
-  return batonFromEvents(events);
+  return mergeBatonEvents(events);
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.0.1] - 2026-04-14
+
+### Added — Wiki Self-Annealing (#96)
+- `scripts/wiki/anneal.js`: auto-fix broken links, orphans, frontmatter
+- `npm run wiki:anneal` (dry-run default, `--apply` to write)
+- Fuzzy slug matching, index backlink insertion, frontmatter template
+
+### Added — SSE Push Model (#97)
+- `/api/events/stream` SSE endpoint in dashboard-server.js
+- `scripts/sse-handler.js`: fs.watch() on events.jsonl, broadcasts
+- `dashboard/js/event-source.js`: EventSource client + polling fallback
+- Dashboard init() connects SSE, degrades to polling on error
+
 ## [2.4.1] - 2025-07-14
 
 ### Fixed — Dashboard UX Polish (11 issues from v2.4.0 UAT)
@@ -70,23 +83,11 @@
 - **LLM Wiki Phase 4 — Bootstrap + Skill** (#30, #31):
   Ingested 3 raw sources via OpenClaw (fleet, skills, Karpathy pattern).
   Created `llm-wiki-ops` maintenance skill (34th skill).
-- **LLM Wiki Phase 3 — Integration** (#28, #29):
-  Foam VS Code extension, dashboard wiki health panel, /api/wiki-health.
-- **LLM Wiki Phase 2 — Core Ops** (#25, #26, #27):
-  `ingest.js` ingests raw sources via OpenClaw LLM compilation.
-  `lint.js` checks broken wikilinks, orphans, frontmatter, index sync.
-  `search.js` keyword scoring + LLM synthesis for wiki queries.
-  `wiki-llm.js` failover: OpenClaw→Groq→Cerebras. `wiki-io.js` I/O.
-  `npm run wiki:ingest|wiki:lint|wiki:search` scripts added.
-- **LLM Wiki Phase 1 — Foundation**: Directory scaffold (`raw/`, `wiki/`,
-  `scripts/wiki/`), `WIKI.md` governance schema, `wiki/index.md`,
-  `wiki/log.md`. Based on Karpathy's LLM Wiki pattern.
-- **ADR-007**: LLM Wiki knowledge system adoption decision recorded.
-- **area:knowledge label**: New GitHub label for wiki-related issues.
+- **LLM Wiki Phases 1–3** (#25–#29): Full wiki pipeline — ingest, lint,
+  search, Foam, dashboard panel. Karpathy LLM Wiki pattern.
 
 ### Added
 - **Model routing agents**: 8 custom agents with pinned models (ADR-004)
-- **VS Code settings**: planAgent→Opus, implementAgent→Sonnet
 
 ## [1.5.0] - x-if architecture, XSS hardening, pure Alpine tooltips, CDP tests
 ## [1.4.0] - Half-screen UX, multi-view tabs, stress test, CDP quality suite

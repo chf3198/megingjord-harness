@@ -10,6 +10,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from governance_state import ensure_state, reset_state
+from wiki_wisdom import baton_protocol, governance_enforcement, post_merge_checklist
 
 
 def main() -> int:
@@ -68,13 +69,9 @@ def main() -> int:
             "(commit/push/PR/CI/merge) for code-changing sessions."
         )
 
-    baton_msg = ("MANDATORY: Begin with Manager role. Emit MANAGER_HANDOFF "
-        "(objective, constraints, acceptance_criteria, gates) before implementation. "
-        "Then Collaborator → Admin → Consultant. Skip for trivial tasks only.")
-    standards_msg = ("Global standards: root-cause first, evidence before claims, "
-        "secret-safe packaging, version integrity, docs-sync on changes.")
-    postmerge_msg = ("Post-merge: after merges changing behavior, run checklist "
-        "(CHANGELOG, README, repo-profile-governance, docs-drift, learnings).")
+    baton_msg = baton_protocol()
+    standards_msg = governance_enforcement()
+    postmerge_msg = post_merge_checklist()
     context_parts = [
         baton_msg, standards_msg,
         f"Project type: {repo_type}.", profile,
