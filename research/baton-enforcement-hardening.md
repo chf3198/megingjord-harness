@@ -52,3 +52,14 @@ status: complete
 | Stop baton audit | 1 | 3 | 3 |
 
 Tiers 1+2 catch ~85% of violations. Adding Tier 3 reaches ~95%.
+
+## Retrospective Implementation Note
+
+- On 2026-04-15, the Tier 1/Tier 2 governance remediation was implemented in this repo.
+- `hooks/repo-scope.json` was enabled by default and the current repo path registered.
+- `hooks/global-standards.json` now wires `manager_ticket_gate.py` into `UserPromptSubmit` and `commit_ticket_gate.py` into `PreToolUse`.
+- `hooks/scripts/pretool_guard.py` now denies file-edit tools until `roles.manager` is set.
+- `hooks/scripts/posttool_reminders.py` now warns when code was touched before Manager scope.
+- The bug and governance bypass were tracked in closed issue #105.
+
+This document now reflects both the original findings and the actual remediation that corrected the ticketing/documentation gap.
