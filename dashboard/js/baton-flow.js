@@ -11,8 +11,10 @@ const BATON_ROLES = [
 function renderBatonFlow(batonState) {
   const tickets = normalizeBaton(batonState);
   if (!tickets.length) {
-    return `<div class="baton-flow">
-      <div class="baton-empty">No active tickets</div></div>`;
+    return `<div class="baton-flow"><div class="baton-empty">
+      🎯 No active tickets
+      <span style="font-size:0.72rem;display:block;margin-top:0.2rem">
+      Baton activates when issues are assigned</span></div></div>`;
   }
   const rows = tickets.map(renderBatonRow).join('');
   return `<div class="baton-flow">${rows}</div>`;
