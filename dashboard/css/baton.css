@@ -79,3 +79,13 @@
   .baton-step { font-size: 0.65rem; padding: 0.1rem 0.2rem; }
   .baton-agent { margin-left: 0; }
 }
+
+.baton-done-group {
+  border-top: 1px dashed var(--border); padding-top: 0.3rem;
+  margin-top: 0.2rem;
+}
+.baton-done-group summary {
+  font-size: 0.72rem; color: var(--text-muted); cursor: pointer;
+  padding: 0.15rem 0; user-select: none;
+}
+.baton-done-group .baton-row { opacity: 0.6; }

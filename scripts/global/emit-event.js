@@ -44,6 +44,7 @@ function emit(args) {
     model: args.model || null,
     title: args.title || null,
     epic: args.epic ? Number(args.epic) : null,
+    status: args.status || null,
     detail: args.detail || '',
   };
 

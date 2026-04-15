@@ -16,8 +16,15 @@ function renderBatonFlow(batonState) {
       <span style="font-size:0.72rem;display:block;margin-top:0.2rem">
       Baton activates when issues are assigned</span></div></div>`;
   }
-  const rows = tickets.map(renderBatonRow).join('');
-  return `<div class="baton-flow">${rows}</div>`;
+  const active = tickets.filter(t => t.status !== 'done');
+  const done = tickets.filter(t => t.status === 'done');
+  let html = active.map(renderBatonRow).join('');
+  if (done.length) {
+    html += `<details class="baton-done-group"><summary>
+      ✅ ${done.length} completed</summary>
+      ${done.map(renderBatonRow).join('')}</details>`;
+  }
+  return `<div class="baton-flow">${html}</div>`;
 }
 
 function renderBatonRow(t) {
@@ -58,7 +65,7 @@ function renderBatonRow(t) {
 
 function statusBadge(s) {
   const m = { 'in-progress': 'active', ready: 'degraded',
-    done: 'healthy', idle: 'unknown' };
+    done: 'healthy', idle: 'unknown', review: 'degraded' };
   return m[s] || 'unknown';
 }
 

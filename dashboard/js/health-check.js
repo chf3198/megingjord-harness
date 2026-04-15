@@ -32,6 +32,10 @@ async function checkOpenClaw(deviceId) {
 async function runHealthChecks(devices) {
   const results = {};
   for (const d of devices) {
+    if (d.local) {
+      results[d.id] = { status: 'healthy' };
+      continue;
+    }
     if (!d.ollama && !d.openclaw) {
       results[d.id] = { status: 'unknown' };
       continue;

@@ -7,7 +7,9 @@ const OPENCLAW = 'http://100.78.22.13:4000';
 
 function serveStatic(req, res) {
   if (req.url === '/') { res.writeHead(302,{Location:'/dashboard/'}); res.end(); return; }
-  let fp=path.join(ROOT,req.url); if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;} if(fp.endsWith('/')||fp.endsWith(path.sep)) fp=path.join(fp,'index.html');
+  let fp=path.join(ROOT,req.url); if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
+  if(fs.existsSync(fp)&&fs.statSync(fp).isDirectory()&&!req.url.endsWith('/')){res.writeHead(302,{Location:req.url+'/'});res.end();return;}
+  if(fp.endsWith('/')||fp.endsWith(path.sep)) fp=path.join(fp,'index.html');
   const ext=path.extname(fp); fs.readFile(fp,(err,data)=>{ if(err){res.writeHead(404);res.end('Not found');return;} res.writeHead(200,{'Content-Type':MIME[ext]||'application/octet-stream','Cache-Control':'no-cache'}); res.end(data); });
 }
 
@@ -58,6 +60,7 @@ async function handleApi(req, res) {
   if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
+  if (u.startsWith('/api/fleet-health')) { const { readLog } = require('./fleet-health-log'); return jsonRes(res, 200, readLog(100)); }
   jsonRes(res, 404, { error: 'not found' });
 }
 
@@ -92,8 +95,5 @@ function getWikiHealth() {
     lastCheck: new Date().toISOString() };
 }
 
-function getWikiPages() {
-  return require('./wiki-pages-api')(WIKI_DIR, WIKI_CATS);
-}
-
-http.createServer((req,res)=>{ if(req.url.startsWith('/api/')) return handleApi(req,res); serveStatic(req,res); }).listen(PORT,()=>{ console.log(`Dashboard: http://localhost:${PORT} Fleet: ${Object.keys(FLEET).join(', ')}`); });
+function getWikiPages() { return require('./wiki-pages-api')(WIKI_DIR, WIKI_CATS); }
+http.createServer((req,res)=>{ if(req.url.startsWith('/api/')) return handleApi(req,res); serveStatic(req,res); }).listen(PORT,()=>{ console.log(`Dashboard: http://localhost:${PORT} Fleet: ${Object.keys(FLEET).join(', ')}`); try { require('./fleet-health-log').startMonitor(); } catch(e) { console.error('Fleet health monitor:', e.message); } });

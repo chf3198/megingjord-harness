@@ -11,6 +11,7 @@ function dashboardApp() {
     wikiHealth: { loaded: false },
     wikiPages: [],
     githubData: null,
+    fleetHealthLog: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -61,6 +62,7 @@ function dashboardApp() {
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
         if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
+        if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
         this.loading = false;

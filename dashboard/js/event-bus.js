@@ -4,7 +4,7 @@
 let _lastEventTs = null;
 const _batonTickets = {};   // issue → ticket, persists across polls
 const _batonHistory = {};   // issue → [{role, ts}] for timeline
-const BATON_TTL_MS = 90000; // keep tickets visible 90s after last update
+const BATON_TTL_MS = 600000; // keep done tickets visible 10min
 
 async function fetchEvents(since) {
   const url = since
@@ -36,22 +36,28 @@ function mergeBatonEvents(events) {
   for (const e of events) {
     if (!e.role || !e.issue) continue;
     const prev = _batonTickets[e.issue];
+    const isDone = e.status === 'done' || e.role === 'consultant';
     _batonTickets[e.issue] = {
       activeRole: e.role, issue: e.issue,
       title: e.title || prev?.title || '',
       epic: e.epic || prev?.epic || null,
-      status: e.status || 'in-progress',
+      status: isDone ? 'done' : (e.status || 'in-progress'),
       agent: e.agent || '', model: e.model || prev?.model || '',
       _updated: now
     };
     if (!_batonHistory[e.issue]) _batonHistory[e.issue] = [];
     _batonHistory[e.issue].push({ role: e.role, ts: e.ts || new Date(now).toISOString() });
   }
-  // Expire stale done tickets beyond TTL
+  // Expire done tickets beyond TTL
   for (const [id, t] of Object.entries(_batonTickets)) {
     if (t.status === 'done' && now - t._updated > BATON_TTL_MS) delete _batonTickets[id];
   }
-  return Object.values(_batonTickets);
+  // Sort: active first (by issue# desc), then done
+  return Object.values(_batonTickets).sort((a, b) => {
+    if (a.status !== 'done' && b.status === 'done') return -1;
+    if (a.status === 'done' && b.status !== 'done') return 1;
+    return (b.issue || 0) - (a.issue || 0);
+  });
 }
 
 function getBatonState() { return Object.values(_batonTickets); }
