@@ -8,6 +8,7 @@ function dashboardApp() {
     currentView: 'fleet', helpDevMode: false,
     batonState: [],
     activityLog: [],
+    governanceState: {},
     wikiHealth: { loaded: false },
     wikiPages: [],
     githubData: null,
@@ -63,6 +64,7 @@ function dashboardApp() {
         this.wikiHealth = await fetchWikiHealth();
         if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
+        if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
         this.loading = false;

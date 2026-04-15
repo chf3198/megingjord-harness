@@ -62,6 +62,11 @@ def main() -> int:
             )
 
     if flags.get("code_touched"):
+        if not state.get("roles", {}).get("manager"):
+            messages.append(
+                "Governance alert: code changes were made before Manager scope was recorded. "
+                "Create or link an issue and perform Manager handoff."
+            )
         missing = [k for k in ("commit", "push", "pr_create", "ci_green", "merge") if not ops.get(k)]
         if missing:
             messages.append(f"Admin baton incomplete — missing: {', '.join(missing)}.")

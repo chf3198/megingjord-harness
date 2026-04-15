@@ -6,7 +6,7 @@
     <title>DevEnv Ops — Fleet Operations Center</title>
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="css/help.css"><link rel="stylesheet" href="css/stats.css"><link rel="stylesheet" href="css/router.css"><link rel="stylesheet" href="css/config.css"><link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
-    <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/activity.css"><link rel="stylesheet" href="css/wiki.css"><link rel="stylesheet" href="css/fleet-health.css"><link rel="stylesheet" href="css/context.css"><link rel="stylesheet" href="css/github.css">
+    <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/activity.css"><link rel="stylesheet" href="css/wiki.css"><link rel="stylesheet" href="css/fleet-health.css"><link rel="stylesheet" href="css/governance.css"><link rel="stylesheet" href="css/context.css"><link rel="stylesheet" href="css/github.css">
     <script defer src="js/alpine.min.js"></script>
     <script src="js/health-check.js"></script><script src="js/quota-tracker.js"></script>
     <script src="js/device-monitor.js"></script><script src="js/router-tracker.js"></script>
@@ -19,6 +19,7 @@
     <script src="js/wiki-panel.js"></script><script src="js/wiki-reader.js"></script>
     <script src="js/context-flow.js"></script><script src="js/llm-context.js"></script><script src="js/github-monitor.js"></script>
     <script src="js/fleet-health-log.js"></script>
+    <script src="js/governance-panel.js"></script>
     <script src="js/tooltips.js"></script><script src="js/app-actions.js"></script>
     <script src="js/event-source.js"></script><script src="js/help-tour.js"></script><script src="js/app.js"></script>
 </head>
@@ -74,6 +75,8 @@
             <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div></section>
         <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
             <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div></section>
+        <section id="panel-governance" class="panel" x-show="isView('ops')" data-tip="governance">
+            <h2>🛡️ Governance Enforcement</h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
         <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
             <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section>
         <section id="panel-test" class="panel" x-show="isView('ops')" data-tip="test-panel">
@@ -93,7 +96,5 @@
             <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div>
         </section></template>
     </main>
-    <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>devenv-ops v3.0.0</span></footer>
-    <aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
-</body>
-</html>
+    <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>devenv-ops v3.0.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside>
+</body></html>

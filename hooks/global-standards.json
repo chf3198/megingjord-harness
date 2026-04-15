@@ -10,11 +10,21 @@
     "UserPromptSubmit": [
       {
         "type": "command",
+        "command": "python3 ~/.copilot/hooks/scripts/manager_ticket_gate.py",
+        "timeout": 10
+      },
+      {
+        "type": "command",
         "command": "python3 ~/.copilot/hooks/scripts/userprompt_gate.py",
         "timeout": 10
       }
     ],
     "PreToolUse": [
+      {
+        "type": "command",
+        "command": "python3 ~/.copilot/hooks/scripts/commit_ticket_gate.py",
+        "timeout": 10
+      },
       {
         "type": "command",
         "command": "python3 ~/.copilot/hooks/scripts/pretool_guard.py",

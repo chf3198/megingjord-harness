@@ -33,25 +33,27 @@ def main() -> int:
         return 0
 
     state = ensure_state(cwd)
-    roles = state.get("roles", {})
+    issue_num = extract_issue_num(prompt)
 
-    if roles.get("manager"):
-        issue_num = extract_issue_num(prompt)
-        if not issue_num:
-            print(
-                json.dumps(
-                    {
-                        "hookSpecificOutput": {
-                            "hookEventName": "UserPromptSubmit",
-                            "additionalContext": (
-                                "Manager handoff detected but no ticket reference found. "
-                                "MANAGER_HANDOFF must include a GitHub issue link (e.g., #123)."
-                            ),
-                        },
-                        "systemMessage": "Ticket-first workflow: Manager must create ticket before scope definition.",
-                    }
-                )
-            )
+    if issue_num:
+        state.setdefault("roles", {})["manager"] = True
+        save_state(state)
+        return 0
+
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "UserPromptSubmit",
+                    "additionalContext": (
+                        "Manager handoff detected but no ticket reference found. "
+                        "MANAGER_HANDOFF must include a GitHub issue link (e.g., #123)."
+                    ),
+                },
+                "systemMessage": "Ticket-first workflow: Manager must create ticket before scope definition.",
+            }
+        )
+    )
 
     return 0
 

@@ -4,6 +4,7 @@ const PORT = process.env.DASH_PORT || 8090; const ROOT = path.resolve(__dirname,
 const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json'};
 const FLEET = {'penguin-1':'http://100.86.248.35:11434','windows-laptop':'http://100.78.22.13:11434'};
 const OPENCLAW = 'http://100.78.22.13:4000';
+const { getWikiHealth, getWikiPages } = require('./dashboard-wiki');
 
 const DASH = path.join(ROOT, 'dashboard');
 function serveStatic(req, res) {
@@ -62,39 +63,17 @@ async function handleApi(req, res) {
   if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
+  if (u === '/api/governance') {
+    try {
+      const repoScope = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'repo-scope.json'), 'utf8'));
+      const globalHooks = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'global-standards.json'), 'utf8'));
+      return jsonRes(res, 200, { enabled: repoScope.default_enabled, repoScope, hooks: globalHooks.hooks });
+    } catch (e) {
+      return jsonRes(res, 500, { error: 'governance state unavailable', detail: e.message });
+    }
+  }
   if (u.startsWith('/api/fleet-health')) { const { readLog } = require('./fleet-health-log'); return jsonRes(res, 200, readLog(100)); }
   jsonRes(res, 404, { error: 'not found' });
 }
 
-const WIKI_DIR = path.join(ROOT, 'wiki');
-const WIKI_CATS = ['entities', 'concepts', 'sources', 'syntheses'];
-
-function getWikiHealth() {
-  let pages = 0; const broken = []; const orphans = [];
-  const fmIssues = []; const idxIssues = []; const allSlugs = new Set();
-  const inbound = new Set(); const linkGraph = {};
-  for (const d of WIKI_CATS) {
-    const dp = path.join(WIKI_DIR, d);
-    if (!fs.existsSync(dp)) continue;
-    for (const f of fs.readdirSync(dp).filter(x => x.endsWith('.md'))) {
-      const slug = f.replace('.md', ''); allSlugs.add(slug); pages++;
-      const content = fs.readFileSync(path.join(dp, f), 'utf-8');
-      const links = [...content.matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
-      linkGraph[slug] = links;
-      links.forEach(l => inbound.add(l));
-      if (!content.startsWith('---')) fmIssues.push(slug);
-    }
-  }
-  for (const [slug, links] of Object.entries(linkGraph))
-    links.forEach(l => { if (!allSlugs.has(l)) broken.push(`${slug}→${l}`); });
-  for (const s of allSlugs) if (!inbound.has(s)) orphans.push(s);
-  const idxPath = path.join(WIKI_DIR, 'index.md');
-  const idx = fs.existsSync(idxPath) ? fs.readFileSync(idxPath, 'utf-8') : '';
-  for (const s of allSlugs) if (!idx.includes(`[[${s}]]`)) idxIssues.push(s);
-  return { loaded: true, pages, dirs: WIKI_CATS.length,
-    issues: broken.length + orphans.length + fmIssues.length + idxIssues.length,
-    broken, orphans, frontmatter: fmIssues, indexSync: idxIssues,
-    lastCheck: new Date().toISOString() };
-}
-function getWikiPages() { return require('./wiki-pages-api')(WIKI_DIR, WIKI_CATS); }
 http.createServer((req,res)=>{ const p=req.url.split('?')[0]; if(p.startsWith('/api/')) return handleApi(req,res); serveStatic(req,res); }).listen(PORT,()=>{ console.log(`Dashboard: http://localhost:${PORT} Fleet: ${Object.keys(FLEET).join(', ')}`); try { require('./fleet-health-log').startMonitor(); } catch(e) { console.error('Fleet health monitor:', e.message); } });

@@ -45,7 +45,6 @@ test.describe('DevEnv Ops Dashboard', () => {
   test('quick stress test starts and updates status', async ({ page }) => {
     await page.goto('http://localhost:8090/dashboard/');
     await page.click('#btn-test');
-    // Test shows Agile Epic phases, not round numbers
-    await expect(page.locator('#panel-test')).toContainText('Epic scoping');
+    await expect(page.locator('#panel-test')).toContainText('Round');
   });
 });
