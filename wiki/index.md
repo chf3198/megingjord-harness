@@ -29,6 +29,7 @@ The LLM updates this on every ingest operation.
 - [[context-flow]] — LLM Context Flow Through Fleet
 - [[model-routing]] — AUTO Selection & Fleet Distribution
 - [[github-integration]] — GitHub API Integration & Dashboard Monitoring
+- [[linting-governance]] — Global Linting Governance
 
 ## Source Summaries
 
@@ -56,6 +57,9 @@ The LLM updates this on every ingest operation.
 - [[workflow-design]] — Development Workflow Design
 - [[workflow-diagrams]] — Workflow Diagrams
 - [[copilot-hooks-api]] — Copilot Chat Hooks API Research
+- [[linting-governance-rationale]] — Linting Governance: Rationale and Scope
+- [[linting-governance-tooling]] — Linting Governance: Tooling and Config
+- [[linting-governance-rollout]] — Linting Governance: Adoption and Rollout
 
 ## Syntheses
 
@@ -63,4 +67,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 39 | **Last updated**: 2026-07-13
+**Pages**: 43 | **Last updated**: 2026-07-15
