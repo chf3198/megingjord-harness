@@ -33,6 +33,7 @@ function dashboardApp() {
       await this.loadInventory();
       await this.refreshAll();
       this.scheduleRefresh();
+      if (typeof connectSSE === 'function') connectSSE(this);
       this.lastRefresh = new Date().toLocaleTimeString();
       addActivity(this.activityLog, 'system', 'Dashboard initialized',
         `${this.devices.length} devices loaded`);

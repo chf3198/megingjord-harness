@@ -55,6 +55,7 @@ async function handleApi(req, res) {
   if (u === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
   if (u === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
+  if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
   jsonRes(res, 404, { error: 'not found' });
