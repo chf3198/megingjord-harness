@@ -6,8 +6,8 @@ const FLEET = {'penguin-1':'http://100.86.248.35:11434','windows-laptop':'http:/
 const OPENCLAW = 'http://100.78.22.13:4000';
 
 function serveStatic(req, res) {
-  if (req.url === '/') { res.writeHead(302,{Location:'/dashboard/'}); res.end(); return; }
-  let fp=path.join(ROOT,req.url); if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
+  const url = req.url === '/' ? '/dashboard/' : req.url;
+  let fp=path.join(ROOT,url); if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
   if(fs.existsSync(fp)&&fs.statSync(fp).isDirectory()&&!req.url.endsWith('/')){res.writeHead(302,{Location:req.url+'/'});res.end();return;}
   if(fp.endsWith('/')||fp.endsWith(path.sep)) fp=path.join(fp,'index.html');
   const ext=path.extname(fp); fs.readFile(fp,(err,data)=>{ if(err){res.writeHead(404);res.end('Not found');return;} res.writeHead(200,{'Content-Type':MIME[ext]||'application/octet-stream','Cache-Control':'no-cache'}); res.end(data); });
