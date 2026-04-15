@@ -15,7 +15,7 @@ const FLEET = {
   'windows-laptop': { url: 'http://100.78.22.13:11434', type: 'ollama' },
 };
 const OPENCLAW = {
-  'windows-laptop': { url: 'http://100.78.22.13:4000/health' }
+  'windows-laptop': { url: 'http://100.78.22.13:4000/health/liveliness' }
 };
 
 function logEntry(device, status, detail) {
