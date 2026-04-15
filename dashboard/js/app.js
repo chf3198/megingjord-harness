@@ -14,12 +14,12 @@ function dashboardApp() {
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
-    activeTip: '', loading: false, lastRefresh: 'never',
+    activeTip: '', loading: false, lastRefresh: 'initializing…',
 
     get overallStatus() {
-      if (!this.devices.length) return 'loading';
+      if (!this.devices.length) return 'initializing';
       const checked = this.devices.filter(d => d.status !== 'unknown');
-      if (!checked.length) return 'loading';
+      if (!checked.length) return 'initializing';
       if (checked.every(d => d.status === 'healthy')) return 'healthy';
       return 'degraded';
     },

@@ -2,7 +2,10 @@
 
 function renderWikiPanel(wikiHealth) {
   if (!wikiHealth || !wikiHealth.loaded) {
-    return '<div class="wiki-empty">Wiki health loading…</div>';
+    return `<div class="wiki-empty">
+      <span style="font-size:1.2rem">📚</span>
+      Scanning wiki pages…
+      <span style="font-size:0.72rem">(runs each refresh cycle)</span></div>`;
   }
   const h = wikiHealth;
   const ok = h.issues === 0;

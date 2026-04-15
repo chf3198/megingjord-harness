@@ -9,8 +9,9 @@
 }
 
 .topo-svg { width: 100%; height: auto; max-height: 100px; }
-.topo-node { cursor: default; transition: stroke-width 0.2s; }
-.topo-node:hover { stroke-width: 3.5; }
+.topo-node { cursor: pointer; transition: stroke-width 0.2s, filter 0.2s; }
+.topo-node:hover { stroke-width: 3.5; filter: brightness(1.2); }
+.topo-node:focus { outline: none; stroke: var(--blue); stroke-width: 3; }
 .topo-empty { color: var(--text-muted); font-style: italic; padding: 0.3rem; }
 
 .topo-legend {
@@ -44,7 +45,10 @@
   display: flex; align-items: center; gap: 0.35rem;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.8rem;
+  transition: border-color 0.15s;
 }
+
+.res-card:hover { border-color: var(--blue); }
 
 .resource-icon { font-size: 0.9rem; }
 .res-detail { color: var(--text-muted); font-size: 0.72rem; margin-left: auto; }

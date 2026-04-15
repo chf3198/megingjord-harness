@@ -36,6 +36,7 @@
     font-size: 0.8rem; color: var(--text-muted);
     padding: 0.15rem 0; display: flex; justify-content: space-between;
 }
+.model-list li strong { color: var(--text); font-weight: 600; }
 .model-list li .active-dot { color: var(--green); margin-right: 0.3rem; }
 .stat-offline { color: var(--text-muted); font-style: italic; font-size: 0.85rem; }
 
@@ -49,6 +50,7 @@
 }
 .quota-cost a { color: var(--blue); text-decoration: none; font-weight: 600; display: block; }
 .quota-cost a:hover { text-decoration: underline; }
+.quota-cost a:focus-visible { box-shadow: var(--focus-ring); border-radius: 4px; }
 .quota-price { display: block; font-size: 1.1rem; font-weight: 700; color: var(--text); }
 .quota-detail { font-size: 0.65rem; color: var(--text-muted); }
 .quota-ext { color: var(--blue); text-decoration: none; font-size: 0.65rem; margin-left: 0.2rem; }

@@ -1,22 +1,19 @@
 /* Header nav + responsive + tooltips */
 
-.header-nav {
-  display: flex;
-  gap: 0.25rem;
-}
+.header-nav { display: flex; gap: 0.25rem; }
 
 .header-nav button {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.82rem;
-  cursor: pointer;
-  white-space: nowrap;
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 0.2rem 0.6rem; font-size: 0.82rem;
+  cursor: pointer; white-space: nowrap;
 }
 
-.header-nav button:hover { border-color: var(--blue); }
+.header-nav button:hover {
+  border-color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 10%, var(--surface));
+}
+.header-nav button:focus-visible { box-shadow: var(--focus-ring); }
 .header-nav button.active { border-color: var(--blue); color: var(--blue); }
 
 .panel {
@@ -27,14 +24,9 @@
 .panel.full-width { grid-column: 1 / -1; }
 
 .app-tip {
-  position: fixed;
-  z-index: 1000;
-  width: 220px;
-  background: var(--surface);
-  border: 1px solid var(--blue);
-  border-radius: 8px;
-  padding: 0.4rem 0.5rem;
-  pointer-events: auto;
+  position: fixed; z-index: 1000; width: 220px;
+  background: var(--surface); border: 1px solid var(--blue);
+  border-radius: 8px; padding: 0.4rem 0.5rem; pointer-events: auto;
 }
 
 .app-tip p { color: var(--text-muted); margin: 0.15rem 0; font-size: 0.75rem; }
@@ -60,7 +52,11 @@
   cursor: pointer; font-weight: 600; font-size: 0.85rem;
   padding: 0.3rem 0.4rem; border-radius: 6px;
   background: var(--surface); border: 1px solid var(--border);
-  list-style: none;
+  list-style: none; transition: border-color 0.15s;
+}
+
+.help-section summary:hover {
+  border-color: var(--blue); background: color-mix(in srgb, var(--blue) 6%, var(--surface));
 }
 
 .help-section summary::before { content: '▸ '; color: var(--blue); }
@@ -74,18 +70,17 @@
 }
 
 /* Help toolbar + service links */
-.help-toolbar {
-  display: flex; gap: 0.4rem; margin-bottom: 0.5rem; align-items: center;
-}
+.help-toolbar { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; align-items: center; }
 .help-toolbar .help-search { flex: 1; margin-bottom: 0; }
 .help-toggle {
   background: var(--surface); color: var(--text); border: 1px solid var(--border);
-  border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.78rem;
-  cursor: pointer; white-space: nowrap;
+  border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.78rem; cursor: pointer; white-space: nowrap;
 }
 .help-toggle:hover { border-color: var(--blue); color: var(--blue); }
+.help-toggle:focus-visible { box-shadow: var(--focus-ring); }
 .svc-link { color: var(--blue); font-size: 0.78rem; text-decoration: none; }
 .svc-link:hover { text-decoration: underline; }
+.svc-link:focus-visible { box-shadow: var(--focus-ring); border-radius: 2px; }
 .help-cat-title { font-size: 0.88rem; color: var(--blue); margin: 0.5rem 0 0.25rem; }
 .help-category:first-child .help-cat-title { margin-top: 0; }
 .help-feedback { display: flex; gap: 1rem; padding: 0.5rem 0; }
@@ -94,7 +89,8 @@
   .header { flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0.75rem; }
   .header-brand h1 { font-size: 0.95rem; }
   .header-nav, .header-actions { flex-wrap: wrap; }
+  .header-nav button { min-height: 44px; min-width: 44px; padding: 0.4rem 0.6rem; font-size: 0.82rem; }
   .header-actions { gap: 0.3rem; }
-  .header-actions button { padding: 0.25rem 0.4rem; font-size: 0.78rem; }
+  .header-actions button { min-height: 44px; min-width: 44px; padding: 0.4rem; font-size: 0.95rem; }
   .dashboard-grid { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.5rem; }
 }

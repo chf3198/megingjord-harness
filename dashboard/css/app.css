@@ -3,11 +3,14 @@
 
 :root {
   --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --text: #e6edf3; --text-muted: #8b949e;
+  --text: #e6edf3; --text-muted: #9ca3af;
   --green: #3fb950; --yellow: #d29922; --red: #f85149; --blue: #58a6ff;
+  --focus-ring: 0 0 0 2px var(--blue);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
 [x-cloak] { display: none !important; }
 
@@ -47,10 +50,13 @@ body {
   border-radius: 6px; cursor: pointer; font-size: 0.85rem;
 }
 
-.header-actions button:hover { border-color: var(--blue); }
+.header-actions button:hover {
+  border-color: var(--blue); color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+}
 
 .header-actions button:focus-visible {
-  outline: 2px solid var(--blue); outline-offset: 2px;
+  outline: none; box-shadow: var(--focus-ring);
 }
 
 .dashboard-grid {
@@ -73,5 +79,6 @@ body {
 
 body.high-contrast {
   --bg: #000; --surface: #111; --border: #fff;
-  --text: #fff; --text-muted: #ddd; --blue: #86d3ff;
+  --text: #fff; --text-muted: #e5e7eb; --blue: #86d3ff;
+  --green: #4ade80; --yellow: #facc15;
 }
