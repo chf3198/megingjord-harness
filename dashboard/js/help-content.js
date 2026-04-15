@@ -20,7 +20,7 @@ function renderHelpPanel(devMode) {
       placeholder="Search help…"
       oninput="filterHelpSections(this.value)"/>
     <button class="help-toggle"
-      onclick="document.querySelector('[x-data]').__x.$data.toggleHelpDevMode()">
+      onclick="Alpine.$data(document.querySelector('[x-data]')).toggleHelpDevMode()">
       ${toggleLabel}</button></div>`;
 
   const cats = devMode

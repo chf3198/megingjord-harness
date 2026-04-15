@@ -8,14 +8,14 @@ applyTo: "dashboard/**"
 
 - **HTML**: Semantic, accessible, no framework
 - **CSS**: Vanilla CSS, mobile-first responsive
-- **JS**: Alpine.js for reactive state, ES modules for logic
+- **JS**: Alpine.js for reactive state, plain `<script>` tags for logic (global scope)
 - **No build step**: Files served as-is
 
 ## Patterns
 
 - Dashboard state in `app.js` via `dashboardApp()` Alpine component
-- Each monitor module exports pure check functions
-- API configs in `dashboard/api/config.js`
+- Each monitor module exports pure render/check functions (global scope)
+- Config stored in localStorage via `config-panel.js`
 - Health checks return `{ status, message, timestamp }` objects
 
 ## File Size
@@ -29,4 +29,4 @@ applyTo: "dashboard/**"
 
 - CSS custom properties for theming (dark mode default)
 - Grid/flexbox for layout
-- Status colors: green (#22c55e), yellow (#eab308), red (#ef4444)
+- Status colors: green (#3fb950), yellow (#d29922), red (#f85149), blue (#58a6ff)

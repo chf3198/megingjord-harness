@@ -30,7 +30,7 @@ function renderWikiPanel(wikiHealth) {
     ${stats}
     <div class="wiki-issues">${issues}</div>
     <div class="wiki-actions">
-      <button class="wiki-view-btn" onclick="document.querySelector('[x-data]').__x.$data.setView('wiki')">📖 View Wiki</button>
+      <button class="wiki-view-btn" onclick="Alpine.$data(document.querySelector('[x-data]')).setView('wiki')">📖 View Wiki</button>
       <span class="wiki-ts">🕐 ${esc(ts)}</span>
     </div>
   </div>`;
