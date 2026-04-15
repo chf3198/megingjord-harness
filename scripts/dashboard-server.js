@@ -5,11 +5,12 @@ const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.js
 const FLEET = {'penguin-1':'http://100.86.248.35:11434','windows-laptop':'http://100.78.22.13:11434'};
 const OPENCLAW = 'http://100.78.22.13:4000';
 
+const DASH = path.join(ROOT, 'dashboard');
 function serveStatic(req, res) {
-  const raw = req.url.split('?')[0];
-  const pathname = raw === '/' ? '/dashboard/' : raw;
-  let fp=path.join(ROOT,pathname); if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
-  if(fs.existsSync(fp)&&fs.statSync(fp).isDirectory()&&!pathname.endsWith('/')){res.writeHead(302,{Location:pathname+'/'});res.end();return;}
+  const pn = req.url.split('?')[0];
+  let fp = pn.startsWith('/dashboard/') ? path.join(ROOT, pn) : path.join(DASH, pn);
+  if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
+  if(fs.existsSync(fp)&&fs.statSync(fp).isDirectory()&&!pn.endsWith('/')){res.writeHead(302,{Location:pn+'/'});res.end();return;}
   if(fp.endsWith('/')||fp.endsWith(path.sep)) fp=path.join(fp,'index.html');
   const ext=path.extname(fp); fs.readFile(fp,(err,data)=>{ if(err){res.writeHead(404);res.end('Not found');return;} res.writeHead(200,{'Content-Type':MIME[ext]||'application/octet-stream','Cache-Control':'no-cache'}); res.end(data); });
 }
@@ -95,6 +96,5 @@ function getWikiHealth() {
     broken, orphans, frontmatter: fmIssues, indexSync: idxIssues,
     lastCheck: new Date().toISOString() };
 }
-
 function getWikiPages() { return require('./wiki-pages-api')(WIKI_DIR, WIKI_CATS); }
 http.createServer((req,res)=>{ const p=req.url.split('?')[0]; if(p.startsWith('/api/')) return handleApi(req,res); serveStatic(req,res); }).listen(PORT,()=>{ console.log(`Dashboard: http://localhost:${PORT} Fleet: ${Object.keys(FLEET).join(', ')}`); try { require('./fleet-health-log').startMonitor(); } catch(e) { console.error('Fleet health monitor:', e.message); } });
