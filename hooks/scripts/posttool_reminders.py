@@ -11,6 +11,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from admin_patterns import RE_GIT_COMMIT, RE_GIT_PUSH, iter_strings
 from governance_state import ensure_state, mark_tool_activity, save_state
+from wiki_wisdom import governance_enforcement, post_merge_checklist
 
 DOC_TRIGGER_RE = re.compile(
     r"(^|/)(README\.md|CHANGELOG\.md|docs/|\.github/workflows/|"
@@ -44,10 +45,7 @@ def main() -> int:
     messages = []
 
     if any(DOC_TRIGGER_RE.search(v) for v in values):
-        messages.append(
-            "Standards reminder: validate version integrity, run checks, "
-            "audit artifacts for secrets, sync docs to changes."
-        )
+        messages.append(governance_enforcement())
     if any(CODE_TRIGGER_RE.search(v) for v in values):
         messages.append(
             "Doc coverage matrix: root README, extension README, "
@@ -56,10 +54,7 @@ def main() -> int:
 
     if tool in {"run_in_terminal", "terminal", "runTerminalCommand"}:
         if RE_GIT_PUSH.search(joined):
-            messages.append(
-                "Pre-push gate: run docs-integrity-check.sh and verify "
-                "badge + CI + CONTRIBUTING + PR template match test output."
-            )
+            messages.append(post_merge_checklist())
         elif RE_GIT_COMMIT.search(joined):
             messages.append(
                 "Post-commit: if behavior/config changed, update docs "

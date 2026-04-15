@@ -36,7 +36,7 @@ function handleSSEvent(app, event) {
     const a = eventToActivity(data);
     addActivity(app.activityLog, a.type, a.message, a.detail);
     if (data.role && data.issue) {
-      app.batonState = batonFromEvents([data]) || app.batonState;
+      app.batonState = mergeBatonEvents([data]);
     }
   } catch { /* skip malformed */ }
 }

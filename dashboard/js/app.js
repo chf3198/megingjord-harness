@@ -57,7 +57,7 @@ function dashboardApp() {
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
         this.routerStats = rs;
-        this.batonState = evBaton || buildBatonState(getRouterLog());
+        this.batonState = evBaton.length ? evBaton : buildBatonState(getRouterLog());
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
         if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
