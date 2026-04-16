@@ -5,6 +5,7 @@ const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.js
 const FLEET = {'penguin-1':'http://100.86.248.35:11434','windows-laptop':'http://100.78.22.13:11434'};
 const OPENCLAW = 'http://100.78.22.13:4000';
 const { getWikiHealth, getWikiPages } = require('./dashboard-wiki');
+const { recordAccess, getWikiMetrics } = require('./wiki-metrics');
 
 const DASH = path.join(ROOT, 'dashboard');
 function serveStatic(req, res) {
@@ -60,6 +61,11 @@ async function handleApi(req, res) {
   if (u === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
   if (u === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
   if (u === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
+  if (u === '/api/wiki-metrics') { const h = getWikiHealth(); return jsonRes(res, 200, getWikiMetrics(h)); }
+  if (u.startsWith('/api/wiki-access')) {
+    const p = new URL(req.url, 'http://x'); const sec = p.searchParams.get('section'); const sl = p.searchParams.get('slug');
+    recordAccess(sec, sl); return jsonRes(res, 200, { ok: true });
+  }
   if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }

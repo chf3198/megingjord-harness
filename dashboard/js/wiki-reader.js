@@ -31,13 +31,15 @@ function renderWikiReader(pages) {
     const label = typeLabel[cat] || `📁 ${cat}`;
     const items = files.map(f => {
       const name = esc(f.title || f.slug);
-      return `<li class="wiki-link">${name}
+      const slug = f.slug || '';
+      const onclick = `trackWikiAccess('${esc(cat)}','${esc(slug)}')`;
+      return `<li class="wiki-link" onclick="${onclick}">${name}
         <small class="wiki-tags">${(f.tags || []).map(
         t => '<span class="wiki-tag">' + esc(t) + '</span>'
       ).join('')}</small></li>`;
     }).join('');
     return `<details class="wiki-section" open>
-      <summary>${label} (${files.length})</summary>
+      <summary onclick="trackWikiAccess('${esc(cat)}','')">${label} (${files.length})</summary>
       <ul class="wiki-list">${items}</ul></details>`;
   }).join('');
   const total = pages.length;
