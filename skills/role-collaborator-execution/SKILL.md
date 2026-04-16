@@ -43,6 +43,15 @@ Before implementing, verify Manager's scope:
 - Do not declare complete at exit; "all gates pass" = validated, not released.
 - Any scope drift is explicitly flagged for manager re-handoff.
 
+## Multi-ticket TODO model
+
+When multiple tickets are in `status:todo`, the Collaborator:
+- Holds ALL of them in TODO simultaneously (visible in baton map).
+- Keeps **exactly one** in `status:in-progress` at a time.
+- Completes and emits `COLLABORATOR_HANDOFF` before pulling the next ticket to `in-progress`.
+
+This prevents context bleed and ensures clean per-ticket evidence trails.
+
 ## Ticket baton protocol
 
 1. Write comment: `## 🔧 Collaborator — Validation Evidence (<persona>, #N)`.

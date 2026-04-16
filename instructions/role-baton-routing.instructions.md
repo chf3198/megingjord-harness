@@ -8,19 +8,37 @@ applyTo: "**"
 
 The GitHub issue **is** the baton. Execute every task through a single active role at a time. Each role writes a structured comment on the ticket and transitions the status label.
 
-## Status workflow
+## Status workflow (v0.2 — 8-status canonical model)
 
 ```
-status:backlog → status:ready → status:in-progress → status:review → status:done
-  (create)        (Manager)       (Collaborator)       (Admin)         (Consultant)
+Status            Role Binding     Gate Condition
+─────────────────────────────────────────────────
+backlog           (none)           Triaged; not yet assigned to Manager
+todo              manager          Manager claimed; scope being defined
+in-progress       collaborator     MANAGER_HANDOFF emitted; implementation active
+ready-for-testing admin            COLLABORATOR_HANDOFF emitted; CI pre-check needed
+testing           admin            Admin running gates/CI
+passed-testing    admin            All gates green; merge complete
+done              consultant       ADMIN_HANDOFF emitted; critique + closeout
+cancelled         (none)           Abandoned at any stage; reason note required
 ```
+
+Transition guards:
+- `backlog → todo`: Manager creates/links issue, writes scope comment.
+- `todo → in-progress`: MANAGER_HANDOFF emitted with testable ACs.
+- `in-progress → ready-for-testing`: COLLABORATOR_HANDOFF emitted; all ACs ✅.
+- `ready-for-testing → testing`: Admin begins gate verification.
+- `testing → passed-testing`: All gates pass; merge executed.
+- `passed-testing → done`: ADMIN_HANDOFF emitted; Consultant starts.
+- `done → (closed)`: CONSULTANT_CLOSEOUT emitted; issue closed.
+- `any → cancelled`: Manager authority only; reason comment required.
 
 ## Sequence
 
-1. **Manager**: scope, AC, gates → create/link issue → set `status:ready`, `role:manager` → emit `MANAGER_HANDOFF` → swap to `role:collaborator`.
-2. **Collaborator**: implement + validate → set `status:in-progress` → emit `COLLABORATOR_HANDOFF` → swap to `role:admin`.
-3. **Admin**: commit/PR/merge ops → set `status:review` → emit `ADMIN_HANDOFF` → swap to `role:consultant`.
-4. **Consultant**: critique + CLOSEOUT → set `status:done`, remove `role:*` labels, close issue → emit `CONSULTANT_CLOSEOUT`.
+1. **Manager**: scope, AC, gates → create/link issue → set `status:todo`, `role:manager` → emit `MANAGER_HANDOFF` → swap to `role:collaborator`.
+2. **Collaborator**: implement + validate → `status:in-progress` → `status:ready-for-testing` → emit `COLLABORATOR_HANDOFF` → swap to `role:admin`.
+3. **Admin**: run gates/merge → `status:testing` → `status:passed-testing` → emit `ADMIN_HANDOFF` → swap to `role:consultant`.
+4. **Consultant**: critique + CLOSEOUT → `status:done` → remove `role:*` labels → close issue → emit `CONSULTANT_CLOSEOUT`.
 
 ## Hard rules
 

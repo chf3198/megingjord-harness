@@ -19,9 +19,21 @@ applyTo: "**"
 | Doc | Documentation | `type:doc` |
 | Research | Investigation/spike | `type:research` |
 
-## Label taxonomy
+## Label taxonomy (v0.2 — 8-status canonical)
 
-- **Status**: `status:backlog` → `status:ready` → `status:in-progress` → `status:review` → `status:done`
+Status labels and their role bindings + gate conditions:
+
+| Status | Role Binding | Gate Condition |
+|---|---|---|
+| `status:backlog` | (none) | Triaged; inactive; not yet assigned |
+| `status:todo` | `role:manager` | Manager claimed; scope definition active |
+| `status:in-progress` | `role:collaborator` | MANAGER_HANDOFF emitted; implementing |
+| `status:ready-for-testing` | `role:admin` | COLLABORATOR_HANDOFF emitted; all ACs ✅ |
+| `status:testing` | `role:admin` | Admin running CI/gate verification |
+| `status:passed-testing` | `role:admin` | Gates green; merge complete |
+| `status:done` | `role:consultant` | ADMIN_HANDOFF emitted; critique active |
+| `status:cancelled` | (none) | Abandoned; Manager authority; reason required |
+
 - **Priority**: `priority:P1` (urgent) · `priority:P2` (normal) · `priority:P3` (low)
 - **Area**: `area:dashboard` · `area:hooks` · `area:skills` · `area:instructions` · `area:agents` · `area:scripts` · `area:infra`
 - **Role** (current baton holder): `role:manager` · `role:collaborator` · `role:admin` · `role:consultant`

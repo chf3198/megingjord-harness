@@ -2,11 +2,14 @@
 // Separate from Agent Baton which shows only active-baton tickets
 
 const STATUS_META = {
-  backlog:      { icon: '📋', cls: 'tl-backlog' },
-  'in-progress':{ icon: '🔄', cls: 'tl-active'  },
-  closed:       { icon: '✅', cls: 'tl-closed'  },
-  cancelled:    { icon: '🚫', cls: 'tl-cancelled'},
-  done:         { icon: '✅', cls: 'tl-closed'  },
+  backlog:             { icon: '📋', cls: 'tl-backlog'          },
+  todo:                { icon: '🎯', cls: 'tl-todo'             },
+  'in-progress':       { icon: '🔄', cls: 'tl-active'           },
+  'ready-for-testing': { icon: '📤', cls: 'tl-ready-for-testing'},
+  testing:             { icon: '🧪', cls: 'tl-testing'          },
+  'passed-testing':    { icon: '✔️', cls: 'tl-passed-testing'   },
+  done:                { icon: '✅', cls: 'tl-done'             },
+  cancelled:           { icon: '🚫', cls: 'tl-cancelled'        },
 };
 
 function renderTicketLog(tickets) {
@@ -14,14 +17,14 @@ function renderTicketLog(tickets) {
     return `<div class="tlog-empty">📋 No ticket history yet.<br>
       <span style="font-size:0.75rem">Tickets appear once events are emitted.</span></div>`;
   }
-  const open = tickets.filter(t => !['closed','cancelled','done'].includes(t.status));
-  const closed = tickets.filter(t =>  ['closed','cancelled','done'].includes(t.status));
+  const open = tickets.filter(t => !['done','cancelled'].includes(t.status));
+  const closed = tickets.filter(t =>  ['done','cancelled'].includes(t.status));
   let html = '';
   if (open.length) html += renderTicketSection('Active / Backlog', open);
   if (closed.length) html += `<details class="tlog-closed-group" open>
     <summary>📁 ${closed.length} closed / cancelled</summary>
     ${renderTicketSection(null, closed)}
-  </details>`;
+  </details>`; // done = closed successfully; cancelled = abandoned
   return `<div class="tlog-wrap">${html}</div>`;
 }
 

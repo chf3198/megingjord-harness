@@ -36,10 +36,21 @@ disable-model-invocation: false
 ## Ticket baton protocol (CLOSEOUT)
 
 1. Write CLOSEOUT: `## 🔍 Consultant — CLOSEOUT (Quinn Critic, #N)` with grades, risks, follow-ups.
-2. Transition labels: `status:in-review` → `status:done`, remove `role:*`.
+2. Transition labels: `status:passed-testing` → `status:done`, remove `role:*`.
 3. **Audit**: Verify each role posted a structured comment (Manager scope, Collaborator evidence, Admin ops).
 4. **Emit event**: `emit-event.js --type baton:consultant --issue N --role consultant --agent "Quinn Critic"`.
-3. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
+5. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
+
+## Reject criteria (governance failures only)
+
+Consultant MAY reject (revert to Collaborator) **only** when:
+- A required handoff artifact (MANAGER_HANDOFF / COLLABORATOR_HANDOFF / ADMIN_HANDOFF) is absent.
+- ACs were not checked ✅ with evidence before handoff.
+- Admin merged before CI was green (verifiable via PR checks).
+
+**Consultant must NOT reject** for: solution quality disagreements, style preferences, or scope additions not in original ACs. Those become `recommended_follow_ups` items.
+
+**Before rejecting**: Post a comment enumerating exactly which governance rule was violated and which artifact/evidence is missing.
 
 ## Entry criteria
 

@@ -24,10 +24,20 @@ Before merging/deploying, verify:
 
 ## Ticket baton protocol
 
-1. Transition labels: `status:in-progress` → `status:in-review`, confirm `role:admin`.
-2. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)`.
-3. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`.
-4. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
+1. Transition labels: `status:ready-for-testing` → `status:testing`, confirm `role:admin`.
+2. After merge: transition `status:testing` → `status:passed-testing`.
+3. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)`.
+4. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`, set `status:passed-testing`.
+5. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
+
+## PASSED-TESTING gate
+
+`status:passed-testing` means the merge is **already complete**. Admin sets this status only after:
+- All CI gates green.
+- PR merged via `gh pr merge --squash --delete-branch`.
+- Post-merge event emitted.
+
+Do not set `passed-testing` before merge. Consultant receives the baton only after merge is confirmed.
 
 ## Review-failed flow
 
