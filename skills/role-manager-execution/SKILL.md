@@ -64,10 +64,17 @@ Before emitting `MANAGER_HANDOFF`, the Manager **must**:
 
 - If scope expands materially, regenerate `MANAGER_HANDOFF` before collaborator work continues.
 
-## Required integrations
+## BACKLOG vs TODO distinction
 
-- Route standards with `repo-standards-router`.
-- Use `workflow-self-anneal` only if post-failure/process drift applies.
+- **BACKLOG** (`status:backlog`): Ticket exists but Manager has NOT claimed it. Inactive-open. No role binding. Used for triage queue.
+- **TODO** (`status:todo`): Manager has claimed and is actively defining scope. Role binding = `role:manager`.
+
+Set `status:todo` (not `status:backlog`) when beginning a new Manager cycle.
+
+## Cancellation authority
+
+Manager is the **only role** that may cancel a ticket. Applies at **any status**.
+Required: post a comment with cancellation reason before setting `status:cancelled` and removing all role labels.
 
 ## Output contract
 

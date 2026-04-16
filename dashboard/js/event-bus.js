@@ -6,7 +6,12 @@ let _lastEventTs = null;
 const _batonTickets = {};   // issue → ticket (active baton only)
 const _batonHistory = {};   // issue → [{role, ts}] for timeline
 const _ticketLog = {};      // issue → ticket (all, including closed)
-const CLOSED_STATUSES = new Set(['closed', 'cancelled', 'done']);
+const CLOSED_STATUSES = new Set(['done', 'cancelled']);
+const STATUS_ROLE_MAP = {
+  backlog: null, todo: 'manager', 'in-progress': 'collaborator',
+  'ready-for-testing': 'admin', testing: 'admin',
+  'passed-testing': 'admin', done: 'consultant', cancelled: null,
+};
 
 async function fetchEvents(since) {
   const url = since
