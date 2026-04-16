@@ -11,19 +11,14 @@ const BATON_ROLES = [
 function renderBatonFlow(batonState) {
   const tickets = normalizeBaton(batonState);
   if (!tickets.length) {
-    return `<div class="baton-flow"><div class="baton-empty">
-      🎯 No active tickets
-      <span style="font-size:0.72rem;display:block;margin-top:0.2rem">
-      Baton activates when issues are assigned</span></div></div>`;
+    return `<div class="baton-flow"><div class="baton-empty">🎯 No active tickets<br>
+      <small>Baton activates when issues are assigned to a role.</small></div></div>`;
   }
-  const active = tickets.filter(t => t.status !== 'done');
-  const done = tickets.filter(t => t.status === 'done');
-  let html = active.map(renderBatonRow).join('');
-  if (done.length) {
-    html += `<details class="baton-done-group"><summary>
-      ✅ ${done.length} completed</summary>
-      ${done.map(renderBatonRow).join('')}</details>`;
-  }
+  const active = tickets.filter(t =>
+    !['done','cancelled'].includes(t.status));
+  const html = active.length
+    ? active.map(renderBatonRow).join('')
+    : `<div class="baton-empty">✅ All active tickets completed — see Ticket Log</div>`;
   return `<div class="baton-flow">${html}</div>`;
 }
 
@@ -64,9 +59,7 @@ function renderBatonRow(t) {
 }
 
 function statusBadge(s) {
-  const m = { 'in-progress': 'active', ready: 'degraded',
-    done: 'healthy', idle: 'unknown', review: 'degraded' };
-  return m[s] || 'unknown';
+  return ({ 'in-progress': 'active', ready: 'degraded', done: 'healthy', idle: 'unknown', review: 'degraded' })[s] || 'unknown';
 }
 
 function normalizeBaton(state) {
@@ -80,21 +73,25 @@ function renderTimeline(issue) {
   const tl = typeof getTicketTimeline === 'function'
     ? getTicketTimeline(issue) : [];
   if (!tl.length) return '';
-  const items = tl.map(h => {
+  const roleDesc = {
+    manager: 'Manager: scope defined, ACs written',
+    collaborator: 'Collaborator: implementation + validation',
+    admin: 'Admin: CI gates run, PR merged',
+    consultant: 'Consultant: critique + CLOSEOUT'
+  };
+  const items = tl.map((h, i) => {
     const r = BATON_ROLES.find(x => x.id === h.role);
-    const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '';
-    return `<span class="tl-step">${r?.icon || '?'} ${t}</span>`;
-  }).join(' → ');
-  return `<div class="baton-timeline">${items}</div>`;
+    const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
+    const ttl = `${roleDesc[h.role] || h.role} \u2014 at ${t}`;
+    return `<span class="tl-step" title="${esc(ttl)}" data-tip="tl-step">`
+      + `${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;  }).join('');
+  return `<div class="baton-timeline" title="Baton handoff history">${items}</div>`;
 }
 
 function buildBatonState(routerLog) {
   if (!routerLog || !routerLog.length) return [];
   const last = routerLog[0];
   const roleMap = { router: 'manager', implementer: 'collaborator', quick: 'admin' };
-  return [{
-    activeRole: roleMap[last.agent] || 'manager',
-    issue: last.task?.match(/#(\d+)/)?.[1] || null,
-    status: 'in-progress'
-  }];
+  return [{ activeRole: roleMap[last.agent] || 'manager',
+    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress' }];
 }

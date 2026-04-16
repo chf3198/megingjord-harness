@@ -38,8 +38,9 @@ disable-model-invocation: false
 1. Write CLOSEOUT: `## 🔍 Consultant — CLOSEOUT (Quinn Critic, #N)` with grades, risks, follow-ups.
 2. Transition labels: `status:passed-testing` → `status:done`, remove `role:*`.
 3. **Audit**: Verify each role posted a structured comment (Manager scope, Collaborator evidence, Admin ops).
-4. **Emit event**: `emit-event.js --type baton:consultant --issue N --role consultant --agent "Quinn Critic"`.
-5. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
+4. Add 🎉 emoji reaction to the issue to celebrate closure.
+5. **Emit event**: `emit-event.js --type baton:consultant --issue N --role consultant --agent "Quinn Critic"`.
+6. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
 
 ## Reject criteria (governance failures only)
 

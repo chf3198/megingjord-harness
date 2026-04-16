@@ -47,37 +47,34 @@
         </div>
     </header>
     <main id="main-content" class="dashboard-grid">
-        <template x-if="isView('fleet')"><section id="panel-topology" class="panel" data-tip="topology">
-            <h2>🌐 Fleet Topology</h2><div x-html="renderFleetTopology(devices)"></div>
+        <template x-if="isView('fleet')"><section id="panel-baton" class="panel full-width" data-tip="baton">
+            <h2>🔄 Agent Baton <button class="shb" data-tip="baton" aria-label="Help: Agent Baton">?</button></h2><div x-html="renderBatonFlow(batonState)"></div>
         </section></template>
         <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">
-            <h2>🏥 Fleet Health Log</h2><div x-html="renderFleetHealthLog(fleetHealthLog)"></div>
-        </section></template>
-        <template x-if="isView('fleet')"><section id="panel-baton" class="panel" data-tip="baton">
-            <h2>🔄 Agent Baton</h2><div x-html="renderBatonFlow(batonState)"></div>
+            <h2>🏥 Fleet Health Log <button class="shb" data-tip="fleet-health" aria-label="Help: Fleet Health">?</button></h2><div x-html="renderFleetHealthLog(fleetHealthLog)"></div>
         </section></template>
         <template x-if="isView('fleet')"><section id="panel-activity" class="panel" data-tip="activity">
-            <h2>📡 Live Activity</h2><div x-html="renderActivityFeed(activityLog)"></div>
+            <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div>
         </section></template>
         <template x-if="isView('fleet')"><section id="panel-resources" class="panel" data-tip="resource-mon">
-            <h2>⚡ Resources</h2><div x-html="renderResourceMonitor(devices, services)"></div>
+            <h2>⚡ Resources <button class="shb" data-tip="resource-mon" aria-label="Help: Resources">?</button></h2><div x-html="renderResourceMonitor(devices, services)"></div>
         </section></template>
         <template x-if="isView('fleet')"><section id="panel-context-flow" class="panel" data-tip="context-flow">
-            <h2>🧠 Context Flow</h2><div x-html="renderContextFlow()"></div>
+            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div>
         </section></template>
         <section id="panel-llm-context" class="panel" x-show="isView('ops')" data-tip="llm-context">
-            <h2>📐 LLM Context Windows</h2><div x-html="renderLLMContext()"></div></section>
+            <h2>📐 LLM Context Windows <button class="shb" data-tip="llm-context" aria-label="Help">?</button></h2><div x-html="renderLLMContext()"></div></section>
         <section id="panel-github" class="panel" x-show="isView('ops')" data-tip="github">
-            <h2>🐙 GitHub Activity</h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
+            <h2>🐙 GitHub Activity <button class="shb" data-tip="github" aria-label="Help">?</button></h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
         <section id="panel-quotas" class="panel" x-show="isView('ops')" data-tip="quotas">
-            <h2>📊 Quotas</h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
+            <h2>📊 Quotas <button class="shb" data-tip="quotas" aria-label="Help">?</button></h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
         <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
-            <h2>🛣️ Task Router Lanes</h2><div x-html="renderRouterPanel(routerStats)"></div></section>
+            <h2>🛣️ Task Router Lanes <button class="shb" data-tip="router" aria-label="Help">?</button></h2><div x-html="renderRouterPanel(routerStats)"></div></section>
         <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
-            <h2>📋 LLM Router Log</h2><div x-html="renderRouterLog()"></div></section>
+            <h2>📋 LLM Router Log <button class="shb" data-tip="router-log" aria-label="Help">?</button></h2><div x-html="renderRouterLog()"></div></section>
         <section id="panel-governance" class="panel" x-show="isView('ops')" data-tip="governance">
-            <h2>🛡️ Governance Enforcement</h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
-        <section id="panel-ticket-log" class="panel" x-show="isView('ops')" data-tip="ticket-log"><h2>📋 Ticket Log</h2><div x-html="renderTicketLog(ticketLog)"></div></section>
+            <h2>🛡️ Governance <button class="shb" data-tip="governance" aria-label="Help">?</button></h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
+        <section id="panel-ticket-log" class="panel" x-show="isView('ops')" data-tip="ticket-log"><h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help">?</button></h2><div x-html="renderTicketLog(ticketLog)"></div></section>
         <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
             <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section>
         <section id="panel-test" class="panel" x-show="isView('ops')" data-tip="test-panel">

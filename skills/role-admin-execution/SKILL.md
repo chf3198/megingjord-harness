@@ -26,9 +26,13 @@ Before merging/deploying, verify:
 
 1. Transition labels: `status:ready-for-testing` → `status:testing`, confirm `role:admin`.
 2. After merge: transition `status:testing` → `status:passed-testing`.
-3. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)`.
-4. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`, set `status:passed-testing`.
-5. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
+3. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)` including:
+   - PR URL and merge SHA
+   - CI check results (pass/fail per check name)
+   - Any post-merge actions (release, deploy, label update)
+4. Add ✅ emoji reaction to the merged PR to signal Admin complete.
+5. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`, set `status:passed-testing`.
+6. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
 
 ## PASSED-TESTING gate
 
@@ -45,7 +49,7 @@ If AC verification fails: swap `status:in-review` → `status:review-failed`, sw
 
 ## Post-merge AC failure policy
 
-Never revert a merge. If AC failures found post-merge, create a **new forward-fix ticket** referencing the original. Close the original as-is.
+Never revert a merge. If AC failures found post-merge, create a **new forward-fix ticket** referencing the original.
 
 ## Entry criteria
 
@@ -62,39 +66,20 @@ Never revert a merge. If AC failures found post-merge, create a **new forward-fi
 - Do not re-scope implementation.
 - Do not skip required validation evidence.
 
----
-
 ## Merge verification checklist
 
 1. Branch matches `<type>/<issue#>-<slug>` convention.
 2. Collaborator pulled latest `main` before PR (no stale base).
 3. Commit messages reference `#N` (issue number).
-4. Research tickets: no merge needed — verify findings posted as comment.
+4. Research tickets: no merge — verify findings posted as comment.
 
 ## Feature completion steps (required for feature/bugfix)
 
-"All gates pass" = Collaborator done, NOT Admin done. Execute in order:
-
-1. **Commit** — `git add -A && git commit` with `Closes #N` and context
+Execute in order:
+1. **Commit** — `git add -A && git commit -m "... Closes #N"`
 2. **Push** — `git push -u origin <branch-name>`
-3. **PR** — `gh pr create` with `Closes #N`, gate evidence, labels
-4. **CI green** — `gh pr checks <PR> --watch`; fix failures before merge
+3. **PR** — `gh pr create` with `Closes #N`, evidence, labels
+4. **CI green** — `gh pr checks <PR> --watch`; fix before merge
 5. **Merge** — `gh pr merge --squash --delete-branch`
 6. **Event** — `emit-event.js '{"type":"pr:merged","ticket":"#N"}'`
-7. **Publish/release** — If applicable: build, publish, create GH release
-8. **Close issue** — `gh issue close N --comment "Released in vX.Y.Z"`
-
-**Feature is NOT complete until all steps are done, including event.**
-
----
-
-## Output contract
-
-```text
-ADMIN_HANDOFF
-operations_run:
-service_runtime_state:
-git_pr_release_state:
-governance_checks:
-exceptions_or_na:
-```
+7. **Close** — `gh issue close N --comment "Released in vX.Y.Z"`
