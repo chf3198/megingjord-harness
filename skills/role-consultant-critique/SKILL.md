@@ -35,7 +35,8 @@ disable-model-invocation: false
 
 ## Ticket baton protocol (CLOSEOUT)
 
-1. Write CLOSEOUT: `## 🔍 Consultant — CLOSEOUT (Quinn Critic, #N)` with grades, risks, follow-ups.
+1. Write CLOSEOUT — **first line**: `**🔍 Consultant [role-consultant-critique] — Quinn Critic**`
+   then: `## CLOSEOUT (#N)` with grades, risks, follow-ups.
 2. Transition labels: `status:passed-testing` → `status:done`, remove `role:*`.
 3. **Audit**: Verify each role posted a structured comment (Manager scope, Collaborator evidence, Admin ops).
 4. Add 🎉 emoji reaction to the issue to celebrate closure.

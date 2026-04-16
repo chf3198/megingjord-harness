@@ -60,11 +60,11 @@ function dashboardApp() {
         this.devices = mergeHealthStatus(this.devices, checks);
         this.fleetStats = stats;
         this.routerStats = rs;
-        this.batonState = evBaton.length ? evBaton : buildBatonState(getRouterLog());
-        this.ticketLog = getTicketLog();
-        if (lq.length) this.liveQuotas = lq;
+        this.ticketLog = getTicketLog(); if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
-        if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
+        if (typeof pollGitHub === 'function') { this.githubData = await pollGitHub();
+          if (this.githubData?.issues?.recent) pruneClosedFromGitHub(this.githubData.issues.recent); }
+        this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
         this.lastRefresh = new Date().toLocaleTimeString();
