@@ -1,10 +1,12 @@
 // Event Bus Client — polls /api/events for live dashboard updates
-// Persistent baton map so tickets stay visible through full workflow
+// _batonTickets: active baton only (backlog→consultant, never closed)
+// _ticketLog: full audit trail of all tickets, all statuses
 
 let _lastEventTs = null;
-const _batonTickets = {};   // issue → ticket, persists across polls
+const _batonTickets = {};   // issue → ticket (active baton only)
 const _batonHistory = {};   // issue → [{role, ts}] for timeline
-const BATON_TTL_MS = 600000; // keep done tickets visible 10min
+const _ticketLog = {};      // issue → ticket (all, including closed)
+const CLOSED_STATUSES = new Set(['closed', 'cancelled', 'done']);
 
 async function fetchEvents(since) {
   const url = since
@@ -30,37 +32,37 @@ function eventToActivity(e) {
   return { type, message: msg, detail: e.issue ? `#${e.issue}` : '' };
 }
 
-/** Merge events into persistent baton ticket map */
+/** Merge events into persistent baton ticket map and ticket log */
 function mergeBatonEvents(events) {
   const now = Date.now();
   for (const e of events) {
-    if (!e.role || !e.issue) continue;
-    const prev = _batonTickets[e.issue];
-    const isDone = e.status === 'done' || e.role === 'consultant';
-    _batonTickets[e.issue] = {
-      activeRole: e.role, issue: e.issue,
+    if (!e.issue) continue;
+    const prev = _batonTickets[e.issue] || _ticketLog[e.issue];
+    const base = { issue: e.issue, _updated: now,
       title: e.title || prev?.title || '',
       epic: e.epic || prev?.epic || null,
-      status: isDone ? 'done' : (e.status || 'in-progress'),
-      agent: e.agent || '', model: e.model || prev?.model || '',
-      _updated: now
-    };
+      agent: e.agent || prev?.agent || '',
+      model: e.model || prev?.model || '' };
+    // Always update ticket log (full audit trail)
+    const logStatus = e.status || (e.type === 'ticket:created' ? 'backlog' : null)
+      || _ticketLog[e.issue]?.status || 'backlog';
+    _ticketLog[e.issue] = { ...base, status: logStatus,
+      activeRole: e.role || _ticketLog[e.issue]?.activeRole || null };
+    // Baton map: evict on close; skip if no role
+    if (e.status && CLOSED_STATUSES.has(e.status)) { delete _batonTickets[e.issue]; continue; }
+    if (!e.role) continue;
+    _batonTickets[e.issue] = { ...base, activeRole: e.role, status: e.status || 'in-progress' };
     if (!_batonHistory[e.issue]) _batonHistory[e.issue] = [];
     _batonHistory[e.issue].push({ role: e.role, ts: e.ts || new Date(now).toISOString() });
   }
-  // Expire done tickets beyond TTL
-  for (const [id, t] of Object.entries(_batonTickets)) {
-    if (t.status === 'done' && now - t._updated > BATON_TTL_MS) delete _batonTickets[id];
-  }
-  // Sort: active first (by issue# desc), then done
-  return Object.values(_batonTickets).sort((a, b) => {
-    if (a.status !== 'done' && b.status === 'done') return -1;
-    if (a.status === 'done' && b.status !== 'done') return 1;
-    return (b.issue || 0) - (a.issue || 0);
-  });
+  // Sort baton: by issue# desc (all active, no done tier)
+  return Object.values(_batonTickets).sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 
 function getBatonState() { return Object.values(_batonTickets); }
+function getTicketLog() {
+  return Object.values(_ticketLog).sort((a, b) => (b.issue || 0) - (a.issue || 0));
+}
 function getTicketTimeline(issue) { return _batonHistory[issue] || []; }
 
 /** Detect governance gaps: skipped baton roles */
@@ -72,9 +74,8 @@ function detectMissingEvents(issue) {
   for (let i = 0; i < roles.length - 1; i++) {
     const from = expected.indexOf(roles[i]);
     const to = expected.indexOf(roles[i + 1]);
-    if (to > from + 1) {
+    if (to > from + 1)
       for (let j = from + 1; j < to; j++) gaps.push(expected[j]);
-    }
   }
   return gaps;
 }
