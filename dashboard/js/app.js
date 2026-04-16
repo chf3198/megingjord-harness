@@ -7,6 +7,7 @@ function dashboardApp() {
     config: { refreshSec: 5, highContrast: false },
     currentView: 'fleet', helpDevMode: false,
     batonState: [],
+    ticketLog: [],
     activityLog: [],
     governanceState: {},
     wikiHealth: { loaded: false },
@@ -60,6 +61,7 @@ function dashboardApp() {
         this.fleetStats = stats;
         this.routerStats = rs;
         this.batonState = evBaton.length ? evBaton : buildBatonState(getRouterLog());
+        this.ticketLog = getTicketLog();
         if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth();
         if (typeof pollGitHub === 'function') this.githubData = await pollGitHub();
@@ -84,13 +86,11 @@ function dashboardApp() {
       addActivity(this.activityLog, 'system',
         this.autoRefreshEnabled ? 'Auto-refresh on' : 'Auto-refresh off');
     },
-
     setHighContrast(on) {
       this.config.highContrast = !!on;
       saveDashboardConfig(this.config);
       document.body.classList.toggle('high-contrast', this.config.highContrast);
     },
-
     setView(view) { setDashboardView(this, view); },
     isView(view) { return isDashboardView(this, view); },
     toggleTips() { toggleDashboardTips(this); },
