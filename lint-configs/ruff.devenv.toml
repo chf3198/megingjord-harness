@@ -1,0 +1,50 @@
+# ruff.devenv.toml — DevEnv Ops shared Ruff config for Python linting
+# Deploy to each fleet repo's lint-configs/ directory (do not override).
+# Usage: ruff check --config lint-configs/ruff.devenv.toml <path>
+# Enforces: PEP 257 / Google-style docstrings + Ruff F+E quality rules.
+
+# Align with repo ≤100-line file constraint; match existing lint rule
+line-length = 100
+target-version = "py39"
+
+# Exclude generated, test helpers, and vendor code from strict rules
+exclude = [
+    ".git",
+    "__pycache__",
+    "*.pyc",
+    "dist",
+    "build",
+    "node_modules",
+]
+
+[lint]
+# Tier 1 (P0): D = pydocstyle (docstrings), required on public functions
+# Tier 2 (P1): F = pyflakes (undefined names, unused imports)
+#              E = pycodestyle errors (syntax/style errors only)
+select = ["D", "E", "F"]
+
+# Disable rules that conflict with concise hook scripts or are too noisy
+ignore = [
+    "D100", # Missing docstring in public module  — module-level optional
+    "D104", # Missing docstring in public package — __init__ optional
+    "D203", # 1 blank line before class docstring — conflicts with D211
+    "D213", # Multi-line summary second line      — conflicts with D212
+    "E501", # Line too long — handled by line-length above
+]
+
+# Existing hooks/ scripts waived for incremental adoption (Tier 1 only)
+# E402: conditional sys.path injection before imports — by design
+# E401, E701: compact style in guard scripts — waived baseline
+# D205, D212: docstring style — waived baseline
+# F401: unused imports in scripts loaded for side-effects
+[lint.per-file-ignores]
+"hooks/scripts/*.py" = [
+    "D101", "D102", "D103",
+    "E402", "E401", "E701",
+    "D205", "D212",
+    "F401",
+]
+
+[lint.pydocstyle]
+# Google convention: first line summary, Args/Returns/Raises sections
+convention = "google"

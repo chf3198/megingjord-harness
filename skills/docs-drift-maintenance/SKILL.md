@@ -30,6 +30,13 @@ For feature-adds and behavior changes, evaluate all applicable surfaces:
 4. Release traceability docs
    - root `CHANGELOG.md`
    - release notes / GitHub release object
+5. Inline code documentation (added #101 — global linting governance)
+   - **JS/TS**: JSDoc on all exported/public functions (`@param`, `@returns`, `@description`)
+   - **Python**: Google-style docstrings on all public functions, classes, and modules
+   - **Bash**: Header comment block on each script; inline comments on non-obvious logic
+   - **CSS**: Section header comments; non-obvious rule explanations
+   - Governed by `lint-configs/eslint.config.devenv.js` (JSDoc rules) and `lint-configs/ruff.devenv.toml` (D rules)
+   - Drift check: run `npm run lint:all`; any new `jsdoc/*` or `D*` violations are inline-doc drift
 
 ## Procedure
 

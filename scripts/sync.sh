@@ -22,7 +22,7 @@ sync_dir() {
   echo "── $label ──"
   local count=0
   for item in "$src"/*/; do
-    local name=$(basename "$item")
+    local name; name=$(basename "$item")
     [[ "$name" == "*" ]] && continue
     if $DRY_RUN; then
       echo "  Would sync: $name"
@@ -47,7 +47,7 @@ sync_files() {
   local count=0
   for file in "$src"/*; do
     [[ -f "$file" ]] || continue
-    local name=$(basename "$file")
+    local name; name=$(basename "$file")
     if $DRY_RUN; then
       echo "  Would sync: $name"
     else
@@ -75,7 +75,7 @@ if [[ -d "$COPILOT/hooks" ]]; then
   if $DRY_RUN; then
     find "$COPILOT/hooks" -type f \
       ! -path "*__pycache__*" ! -path "*/state/*" \
-      -exec basename {} \; | while read f; do
+      -exec basename {} \; | while read -r f; do
       echo "  Would sync: $f"
     done
   else

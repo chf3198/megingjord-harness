@@ -40,8 +40,40 @@ devenv-ops/lint-configs/     → Each repo's lint-configs/
 - [[governance-enforcement]] — CI gates block on lint failure
 - [[repo-onboarding-standards]] — new repos get configs
 
+## Implementation Status
+
+✅ **Implemented** — `lint-configs/` created in devenv-ops (epic #101).
+
+| File | Purpose |
+|------|---------|
+| `lint-configs/eslint.config.devenv.js` | ESLint v9 flat config, JSDoc T1 |
+| `lint-configs/ruff.devenv.toml` | Ruff standalone config, Google conv. |
+| `lint-configs/ci-lint.yml` | GHA workflow template |
+| `lint-configs/lint-baseline.md` | Baseline waiver register |
+
+**devenv-ops dogfood**: `npm run lint:all` passes (exit 0).
+- ESLint: 0 errors (208 baseline warnings — waived, tracked in #111)
+- Ruff: 0 errors
+- shellcheck: 0 issues
+
+## Per-Repo Wiring
+
+```bash
+cp devenv-ops/lint-configs/eslint.config.devenv.js lint-configs/
+cp devenv-ops/lint-configs/ruff.devenv.toml lint-configs/
+# Add to package.json scripts:
+# "lint:js": "eslint -c lint-configs/eslint.config.devenv.js src/"
+# "lint:py": "ruff check --config lint-configs/ruff.devenv.toml ."
+# "lint:sh": "find scripts -name '*.sh' -exec shellcheck {} +"
+```
+
+## Baseline Waivers
+
+Pre-existing violations are documented in `lint-configs/lint-baseline.md`
+and waived for incremental adoption. Forward-fix in #111.
+
 ## Related
 
-- Epic #101: Global linting governance
-- Research: `research/linting-governance-rationale.md`
-- Research: `research/linting-governance-implementation.md`
+- Epic #101: Global linting governance (closed)
+- Forward-fix: #111 — ESLint baseline remediation
+- `lint-configs/lint-baseline.md` — waiver register

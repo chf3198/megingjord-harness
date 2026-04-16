@@ -1,0 +1,52 @@
+# ci-lint.yml — DevEnv Ops reusable lint enforcement workflow template
+# Copy to .github/workflows/ci-lint.yml in each fleet repo.
+# Runs ESLint (JS/TS), Ruff (Python), shellcheck (Bash) on every PR.
+# Requires lint-configs/ directory present in the target repository.
+
+name: Lint Enforcement
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-js:
+    name: ESLint (JS/TS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run ESLint
+        run: npx eslint --no-eslintrc -c lint-configs/eslint.config.devenv.js \
+               --ext .js,.ts .
+
+  lint-python:
+    name: Ruff (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: '3.11'
+      - name: Install Ruff
+        run: pip install ruff==0.11.0
+      - name: Run Ruff
+        run: ruff check --config lint-configs/ruff.devenv.toml .
+
+  lint-shell:
+    name: shellcheck (Bash)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: |
+          find . -name '*.sh' -not -path './node_modules/*' \
+            -exec shellcheck {} +

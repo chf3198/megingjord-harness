@@ -21,7 +21,11 @@
     "wiki:search": "node scripts/wiki/search.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
-    "test:quality": "npx playwright test tests/google-quality.spec.js"
+    "test:quality": "npx playwright test tests/google-quality.spec.js",
+    "lint:js": "eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki",
+    "lint:py": "ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/",
+    "lint:sh": "find scripts -name '*.sh' -exec shellcheck {} +",
+    "lint:all": "npm run lint:js && npm run lint:py && npm run lint:sh"
   },
   "keywords": [
     "devops",
@@ -32,7 +36,10 @@
   "author": "Curtis Franks",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.52.0"
+    "@playwright/test": "^1.52.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-jsdoc": "^50.8.0",
+    "globals": "^17.5.0"
   },
   "dependencies": {
     "dotenv": "^17.4.1"

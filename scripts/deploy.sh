@@ -21,7 +21,7 @@ deploy_dir() {
   echo "── $label ──"
   local count=0
   for item in "$src"/*/; do
-    local name=$(basename "$item")
+    local name; name=$(basename "$item")
     [[ "$name" == "*" ]] && continue
     if $APPLY; then
       mkdir -p "$dest/$name"
@@ -46,7 +46,7 @@ deploy_files() {
   local count=0
   for file in "$src"/*; do
     [[ -f "$file" ]] || continue
-    local name=$(basename "$file")
+    local name; name=$(basename "$file")
     if $APPLY; then
       cp "$file" "$dest/$name"
       echo "  ✅ $name"
