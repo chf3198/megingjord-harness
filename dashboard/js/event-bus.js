@@ -64,7 +64,14 @@ function mergeBatonEvents(events) {
   return Object.values(_batonTickets).sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 
-function getBatonState() { return Object.values(_batonTickets); }
+const _STALE_MS = 30 * 60 * 1000;
+function pruneClosedFromGitHub(issues) {
+  (issues||[]).filter(i=>i.state==='closed').forEach(i=>delete _batonTickets[String(i.number)]);
+}
+function getBatonState() {
+  const now = Date.now();
+  return Object.values(_batonTickets).map(t=>({...t,stale:now-t._updated>_STALE_MS}));
+}
 function getTicketLog() {
   return Object.values(_ticketLog).sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
@@ -72,17 +79,10 @@ function getTicketTimeline(issue) { return _batonHistory[issue] || []; }
 
 /** Detect governance gaps: skipped baton roles */
 function detectMissingEvents(issue) {
-  const expected = ['manager', 'collaborator', 'admin', 'consultant'];
-  const hist = _batonHistory[issue] || [];
-  const roles = hist.map(h => h.role);
-  const gaps = [];
-  for (let i = 0; i < roles.length - 1; i++) {
-    const from = expected.indexOf(roles[i]);
-    const to = expected.indexOf(roles[i + 1]);
-    if (to > from + 1)
-      for (let j = from + 1; j < to; j++) gaps.push(expected[j]);
-  }
-  return gaps;
+  const exp = ['manager','collaborator','admin','consultant'];
+  const roles = (_batonHistory[issue]||[]).map(h=>h.role);
+  return roles.flatMap((r,i) => i>=roles.length-1 ? [] :
+    exp.slice(exp.indexOf(r)+1, exp.indexOf(roles[i+1])));
 }
 
 async function pollEventBus(activityLog) {

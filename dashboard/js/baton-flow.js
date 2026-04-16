@@ -44,6 +44,7 @@ function renderBatonRow(t) {
     ? detectMissingEvents(t.issue) : [];
   const gapWarn = gaps.length
     ? `<span class="baton-gap">⚠️ Skipped: ${gaps.join(', ')}</span>` : '';
+  const staleWarn = t.stale ? '<span class="baton-gap">⏳ stale &gt;30m</span>' : '';
   const tl = renderTimeline(t.issue);
   return `<div class="baton-row">
     <div class="baton-meta">
@@ -51,7 +52,7 @@ function renderBatonRow(t) {
       <span class="baton-issue">#${t.issue || '?'}</span>
       ${title}
       <span class="badge ${badge}">${t.status || 'idle'}</span>
-      ${agent} ${model} ${gapWarn}
+      ${agent} ${model} ${gapWarn} ${staleWarn}
     </div>
     <div class="baton-pipeline">${steps}</div>
     ${tl}

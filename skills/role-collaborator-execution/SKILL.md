@@ -52,7 +52,7 @@ Before implementing, verify Manager's scope:
 - **Risks for Admin**: potential CI flags, merge conflict risk, env dependencies
 - **Visualization** (optional): Mermaid diagram or ASCII flow for complex changes
 
-Add 🔧 emoji reaction to the issue after posting to signal Collaborator active.
+Add 🔧 reaction: `gh api repos/{owner}/{repo}/issues/{N}/reactions -f content=wrench`
 
 ## Multi-ticket TODO model
 
@@ -65,7 +65,8 @@ This prevents context bleed and ensures clean per-ticket evidence trails.
 
 ## Ticket baton protocol
 
-1. Write comment: `## 🔧 Collaborator — Validation Evidence (<persona>, #N)`.
+1. Write comment — **first line**: `**🔧 Collaborator [role-collaborator-execution] — <persona>**`
+   then: `## Validation Evidence (#N)`.
 2. Transition labels: `status:todo` → `status:in-progress`, confirm `role:collaborator`.
 3. **AC confirmation gate**: Before COLLABORATOR_HANDOFF, mark each AC checkbox ✅ or ❌ with evidence. All must be ✅ to proceed.
 4. On COLLABORATOR_HANDOFF: swap `role:collaborator` → `role:admin`.

@@ -3,8 +3,8 @@
 .baton-flow {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; padding: 0.5rem 0.75rem;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr));
-  gap: 0.5rem;
+  display: flex; flex-direction: column;
+  gap: 0.4rem; max-height: 260px; overflow-y: auto;
 }
 
 .baton-empty {

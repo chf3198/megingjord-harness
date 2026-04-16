@@ -47,7 +47,7 @@
         </div>
     </header>
     <main id="main-content" class="dashboard-grid">
-        <template x-if="isView('fleet')"><section id="panel-baton" class="panel full-width" data-tip="baton">
+        <template x-if="isView('fleet')"><section id="panel-baton" class="panel" data-tip="baton">
             <h2>🔄 Agent Baton <button class="shb" data-tip="baton" aria-label="Help: Agent Baton">?</button></h2><div x-html="renderBatonFlow(batonState)"></div>
         </section></template>
         <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">

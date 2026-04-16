@@ -36,10 +36,11 @@ Before emitting `MANAGER_HANDOFF`, the Manager **must**:
 
 ## Ticket baton protocol
 
-1. Write scope comment: `## 🎯 Manager — Scope Definition (Manny Scope, #N)` with objective, AC, constraints.
+1. Write scope comment — **first line must be**: `**🎯 Manager [role-manager-execution] — Manny Scope**`
+   then: `## Scope Definition (#N)` with objective, AC, constraints.
 2. Each AC **must** be a binary pass/fail checkbox: `- [ ] AC1: <testable statement>`.
 3. Set labels: `status:todo`, `role:manager`.
-4. Add 👀 emoji reaction to the issue to signal Manager review active.
+4. Add 👀 reaction via `gh api repos/{owner}/{repo}/issues/{N}/reactions -f content=eyes`.
 5. On MANAGER_HANDOFF: swap `role:manager` → `role:collaborator`.
 6. **Emit event**: `emit-event.js --type baton:manager --issue N --role manager --agent "Manny Scope"`.
 

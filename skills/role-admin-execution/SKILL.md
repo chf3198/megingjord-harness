@@ -26,11 +26,12 @@ Before merging/deploying, verify:
 
 1. Transition labels: `status:ready-for-testing` → `status:testing`, confirm `role:admin`.
 2. After merge: transition `status:testing` → `status:passed-testing`.
-3. Write ops comment: `## ⚙️ Admin — Operations Evidence (Addie Merges, #N)` including:
+3. Write ops comment — **first line**: `**⚙️ Admin [role-admin-execution] — Addie Merges**`
+   then: `## Operations Evidence (#N)` including:
    - PR URL and merge SHA
    - CI check results (pass/fail per check name)
    - Any post-merge actions (release, deploy, label update)
-4. Add ✅ emoji reaction to the merged PR to signal Admin complete.
+4. Add ✅ reaction: `gh api repos/{owner}/{repo}/pulls/{PR}/reactions -f content=+1`
 5. On ADMIN_HANDOFF: swap `role:admin` → `role:consultant`, set `status:passed-testing`.
 6. **Emit event**: `emit-event.js --type baton:admin --issue N --role admin --agent "Addie Merges"`.
 
