@@ -10,8 +10,7 @@ function dashboardApp() {
     ticketLog: [],
     activityLog: [],
     governanceState: {},
-    wikiHealth: { loaded: false },
-    wikiPages: [],
+    wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
     githubData: null,
     fleetHealthLog: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
@@ -61,7 +60,7 @@ function dashboardApp() {
         this.fleetStats = stats;
         this.routerStats = rs;
         this.ticketLog = getTicketLog(); if (lq.length) this.liveQuotas = lq;
-        this.wikiHealth = await fetchWikiHealth();
+        this.wikiHealth = await fetchWikiHealth(); if (typeof fetchWikiMetrics==='function') this.wikiMetrics=await fetchWikiMetrics();
         if (typeof pollGitHub === 'function') { this.githubData = await pollGitHub();
           if (this.githubData?.issues?.recent) pruneClosedFromGitHub(this.githubData.issues.recent); }
         this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
