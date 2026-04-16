@@ -26,14 +26,16 @@ function renderHelpPanel(devMode) {
   const cats = devMode
     ? [
         { title: '🚀 Getting Started', ids: ['start-what', 'start-tour'] },
-        { title: '📖 Using the Dashboard', ids: ['use-health', 'use-baton', 'use-activity', 'use-stress'] },
-        { title: '🔧 Troubleshooting', ids: ['trouble-offline', 'trouble-stale'] },
+        { title: '📖 Fleet View', ids: ['use-baton', 'use-health', 'use-context', 'use-activity'] },
+        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance'] },
+        { title: '🧪 Testing & Troubleshooting', ids: ['use-stress', 'trouble-offline', 'trouble-stale'] },
         { title: '👨‍💻 For Developers', ids: ['dev-arch', 'dev-files', 'dev-alpine', 'dev-panel', 'dev-api', 'dev-test', 'dev-contribute', 'dev-skills'] }
       ]
     : [
         { title: '🚀 Getting Started', ids: ['start-what', 'start-tour'] },
-        { title: '📖 Using the Dashboard', ids: ['use-health', 'use-baton', 'use-activity', 'use-stress'] },
-        { title: '🔧 Troubleshooting', ids: ['trouble-offline', 'trouble-stale'] }
+        { title: '📖 Fleet View', ids: ['use-baton', 'use-health', 'use-context', 'use-activity'] },
+        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance'] },
+        { title: '🧪 Testing & Troubleshooting', ids: ['use-stress', 'trouble-offline', 'trouble-stale'] }
       ];
 
   const byId = {};

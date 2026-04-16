@@ -1,13 +1,21 @@
-/* Header nav + responsive + tooltips */
-
+/* Section help button — ? icon on panel h2 */
+.shb {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.1rem; height: 1.1rem; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--blue); font-size: 0.62rem; font-weight: 700;
+  cursor: pointer; margin-left: 0.35rem; vertical-align: middle;
+  line-height: 1; padding: 0; opacity: 0.7; transition: opacity 0.15s;
+}
+.shb:hover { opacity: 1; border-color: var(--blue); }
+.shb:focus-visible { box-shadow: var(--focus-ring); }
+.panel h2 { display: flex; align-items: center; }
+/* Header nav */
 .header-nav { display: flex; gap: 0.25rem; }
 
-.header-nav button {
-  background: var(--surface); color: var(--text);
+.header-nav button { background: var(--surface); color: var(--text);
   border: 1px solid var(--border); border-radius: 999px;
-  padding: 0.2rem 0.6rem; font-size: 0.82rem;
-  cursor: pointer; white-space: nowrap;
-}
+  padding: 0.2rem 0.6rem; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
 
 .header-nav button:hover {
   border-color: var(--blue);
@@ -39,21 +47,15 @@
 .tip-nav:hover { text-decoration: underline; }
 
 /* Help Center — collapsible sections + search */
-.help-search {
-  width: 100%; padding: 0.35rem 0.5rem; font-size: 0.82rem;
-  background: var(--bg); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px;
-  margin-bottom: 0.5rem;
-}
+.help-search { width: 100%; padding: 0.35rem 0.5rem; font-size: 0.82rem;
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 0.5rem; }
 
 .help-section { margin-bottom: 0.3rem; }
 
-.help-section summary {
-  cursor: pointer; font-weight: 600; font-size: 0.85rem;
-  padding: 0.3rem 0.4rem; border-radius: 6px;
-  background: var(--surface); border: 1px solid var(--border);
-  list-style: none; transition: border-color 0.15s;
-}
+.help-section summary { cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  padding: 0.3rem 0.4rem; border-radius: 6px; background: var(--surface);
+  border: 1px solid var(--border); list-style: none; transition: border-color 0.15s; }
 
 .help-section summary:hover {
   border-color: var(--blue); background: color-mix(in srgb, var(--blue) 6%, var(--surface));
@@ -64,10 +66,8 @@
 
 .help-section summary::-webkit-details-marker { display: none; }
 
-.help-section .help-body {
-  padding: 0.3rem 0.5rem 0.4rem; font-size: 0.78rem;
-  color: var(--text-muted); line-height: 1.4;
-}
+.help-section .help-body { padding: 0.3rem 0.5rem 0.4rem; font-size: 0.78rem;
+  color: var(--text-muted); line-height: 1.4; }
 
 /* Help toolbar + service links */
 .help-toolbar { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; align-items: center; }

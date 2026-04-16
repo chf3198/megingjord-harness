@@ -43,6 +43,17 @@ Before implementing, verify Manager's scope:
 - Do not declare complete at exit; "all gates pass" = validated, not released.
 - Any scope drift is explicitly flagged for manager re-handoff.
 
+## Rich comment template
+
+`COLLABORATOR_HANDOFF` comment must include:
+- **Changes**: per-file summary of what changed and why
+- **Behavior delta**: before/after description of observable behavior
+- **AC evidence**: each AC checkbox ✅ with the test command or output proving it
+- **Risks for Admin**: potential CI flags, merge conflict risk, env dependencies
+- **Visualization** (optional): Mermaid diagram or ASCII flow for complex changes
+
+Add 🔧 emoji reaction to the issue after posting to signal Collaborator active.
+
 ## Multi-ticket TODO model
 
 When multiple tickets are in `status:todo`, the Collaborator:
