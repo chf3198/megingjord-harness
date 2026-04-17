@@ -13,7 +13,8 @@ def _find_wiki() -> Path | None:
     global _WIKI_ROOT
     if _WIKI_ROOT is not None:
         return _WIKI_ROOT
-    for c in [Path(__file__).resolve().parent.parent.parent / "wiki",
+    for c in [Path.home() / ".copilot" / "wiki",
+              Path(__file__).resolve().parent.parent.parent / "wiki",
               Path.home() / "devenv-ops" / "wiki"]:
         if c.is_dir():
             _WIKI_ROOT = c

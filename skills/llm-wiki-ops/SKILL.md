@@ -5,64 +5,59 @@ Operate and maintain the LLM Wiki knowledge system. Use this
 skill when ingesting sources, querying the wiki, diagnosing
 health issues, or planning knowledge graph expansion.
 
+## Global Access Model
+
+| Mode | Scope | Path |
+|---|---|---|
+| **Read** | Any repo | `~/.copilot/wiki/` (deployed runtime) |
+| **Write** | devenv-ops only | `wiki/` (source of truth) |
+| **Search** | Any repo | `node ~/.copilot/scripts/wiki-search.js` |
+| **Ingest** | devenv-ops only | `npm run wiki:ingest` |
+| **Lint** | devenv-ops only | `npm run wiki:lint` |
+
 ## Architecture
 ```
-raw/articles/     → Immutable human-curated sources
-wiki/             → LLM-compiled pages (sources/, entities/, concepts/, syntheses/)
-wiki/index.md     → Page catalog (updated on every ingest)
-wiki/log.md       → Append-only operation log
-scripts/wiki/     → CLI tools (ingest, lint, search)
-WIKI.md           → Governance schema
+devenv-ops/wiki/    ──deploy──▶  ~/.copilot/wiki/  (read-only)
+devenv-ops/raw/     (stays local, not deployed)
+scripts/wiki/       (dev tools, not deployed)
+scripts/global/wiki-search.js ──deploy──▶ ~/.copilot/scripts/
 ```
 
 ## Operations
 
-### Ingest
+### Search (any repo)
 ```bash
-node scripts/wiki/ingest.js raw/articles/<source>.md
-# or: npm run wiki:ingest -- raw/articles/<source>.md
+node ~/.copilot/scripts/wiki-search.js "your question"
 ```
-Reads raw source → calls OpenClaw LLM → writes wiki/sources/ page.
-Updates index.md and log.md. Marks raw source as ingested.
+Keyword scoring → top 5 pages → shows matches with excerpts.
 
-### Lint
+### Ingest (devenv-ops only)
 ```bash
-node scripts/wiki/lint.js
-# or: npm run wiki:lint
+npm run wiki:ingest -- raw/articles/<source>.md
 ```
-Checks: broken [[wikilinks]], orphan pages, missing frontmatter,
-index.md sync. Exit 0 = healthy, exit 1 = issues found.
+Raw → LLM summary → wiki/sources/ page → index + log update.
 
-### Search
+### Lint (devenv-ops only)
 ```bash
-node scripts/wiki/search.js "your question here"
-# or: npm run wiki:search -- "your question"
+npm run wiki:lint
 ```
-Keyword scoring → top 5 pages → LLM synthesis via OpenClaw.
-Graceful fallback: shows raw matches if LLM unavailable.
+Broken wikilinks, orphans, frontmatter, index sync.
 
 ## Fleet Routing
-- **Ingest**: Fleet lane → OpenClaw (mistral primary, qwen2.5 fallback)
-- **Lint**: Free lane → local only (no LLM needed)
-- **Search**: Fleet lane → OpenClaw for synthesis
-
-## Failover Chain
-OpenClaw(mistral) → OpenClaw(qwen2.5:7b) → Groq → Cerebras
+- **Ingest**: Fleet lane → OpenClaw (mistral → qwen2.5 fallback)
+- **Search (LLM)**: Fleet lane → OpenClaw for synthesis
+- **Lint**: Free lane → local only (no LLM)
 
 ## Troubleshooting
 | Symptom | Cause | Fix |
 |---|---|---|
-| Ingest timeout | Model cold start | Warm up: `curl OpenClaw/health` |
-| All LLMs fail | Network/Tailscale | Check `tailscale status` |
-| Orphan pages | No cross-refs | Expected for isolated topics |
-| Index drift | Manual wiki edits | Run `npm run wiki:lint` |
+| Wiki not found | Not deployed | `npm run deploy:apply` in devenv-ops |
+| Stale content | Not redeployed | Redeploy after wiki changes |
+| Ingest timeout | Model cold start | `curl OpenClaw/health` |
+| All LLMs fail | Network/Tailscale | `tailscale status` |
 
 ## Constraints
-- Raw sources are immutable after ingest (status: ingested)
-- Wiki pages are LLM-generated — human edits go in raw/
+- `~/.copilot/wiki/` is read-only from non-devenv-ops repos
+- Raw sources are immutable after ingest
 - All scripts ≤100 lines (lint-enforced)
-- Timeout: 300s per LLM call (model inference on 16GB RAM)
-
-## Dashboard
-Wiki Health panel in Ops view shows: page count, categories,
-structural issues. Backed by `/api/wiki-health` endpoint.
+- Changes flow: devenv-ops → merge → deploy → ~/.copilot/

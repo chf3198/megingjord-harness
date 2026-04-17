@@ -39,6 +39,7 @@ The generated instruction file must require this order:
 4. `web-regression-governance` when repo type is `website-static` or `web-app`
 5. `github-ops-tree-router` for rulesets/required checks/governance controls
 6. `workflow-self-anneal` only after failures/process drift
+7. `llm-wiki-ops` when querying compiled knowledge from `~/.copilot/wiki/`
 
 ## Hard constraints
 

@@ -66,6 +66,7 @@ if ! $APPLY; then
   deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
   deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
   deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
+  deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
   echo "Re-run with --apply to deploy changes."
   exit 0
 fi
@@ -78,6 +79,12 @@ deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
 deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
 deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
 deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
+deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
+
+# Deploy wiki index + log + schema
+for wf in "$ROOT/wiki/index.md" "$ROOT/wiki/log.md" "$ROOT/WIKI.md"; do
+  [[ -f "$wf" ]] && cp "$wf" "$COPILOT/wiki/$(basename "$wf")"
+done
 
 # Hooks: deploy excluding pycache/state
 rsync -a --exclude='__pycache__' \
