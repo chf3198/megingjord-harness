@@ -87,5 +87,5 @@ function refreshSettingsView() {
   const el = document.getElementById('settings-content');
   if (!el) return;
   const res = loadFleetResources();
-  el.innerHTML = renderSettingsPanel(res, window._lastProbeResults);
+  el.innerHTML = renderSettingsPanel(res, window._lastProbeResults, window._hostInfo);
 }
