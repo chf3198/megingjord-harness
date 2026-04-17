@@ -59,3 +59,21 @@ Symlinks auto-resolve to root `plugin.json`.
 - **Branch before editing**: `feat/<issue>-<slug>`
 - **Conventional commits**: `feat(scope):`, `fix(scope):`
 - Run `npm run lint` before pushing
+
+## PR Checklist
+
+Before submitting a pull request, verify:
+
+- [ ] `npm run lint` passes (no new violations)
+- [ ] `npm run validate:triage` passes (if skills changed)
+- [ ] `npm run validate:compat` passes (if plugin.json changed)
+- [ ] All new files ≤100 lines
+- [ ] Conventional commit message format used
+
+## Issue Templates
+
+Use the appropriate template when opening issues:
+- **Bug report** → `bug-report.yml`
+- **Feature request** → `feature_request.md`
+- **Epic** → `epic.yml`
+- **Research** → `research.yml`

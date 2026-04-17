@@ -1,21 +1,29 @@
 # devenv-ops
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-purple.svg)](LICENSE)
+[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-24%20skills-blue.svg)](plugin.json)
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
-[![Lint: ≤100 lines](https://img.shields.io/badge/lint-%E2%89%A4100%20lines-blue)](#)
 
 **AI agent governance harness — skills, agents, hooks, and wiki.**
-24 universal skills ship as a VS Code Agent Plugin. Install via Git
-URL or develop the harness itself for personal fleet deployment.
+
+Install as a VS Code Agent Plugin to get 24 governance skills,
+8 custom agents, and wiki seed content. No build step required.
 
 ## Install as Agent Plugin
 
 In VS Code (with Copilot), run:
 > `Chat: Install Plugin From Source` → paste this repo's Git URL.
 
-You get: 24 governance skills, 8 custom agents, wiki seed content.
-No build step. No configuration. Works in VS Code, Copilot CLI,
-and Claude Code (via `.claude-plugin/` symlink).
+Works in VS Code, Copilot CLI, and Claude Code.
+
+## What You Get
+
+| Category | Count | Examples |
+|----------|-------|---------|
+| **Skills** | 24 | Role baton orchestration, GitHub governance, secret prevention, drift detection |
+| **Agents** | 8 | @architect, @implementer, @quick, @planner, @router, @governance-auditor |
+| **Wiki** | 15 seed articles | Agent drift, baton protocol, self-annealing, wiki pattern |
+| **Hooks** | 19 | Global standards enforcement, repo scoping |
 
 ## How It Works
 
@@ -56,22 +64,14 @@ devenv-ops (source of truth)          ~/.copilot/ (runtime)
   scripts/global/  (17) ──deploy──▶   scripts/
 ```
 
-## Quick Start
+## Develop the Harness
 
 ```bash
-# Option A — native Node
-npm run setup          # Install deps + confirm environment
-npm start              # Dashboard on http://localhost:8090
-
-# Option B — Docker
-docker compose up      # Dashboard on http://localhost:8090
-```
-
-```bash
+npm run setup          # Install deps
+npm start              # Dashboard on :8090
 npm run deploy:apply   # Deploy repo → ~/.copilot/
-npm run sync           # Pull ~/.copilot/ → repo
-npm test               # Playwright E2E tests
 npm run lint           # ≤100-line file check
+npm test               # Playwright E2E tests
 ```
 
 ## Enable for Other Repos
@@ -82,13 +82,14 @@ npm run repo:scope -- disable /path/to/repo
 npm run repo:scope -- list
 ```
 
-## Hardware Fleet
+## Help
 
-| Machine | Role | RAM | Services |
-|---------|------|-----|----------|
-| penguin-1 | SML agent | 2.7 GB | Ollama (tiny), Tailscale |
-| windows-laptop | OpenClaw host | 16 GB | Ollama 7B, LiteLLM |
+- [Bug reports](https://github.com/chf3198/devenv-ops/issues/new?template=bug-report.yml)
+- [Feature requests](https://github.com/chf3198/devenv-ops/issues/new?template=feature_request.md)
+- [Support guide](SUPPORT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## License
 
-MIT
+[PolyForm Noncommercial 1.0.0](LICENSE) — free for personal,
+educational, nonprofit, and government use. Commercial use
+requires explicit permission.

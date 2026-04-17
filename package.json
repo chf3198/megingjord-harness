@@ -1,7 +1,7 @@
 {
   "name": "devenv-ops",
   "version": "3.0.0",
-  "description": "Development environment operations: skills, monitoring, research",
+  "description": "AI agent governance harness — 24 skills, 8 agents, hooks, and wiki as a VS Code Agent Plugin",
   "private": true,
   "scripts": {
     "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
