@@ -1,6 +1,6 @@
 # devenv-ops
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-purple.svg)](LICENSE)
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![Lint: ≤100 lines](https://img.shields.io/badge/lint-%E2%89%A4100%20lines-blue)](#)
 

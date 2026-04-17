@@ -37,7 +37,7 @@
     "dashboard"
   ],
   "author": "Curtis Franks",
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "eslint": "^9.39.4",
