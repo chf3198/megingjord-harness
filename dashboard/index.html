@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevEnv Ops — Fleet Operations Center</title>
-    <link rel="stylesheet" href="css/app.css"><link rel="stylesheet" href="css/help.css"><link rel="stylesheet" href="css/stats.css"><link rel="stylesheet" href="css/router.css"><link rel="stylesheet" href="css/config.css"><link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
+    <link rel="stylesheet" href="css/app.css"><link rel="stylesheet" href="css/stats.css"><link rel="stylesheet" href="css/router.css"><link rel="stylesheet" href="css/config.css"><link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
     <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/ticket-log.css"><link rel="stylesheet" href="css/activity.css"><link rel="stylesheet" href="css/wiki.css"><link rel="stylesheet" href="css/wiki-metrics.css"><link rel="stylesheet" href="css/fleet-health.css"><link rel="stylesheet" href="css/governance.css"><link rel="stylesheet" href="css/context.css"><link rel="stylesheet" href="css/github.css"><link rel="stylesheet" href="css/settings.css">
     <script defer src="js/alpine.min.js"></script>
     <script src="js/health-check.js"></script><script src="js/quota-tracker.js"></script>
@@ -21,7 +21,7 @@
     <script src="js/governance-panel.js"></script><script src="js/ticket-log.js"></script>
     <script src="js/tooltips.js"></script><script src="js/app-actions.js"></script>
     <script src="js/credential-store.js"></script><script src="js/provider-presets.js"></script><script src="js/fleet-probe.js"></script><script src="js/settings-panel.js"></script><script src="js/settings-form.js"></script><script src="js/settings-actions.js"></script>
-    <script src="js/event-source.js"></script><script src="js/help-tour.js"></script><script src="js/app.js"></script>
+    <script src="js/event-source.js"></script><script src="js/app.js"></script>
 </head>
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <a href="#main-content" class="skip-link">Skip to content</a>
@@ -44,7 +44,6 @@
             <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Run stress test">🧪</button>
             <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Toggle tooltips">💡</button>
             <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="High contrast">◐</button>
-            <button id="btn-help" @click="startDashboardTour()" data-tip="help" title="Guided tour">❓</button>
         </div>
     </header>
     <main id="main-content" class="dashboard-grid">
