@@ -1,5 +1,5 @@
-// Fleet Probe — health check each configured resource
-// Probes health endpoints, returns status objects
+// Fleet Probe — health check configured resources via server proxy
+// Local resources use /api/fleet/ proxy; cloud validated client-side
 
 const PROBE_TIMEOUT_MS = 5000;
 
@@ -7,11 +7,17 @@ async function probeResource(resource) {
   if (!resource.enabled || !resource.baseUrl) {
     return { ...resource, status: 'disabled', checkedAt: now() };
   }
-  const url = resource.baseUrl + (resource.healthEndpoint || '/v1/models');
-  const headers = buildAuthHeaders(resource);
+  if (resource.tier === 'cloud') return probeCloudResource(resource);
+  return probeLocalResource(resource);
+}
+
+async function probeLocalResource(resource) {
+  const deviceId = resource.meta?.device || resource.id;
+  const ep = resource.healthEndpoint || '/api/tags';
+  const proxyUrl = `/api/fleet/${deviceId}${ep}`;
   try {
-    const res = await fetch(url, {
-      headers, signal: AbortSignal.timeout(PROBE_TIMEOUT_MS)
+    const res = await fetch(proxyUrl, {
+      signal: AbortSignal.timeout(PROBE_TIMEOUT_MS)
     });
     if (!res.ok) {
       return { ...resource, status: 'error', statusCode: res.status, checkedAt: now() };
@@ -25,15 +31,13 @@ async function probeResource(resource) {
   }
 }
 
-function buildAuthHeaders(resource) {
+function probeCloudResource(resource) {
   const auth = resource.auth || {};
-  if (auth.type === 'bearer' && auth.key) {
-    return { Authorization: `Bearer ${auth.key}` };
+  const needsKey = auth.type && auth.type !== 'none';
+  if (needsKey && !auth.key) {
+    return { ...resource, status: 'no-key', checkedAt: now() };
   }
-  if (auth.type === 'header' && auth.headerName && auth.key) {
-    return { [auth.headerName]: auth.key };
-  }
-  return {};
+  return { ...resource, status: 'ready', checkedAt: now() };
 }
 
 function extractModels(data, provider) {

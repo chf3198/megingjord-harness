@@ -2,8 +2,13 @@
 require('dotenv').config(); const http = require('http'); const fs = require('fs'); const path = require('path');
 const PORT = process.env.DASH_PORT || 8090; const ROOT = path.resolve(__dirname, '..');
 const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json'};
-const FLEET = {'penguin-1':'http://100.86.248.35:11434','windows-laptop':'http://100.78.22.13:11434'};
-const OPENCLAW = 'http://100.78.22.13:4000';
+const FLEET = {
+  'penguin-1': process.env.DEVICE_PENGUIN1_URL || 'http://100.86.248.35:11434',
+  'windows-laptop': process.env.DEVICE_WINDOWS_URL || 'http://100.78.22.13:11434',
+  'openclaw-litellm': process.env.OPENCLAW_URL || 'http://100.78.22.13:4000',
+  'chromebook-2': process.env.DEVICE_CHROMEBOOK2_URL || 'http://100.87.216.75:11434'
+};
+const OPENCLAW = process.env.OPENCLAW_URL || 'http://100.78.22.13:4000';
 const { getWikiHealth, getWikiPages } = require('./dashboard-wiki');
 const { recordAccess, getWikiMetrics } = require('./wiki-metrics');
 

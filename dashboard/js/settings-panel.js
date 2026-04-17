@@ -6,7 +6,7 @@ function renderSettingsPanel(resources, probeResults) {
   const rows = resources.map(r => {
     const probe = (probeResults || []).find(p => p.id === r.id);
     const st = probe?.status || r.status || 'unknown';
-    const cls = st === 'healthy' ? 'ok' : st === 'offline' ? 'err' : 'warn';
+    const cls = st === 'healthy' || st === 'ready' ? 'ok' : st === 'offline' || st === 'no-key' ? 'err' : 'warn';
     const authBadge = authStatus(r);
     return `<tr class="settings-row">
       <td><span class="dot dot-${cls}"></span> ${esc(r.name)}</td>
