@@ -1,10 +1,12 @@
 // Health Check — ping Ollama and OpenClaw endpoints
 // Returns status objects for each device
 
+const HEALTH_TIMEOUT_MS = 5000;
+
 async function checkOllama(deviceId) {
   try {
     const r = await fetch(`/api/fleet/${deviceId}/api/tags`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS)
     });
     if (!r.ok) return { status: 'error', models: [] };
     const data = await r.json();
@@ -19,7 +21,7 @@ async function checkOpenClaw(deviceId) {
   try {
     const url = `/api/fleet/${deviceId}/openclaw/health`;
     const r = await fetch(url, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS)
     });
     return r.ok
       ? { status: 'healthy' }

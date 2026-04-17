@@ -23,6 +23,9 @@ function setRefreshSec(val) {
   app.scheduleRefresh();
 }
 
+const STRESS_HARD_STOP_SEC = 62;
+const STRESS_EARLY_STOP_SEC = 30;
+
 async function runDashboardQuickTest(app) {
   if (app.testRun.running) return;
   const tickets = buildParallelTickets();
@@ -41,16 +44,16 @@ async function runDashboardQuickTest(app) {
   for (let i = 0; i < maxRounds; i++) {
     await new Promise(r => setTimeout(r, INTERVAL_MS));
     const elapsed = (performance.now() - t0) / 1000;
-    if (elapsed > 62) break;
+    if (elapsed > STRESS_HARD_STOP_SEC) break;
 
     // Advance random non-done ticket
     const active = tickets.filter(t => t.status !== 'done');
     if (active.length) {
-      const t = active[Math.floor(Math.random() * active.length)];
-      advanceTicket(t);
-      const agent = AGENT_NAMES[t.role] || 'system';
+      const ticket = active[Math.floor(Math.random() * active.length)];
+      advanceTicket(ticket);
+      const agent = AGENT_NAMES[ticket.role] || 'system';
       addActivity(app.activityLog, 'baton',
-        `[${agent}] ${t.id}: ${t.label}`, t.role);
+        `[${agent}] ${ticket.id}: ${ticket.label}`, ticket.role);
     }
 
     // Mock router log entry every round
@@ -82,7 +85,7 @@ async function runDashboardQuickTest(app) {
     }
 
     // All tickets done? Keep going for router/activity exercise
-    if (!active.length && elapsed > 30) break;
+    if (!active.length && elapsed > STRESS_EARLY_STOP_SEC) break;
   }
 
   app.testRun.running = false;

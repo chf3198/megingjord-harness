@@ -1,0 +1,8 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./inventory:/app/inventory:ro
+    restart: unless-stopped

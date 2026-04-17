@@ -4,6 +4,7 @@
   "description": "Development environment operations: skills, monitoring, research",
   "private": true,
   "scripts": {
+    "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
     "sync": "bash scripts/sync.sh",

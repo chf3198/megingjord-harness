@@ -3,13 +3,14 @@
 
 const MAX_ACTIVITY = 30;
 const SUPPRESS_TYPES = new Set(['refresh']);
+const DEDUP_WINDOW_MS = 10000;
 
 function addActivity(log, type, message, detail) {
   if (SUPPRESS_TYPES.has(type)) return;
   // Deduplicate: skip if same message in last 10 seconds
   if (log.length && log[0].message === message) {
     const prev = log[0]._ts || 0;
-    if (Date.now() - prev < 10000) return;
+    if (Date.now() - prev < DEDUP_WINDOW_MS) return;
   }
   log.unshift({
     time: new Date().toLocaleTimeString(),
