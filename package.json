@@ -20,6 +20,7 @@
     "wiki:lint": "node scripts/wiki/lint.js",
     "wiki:anneal": "node scripts/wiki/anneal.js",
     "wiki:search": "node scripts/wiki/search.js",
+    "validate:triage": "node scripts/validate-plugin-triage.js",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:quality": "npx playwright test tests/google-quality.spec.js",
