@@ -2,9 +2,12 @@
 'use strict';
 const { execSync } = require('child_process');
 const { classifyPrompt } = require('./task-router');
+const { chatComplete } = require('./openclaw-chat');
 
 const args = process.argv.slice(2);
 const prompt = (args[args.indexOf('--prompt') + 1]) || '';
+const modelIdx = args.indexOf('--model');
+const model = modelIdx !== -1 ? args[modelIdx + 1] : undefined;
 const json = args.includes('--json');
 const execute = args.includes('--execute');
 
@@ -18,29 +21,42 @@ function safe(cmd) {
   }
 }
 
-function buildDecision(route) {
+async function buildDecision(route) {
   if (route.lane === 'free') {
-    return { action: 'stay-auto', reason: 'lowest adequate lane selected' };
+    return { action: 'stay-auto', reason: 'lowest adequate lane' };
   }
   if (route.lane === 'fleet') {
     const preflight = execute
       ? safe('node scripts/global/openclaw-preflight.js --json')
       : { ok: true, out: 'dry-run: preflight skipped' };
+    if (execute && !preflight.ok) {
+      return { action: 'fleet-unavailable', preflight };
+    }
+    if (execute && prompt) {
+      const selectedModel = model || route.recommendedModel;
+      const chat = await chatComplete(prompt, { model: selectedModel });
+      if (chat.ok) safe('node scripts/global/openclaw-lane-log.js record openclaw task-router');
+      return { action: chat.ok ? 'dispatched-openclaw' : 'fleet-error', preflight, chat };
+    }
     return { action: 'route-openclaw', preflight };
   }
-  return {
-    action: 'recommend-sonnet',
-    reason: 'premium lane selected for quality/capability gain'
-  };
+  return { action: 'recommend-sonnet', reason: 'premium lane' };
 }
 
-const route = classifyPrompt(prompt);
-const decision = buildDecision(route);
-const result = { route, decision, execute };
-if (json) console.log(JSON.stringify(result, null, 2));
-else {
-  console.log(`lane=${route.lane}`);
-  console.log(`backend=${route.backend}`);
-  console.log(`action=${decision.action}`);
+async function main() {
+  const route = classifyPrompt(prompt);
+  const decision = await buildDecision(route);
+  const result = { route, decision, execute };
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`lane=${route.lane}`);
+    console.log(`backend=${route.backend}`);
+    console.log(`action=${decision.action}`);
+    if (decision.chat?.ok) console.log('\n' + decision.chat.content);
+    if (decision.chat && !decision.chat.ok) console.error('Fleet error:', decision.chat.error);
+  }
+  process.exit(decision.action === 'fleet-error' || decision.action === 'fleet-unavailable' ? 1 : 0);
 }
-process.exit(0);
+
+main().catch(e => { console.error(e.message); process.exit(1); });

@@ -12,7 +12,7 @@
     },
     "fleet": {
       "backend": "openclaw",
-      "recommendedModel": "qwen2.5:7b",
+      "recommendedModel": "qwen2.5-7b",
       "keywords": [
         "multi-file", "tests", "refactor", "implement", "migration",
         "pattern", "transform", "integration", "batch", "known"
