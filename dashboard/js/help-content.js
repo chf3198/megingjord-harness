@@ -26,15 +26,17 @@ function renderHelpPanel(devMode) {
   const cats = devMode
     ? [
         { title: '🚀 Getting Started', ids: ['start-what', 'start-tour'] },
-        { title: '📖 Fleet View', ids: ['use-baton', 'use-health', 'use-context', 'use-activity'] },
-        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance'] },
+        { title: '📖 Live & Logs', ids: ['use-baton', 'use-health', 'use-context', 'use-activity', 'use-ticket-log'] },
+        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance', 'use-github'] },
+        { title: '🌐 Fleet & Wiki', ids: ['use-devices', 'use-services', 'use-settings', 'use-config', 'use-wiki-metrics', 'use-wiki-reader'] },
         { title: '🧪 Testing & Troubleshooting', ids: ['use-stress', 'trouble-offline', 'trouble-stale'] },
         { title: '👨‍💻 For Developers', ids: ['dev-arch', 'dev-files', 'dev-alpine', 'dev-panel', 'dev-api', 'dev-test', 'dev-contribute', 'dev-skills'] }
       ]
     : [
         { title: '🚀 Getting Started', ids: ['start-what', 'start-tour'] },
-        { title: '📖 Fleet View', ids: ['use-baton', 'use-health', 'use-context', 'use-activity'] },
-        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance'] },
+        { title: '📖 Live & Logs', ids: ['use-baton', 'use-health', 'use-context', 'use-activity', 'use-ticket-log'] },
+        { title: '📊 Ops & Governance', ids: ['use-quotas', 'use-router', 'use-governance', 'use-github'] },
+        { title: '🌐 Fleet & Wiki', ids: ['use-devices', 'use-services', 'use-settings', 'use-config', 'use-wiki-metrics', 'use-wiki-reader'] },
         { title: '🧪 Testing & Troubleshooting', ids: ['use-stress', 'trouble-offline', 'trouble-stale'] }
       ];
 
@@ -46,7 +48,7 @@ function renderHelpPanel(devMode) {
       .filter(id => byId[id])
       .map(id => {
         const s = byId[id];
-        return `<details class="help-section" data-help-id="${s.id}">
+        return `<details id="help-${s.id}" class="help-section" data-help-id="${s.id}">
           <summary>${s.title}</summary>
           <div class="help-body">${s.body}</div></details>`;
       }).join('');
