@@ -10,7 +10,6 @@
 .shb:hover { opacity: 1; border-color: var(--blue); }
 .shb:focus-visible { box-shadow: var(--focus-ring); }
 .panel h2 { display: flex; align-items: center; }
-/* Header nav */
 .header-nav { display: flex; gap: 0.25rem; }
 
 .header-nav button { background: var(--surface); color: var(--text);
@@ -21,9 +20,6 @@
   background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
 .header-nav button:focus-visible { box-shadow: var(--focus-ring); }
 .header-nav button.active { border-color: var(--blue); color: var(--blue); }
-
-.panel { content-visibility: auto;
-  contain-intrinsic-size: auto 180px; }
 
 .panel.full-width { grid-column: 1 / -1; }
 
@@ -73,14 +69,19 @@
 .help-category:first-child .help-cat-title { margin-top: 0; }
 .help-feedback { display: flex; gap: 1rem; padding: 0.5rem 0; }
 .help-empty { color: var(--text-muted); font-style: italic; }
-/* View-specific grids + responsive */
-.view-live, .view-logs { grid-template-rows: 1fr 1fr; }
-.view-ops { grid-template-rows: repeat(3, 1fr); }
+/* View grids + responsive */
+.view-live { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; }
+.view-logs, .view-fleet { grid-template-columns: 1fr 1fr; }
+.view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr 1fr; }
 .view-wiki { grid-template-columns: 1fr 2fr; }
 .view-help { grid-template-columns: 1fr; }
-.log-scroll { overflow-y: auto; max-height: calc(50dvh - 60px); }
-.panel { overflow: hidden; display: flex; flex-direction: column; }
-.panel > div { flex: 1; overflow-y: auto; min-height: 0; }
+.log-scroll { overflow-y: scroll; max-height: calc(50dvh - 60px); }
+.panel { overflow: hidden; display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.5rem 0.6rem; }
+.panel:hover { border-color: color-mix(in srgb, var(--blue) 50%, var(--border)); }
+.panel > div { flex: 1; overflow-y: scroll; min-height: 0; }
+#panel-github, #panel-governance { grid-row: span 2; }
 @media (max-width: 1023px) and (min-width: 641px) {
   .header { padding: 0.4rem 0.75rem; }
   .header-nav button { padding: 0.15rem 0.45rem; font-size: 0.78rem; }
@@ -95,4 +96,5 @@
   .dashboard-grid { grid-template-columns: 1fr; height: auto; overflow-y: auto; }
   .view-wiki { grid-template-columns: 1fr; }
   .log-scroll { max-height: 40vh; }
+  #panel-github, #panel-governance { grid-row: span 1; }
 }

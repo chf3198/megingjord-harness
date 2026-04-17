@@ -11,6 +11,7 @@
 .settings-actions button:hover, .btn-label:hover { border-color: var(--accent, #58a6ff); }
 .settings-empty { padding: 24px; text-align: center; color: var(--muted); }
 .settings-form { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+#settings-form-container:empty { display: none; }
 .settings-form label { display: block; margin: 8px 0; font-size: 0.85rem; }
 .settings-form input, .settings-form select {
   display: block; width: 100%; padding: 6px 8px; margin-top: 4px;
