@@ -12,7 +12,7 @@ async function probeResource(resource) {
 }
 
 async function probeLocalResource(resource) {
-  const deviceId = resource.meta?.device || resource.id;
+  const deviceId = resource.id;
   const ep = resource.healthEndpoint || '/api/tags';
   const proxyUrl = `/api/fleet/${deviceId}${ep}`;
   try {
