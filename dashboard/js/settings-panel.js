@@ -1,8 +1,9 @@
 // Settings Panel — render fleet resource CRUD UI
 // Alpine.js integration via global functions
 
-function renderSettingsPanel(resources, probeResults) {
-  if (!resources.length) return renderEmptySettings();
+function renderSettingsPanel(resources, probeResults, hostInfo) {
+  const hostRow = hostInfo ? renderHostRow(hostInfo) : '';
+  if (!resources.length && !hostInfo) return renderEmptySettings();
   const rows = resources.map(r => {
     const probe = (probeResults || []).find(p => p.id === r.id);
     const st = probe?.status || r.status || 'unknown';
@@ -19,7 +20,7 @@ function renderSettingsPanel(resources, probeResults) {
   return `<table class="settings-table"><thead><tr>
     <th>Name</th><th>Provider</th><th>Tier</th>
     <th>URL</th><th>Auth</th><th>Status</th><th>Actions</th>
-  </tr></thead><tbody>${rows}</tbody></table>
+  </tr></thead><tbody>${hostRow}${rows}</tbody></table>
   ${renderSettingsActions()}`;
 }
 
@@ -54,4 +55,24 @@ function authStatus(r) {
   if (r.auth?.key) return '<span class="auth-ok">🔑 Set</span>';
   const label = t === 'query-param' ? 'Secret needed' : 'Key needed';
   return `<span class="auth-missing" onclick="editResource('${r.id}')" title="Click to add">⚠️ ${label}</span>`;
+}
+
+function renderHostRow(h) {
+  const mem = h.memory || '';
+  const info = `${h.platform}/${h.arch} · Node ${h.nodeVersion} · ${mem}`;
+  return `<tr class="settings-row host-row">
+    <td><span class="dot dot-ok"></span> ${esc(h.hostname)}
+      <span class="host-badge">📍 This Device</span></td>
+    <td>Dashboard Host</td><td>local</td>
+    <td title="${esc(info)}">${esc(info)}</td>
+    <td><span class="auth-ok">N/A</span></td>
+    <td>up ${esc(h.uptime)}</td><td></td>
+  </tr>`;
+}
+
+async function fetchHostInfo() {
+  try {
+    const r = await fetch('/api/host-info');
+    return r.ok ? r.json() : null;
+  } catch { return null; }
 }

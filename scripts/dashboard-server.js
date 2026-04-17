@@ -11,7 +11,13 @@ const FLEET = {
   'chromebook-2': process.env.DEVICE_CHROMEBOOK2_URL || 'http://100.87.216.75:11434',
   'chromebook-2-ollama': process.env.DEVICE_CHROMEBOOK2_URL || 'http://100.87.216.75:11434'
 };
-const OPENCLAW = process.env.OPENCLAW_URL || 'http://100.78.22.13:4000';
+const OPENCLAW = process.env.OPENCLAW_URL || 'http://100.78.22.13:4000'; const os = require('os');
+function getHostInfo() {
+  const up = os.uptime(); const h = Math.floor(up/3600); const m = Math.floor((up%3600)/60);
+  return { hostname: os.hostname(), platform: os.platform(), arch: os.arch(),
+    uptime: `${h}h ${m}m`, memory: `${(os.freemem()/1e9).toFixed(1)}/${(os.totalmem()/1e9).toFixed(1)} GB`,
+    nodeVersion: process.version, timestamp: new Date().toISOString() };
+}
 const { getWikiHealth, getWikiPages } = require('./dashboard-wiki');
 const { recordAccess, getWikiMetrics } = require('./wiki-metrics');
 
@@ -86,6 +92,7 @@ async function handleApi(req, res) {
       return jsonRes(res, 500, { error: 'governance state unavailable', detail: e.message });
     }
   }
+  if (u === '/api/host-info') { return jsonRes(res, 200, getHostInfo()); }
   if (u.startsWith('/api/fleet-health')) { const { readLog } = require('./fleet-health-log'); return jsonRes(res, 200, readLog(100)); }
   jsonRes(res, 404, { error: 'not found' });
 }

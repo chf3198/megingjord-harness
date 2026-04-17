@@ -91,7 +91,7 @@
             <h2>⚡ Services</h2><div x-html="renderServiceCards(services)"></div>
         </section></template>
         <template x-if="isView('settings')"><section id="panel-settings" class="panel full-width" data-tip="settings">
-            <h2>⚙️ Fleet Resources</h2><div id="settings-form-container"></div><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults)"></div>
+            <h2>⚙️ Fleet Resources</h2><div id="settings-form-container"></div><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h => { window._hostInfo = h; $el.innerHTML = renderSettingsPanel(loadFleetResources(), window._lastProbeResults, h); })"></div>
         </section></template>
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width" data-tip="help">
             <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div>
