@@ -15,7 +15,7 @@ const PROVIDER_PRESETS = {
   groq: _p('Groq','cloud',_oc,'/openai/v1/models','/openai/v1/models','bearer','https://api.groq.com/openai/v1'),
   deepseek: _p('DeepSeek','cloud',_oc,_v1,_v1,'bearer','https://api.deepseek.com/v1'),
   mistral: _p('Mistral AI','cloud',_oc,_v1,_v1,'bearer','https://api.mistral.ai/v1'),
-  'google-ai': _p('Google AI Studio','cloud','google','/v1beta/models','/v1beta/models','query-param','https://generativelanguage.googleapis.com'),
+  'google-ai': _p('Google AI Studio','cloud','google','/v1beta/models','/v1beta/models','query-param','https://generativelanguage.googleapis.com',{authLabel:'API Secret',authPlaceholder:'AIza...'}),
   together: _p('Together AI','cloud',_oc,_v1,_v1,'bearer','https://api.together.xyz/v1'),
   fireworks: _p('Fireworks AI','cloud',_oc,'/inference/v1/models','/inference/v1/models','bearer','https://api.fireworks.ai/inference/v1'),
   cerebras: _p('Cerebras','cloud',_oc,_v1,_v1,'bearer','https://api.cerebras.ai/v1'),

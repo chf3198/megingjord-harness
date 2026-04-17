@@ -51,6 +51,7 @@ function esc(s) {
 function authStatus(r) {
   const t = r.auth?.type || 'none';
   if (t === 'none') return '<span class="auth-ok">None needed</span>';
-  if (r.auth?.key) return '<span class="auth-ok">🔑 Key set</span>';
-  return `<span class="auth-missing" onclick="editResource('${r.id}')" title="Click to add key">⚠️ Key needed</span>`;
+  if (r.auth?.key) return '<span class="auth-ok">🔑 Set</span>';
+  const label = t === 'query-param' ? 'Secret needed' : 'Key needed';
+  return `<span class="auth-missing" onclick="editResource('${r.id}')" title="Click to add">⚠️ ${label}</span>`;
 }
