@@ -68,6 +68,7 @@ sync_dir "$COPILOT/skills" "$ROOT/skills" "Skills"
 sync_files "$COPILOT/instructions" "$ROOT/instructions" "Instructions"
 sync_files "$COPILOT/scripts" "$ROOT/scripts/global" "Global Scripts"
 sync_files "$COPILOT/agents" "$ROOT/agents" "Agents"
+sync_dir "$COPILOT/wiki" "$ROOT/wiki" "Wiki"
 
 # Hooks: copy files, skip __pycache__ and state/
 echo "── Hooks ──"
