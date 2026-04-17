@@ -1,62 +1,70 @@
 // Context Flow — SVG diagram showing prompt → LLM → response chain
-// Renders in the Fleet view as a visual architecture map
+// Shows all fleet resources that send/receive context
 
 function renderContextFlow() {
-  const W = 500, H = 220;
+  const W = 620, H = 260;
   const nodes = [
-    { x: 55, y: 45, icon: '💻', label: 'VS Code', sub: 'Copilot Agent' },
-    { x: 185, y: 45, icon: '🧠', label: 'AUTO', sub: 'Model Select' },
-    { x: 325, y: 45, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API' },
-    { x: 325, y: 155, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM Proxy' },
-    { x: 460, y: 155, icon: '🤖', label: 'Ollama', sub: 'Local Models' },
+    { x: 60, y: 50, icon: '💻', label: 'VS Code', sub: 'Copilot Agent', tip: 'IDE sends prompts with file context, conversation history, and MCP tool results to the AUTO router.' },
+    { x: 200, y: 50, icon: '🧠', label: 'AUTO', sub: 'Model Select', tip: 'Routes prompts to Cloud LLM (primary) or OpenClaw (local fallback) based on model availability and rate limits.' },
+    { x: 370, y: 50, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API', tip: 'GitHub Copilot cloud models (GPT-4o, Claude). Primary route. Responses stream back to VS Code.' },
+    { x: 540, y: 50, icon: '🐙', label: 'GitHub', sub: 'API + Actions', tip: 'GitHub API: issues, PRs, commits. Actions CI/CD. Context flows bidirectionally via gh CLI and webhooks.' },
+    { x: 120, y: 150, icon: '🌐', label: 'Tailscale', sub: 'VPN Mesh', tip: 'Encrypted WireGuard mesh connecting all fleet devices. Routes traffic between Chromebooks and Windows laptop.' },
+    { x: 290, y: 150, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM :4000', tip: 'LiteLLM proxy on Windows laptop. Routes to local Ollama models. Fallback when cloud is rate-limited.' },
+    { x: 460, y: 150, icon: '🤖', label: 'Ollama', sub: 'Local 7B', tip: 'Local inference on Windows laptop (16GB RAM). Runs 7B models. Accessed via OpenClaw proxy over Tailscale.' },
+    { x: 60, y: 210, icon: '💻', label: 'CB-2', sub: 'This machine', tip: 'Chromebook-2 (penguin): primary dev workstation. 2.7GB RAM. Runs VS Code + dashboard.' },
+    { x: 200, y: 210, icon: '💻', label: 'CB-1', sub: 'SLM node', tip: 'Chromebook-1 (penguin-1): runs Ollama with tiny SLM models for lightweight local inference.' },
+    { x: 370, y: 210, icon: '🖥️', label: 'Win Laptop', sub: 'OpenClaw host', tip: 'Windows laptop (16GB). Hosts OpenClaw + Ollama. Primary fleet compute for local LLM inference.' },
   ];
   const arrows = [
-    { from: 0, to: 1, label: 'prompt + context' },
-    { from: 1, to: 2, label: 'cloud route' },
-    { from: 1, to: 3, label: 'local route', dashed: true },
-    { from: 3, to: 4, label: 'inference' },
+    { from: 0, to: 1, label: 'prompt', tip: 'User prompt + file context + conversation history sent to model router' },
+    { from: 1, to: 2, label: 'cloud', tip: 'Primary route: prompt sent to GitHub Copilot cloud API' },
+    { from: 1, to: 5, label: 'local', dashed: true, tip: 'Fallback route: prompt sent to OpenClaw LiteLLM proxy over Tailscale' },
+    { from: 5, to: 6, label: 'inference', tip: 'OpenClaw forwards to local Ollama for model inference' },
+    { from: 4, to: 5, label: 'mesh', dashed: true, tip: 'Tailscale VPN tunnels traffic between devices' },
+    { from: 7, to: 4, label: '', dashed: true, tip: 'CB-2 connects to Tailscale mesh' },
+    { from: 8, to: 4, label: '', dashed: true, tip: 'CB-1 connects to Tailscale mesh' },
+    { from: 9, to: 5, label: 'host', tip: 'Windows laptop hosts the OpenClaw proxy locally' },
+    { from: 0, to: 3, label: 'gh cli', tip: 'VS Code uses gh CLI for issue/PR operations' },
   ];
-
-  const arrowsSvg = arrows.map(a => {
+  return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
+    class="cf-svg" role="img" aria-label="Context flow diagram">
+    <defs>${cfDefs()}</defs>
+    ${cfArrows(nodes, arrows)}${cfNodes(nodes)}</svg>
+    ${contextBudgetLegend()}</div>`;
+}
+function cfDefs() {
+  return `<marker id="cfHead" markerWidth="6" markerHeight="4"
+    refX="6" refY="2" orient="auto">
+    <polygon points="0 0, 6 2, 0 4" fill="var(--green)"/></marker>
+  <style>.cf-arrow{stroke:var(--green);stroke-width:1.5;opacity:.7}
+  .cf-arrow.dashed{stroke-dasharray:4,3;stroke:var(--yellow)}
+  .cf-node{fill:var(--surface);stroke:var(--border);stroke-width:1;cursor:pointer}
+  .cf-node:hover{stroke:var(--blue);stroke-width:2}
+  .cf-icon{font-size:13px;fill:var(--text);pointer-events:none}
+  .cf-name{font-size:9px;fill:var(--text);font-weight:600;pointer-events:none}
+  .cf-sub{font-size:7px;fill:var(--text-muted);pointer-events:none}
+  .cf-lbl{font-size:7px;fill:var(--text-muted);font-style:italic}</style>`;
+}
+function cfArrows(nodes, arrows) {
+  return arrows.map(a => {
     const f = nodes[a.from], t = nodes[a.to];
     const cls = a.dashed ? 'cf-arrow dashed' : 'cf-arrow';
     const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
     return `<line x1="${f.x}" y1="${f.y}" x2="${t.x}" y2="${t.y}"
-      class="${cls}" marker-end="url(#cfHead)"/>
-      <text x="${mx}" y="${my - 5}" text-anchor="middle"
-        class="cf-lbl">${a.label}</text>`;
+      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></line>
+      ${a.label ? `<text x="${mx}" y="${my - 4}" text-anchor="middle"
+        class="cf-lbl">${a.label}</text>` : ''}`;
   }).join('');
-
-  const nodesSvg = nodes.map(n => `
-    <rect x="${n.x - 38}" y="${n.y - 22}" width="76" height="44"
-      rx="6" class="cf-node"/>
-    <text x="${n.x}" y="${n.y - 5}" text-anchor="middle"
-      class="cf-icon">${n.icon}</text>
-    <text x="${n.x}" y="${n.y + 10}" text-anchor="middle"
-      class="cf-name">${n.label}</text>
-    <text x="${n.x}" y="${n.y + 22}" text-anchor="middle"
-      class="cf-sub">${n.sub}</text>`).join('');
-
-  return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
-    class="cf-svg" role="img" aria-label="Context flow diagram">
-    <defs>
-      <marker id="cfHead" markerWidth="6" markerHeight="4"
-        refX="6" refY="2" orient="auto">
-        <polygon points="0 0, 6 2, 0 4" fill="var(--green)"/>
-      </marker>
-      <style>
-        .cf-arrow{stroke:var(--green);stroke-width:1.5;opacity:.7}
-        .cf-arrow.dashed{stroke-dasharray:4,3;stroke:var(--yellow)}
-        .cf-node{fill:var(--surface);stroke:var(--border);stroke-width:1}
-        .cf-icon{font-size:14px;fill:var(--text)}
-        .cf-name{font-size:10px;fill:var(--text);font-weight:600}
-        .cf-sub{font-size:8px;fill:var(--text-muted)}
-        .cf-lbl{font-size:8px;fill:var(--text-muted);font-style:italic}
-      </style>
-    </defs>${arrowsSvg}${nodesSvg}</svg>
-    ${contextBudgetLegend()}</div>`;
 }
-
+function cfNodes(nodes) {
+  return nodes.map(n => `<g class="cf-node-g">
+    <rect x="${n.x - 36}" y="${n.y - 20}" width="72" height="40"
+      rx="6" class="cf-node"><title>${n.tip}</title></rect>
+    <text x="${n.x}" y="${n.y - 4}" text-anchor="middle" class="cf-icon">${n.icon}</text>
+    <text x="${n.x}" y="${n.y + 8}" text-anchor="middle" class="cf-name">${n.label}</text>
+    <text x="${n.x}" y="${n.y + 18}" text-anchor="middle" class="cf-sub">${n.sub}</text>
+  </g>`).join('');
+}
 function contextBudgetLegend() {
   const items = [
     { label: 'System prompt', pct: 10, color: 'var(--blue)' },

@@ -49,14 +49,12 @@
             <h2>🔄 Agent Baton <button class="shb" data-tip="baton" aria-label="Help: Baton">?</button></h2><div x-html="renderBatonFlow(batonState)"></div></section></template>
         <template x-if="isView('live')"><section id="panel-activity" class="panel" data-tip="activity">
             <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
-        <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width" data-tip="context-flow">
+        <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width">
             <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div></section></template>
-        <!-- LOGS: 3 panels (streaming chronological) -->
-        <template x-if="isView('logs')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">
-            <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
+        <!-- LOGS: 2 panels (streaming chronological) -->
         <template x-if="isView('logs')"><section id="panel-router-log" class="panel" data-tip="router-log">
             <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>
-        <template x-if="isView('logs')"><section id="panel-ticket-log" class="panel full-width" data-tip="ticket-log">
+        <template x-if="isView('logs')"><section id="panel-ticket-log" class="panel" data-tip="ticket-log">
             <h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help: Tickets">?</button></h2><div class="log-scroll" x-html="renderTicketLog(ticketLog)"></div></section></template>
         <!-- OPS: 6 panels (monitoring + analytics) -->
         <section id="panel-github" class="panel" x-show="isView('ops')" data-tip="github">
@@ -71,13 +69,15 @@
             <h2>📐 LLM Context <button class="shb" data-tip="llm-context" aria-label="Help: LLM">?</button></h2><div x-html="renderLLMContext()"></div></section>
         <section id="panel-wiki-health" class="panel" x-show="isView('ops')" data-tip="wiki">
             <h2>📚 Wiki Health <button class="shb" data-tip="wiki" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiPanel(wikiHealth)"></div></section>
-        <!-- FLEET: 5 panels (inventory + config) -->
+        <!-- FLEET: 6 panels (inventory + config + health) -->
+        <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">
+            <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-devices" class="panel" data-tip="devices">
             <h2>🏗️ Devices <button class="shb" data-tip="devices" aria-label="Help: Devices">?</button></h2><div x-html="renderDeviceCards(devices)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-services" class="panel" data-tip="services">
             <h2>⚡ Services <button class="shb" data-tip="services" aria-label="Help: Services">?</button></h2><div x-html="renderServiceCards(services)"></div></section></template>
-        <template x-if="isView('fleet')"><section id="panel-settings" class="panel full-width" data-tip="settings">
-            <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-form-container"></div><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-settings" class="panel" data-tip="settings">
+            <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div><div id="settings-form-container"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-config" class="panel" data-tip="config">
             <h2>⚙️ Config <button class="shb" data-tip="config" aria-label="Help: Config">?</button></h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-test" class="panel" data-tip="test-panel">
