@@ -1,6 +1,12 @@
 # devenv-ops
 
-Development environment operations hub — global Copilot resources, LLM task router, fleet monitoring dashboard.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
+[![Lint: ≤100 lines](https://img.shields.io/badge/lint-%E2%89%A4100%20lines-blue)](#)
+
+**Copilot workbench for a personal AI-augmented dev environment.**
+Routes prompts across 8 custom agents, monitors an Ollama fleet,
+and deploys global skills/instructions to `~/.copilot/` via one command.
 
 ## How It Works
 
@@ -44,7 +50,15 @@ devenv-ops (source of truth)          ~/.copilot/ (runtime)
 ## Quick Start
 
 ```bash
-npm start              # Dashboard on :8090
+# Option A — native Node
+npm run setup          # Install deps + confirm environment
+npm start              # Dashboard on http://localhost:8090
+
+# Option B — Docker
+docker compose up      # Dashboard on http://localhost:8090
+```
+
+```bash
 npm run deploy:apply   # Deploy repo → ~/.copilot/
 npm run sync           # Pull ~/.copilot/ → repo
 npm test               # Playwright E2E tests
