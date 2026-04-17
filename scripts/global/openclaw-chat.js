@@ -3,7 +3,7 @@
 // OpenClaw Chat — OpenAI-compatible dispatch to LiteLLM fleet gateway
 // Direct Tailscale HTTP, no SSH tunnel required
 
-const OPENCLAW_BASE = process.env.OPENCLAW_URL || 'http://100.78.22.13:4000';
+const OPENCLAW_BASE = process.env.OPENCLAW_URL || 'http://localhost:4000';
 const DEFAULT_MODEL = 'qwen2.5-7b';
 const CHAT_TIMEOUT_MS = 120000;
 const HEALTH_TIMEOUT_MS = 5000;
