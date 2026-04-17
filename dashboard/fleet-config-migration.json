@@ -40,7 +40,7 @@
     { "id": "chromebook-2-ollama", "name": "Chromebook-2 Ollama", "provider": "ollama", "tier": "local",
       "baseUrl": "http://100.87.216.75:11434",
       "apiFormat": "openai-compat", "healthEndpoint": "/api/tags", "modelsEndpoint": "/api/tags",
-      "auth": {"type":"none"}, "tags": ["local","chromebook","tbd"], "enabled": false,
+      "auth": {"type":"none"}, "tags": ["local","chromebook","slm"], "enabled": true,
       "meta": {"device":"chromebook-2","tailscaleIP":"100.87.216.75","status":"provisioning"} }
   ]
 }
