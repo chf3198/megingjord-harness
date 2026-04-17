@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy all global resources from this repo to ~/.copilot/
+# Deploy ALL resources (universal + personal) to ~/.copilot/
+# Dual-layer: plugin.json exposes universal only; this deploys all.
 # Default: dry-run. Pass --apply to actually deploy.
 set -euo pipefail
 
