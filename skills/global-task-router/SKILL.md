@@ -67,3 +67,6 @@ triggers:
 - Prompt hook injects lane context on substantive prompts.
 - Router CLI returns JSON for sample prompts.
 - Repository lint still passes.
+- **Fleet dispatch is operational**: `node scripts/global/task-router-dispatch.js --prompt "implement multi-file refactor" --execute` makes a live HTTP call to OpenClaw (`http://100.78.22.13:4000`) and returns a real model response.
+- Successful fleet dispatches are logged to `~/.copilot/openclaw-usage.log` via `openclaw-lane-log.js`.
+- `openclaw-chat.js --health` confirms gateway reachability before dispatch.
