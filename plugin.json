@@ -1,0 +1,32 @@
+{
+  "name": "devenv-ops",
+  "description": "AI agent governance harness — skills, agents, hooks for structured development workflows",
+  "version": "3.0.0",
+  "author": "chf3198",
+  "skills": [
+    "skills/docs-drift-maintenance",
+    "skills/github-actions-security-hardening",
+    "skills/github-capability-resolver",
+    "skills/github-ops-excellence",
+    "skills/github-ops-tree-router",
+    "skills/github-projects-agile-linkage",
+    "skills/github-release-incident-flow",
+    "skills/github-review-merge-admin",
+    "skills/github-ruleset-architecture",
+    "skills/github-ticket-lifecycle-orchestrator",
+    "skills/manager-ticket-lifecycle",
+    "skills/release-version-integrity",
+    "skills/repo-onboarding-standards",
+    "skills/repo-profile-governance",
+    "skills/repo-standards-router",
+    "skills/repo-structure-conventions",
+    "skills/role-baton-orchestrator",
+    "skills/role-collaborator-execution",
+    "skills/role-consultant-critique",
+    "skills/role-manager-execution",
+    "skills/secret-exposure-prevention",
+    "skills/web-regression-governance",
+    "skills/workflow-self-anneal"
+  ],
+  "agents": "agents/"
+}
