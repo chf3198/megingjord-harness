@@ -4,9 +4,18 @@
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![Lint: ≤100 lines](https://img.shields.io/badge/lint-%E2%89%A4100%20lines-blue)](#)
 
-**Copilot workbench for a personal AI-augmented dev environment.**
-Routes prompts across 8 custom agents, monitors an Ollama fleet,
-and deploys global skills/instructions to `~/.copilot/` via one command.
+**AI agent governance harness — skills, agents, hooks, and wiki.**
+24 universal skills ship as a VS Code Agent Plugin. Install via Git
+URL or develop the harness itself for personal fleet deployment.
+
+## Install as Agent Plugin
+
+In VS Code (with Copilot), run:
+> `Chat: Install Plugin From Source` → paste this repo's Git URL.
+
+You get: 24 governance skills, 8 custom agents, wiki seed content.
+No build step. No configuration. Works in VS Code, Copilot CLI,
+and Claude Code (via `.claude-plugin/` symlink).
 
 ## How It Works
 
@@ -40,7 +49,7 @@ Custom agents override VS Code Copilot AUTO model selection via
 
 ```
 devenv-ops (source of truth)          ~/.copilot/ (runtime)
-  skills/          (33) ──deploy──▶   skills/
+  skills/          (35) ──deploy──▶   skills/
   instructions/    (12) ──deploy──▶   instructions/
   agents/           (8) ──deploy──▶   agents/
   hooks/           (19) ──deploy──▶   hooks/
