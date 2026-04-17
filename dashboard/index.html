@@ -26,74 +26,69 @@
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <a href="#main-content" class="skip-link">Skip to content</a>
     <header class="header">
-        <div class="header-brand">
-            <h1>🖥️ DevEnv Ops</h1>
-            <span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span>
-        </div>
+        <div class="header-brand"><h1>🖥️ DevEnv Ops</h1><span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span></div>
         <nav class="header-nav" aria-label="Dashboard views">
-            <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
+            <button @click="setView('live')" :class="{active:isView('live')}" data-tip="view-live">🔴 Live</button>
+            <button @click="setView('logs')" :class="{active:isView('logs')}" data-tip="view-logs">📜 Logs</button>
             <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">📊 Ops</button>
+            <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
             <button @click="setView('wiki')" :class="{active:isView('wiki')}" data-tip="view-wiki">📚 Wiki</button>
-            <button @click="setView('resources')" :class="{active:isView('resources')}" data-tip="view-resources">📦 Resources</button>
-            <button @click="setView('settings')" :class="{active:isView('settings')}" data-tip="view-settings">⚙️ Settings</button>
             <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">📘 Help</button>
         </nav>
         <div class="header-actions">
-            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh all endpoints">↻</button>
-            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" :title="'Auto-refresh: ' + config.refreshSec + 's'">⏱️</button>
-            <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Run stress test">🧪</button>
-            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Toggle tooltips">💡</button>
-            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="High contrast">◐</button>
+            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh">↻</button>
+            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" :title="'Auto-refresh: '+config.refreshSec+'s'">⏱️</button>
+            <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Stress test">🧪</button>
+            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Tooltips">💡</button>
+            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="Contrast">◐</button>
         </div>
     </header>
-    <main id="main-content" class="dashboard-grid">
-        <template x-if="isView('fleet')"><section id="panel-baton" class="panel" data-tip="baton">
-            <h2>🔄 Agent Baton <button class="shb" data-tip="baton" aria-label="Help: Agent Baton">?</button></h2><div x-html="renderBatonFlow(batonState)"></div>
-        </section></template>
-        <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">
-            <h2>🏥 Fleet Health Log <button class="shb" data-tip="fleet-health" aria-label="Help: Fleet Health">?</button></h2><div x-html="renderFleetHealthLog(fleetHealthLog)"></div>
-        </section></template>
-        <template x-if="isView('fleet')"><section id="panel-activity" class="panel" data-tip="activity">
-            <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div>
-        </section></template>
-        <template x-if="isView('fleet')"><section id="panel-resources" class="panel" data-tip="resource-mon">
-            <h2>⚡ Resources <button class="shb" data-tip="resource-mon" aria-label="Help: Resources">?</button></h2><div x-html="renderResourceMonitor(devices, services)"></div>
-        </section></template>
-        <template x-if="isView('fleet')"><section id="panel-context-flow" class="panel" data-tip="context-flow">
-            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div>
-        </section></template>
-        <section id="panel-llm-context" class="panel" x-show="isView('ops')" data-tip="llm-context">
-            <h2>📐 LLM Context Windows <button class="shb" data-tip="llm-context" aria-label="Help">?</button></h2><div x-html="renderLLMContext()"></div></section>
+    <main id="main-content" class="dashboard-grid" :class="'view-'+currentView">
+        <!-- LIVE: 3 panels (animated-updates) -->
+        <template x-if="isView('live')"><section id="panel-baton" class="panel" data-tip="baton">
+            <h2>🔄 Agent Baton <button class="shb" data-tip="baton" aria-label="Help: Baton">?</button></h2><div x-html="renderBatonFlow(batonState)"></div></section></template>
+        <template x-if="isView('live')"><section id="panel-activity" class="panel" data-tip="activity">
+            <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
+        <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width" data-tip="context-flow">
+            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div></section></template>
+        <!-- LOGS: 3 panels (streaming chronological) -->
+        <template x-if="isView('logs')"><section id="panel-fleet-health" class="panel" data-tip="fleet-health">
+            <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
+        <template x-if="isView('logs')"><section id="panel-router-log" class="panel" data-tip="router-log">
+            <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>
+        <template x-if="isView('logs')"><section id="panel-ticket-log" class="panel full-width" data-tip="ticket-log">
+            <h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help: Tickets">?</button></h2><div class="log-scroll" x-html="renderTicketLog(ticketLog)"></div></section></template>
+        <!-- OPS: 6 panels (monitoring + analytics) -->
         <section id="panel-github" class="panel" x-show="isView('ops')" data-tip="github">
-            <h2>🐙 GitHub Activity <button class="shb" data-tip="github" aria-label="Help">?</button></h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
+            <h2>🐙 GitHub <button class="shb" data-tip="github" aria-label="Help: GitHub">?</button></h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
         <section id="panel-quotas" class="panel" x-show="isView('ops')" data-tip="quotas">
-            <h2>📊 Quotas <button class="shb" data-tip="quotas" aria-label="Help">?</button></h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
+            <h2>📊 Quotas <button class="shb" data-tip="quotas" aria-label="Help: Quotas">?</button></h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
         <section id="panel-router" class="panel" x-show="isView('ops')" data-tip="router">
-            <h2>🛣️ Task Router Lanes <button class="shb" data-tip="router" aria-label="Help">?</button></h2><div x-html="renderRouterPanel(routerStats)"></div></section>
-        <section id="panel-router-log" class="panel" x-show="isView('ops')" data-tip="router-log">
-            <h2>📋 LLM Router Log <button class="shb" data-tip="router-log" aria-label="Help">?</button></h2><div x-html="renderRouterLog()"></div></section>
+            <h2>🛣️ Router Lanes <button class="shb" data-tip="router" aria-label="Help: Router">?</button></h2><div x-html="renderRouterPanel(routerStats)"></div></section>
         <section id="panel-governance" class="panel" x-show="isView('ops')" data-tip="governance">
-            <h2>🛡️ Governance <button class="shb" data-tip="governance" aria-label="Help">?</button></h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
-        <section id="panel-ticket-log" class="panel" x-show="isView('ops')" data-tip="ticket-log"><h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help">?</button></h2><div x-html="renderTicketLog(ticketLog)"></div></section>
-        <section id="panel-config" class="panel" x-show="isView('ops')" data-tip="config">
-            <h2>⚙️ Dashboard Settings</h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section>
-        <section id="panel-test" class="panel" x-show="isView('ops')" data-tip="test-panel">
-            <h2>🧪 Quick Stress Test</h2><div x-html="renderStressPanel(testRun)"></div></section>
-        <section id="panel-wiki" class="panel" x-show="isView('ops')" data-tip="wiki">
-            <h2>📚 Wiki Health</h2><div x-html="renderWikiPanel(wikiHealth)"></div></section>
-        <template x-if="isView('wiki')"><section id="panel-wiki-metrics" class="panel" data-tip="wiki-metrics"><h2>📊 Wiki Metrics</h2><div x-html="renderWikiMetrics(wikiMetrics, wikiHealth)"></div></section></template>
-        <template x-if="isView('wiki')"><section id="panel-wiki-reader" class="panel" data-tip="wiki-reader"><h2>📚 Research Wiki</h2><div x-html="renderWikiReader(wikiPages)"></div></section></template>
-        <template x-if="isView('resources')"><section id="panel-devices" class="panel" data-tip="devices">
-            <h2>🏗️ Fleet Devices</h2><div x-html="renderDeviceCards(devices)"></div>
-        </section></template>
-        <template x-if="isView('resources')"><section id="panel-services" class="panel" data-tip="services">
-            <h2>⚡ Services</h2><div x-html="renderServiceCards(services)"></div>
-        </section></template>
-        <template x-if="isView('settings')"><section id="panel-settings" class="panel full-width" data-tip="settings">
-            <h2>⚙️ Fleet Resources</h2><div id="settings-form-container"></div><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h => { window._hostInfo = h; $el.innerHTML = renderSettingsPanel(loadFleetResources(), window._lastProbeResults, h); })"></div>
-        </section></template>
+            <h2>🛡️ Governance <button class="shb" data-tip="governance" aria-label="Help: Governance">?</button></h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
+        <section id="panel-llm-context" class="panel" x-show="isView('ops')" data-tip="llm-context">
+            <h2>📐 LLM Context <button class="shb" data-tip="llm-context" aria-label="Help: LLM">?</button></h2><div x-html="renderLLMContext()"></div></section>
+        <section id="panel-wiki-health" class="panel" x-show="isView('ops')" data-tip="wiki">
+            <h2>📚 Wiki Health <button class="shb" data-tip="wiki" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiPanel(wikiHealth)"></div></section>
+        <!-- FLEET: 5 panels (inventory + config) -->
+        <template x-if="isView('fleet')"><section id="panel-devices" class="panel" data-tip="devices">
+            <h2>🏗️ Devices <button class="shb" data-tip="devices" aria-label="Help: Devices">?</button></h2><div x-html="renderDeviceCards(devices)"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-services" class="panel" data-tip="services">
+            <h2>⚡ Services <button class="shb" data-tip="services" aria-label="Help: Services">?</button></h2><div x-html="renderServiceCards(services)"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-settings" class="panel full-width" data-tip="settings">
+            <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-form-container"></div><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-config" class="panel" data-tip="config">
+            <h2>⚙️ Config <button class="shb" data-tip="config" aria-label="Help: Config">?</button></h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-test" class="panel" data-tip="test-panel">
+            <h2>🧪 Stress Test <button class="shb" data-tip="test-panel" aria-label="Help: Test">?</button></h2><div x-html="renderStressPanel(testRun)"></div></section></template>
+        <!-- WIKI: 2 panels -->
+        <template x-if="isView('wiki')"><section id="panel-wiki-metrics" class="panel" data-tip="wiki-metrics">
+            <h2>📊 Metrics <button class="shb" data-tip="wiki-metrics" aria-label="Help: Metrics">?</button></h2><div x-html="renderWikiMetrics(wikiMetrics, wikiHealth)"></div></section></template>
+        <template x-if="isView('wiki')"><section id="panel-wiki-reader" class="panel wiki-main" data-tip="wiki-reader">
+            <h2>📚 Research Wiki <button class="shb" data-tip="wiki-reader" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiReader(wikiPages)"></div></section></template>
+        <!-- HELP: 1 panel full-width -->
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width" data-tip="help">
-            <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div>
-        </section></template>
+            <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>
     </main>
     <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>devenv-ops v3.0.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>

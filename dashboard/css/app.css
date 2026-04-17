@@ -62,8 +62,8 @@ body {
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem; padding: 0.5rem;
-  min-height: calc(100vh - 80px);
-  align-content: start;
+  height: calc(100dvh - 56px - 28px);
+  align-content: start; overflow: hidden;
 }
 
 .panel h2 {

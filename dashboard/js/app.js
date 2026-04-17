@@ -5,7 +5,7 @@ function dashboardApp() {
     devices: [], services: [], quotas: [], liveQuotas: [],
     fleetStats: {}, routerStats: {},
     config: { refreshSec: 5, highContrast: false },
-    currentView: 'fleet', helpDevMode: false,
+    currentView: 'live', helpDevMode: false,
     batonState: [],
     ticketLog: [],
     activityLog: [],
