@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Deploy ALL resources (universal + personal) to ~/.copilot/
-# Dual-layer: plugin.json exposes universal only; this deploys all.
-# Default: dry-run. Pass --apply to actually deploy.
+# Deploy resources to ~/.copilot/. Default: dry-run. Pass --apply to deploy.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -68,6 +66,7 @@ if ! $APPLY; then
   deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
   deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
   deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
+  echo "── Dashboard ── Would deploy: index.html + css/ + js/"
   echo "Re-run with --apply to deploy changes."
   exit 0
 fi
@@ -82,17 +81,19 @@ deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
 deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
 deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
 
-# Deploy wiki index + log + schema
+# Dashboard: static assets (HTML + css/ + js/)
+echo "── Dashboard ──"
+mkdir -p "$COPILOT/dashboard/css" "$COPILOT/dashboard/js"
+cp "$ROOT/dashboard/index.html" "$COPILOT/dashboard/"
+cp "$ROOT"/dashboard/css/*.css "$COPILOT/dashboard/css/"
+cp "$ROOT"/dashboard/js/*.js "$COPILOT/dashboard/js/"
+echo "  ✅ Dashboard deployed"
+echo ""
+
 for wf in "$ROOT/wiki/index.md" "$ROOT/wiki/log.md" "$ROOT/WIKI.md"; do
   [[ -f "$wf" ]] && cp "$wf" "$COPILOT/wiki/$(basename "$wf")"
 done
-
-# Hooks: deploy excluding pycache/state
-rsync -a --exclude='__pycache__' \
-  --exclude='state/' \
-  "$ROOT/hooks/" "$COPILOT/hooks/"
-echo "── Hooks ──"
-echo "  ✅ Deployed (excluding cache/state)"
+rsync -a --exclude='__pycache__' --exclude='state/' "$ROOT/hooks/" "$COPILOT/hooks/"
+echo "── Hooks ── ✅ Deployed (excluding cache/state)"
 echo ""
-
 echo "Done. Backup at: $BACKUP"

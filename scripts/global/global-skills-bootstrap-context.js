@@ -33,12 +33,24 @@ function buildPaths(repoPath) {
   };
 }
 
+function dashboardLaunchScript() {
+  return `node ${path.join(copilotDir, 'scripts', 'dashboard-serve.js')}`;
+}
+
+function installDashboardScript(repoPath) {
+  const pkgPath = path.join(repoPath, 'package.json');
+  if (!require('fs').existsSync(pkgPath)) return false;
+  const pkg = JSON.parse(require('fs').readFileSync(pkgPath, 'utf8'));
+  if (!pkg.scripts) pkg.scripts = {};
+  if (pkg.scripts.dashboard) return false;
+  pkg.scripts.dashboard = dashboardLaunchScript();
+  require('fs').writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+  return true;
+}
+
 module.exports = {
-  resolveRuntime,
-  buildPaths,
-  globalPolicy,
-  globalSkill,
-  governanceCall,
-  blockStart,
-  blockEnd
+  resolveRuntime, buildPaths,
+  globalPolicy, globalSkill, governanceCall,
+  blockStart, blockEnd,
+  dashboardLaunchScript, installDashboardScript
 };
