@@ -20,8 +20,8 @@ Make OpenClaw usage operational by default instead of optional:
 Run before implementation sessions and every 60–90 minutes during long sessions.
 
 1. **Network lane check**
-   - Validate Tailscale and SSH to `windows-laptop`.
-   - If unreachable, run recovery path immediately.
+   - Auto-detect fleet via `fleet-config.js profile`.
+   - If profile is `solo`, skip fleet checks — use cloud fallback chain.
 2. **Gateway health check**
    - Confirm OpenClaw service is up and model status responds.
 3. **Provider budget check**
@@ -39,9 +39,10 @@ Run before implementation sessions and every 60–90 minutes during long session
 
 ### Minimum target utilization
 
-For coding sessions longer than 45 minutes:
-- At least **60%** of implementation/test workload should execute through OpenClaw lane.
-- If below target, move the next heavy slice to OpenClaw before continuing.
+For coding sessions longer than 45 minutes **when fleet is available** (profile=full or degraded):
+- Prefer fleet lane for heavy workloads when reachable.
+- If fleet is unavailable (profile=solo), use cloud free tier (Groq/Cerebras/OpenRouter).
+- No fixed percentage mandate — use fleet when it adds value, skip when it doesn't.
 
 ## Recovery Playbook
 

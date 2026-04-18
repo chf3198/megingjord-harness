@@ -3,11 +3,11 @@
 // Usage: node scripts/health-check.js
 
 const http = require('http');
+const { resolveFleet } = require('./global/fleet-config');
 
-const DEVICES = [
-  { id: 'penguin-1', host: '100.86.248.35', port: 11434 },
-  { id: 'windows-laptop', host: '100.78.22.13', port: 11434 }
-];
+const DEVICES = resolveFleet()
+  .filter(d => !d.local && d.resolvedIP)
+  .map(d => ({ id: d.id, host: d.resolvedIP, port: 11434 }));
 
 function probe(host, port, path, timeout = 3000) {
   return new Promise((resolve) => {

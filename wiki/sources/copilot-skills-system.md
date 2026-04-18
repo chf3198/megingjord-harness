@@ -4,7 +4,7 @@ type: source
 created: 2026-04-14
 updated: 2026-04-14
 tags: []
-sources: [/home/curtisfranks/devenv-ops/raw/articles/copilot-skills-system.md]
+sources: [raw/articles/copilot-skills-system.md]
 related: []
 status: draft
 ---
@@ -35,4 +35,4 @@ Main Concepts:
 
 No claims that contradict existing knowledge were found in the provided source.
 
-*Source: /home/curtisfranks/devenv-ops/raw/articles/copilot-skills-system.md*
+*Source: raw/articles/copilot-skills-system.md*

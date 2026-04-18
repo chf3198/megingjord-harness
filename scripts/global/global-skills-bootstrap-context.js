@@ -1,7 +1,9 @@
 const path = require('path');
+const os = require('os');
 
-const globalPolicy = '/home/curtisfranks/.copilot/openclaw/OPENCLAW_UNIVERSAL_SYSTEM.md';
-const globalSkill = '/home/curtisfranks/.copilot/skills/openclaw-universal-system/SKILL.md';
+const copilotDir = path.join(os.homedir(), '.copilot');
+const globalPolicy = path.join(copilotDir, 'openclaw', 'OPENCLAW_UNIVERSAL_SYSTEM.md');
+const globalSkill = path.join(copilotDir, 'skills', 'openclaw-universal-system', 'SKILL.md');
 const governanceCall = 'bash .github/scripts/check-global-governance.sh';
 const blockStart = '<!-- GLOBAL-SKILLS-MANAGED:START -->';
 const blockEnd = '<!-- GLOBAL-SKILLS-MANAGED:END -->';

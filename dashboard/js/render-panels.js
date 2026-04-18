@@ -28,7 +28,7 @@ const SERVICE_URLS = {
   'groq': 'https://console.groq.com/',
   'cerebras': 'https://cloud.cerebras.ai/',
   'openrouter': 'https://openrouter.ai/activity',
-  'openclaw': 'http://100.78.22.13:4000/ui/'
+  'openclaw': (window.__fleetConfig?.openclawURL || '') + '/ui/'
 };
 
 function renderServiceCards(services) {
