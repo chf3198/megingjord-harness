@@ -23,7 +23,8 @@ const { recordAccess, getWikiMetrics } = require('./wiki-metrics');
 const DASH = path.join(ROOT, 'dashboard');
 function serveStatic(req, res) {
   const pn = req.url.split('?')[0];
-  let fp = pn.startsWith('/dashboard/') ? path.join(ROOT, pn) : path.join(DASH, pn);
+  let fp = path.join(ROOT, pn === '/' ? 'dashboard/index.html' : pn.startsWith('/dashboard/') || pn.startsWith('/inventory/') ? pn : 'dashboard' + pn);
+  fp = path.resolve(fp);
   if(!fp.startsWith(ROOT)){res.writeHead(403);res.end();return;}
   if(fs.existsSync(fp)&&fs.statSync(fp).isDirectory()&&!pn.endsWith('/')){res.writeHead(302,{Location:pn+'/'});res.end();return;}
   if(fp.endsWith('/')||fp.endsWith(path.sep)) fp=path.join(fp,'index.html');
