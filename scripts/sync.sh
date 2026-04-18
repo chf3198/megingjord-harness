@@ -70,22 +70,25 @@ sync_files "$COPILOT/scripts" "$ROOT/scripts/global" "Global Scripts"
 sync_files "$COPILOT/agents" "$ROOT/agents" "Agents"
 sync_dir "$COPILOT/wiki" "$ROOT/wiki" "Wiki"
 
-# Hooks: copy files, skip __pycache__ and state/
-echo "── Hooks ──"
-if [[ -d "$COPILOT/hooks" ]]; then
+# Dashboard: sync static assets back
+echo "── Dashboard ──"
+if [[ -d "$COPILOT/dashboard" ]]; then
   if $DRY_RUN; then
-    find "$COPILOT/hooks" -type f \
-      ! -path "*__pycache__*" ! -path "*/state/*" \
-      -exec basename {} \; | while read -r f; do
-      echo "  Would sync: $f"
-    done
+    echo "  Would sync: dashboard/ (html, css, js)"
   else
-    rsync -a --exclude='__pycache__' \
-      --exclude='state/' \
-      "$COPILOT/hooks/" "$ROOT/hooks/"
-    echo "  ✅ Hooks synced (excluding cache/state)"
+    mkdir -p "$ROOT/dashboard/css" "$ROOT/dashboard/js"
+    cp "$COPILOT/dashboard/index.html" "$ROOT/dashboard/" 2>/dev/null || true
+    cp "$COPILOT"/dashboard/css/*.css "$ROOT/dashboard/css/" 2>/dev/null || true
+    cp "$COPILOT"/dashboard/js/*.js "$ROOT/dashboard/js/" 2>/dev/null || true
+    echo "  ✅ Dashboard synced"
   fi
 fi
 echo ""
 
+echo "── Hooks ──"
+if [[ -d "$COPILOT/hooks" ]]; then
+  if $DRY_RUN; then echo "  Would sync: hooks/"
+  else rsync -a --exclude='__pycache__' --exclude='state/' "$COPILOT/hooks/" "$ROOT/hooks/"; echo "  ✅ Hooks synced"; fi
+fi
+echo ""
 echo "Done. Review changes with: git diff --stat"
