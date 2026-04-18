@@ -10,13 +10,19 @@ const LOG_FILE = path.join(LOG_DIR, 'fleet-health.jsonl');
 const MAX_ENTRIES = 500;
 const CHECK_INTERVAL = 60000; // 1 min
 
-const FLEET = {
-  'penguin-1': { url: 'http://100.86.248.35:11434', type: 'ollama' },
-  'windows-laptop': { url: 'http://100.78.22.13:11434', type: 'ollama' },
-};
-const OPENCLAW = {
-  'windows-laptop': { url: 'http://100.78.22.13:4000/health/liveliness' }
-};
+const { resolveFleet, getOpenClawURL } = require('./global/fleet-config');
+
+function buildFleetTargets() {
+  const fleet = {};
+  const claw = {};
+  for (const d of resolveFleet().filter(x => !x.local && x.resolvedIP)) {
+    fleet[d.id] = { url: `http://${d.resolvedIP}:11434`, type: 'ollama' };
+  }
+  const clawURL = getOpenClawURL();
+  if (clawURL) claw['windows-laptop'] = { url: `${clawURL}/health/liveliness` };
+  return { fleet, claw };
+}
+const { fleet: FLEET, claw: OPENCLAW } = buildFleetTargets();
 
 function logEntry(device, status, detail) {
   if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });

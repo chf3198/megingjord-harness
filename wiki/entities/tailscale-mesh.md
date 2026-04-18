@@ -15,8 +15,8 @@ WireGuard-based mesh VPN connecting all fleet devices.
 
 ## Topology
 ```
-chromebook-2 (100.115.92.2) ──→ penguin-1 (100.86.248.35)
-         └────────────────────→ windows-laptop (100.78.22.13)
+chromebook-2 ──→ penguin-1
+         └──→ windows-laptop
 ```
 
 ## Fleet Management Operations
@@ -24,14 +24,14 @@ chromebook-2 (100.115.92.2) ──→ penguin-1 (100.86.248.35)
 ### SSH Access
 Agent uses `sshpass` + `OPENCLAW_DEVICE_PASSWORD` from `.env`:
 ```
-sshpass -p "$OPENCLAW_DEVICE_PASSWORD" ssh admin@100.78.22.13
+sshpass -p "$OPENCLAW_DEVICE_PASSWORD" ssh $FLEET_SSH_USER@<tailscale-ip>
 ```
 Credentials never hardcoded — sourced from gitignored `.env`.
 
 ### Health Monitoring
-Dashboard server probes fleet every 60s via Tailscale IPs:
-- Ollama: `GET http://<ip>:11434/api/tags`
-- OpenClaw: `GET http://<ip>:4000/health`
+Dashboard server probes fleet every 60s via Tailscale IPs (auto-detected):
+- Ollama: `GET http://<tailscale-ip>:11434/api/tags`
+- OpenClaw: `GET http://<tailscale-ip>:4000/health`
 - Failures logged to `.dashboard/fleet-health.jsonl`
 
 ### OpenClaw Control

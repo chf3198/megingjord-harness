@@ -4,7 +4,7 @@ type: source
 created: 2026-04-14
 updated: 2026-04-14
 tags: []
-sources: [/home/curtisfranks/devenv-ops/raw/articles/devenv-fleet-topology.md]
+sources: [raw/articles/devenv-fleet-topology.md]
 related: []
 status: draft
 ---
@@ -14,12 +14,12 @@ status: draft
 ## Summary
 
 ## Summary
-A three-device development and inference setup using Tailscale mesh is described. The devices include a primary Chromebook (penguin) for the IDE host, a secondary Chromebook (penguin-1) for Ollama with limited resources, and a Dell XPS 13 laptop (windows-laptop) for running OpenClaw/LiteLLM gateway and more resource-intensive Ollama tasks. The routing strategy separates fleet-lane tasks to OpenClaw, free-lane tasks to local tools or free cloud APIs, and premium-lane tasks to Copilot Pro. The setup has constraints due to limited RAM on the primary Chromebook, with inference offloaded to the laptop via Tailscale VPN, and a memory watchdog monitoring for OOM conditions during heavy operations.
+A three-device development and inference setup using Tailscale mesh is described. The devices include a primary Chromebook (penguin) for the IDE host, a secondary Chromebook (penguin-1) for Ollama with limited resources, and a Windows laptop (windows-laptop) for running OpenClaw/LiteLLM gateway and more resource-intensive Ollama tasks. The routing strategy separates fleet-lane tasks to OpenClaw, free-lane tasks to local tools or free cloud APIs, and premium-lane tasks to Copilot Pro. The setup has constraints due to limited RAM on the primary Chromebook, with inference offloaded to the laptop via Tailscale VPN, and a memory watchdog monitoring for OOM conditions during heavy operations.
 
 ## Entities
 - penguin (Primary Chromebook IDE host)
 - penguin-1 (Secondary Chromebook)
-- windows-laptop (Dell XPS 13)
+- windows-laptop (inference host)
 - VS Code
 - Copilot agent
 - dashboard server
@@ -39,4 +39,4 @@ A three-device development and inference setup using Tailscale mesh is described
 - Offloading inference to a more powerful device via Tailscale VPN.
 - Monitoring for Out Of Memory (OOM) conditions with a memory watchdog.
 
-*Source: /home/curtisfranks/devenv-ops/raw/articles/devenv-fleet-topology.md*
+*Source: raw/articles/devenv-fleet-topology.md*

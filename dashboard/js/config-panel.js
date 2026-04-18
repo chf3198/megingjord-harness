@@ -30,5 +30,5 @@ function renderConfigPanel(config, enabled, tips) {
     <p><strong>High contrast:</strong> ${config.highContrast ? 'On' : 'Off'}</p>
     <p><strong>Tooltips:</strong> ${tips ? 'On' : 'Off'}</p>
     <p class="config-note">Drag slider to set refresh interval (3–60s).</p>
-  </div>`;
+  </div>${renderFleetSettingsPanel()}`;
 }

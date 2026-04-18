@@ -16,10 +16,10 @@ It applies across all VS Code Copilot agent chats on this machine, regardless of
 ## Global Scope
 
 The canonical shared assets live here:
-- Strategy: `/home/curtisfranks/.copilot/openclaw/OPENCLAW_UNIVERSAL_SYSTEM.md`
-- Quick reference: `/home/curtisfranks/.copilot/openclaw/OPENCLAW_UNIVERSAL_QUICK_REF.md`
-- Routing map: `/home/curtisfranks/.copilot/openclaw/task-router-profile-map.json`
-- Bootstrap command: `/home/curtisfranks/.local/bin/openclaw-bootstrap-repo`
+- Strategy: `~/.copilot/openclaw/OPENCLAW_UNIVERSAL_SYSTEM.md`
+- Quick reference: `~/.copilot/openclaw/OPENCLAW_UNIVERSAL_QUICK_REF.md`
+- Routing map: `~/.copilot/openclaw/task-router-profile-map.json`
+- Bootstrap command: `~/.local/bin/openclaw-bootstrap-repo`
 
 Repository docs may add overlays, but they should not redefine the global policy.
 

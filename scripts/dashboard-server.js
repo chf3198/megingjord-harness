@@ -2,16 +2,15 @@
 require('dotenv').config(); const http = require('http'); const fs = require('fs'); const path = require('path');
 const PORT = process.env.DASH_PORT || 8090; const ROOT = path.resolve(__dirname, '..');
 const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json'};
-const FLEET = {
-  'penguin-1': process.env.DEVICE_PENGUIN1_URL || 'http://100.86.248.35:11434',
-  'penguin-1-ollama': process.env.DEVICE_PENGUIN1_URL || 'http://100.86.248.35:11434',
-  'windows-laptop': process.env.DEVICE_WINDOWS_URL || 'http://100.78.22.13:11434',
-  'windows-laptop-ollama': process.env.DEVICE_WINDOWS_URL || 'http://100.78.22.13:11434',
-  'openclaw-litellm': process.env.OPENCLAW_URL || 'http://100.78.22.13:4000',
-  'chromebook-2': process.env.DEVICE_CHROMEBOOK2_URL || 'http://100.87.216.75:11434',
-  'chromebook-2-ollama': process.env.DEVICE_CHROMEBOOK2_URL || 'http://100.87.216.75:11434'
-};
-const OPENCLAW = process.env.OPENCLAW_URL || 'http://100.78.22.13:4000'; const os = require('os');
+const { resolveFleet, getDeviceURL, getOpenClawURL } = require('./global/fleet-config');
+function buildFleetMap() {
+  const fleet = {}; for (const d of resolveFleet()) {
+    if (!d.resolvedIP) continue; const ip = d.resolvedIP;
+    fleet[d.id] = `http://${ip}:11434`; fleet[`${d.id}-ollama`] = `http://${ip}:11434`;
+    if (d.services?.includes('openclaw')) fleet['openclaw-litellm'] = `http://${ip}:4000`;
+  } return fleet;
+}
+const FLEET = buildFleetMap(); const OPENCLAW = getOpenClawURL() || ''; const os = require('os');
 function getHostInfo() {
   const up = os.uptime(); const h = Math.floor(up/3600); const m = Math.floor((up%3600)/60);
   return { hostname: os.hostname(), platform: os.platform(), arch: os.arch(),

@@ -1,32 +1,21 @@
 // scripts/wiki/wiki-llm.js — LLM integration for wiki operations
 // Fleet routing: OpenClaw (primary) → Groq → Cerebras (failover)
 
-const ENDPOINTS = [
-  {
-    name: 'OpenClaw',
-    url: 'http://100.78.22.13:4000/v1/chat/completions',
-    model: 'ollama/mistral',
-    key: process.env.OPENCLAW_API_KEY || 'sk-1234',
-  },
-  {
-    name: 'OpenClaw-7B',
-    url: 'http://100.78.22.13:4000/v1/chat/completions',
-    model: 'ollama/qwen2.5:7b-instruct',
-    key: process.env.OPENCLAW_API_KEY || 'sk-1234',
-  },
-  {
-    name: 'Groq',
-    url: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'llama-3.3-70b-versatile',
-    key: process.env.GROQ_API_KEY || '',
-  },
-  {
-    name: 'Cerebras',
-    url: 'https://api.cerebras.ai/v1/chat/completions',
-    model: 'llama-3.3-70b',
-    key: process.env.CEREBRAS_API_KEY || '',
-  },
-];
+const ENDPOINTS = (() => {
+  let ocURL;
+  try { ocURL = require('../global/fleet-config').getOpenClawURL(); } catch { ocURL = null; }
+  const oc = ocURL ? `${ocURL}/v1/chat/completions` : null;
+  const list = [];
+  if (oc) {
+    list.push({ name: 'OpenClaw', url: oc, model: 'ollama/mistral', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
+    list.push({ name: 'OpenClaw-7B', url: oc, model: 'ollama/qwen2.5:7b-instruct', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
+  }
+  list.push({ name: 'Groq', url: 'https://api.groq.com/openai/v1/chat/completions',
+    model: 'llama-3.3-70b-versatile', key: process.env.GROQ_API_KEY || '' });
+  list.push({ name: 'Cerebras', url: 'https://api.cerebras.ai/v1/chat/completions',
+    model: 'llama-3.3-70b', key: process.env.CEREBRAS_API_KEY || '' });
+  return list;
+})();
 
 async function callLLM(prompt) {
   for (const ep of ENDPOINTS) {

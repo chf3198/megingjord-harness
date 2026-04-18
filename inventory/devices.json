@@ -18,7 +18,6 @@
       },
       "swap": "none (kernel-blocked)",
       "tailscale": true,
-      "tailscaleIP": "100.86.248.35",
       "ollama": true,
       "ollamaModels": [
         "qwen3.5:0.8b",
@@ -37,7 +36,6 @@
       "alias": "OpenClaw Host",
       "role": "primary-inference",
       "os": "Windows",
-      "hostname": "DESKTOP-909A7KM",
       "arch": "x86_64",
       "ram": {
         "total": "16GB",
@@ -48,8 +46,6 @@
         "free": "~39.5GB"
       },
       "tailscale": true,
-      "tailscaleIP": "100.78.22.13",
-      "sshUser": "admin",
       "ollama": true,
       "ollamaHost": "0.0.0.0",
       "ollamaModels": [
@@ -85,7 +81,6 @@
         "free": "~8GB"
       },
       "tailscale": true,
-      "tailscaleIP": "100.115.92.2",
       "local": true,
       "ollama": false,
       "ollamaModels": [],

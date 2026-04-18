@@ -34,12 +34,9 @@ agents/          ──deploy──▶  agents/
 
 ## Fleet Topology
 
-```
-penguin-1 (SML Chromebook)   windows-laptop (OpenClaw)   chromebook-2
-  Ollama: tiny models          Ollama: 7B models           TBD
-  2.7GB RAM                    16GB RAM
-         └──────── Tailscale VPN mesh ────────┘
-```
+Auto-detected via `scripts/global/fleet-config.js`. Devices in `inventory/devices.json`.
+IPs resolved from `.env` overrides or Tailscale auto-discovery.
+Run `node scripts/global/fleet-config.js profile` for current state.
 
 ## Constraints
 

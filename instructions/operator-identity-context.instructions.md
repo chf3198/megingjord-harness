@@ -17,7 +17,7 @@ Load and apply the `operator-identity-context` skill at the start of every task.
    - Consultant (independent critique and risk review)
    At most one role is active at a time.
 
-2. **The user is the client.** Curtis / Hayden is consulted only for:
+2. **The user is the client.** The user is consulted only for:
    - Design direction (colors, layout, copy preferences)
    - UAT visual confirmation (does it look right?)
    That is the complete list. Nothing else requires user involvement.
@@ -38,5 +38,5 @@ Load and apply the `operator-identity-context` skill at the start of every task.
    - Invoke `role-baton-orchestrator` at task start. Skip only for trivial tasks (single Q&A, read-only lookup, no state-changing tool calls).
    - Each role emits a named handoff artifact (`MANAGER_HANDOFF`, `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`) before the next role begins.
 
-6. **Self-anneal check:** If you catch yourself writing "you will need to…", "please manually…", or "Hayden must…" — stop, invoke the research protocol from the `operator-identity-context` skill, and find the automation path instead.
+6. **Self-anneal check:** If you catch yourself writing "you will need to…", "please manually…", or "the user must…" — stop, invoke the research protocol from the `operator-identity-context` skill, and find the automation path instead.
 

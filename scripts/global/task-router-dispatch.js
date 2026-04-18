@@ -3,6 +3,7 @@
 const { execSync } = require('child_process');
 const { classifyPrompt } = require('./task-router');
 const { chatComplete } = require('./openclaw-chat');
+const { getProfile } = require('./fleet-config');
 
 const args = process.argv.slice(2);
 const prompt = (args[args.indexOf('--prompt') + 1]) || '';
@@ -26,6 +27,10 @@ async function buildDecision(route) {
     return { action: 'stay-auto', reason: 'lowest adequate lane' };
   }
   if (route.lane === 'fleet') {
+    const profile = getProfile();
+    if (profile.mode === 'solo') {
+      return { action: 'fleet-solo-fallback', reason: 'No fleet nodes reachable — using cloud fallback' };
+    }
     const preflight = execute
       ? safe('node scripts/global/openclaw-preflight.js --json')
       : { ok: true, out: 'dry-run: preflight skipped' };
@@ -56,7 +61,7 @@ async function main() {
     if (decision.chat?.ok) console.log('\n' + decision.chat.content);
     if (decision.chat && !decision.chat.ok) console.error('Fleet error:', decision.chat.error);
   }
-  process.exit(decision.action === 'fleet-error' || decision.action === 'fleet-unavailable' ? 1 : 0);
+  process.exit(decision.action === 'fleet-error' ? 1 : 0);
 }
 
 main().catch(e => { console.error(e.message); process.exit(1); });

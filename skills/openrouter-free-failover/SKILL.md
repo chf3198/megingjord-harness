@@ -102,7 +102,7 @@ Ranked by: coding benchmark scores, parameter count, context window, tool/functi
 
 ### Config location
 
-`~/.openclaw/openclaw.json` (Windows: `C:\Users\Admin\.openclaw\openclaw.json`)
+`~/.openclaw/openclaw.json` (Windows: `%USERPROFILE%\.openclaw\openclaw.json`)
 
 ### Required config changes (JSON5)
 
@@ -310,7 +310,7 @@ openclaw gateway restart
 | Refresh free model list | Session start + monthly | `npm run models:refresh` |
 | Refresh after degradation | After failover exhaustion | `npm run models:refresh` |
 | General/image profile refresh | Task-type change | `npm run models:refresh:general` or `:image` |
-| Verify no paid models | After any config change | `ssh windows-laptop "openclaw models status"` |
+| Verify no paid models | After any config change | `openclaw models status` on inference host |
 | Check rate limit status | When failures increase | `curl https://openrouter.ai/api/v1/auth/key -H "Authorization: Bearer $KEY"` |
 | Clear stale cooldowns | After extended downtime | Delete `auth-state.json` + restart |
 

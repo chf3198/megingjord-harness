@@ -4,7 +4,7 @@ type: source
 created: 2026-04-14
 updated: 2026-04-14
 tags: []
-sources: [/home/curtisfranks/devenv-ops/raw/articles/karpathy-llm-wiki-pattern.md]
+sources: [raw/articles/karpathy-llm-wiki-pattern.md]
 related: []
 status: draft
 ---
@@ -36,4 +36,4 @@ The Karpathy LLM Wiki Pattern is a method for creating personal knowledge bases 
 ## Potential Contradictions
 The claim of model collapse risk could contradict existing knowledge about the robustness and reliability of large language models in certain applications.
 
-*Source: /home/curtisfranks/devenv-ops/raw/articles/karpathy-llm-wiki-pattern.md*
+*Source: raw/articles/karpathy-llm-wiki-pattern.md*
