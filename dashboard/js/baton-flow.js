@@ -9,7 +9,8 @@ const BATON_ROLES = [
 ];
 
 function renderBatonFlow(batonState) {
-  const tickets = normalizeBaton(batonState);
+  let tickets = normalizeBaton(batonState);
+  if (typeof pruneStaleBaton === 'function') tickets = pruneStaleBaton(tickets, typeof getTicketLog === 'function' ? getTicketLog() : []);
   if (!tickets.length) {
     return `<div class="baton-flow"><div class="baton-empty">🎯 No active tickets<br>
       <small>Baton activates when issues are assigned to a role.</small></div></div>`;
