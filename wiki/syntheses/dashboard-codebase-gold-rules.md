@@ -93,3 +93,6 @@ CLI defaults.
 - Epic: #290 (Codebase Excellence & Testability Audit)
 - Tickets: #291–#300
 - Wiki: [[devenv-ops-enforcement-architecture]]
+
+
+[devenv-ops-enforcement-architecture]: devenv-ops-enforcement-architecture.md "DevEnv Ops Enforcement Architecture"

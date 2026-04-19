@@ -43,11 +43,7 @@ function renderSettingsActions() {
   </div>`;
 }
 
-function esc(s) {
-  if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = String(s); return d.innerHTML;
-}
+// esc() is defined in render-panels.js (loaded earlier)
 
 function authStatus(r) {
   const t = r.auth?.type || 'none';

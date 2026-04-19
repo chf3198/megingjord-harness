@@ -6,7 +6,10 @@ function getBatonFilter() { return _batonFilter; }
 function setBatonFilter(key, val) {
   _batonFilter[key] = val;
   const el = document.querySelector('[x-data]');
-  if (el && el.__x) el.__x.$data.batonState = [...el.__x.$data.batonState];
+  if (el && typeof Alpine !== 'undefined') {
+    const data = Alpine.$data(el);
+    if (data) data.batonState = [...data.batonState];
+  }
 }
 
 function applyBatonFilter(tickets) {

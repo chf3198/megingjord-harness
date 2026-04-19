@@ -1,5 +1,4 @@
 // Dashboard App — Alpine.js root component
-
 function dashboardApp() {
   return {
     devices: [], services: [], quotas: [], liveQuotas: [],
@@ -51,14 +50,16 @@ function dashboardApp() {
       this.loading = true;
       try {
         const ids = this.devices.filter(d => d.ollama).map(d => d.id);
-        const [checks, stats, lq, rs, evBaton] = await Promise.all([
+        const results = await Promise.allSettled([
           runHealthChecks(this.devices), fetchAllFleetStats(ids),
           fetchAllLiveQuotas(), fetchRouterLaneStats(),
           pollEventBus(this.activityLog)
         ]);
+        const val = (i, fb) => results[i].status === 'fulfilled' ? results[i].value : fb;
+        results.filter(r => r.status === 'rejected').forEach((r, i) => console.warn(`refreshAll failed:`, r.reason));
+        const [checks, stats, lq, rs, evBaton] = [val(0,[]), val(1,{}), val(2,[]), val(3,{}), val(4,[])];
         this.devices = mergeHealthStatus(this.devices, checks);
-        this.fleetStats = stats;
-        this.routerStats = rs;
+        this.fleetStats = stats; this.routerStats = rs;
         this.ticketLog = getTicketLog(); if (lq.length) this.liveQuotas = lq;
         this.wikiHealth = await fetchWikiHealth(); if (typeof fetchWikiMetrics==='function') this.wikiMetrics=await fetchWikiMetrics();
         if (typeof pollGitHub === 'function') { this.githubData = await pollGitHub();
