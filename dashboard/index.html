@@ -26,14 +26,14 @@
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <a href="#main-content" class="skip-link">Skip to content</a>
     <header class="header">
-        <div class="header-brand"><h1>🖥️ DevEnv Ops</h1><span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span></div>
+        <div class="header-brand"><h1>🖥️ DevEnv Ops</h1><span class="status-badge" :class="overallStatus" :title="overallStatus==='degraded'?devices.filter(d=>d.status!=='healthy').map(d=>d.alias+': '+d.status).join(', '):overallStatus"><span x-text="overallStatus"></span></span></div>
         <nav class="header-nav" aria-label="Dashboard views">
-            <button @click="setView('live')" :class="{active:isView('live')}" data-tip="view-live">🔴 Live</button>
-            <button @click="setView('logs')" :class="{active:isView('logs')}" data-tip="view-logs">📜 Logs</button>
-            <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops">📊 Ops</button>
-            <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet">🌐 Fleet</button>
-            <button @click="setView('wiki')" :class="{active:isView('wiki')}" data-tip="view-wiki">📚 Wiki</button>
-            <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help">📘 Help</button>
+            <button @click="setView('live')" :class="{active:isView('live')}" data-tip="view-live" title="Live">🔴</button>
+            <button @click="setView('logs')" :class="{active:isView('logs')}" data-tip="view-logs" title="Logs">📜</button>
+            <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops" title="Ops">📊</button>
+            <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet" title="Fleet">🌐</button>
+            <button @click="setView('wiki')" :class="{active:isView('wiki')}" data-tip="view-wiki" title="Wiki">📚</button>
+            <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help" title="Help">📘</button>
         </nav>
         <div class="header-actions">
             <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh">↻</button>
