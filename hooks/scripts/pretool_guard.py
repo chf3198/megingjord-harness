@@ -10,6 +10,8 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
 from governance_state import ensure_state
 RE_ISSUE_REF = re.compile(r"#\d+")
+RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
+BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 
 def emit(decision: str, reason: str, extra: str | None = None) -> int:
     hook = {"hookEventName":"PreToolUse","permissionDecision":decision,"permissionDecisionReason":reason}
@@ -21,6 +23,9 @@ def check_terminal(joined: str, state: dict) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
+    m = RE_BRANCH_CREATE.search(joined)
+    if m and not BRANCH_VALID.match(m.group(1)):
+        return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc, fix/<ticket#>-desc, skill/<name>, or chore/<desc>.")
     if ".copilot/hooks/scripts" in joined:
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening or bypass logic.")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
