@@ -37,6 +37,7 @@ def main() -> int:
 
     if issue_num:
         state.setdefault("roles", {})["manager"] = True
+        state["active_ticket"] = issue_num
         save_state(state)
         return 0
 

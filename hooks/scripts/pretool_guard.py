@@ -62,9 +62,9 @@ def main() -> int:
     values = list(iter_strings(payload.get("tool_input",{})))
     cwd = str(payload.get("cwd","")) or str(Path.cwd())
     state = ensure_state(cwd)
-    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file"}:
-        if not state.get("roles", {}).get("manager"):
-            return emit("deny","File edit blocked: Manager handoff required before editing repository files. Create and reference a ticket first.")
+    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file"}:
+        if not state.get("active_ticket"):
+            return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand"}:
         result = check_terminal("\n".join(values), state)
         if result is not None: return result
