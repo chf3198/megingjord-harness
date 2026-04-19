@@ -13,20 +13,20 @@
 | Anthropic: Building Effective Agents | Agent patterns | Evaluator-optimizer loops, error recovery |
 | MetaGPT (arXiv:2308.00352) | Multi-agent SOPs | SOP-encoded workflows reduce cascading errors |
 
-## AI Agent Self-Improvement Areas
+## AI Agent Self-Improvement Areas (10 Domains)
 
-Areas where an AI dev harness can self-correct and self-improve:
-
-1. **Prompt/Instruction Drift** — detect when skills/instructions diverge from behavior
-2. **Context Window Management** — optimize what enters the context window
-3. **Tool Selection Accuracy** — learn which tools solve which problem classes
-4. **Error Pattern Recognition** — detect recurring failures and auto-remediate
-5. **Resource Efficiency** — memory, token, and compute budget awareness
-6. **Knowledge Freshness** — detect stale wiki/docs, trigger refresh cycles
-7. **Governance Compliance** — verify own outputs against policy constraints
-8. **Workflow Bottleneck Detection** — identify slow/failing pipeline stages
-9. **Output Quality Regression** — detect declining code/doc quality over time
-10. **Model Routing Optimization** — select best model for task complexity
+| # | Area | Detect | Correct | Measure |
+|---|------|--------|---------|---------|
+| 1 | **Prompt/Instruction Drift** | Diff skill text vs observed behavior | Re-read skill, flag divergence | Drift incidents per session |
+| 2 | **Context Window Optimization** | Token budget tracking, redundant content | Prune stale context, summarize | Effective token utilization % |
+| 3 | **Tool Selection Accuracy** | Wrong tool chosen → error/retry | Log tool-task pairs, learn patterns | First-try success rate |
+| 4 | **Error Pattern Recognition** | Repeated same error class | Auto-suggest fix from error log | Unique error classes trending down |
+| 5 | **Resource Efficiency** | Memory pressure, long execution times | Graceful degradation, offload | Peak memory, task latency |
+| 6 | **Knowledge Freshness** | Wiki/doc last-updated timestamps | Flag stale entries, trigger refresh | % entries updated within 30 days |
+| 7 | **Governance Compliance** | Post-action policy check | Block or warn on violation | Violations per commit/session |
+| 8 | **Workflow Bottleneck Detection** | Stage timing, failure frequency | Reorder/parallelize stages | P95 pipeline duration |
+| 9 | **Output Quality Regression** | Lint warnings trending up, test failures | Tighten checks, add missing tests | Warning count trend, test pass rate |
+| 10 | **Model Routing Optimization** | Task complexity vs model capability | Route simple→small, complex→large | Cost per successful task |
 
 ## Generalization Principles (from user feedback)
 
