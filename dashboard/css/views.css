@@ -76,6 +76,7 @@
 #panel-devices > div, #panel-services > div { max-height: 12rem; }
 .view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; }
 .view-wiki { grid-template-columns: 1fr; } .view-help { grid-template-columns: 1fr; }
+.view-settings { grid-template-columns: 1fr; }
 .log-scroll { overflow-y: scroll; }
 .panel { overflow: hidden; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.6rem; }
 .panel:hover { border-color: color-mix(in srgb, var(--blue) 50%, var(--border)); }

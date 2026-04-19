@@ -33,6 +33,7 @@
             <button @click="setView('ops')" :class="{active:isView('ops')}" data-tip="view-ops" title="Ops">📊</button>
             <button @click="setView('fleet')" :class="{active:isView('fleet')}" data-tip="view-fleet" title="Fleet">🌐</button>
             <button @click="setView('wiki')" :class="{active:isView('wiki')}" data-tip="view-wiki" title="Wiki">📚</button>
+            <button @click="setView('settings')" :class="{active:isView('settings')}" data-tip="view-settings" title="Settings">⚙️</button>
             <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help" title="Help">📘</button>
         </nav>
         <div class="header-actions">
@@ -78,8 +79,6 @@
             <h2>⚡ Services <button class="shb" data-tip="services" aria-label="Help: Services">?</button></h2><div x-html="renderServiceCards(services)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-settings" class="panel">
             <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div><div id="settings-form-container"></div></section></template>
-        <template x-if="isView('fleet')"><section id="panel-config" class="panel">
-            <h2>⚙️ Config <button class="shb" data-tip="config" aria-label="Help: Config">?</button></h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-test" class="panel">
             <h2>🧪 Stress Test <button class="shb" data-tip="test-panel" aria-label="Help: Test">?</button></h2><div x-html="renderStressPanel(testRun)"></div></section></template>
         <!-- WIKI: 2 panels -->
@@ -90,5 +89,8 @@
         <!-- HELP: 1 panel full-width -->
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width">
             <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>
+        <!-- SETTINGS: full-width config -->
+        <template x-if="isView('settings')"><section id="panel-config" class="panel full-width">
+            <h2>⚙️ Settings <button class="shb" data-tip="config" aria-label="Help: Settings">?</button></h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section></template>
     </main>
     <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>devenv-ops v3.0.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>
