@@ -25,16 +25,16 @@ function renderTicketLog(tickets) {
       (epics[t.issue] = epics[t.issue] || []).unshift(t);
     } else { standalone.push(t); }
   }
-  // Ensure epic parent ticket is first in each group
-  let html = '';
+  // Build filter bar for ticket log
+  const filterBar = typeof renderBatonFilterBar === 'function'
+    ? renderBatonFilterBar(tickets) : '';
+  let html = filterBar;
   for (const [epicId, items] of Object.entries(epics).sort((a,b) => b[0]-a[0])) {
     const parent = items.find(i => String(i.issue) === String(epicId));
     const children = items.filter(i => String(i.issue) !== String(epicId));
-    const allDone = children.every(t => ['done','cancelled'].includes(t.status));
     const label = parent ? `Epic #${epicId}: ${esc(parent.title)}` : `Epic #${epicId}`;
     const count = children.length;
-    const open = allDone ? '' : ' open';
-    html += `<details class="tlog-epic-group"${open}>
+    html += `<details class="tlog-epic-group">
       <summary class="tlog-epic-header">${label} <span class="tlog-count">(${count} sub)</span></summary>
       ${parent ? renderTicketRow(parent) : ''}
       ${renderTicketSection(null, children)}

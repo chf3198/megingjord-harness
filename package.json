@@ -8,6 +8,7 @@
     "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
+    "lint:readability": "node scripts/lint-readability.js",
     "sync": "bash scripts/sync.sh",
     "sync:dry": "bash scripts/sync.sh --dry-run",
     "deploy": "bash scripts/deploy.sh",

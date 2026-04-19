@@ -78,5 +78,12 @@ function renderIssueDrilldowns(h) {
     </details>`
   ).join('') || '<div class="wm-all-ok">✅ No structural issues</div>';
 }
-Object.assign(window,{fetchWikiMetrics,trackWikiAccess,gradeColor,renderWikiMetrics,renderIssueDrilldowns});
+
+function renderWikiHealthAndMetrics(metrics, health) {
+  const healthBar = health?.loaded
+    ? `<div class="wm-health-bar">📚 ${health.pages} pages · ${health.dirs} categories · <span class="badge ${health.issues===0?'healthy':'degraded'}">${health.issues} issues</span></div>`
+    : '<div class="wiki-muted">Scanning wiki…</div>';
+  return `<div class="wiki-health-metrics">${healthBar}${renderWikiMetrics(metrics, health)}</div>`;
+}
+Object.assign(window,{fetchWikiMetrics,trackWikiAccess,gradeColor,renderWikiMetrics,renderIssueDrilldowns,renderWikiHealthAndMetrics});
 })();

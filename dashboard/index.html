@@ -68,8 +68,7 @@
             <h2>🛡️ Governance <button class="shb" data-tip="governance" aria-label="Help: Governance">?</button></h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
         <section id="panel-llm-context" class="panel" x-show="isView('ops')">
             <h2>📐 LLM Context <button class="shb" data-tip="llm-context" aria-label="Help: LLM">?</button></h2><div x-html="renderLLMContext()"></div></section>
-        <section id="panel-wiki-health" class="panel" x-show="isView('ops')">
-            <h2>📚 Wiki Health <button class="shb" data-tip="wiki" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiPanel(wikiHealth)"></div></section>
+
         <!-- FLEET: 6 panels (inventory + config + health) -->
         <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel">
             <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
@@ -81,9 +80,9 @@
             <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div><div id="settings-form-container"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-test" class="panel">
             <h2>🧪 Stress Test <button class="shb" data-tip="test-panel" aria-label="Help: Test">?</button></h2><div x-html="renderStressPanel(testRun)"></div></section></template>
-        <!-- WIKI: 2 panels -->
+        <!-- WIKI: health+metrics at top, then research wiki -->
         <template x-if="isView('wiki')"><section id="panel-wiki-metrics" class="panel">
-            <h2>📊 Metrics <button class="shb" data-tip="wiki-metrics" aria-label="Help: Metrics">?</button></h2><div x-html="renderWikiMetrics(wikiMetrics, wikiHealth)"></div></section></template>
+            <h2>📊 Wiki Health & Metrics <button class="shb" data-tip="wiki-metrics" aria-label="Help: Metrics">?</button></h2><div x-html="renderWikiHealthAndMetrics(wikiMetrics, wikiHealth)"></div></section></template>
         <template x-if="isView('wiki')"><section id="panel-wiki-reader" class="panel wiki-main">
             <h2>📚 Research Wiki <button class="shb" data-tip="wiki-reader" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiReader(wikiPages)"></div></section></template>
         <!-- HELP: 1 panel full-width -->

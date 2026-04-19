@@ -10,18 +10,17 @@ const BATON_ROLES = [
 
 function renderBatonFlow(batonState) {
   let tickets = normalizeBaton(batonState);
-  if (typeof pruneStaleBaton === 'function') tickets = pruneStaleBaton(tickets, typeof getTicketLog === 'function' ? getTicketLog() : []);
-  if (!tickets.length) {
-    return `<div class="baton-flow"><div class="baton-empty">🎯 No active tickets<br>
-      <small>Baton activates when issues are assigned to a role.</small></div></div>`;
+  if (typeof pruneStaleBaton === 'function') {
+    const logSnapshot = typeof getTicketLog === 'function' ? getTicketLog() : [];
+    tickets = pruneStaleBaton(tickets, logSnapshot);
   }
-  const active = tickets.filter(t =>
-    !['done','cancelled'].includes(t.status));
-  const filtered = typeof applyBatonFilter === 'function' ? applyBatonFilter(active) : active;
-  const filterBar = typeof renderBatonFilterBar === 'function' ? renderBatonFilterBar(tickets) : '';
-  const html = filtered.length ? filtered.map(renderBatonRow).join('')
-    : `<div class="baton-empty">✅ All active tickets completed — see Ticket Log</div>`;
-  return `<div class="baton-flow">${filterBar}${html}</div>`;
+  const activelyWorked = tickets.filter(t => t.status === 'in-progress');
+  if (!activelyWorked.length) {
+    return `<div class="baton-flow"><div class="baton-empty">🎯 No tickets in active LLM work<br>
+      <small>Shows only in-progress tickets. See Ticket Log for full history.</small></div></div>`;
+  }
+  const rows = activelyWorked.map(renderBatonRow).join('');
+  return `<div class="baton-flow">${rows}</div>`;
 }
 
 function renderBatonRow(t) {
