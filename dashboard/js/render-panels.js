@@ -11,7 +11,7 @@ function renderDeviceCards(devices) {
   if (!devices.length) {
     return '<div class="card"><p>No devices loaded yet.</p></div>';
   }
-  return devices.map(d => `<div class="card device-card ${d.status}">
+  return devices.map(d => `<div class="card device-card ${d.status}" title="${esc(d.alias)}: ${esc(d.role)} · ${esc(d.ram)} RAM · ${d.modelCount} models · ${d.status}">
     <div class="card-header"><strong>${esc(d.alias)}</strong>
       <span class="badge ${d.status}">${d.status}</span></div>
     <div class="card-body">
@@ -36,7 +36,7 @@ function renderServiceCards(services) {
   return services.map(s => {
     const url = SERVICE_URLS[s.id] || '';
     const link = url ? `<p><a href="${esc(url)}" target="_blank" rel="noopener" class="svc-link">Open dashboard ↗</a></p>` : '';
-    return `<div class="card service-card ${s.status}">
+    return `<div class="card service-card ${s.status}" title="${esc(s.name)}: ${s.status} · ${esc(s.cost)}">
       <div class="card-header"><strong>${esc(s.name)}</strong>
         <span class="badge ${s.status}">${s.status}</span></div>
       <div class="card-body">
