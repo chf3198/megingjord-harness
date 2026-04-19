@@ -69,7 +69,7 @@ def main() -> int:
     commit_issue = extract_issue_num(joined)
     if not commit_issue:
         return emit(
-            "ask",
+            "deny",
             f"Branch #{branch_issue} requires ticket reference in commit. "
             f"Use: git commit -m \"...(closes #{branch_issue})\"",
         )
