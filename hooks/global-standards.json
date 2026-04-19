@@ -51,6 +51,13 @@
         "command": "python3 ~/.copilot/hooks/scripts/precompact_anchor.py",
         "timeout": 10
       }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "command": "python3 ~/.copilot/hooks/scripts/subagent_inject.py",
+        "timeout": 10
+      }
     ]
   }
 }
