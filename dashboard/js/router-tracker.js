@@ -1,4 +1,4 @@
-// Router metrics + LLM choice log for dashboard
+(function() { // Router metrics + LLM choice log for dashboard
 let routerMetrics = {
   sessions: {},
   laneDistribution: { free: 0, fleet: 0, premium: 0 }
@@ -88,3 +88,5 @@ function renderRouterLog() {
       <th>Model</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
+Object.assign(window,{routerMetrics,routerLog,loadRouterMetrics,fetchRouterLaneStats,addRouterLogEntry,getRouterLog,renderRouterPanel,renderRouterLog});
+})();

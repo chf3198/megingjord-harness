@@ -1,4 +1,4 @@
-// SSE Event Source — live push from /api/events/stream
+(function() { // SSE Event Source — live push from /api/events/stream
 // Falls back to polling on error or unsupported environments
 
 let _eventSource = null;
@@ -53,3 +53,5 @@ function disconnectSSE() {
   if (_eventSource) { _eventSource.close(); _eventSource = null; }
   if (_fallbackTimer) { clearInterval(_fallbackTimer); _fallbackTimer = null; }
 }
+Object.assign(window,{connectSSE,disconnectSSE});
+})();

@@ -66,3 +66,4 @@ function mergeHealthStatus(devices, checks) {
     status: checks[d.id]?.status || d.status
   }));
 }
+if (typeof module !== 'undefined') module.exports = { mergeHealthStatus, HEALTH_TIMEOUT_MS };

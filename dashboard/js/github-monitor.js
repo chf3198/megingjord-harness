@@ -1,4 +1,4 @@
-/* GitHub Monitor — dashboard panel for repo activity */
+(function() { /* GitHub Monitor — dashboard panel for repo activity */
 /* globals: called from app.js, data from /api/github/summary */
 
 let _ghCache = null;
@@ -55,3 +55,5 @@ function renderGitHubMonitor(gh) {
     </div>
     <div class="gh-branches"><h4>Active Branches</h4>${branchList || 'None'}</div>`;
 }
+if(typeof module!=="undefined")module.exports={pollGitHub,ghIcon,renderGitHubMonitor};else Object.assign(window,{pollGitHub,ghIcon,renderGitHubMonitor});
+})();

@@ -1,5 +1,4 @@
-// Event Bus Client — polls /api/events for live dashboard updates
-// _batonTickets: active baton only (backlog→consultant, never closed)
+(function() { // Event Bus Client — polls /api/events for live dashboard updates _batonTickets: active baton only (backlog→consultant, never closed)
 // _ticketLog: full audit trail of all tickets, all statuses
 
 let _lastEventTs = null;
@@ -96,3 +95,5 @@ async function pollEventBus(activityLog) {
   }
   return mergeBatonEvents(events);
 }
+if(typeof module!=="undefined")module.exports={fetchEvents,eventToActivity,mergeBatonEvents,pruneClosedFromGitHub,getBatonState,getTicketLog,getTicketTimeline,detectMissingEvents,pollEventBus};else Object.assign(window,{fetchEvents,eventToActivity,mergeBatonEvents,pruneClosedFromGitHub,getBatonState,getTicketLog,getTicketTimeline,detectMissingEvents,pollEventBus});
+})();

@@ -1,4 +1,4 @@
-// Baton Filter — dropdown filter for epic and status
+(function() { // Baton Filter — dropdown filter for epic and status
 
 let _batonFilter = { epic: '', status: '' };
 
@@ -36,3 +36,5 @@ function renderBatonFilterBar(tickets) {
       <option value="">All statuses</option>${statusOpts}</select>
   </div>`;
 }
+if(typeof module!=="undefined")module.exports={getBatonFilter,setBatonFilter,applyBatonFilter,renderBatonFilterBar};else Object.assign(window,{getBatonFilter,setBatonFilter,applyBatonFilter,renderBatonFilterBar});
+})();

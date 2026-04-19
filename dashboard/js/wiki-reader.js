@@ -1,4 +1,4 @@
-// Wiki Reader — browse real wiki pages from /api/wiki-pages
+(function() { // Wiki Reader — browse real wiki pages from /api/wiki-pages
 
 let _wikiPagesCache = [];
 
@@ -48,3 +48,5 @@ function renderWikiReader(pages) {
     <div class="wiki-summary">${total} pages · ${catCount} types</div>
     ${sections}</div>`;
 }
+if(typeof module!=="undefined")module.exports={loadWikiPages,getWikiPages,renderWikiReader};else Object.assign(window,{loadWikiPages,getWikiPages,renderWikiReader});
+})();

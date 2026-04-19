@@ -20,7 +20,7 @@ function renderDeviceCards(devices) {
     </div></div>`).join('');
 }
 
-const _oc = (typeof loadFleetSettings === 'function' ? loadFleetSettings() : {}).endpoints?.openclaw || 'http://localhost:4000';
+const _ocUrl = (typeof loadFleetSettings === 'function' ? loadFleetSettings() : {}).endpoints?.openclaw || 'http://localhost:4000';
 const SERVICE_URLS = {
   'copilot-pro': 'https://github.com/settings/copilot',
   'cloudflare': 'https://dash.cloudflare.com/',
@@ -28,7 +28,7 @@ const SERVICE_URLS = {
   'groq': 'https://console.groq.com/',
   'cerebras': 'https://cloud.cerebras.ai/',
   'openrouter': 'https://openrouter.ai/activity',
-  'openclaw': _oc + '/ui/'
+  'openclaw': _ocUrl + '/ui/'
 };
 
 function renderServiceCards(services) {

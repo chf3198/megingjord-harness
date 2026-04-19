@@ -1,4 +1,4 @@
-// Wiki Metrics — client-side display for wiki usage and health grade
+(function() { // Wiki Metrics — client-side display for wiki usage and health grade
 
 let _wikiMetrics = null;
 
@@ -78,3 +78,5 @@ function renderIssueDrilldowns(h) {
     </details>`
   ).join('') || '<div class="wm-all-ok">✅ No structural issues</div>';
 }
+Object.assign(window,{fetchWikiMetrics,trackWikiAccess,gradeColor,renderWikiMetrics,renderIssueDrilldowns});
+})();
