@@ -89,3 +89,8 @@
   padding: 0.15rem 0; user-select: none;
 }
 .baton-done-group .baton-row { opacity: 0.6; }
+.baton-filter-bar { display: flex; gap: 0.3rem; margin-bottom: 0.3rem; }
+.baton-filter-bar select { background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.3rem;
+  font-size: 0.72rem; cursor: pointer; }
+.baton-filter-bar select:hover { border-color: var(--blue); }
