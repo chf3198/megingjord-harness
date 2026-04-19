@@ -93,12 +93,8 @@
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 0.2rem;
 }
-
 @keyframes cf-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
 .cf-arrow { animation: cf-pulse 2.5s ease-in-out infinite; }
 @keyframes cf-dash { to { stroke-dashoffset: -14; } }
-.cf-arrow.dashed {
-  animation: cf-dash 1.2s linear infinite,
-    cf-pulse 2.5s ease-in-out infinite;
-}
+.cf-arrow.dashed { animation: cf-dash 1.2s linear infinite, cf-pulse 2.5s ease-in-out infinite; }
 .cf-node-g:hover .cf-node { filter: brightness(1.3); }
