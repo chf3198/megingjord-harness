@@ -17,10 +17,11 @@ function renderBatonFlow(batonState) {
   }
   const active = tickets.filter(t =>
     !['done','cancelled'].includes(t.status));
-  const html = active.length
-    ? active.map(renderBatonRow).join('')
+  const filtered = typeof applyBatonFilter === 'function' ? applyBatonFilter(active) : active;
+  const filterBar = typeof renderBatonFilterBar === 'function' ? renderBatonFilterBar(tickets) : '';
+  const html = filtered.length ? filtered.map(renderBatonRow).join('')
     : `<div class="baton-empty">✅ All active tickets completed — see Ticket Log</div>`;
-  return `<div class="baton-flow">${html}</div>`;
+  return `<div class="baton-flow">${filterBar}${html}</div>`;
 }
 
 function renderBatonRow(t) {
