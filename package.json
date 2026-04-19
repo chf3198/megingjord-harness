@@ -4,6 +4,7 @@
   "description": "AI agent governance harness — 24 skills, extensible agents, hooks, and wiki as a VS Code Agent Plugin",
   "private": true,
   "scripts": {
+    "prepare": "cp hooks/scripts/validate-branch-name.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
     "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
