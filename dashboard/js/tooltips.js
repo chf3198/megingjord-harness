@@ -30,7 +30,8 @@ const TIP_COPY = {
   'wiki-reader': ['Wiki Reader', 'Browse and search research/ markdown pages.', 'wiki', 'use-wiki-reader'],
   devices: ['Fleet Devices', 'Device inventory: name, Tailscale IP, RAM, OS, role.', 'fleet', 'use-devices'],
   services: ['Services', 'API service cards: endpoint, status, last checked.', 'fleet', 'use-services'],
-  config: ['Settings', 'Dashboard preferences: refresh interval, contrast, tooltips.', 'fleet', 'use-config'],
+  config: ['Settings', 'Dashboard preferences: refresh interval, contrast, tooltips.', 'settings', 'use-config'],
+  'view-settings': ['Settings', 'Dashboard preferences and configuration.', 'settings', 'use-config'],
   'test-panel': ['Stress Test', 'Simulates 5 parallel tickets + mock events. ~60s.', 'fleet', 'use-stress'],
   'tl-step': ['Baton handoff', 'Role icon + time the baton was received. Hover for role description.', 'fleet', 'use-baton'],
 };
