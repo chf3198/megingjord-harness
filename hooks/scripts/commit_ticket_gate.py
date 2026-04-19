@@ -13,6 +13,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from repo_scope import is_repo_enabled
 from ticket_helpers import extract_issue_num, extract_from_branch
+from governance_state import ensure_state, save_state
 
 
 def get_current_branch() -> str:
@@ -81,6 +82,11 @@ def main() -> int:
             f"Branch and commit must reference the same ticket.",
         )
 
+    state = ensure_state(cwd)
+    d = state.setdefault("drift", {})
+    d["commits"] = d.get("commits", 0) + 1
+    d["commits_with_ticket"] = d.get("commits_with_ticket", 0) + 1
+    save_state(state)
     return 0
 
 

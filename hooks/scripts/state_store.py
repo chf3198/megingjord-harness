@@ -46,6 +46,11 @@ def _default_state(cwd: str) -> dict[str, Any]:
             "gh_release": False, "issue_close": False,
             "issue_linked": False, "visual_qa": False,
         },
+        "drift": {
+            "commits": 0, "commits_with_ticket": 0,
+            "branches": 0, "branches_compliant": 0,
+            "edits_gated": 0, "edits_ungated": 0,
+        },
     }
 
 
@@ -60,7 +65,7 @@ def load_state(cwd: str) -> dict[str, Any]:
         defaults = _default_state(cwd)
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
-        for key in ("routing", "roles", "flags", "admin_ops"):
+        for key in ("routing", "roles", "flags", "admin_ops", "drift"):
             if key not in data:
                 data[key] = defaults[key]
             elif isinstance(defaults[key], dict):
