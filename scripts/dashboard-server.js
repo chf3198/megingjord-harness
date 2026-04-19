@@ -32,6 +32,7 @@ function serveStatic(req, res) {
 }
 
 function proxyGet(url, headers, timeout = 5000) {
+  if (!url || !url.startsWith('http')) return Promise.resolve({status:502,body:'{}'});
   return new Promise(resolve=>{ const mod=url.startsWith('https')?require('https'):http; const req=mod.get(url,{headers,timeout},r=>{let body=''; r.on('data',c=>body+=c); r.on('end',()=>resolve({status:r.statusCode,body}));}); req.on('error',()=>resolve({status:502,body:'{}'})); req.on('timeout',()=>{req.destroy();resolve({status:504,body:'{}'})}); });
 }
 
