@@ -48,32 +48,27 @@ def main() -> int:
         gaps.append("missing:CODEOWNERS")
 
     if repo_type == "vscode-extension":
-        profile = (
-            "Profile=vscode-extension: hard admin gates "
-            "(commit/push/PR/CI/merge) plus release gates "
-            "(vsce publish, release-integrity, GitHub release)."
-        )
+        profile = "Profile=vscode-extension: hard admin+release gates."
     elif repo_type in {"web-app", "website-static"}:
-        profile = (
-            "Profile=web: hard admin gates "
-            "(commit/push/PR/CI/merge) and strict docs-drift checks."
-        )
+        profile = "Profile=web: hard admin gates+docs-drift checks."
     elif repo_type == "infra-automation":
-        profile = (
-            "Profile=infra-automation: hard admin gates "
-            "and governance checks before merge."
-        )
+        profile = "Profile=infra: hard admin gates+governance checks."
     else:
-        profile = (
-            "Profile=generic: hard admin gates "
-            "(commit/push/PR/CI/merge) for code-changing sessions."
-        )
+        profile = "Profile=generic: hard admin gates for code sessions."
 
     baton_msg = baton_protocol()
     standards_msg = governance_enforcement()
     postmerge_msg = post_merge_checklist()
+    ANCHOR = (
+        "GOVERNANCE ANCHOR (non-negotiable): "
+        "1) One ticket per branch — feat/<N>-desc or fix/<N>-desc. "
+        "2) Manager scope comment BEFORE any file edits. "
+        "3) Commits MUST reference ticket (#N) — deny on missing. "
+        "4) One branch = one ticket = one PR. No bundling. "
+        "5) Baton sequence: Manager→Collaborator→Admin→Consultant."
+    )
     context_parts = [
-        baton_msg, standards_msg,
+        ANCHOR, baton_msg, standards_msg,
         f"Project type: {repo_type}.", profile,
         f"Signals: {', '.join(signals) if signals else 'none'}.",
     ]
