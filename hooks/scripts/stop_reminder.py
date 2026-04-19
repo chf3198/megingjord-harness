@@ -50,6 +50,12 @@ def main() -> int:
 
     messages.extend(post_merge_messages(signals, bool(messages)))
 
+    drift = state.get("drift", {})
+    total_c = drift.get("commits", 0)
+    if total_c > 0:
+        rate = (total_c - drift.get("commits_with_ticket", 0)) / total_c * 100
+        messages.append(f"📊 Drift score: {rate:.0f}% ticketless ({total_c} commits this session).")
+
     out = {"systemMessage": "\n\n".join(messages)}
     if block_reason:
         out["hookSpecificOutput"] = {
