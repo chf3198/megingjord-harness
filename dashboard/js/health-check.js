@@ -12,7 +12,8 @@ async function checkOllama(deviceId) {
     const data = await r.json();
     const models = (data.models || []).map(m => m.name);
     return { status: 'healthy', models };
-  } catch {
+  } catch (e) {
+    console.warn('health-check: ollama check failed:', e.message);
     return { status: 'offline', models: [] };
   }
 }
@@ -26,7 +27,8 @@ async function checkOpenClaw(deviceId) {
     return r.ok
       ? { status: 'healthy' }
       : { status: 'error' };
-  } catch {
+  } catch (e) {
+    console.warn('health-check: openclaw check failed:', e.message);
     return { status: 'offline' };
   }
 }

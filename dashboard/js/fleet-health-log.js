@@ -5,7 +5,7 @@ async function fetchFleetHealthLog() {
   try {
     const r = await fetch('/api/fleet-health');
     return r.ok ? await r.json() : [];
-  } catch { return []; }
+  } catch (e) { console.warn('fleet-health-log: fetch failed:', e.message); return []; }
 }
 
 function renderFleetHealthLog(log) {

@@ -8,7 +8,7 @@ async function loadWikiPages() {
     if (!r.ok) return [];
     _wikiPagesCache = await r.json();
     return _wikiPagesCache;
-  } catch { return []; }
+  } catch (e) { console.warn('wiki-reader: loadWikiPages failed:', e.message); return []; }
 }
 
 function getWikiPages() { return _wikiPagesCache; }

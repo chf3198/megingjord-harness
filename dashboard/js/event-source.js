@@ -9,7 +9,7 @@ const FALLBACK_MS = 5000;
 /** Connect SSE and dispatch events into Alpine state */
 function connectSSE(app) {
   if (typeof EventSource === 'undefined') return startFallback(app);
-  try { _eventSource = new EventSource(SSE_URL); } catch { return startFallback(app); }
+  try { _eventSource = new EventSource(SSE_URL); } catch (e) { console.warn('event-source: SSE init failed:', e.message); return startFallback(app); }
 
   _eventSource.addEventListener('connected', () => {
     addActivity(app.activityLog, 'system', 'SSE connected', 'Live push active');
@@ -38,13 +38,13 @@ function handleSSEvent(app, event) {
     if (data.role && data.issue) {
       app.batonState = mergeBatonEvents([data]);
     }
-  } catch { /* skip malformed */ }
+  } catch (e) { console.warn('event-source: malformed event:', e.message); }
 }
 
 function startFallback(app) {
   if (_fallbackTimer) return;
   _fallbackTimer = setInterval(async () => {
-    try { await pollEventBus(app.activityLog); } catch { /* ignore */ }
+    try { await pollEventBus(app.activityLog); } catch (e) { console.warn('event-source: fallback poll failed:', e.message); }
   }, FALLBACK_MS);
 }
 

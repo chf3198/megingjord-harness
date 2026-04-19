@@ -10,7 +10,7 @@ async function pollGitHub() {
   try {
     const r = await fetch('/api/github/summary');
     if (r.ok) _ghCache = await r.json();
-  } catch { /* keep stale cache */ }
+  } catch (e) { console.warn('github-monitor: fetch failed:', e.message); }
   _ghLoading = false;
   return _ghCache;
 }

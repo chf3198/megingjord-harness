@@ -10,7 +10,8 @@ function loadDashboardConfig() {
       highContrast: !!cfg.highContrast,
       tooltipsEnabled: !!cfg.tooltipsEnabled
     };
-  } catch {
+  } catch (e) {
+    console.warn('config-panel: loadDashboardConfig failed:', e.message);
     return { refreshSec: 5, highContrast: false, tooltipsEnabled: false };
   }
 }

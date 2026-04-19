@@ -13,7 +13,7 @@ async function fetchOpenRouterCredits() {
       limit: limit || '∞', period: 'account',
       percent: limit ? Math.min(100, Math.round((used / limit) * 100)) : 0,
       link: 'https://openrouter.ai/activity' };
-  } catch { return null; }
+  } catch (e) { console.warn('quota-live: openrouter fetch failed:', e.message); return null; }
 }
 
 async function fetchCloudflareAIUsage() {
@@ -29,7 +29,7 @@ async function fetchCloudflareAIUsage() {
       used: neurons, limit: 10000, period: 'daily',
       percent: Math.min(100, Math.round((neurons / 10000) * 100)),
       link: 'https://dash.cloudflare.com/' };
-  } catch { return null; }
+  } catch (e) { console.warn('quota-live: cloudflare fetch failed:', e.message); return null; }
 }
 
 function buildServiceCosts() {

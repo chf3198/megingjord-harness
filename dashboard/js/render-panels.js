@@ -1,5 +1,4 @@
 // Render Panels — JS template functions for Alpine x-html
-
 function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -21,6 +20,7 @@ function renderDeviceCards(devices) {
     </div></div>`).join('');
 }
 
+const _oc = (typeof loadFleetSettings === 'function' ? loadFleetSettings() : {}).endpoints?.openclaw || 'http://localhost:4000';
 const SERVICE_URLS = {
   'copilot-pro': 'https://github.com/settings/copilot',
   'cloudflare': 'https://dash.cloudflare.com/',
@@ -28,7 +28,7 @@ const SERVICE_URLS = {
   'groq': 'https://console.groq.com/',
   'cerebras': 'https://cloud.cerebras.ai/',
   'openrouter': 'https://openrouter.ai/activity',
-  'openclaw': (window.__fleetConfig?.openclawURL || '') + '/ui/'
+  'openclaw': _oc + '/ui/'
 };
 
 function renderServiceCards(services) {

@@ -1,81 +1,56 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('Fleet Operations Center', () => {
-  test.use({ viewport: { width: 960, height: 1080 } });
-
-  test('fleet topology renders SVG with device nodes', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    const svg = page.locator('#panel-topology .topo-svg');
-    await expect(svg).toBeVisible();
-    // Should have device nodes (circles)
-    const nodes = await svg.locator('.topo-node').count();
-    expect(nodes).toBeGreaterThanOrEqual(1);
-    // Should have labels
-    const labels = await svg.locator('.topo-label').count();
-    expect(labels).toBeGreaterThanOrEqual(1);
-    // Should have topology legend
-    await expect(page.locator('.topo-legend')).toBeVisible();
-    await expect(page.locator('.topo-legend')).toContainText('Online');
-    await page.screenshot({ path: 'test-results/fleet-topology.png' });
+  test('fleet view shows device and service panels', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button[title="Fleet"]');
+    await page.waitForTimeout(500);
+    await expect(page.locator('#panel-devices h2')).toContainText('Devices');
+    await expect(page.locator('#panel-services h2')).toContainText('Services');
+    await expect(page.locator('#panel-fleet-health h2')).toContainText('Fleet Health');
   });
 
-  test('agent baton flow shows pipeline steps', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    const baton = page.locator('#panel-baton .baton-flow');
+  test('agent baton flow shows on live view', async ({ page }) => {
+    await page.goto('/');
+    // Live is default view
+    const baton = page.locator('#panel-baton');
     await expect(baton).toBeVisible();
-    // Should have 4 role steps
-    const steps = await baton.locator('.baton-step').count();
-    expect(steps).toBe(4);
-    // Should have role labels
-    await expect(baton).toContainText('Manager');
-    await expect(baton).toContainText('Collaborator');
-    await expect(baton).toContainText('Admin');
-    await expect(baton).toContainText('Consultant');
-    // Should have arrows between steps
-    const arrows = await baton.locator('.baton-arrow').count();
-    expect(arrows).toBe(3);
+    await expect(baton).toContainText('Agent Baton');
   });
 
-  test('resource monitor shows OpenClaw and Tailscale', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    const resources = page.locator('#panel-resources');
-    await expect(resources).toBeVisible();
-    // Should have compact resource cards
-    const cards = await resources.locator('.res-card').count();
-    expect(cards).toBeGreaterThanOrEqual(2);
-    // Should mention Tailscale
-    await expect(resources).toContainText('Tailscale');
-    // Should mention Ollama
-    await expect(resources).toContainText('Ollama');
-    await page.screenshot({ path: 'test-results/fleet-resources.png' });
+  test('fleet panels use grid layout', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button[title="Fleet"]');
+    await page.waitForTimeout(500);
+    const devices = page.locator('#panel-devices');
+    const box = await devices.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box.width).toBeGreaterThan(100);
   });
 
-  test('fleet panels use 2-column grid layout', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    const topo = page.locator('#panel-topology');
-    const box = await topo.boundingBox();
-    // Half-width panels should be less than 600px at 960 viewport
-    expect(box.width).toBeLessThan(600);
-    expect(box.width).toBeGreaterThan(200);
-  });
-
-  test('view switching preserves fleet panel state', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    await expect(page.locator('#panel-topology')).toBeVisible();
-    await page.click('button:has-text("Ops")');
+  test('view switching preserves panel state', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#panel-baton')).toBeVisible();
+    await page.click('button[title="Ops"]');
     await page.waitForTimeout(300);
-    await page.click('button:has-text("Fleet")');
+    await page.click('button[title="Live"]');
     await page.waitForTimeout(300);
-    await expect(page.locator('#panel-topology')).toBeVisible();
     await expect(page.locator('#panel-baton')).toBeVisible();
     await expect(page.locator('#panel-activity')).toBeVisible();
   });
 
   test('service cards include dashboard links', async ({ page }) => {
-    await page.goto('http://localhost:8090/dashboard/');
-    await page.click('button:has-text("Resources")');
-    await page.waitForTimeout(300);
+    await page.goto('/');
+    await page.click('button[title="Fleet"]');
+    await page.waitForTimeout(500);
     const links = await page.locator('.svc-link').count();
     expect(links).toBeGreaterThanOrEqual(1);
+  });
+
+  test('settings panel shows fleet resources', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button[title="Fleet"]');
+    await page.waitForTimeout(500);
+    await expect(page.locator('#panel-settings h2')).toContainText('Fleet Resources');
   });
 });

@@ -11,7 +11,8 @@ async function loadRouterMetrics() {
     if (!r.ok) return { free: 0, fleet: 0, premium: 0 };
     const data = await r.json();
     return data.lanes || { free: 0, fleet: 0, premium: 0 };
-  } catch {
+  } catch (e) {
+    console.warn('router-tracker: fetchLaneStats failed:', e.message);
     return { free: 0, fleet: 0, premium: 0 };
   }
 }

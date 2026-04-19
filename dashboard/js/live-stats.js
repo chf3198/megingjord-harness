@@ -47,7 +47,8 @@ async function safeFetch(url) {
     });
     if (!r.ok) return null;
     return await r.json();
-  } catch {
+  } catch (e) {
+    console.warn('live-stats: fetch failed:', e.message);
     return null;
   }
 }

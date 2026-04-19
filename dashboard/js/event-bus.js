@@ -18,7 +18,7 @@ async function fetchEvents(since) {
     ? '/api/events?since=' + encodeURIComponent(since)
     : '/api/events';
   try { const r = await fetch(url); return r.ok ? await r.json() : []; }
-  catch { return []; }
+  catch (e) { console.warn('event-bus: poll failed:', e.message); return []; }
 }
 
 function eventToActivity(e) {

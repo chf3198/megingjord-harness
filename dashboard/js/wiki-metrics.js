@@ -12,7 +12,8 @@ async function fetchWikiMetrics() {
     const r = await fetch('/api/wiki-metrics');
     if (r.ok) _wikiMetrics = await r.json();
     else if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
-  } catch {
+  } catch (e) {
+    console.warn('wiki-metrics: fetch failed:', e.message);
     if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
   }
   return _wikiMetrics;

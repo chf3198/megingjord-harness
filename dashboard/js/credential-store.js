@@ -6,7 +6,7 @@ const FLEET_STORE_KEY = 'devenv-fleet-resources';
 function loadFleetResources() {
   try {
     return JSON.parse(localStorage.getItem(FLEET_STORE_KEY)) || [];
-  } catch { return []; }
+  } catch (e) { console.warn('credential-store: parse failed:', e.message); return []; }
 }
 
 function saveFleetResources(resources) {

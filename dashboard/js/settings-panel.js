@@ -70,5 +70,5 @@ async function fetchHostInfo() {
   try {
     const r = await fetch('/api/host-info');
     return r.ok ? r.json() : null;
-  } catch { return null; }
+  } catch (e) { console.warn('settings-panel: fetchHostInfo failed:', e.message); return null; }
 }
