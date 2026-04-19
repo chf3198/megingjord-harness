@@ -9,6 +9,7 @@
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
     "lint:readability": "node scripts/lint-readability.js",
+    "lint:router": "node scripts/lint-router.js",
     "sync": "bash scripts/sync.sh",
     "sync:dry": "bash scripts/sync.sh --dry-run",
     "deploy": "bash scripts/deploy.sh",
