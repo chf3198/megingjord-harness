@@ -29,4 +29,4 @@ Progressive divergence of agent behavior from intended instructions.
 - Executable constraint transformation
 - [[self-annealing]] review cycles
 
-See: [[agent-drift-governance]], [[agent-drift-mitigations]]
+See: [[agent-drift-governance]], [[agent-drift-mitigations]], [[agent-drift-copilot]], [[agent-drift-frameworks]], [[agent-drift-root-causes]], [[agent-drift-sources]], [[tiered-research-findings]]

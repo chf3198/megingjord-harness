@@ -31,3 +31,5 @@ Premium AI coding assistant running on [[penguin-1]].
 - [[openclaw]] handles bulk inference
 
 See: [[copilot-governance-actions]], [[agent-drift-governance]]
+
+See also: [[copilot-skills-system]]

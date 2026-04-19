@@ -1,8 +1,19 @@
 // Context Flow — SVG diagram showing prompt → LLM → response chain
-// Shows all fleet resources that send/receive context
+// Accepts live device health + fleet stats for real-time status dots
 
-function renderContextFlow() {
+function renderContextFlow(devices, fleetStats) {
   const W = 620, H = 260;
+  // Build live status map from device health
+  const dm = {}; (devices || []).forEach(d => { dm[d.id] = d.status; });
+  const liveMap = {
+    'CB-2': dm['chromebook-2'] || 'unknown', 'CB-1': dm['chromebook-1'] || 'unknown',
+    'Win Laptop': dm['windows-laptop'] || 'unknown',
+    'Tailscale': (dm['chromebook-2'] === 'healthy' ? 'healthy' : 'degraded'),
+    'OpenClaw': dm['windows-laptop'] || 'unknown',
+    'Ollama': fleetStats?.['windows-laptop']?.online ? 'healthy' : 'offline',
+    'VS Code': 'healthy', 'AUTO': 'healthy',
+    'Cloud LLM': 'healthy', 'GitHub': 'healthy',
+  };
   const nodes = [
     { x: 60, y: 50, icon: '💻', label: 'VS Code', sub: 'Copilot Agent', tip: 'IDE sends prompts with file context, conversation history, and MCP tool results to the AUTO router.' },
     { x: 200, y: 50, icon: '🧠', label: 'AUTO', sub: 'Model Select', tip: 'Routes prompts to Cloud LLM (primary) or OpenClaw (local fallback) based on model availability and rate limits.' },
@@ -29,7 +40,7 @@ function renderContextFlow() {
   return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
     class="cf-svg" role="img" aria-label="Context flow diagram">
     <defs>${cfDefs()}</defs>
-    ${cfArrows(nodes, arrows)}${cfNodes(nodes)}</svg>
+    ${cfArrows(nodes, arrows)}${cfNodes(nodes, liveMap)}</svg>
     ${contextBudgetLegend()}</div>`;
 }
 function cfDefs() {
@@ -56,14 +67,19 @@ function cfArrows(nodes, arrows) {
         class="cf-lbl">${a.label}</text>` : ''}`;
   }).join('');
 }
-function cfNodes(nodes) {
-  return nodes.map(n => `<g class="cf-node-g">
+function cfNodes(nodes, liveMap) {
+  const sc = { healthy: 'var(--green)', degraded: 'var(--yellow)', offline: 'var(--red)', unknown: 'var(--text-muted)' };
+  return nodes.map(n => {
+    const st = (liveMap || {})[n.label] || 'unknown';
+    const c = sc[st] || sc.unknown;
+    return `<g class="cf-node-g">
     <rect x="${n.x - 36}" y="${n.y - 20}" width="72" height="40"
       rx="6" class="cf-node"><title>${n.tip}</title></rect>
+    <circle cx="${n.x + 30}" cy="${n.y - 14}" r="4" fill="${c}" class="${st === 'healthy' ? 'cf-pulse' : ''}"><title>${n.label}: ${st}</title></circle>
     <text x="${n.x}" y="${n.y - 4}" text-anchor="middle" class="cf-icon">${n.icon}</text>
     <text x="${n.x}" y="${n.y + 8}" text-anchor="middle" class="cf-name">${n.label}</text>
     <text x="${n.x}" y="${n.y + 18}" text-anchor="middle" class="cf-sub">${n.sub}</text>
-  </g>`).join('');
+  </g>`; }).join('');
 }
 function contextBudgetLegend() {
   const items = [
@@ -74,12 +90,8 @@ function contextBudgetLegend() {
     { label: 'User message', pct: 5, color: 'var(--red)' },
     { label: 'Headroom', pct: 15, color: 'var(--border)' },
   ];
-  const bars = items.map(i => `<div class="cb-seg"
-    style="flex:${i.pct};background:${i.color}"
-    title="${i.label}: ~${i.pct}%"></div>`).join('');
-  const labels = items.map(i =>
-    `<span><span class="dot" style="background:${i.color}"></span>
-    ${i.label}</span>`).join('');
+  const bars = items.map(i => `<div class="cb-seg" style="flex:${i.pct};background:${i.color}" title="${i.label}: ~${i.pct}%"></div>`).join('');
+  const labels = items.map(i => `<span><span class="dot" style="background:${i.color}"></span>${i.label}</span>`).join('');
   return `<div class="cb-bar">${bars}</div>
     <div class="cb-legend">${labels}</div>`;
 }

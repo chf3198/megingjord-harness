@@ -15,7 +15,7 @@
     <script defer src="js/config-panel.js"></script><script defer src="js/stress-test.js"></script>
     <script defer src="js/help-content.js"></script><script defer src="js/help-user.js"></script><script defer src="js/help-dev.js"></script>
     <script defer src="js/wiki-panel.js"></script><script defer src="js/wiki-reader.js"></script><script defer src="js/wiki-metrics.js"></script>
-    <script defer src="js/context-flow.js"></script><script defer src="js/llm-context.js"></script><script defer src="js/github-monitor.js"></script>
+    <script defer src="js/context-flow.js"></script><script defer src="js/llm-context.js"></script><script defer src="js/github-monitor.js"></script><script defer src="js/github-sync.js"></script>
     <script defer src="js/fleet-health-log.js"></script><script defer src="js/fleet-settings.js"></script>
     <script defer src="js/governance-panel.js"></script><script defer src="js/ticket-log.js"></script>
     <script defer src="js/tooltips.js"></script><script defer src="js/app-actions.js"></script>
@@ -51,7 +51,7 @@
         <template x-if="isView('live')"><section id="panel-activity" class="panel">
             <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
         <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width">
-            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div></section></template>
+            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow(devices, fleetStats)"></div></section></template>
         <!-- LOGS: 2 panels (streaming chronological) -->
         <template x-if="isView('logs')"><section id="panel-router-log" class="panel">
             <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>

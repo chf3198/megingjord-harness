@@ -1,3 +1,8 @@
+---
+title: Nodejs Install Patterns
+type: sources
+tags: []
+---
 # Node.js Ease-of-Install Patterns
 
 ## Sources

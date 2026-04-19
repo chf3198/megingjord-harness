@@ -64,7 +64,15 @@ The LLM updates this on every ingest operation.
 ## Syntheses
 
 - [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
+- [[dashboard-codebase-gold-rules]] — Dashboard Codebase Gold Rules
+
+## Recent Additions
+
+- [[dashboard-comparable-tools]] — Dashboard Comparable Tools Research
+- [[js-code-quality-practices]] — JS Code Quality Practices
+- [[nodejs-install-patterns]] — Node.js Install Patterns
+- [[nodejs-project-organization]] — Node.js Project Organization
 
 ---
 
-**Pages**: 43 | **Last updated**: 2026-07-15
+**Pages**: 48 | **Last updated**: 2026-04-19

@@ -32,4 +32,4 @@ Bounded review cycle that detects and corrects operational drift.
 - Event bus provides audit trail
 - wiki/log.md captures operational history
 
-See: [[workflow-self-anneal]], [[agent-drift-recommendations]]
+See: [[self-annealing]], [[agent-drift-recommendations]]

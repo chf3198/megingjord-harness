@@ -31,3 +31,5 @@ Manager → Collaborator → Admin → Consultant
 - No role may perform another role's duties
 
 See: [[agile-roles-analysis]], [[agile-roles-cross-verification]]
+
+See also: [[github-integration]], [[workflow-diagrams]]

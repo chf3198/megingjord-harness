@@ -17,26 +17,31 @@ function renderTicketLog(tickets) {
     return `<div class="tlog-empty">📋 No ticket history yet.<br>
       <span style="font-size:0.75rem">Tickets appear once events are emitted.</span></div>`;
   }
-  const open = tickets.filter(t => !['done','cancelled'].includes(t.status));
-  const closed = tickets.filter(t =>  ['done','cancelled'].includes(t.status));
+  // Group all tickets by epic (epics first, then sub-tickets collapsed)
+  const epics = {}, standalone = [];
+  for (const t of tickets) {
+    if (t.epic) { (epics[t.epic] = epics[t.epic] || []).push(t); }
+    else if ((t.labels || []).some(l => l === 'type:epic')) {
+      (epics[t.issue] = epics[t.issue] || []).unshift(t);
+    } else { standalone.push(t); }
+  }
+  // Ensure epic parent ticket is first in each group
   let html = '';
-  if (open.length) html += renderTicketSection('Active / Backlog', open);
-  if (closed.length) html += renderEpicGroups(closed);
+  for (const [epicId, items] of Object.entries(epics).sort((a,b) => b[0]-a[0])) {
+    const parent = items.find(i => String(i.issue) === String(epicId));
+    const children = items.filter(i => String(i.issue) !== String(epicId));
+    const allDone = children.every(t => ['done','cancelled'].includes(t.status));
+    const label = parent ? `Epic #${epicId}: ${esc(parent.title)}` : `Epic #${epicId}`;
+    const count = children.length;
+    const open = allDone ? '' : ' open';
+    html += `<details class="tlog-epic-group"${open}>
+      <summary class="tlog-epic-header">${label} <span class="tlog-count">(${count} sub)</span></summary>
+      ${parent ? renderTicketRow(parent) : ''}
+      ${renderTicketSection(null, children)}
+    </details>`;
+  }
+  if (standalone.length) html += renderTicketSection('Standalone', standalone);
   return `<div class="tlog-wrap">${html}</div>`;
-}
-
-function renderEpicGroups(tickets) {
-  const grouped = {};
-  tickets.forEach(t => {
-    const key = t.epic ? `Epic #${t.epic}` : 'Standalone';
-    (grouped[key] = grouped[key] || []).push(t);
-  });
-  return Object.entries(grouped).map(([epic, items]) =>
-    `<details class="tlog-epic-group">
-      <summary class="tlog-epic-header">${epic} <span class="tlog-count">(${items.length})</span></summary>
-      ${renderTicketSection(null, items)}
-    </details>`
-  ).join('');
 }
 
 function renderTicketSection(heading, tickets) {

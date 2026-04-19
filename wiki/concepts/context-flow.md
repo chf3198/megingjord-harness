@@ -1,3 +1,8 @@
+---
+title: Context Flow
+type: concepts
+tags: []
+---
 # Context Flow — How LLM Context Moves Through the Fleet
 
 **Type**: concept | **Created**: 2026-04-14 | **Epic**: #85+
@@ -62,3 +67,5 @@ Response returned via Tailscale mesh
 - [model-routing](model-routing.md) — AUTO selection logic
 - [copilot-pro](../entities/copilot-pro.md)
 - [openclaw](../entities/openclaw.md)
+
+See also: [[wiki-pattern]], [[dashboard-comparable-tools]], [[dashboard-world-class-research]]

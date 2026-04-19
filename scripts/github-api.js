@@ -19,8 +19,12 @@ function getRepoInfo() {
 }
 
 function getIssues() {
-  return ghApi(`repos/${REPO}/issues?state=all&per_page=20&sort=updated`,
-    '[.[]|{number,title,state,labels:[.labels[]|.name],created:.created_at,updated:.updated_at,isPR:(.pull_request!=null)}]');
+  return ghApi(`repos/${REPO}/issues?state=all&per_page=30&sort=updated`,
+    '[.[]|{number,title,state,labels:[.labels[]|.name],assignee:.assignee.login,body:(.body[:120]),created:.created_at,updated:.updated_at,isPR:(.pull_request!=null)}]');
+}
+function getIssueComments(num) {
+  return ghApi(`repos/${REPO}/issues/${num}/comments?per_page=1&sort=updated&direction=desc`,
+    '[.[]|{body:(.body[:100]),user:.user.login,updated:.updated_at}]');
 }
 
 function getPulls() {
@@ -45,12 +49,20 @@ function getSummary() {
   const runs = getWorkflowRuns() || [];
   const branches = getBranches() || [];
   const realIssues = issues.filter(i => !i.isPR);
+  // Enrich recent issues with last comment (for DUX4 ticket log)
+  const enriched = realIssues.slice(0, 20).map(i => {
+    const c = getIssueComments(i.number);
+    const last = c && c[0] ? c[0].body : null;
+    const epic = i.body?.match(/Parent:\s*#(\d+)/)?.[1] || null;
+    return { ...i, lastComment: last, epic: epic ? Number(epic) : null };
+  });
   return {
     repo: repo || {},
     issues: {
       open: realIssues.filter(i => i.state === 'open').length,
       closed: realIssues.filter(i => i.state === 'closed').length,
-      recent: realIssues.slice(0, 8)
+      recent: enriched.slice(0, 8),
+      all: enriched
     },
     pulls: {
       open: pulls.filter(p => p.state === 'open').length,
@@ -66,4 +78,4 @@ function getSummary() {
   };
 }
 
-module.exports = { getSummary, getRepoInfo, getIssues, getPulls };
+module.exports = { getSummary, getRepoInfo, getIssues, getPulls, getIssueComments };

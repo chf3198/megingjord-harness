@@ -1,3 +1,8 @@
+---
+title: Linting Governance
+type: concepts
+tags: []
+---
 # Linting Governance
 
 Global enforcement of code quality, documentation, and style
@@ -36,9 +41,9 @@ devenv-ops/lint-configs/     → Each repo's lint-configs/
 
 ## Integration Points
 
-- [[docs-drift-maintenance]] — 5th surface: inline code docs
+- [[governance-enforcement]] — 5th surface: inline code docs
 - [[governance-enforcement]] — CI gates block on lint failure
-- [[repo-onboarding-standards]] — new repos get configs
+- [[governance-enforcement]] — new repos get configs
 
 ## Implementation Status
 
@@ -77,3 +82,5 @@ and waived for incremental adoption. Forward-fix in #111.
 - Epic #101: Global linting governance (closed)
 - Forward-fix: #111 — ESLint baseline remediation
 - `lint-configs/lint-baseline.md` — waiver register
+
+See also: [[js-code-quality-practices]], [[nodejs-install-patterns]], [[nodejs-project-organization]]

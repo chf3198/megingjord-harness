@@ -26,7 +26,7 @@ Primary development machine. Lenovo Chromebook with Linux (Crostini).
 - Uses [[openclaw]] for 7B+ inference offloading
 
 ## Constraints
-- Memory pressure requires [[mem-watchdog]] vigilance
+- Memory pressure requires [[hardware-evaluation]] vigilance
 - No Docker (Crostini limitation)
 - Browser tabs compete for RAM with dev tools
 

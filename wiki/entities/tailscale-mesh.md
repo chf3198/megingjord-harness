@@ -49,4 +49,4 @@ Dashboard server probes fleet every 60s via Tailscale IPs (auto-detected):
 - MagicDNS: devices addressable by hostname
 - ACLs: all fleet devices can reach each other
 
-See: [[hardware-evaluation]], [[network-platform-resources]]
+See: [[hardware-evaluation]], [[devenv-fleet-topology]]

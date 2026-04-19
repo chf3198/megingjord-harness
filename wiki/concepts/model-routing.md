@@ -1,3 +1,8 @@
+---
+title: Model Routing
+type: concepts
+tags: []
+---
 # Model Routing — AUTO Selection & Fleet Distribution
 
 **Type**: concept | **Created**: 2026-04-14 | **Epic**: #85+

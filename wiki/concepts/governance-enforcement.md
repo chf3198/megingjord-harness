@@ -5,7 +5,7 @@ created: 2026-04-14
 updated: 2026-04-14
 tags: [governance, architecture, copilot]
 sources: []
-related: ["[[baton-protocol]]", "[[agent-drift]]", "[[self-annealing]]"]
+related: ["[[baton-protocol]]", "[[agent-drift]]", "[[self-annealing]]", "[[linting-governance]]"]
 status: draft
 ---
 
@@ -34,3 +34,5 @@ status: draft
 - Ticket lifecycle enforcement (Manager gates)
 
 See: [[workflow-design]], [[copilot-governance-actions]]
+
+See also: [[help-best-practices]], [[help-section-structure]], [[dashboard-codebase-gold-rules]]

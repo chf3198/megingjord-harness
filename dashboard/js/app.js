@@ -36,16 +36,12 @@ function dashboardApp() {
       this.scheduleRefresh();
       if (typeof connectSSE === 'function') connectSSE(this);
       this.lastRefresh = new Date().toLocaleTimeString();
-      addActivity(this.activityLog, 'system', 'Dashboard initialized',
-        `${this.devices.length} devices loaded`);
+      addActivity(this.activityLog, 'system', 'Dashboard initialized', `${this.devices.length} devices`);
     },
-
     async loadInventory() {
-      this.devices = await loadDevices();
-      this.services = await loadServices();
+      this.devices = await loadDevices(); this.services = await loadServices();
       this.quotas = buildQuotaList(this.services);
     },
-
     async refreshAll() {
       this.loading = true;
       try {
@@ -56,15 +52,20 @@ function dashboardApp() {
           pollEventBus(this.activityLog)
         ]);
         const val = (i, fb) => results[i].status === 'fulfilled' ? results[i].value : fb;
-        results.filter(r => r.status === 'rejected').forEach((r, i) => console.warn(`refreshAll failed:`, r.reason));
+        results.filter(r => r.status === 'rejected').forEach(r => console.warn('refreshAll failed:', r.reason));
         const [checks, stats, lq, rs, evBaton] = [val(0,[]), val(1,{}), val(2,[]), val(3,{}), val(4,[])];
         this.devices = mergeHealthStatus(this.devices, checks);
-        this.fleetStats = stats; this.routerStats = rs;
-        this.ticketLog = getTicketLog(); if (lq.length) this.liveQuotas = lq;
-        this.wikiHealth = await fetchWikiHealth(); if (typeof fetchWikiMetrics==='function') this.wikiMetrics=await fetchWikiMetrics();
+        this.fleetStats = stats; this.routerStats = rs; if (lq.length) this.liveQuotas = lq;
+        this.ticketLog = getTicketLog();
+        this.wikiHealth = await fetchWikiHealth();
+        if (typeof fetchWikiMetrics==='function') this.wikiMetrics=await fetchWikiMetrics();
         if (typeof pollGitHub === 'function') { this.githubData = await pollGitHub();
-          if (this.githubData?.issues?.recent) pruneClosedFromGitHub(this.githubData.issues.recent); }
-        this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
+          if (this.githubData?.issues?.recent) pruneClosedFromGitHub(this.githubData.issues.recent);
+          if (typeof syncWithGitHub === 'function' && this.githubData?.issues?.all)
+            this.ticketLog = syncWithGitHub(this.githubData.issues.all); }
+        this.batonState = this.ticketLog.length
+          ? this.ticketLog.filter(t => !['done','cancelled'].includes(t.status))
+          : (evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog())));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
         this.lastRefresh = new Date().toLocaleTimeString();
@@ -83,12 +84,10 @@ function dashboardApp() {
     toggleAutoRefresh() {
       this.autoRefreshEnabled = !this.autoRefreshEnabled;
       this.scheduleRefresh();
-      addActivity(this.activityLog, 'system',
-        this.autoRefreshEnabled ? 'Auto-refresh on' : 'Auto-refresh off');
+      addActivity(this.activityLog, 'system', this.autoRefreshEnabled ? 'Auto-refresh on' : 'Auto-refresh off');
     },
     setHighContrast(on) {
-      this.config.highContrast = !!on;
-      saveDashboardConfig(this.config);
+      this.config.highContrast = !!on; saveDashboardConfig(this.config);
       document.body.classList.toggle('high-contrast', this.config.highContrast);
     },
     setView(view) { setDashboardView(this, view); },

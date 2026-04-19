@@ -1,3 +1,8 @@
+---
+title: Js Code Quality Practices
+type: sources
+tags: []
+---
 # JavaScript Code Quality Practices
 
 ## Sources

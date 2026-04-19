@@ -1,3 +1,8 @@
+---
+title: Dashboard Comparable Tools
+type: sources
+tags: []
+---
 # Dashboard Comparable Tools: Marketability Patterns
 
 ## Sources

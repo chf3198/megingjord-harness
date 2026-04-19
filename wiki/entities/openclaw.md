@@ -28,4 +28,4 @@ Self-hosted LLM inference gateway on [[windows-laptop]].
 2. Groq (cloud free tier) — fast, rate limited
 3. Cerebras (cloud free tier) — fast, limited models
 
-See: [[openrouter-free-failover]], [[tiered-agent-architecture]]
+See: [[free-tier-inventory]], [[tiered-agent-architecture]]

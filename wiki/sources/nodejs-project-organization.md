@@ -1,3 +1,8 @@
+---
+title: Nodejs Project Organization
+type: sources
+tags: []
+---
 # Node.js Project Organization Patterns
 
 ## Sources
