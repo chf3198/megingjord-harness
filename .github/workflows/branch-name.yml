@@ -1,0 +1,20 @@
+name: Branch Name
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ -z "$BRANCH" ]]; then exit 0; fi
+          VALID='^(feat|fix|hotfix)/[0-9]+-|^(chore|skill)/[a-z0-9]|^main$|^develop$'
+          if ! echo "$BRANCH" | grep -qE "$VALID"; then
+            echo "::error::Branch '$BRANCH' violates naming convention."
+            echo "Required: feat/<ticket#>-desc, fix/<ticket#>-desc, skill/<name>, chore/<desc>"
+            exit 1
+          fi
