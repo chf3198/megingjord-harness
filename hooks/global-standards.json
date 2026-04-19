@@ -44,6 +44,13 @@
         "command": "python3 ~/.copilot/hooks/scripts/stop_reminder.py",
         "timeout": 10
       }
+    ],
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "python3 ~/.copilot/hooks/scripts/precompact_anchor.py",
+        "timeout": 10
+      }
     ]
   }
 }
