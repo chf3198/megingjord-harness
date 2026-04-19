@@ -73,7 +73,7 @@
 .view-logs { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 .view-fleet { grid-template-columns: 1fr 1fr; }
 #panel-settings { grid-row: span 2; }
-#panel-devices > div, #panel-services > div { max-height: 12rem; }
+#panel-devices > div, #panel-services > div { max-height: none; flex: 1; min-height: 4rem; }
 .view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; }
 .view-wiki { grid-template-columns: 1fr; } .view-help { grid-template-columns: 1fr; }
 .view-settings { grid-template-columns: 1fr; }
