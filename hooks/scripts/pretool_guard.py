@@ -29,7 +29,7 @@ def check_terminal(joined: str, state: dict) -> int | None:
     if ".copilot/hooks/scripts" in joined:
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening or bypass logic.")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
-        return emit("ask","Commit has no issue ref (#N). Create/link issue first.")
+        return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
     if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
         return emit("deny","Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
