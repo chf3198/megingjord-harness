@@ -2,11 +2,19 @@
 
 let _wikiMetrics = null;
 
+function _fallbackMetrics() {
+  return { totalAccess: 0, sections: {},
+    grade: '?', score: 0, gradeReasons: ['Metrics API unavailable'] };
+}
+
 async function fetchWikiMetrics() {
   try {
     const r = await fetch('/api/wiki-metrics');
     if (r.ok) _wikiMetrics = await r.json();
-  } catch { /* keep stale */ }
+    else if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
+  } catch {
+    if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
+  }
   return _wikiMetrics;
 }
 
@@ -20,7 +28,7 @@ function gradeColor(g) {
 }
 
 function renderWikiMetrics(m, health) {
-  if (!m) return '<div class="wiki-metrics-empty">Loading usage metrics…</div>';
+  if (!m) return '<div class="wiki-metrics-empty">📊 No metrics available — browse wiki pages to generate usage data.</div>';
   const grade = m.grade || '?';
   const cls = gradeColor(grade);
   const total = m.totalAccess || 0;
