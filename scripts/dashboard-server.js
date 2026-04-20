@@ -85,16 +85,13 @@ async function handleApi(req, res) {
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
   if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
   if (u === '/api/governance') {
-    try {
-      const repoScope = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'repo-scope.json'), 'utf8'));
-      const globalHooks = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'global-standards.json'), 'utf8'));
-      return jsonRes(res, 200, { enabled: repoScope.default_enabled, repoScope, hooks: globalHooks.hooks });
-    } catch (e) {
-      return jsonRes(res, 500, { error: 'governance state unavailable', detail: e.message });
-    }
+    try { const rs = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'repo-scope.json'), 'utf8')); const gh = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'global-standards.json'), 'utf8')); return jsonRes(res, 200, { enabled: rs.default_enabled, repoScope: rs, hooks: gh.hooks }); } catch (e) { return jsonRes(res, 500, { error: e.message }); }
   }
   if (u === '/api/host-info') { return jsonRes(res, 200, getHostInfo()); }
   if (u.startsWith('/api/fleet-health')) { const { readLog } = require('./fleet-health-log'); return jsonRes(res, 200, readLog(100)); }
+  if (u === '/api/quota-probes') { const { probeAll } = require('./quota-probes'); return jsonRes(res, 200, await probeAll()); }
+  if (u === '/api/copilot-usage') { const { getCopilotQuota } = require('./copilot-tracker'); return jsonRes(res, 200, getCopilotQuota()); }
+  if (u === '/api/copilot-usage/sync' && req.method === 'POST') { let b=''; req.on('data',c=>b+=c); req.on('end',()=>{ try { const d=JSON.parse(b); const { setManualUsage } = require('./copilot-tracker'); return jsonRes(res,200,setManualUsage(d.cost,d.requests)); } catch(e){ return jsonRes(res,400,{error:e.message}); } }); return; }
   jsonRes(res, 404, { error: 'not found' });
 }
 

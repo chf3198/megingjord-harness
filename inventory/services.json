@@ -14,7 +14,6 @@
       "id": "cloudflare",
       "name": "Cloudflare Workers",
       "cost": "$10/mo",
-      "quotas": { "neuronsPerDay": 10000, "period": "daily" },
       "features": ["pages", "workers-ai", "d1", "r2", "kv"],
       "visionModel": "@cf/meta/llama-3.2-11b-vision-instruct",
       "status": "active"
@@ -24,7 +23,6 @@
     {
       "id": "google-ai-studio",
       "name": "Google AI Studio",
-      "quotas": { "searchGrounding": 500, "period": "daily" },
       "models": ["Gemini 2.5 Pro", "Gemini 2.5 Flash", "Gemini 3 Flash", "Gemma 4"],
       "features": ["vision", "audio", "code-execution", "embeddings"],
       "balance": "$10",
@@ -33,7 +31,6 @@
     {
       "id": "groq",
       "name": "Groq",
-      "quotas": { "rpm": 30, "rpd": 14400 },
       "status": "active"
     },
     {
@@ -45,7 +42,6 @@
     {
       "id": "openrouter",
       "name": "OpenRouter",
-      "quotas": { "note": "Varies by model provider" },
       "status": "active"
     }
   ],

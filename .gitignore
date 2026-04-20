@@ -28,3 +28,4 @@ raw/**/*.epub
 .DS_Store
 Thumbs.db
 logs/
+logs/copilot-usage.json
