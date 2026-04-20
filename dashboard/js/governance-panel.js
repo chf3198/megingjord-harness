@@ -15,6 +15,7 @@ function renderGovernancePanel(state = {}) {
   const hooks = state.hooks || {};
   const allHooks = [
     ...(hooks.PreToolUse || []),
+    ...(hooks.PostToolUse || []),
     ...(hooks.UserPromptSubmit || []),
     ...(hooks.Stop || []),
   ];

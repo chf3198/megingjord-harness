@@ -43,8 +43,8 @@ async function fetchCloudflareAIUsage() {
 function buildServiceCosts() {
   return [
     { id: 'copilot-pro', name: 'GitHub Copilot Pro',
-      cost: '$10/mo', detail: '300 premium req/mo · usage via settings',
-      link: 'https://github.com/settings/copilot' },
+      cost: 'Metered', detail: 'Metered billing — check usage overview',
+      link: 'https://github.com/settings/billing/summary' },
     { id: 'cloudflare', name: 'Cloudflare Workers',
       cost: '$10/mo', detail: 'Pages + Workers AI',
       link: 'https://dash.cloudflare.com/' },

@@ -41,8 +41,8 @@ function syncWithGitHub(ghIssues) {
   for (const gh of ghIssues) {
     const key = String(gh.number);
     const existing = logMap[key] || {};
-    const ghStatus = ghStatusFromLabels(gh.labels)
-      || (gh.state === 'closed' ? 'done' : null);
+    const ghStatus = gh.state === 'closed' ? 'done'
+      : ghStatusFromLabels(gh.labels);
     const ghRole = ghRoleFromLabels(gh.labels);
     const fallbackStatus = gh.state === 'open' ? 'in-progress' : 'backlog';
     synced.push({

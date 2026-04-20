@@ -23,7 +23,8 @@
 }
 
 .baton-issue { font-size: 0.9rem; font-weight: 700; color: var(--blue); }
-.baton-title { font-size: 0.78rem; color: var(--text); font-weight: 500; }
+.baton-title { font-size: 0.78rem; color: var(--text); font-weight: 500;
+  max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
 .baton-epic {
   font-size: 0.65rem; color: var(--text-muted); background: var(--surface);
   border: 1px solid var(--border); border-radius: 3px; padding: 0 0.3rem;

@@ -40,7 +40,7 @@ function renderBatonRow(t) {
   const badge = statusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
   const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
-  const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
+  const title = t.title ? `<span class="baton-title" title="${esc(t.title)}">${esc(t.title)}</span>` : '';
   const epic = t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
   const gaps = typeof detectMissingEvents === 'function'
     ? detectMissingEvents(t.issue) : [];

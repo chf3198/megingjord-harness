@@ -51,7 +51,7 @@
         <template x-if="isView('live')"><section id="panel-activity" class="panel">
             <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
         <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width">
-            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow(devices, fleetStats)"></div></section></template>
+            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow(devices, fleetStats, batonState.some(t=>!['done','cancelled','backlog'].includes(t.status)))"></div></section></template>
         <!-- LOGS: 3 panels (Router+Fleet side-by-side, Tickets full) -->
         <template x-if="isView('logs')"><section id="panel-router-log" class="panel">
             <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>

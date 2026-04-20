@@ -1,6 +1,6 @@
 // Context Flow — SVG diagram with animated data packets
 // Accepts live device health + fleet stats for real-time status
-function renderContextFlow(devices, fleetStats) {
+function renderContextFlow(devices, fleetStats, isActive) {
   const W = 620, H = 260;
   // Build live status map from device health
   const dm = {}; (devices || []).forEach(d => { dm[d.id] = d.status; });
@@ -63,11 +63,11 @@ function cfArrows(nodes, arrows) {
     const pathId = `cfpath${i}`;
     const color = a.dashed ? 'var(--yellow)' : 'var(--green)';
     const dur = a.dashed ? '4s' : '2.5s';
-    return `<path id="${pathId}" d="M${f.x},${f.y} L${t.x},${t.y}"
-      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></path>
-      <circle r="2.5" fill="${color}" class="cf-packet" opacity="0.9">
+    const pkt = isActive ? `<circle r="2.5" fill="${color}" class="cf-packet" opacity="0.9">
         <animateMotion dur="${dur}" repeatCount="indefinite">
-          <mpath href="#${pathId}"/></animateMotion></circle>
+          <mpath href="#${pathId}"/></animateMotion></circle>` : '';
+    return `<path id="${pathId}" d="M${f.x},${f.y} L${t.x},${t.y}"
+      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></path>${pkt}
       ${a.label ? `<text x="${mx}" y="${my - 4}" text-anchor="middle"
         class="cf-lbl">${a.label}</text>` : ''}`;
   }).join('');
