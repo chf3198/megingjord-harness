@@ -44,10 +44,11 @@ function syncWithGitHub(ghIssues) {
     const ghStatus = ghStatusFromLabels(gh.labels)
       || (gh.state === 'closed' ? 'done' : null);
     const ghRole = ghRoleFromLabels(gh.labels);
+    const fallbackStatus = gh.state === 'open' ? 'in-progress' : 'backlog';
     synced.push({
       issue: gh.number,
       title: gh.title || existing.title || '',
-      status: ghStatus || existing.status || 'backlog',
+      status: ghStatus || existing.status || fallbackStatus,
       activeRole: ghRole || existing.activeRole || null,
       agent: existing.agent || gh.assignee || '',
       model: existing.model || '',

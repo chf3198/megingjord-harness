@@ -53,9 +53,9 @@ test.describe('Fleet Operations Center', () => {
     expect(links).toBeGreaterThanOrEqual(1);
   });
 
-  test('settings panel shows fleet resources', async ({ page }) => {
+  test('settings view shows fleet resources', async ({ page }) => {
     await page.goto('/');
-    await page.click('button[title="Fleet"]');
+    await page.click('button[title="Settings"]');
     await page.waitForTimeout(500);
     await expect(page.locator('#panel-settings h2')).toContainText('Fleet Resources');
   });

@@ -74,7 +74,7 @@
 .view-logs { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 .view-fleet { grid-template-columns: 1fr 1fr; }
 .view-fleet .panel { border-top: 2px solid #79c0ff; }
-#panel-settings { grid-row: span 2; }
+
 #panel-devices > div, #panel-services > div { max-height: none; flex: 1; min-height: 4rem; }
 .view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
 .view-ops .panel { border-top: 2px solid var(--green); }

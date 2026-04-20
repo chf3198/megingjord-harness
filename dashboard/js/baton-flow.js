@@ -14,10 +14,11 @@ function renderBatonFlow(batonState) {
     const logSnapshot = typeof getTicketLog === 'function' ? getTicketLog() : [];
     tickets = pruneStaleBaton(tickets, logSnapshot);
   }
-  const activelyWorked = tickets.filter(t => t.status === 'in-progress');
+  const INACTIVE = new Set(['done', 'cancelled', 'backlog']);
+  const activelyWorked = tickets.filter(t => !INACTIVE.has(t.status));
   if (!activelyWorked.length) {
     return `<div class="baton-flow"><div class="baton-empty">🎯 No tickets in active LLM work<br>
-      <small>Shows only in-progress tickets. See Ticket Log for full history.</small></div></div>`;
+      <small>Open tickets appear here automatically. See Ticket Log for full history.</small></div></div>`;
   }
   const rows = activelyWorked.map(renderBatonRow).join('');
   return `<div class="baton-flow">${rows}</div>`;
