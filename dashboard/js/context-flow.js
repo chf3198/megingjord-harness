@@ -1,6 +1,5 @@
-// Context Flow — SVG diagram showing prompt → LLM → response chain
-// Accepts live device health + fleet stats for real-time status dots
-
+// Context Flow — SVG diagram with animated data packets
+// Accepts live device health + fleet stats for real-time status
 function renderContextFlow(devices, fleetStats) {
   const W = 620, H = 260;
   // Build live status map from device health
@@ -57,12 +56,18 @@ function cfDefs() {
   .cf-lbl{font-size:7px;fill:var(--text-muted);font-style:italic}</style>`;
 }
 function cfArrows(nodes, arrows) {
-  return arrows.map(a => {
+  return arrows.map((a, i) => {
     const f = nodes[a.from], t = nodes[a.to];
     const cls = a.dashed ? 'cf-arrow dashed' : 'cf-arrow';
     const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
-    return `<line x1="${f.x}" y1="${f.y}" x2="${t.x}" y2="${t.y}"
-      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></line>
+    const pathId = `cfpath${i}`;
+    const color = a.dashed ? 'var(--yellow)' : 'var(--green)';
+    const dur = a.dashed ? '4s' : '2.5s';
+    return `<path id="${pathId}" d="M${f.x},${f.y} L${t.x},${t.y}"
+      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></path>
+      <circle r="2.5" fill="${color}" class="cf-packet" opacity="0.9">
+        <animateMotion dur="${dur}" repeatCount="indefinite">
+          <mpath href="#${pathId}"/></animateMotion></circle>
       ${a.label ? `<text x="${mx}" y="${my - 4}" text-anchor="middle"
         class="cf-lbl">${a.label}</text>` : ''}`;
   }).join('');
@@ -88,10 +93,8 @@ function contextBudgetLegend() {
     { label: 'File context', pct: 25, color: 'var(--yellow)' },
     { label: 'MCP tools', pct: 10, color: 'var(--text-muted)' },
     { label: 'User message', pct: 5, color: 'var(--red)' },
-    { label: 'Headroom', pct: 15, color: 'var(--border)' },
-  ];
+    { label: 'Headroom', pct: 15, color: 'var(--border)' }, ];
   const bars = items.map(i => `<div class="cb-seg" style="flex:${i.pct};background:${i.color}" title="${i.label}: ~${i.pct}%"></div>`).join('');
   const labels = items.map(i => `<span><span class="dot" style="background:${i.color}"></span>${i.label}</span>`).join('');
-  return `<div class="cb-bar">${bars}</div>
-    <div class="cb-legend">${labels}</div>`;
+  return `<div class="cb-bar">${bars}</div><div class="cb-legend">${labels}</div>`;
 }

@@ -19,7 +19,7 @@
     <script defer src="js/fleet-health-log.js"></script><script defer src="js/fleet-settings.js"></script>
     <script defer src="js/governance-panel.js"></script><script defer src="js/ticket-log.js"></script>
     <script defer src="js/tooltips.js"></script><script defer src="js/app-actions.js"></script>
-    <script defer src="js/credential-store.js"></script><script defer src="js/provider-presets.js"></script><script defer src="js/fleet-probe.js"></script><script defer src="js/settings-panel.js"></script><script defer src="js/settings-form.js"></script><script defer src="js/settings-actions.js"></script>
+    <script defer src="js/credential-store.js"></script><script defer src="js/provider-presets.js"></script><script defer src="js/fleet-probe.js"></script><script defer src="js/settings-panel.js"></script><script defer src="js/settings-form.js"></script><script defer src="js/settings-modal.js"></script><script defer src="js/settings-actions.js"></script>
     <script defer src="js/event-source.js"></script><script defer src="js/app.js"></script>
     <script defer src="js/alpine.min.js"></script>
 </head>
@@ -52,10 +52,12 @@
             <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
         <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width">
             <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow(devices, fleetStats)"></div></section></template>
-        <!-- LOGS: 2 panels (streaming chronological) -->
+        <!-- LOGS: 3 panels (Router+Fleet side-by-side, Tickets full) -->
         <template x-if="isView('logs')"><section id="panel-router-log" class="panel">
             <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>
-        <template x-if="isView('logs')"><section id="panel-ticket-log" class="panel">
+        <template x-if="isView('logs')"><section id="panel-fleet-health-log" class="panel">
+            <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
+        <template x-if="isView('logs')"><section id="panel-ticket-log" class="panel full-width">
             <h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help: Tickets">?</button></h2><div class="log-scroll" x-html="renderTicketLog(ticketLog)"></div></section></template>
         <!-- OPS: 6 panels (monitoring + analytics) -->
         <section id="panel-github" class="panel" x-show="isView('ops')">
@@ -69,9 +71,7 @@
         <section id="panel-llm-context" class="panel" x-show="isView('ops')">
             <h2>📐 LLM Context <button class="shb" data-tip="llm-context" aria-label="Help: LLM">?</button></h2><div x-html="renderLLMContext()"></div></section>
 
-        <!-- FLEET: 6 panels (inventory + config + health) -->
-        <template x-if="isView('fleet')"><section id="panel-fleet-health" class="panel">
-            <h2>🏥 Fleet Health <button class="shb" data-tip="fleet-health" aria-label="Help: Health">?</button></h2><div class="log-scroll" x-html="renderFleetHealthLog(fleetHealthLog)"></div></section></template>
+        <!-- FLEET: 5 panels (inventory + config) -->
         <template x-if="isView('fleet')"><section id="panel-devices" class="panel">
             <h2>🏗️ Devices <button class="shb" data-tip="devices" aria-label="Help: Devices">?</button></h2><div x-html="renderDeviceCards(devices)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-services" class="panel">
@@ -92,4 +92,5 @@
         <template x-if="isView('settings')"><section id="panel-config" class="panel full-width">
             <h2>⚙️ Settings <button class="shb" data-tip="config" aria-label="Help: Settings">?</button></h2><div x-html="renderConfigPanel(config, autoRefreshEnabled, tooltipsEnabled)"></div></section></template>
     </main>
+    <div id="settings-modal-overlay"></div>
     <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>devenv-ops v3.0.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>

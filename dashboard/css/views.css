@@ -14,12 +14,12 @@
 
 .header-nav button { background: var(--surface); color: var(--text);
   border: 1px solid var(--border); border-radius: 999px;
-  padding: 0.2rem 0.6rem; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
+  padding: 0.2rem 0.6rem; font-size: 0.82rem; cursor: pointer; white-space: nowrap; transition: all 0.15s ease; }
 
 .header-nav button:hover { border-color: var(--blue);
-  background: color-mix(in srgb, var(--blue) 10%, var(--surface)); }
+  background: color-mix(in srgb, var(--blue) 10%, var(--surface)); transform: scale(0.97); }
 .header-nav button:focus-visible { box-shadow: var(--focus-ring); }
-.header-nav button.active { border-color: var(--blue); color: var(--blue); }
+.header-nav button.active { border-color: var(--blue); color: var(--blue); background: color-mix(in srgb, var(--blue) 15%, var(--surface)); box-shadow: 0 0 8px rgba(88,166,255,0.2); }
 
 .panel.full-width { grid-column: 1 / -1; }
 
@@ -70,16 +70,17 @@
 .help-feedback { display: flex; gap: 1rem; padding: 0.5rem 0; }
 .help-empty { color: var(--text-muted); font-style: italic; }
 .view-live { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; }
-.view-logs { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+.view-live .panel { border-top: 2px solid var(--blue); }
+.view-logs { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 .view-fleet { grid-template-columns: 1fr 1fr; }
+.view-fleet .panel { border-top: 2px solid #79c0ff; }
 #panel-settings { grid-row: span 2; }
 #panel-devices > div, #panel-services > div { max-height: none; flex: 1; min-height: 4rem; }
 .view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
-.view-wiki { grid-template-columns: 1fr; } .view-help { grid-template-columns: 1fr; }
-.view-settings { grid-template-columns: 1fr; }
-.log-scroll { overflow-y: scroll; }
-.panel { overflow: hidden; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.6rem; }
-.panel:hover { border-color: color-mix(in srgb, var(--blue) 50%, var(--border)); }
+.view-ops .panel { border-top: 2px solid var(--green); }
+.view-wiki { grid-template-columns: 1fr; } .view-help { grid-template-columns: 1fr; } .view-settings { grid-template-columns: 1fr; } .log-scroll { overflow-y: scroll; }
+.panel { overflow: hidden; display: flex; flex-direction: column; background: var(--surface); backdrop-filter: var(--glass); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.6rem; box-shadow: var(--shadow-sm); transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s; }
+.panel:hover { border-color: color-mix(in srgb, var(--blue) 50%, var(--border)); box-shadow: var(--shadow); }
 .panel > div { flex: 1; overflow-y: scroll; min-height: 0; }
 #panel-github { grid-row: 1 / 3; }
 #panel-llm-context { grid-row: 3; grid-column: 1; }

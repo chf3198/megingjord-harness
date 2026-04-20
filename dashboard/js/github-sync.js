@@ -60,6 +60,15 @@ function syncWithGitHub(ghIssues) {
   return synced.sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 
-if (typeof module !== 'undefined') module.exports = { syncWithGitHub };
-else Object.assign(window, { syncWithGitHub });
+/** Infer baton role from ticket status when no role label exists */
+function inferRole(status) {
+  const map = {
+    'backlog': null, 'todo': 'manager', 'in-progress': 'collaborator',
+    'ready-for-testing': 'admin', 'review': 'consultant', 'blocked': null,
+  };
+  return map[status] || null;
+}
+
+if (typeof module !== 'undefined') module.exports = { syncWithGitHub, inferRole };
+else Object.assign(window, { syncWithGitHub, inferRole });
 })();
