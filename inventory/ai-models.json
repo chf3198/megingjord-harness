@@ -1,0 +1,76 @@
+{
+  "lastUpdated": "2026-04-20",
+  "note": "Real-time resource matrix — all available LLMs/SLMs across services",
+  "copilotPro": {
+    "plan": "Pro",
+    "cost": "$10/mo metered",
+    "premiumAllowance": 300,
+    "overage": "$0.04/request",
+    "freeModels": [
+      { "id": "gpt-5-mini", "mult": 0, "tier": "S", "tasks": ["general", "reasoning", "vision"] },
+      { "id": "gpt-4.1", "mult": 0, "tier": "A", "tasks": ["general"] },
+      { "id": "gpt-4o", "mult": 0, "tier": "A", "tasks": ["general", "vision"] },
+      { "id": "raptor-mini", "mult": 0, "tier": "B", "tasks": ["general", "inline"] }
+    ],
+    "cheapModels": [
+      { "id": "grok-code-fast-1", "mult": 0.25, "tier": "A", "tasks": ["general", "coding"] },
+      { "id": "claude-haiku-4.5", "mult": 0.33, "tier": "B", "tasks": ["fast", "simple"] },
+      { "id": "gemini-3-flash", "mult": 0.33, "tier": "B", "tasks": ["fast", "simple"] },
+      { "id": "gpt-5.4-mini", "mult": 0.33, "tier": "A", "tasks": ["agentic", "grep"] }
+    ],
+    "standardModels": [
+      { "id": "claude-sonnet-4.6", "mult": 1, "tier": "S", "tasks": ["general", "agentic", "vision"] },
+      { "id": "claude-sonnet-4.5", "mult": 1, "tier": "S", "tasks": ["general", "agentic"] },
+      { "id": "gemini-2.5-pro", "mult": 1, "tier": "S", "tasks": ["reasoning", "research"] },
+      { "id": "gemini-3.1-pro", "mult": 1, "tier": "S", "tasks": ["reasoning", "tool-use"] },
+      { "id": "gpt-5.2", "mult": 1, "tier": "A", "tasks": ["reasoning", "debugging"] },
+      { "id": "gpt-5.4", "mult": 1, "tier": "A", "tasks": ["reasoning"] }
+    ],
+    "premiumModels": [
+      { "id": "claude-opus-4.5", "mult": 3, "tier": "S+", "tasks": ["reasoning"] },
+      { "id": "claude-opus-4.6", "mult": 3, "tier": "S+", "tasks": ["reasoning"] },
+      { "id": "claude-opus-4.7", "mult": 7.5, "tier": "S+", "tasks": ["reasoning"] }
+    ],
+    "defaultFree": "gpt-5-mini",
+    "bestBudgetAgent": "gpt-5.4-mini"
+  },
+  "openrouter": {
+    "cost": "free-tier + credits",
+    "freeModels": "see openrouter-free-failover skill",
+    "note": "Free models rotate — check /api/openrouter/credits"
+  },
+  "googleAIStudio": {
+    "cost": "free ($10 credit)",
+    "models": ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3-flash", "gemma-4"],
+    "limits": "500/day search grounding, RPM varies by model"
+  },
+  "groq": {
+    "cost": "free",
+    "limits": "RPM/RPD varies, exposed via headers",
+    "note": "Fastest inference — ideal for quick tasks"
+  },
+  "cerebras": {
+    "cost": "free",
+    "models": ["gpt-oss-120b", "llama-3.1-8b", "qwen3-235b"],
+    "note": "Ultra-fast inference for large models"
+  },
+  "openclaw": {
+    "cost": "free (self-hosted)",
+    "models": ["ollama/mistral", "ollama/phi3:mini", "ollama/qwen2.5:7b-instruct"],
+    "note": "Windows laptop — available when online"
+  },
+  "cloudflareAI": {
+    "cost": "included in $10/mo Workers plan",
+    "limits": "10000 neurons/day free",
+    "models": ["@cf/meta/llama-3.2-11b-vision-instruct"],
+    "note": "Vision model for visual QA"
+  },
+  "optimizationStrategy": {
+    "rule1": "Default Copilot to GPT-5 mini (0x) for all routine work",
+    "rule2": "Use Grok Code Fast 1 (0.25x) or GPT-5.4 mini (0.33x) for coding-heavy sessions",
+    "rule3": "Reserve 1x models (Sonnet 4.6, Gemini) for complex reasoning only",
+    "rule4": "Never use Opus (3-7.5x) without explicit justification",
+    "rule5": "Offload non-Copilot tasks to Groq/Cerebras/Google (free APIs)",
+    "rule6": "Use OpenClaw for local SLM tasks (zero cost, zero latency)"
+  }
+}
