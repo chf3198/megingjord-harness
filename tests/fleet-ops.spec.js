@@ -7,7 +7,13 @@ test.describe('Fleet Operations Center', () => {
     await page.waitForTimeout(500);
     await expect(page.locator('#panel-devices h2')).toContainText('Devices');
     await expect(page.locator('#panel-services h2')).toContainText('Services');
-    await expect(page.locator('#panel-fleet-health h2')).toContainText('Fleet Health');
+  });
+
+  test('fleet health is in logs view', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button[title="Logs"]');
+    await page.waitForTimeout(500);
+    await expect(page.locator('#panel-fleet-health-log h2')).toContainText('Fleet Health');
   });
 
   test('agent baton flow shows on live view', async ({ page }) => {

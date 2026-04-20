@@ -5,6 +5,10 @@ async function fetchOpenRouterCredits() {
   try {
     const r = await fetch('/api/openrouter/credits', {
       signal: AbortSignal.timeout(5000) });
+    if (r.status === 503) return { id: 'openrouter', name: 'OpenRouter Credits',
+      used: '—', limit: '—', percent: 0, period: 'account',
+      note: '🔧 API key not configured',
+      link: 'https://openrouter.ai/activity' };
     if (!r.ok) return null;
     const info = (await r.json()).data || {};
     const used = info.usage ?? 0, limit = info.limit ?? 0;
@@ -13,7 +17,9 @@ async function fetchOpenRouterCredits() {
       limit: limit || '∞', period: 'account',
       percent: limit ? Math.min(100, Math.round((used / limit) * 100)) : 0,
       link: 'https://openrouter.ai/activity' };
-  } catch (e) { console.warn('quota-live: openrouter fetch failed:', e.message); return null; }
+  } catch (e) { return { id: 'openrouter', name: 'OpenRouter Credits',
+    used: '—', limit: '—', percent: 0, note: '⚠️ Unreachable',
+    link: 'https://openrouter.ai/activity' }; }
 }
 
 async function fetchCloudflareAIUsage() {
@@ -22,20 +28,22 @@ async function fetchCloudflareAIUsage() {
       signal: AbortSignal.timeout(5000) });
     if (!r.ok) return { id: 'cloudflare-ai', name: 'Cloudflare AI Neurons',
       used: '—', limit: 10000, percent: 0, period: 'daily',
-      note: r.status === 503 ? 'Account ID needed' : 'API error',
+      note: r.status === 503 ? '🔧 Account ID needed' : '⚠️ API error',
       link: 'https://dash.cloudflare.com/' };
     const neurons = (await r.json()).result?.neurons_used ?? 0;
     return { id: 'cloudflare-ai', name: 'Cloudflare AI Neurons',
       used: neurons, limit: 10000, period: 'daily',
       percent: Math.min(100, Math.round((neurons / 10000) * 100)),
       link: 'https://dash.cloudflare.com/' };
-  } catch (e) { console.warn('quota-live: cloudflare fetch failed:', e.message); return null; }
+  } catch (e) { return { id: 'cloudflare-ai', name: 'Cloudflare AI Neurons',
+    used: '—', limit: 10000, percent: 0, note: '⚠️ Unreachable',
+    link: 'https://dash.cloudflare.com/' }; }
 }
 
 function buildServiceCosts() {
   return [
     { id: 'copilot-pro', name: 'GitHub Copilot Pro',
-      cost: '$10/mo', detail: '300 premium req/mo',
+      cost: '$10/mo', detail: '300 premium req/mo · usage via settings',
       link: 'https://github.com/settings/copilot' },
     { id: 'cloudflare', name: 'Cloudflare Workers',
       cost: '$10/mo', detail: 'Pages + Workers AI',

@@ -95,3 +95,4 @@
 .cf-arrow.dashed { animation: cf-dash 1.2s linear infinite, cf-pulse 2.5s ease-in-out infinite; }
 .cf-node-g:hover .cf-node { filter: brightness(1.3); }
 circle.cf-pulse { animation: cf-pulse 1.5s ease-in-out infinite; }
+.cf-packet { filter: drop-shadow(0 0 3px currentColor); }

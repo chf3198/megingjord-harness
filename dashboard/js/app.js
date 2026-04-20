@@ -65,6 +65,7 @@ function dashboardApp() {
             this.ticketLog = syncWithGitHub(this.githubData.issues.all); }
         this.batonState = this.ticketLog.length
           ? this.ticketLog.filter(t => !['done','cancelled'].includes(t.status))
+              .map(t => ({ ...t, activeRole: t.activeRole || inferRole(t.status) }))
           : (evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog())));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();

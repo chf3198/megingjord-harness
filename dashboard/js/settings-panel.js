@@ -1,5 +1,5 @@
 // Settings Panel — render fleet resource CRUD UI
-// Alpine.js integration via global functions
+// Modal editing + secret masking (no inline secrets)
 
 function renderSettingsPanel(resources, probeResults, hostInfo) {
   const hostRow = hostInfo ? renderHostRow(hostInfo) : '';
@@ -7,13 +7,14 @@ function renderSettingsPanel(resources, probeResults, hostInfo) {
   const rows = resources.map(r => {
     const probe = (probeResults || []).find(p => p.id === r.id);
     const st = probe?.status || r.status || 'unknown';
-    const cls = st === 'healthy' || st === 'ready' ? 'ok' : st === 'offline' || st === 'no-key' ? 'err' : 'warn';
-    const authBadge = authStatus(r);
+    const cls = st === 'healthy' || st === 'ready' ? 'ok'
+      : st === 'offline' || st === 'no-key' ? 'err' : 'warn';
+    const authCell = maskedAuthCell(r);
     return `<tr class="settings-row">
       <td><span class="dot dot-${cls}"></span> ${esc(r.name)}</td>
       <td>${esc(r.provider)}</td><td>${esc(r.tier)}</td>
-      <td>${esc(r.baseUrl)}</td><td>${authBadge}</td><td>${st}</td>
-      <td><button onclick="editResource('${r.id}')">✏️</button>
+      <td>${esc(r.baseUrl)}</td><td>${authCell}</td><td>${st}</td>
+      <td><button onclick="openEditModal('${r.id}')">⚙️</button>
        <button onclick="removeResource('${r.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -34,7 +35,7 @@ function renderEmptySettings() {
 
 function renderSettingsActions() {
   return `<div class="settings-actions">
-    <button onclick="showAddResource()">➕ Add Resource</button>
+    <button onclick="openEditModal()">➕ Add Resource</button>
     <button onclick="probeAll()">🔍 Health Check All</button>
     <button onclick="exportConfig()">📤 Export Config</button>
     <label class="btn-label">📥 Import
@@ -43,14 +44,20 @@ function renderSettingsActions() {
   </div>`;
 }
 
-// esc() is defined in render-panels.js (loaded earlier)
-
-function authStatus(r) {
+function maskedAuthCell(r) {
   const t = r.auth?.type || 'none';
   if (t === 'none') return '<span class="auth-ok">None needed</span>';
-  if (r.auth?.key) return '<span class="auth-ok">🔑 Set</span>';
-  const label = t === 'query-param' ? 'Secret needed' : 'Key needed';
-  return `<span class="auth-missing" onclick="editResource('${r.id}')" title="Click to add">⚠️ ${label}</span>`;
+  if (!r.auth?.key) {
+    return `<span class="auth-missing"
+      onclick="openEditModal('${r.id}')" title="Click to add">
+      ⚠️ Key needed</span>`;
+  }
+  const masked = maskSecret(r.auth.key);
+  return `<span class="secret-cell">
+    <span data-secret-id="${r.id}">${masked}</span>
+    <button class="eye-toggle"
+      onclick="toggleReveal('${r.id}')" title="Reveal 5s">👁️</button>
+  </span>`;
 }
 
 function renderHostRow(h) {

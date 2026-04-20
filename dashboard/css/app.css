@@ -1,11 +1,14 @@
 /* DevEnv Ops Dashboard — Layout & Shell */
 @import url('cards.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --bg: #0d1117; --surface: rgba(22,27,34,0.85); --border: #30363d;
   --text: #e6edf3; --text-muted: #9ca3af;
   --green: #3fb950; --yellow: #d29922; --red: #f85149; --blue: #58a6ff;
   --focus-ring: 0 0 0 2px var(--blue);
+  --glass: blur(12px); --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -15,9 +18,11 @@
 [x-cloak] { display: none !important; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg); color: var(--text); min-height: 100vh;
   display: flex; flex-direction: column;
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(88,166,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(63,185,80,0.03) 0%, transparent 50%);
 }
 
 .skip-link {
@@ -53,11 +58,14 @@ body {
 .header-actions button:hover {
   border-color: var(--blue); color: var(--blue);
   background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+  transform: scale(0.97);
 }
 
 .header-actions button:focus-visible {
   outline: none; box-shadow: var(--focus-ring);
 }
+
+.header-actions button { transition: all 0.15s ease; }
 
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(2, 1fr);
@@ -74,8 +82,12 @@ body {
   display: flex; justify-content: space-between;
   padding: 0.4rem 1rem; font-size: 0.75rem;
   color: var(--text-muted); border-top: 1px solid var(--border);
-  margin-top: auto;
+  margin-top: auto; font-family: 'JetBrains Mono', monospace;
+  background: linear-gradient(180deg, transparent, rgba(13,17,23,0.8));
 }
+
+@keyframes skeleton-pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
+.skeleton { background: var(--border); border-radius: 4px; animation: skeleton-pulse 1.5s infinite; }
 
 body.high-contrast {
   --bg: #000; --surface: #111; --border: #fff;
