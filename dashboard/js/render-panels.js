@@ -60,7 +60,7 @@ function renderQuotaPanel(live, statics) {
       <div class="quota-bar"><div class="progress-fill
         ${q.percent > 80 ? 'warn' : 'ok'}"
         style="width:${Math.max(q.percent, 2)}%"></div></div>
-      <span class="quota-val">${note || `${q.used ?? q.usage ?? 0}/${q.limit}`}</span>
+      <span class="quota-val">${note || (q.used != null && q.used !== 0 ? `${q.used}/${q.limit}` : `—/${q.limit}`)}</span>
     </div>`;
   };
   const a = live.map(renderRow).join('');

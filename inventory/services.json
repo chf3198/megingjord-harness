@@ -4,8 +4,8 @@
     {
       "id": "copilot-pro",
       "name": "GitHub Copilot Pro",
-      "cost": "$10/mo",
-      "quotas": { "premiumRequests": 300, "period": "monthly" },
+      "cost": "Metered",
+      "quotas": { "period": "monthly", "note": "Metered billing — see github.com/settings/billing" },
       "models": ["Claude Opus 4.5/4.6", "Claude Sonnet 4/4.5/4.6", "Gemini 2.5 Pro", "GPT-4.1", "GPT-5 mini", "GPT-5.1"],
       "features": ["agent-mode", "cloud-agent", "mcp", "code-review", "cli-byok"],
       "status": "active"
