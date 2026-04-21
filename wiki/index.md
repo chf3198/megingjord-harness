@@ -22,6 +22,7 @@ The LLM updates this on every ingest operation.
 
 - [[baton-protocol]] — Baton Protocol (Role Handoff) [v1.0]
 - [[ticket-lifecycle-v1]] — Ticket Lifecycle v1.0 — Agent-Typed Model
+- [[epic-governance]] — Epic Lifecycle Governance Rules
 - [[agent-drift]] — Agent Drift
 - [[self-annealing]] — Self-Annealing Protocol
 - [[wiki-pattern]] — Karpathy LLM Wiki Pattern
