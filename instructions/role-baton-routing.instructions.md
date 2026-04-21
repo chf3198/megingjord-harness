@@ -80,3 +80,4 @@ When global and local instructions conflict, local wins for that workspace.
 - `operator-identity-context` defines authority and automation mandate.
 - Role skills define per-role execution contracts.
 - Domain skills (`repo-standards-router`, `workflow-self-anneal`, release/security/docs skills) remain source of truth for specialized procedures.
+- Epic lifecycle overlay rules: see `epic-governance.instructions.md`.

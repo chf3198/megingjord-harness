@@ -82,3 +82,7 @@ Each status names the active agent type. One glance = who owns it now.
 - Branch: `feat/11-ticket-baton-system`
 - Commit: `feat(skills): implement ticket-as-baton governance #11`
 - PR: Body must include `Closes #11` + validation evidence
+
+## Epic Rules
+
+See `epic-governance.instructions.md` for epic status advancement, role label, progress tracking, and close conditions.
