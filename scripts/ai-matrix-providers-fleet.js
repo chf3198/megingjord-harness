@@ -9,28 +9,23 @@ const chat = (url, apiKey, model) => ({
     model,
     messages: [{ role: 'user', content: task }],
     temperature: 0.1,
-    max_tokens: 300,  // capped for local 7B inference speed
-    stream: true,     // streaming keeps socket alive through full generation
+    max_tokens: 800,
+    stream: false,
   }),
 });
 
-// OpenClaw: Ollama on windows-laptop (Tailscale: 100.78.22.13:11434, bound 0.0.0.0)
-// No auth required. Models: mistral:latest, phi3:mini, qwen2.5:7b-instruct
+// OpenClaw gateway: LiteLLM proxy on windows-laptop (Tailscale: 100.78.22.13:4000)
+// Auth: OPENCLAW_DEVICE_PASSWORD. Services offline = fleet offline marker in matrix.
 const fleetProviders = {
   openclaw_mistral: chat(
-    'http://100.78.22.13:11434/v1/chat/completions',
-    'ollama',
-    'mistral:latest'
-  ),
-  openclaw_phi3: chat(
-    'http://100.78.22.13:11434/v1/chat/completions',
-    'ollama',
-    'phi3:mini'
+    'http://100.78.22.13:4000/v1/chat/completions',
+    process.env.OPENCLAW_DEVICE_PASSWORD || 'nokey',
+    'ollama/mistral'
   ),
   openclaw_qwen: chat(
-    'http://100.78.22.13:11434/v1/chat/completions',
-    'ollama',
-    'qwen2.5:7b-instruct'
+    'http://100.78.22.13:4000/v1/chat/completions',
+    process.env.OPENCLAW_DEVICE_PASSWORD || 'nokey',
+    'ollama/qwen2.5:7b-instruct'
   ),
 };
 
