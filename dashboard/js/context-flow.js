@@ -1,99 +1,55 @@
-// Context Flow — SVG diagram with animated data packets
-// Accepts live device health + fleet stats for real-time status
+// Context Flow — fleet topology: zones (CB-2 Local | Tailscale VPN | Cloud)
 function renderContextFlow(devices, fleetStats, isActive, liveQuotas) {
-  const W = 620, H = 260;
-  // Build live status map from device health
-  const dm = {}; (devices || []).forEach(d => { dm[d.id] = d.status; });
-  const liveMap = {
-    'CB-2': dm['chromebook-2'] || 'unknown', 'CB-1': dm['chromebook-1'] || 'unknown',
-    'Win Laptop': dm['windows-laptop'] || 'unknown',
-    'Tailscale': (dm['chromebook-2'] === 'healthy' ? 'healthy' : 'degraded'),
-    'OpenClaw': dm['windows-laptop'] || 'unknown',
-    'Ollama': fleetStats?.['windows-laptop']?.online ? 'healthy' : 'offline',
-    'VS Code': 'healthy', 'AUTO': 'healthy',
-    'Cloud LLM': 'healthy', 'GitHub': 'healthy',
+  const W=900,H=315;
+  const dm={}; (devices||[]).forEach(d=>{dm[d.id]=d.status;});
+  const liveMap={
+    'VS Code':'healthy','AUTO':'healthy','Wiki':'healthy',
+    'CB-1':dm['penguin-1']||'unknown','Ollama SLM':dm['penguin-1']||'unknown',
+    'Win Laptop':dm['windows-laptop']||'unknown',
+    'OpenClaw':dm['windows-laptop']||'unknown',
+    'Ollama 7B':fleetStats?.['windows-laptop']?.online?'healthy':'offline',
+    'Copilot API':'healthy','GitHub':'healthy',
   };
-  const nodes = [
-    { x: 60, y: 50, icon: '💻', label: 'VS Code', sub: 'Copilot Agent', tip: 'IDE sends prompts with file context, conversation history, and MCP tool results to the AUTO router.' },
-    { x: 200, y: 50, icon: '🧠', label: 'AUTO', sub: 'Model Select', tip: 'Routes prompts to Cloud LLM (primary) or OpenClaw (local fallback) based on model availability and rate limits.' },
-    { x: 370, y: 50, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API', tip: 'GitHub Copilot cloud models (GPT-4o, Claude). Primary route. Responses stream back to VS Code.' },
-    { x: 540, y: 50, icon: '🐙', label: 'GitHub', sub: 'API + Actions', tip: 'GitHub API: issues, PRs, commits. Actions CI/CD. Context flows bidirectionally via gh CLI and webhooks.' },
-    { x: 120, y: 150, icon: '🌐', label: 'Tailscale', sub: 'VPN Mesh', tip: 'Encrypted WireGuard mesh connecting all fleet devices. Routes traffic between Chromebooks and Windows laptop.' },
-    { x: 290, y: 150, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM :4000', tip: 'LiteLLM proxy on Windows laptop. Routes to local Ollama models. Fallback when cloud is rate-limited.' },
-    { x: 460, y: 150, icon: '🤖', label: 'Ollama', sub: 'Local 7B', tip: 'Local inference on Windows laptop (16GB RAM). Runs 7B models. Accessed via OpenClaw proxy over Tailscale.' },
-    { x: 60, y: 210, icon: '💻', label: 'CB-2', sub: 'This machine', tip: 'Chromebook-2 (penguin): primary dev workstation. 2.7GB RAM. Runs VS Code + dashboard.' },
-    { x: 200, y: 210, icon: '💻', label: 'CB-1', sub: 'SLM node', tip: 'Chromebook-1 (penguin-1): runs Ollama with tiny SLM models for lightweight local inference.' },
-    { x: 370, y: 210, icon: '🖥️', label: 'Win Laptop', sub: 'OpenClaw host', tip: 'Windows laptop (16GB). Hosts OpenClaw + Ollama. Primary fleet compute for local LLM inference.' },
+  const zones=[
+    {x:8,  y:22,w:188,h:285,k:'l',label:'💻 CB-2 Dev Machine (local)'},
+    {x:204,y:22,w:368,h:285,k:'t',label:'🌐 Tailscale VPN Mesh'},
+    {x:580,y:22,w:312,h:285,k:'c',label:'☁️ Cloud / Internet'},
   ];
-  const arrows = [
-    { from: 0, to: 1, label: 'prompt', tip: 'User prompt + file context + conversation history sent to model router' },
-    { from: 1, to: 2, label: 'cloud', tip: 'Primary route: prompt sent to GitHub Copilot cloud API' },
-    { from: 1, to: 5, label: 'local', dashed: true, tip: 'Fallback route: prompt sent to OpenClaw LiteLLM proxy over Tailscale' },
-    { from: 5, to: 6, label: 'inference', tip: 'OpenClaw forwards to local Ollama for model inference' },
-    { from: 4, to: 5, label: 'mesh', dashed: true, tip: 'Tailscale VPN tunnels traffic between devices' },
-    { from: 7, to: 4, label: '', dashed: true, tip: 'CB-2 connects to Tailscale mesh' },
-    { from: 8, to: 4, label: '', dashed: true, tip: 'CB-1 connects to Tailscale mesh' },
-    { from: 9, to: 5, label: 'host', tip: 'Windows laptop hosts the OpenClaw proxy locally' },
-    { from: 0, to: 3, label: 'gh cli', tip: 'VS Code uses gh CLI for issue/PR operations' },
+  const nodes=[
+    {x:102,y:95, type:'SW',    icon:'💻',label:'VS Code',    sub:'Copilot Agent',tip:'VS Code + Copilot Agent on CB-2. Sends prompts to AUTO Router.'},
+    {x:102,y:195,type:'SW',    icon:'🧠',label:'AUTO',       sub:'Router',       tip:'Model router software on CB-2. Dispatches to cloud (primary) or OpenClaw (fallback).'},
+    {x:102,y:278,type:'STORE', icon:'📖',label:'Wiki',       sub:'local files',  tip:'Local wiki files on CB-2. Loaded as context by Copilot Agent.'},
+    {x:293,y:90, type:'HW',    icon:'💻',label:'CB-1',       sub:'SLM node 2.7GB',tip:'Chromebook-1: 2.7GB RAM. Hosts Ollama with tiny SLM models.'},
+    {x:293,y:205,type:'LLM',   icon:'🤖',label:'Ollama SLM', sub:'0.8b-1.2b',   tip:'Ollama on CB-1: qwen3.5:0.8b, gemma3:270m, tinyllama, lfm2.5:1.2b.'},
+    {x:468,y:90, type:'HW',    icon:'🖥️',label:'Win Laptop', sub:'16GB',         tip:'Windows laptop: primary inference node. 16GB RAM. Hosts OpenClaw + Ollama.'},
+    {x:468,y:185,type:'SW',    icon:'⚡',label:'OpenClaw',   sub:'LiteLLM :4000',tip:'LiteLLM proxy on Win Laptop. Receives prompt from AUTO via Tailscale VPN.'},
+    {x:468,y:278,type:'LLM',   icon:'🤖',label:'Ollama 7B',  sub:'mistral/qwen', tip:'Ollama on Win Laptop: mistral:latest, qwen2.5:7b-instruct, phi3:mini.'},
+    {x:736,y:110,type:'SVC',   icon:'☁️',label:'Copilot API',sub:'Claude/GPT/Gemini',tip:'GitHub Copilot cloud API. Primary inference. Routes to best available model.'},
+    {x:736,y:220,type:'SVC',   icon:'🐙',label:'GitHub',     sub:'API + Actions', tip:'GitHub API + Actions CI/CD. Accessed via gh CLI from VS Code on CB-2.'},
   ];
-  return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Context flow diagram">
-    <defs>${cfDefs()}</defs>
-    ${cfArrows(nodes, arrows, isActive)}${cfNodes(nodes, liveMap)}</svg>
-    ${contextBudgetLegend()}${typeof cfResourcePills==='function' ? cfResourcePills(liveQuotas) : ''}</div>`;
+  const arrows=[
+    {from:0,to:1,type:'internal',label:'',           tip:'VS Code passes prompt to AUTO Router on CB-2'},
+    {from:1,to:8,type:'cloud',   label:'prompt',     tip:'PRIMARY: prompt dispatched to GitHub Copilot cloud API'},
+    {from:1,to:6,type:'local',   label:'via Tailscale VPN',curve:true,tip:'FALLBACK: AUTO routes over Tailscale mesh to OpenClaw on Win Laptop'},
+    {from:6,to:7,type:'inference',label:'inference', tip:'OpenClaw dispatches prompt to Ollama 7B on Win Laptop'},
+    {from:3,to:4,type:'hosts',   label:'runs',       tip:'CB-1 hardware hosts Ollama SLM service'},
+    {from:5,to:6,type:'hosts',   label:'hosts',      tip:'Win Laptop hosts OpenClaw LiteLLM proxy'},
+    {from:0,to:9,type:'github',  label:'gh cli',     tip:'VS Code uses gh CLI for issues, PRs, commits'},
+  ];
+  const svg=`<svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Fleet topology diagram">
+    <defs>${cfDefs()}</defs>${cfZones(zones)}${cfArrows(nodes,arrows,isActive)}${cfNodes(nodes,liveMap)}</svg>`;
+  return `<div class="cf-wrap">${svg}${cfTypeLegend()}${contextBudgetLegend()}${typeof cfResourcePills==='function'?cfResourcePills(liveQuotas):''}</div>`;
 }
-function cfDefs() {
-  return `<marker id="cfHead" markerWidth="6" markerHeight="4"
-    refX="6" refY="2" orient="auto">
-    <polygon points="0 0, 6 2, 0 4" fill="var(--green)"/></marker>
-  <style>.cf-arrow{stroke:var(--green);stroke-width:1.5;opacity:.7}
-  .cf-arrow.dashed{stroke-dasharray:4,3;stroke:var(--yellow)}
-  .cf-node{fill:var(--surface);stroke:var(--border);stroke-width:1;cursor:pointer}
-  .cf-node:hover{stroke:var(--blue);stroke-width:2}
-  .cf-icon{font-size:13px;fill:var(--text);pointer-events:none}
-  .cf-name{font-size:9px;fill:var(--text);font-weight:600;pointer-events:none}
-  .cf-sub{font-size:7px;fill:var(--text-muted);pointer-events:none}
-  .cf-lbl{font-size:7px;fill:var(--text-muted);font-style:italic}</style>`;
-}
-function cfArrows(nodes, arrows, isActive) {
-  return arrows.map((a, i) => {
-    const f = nodes[a.from], t = nodes[a.to];
-    const cls = a.dashed ? 'cf-arrow dashed' : 'cf-arrow';
-    const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
-    const pathId = `cfpath${i}`;
-    const color = a.dashed ? 'var(--yellow)' : 'var(--green)';
-    const dur = a.dashed ? '4s' : '2.5s';
-    const pkt = isActive ? `<circle r="2.5" fill="${color}" class="cf-packet" opacity="0.9">
-        <animateMotion dur="${dur}" repeatCount="indefinite">
-          <mpath href="#${pathId}"/></animateMotion></circle>` : '';
-    return `<path id="${pathId}" d="M${f.x},${f.y} L${t.x},${t.y}"
-      class="${cls}" marker-end="url(#cfHead)"><title>${a.tip}</title></path>${pkt}
-      ${a.label ? `<text x="${mx}" y="${my - 4}" text-anchor="middle"
-        class="cf-lbl">${a.label}</text>` : ''}`;
-  }).join('');
-}
-function cfNodes(nodes, liveMap) {
-  const sc = { healthy: 'var(--green)', degraded: 'var(--yellow)', offline: 'var(--red)', unknown: 'var(--text-muted)' };
-  return nodes.map(n => {
-    const st = (liveMap || {})[n.label] || 'unknown';
-    const c = sc[st] || sc.unknown;
-    return `<g class="cf-node-g">
-    <rect x="${n.x - 36}" y="${n.y - 20}" width="72" height="40"
-      rx="6" class="cf-node"><title>${n.tip}</title></rect>
-    <circle cx="${n.x + 30}" cy="${n.y - 14}" r="4" fill="${c}" class="${st === 'healthy' ? 'cf-pulse' : ''}"><title>${n.label}: ${st}</title></circle>
-    <text x="${n.x}" y="${n.y - 4}" text-anchor="middle" class="cf-icon">${n.icon}</text>
-    <text x="${n.x}" y="${n.y + 8}" text-anchor="middle" class="cf-name">${n.label}</text>
-    <text x="${n.x}" y="${n.y + 18}" text-anchor="middle" class="cf-sub">${n.sub}</text>
-  </g>`; }).join('');
+function cfTypeLegend() {
+  const types=[['SW','var(--blue)','Software'],['HW','var(--text-muted)','Hardware'],['LLM','var(--green)','AI Model'],['SVC','var(--yellow)','Cloud Svc'],['DB','var(--border)','Storage']];
+  const flows=[['var(--blue)','Cloud prompt'],['var(--yellow)','Local fallback'],['var(--green)','Inference'],['#a371f7','GitHub API'],['var(--border)','Hosts (HW to SW)']];
+  const ts=types.map(([l,c,n])=>`<span class="cf-tleg"><span class="cf-tbadge" style="border-color:${c};color:${c}">${l}</span>${n}</span>`).join('');
+  const fs=flows.map(([c,n])=>`<span class="cf-tleg"><span class="cf-fline" style="background:${c}"></span>${n}</span>`).join('');
+  return `<div class="cf-legend-bar">${ts}<span class="cf-leg-sep">|</span>${fs}</div>`;
 }
 function contextBudgetLegend() {
-  const items = [
-    { label: 'System prompt', pct: 10, color: 'var(--blue)' },
-    { label: 'Conversation', pct: 35, color: 'var(--green)' },
-    { label: 'File context', pct: 25, color: 'var(--yellow)' },
-    { label: 'MCP tools', pct: 10, color: 'var(--text-muted)' },
-    { label: 'User message', pct: 5, color: 'var(--red)' },
-    { label: 'Headroom', pct: 15, color: 'var(--border)' }, ];
-  const bars = items.map(i => `<div class="cb-seg" style="flex:${i.pct};background:${i.color}" title="${i.label}: ~${i.pct}%"></div>`).join('');
-  const labels = items.map(i => `<span><span class="dot" style="background:${i.color}"></span>${i.label}</span>`).join('');
+  const items=[{label:'System prompt',pct:10,color:'var(--blue)'},{label:'Conversation',pct:35,color:'var(--green)'},{label:'File context',pct:25,color:'var(--yellow)'},{label:'MCP tools',pct:10,color:'var(--text-muted)'},{label:'User message',pct:5,color:'var(--red)'},{label:'Headroom',pct:15,color:'var(--border)'}];
+  const bars=items.map(i=>`<div class="cb-seg" style="flex:${i.pct};background:${i.color}" title="${i.label}: ~${i.pct}%"></div>`).join('');
+  const labels=items.map(i=>`<span><span class="dot" style="background:${i.color}"></span>${i.label}</span>`).join('');
   return `<div class="cb-bar">${bars}</div><div class="cb-legend">${labels}</div>`;
 }
