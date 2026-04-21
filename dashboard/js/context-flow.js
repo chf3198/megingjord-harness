@@ -38,7 +38,7 @@ function renderContextFlow(devices, fleetStats, isActive) {
   ];
   return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Context flow diagram">
     <defs>${cfDefs()}</defs>
-    ${cfArrows(nodes, arrows)}${cfNodes(nodes, liveMap)}</svg>
+    ${cfArrows(nodes, arrows, isActive)}${cfNodes(nodes, liveMap)}</svg>
     ${contextBudgetLegend()}</div>`;
 }
 function cfDefs() {
@@ -54,7 +54,7 @@ function cfDefs() {
   .cf-sub{font-size:7px;fill:var(--text-muted);pointer-events:none}
   .cf-lbl{font-size:7px;fill:var(--text-muted);font-style:italic}</style>`;
 }
-function cfArrows(nodes, arrows) {
+function cfArrows(nodes, arrows, isActive) {
   return arrows.map((a, i) => {
     const f = nodes[a.from], t = nodes[a.to];
     const cls = a.dashed ? 'cf-arrow dashed' : 'cf-arrow';

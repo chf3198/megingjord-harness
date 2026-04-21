@@ -1,6 +1,4 @@
 // Baton Flow — Multi-ticket parallel agent baton visualization
-// Shows Manager→Collaborator→Admin→Consultant per ticket
-
 const BATON_ROLES = [
   { id: 'manager', icon: '🎯', label: 'Mgr' },
   { id: 'collaborator', icon: '🔧', label: 'Collab' },
@@ -86,8 +84,8 @@ function renderTimeline(issue) {
     const r = BATON_ROLES.find(x => x.id === h.role);
     const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
     const ttl = `${roleDesc[h.role] || h.role} \u2014 at ${t}`;
-    return `<span class="tl-step" title="${esc(ttl)}" data-tip="tl-step">`
-      + `${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;  }).join('');
+    return `<span class="tl-step" title="${esc(ttl)}">${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;
+  }).join('');
   return `<div class="baton-timeline" title="Baton handoff history">${items}</div>`;
 }
 
@@ -95,6 +93,7 @@ function buildBatonState(routerLog) {
   if (!routerLog || !routerLog.length) return [];
   const last = routerLog[0];
   const roleMap = { router: 'manager', implementer: 'collaborator', quick: 'admin' };
+  const title = last.task ? last.task.replace(/#\d+\s*/g, '').trim() : '';
   return [{ activeRole: roleMap[last.agent] || 'manager',
-    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress' }];
+    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress', title }];
 }
