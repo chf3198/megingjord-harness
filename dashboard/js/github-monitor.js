@@ -8,9 +8,20 @@ async function pollGitHub() {
   if (_ghLoading) return _ghCache;
   _ghLoading = true;
   try {
-    const r = await fetch('/api/github/summary');
-    if (r.ok) _ghCache = await r.json();
-  } catch (e) { console.warn('github-monitor: fetch failed:', e.message); }
+    const controller = new AbortController();
+    const to = setTimeout(() => controller.abort(), 6000);
+    const r = await fetch('/api/github/summary', { signal: controller.signal });
+    clearTimeout(to);
+    if (!r.ok) {
+      const body = await r.json().catch(()=>({}));
+      _ghCache = { error: body.error || 'github_error', message: body.message || `status:${r.status}` };
+    } else {
+      _ghCache = await r.json();
+    }
+  } catch (e) {
+    console.warn('github-monitor: fetch failed:', e && e.message ? e.message : e);
+    _ghCache = { error: 'fetch_failed', message: String(e && e.message ? e.message : e) };
+  }
   _ghLoading = false;
   return _ghCache;
 }
@@ -26,6 +37,12 @@ function renderGitHubMonitor(gh) {
     <span style="font-size:1.5rem">🔄</span>
     <p>Connecting to GitHub API…</p>
     <p style="font-size:0.72rem;color:var(--text-muted)">Data loads on first refresh cycle</p></div>`;
+  if (gh && gh.error) return `<div class="gh-error">
+    <span style="font-size:1.5rem">⚠️</span>
+    <p>GitHub data unavailable</p>
+    <p style="font-size:0.72rem;color:var(--text-muted)">${esc(gh.message || gh.error)}</p>
+    <button class="gh-retry">Retry</button>
+  </div>`;
   const { issues, pulls, actions, branches } = gh;
   const statsHtml = `<div class="gh-stats">
     <div class="gh-stat"><span class="gh-num">${issues.open}</span><span class="gh-lbl">Open Issues</span></div>

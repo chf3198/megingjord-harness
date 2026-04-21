@@ -1,6 +1,16 @@
 # Changelog
 
-## [3.0.1] - 2026-04-14
+## [3.1.0] - 2026-04-20
+
+### Added — Router Policy Integration (#341)
+- **Versioned router policy** (v1.0.0) in `router.agent.md` with keyword lanes and escalation
+- **Router policy tests** (`tests/router-policy.test.js`): 5 test cases validating classification
+- **CI test job** in `.github/workflows/lint.yml` for router policy validation
+- **Dashboard GitHub panel improvements**: Server retry/backoff (3 attempts), client timeout (6s), error UI with retry button
+- **Ticket status tracking**: Event log updates for ticket lifecycle management
+
+### Fixed
+- Router classifier scoring logic for multi-keyword prompts
 
 ### Added — Wiki Self-Annealing (#96)
 - `scripts/wiki/anneal.js`: auto-fix broken links, orphans, frontmatter

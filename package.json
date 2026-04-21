@@ -1,6 +1,6 @@
 {
   "name": "devenv-ops",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "AI agent governance harness — 24 skills, extensible agents, hooks, and wiki as a VS Code Agent Plugin",
   "private": true,
   "scripts": {
@@ -17,6 +17,7 @@
     "health": "node scripts/health-check.js",
     "router:smoke": "node scripts/global/task-router-smoke.js",
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
+    "test:router": "node tests/router-policy.test.js",
     "repo:scope": "node scripts/global/repo-scope.js",
     "ticket:create": "node scripts/global/ticket-create.js",
     "wiki:ingest": "node scripts/wiki/ingest.js",
@@ -48,6 +49,7 @@
     "globals": "^17.5.0"
   },
   "dependencies": {
-    "dotenv": "^17.4.1"
+    "dotenv": "^17.4.1",
+    "node-fetch": "^2.6.9"
   }
 }
