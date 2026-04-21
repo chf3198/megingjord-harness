@@ -15,4 +15,4 @@ Next Actions (Immediate):
 
 Owner: `research` → `planner` for runway to implement prototype.
 
-Status: Prototype committed; ready for research review.
+Status: Closed — model documented in research/ticket-status-model.md and prototype script implemented.

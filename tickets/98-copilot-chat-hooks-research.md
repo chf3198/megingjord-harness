@@ -15,4 +15,4 @@ Next Actions (Immediate):
 
 Owner: `planner` → handoff to `implementer` for stub implementation.
 
-Status: Ready for planner review — adapter skeleton committed.
+Status: Closed — research doc created with adapter designs and acceptance tests outlined.
