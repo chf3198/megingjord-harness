@@ -1,0 +1,50 @@
+{
+  "$id": "devenv-ops/ticket/v1",
+  "title": "Harness Ticket — Field Glossary v1",
+  "note": "Human-readable reference only. Executable validator: ticket-validator.json (constraint adjacency map). Normalizer: scripts/ticket-normalizer.js. All baton roles are AI agents; human = design decisions + UAT. Agile role map: manager=ProductOwner, collaborator=Developer, admin=QA/DevOps, consultant=Architect/Reviewer. GitHub is the system of record; governance is overlaid via labels and body conventions. Validator uses a value-keyed constraint adjacency map: each property value carries sub-maps of permitted sibling values (scalar=exact, array=any-of, absent=unconstrained).",
+  "normalized_shape": {
+    "note": "Object shape after ticket-normalizer.js preprocessing. This is what the validator receives.",
+    "number":          { "type": "integer",         "source": "github:number",         "note": "Immutable." },
+    "title":           { "type": "string",           "source": "github:title",          "note": "Imperative-verb. Max 72 chars." },
+    "body":            { "type": ["string","null"],  "source": "github:body"            },
+    "state":           { "enum": ["open","closed"],  "source": "github:state"           },
+    "state_reason":    { "source": "github:state_reason", "enum": ["completed","not_planned","duplicate","reopened",null] },
+    "assignees":       { "type": "array",            "source": "github:assignees[].login", "note": "GitHub logins and/or AI agent slugs (copilot, devin, cursor, codex, factory)." },
+    "milestone":       { "type": ["string","null"],  "source": "github:milestone.title" },
+    "parent_issue":    { "type": ["integer","null"],  "source": "body:Part of #N",       "note": "Parser accepts 'Part of' and 'Parent:' patterns." },
+    "depends_on":      { "type": "array",            "source": "body:Depends on #N,#M"  },
+    "blocks":          { "type": "array",            "source": "body:Blocks #N,#M"      },
+    "release_version": { "type": ["string","null"],  "source": "body:Release: vX.Y.Z"   },
+    "governance": {
+      "note": "Extracted from GitHub labels (prefix:value). Validator enforces compound-key rules here.",
+      "status":     { "source": "label:status:*",     "enum": ["backlog","triage","ready","in-progress","testing","review","done","cancelled",null], "cardinality": "exactly-one (null when closed)" },
+      "role":       { "source": "label:role:*",        "enum": [null,"manager","collaborator","admin","consultant"], "cardinality": "zero-or-one",
+                      "decision_table": { "backlog":null,"triage":"manager","ready":null,"in-progress":"collaborator","testing":"admin","review":"consultant","done":null,"cancelled":null,"closed":null } },
+      "type":       { "source": "label:type:*",        "enum": ["epic","story","task","bug","research","design","doc","release","spike"], "cardinality": "exactly-one" },
+      "priority":   { "source": "label:priority:*",    "enum": ["P1","P2","P3"], "cardinality": "exactly-one", "defs": {"P1":"blocking/critical","P2":"normal","P3":"nice-to-have"} },
+      "area":       { "source": "label:area:*",        "enum": ["dashboard","hooks","skills","instructions","agents","scripts","infra","governance","research"], "cardinality": "one-or-more" },
+      "resolution": { "source": "label:resolution:*",  "enum": [null,"released","cancelled","duplicate","obsolete","wont-fix","by-design"], "cardinality": "zero-or-one (null on open, required on close)" }
+    }
+  },
+  "github_native_fields_not_in_normalized": {
+    "note": "Available in raw GitHub API response but not passed to validator. Retain for dashboard and audit use.",
+    "labels_raw":                 "github:labels[]",
+    "locked":                     "github:locked",
+    "active_lock_reason":         "github:active_lock_reason",
+    "comments":                   "github:comments",
+    "sub_issues_summary":         "github:sub_issues_summary (Beta — child state counts)",
+    "issue_dependencies_summary": "github:issue_dependencies_summary (Beta — blocks/blocked-by counts)",
+    "created_at":                 "github:created_at",
+    "updated_at":                 "github:updated_at",
+    "closed_at":                  "github:closed_at",
+    "closed_by":                  "github:closed_by",
+    "performed_via_github_app":   "github:performed_via_github_app — set when AI agent app acted on issue",
+    "reactions":                  "github:reactions",
+    "author_association":         "github:author_association"
+  },
+  "handoff_artifact": {
+    "note": "Not a label or body field. Posted as a structured GitHub comment at each role transition.",
+    "values": ["MANAGER_HANDOFF","COLLABORATOR_HANDOFF","ADMIN_HANDOFF","CONSULTANT_CLOSEOUT"],
+    "purpose": "Baton audit trail. Enables post-hoc reconstruction of which agent acted and when."
+  }
+}

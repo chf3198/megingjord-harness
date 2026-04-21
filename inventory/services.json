@@ -5,16 +5,38 @@
       "id": "copilot-pro",
       "name": "GitHub Copilot Pro",
       "cost": "Metered",
-      "quotas": { "period": "monthly", "note": "Metered billing — see github.com/settings/billing" },
-      "models": ["Claude Opus 4.5/4.6", "Claude Sonnet 4/4.5/4.6", "Gemini 2.5 Pro", "GPT-4.1", "GPT-5 mini", "GPT-5.1"],
-      "features": ["agent-mode", "cloud-agent", "mcp", "code-review", "cli-byok"],
+      "quotas": {
+        "period": "monthly",
+        "note": "Metered billing \u2014 see github.com/settings/billing"
+      },
+      "models": [
+        "Claude Opus 4.5/4.6",
+        "Claude Sonnet 4/4.5/4.6",
+        "Gemini 2.5 Pro",
+        "GPT-4.1",
+        "GPT-5 mini",
+        "GPT-5.1"
+      ],
+      "features": [
+        "agent-mode",
+        "cloud-agent",
+        "mcp",
+        "code-review",
+        "cli-byok"
+      ],
       "status": "active"
     },
     {
       "id": "cloudflare",
       "name": "Cloudflare Workers",
       "cost": "$10/mo",
-      "features": ["pages", "workers-ai", "d1", "r2", "kv"],
+      "features": [
+        "pages",
+        "workers-ai",
+        "d1",
+        "r2",
+        "kv"
+      ],
       "visionModel": "@cf/meta/llama-3.2-11b-vision-instruct",
       "status": "active"
     }
@@ -23,8 +45,18 @@
     {
       "id": "google-ai-studio",
       "name": "Google AI Studio",
-      "models": ["Gemini 2.5 Pro", "Gemini 2.5 Flash", "Gemini 3 Flash", "Gemma 4"],
-      "features": ["vision", "audio", "code-execution", "embeddings"],
+      "models": [
+        "Gemini 2.5 Pro",
+        "Gemini 2.5 Flash",
+        "Gemini 3 Flash",
+        "Gemma 4"
+      ],
+      "features": [
+        "vision",
+        "audio",
+        "code-execution",
+        "embeddings"
+      ],
       "balance": "$10",
       "status": "active"
     },
@@ -36,7 +68,11 @@
     {
       "id": "cerebras",
       "name": "Cerebras Inference",
-      "models": ["GPT-OSS-120B", "Llama 3.1-8B", "Qwen3-235B"],
+      "models": [
+        "GPT-OSS-120B",
+        "Llama 3.1-8B",
+        "Qwen3-235B"
+      ],
       "status": "active"
     },
     {
@@ -52,7 +88,11 @@
       "host": "windows-laptop",
       "port": 4000,
       "runtime": "Python 3.12.10 + LiteLLM 1.83.4",
-      "models": ["ollama/mistral", "ollama/phi3:mini", "ollama/qwen2.5:7b-instruct"],
+      "models": [
+        "ollama/mistral",
+        "ollama/phi3:mini",
+        "ollama/qwen2.5:7b-instruct"
+      ],
       "persistence": "LiteLLMServe scheduled task (SYSTEM, ONSTART)",
       "status": "active"
     }

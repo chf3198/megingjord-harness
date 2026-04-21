@@ -20,7 +20,8 @@ The LLM updates this on every ingest operation.
 
 ## Concepts
 
-- [[baton-protocol]] — Baton Protocol (Role Handoff)
+- [[baton-protocol]] — Baton Protocol (Role Handoff) [v1.0]
+- [[ticket-lifecycle-v1]] — Ticket Lifecycle v1.0 — Agent-Typed Model
 - [[agent-drift]] — Agent Drift
 - [[self-annealing]] — Self-Annealing Protocol
 - [[wiki-pattern]] — Karpathy LLM Wiki Pattern
@@ -75,4 +76,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 48 | **Last updated**: 2026-04-19
+**Pages**: 50 | **Last updated**: 2026-04-21

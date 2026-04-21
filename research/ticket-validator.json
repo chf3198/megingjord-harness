@@ -1,0 +1,44 @@
+{
+  "_comment": "Constraint adjacency map. Each property has _allowed (full value universe). Values with cross-property constraints carry sub-maps of permitted sibling values. Scalar = exactly that value required. Array = any of these values permitted. Absent sibling key = unconstrained.",
+  "state": {
+    "_allowed": ["open", "closed"],
+    "open": {
+      "resolution": null,
+      "status": ["backlog","triage","ready","in-progress","testing","review","done","cancelled"]
+    },
+    "closed": {
+      "status": null,
+      "role": null,
+      "resolution": ["released","cancelled","duplicate","obsolete","wont-fix","by-design"]
+    }
+  },
+  "status": {
+    "_allowed": ["backlog","triage","ready","in-progress","testing","review","done","cancelled"],
+    "backlog":     { "role": null,          "resolution": null },
+    "triage":      { "role": "manager",     "resolution": null },
+    "ready":       { "role": null,          "resolution": null },
+    "in-progress": { "role": "collaborator","resolution": null },
+    "testing":     { "role": "admin",       "resolution": null },
+    "review":      { "role": "consultant",  "resolution": null },
+    "done":        { "role": null,          "resolution": null },
+    "cancelled":   { "role": null,          "resolution": null }
+  },
+  "role": {
+    "_allowed": [null,"manager","collaborator","admin","consultant"]
+  },
+  "type": {
+    "_allowed": ["epic","story","task","bug","research","design","doc","release","spike"]
+  },
+  "priority": {
+    "_allowed": ["P1","P2","P3"]
+  },
+  "area": {
+    "_allowed": [
+      "dashboard","hooks","skills","instructions",
+      "agents","scripts","infra","governance","research"
+    ]
+  },
+  "resolution": {
+    "_allowed": [null,"released","cancelled","duplicate","obsolete","wont-fix","by-design"]
+  }
+}

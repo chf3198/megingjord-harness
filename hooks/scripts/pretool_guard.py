@@ -43,6 +43,8 @@ def check_terminal(joined: str, state: dict) -> int | None:
         if flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
+        if "gh issue edit" not in joined and "--remove-label" not in joined:
+            return emit("ask","Issue close should normalize labels first.","Remove execution role labels and stale nonterminal status labels before or alongside close.")
     if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined) and not ops.get("commit"):
         return emit("ask","PR creation before commit. Confirm intentional.")
     if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):

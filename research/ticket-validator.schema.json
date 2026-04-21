@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "devenv-ops/ticket-validator/v1",
+  "$comment": "Decision-table (sparse-table) validator for harness tickets. All baton roles are AI agents; human = client for design decisions and UAT only. Agile role map: manager=ProductOwner, collaborator=Developer, admin=QA/DevOps, consultant=Architect/Reviewer. Preprocessing required before validation — see ticket-normalizer.js. Governance cross-constraints (status+role, state+resolution) are encoded as a oneOf compound-key table; every row is one valid state-vector. Absent rows are implicitly forbidden. Independent fields (type, priority, area) validate via inline enum. Research: JSON Schema oneOf is isomorphic to a decision table / valid-state relation. Ajv compiles to a function at startup; per-ticket validation cost is O(1). See ticket-schema-v1.json for full field glossary.",
+  "type": "object",
+  "required": ["number", "title", "state", "governance"],
+  "additionalProperties": false,
+  "properties": {
+    "number":          { "type": "integer" },
+    "title":           { "type": "string", "maxLength": 72 },
+    "body":            { "type": ["string", "null"] },
+    "state":           { "enum": ["open", "closed"] },
+    "state_reason":    { "enum": ["completed", "not_planned", "duplicate", "reopened", null] },
+    "assignees":       { "type": "array", "items": { "type": "string" }, "$comment": "GitHub logins and/or AI agent slugs: copilot, devin, cursor, codex, factory, etc." },
+    "milestone":       { "type": ["string", "null"] },
+    "parent_issue":    { "type": ["integer", "null"] },
+    "depends_on":      { "type": "array", "items": { "type": "integer" } },
+    "blocks":          { "type": "array",  "items": { "type": "integer" } },
+    "release_version": { "type": ["string", "null"] },
+    "governance": {
+      "type": "object",
+      "required": ["status", "role", "type", "priority", "area", "resolution"],
+      "additionalProperties": false,
+      "properties": {
+        "status":     { "enum": ["backlog","triage","ready","in-progress","testing","review","done","cancelled",null] },
+        "role":       { "enum": [null,"manager","collaborator","admin","consultant"] },
+        "type":       { "enum": ["epic","story","task","bug","research","design","doc","release","spike"] },
+        "priority":   { "enum": ["P1","P2","P3"] },
+        "area":       { "type": "array", "minItems": 1, "items": { "enum": ["dashboard","hooks","skills","instructions","agents","scripts","infra","governance","research"] } },
+        "resolution": { "enum": [null,"released","cancelled","duplicate","obsolete","wont-fix","by-design"] }
+      },
+      "oneOf": [
+        { "$comment": "backlog — unscoped, no active agent, no resolution",   "properties": { "status": {"const":"backlog"},      "role": {"const":null},           "resolution": {"const":null} } },
+        { "$comment": "triage — ProductOwner agent scoping",                  "properties": { "status": {"const":"triage"},       "role": {"const":"manager"},       "resolution": {"const":null} } },
+        { "$comment": "ready — scoped, waiting for Developer capacity",       "properties": { "status": {"const":"ready"},        "role": {"const":null},           "resolution": {"const":null} } },
+        { "$comment": "in-progress — Developer agent implementing",           "properties": { "status": {"const":"in-progress"},  "role": {"const":"collaborator"},  "resolution": {"const":null} } },
+        { "$comment": "testing — QA/DevOps agent verifying and deploying",    "properties": { "status": {"const":"testing"},      "role": {"const":"admin"},         "resolution": {"const":null} } },
+        { "$comment": "review — Architect/Reviewer agent critiquing",         "properties": { "status": {"const":"review"},       "role": {"const":"consultant"},    "resolution": {"const":null} } },
+        { "$comment": "done — work complete, awaiting human UAT or close",    "properties": { "status": {"const":"done"},         "role": {"const":null},           "resolution": {"const":null} } },
+        { "$comment": "cancelled — terminal, work abandoned",                 "properties": { "status": {"const":"cancelled"},    "role": {"const":null},           "resolution": {"const":null} } },
+        { "$comment": "closed/released — shipped",       "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"released"}  } },
+        { "$comment": "closed/cancelled — abandoned",    "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"cancelled"}  } },
+        { "$comment": "closed/duplicate — superseded",   "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"duplicate"}  } },
+        { "$comment": "closed/obsolete — no longer needed", "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"obsolete"}  } },
+        { "$comment": "closed/wont-fix — deliberate non-action", "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"wont-fix"}  } },
+        { "$comment": "closed/by-design — expected behavior",    "properties": { "status": {"const":null}, "role": {"const":null}, "resolution": {"const":"by-design"} } }
+      ]
+    }
+  }
+}
