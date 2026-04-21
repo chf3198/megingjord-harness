@@ -85,14 +85,12 @@
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 0.2rem;
 }
-@keyframes cf-pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
-.cf-arrow { animation: cf-pulse 2.5s ease-in-out infinite; }
-@keyframes cf-dash { to { stroke-dashoffset: -14; } }
-.cf-arrow.dashed { animation: cf-dash 1.2s linear infinite, cf-pulse 2.5s ease-in-out infinite; }
-.cf-node-g:hover .cf-node { filter: brightness(1.3); }
-circle.cf-pulse { animation: cf-pulse 1.5s ease-in-out infinite; }
-.cf-packet { filter: drop-shadow(0 0 3px currentColor); }
 .cf-resources { display:flex; flex-wrap:wrap; gap:0.3rem; padding:0.15rem 0.2rem 0; }
 .cf-res-group { display:flex; align-items:center; gap:0.2rem; font-size:0.6rem; }
 .cf-res-node { color:var(--text-muted); min-width:62px; font-weight:600; }
 .cf-pill { border:1px solid var(--border); border-radius:4px; padding:0 0.2rem; font-size:0.6rem; white-space:nowrap; cursor:default; }
+.cf-legend-bar { display:flex; gap:0.3rem; flex-wrap:wrap; align-items:center; padding:0.1rem 0.2rem; font-size:0.6rem; color:var(--text-muted); border-top:1px dashed var(--border); margin-top:0.15rem; }
+.cf-tleg { display:flex; align-items:center; gap:0.15rem; white-space:nowrap; }
+.cf-tbadge { border:1px solid; border-radius:3px; padding:0 0.15rem; font-size:0.56rem; font-weight:800; }
+.cf-fline { display:inline-block; width:14px; height:2px; border-radius:1px; vertical-align:middle; }
+.cf-leg-sep { color:var(--border); padding:0 0.1rem; }
