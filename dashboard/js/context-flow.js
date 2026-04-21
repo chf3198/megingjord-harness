@@ -1,6 +1,6 @@
 // Context Flow — SVG diagram with animated data packets
 // Accepts live device health + fleet stats for real-time status
-function renderContextFlow(devices, fleetStats, isActive) {
+function renderContextFlow(devices, fleetStats, isActive, liveQuotas) {
   const W = 620, H = 260;
   // Build live status map from device health
   const dm = {}; (devices || []).forEach(d => { dm[d.id] = d.status; });
@@ -39,7 +39,7 @@ function renderContextFlow(devices, fleetStats, isActive) {
   return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Context flow diagram">
     <defs>${cfDefs()}</defs>
     ${cfArrows(nodes, arrows, isActive)}${cfNodes(nodes, liveMap)}</svg>
-    ${contextBudgetLegend()}</div>`;
+    ${contextBudgetLegend()}${typeof cfResourcePills==='function' ? cfResourcePills(liveQuotas) : ''}</div>`;
 }
 function cfDefs() {
   return `<marker id="cfHead" markerWidth="6" markerHeight="4"
