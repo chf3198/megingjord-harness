@@ -36,8 +36,7 @@ function renderContextFlow(devices, fleetStats, isActive) {
     { from: 9, to: 5, label: 'host', tip: 'Windows laptop hosts the OpenClaw proxy locally' },
     { from: 0, to: 3, label: 'gh cli', tip: 'VS Code uses gh CLI for issue/PR operations' },
   ];
-  return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
-    class="cf-svg" role="img" aria-label="Context flow diagram">
+  return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Context flow diagram">
     <defs>${cfDefs()}</defs>
     ${cfArrows(nodes, arrows)}${cfNodes(nodes, liveMap)}</svg>
     ${contextBudgetLegend()}</div>`;

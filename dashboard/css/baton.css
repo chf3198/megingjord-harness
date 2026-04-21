@@ -13,33 +13,31 @@
 }
 
 .baton-row {
-  border: 1px solid var(--border); border-radius: 6px;
-  padding: 0.4rem 0.6rem; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.15rem 0.4rem; background: var(--bg);
+  display: flex; align-items: center; gap: 0.3rem; min-height: 0;
 }
 
-.baton-meta {
-  display: flex; align-items: center; gap: 0.4rem;
-  margin-bottom: 0.3rem; flex-wrap: wrap;
-}
+.baton-meta { display: contents; }
 
 .baton-issue { font-size: 0.9rem; font-weight: 700; color: var(--blue); }
-.baton-title { font-size: 0.78rem; color: var(--text); font-weight: 500;
-  max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle; }
+.baton-title { font-size: 0.75rem; color: var(--text); font-weight: 500;
+  max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .baton-epic {
   font-size: 0.65rem; color: var(--text-muted); background: var(--surface);
   border: 1px solid var(--border); border-radius: 3px; padding: 0 0.3rem;
 }
-.baton-agent { font-size: 0.75rem; color: var(--text); margin-left: auto; }
+.baton-agent { font-size: 0.72rem; color: var(--text); }
 
 .baton-pipeline {
   display: flex; align-items: center; gap: 0;
-  flex-wrap: nowrap; overflow-x: auto;
+  flex-shrink: 0; margin-left: auto;
 }
 
 .baton-step {
-  text-align: center; padding: 0.15rem 0.25rem; border-radius: 4px;
-  border: 1.5px solid var(--border); background: var(--bg);
-  font-size: 0.72rem; opacity: 0.4; transition: all 0.3s ease;
+  text-align: center; padding: 0.1rem 0.2rem; border-radius: 3px;
+  border: 1px solid var(--border); background: var(--bg);
+  font-size: 0.65rem; opacity: 0.4; transition: all 0.3s ease;
   white-space: nowrap; flex-shrink: 0;
 }
 .baton-step.done { border-color: var(--green); opacity: 0.65; }
@@ -63,12 +61,7 @@
   background: color-mix(in srgb, var(--yellow) 10%, var(--bg));
   border: 1px solid var(--yellow); border-radius: 3px; padding: 0 0.3rem;
 }
-.baton-timeline {
-  display: flex; align-items: center; gap: 0.15rem;
-  font-size: 0.65rem; color: var(--text-muted);
-  margin-top: 0.2rem; padding: 0.15rem 0;
-  border-top: 1px dashed var(--border); flex-wrap: wrap;
-}
+.baton-timeline { display: none; }
 .tl-step {
   white-space: nowrap; font-size: 0.62rem; background: var(--bg);
   border: 1px solid var(--border); border-radius: 3px;
