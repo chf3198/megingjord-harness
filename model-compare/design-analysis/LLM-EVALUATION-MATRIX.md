@@ -18,24 +18,24 @@
 | **Grok Code Fast 1** *(Copilot Pro)* | 0.25x | 8.0 | 7.5 | 7.0 | 8.0 | *Academic Synthesis* | 8.5 | -1% (Ind: 81) | — | *None* (Outclassed by GPT-5-mini structurally). |
 | **Gemini 3 Flash** *(Copilot Pro)* | 0.33x | 7.0 | 7.0 | 8.0 | 7.5 | *Extractive Concision* | 8.0 | -3% (Ind: 72) | — | *None* (Outclassed by GPT-5.4-mini at same cost). |
 | **Raptor-mini** *(Copilot Pro)* | 0x (Free) | 6.5 | — | — | 7.0 | *—* | 0 | -12% (Ind: 74) | — | *None* (Not suited for architectural design level). |
-| **OpenRouter — qwen/qwen3-coder:free** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | — | **10.0** | Free cloud coding; top empirical performer. |
-| **OpenRouter — nvidia/nemotron-super-120b:free** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 8.0 | *Empirical Controlled Eval* | — | — | **9.3** | Large NVIDIA model; strong arch + UX, weaker security. |
+| **OpenRouter — qwen/qwen3-coder:free** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | **10** | **10.0** | Free cloud coding; top empirical performer. |
+| **OpenRouter — nvidia/nemotron-super-120b:free** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 8.0 | *Empirical Controlled Eval* | — | **9.3** | **9.3** | Large NVIDIA model; strong arch + UX, weaker security. |
 | **OpenRouter — nvidia/nemotron-nano-30b:free** | 0x / free-cloud | est 7.0 | est 7.0 | est 7.0 | est 7.0 | *Empirical Controlled Eval* | — | — | **10.0** | Solid mid-tier free model; routing/fallback. |
-| **OpenRouter — openai/gpt-oss-20b:free** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | — | **9.0** | OpenAI OSS compact; reliable general use. |
-| **OpenRouter — google/gemma-3-4b-it:free** | 0x / free-cloud | est 6.5 | est 6.0 | est 7.0 | est 6.5 | *Empirical Controlled Eval* | — | — | **10.0** | Small Google model; punches above weight empirically. |
+| **OpenRouter — openai/gpt-oss-20b:free** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | **9** | **9.0** | OpenAI OSS compact; reliable general use. |
+| **OpenRouter — google/gemma-3-4b-it:free** | 0x / free-cloud | est 6.5 | est 6.0 | est 7.0 | est 6.5 | *Empirical Controlled Eval* | — | **10** | **10.0** | Small Google model; punches above weight empirically. |
 | **OpenRouter — nvidia/nemotron-nano-9b:free** | 0x / free-cloud | est 6.5 | est 6.5 | est 6.5 | est 6.5 | *Empirical Controlled Eval* | — | — | **10.0** | Compact NVIDIA; best value at 9B params empirically. |
 | **OpenRouter — llama-3.3-70b-instruct:free** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *RPM/RPD Rate-Limited* | — | — | ⚠ rate-limited | Capped at free-tier daily limit; use Groq variant instead. |
 | **OpenRouter — google/gemma-3-27b-it:free** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *RPM/RPD Rate-Limited* | — | — | ⚠ rate-limited | Mid-large Google; capped at free-tier limit. |
-| **Groq — llama-3.3-70b-versatile** | 0x / free-cloud | est 7.5 | est 7.0 | est 8.0 | est 7.5 | *Empirical Controlled Eval* | — | — | **10.0** | Meta 70B on Groq; fast latency + top empirical score. |
-| **Groq — openai/gpt-oss-120b** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 8.0 | *Empirical Controlled Eval* | — | — | **10.0** | Largest OSS on Groq; strong all-round. |
-| **Groq — qwen/qwen3-32b** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | — | **9.0** | Qwen 32B reasoning; minor quality dip vs 70B peers. |
-| **Groq — llama-4-scout-17b-16e** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | — | **10.0** | MoE architecture; efficient and strong empirically. |
-| **Groq — llama-3.1-8b-instant** | 0x / free-cloud | est 6.5 | est 6.5 | est 7.0 | est 7.0 | *Empirical Controlled Eval* | — | — | **9.0** | Fast small model; good for latency-sensitive tasks. |
-| **Cerebras — qwen-3-235b-a22b** | 0x / free-cloud | est 8.5 | est 8.0 | est 8.0 | est 8.0 | *Empirical Controlled Eval* | — | — | **10.0** | Largest Cerebras model; top analytical + empirical. |
-| **Cerebras — llama3.1-8b** | 0x / free-cloud | est 6.5 | est 6.5 | est 7.0 | est 7.0 | *Empirical Controlled Eval* | — | — | **9.0** | Compact Cerebras; fast inference, solid baseline. |
-| **OpenClaw — mistral:latest** *(fleet)* | 0x / local-fleet | est 7.5 | est 7.0 | est 7.5 | est 7.0 | *On-Device Mid-Range Inference* | — | — | **5.8** | Slow CPU gen (~1 tok/s); accuracy strong, low clarity/security scoring. |
+| **Groq — llama-3.3-70b-versatile** | 0x / free-cloud | est 7.5 | est 7.0 | est 8.0 | est 7.5 | *Empirical Controlled Eval* | — | **10** | **10.0** | Meta 70B on Groq; fast latency + top empirical score. |
+| **Groq — openai/gpt-oss-120b** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 8.0 | *Empirical Controlled Eval* | — | **10** | **10.0** | Largest OSS on Groq; strong all-round. |
+| **Groq — qwen/qwen3-32b** | 0x / free-cloud | est 8.0 | est 7.5 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | **9** | **9.0** | Qwen 32B reasoning; minor quality dip vs 70B peers. |
+| **Groq — llama-4-scout-17b-16e** | 0x / free-cloud | est 7.5 | est 7.0 | est 7.5 | est 7.5 | *Empirical Controlled Eval* | — | **10** | **10.0** | MoE architecture; efficient and strong empirically. |
+| **Groq — llama-3.1-8b-instant** | 0x / free-cloud | est 6.5 | est 6.5 | est 7.0 | est 7.0 | *Empirical Controlled Eval* | — | **9** | **9.0** | Fast small model; good for latency-sensitive tasks. |
+| **Cerebras — qwen-3-235b-a22b** | 0x / free-cloud | est 8.5 | est 8.0 | est 8.0 | est 8.0 | *Empirical Controlled Eval* | — | **10** | **10.0** | Largest Cerebras model; top analytical + empirical. |
+| **Cerebras — llama3.1-8b** | 0x / free-cloud | est 6.5 | est 6.5 | est 7.0 | est 7.0 | *Empirical Controlled Eval* | — | **9** | **9.0** | Compact Cerebras; fast inference, solid baseline. |
+| **OpenClaw — mistral:latest** *(fleet)* | 0x / local-fleet | est 7.5 | est 7.0 | est 7.5 | est 7.0 | *On-Device Mid-Range Inference* | — | **5.8** | **5.8** | Slow CPU gen (~1 tok/s); accuracy strong, low clarity/security scoring. |
 | **OpenClaw — phi3:mini** *(fleet)* | 0x / local-fleet | est 6.5 | est 6.0 | est 6.5 | est 6.5 | *Compact On-Device Inference* | — | — | **6.8** | Fastest fleet model (33s/300tok); good accuracy, limited security depth. |
-| **OpenClaw — qwen2.5:7b-instruct** *(fleet)* | 0x / local-fleet | est 7.0 | est 6.5 | est 7.0 | est 6.5 | *Conversational-Code Synthesis* | — | — | **8.0** | Best fleet model empirically; strong clarity + UX, low security rubric score. |
+| **OpenClaw — qwen2.5:7b-instruct** *(fleet)* | 0x / local-fleet | est 7.0 | est 6.5 | est 7.0 | est 6.5 | *Conversational-Code Synthesis* | — | **8** | **8.0** | Best fleet model empirically; strong clarity + UX, low security rubric score. |
 
 ### Evaluation Methodology Insights
 *Researched methodology for LLM evaluation:*
@@ -46,33 +46,3 @@
 5. **Empirical Composite Column:** Free-tier rows scored via live harness eval (April 2026). `est.` values in analytical columns are tier-level estimates. Cells marked `⚠ fleet offline` indicate host reachable but service not responding. Cells marked `⚠ rate-limited` indicate daily RPM/RPD cap reached.
 
 *(Methodological framing, cost integration, and omission of forced scoring were derived directly from client suggestions.)*
-
-
-
-## Empirical Evaluation Results
-
-<!-- EMPIRICAL-RESULTS-START -->
-_Auto-updated: 2026-04-21T02:43:32.569Z by ai-matrix-build-final_
-
-## Empirical Evaluation Results (Controlled Runs — April 2026)
-
-| Model | Cost | Clarity | Accuracy | Security | UX | Emerging Property | Composite | Notes |
-|---|---|---|---|---|---|---|---|---|
-| **OpenRouter — qwen/qwen3-coder:free** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **OpenRouter — nvidia/nemotron-super-120b:free** | 0x / free-cloud | 10 | 10 | 7 | 10 | *Empirical controlled eval* | **9.3** | Measured 2026-04-21 |
-| **OpenRouter — llama-3.3-70b-instruct:free** | 0x / free-cloud | — | — | — | — | *RPM/RPD rate-limited (free tier)* | — | ⚠ RPM/RPD rate-limited (free tier) |
-| **OpenRouter — hermes-3-llama-3.1-405b:free** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **OpenRouter — openai/gpt-oss-20b:free** | 0x / free-cloud | 9 | 9 | 9 | 9 | *Empirical controlled eval* | **9** | Measured 2026-04-21 |
-| **OpenRouter — google/gemma-3-4b-it:free** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **OpenRouter — google/gemma-3-27b-it:free** | 0x / free-cloud | — | — | — | — | *RPM/RPD rate-limited (free tier)* | — | ⚠ RPM/RPD rate-limited (free tier) |
-| **Groq — llama-3.3-70b-versatile** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **Groq — openai/gpt-oss-120b** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **Groq — qwen/qwen3-32b** | 0x / free-cloud | 9 | 9 | 9 | 9 | *Empirical controlled eval* | **9** | Measured 2026-04-21 |
-| **Groq — llama-4-scout-17b-16e** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **Groq — llama-3.1-8b-instant** | 0x / free-cloud | 9 | 9 | 9 | 9 | *Empirical controlled eval* | **9** | Measured 2026-04-21 |
-| **Cerebras — qwen-3-235b-a22b** | 0x / free-cloud | 10 | 10 | 10 | 10 | *Empirical controlled eval* | **10** | Measured 2026-04-21 |
-| **Cerebras — llama3.1-8b** | 0x / free-cloud | 9 | 9 | 9 | 9 | *Empirical controlled eval* | **9** | Measured 2026-04-21 |
-| **OpenClaw — mistral:latest** | 0x / local-fleet | 1 | 10 | 3 | 9 | *Empirical controlled eval* | **5.8** | Measured 2026-04-21 |
-| **OpenClaw — qwen2.5:7b-instruct** | 0x / local-fleet | 10 | 10 | 2 | 10 | *Empirical controlled eval* | **8** | Measured 2026-04-21 |
-
-<!-- EMPIRICAL-RESULTS-END -->
