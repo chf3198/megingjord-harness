@@ -44,8 +44,8 @@ applyTo: "**"
 - CODEOWNERS coverage for `.github/workflows/`.
 - No auto-remediation that broadens permissions.
 - **Label-lint enforcement**: `.github/workflows/label-lint.yml` runs on all `issues`
-  events and enforces ADR-010 label rules (single status, single role, no role on
-  done/backlog). Violations post a comment and fail the check.
+  events and enforces ADR-010 label rules (single status, single role, no execution
+  role on terminal closed/backlog items). Violations post a comment and fail the check.
 - For detailed Actions hardening, invoke `github-actions-security-hardening` skill.
 
 ## Release and incident flow

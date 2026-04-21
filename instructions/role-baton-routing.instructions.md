@@ -8,37 +8,44 @@ applyTo: "**"
 
 The GitHub issue **is** the baton. Execute every task through a single active role at a time. Each role writes a structured comment on the ticket and transitions the status label.
 
-## Status workflow (v0.2 — 8-status canonical model)
+## Status workflow (v1.0 — agent-typed 8-status)
+
+Each status names the active agent type. One glance = who owns it now.
 
 ```
-Status            Role Binding     Gate Condition
-─────────────────────────────────────────────────
-backlog           (none)           Triaged; not yet assigned to Manager
-todo              manager          Manager claimed; scope being defined
-in-progress       collaborator     MANAGER_HANDOFF emitted; implementation active
-ready-for-testing admin            COLLABORATOR_HANDOFF emitted; CI pre-check needed
-testing           admin            Admin running gates/CI
-passed-testing    admin            All gates green; merge complete
-done              consultant       ADMIN_HANDOFF emitted; critique + closeout
-cancelled         (none)           Abandoned at any stage; reason note required
+Status       Active Agent   Gate Condition
+──────────────────────────────────────────────────────────────
+backlog      —              Queued; unassigned
+triage       manager        Manager scoping AC + gates
+ready        —              MANAGER_HANDOFF emitted; awaiting Collaborator
+in-progress  collaborator   Implementation active
+testing      admin          COLLABORATOR_HANDOFF emitted; CI/gates running
+review       consultant     ADMIN_HANDOFF emitted; critique + closeout active
+done         —              CONSULTANT_CLOSEOUT emitted; issue closes atomically
+cancelled    —              Abandoned at any stage; Manager authority; reason required
 ```
 
 Transition guards:
-- `backlog → todo`: Manager creates/links issue, writes scope comment.
-- `todo → in-progress`: MANAGER_HANDOFF emitted with testable ACs.
-- `in-progress → ready-for-testing`: COLLABORATOR_HANDOFF emitted; all ACs ✅.
-- `ready-for-testing → testing`: Admin begins gate verification.
-- `testing → passed-testing`: All gates pass; merge executed.
-- `passed-testing → done`: ADMIN_HANDOFF emitted; Consultant starts.
-- `done → (closed)`: CONSULTANT_CLOSEOUT emitted; issue closed.
+- `backlog → triage`: Manager creates/links issue, writes scope comment.
+- `triage → ready`: MANAGER_HANDOFF emitted with testable ACs; remove `role:manager`.
+- `ready → in-progress`: Collaborator picks up; apply `role:collaborator`.
+- `in-progress → testing`: COLLABORATOR_HANDOFF emitted; all ACs ✅; swap to `role:admin`.
+- `testing → review`: ADMIN_HANDOFF emitted; all gates pass; swap to `role:consultant`.
+- `review → done + closed`: CONSULTANT_CLOSEOUT emitted; remove all `role:*`; close issue atomically.
 - `any → cancelled`: Manager authority only; reason comment required.
 
 ## Sequence
 
-1. **Manager**: scope, AC, gates → create/link issue → set `status:todo`, `role:manager` → emit `MANAGER_HANDOFF` → swap to `role:collaborator`.
-2. **Collaborator**: implement + validate → `status:in-progress` → `status:ready-for-testing` → emit `COLLABORATOR_HANDOFF` → swap to `role:admin`.
-3. **Admin**: run gates/merge → `status:testing` → `status:passed-testing` → emit `ADMIN_HANDOFF` → swap to `role:consultant`.
-4. **Consultant**: critique + CLOSEOUT → `status:done` → remove `role:*` labels → close issue → emit `CONSULTANT_CLOSEOUT`.
+1. **Manager**: scope, AC, gates → create/link issue → set `status:triage`, `role:manager` → emit `MANAGER_HANDOFF` → set `status:ready`, remove `role:manager`.
+2. **Collaborator**: pick up → set `role:collaborator`, `status:in-progress` → implement + validate → emit `COLLABORATOR_HANDOFF` → set `status:testing`, swap to `role:admin`.
+3. **Admin**: run CI/gates/merge → confirm `status:testing` → emit `ADMIN_HANDOFF` → set `status:review`, swap to `role:consultant`.
+4. **Consultant**: critique + closeout → emit `CONSULTANT_CLOSEOUT` → set `status:done`, remove all `role:*`, close issue.
+
+## Closed-state rule
+
+- GitHub `closed` is terminal and must not retain execution-role labels.
+- Closed tickets never appear in Agent Baton.
+- If a historical owner is displayed after closure, normalize it to Manager rather than Admin/Consultant.
 
 ## Hard rules
 

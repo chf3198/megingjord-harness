@@ -5,7 +5,7 @@ applyTo: "**"
 When asked to "complete" a feature-add (or equivalent language), completion requires all four role batons:
 
 1) Manager complete → `MANAGER_HANDOFF` emitted, `status:ready` set
-2) Collaborator complete → `COLLABORATOR_HANDOFF` emitted, `status:in-progress` set
+2) Collaborator complete → `COLLABORATOR_HANDOFF` emitted, `status:testing` set
 3) Admin complete → `ADMIN_HANDOFF` emitted, `status:review` set
 4) Consultant closeout → `CONSULTANT_CLOSEOUT` emitted, `status:done` set, issue closed
 

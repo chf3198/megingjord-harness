@@ -19,24 +19,54 @@ applyTo: "**"
 | Doc | Documentation | `type:doc` |
 | Research | Investigation/spike | `type:research` |
 
-## Label taxonomy (v0.2 — 8-status canonical)
+## Label taxonomy (v1.0 — agent-typed 8-status)
 
-Status labels and their role bindings + gate conditions:
+Each status names the active agent type. One glance = who owns it now.
 
-| Status | Role Binding | Gate Condition |
+| Status | Active Agent | Gate Condition |
 |---|---|---|
-| `status:backlog` | (none) | Triaged; inactive; not yet assigned |
-| `status:todo` | `role:manager` | Manager claimed; scope definition active |
-| `status:in-progress` | `role:collaborator` | MANAGER_HANDOFF emitted; implementing |
-| `status:ready-for-testing` | `role:admin` | COLLABORATOR_HANDOFF emitted; all ACs ✅ |
-| `status:testing` | `role:admin` | Admin running CI/gate verification |
-| `status:passed-testing` | `role:admin` | Gates green; merge complete |
-| `status:done` | `role:consultant` | ADMIN_HANDOFF emitted; critique active |
-| `status:cancelled` | (none) | Abandoned; Manager authority; reason required |
+| `status:backlog` | — | Queued; unassigned |
+| `status:triage` | `role:manager` | Manager scoping AC + gates |
+| `status:ready` | — | MANAGER_HANDOFF emitted; awaiting Collaborator pickup |
+| `status:in-progress` | `role:collaborator` | Implementation active |
+| `status:testing` | `role:admin` | COLLABORATOR_HANDOFF emitted; CI/gates running |
+| `status:review` | `role:consultant` | ADMIN_HANDOFF emitted; critique + closeout active |
+| `status:done` | — | CONSULTANT_CLOSEOUT emitted; issue closes |
+| `status:cancelled` | — | Abandoned; Manager authority; reason required |
 
 - **Priority**: `priority:P1` (urgent) · `priority:P2` (normal) · `priority:P3` (low)
 - **Area**: `area:dashboard` · `area:hooks` · `area:skills` · `area:instructions` · `area:agents` · `area:scripts` · `area:infra`
 - **Role** (current baton holder): `role:manager` · `role:collaborator` · `role:admin` · `role:consultant`
+
+## Closed ticket normalization
+
+- `done` → `closed` is a single atomic step: emit `CONSULTANT_CLOSEOUT`, set `status:done`, remove all `role:*` labels, close issue.
+- Closed tickets are terminal and must not re-enter active Baton views.
+- Historical ownership in dashboard/audit views resolves to `manager` after close.
+
+## Valid owner × work-type matrix
+
+| Work type | Primary role | Valid active statuses |
+|---|---|---|
+| Research | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+| Development | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
+| UX design | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+| Styling/CSS | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+| Graphic design | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+| Documentation | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+| Bug fix | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
+| Infra / ops | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
+| Marketing / comms | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+
+## Forbidden combinations
+
+- Closed issue + any execution `role:*` label.
+- `status:backlog` or `status:ready` or `status:done` or `status:cancelled` with any `role:*` label.
+- `status:triage` with non-manager role.
+- `status:in-progress` with admin/consultant role.
+- `status:testing` with collaborator/consultant role.
+- `status:review` with manager/collaborator/admin role.
+- `status:done` on an open issue (done must coincide with issue close).
 
 ## Manager Responsibilities
 
