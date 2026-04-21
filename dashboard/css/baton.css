@@ -28,6 +28,7 @@
   border: 1px solid var(--border); border-radius: 3px; padding: 0 0.3rem;
 }
 .baton-agent { font-size: 0.72rem; color: var(--text); }
+.baton-row .badge { font-size: 0.58rem; padding: 0.02rem 0.22rem; border-radius: 6px; line-height: 1.3; font-weight: 600; }
 
 .baton-pipeline {
   display: flex; align-items: center; gap: 0;
