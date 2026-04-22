@@ -1,51 +1,53 @@
-// Context Topology — SVG zones, sub-groups, type-differentiated nodes, and flow arrows
+// Context Topology — world-class redesign #378
 const CF_TYPE_STYLE = {
-  HW:    {rx:4,  sw:2,   stroke:'var(--text-muted)', fill:'var(--surface)'},
-  SW:    {rx:8,  sw:1.5, stroke:'var(--blue)',        fill:'color-mix(in srgb,var(--blue) 8%,var(--bg))'},
-  LLM:   {rx:10, sw:1.5, stroke:'var(--green)',       fill:'color-mix(in srgb,var(--green) 8%,var(--bg))'},
-  SVC:   {rx:6,  sw:1.5, stroke:'var(--yellow)',      fill:'color-mix(in srgb,var(--yellow) 6%,var(--bg))'},
-  STORE: {rx:4,  sw:1,   stroke:'var(--border)',      fill:'var(--bg)'},
+  HW:    {rx:4,  sw:2,   stroke:'#6B7280', fill:'#1f2937'},
+  SW:    {rx:8,  sw:1.5, stroke:'#3B82F6', fill:'#0d1e3d'},
+  LLM:   {rx:10, sw:1.5, stroke:'#10B981', fill:'#052e22'},
+  SVC:   {rx:6,  sw:1.5, stroke:'#F59E0B', fill:'#1e1507'},
+  STORE: {rx:4,  sw:1,   stroke:'#4B5563', fill:'#111827'},
 };
 const CF_TYPE_LBL = {HW:'HW', SW:'SW', LLM:'LLM', SVC:'SVC', STORE:'DB'};
 const FLOW_TYPE = {
-  internal: {color:'var(--border)',  head:'cfHd',  dash:false, dur:0,      op:0.45},
-  hosts:    {color:'var(--border)',  head:'cfHd',  dash:true,  dur:0,      op:0.3},
-  cloud:    {color:'var(--blue)',    head:'cfHdB', dash:false, dur:'2s',   op:0.85},
-  local:    {color:'var(--yellow)',  head:'cfHdY', dash:true,  dur:'3s',   op:0.85},
-  inference:{color:'var(--green)',   head:'cfHd',  dash:false, dur:'2s',   op:0.85},
-  github:   {color:'#a371f7',        head:'cfHdP', dash:false, dur:'3.5s', op:0.75},
+  internal: {color:'#4B5563',head:'cfHd', dash:false,dur:0,     op:0.5, sw:1.5,cls:''},
+  hosts:    {color:'#4B5563',head:'cfHd', dash:true, dur:0,     op:0.35,sw:1.5,cls:''},
+  cloud:    {color:'#3B82F6',head:'cfHdB',dash:false,dur:'2s',  op:1.0, sw:5,  cls:'cf-cloud-path'},
+  local:    {color:'#F59E0B',head:'cfHdY',dash:true, dur:'3s',  op:0.9, sw:2,  cls:''},
+  inference:{color:'#10B981',head:'cfHdG',dash:false,dur:'1.8s',op:0.9, sw:2,  cls:'cf-infer-path'},
+  github:   {color:'#8B5CF6',head:'cfHdP',dash:false,dur:'3.5s',op:0.8, sw:2,  cls:''},
 };
 function cfDefs() {
-  const mk=(id,c)=>`<marker id="${id}" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="${c}"/></marker>`;
-  return mk('cfHd','var(--green)')+mk('cfHdB','var(--blue)')+mk('cfHdY','var(--yellow)')+mk('cfHdP','#a371f7')
-    +`<style>.cf-zone{stroke-width:1.5;stroke-dasharray:5,3}
-    .cf-zl{stroke:var(--blue);fill:color-mix(in srgb,var(--blue) 4%,transparent)}
-    .cf-zt{stroke:var(--yellow);fill:color-mix(in srgb,var(--yellow) 3%,transparent)}
-    .cf-zc{stroke:var(--text-muted);fill:color-mix(in srgb,var(--text-muted) 3%,transparent)}
-    .cf-sg{stroke:var(--text-muted);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--text-muted) 5%,transparent);rx:6}
-    .cf-oc{stroke:var(--yellow);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--yellow) 6%,transparent)}
-    .cf-zlbl{font-size:8.5px;font-weight:700;fill:var(--text-muted);pointer-events:none}
-    .cf-sglbl{font-size:7.5px;font-weight:600;fill:var(--text-muted);pointer-events:none}
-    .cf-nm{font-size:9.5px;fill:var(--text);font-weight:700;pointer-events:none}
-    .cf-sb{font-size:7px;fill:var(--text-muted);pointer-events:none}
-    .cf-tb{font-size:6.5px;font-weight:800;pointer-events:none}
-    .cf-lbl2{font-size:7px;fill:var(--text-muted);font-style:italic}
-    .cf-ng:hover rect{filter:brightness(1.4)}
-    @keyframes cfpulse{0%,100%{opacity:.4}50%{opacity:1}}
-    circle.cfp{animation:cfpulse 1.5s ease-in-out infinite}
-    .cfpkt{filter:drop-shadow(0 0 3px currentColor)}</style>`;
+  const mk=(id,c)=>`<marker id="${id}" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="${c}"/></marker>`;
+  const glow=(id,s)=>`<filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${s}" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+  return mk('cfHd','#4B5563')+mk('cfHdB','#3B82F6')+mk('cfHdY','#F59E0B')+mk('cfHdG','#10B981')+mk('cfHdP','#8B5CF6')
+    +glow('cfGlowB','4')+glow('cfGlowG','3')
+    +`<style>.cf-zone{stroke-width:2;stroke-dasharray:6,3}
+.cf-zl{stroke:#3B82F6;fill:rgba(59,130,246,0.15)}.cf-zt{stroke:#8B5CF6;fill:rgba(139,92,246,0.12)}
+.cf-zc{stroke:#F59E0B;fill:rgba(245,158,11,0.12)}.cf-sg{stroke:#4B5563;stroke-width:1.5;stroke-dasharray:4,2;fill:rgba(75,85,99,0.1)}
+.cf-oc{stroke:#F59E0B;stroke-width:1.5;stroke-dasharray:4,2;fill:rgba(245,158,11,0.1)}
+.cf-zlbl{font-size:11px;font-weight:700;pointer-events:none}
+.cf-zlbl-l{fill:#3B82F6}.cf-zlbl-t{fill:#8B5CF6}.cf-zlbl-c{fill:#F59E0B}
+.cf-sglbl{font-size:9px;font-weight:600;fill:#9CA3AF;pointer-events:none}
+.cf-nm{font-size:13px;fill:#E6EDF3;font-weight:700;pointer-events:none}
+.cf-sb{font-size:10px;fill:#A3AEBF;pointer-events:none}
+.cf-tb{font-size:8px;font-weight:800;pointer-events:none}
+.cf-lbl2{font-size:9px;fill:#9CA3AF;font-style:italic}.cf-lbl2-bg{fill:#0d1117}
+.cf-cloud-path{filter:url(#cfGlowB)}.cf-infer-path{filter:url(#cfGlowG)}
+.cf-ng:hover rect{filter:brightness(1.5);transition:filter 0.15s}
+@keyframes cfpulse{0%,100%{opacity:.3}50%{opacity:1}}
+circle.cfp{animation:cfpulse 1.4s ease-in-out infinite}
+.cfpkt{filter:drop-shadow(0 0 4px currentColor)}</style>`;
 }
 function cfZones(zones) {
   return zones.map(z=>`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="8" class="cf-zone cf-z${z.k}"/>
-    <text x="${z.x+8}" y="${z.y+13}" class="cf-zlbl">${z.label}</text>`).join('');
+    <text x="${z.x+10}" y="${z.y+16}" class="cf-zlbl cf-zlbl-${z.k}">${z.label}</text>`).join('');
 }
 function cfSubGroups(groups) {
   return (groups||[]).map(g=>`<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="6" class="${g.cls||'cf-sg'}"/>
-    <text x="${g.x+6}" y="${g.y+11}" class="cf-sglbl">${g.label}</text>`).join('');
+    <text x="${g.x+8}" y="${g.y+13}" class="cf-sglbl">${g.label}</text>`).join('');
 }
 function cfNodes(nodes, liveMap) {
-  const sc={healthy:'var(--green)',online:'var(--green)',degraded:'var(--yellow)',offline:'var(--red)',unknown:'var(--text-muted)'};
-  const NW=80,NH=46;
+  const sc={healthy:'#22C55E',online:'#22C55E',degraded:'#EAB308',offline:'#EF4444',unknown:'#6B7280'};
+  const NW=100,NH=56;
   return nodes.map(n=>{
     const st=(liveMap||{})[n.label]||'unknown';
     const ts=CF_TYPE_STYLE[n.type]||CF_TYPE_STYLE.SW;
@@ -53,23 +55,29 @@ function cfNodes(nodes, liveMap) {
     const hp=st==='healthy'||st==='online'?' class="cfp"':'';
     return `<g class="cf-ng"><title>${n.tip}</title>
     <rect x="${n.x-NW/2}" y="${n.y-NH/2}" width="${NW}" height="${NH}" rx="${ts.rx}" ${sd} fill="${ts.fill}" stroke="${ts.stroke}" stroke-width="${ts.sw}"/>
-    <circle cx="${n.x+NW/2-7}" cy="${n.y-NH/2+8}" r="4.5" fill="${sc[st]||sc.unknown}"${hp}/>
-    <text x="${n.x-NW/2+5}" y="${n.y-NH/2+11}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
-    <text x="${n.x}" y="${n.y+1}" text-anchor="middle" style="font-size:12px;pointer-events:none">${n.icon}</text>
-    <text x="${n.x}" y="${n.y+14}" text-anchor="middle" class="cf-nm">${n.label}</text>
-    <text x="${n.x}" y="${n.y+24}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
+    <circle cx="${n.x+NW/2-8}" cy="${n.y-NH/2+9}" r="5" fill="${sc[st]||sc.unknown}"${hp}/>
+    <text x="${n.x-NW/2+6}" y="${n.y-NH/2+12}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
+    <text x="${n.x}" y="${n.y+2}" text-anchor="middle" style="font-size:14px;pointer-events:none">${n.icon}</text>
+    <text x="${n.x}" y="${n.y+16}" text-anchor="middle" class="cf-nm">${n.label}</text>
+    <text x="${n.x}" y="${n.y+28}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
   }).join('');
 }
 function cfArrows(nodes,arrows,isActive){
   return arrows.map((a,i)=>{
     const f=nodes[a.from],t=nodes[a.to];
     const ft=FLOW_TYPE[a.type||'internal'];
-    const d=a.curve?`M${f.x},${f.y} C${f.x},${f.y-90} ${t.x},${t.y-90} ${t.x},${t.y}`:`M${f.x},${f.y} L${t.x},${t.y}`;
-    const dk=ft.dash?'stroke-dasharray="5,3"':'';
+    const dx=(t.x-f.x)*0.45;
+    const d=ft.cls==='cf-cloud-path'
+      ?`M${f.x},${f.y} C${f.x},38 ${t.x},38 ${t.x},${t.y}`
+      :a.curve?`M${f.x},${f.y} C${f.x+dx},${f.y} ${t.x-dx},${t.y} ${t.x},${t.y}`:`M${f.x},${f.y} L${t.x},${t.y}`;
+    const dk=ft.dash?'stroke-dasharray="6,3"':'';
     const pid=`cfp${i}`;
-    const mx=(f.x+t.x)/2, my=a.curve?Math.min(f.y,t.y)-62:(f.y+t.y)/2-5;
-    const pkt=(isActive&&ft.dur)?`<circle r="2.5" fill="${ft.color}" class="cfpkt" opacity="0.9"><animateMotion dur="${ft.dur}" repeatCount="indefinite"><mpath href="#${pid}"/></animateMotion></circle>`:'';
-    return `<path id="${pid}" d="${d}" fill="none" stroke="${ft.color}" stroke-width="1.5" ${dk} opacity="${ft.op}" marker-end="url(#${ft.head})"><title>${a.tip||''}</title></path>${pkt}
-    ${a.label?`<text x="${mx}" y="${my}" text-anchor="middle" class="cf-lbl2">${a.label}</text>`:''}`;
+    const mx=(f.x+t.x)/2, my=a.curve?Math.min(f.y,t.y)-72:(f.y+t.y)/2-6;
+    const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="indefinite"><mpath href="#${pid}"/></animateMotion></circle>`:'';
+    const gp=ft.cls==='cf-cloud-path'
+      ?`<path d="${d}" fill="none" stroke="#1D4ED8" stroke-width="28" opacity="0.55"/><path d="${d}" fill="none" stroke="#93C5FD" stroke-width="12" opacity="0.7"/><path d="${d}" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.6"/>`
+      :ft.cls==='cf-infer-path'?`<path d="${d}" fill="none" stroke="#065F46" stroke-width="12" opacity="0.5"/>` :'';
+    return `${gp}<path id="${pid}" d="${d}" fill="none" stroke="${ft.color}" stroke-width="${ft.sw}" ${dk} opacity="${ft.op}" marker-end="url(#${ft.head})"><title>${a.tip||''}</title></path>${pkt}
+    ${a.label?`<rect x="${mx-20}" y="${my-8}" width="40" height="13" rx="3" fill="#0d1117" opacity="0.75"/><text x="${mx}" y="${my+3}" text-anchor="middle" class="cf-lbl2">${a.label}</text>`:''}`;
   }).join('');
 }
