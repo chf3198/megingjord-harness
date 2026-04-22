@@ -18,6 +18,7 @@
       },
       "swap": "none (kernel-blocked)",
       "tailscale": true,
+      "tailscaleIP": "100.86.248.35",
       "ollama": true,
       "ollamaModels": [
         "qwen3.5:0.8b",
@@ -46,6 +47,7 @@
         "free": "~39.5GB"
       },
       "tailscale": true,
+      "tailscaleIP": "100.78.22.13",
       "ollama": true,
       "ollamaHost": "0.0.0.0",
       "ollamaModels": [
