@@ -34,7 +34,7 @@ function cfDefs() {
 .cf-cloud-path{filter:url(#cfGlowB)}.cf-infer-path{filter:url(#cfGlowG)}
 .cf-ng:hover rect{filter:brightness(1.5);transition:filter 0.15s}
 @keyframes cfpulse{0%,100%{opacity:.3}50%{opacity:1}}
-circle.cfp{animation:cfpulse 1.4s ease-in-out infinite}
+circle.cfp{animation:cfpulse 1.4s ease-in-out 4;animation-fill-mode:forwards}
 .cfpkt{filter:drop-shadow(0 0 4px currentColor)}</style>`;
 }
 function cfZones(zones) {
@@ -47,7 +47,7 @@ function cfSubGroups(groups) {
 }
 function cfNodes(nodes, liveMap) {
   const sc={healthy:'#22C55E',online:'#22C55E',degraded:'#EAB308',offline:'#EF4444',unknown:'#6B7280'};
-  const NW=100,NH=56;
+  const NW=88,NH=50;
   return nodes.map(n=>{
     const st=(liveMap||{})[n.label]||'unknown';
     const ts=CF_TYPE_STYLE[n.type]||CF_TYPE_STYLE.SW;
@@ -68,12 +68,12 @@ function cfArrows(nodes,arrows,isActive){
     const ft=FLOW_TYPE[a.type||'internal'];
     const dx=(t.x-f.x)*0.45;
     const d=ft.cls==='cf-cloud-path'
-      ?`M${f.x},${f.y} C${f.x},38 ${t.x},38 ${t.x},${t.y}`
+      ?`M${f.x},${f.y} C${f.x},26 ${t.x},26 ${t.x},${t.y}`
       :a.curve?`M${f.x},${f.y} C${f.x+dx},${f.y} ${t.x-dx},${t.y} ${t.x},${t.y}`:`M${f.x},${f.y} L${t.x},${t.y}`;
     const dk=ft.dash?'stroke-dasharray="6,3"':'';
     const pid=`cfp${i}`;
     const mx=(f.x+t.x)/2, my=a.curve?Math.min(f.y,t.y)-72:(f.y+t.y)/2-6;
-    const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="indefinite"><mpath href="#${pid}"/></animateMotion></circle>`:'';
+    const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="3"><mpath href="#${pid}"/></animateMotion></circle>`:'';
     const gp=ft.cls==='cf-cloud-path'
       ?`<path d="${d}" fill="none" stroke="#1D4ED8" stroke-width="28" opacity="0.55"/><path d="${d}" fill="none" stroke="#93C5FD" stroke-width="12" opacity="0.7"/><path d="${d}" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.6"/>`
       :ft.cls==='cf-infer-path'?`<path d="${d}" fill="none" stroke="#065F46" stroke-width="12" opacity="0.5"/>` :'';

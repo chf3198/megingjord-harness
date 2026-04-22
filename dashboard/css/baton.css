@@ -14,15 +14,15 @@
 
 .baton-row {
   border: 1px solid var(--border); border-radius: 4px;
-  padding: 0.15rem 0.4rem; background: var(--bg);
-  display: flex; align-items: center; gap: 0.3rem; min-height: 0;
+  padding: 0.25rem 0.4rem; background: var(--bg);
+  display: flex; flex-direction: column; gap: 0.2rem; min-height: 0;
 }
 
-.baton-meta { display: contents; }
+.baton-meta { display:flex; flex-wrap:wrap; gap:0.2rem; align-items:center; min-width:0; width:100%; }
 
 .baton-issue { font-size: 0.9rem; font-weight: 700; color: var(--blue); }
 .baton-title { font-size: 0.75rem; color: var(--text); font-weight: 500;
-  max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .baton-epic {
   font-size: 0.65rem; color: var(--text-muted); background: var(--surface);
   border: 1px solid var(--border); border-radius: 3px; padding: 0 0.3rem;
@@ -32,7 +32,7 @@
 
 .baton-pipeline {
   display: flex; align-items: center; gap: 0;
-  flex-shrink: 0; margin-left: auto;
+  flex-shrink: 0; flex-wrap: nowrap; overflow-x: auto;
 }
 
 .baton-step {

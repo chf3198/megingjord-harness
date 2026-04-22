@@ -8,7 +8,7 @@
   overflow-x: auto;
 }
 
-.cf-svg { width:984px; height:356px; display:block; }
+.cf-svg { width:100%; height:auto; display:block; min-width:320px; }
 
 .cb-bar {
   display: flex; height: 8px; border-radius: 4px;

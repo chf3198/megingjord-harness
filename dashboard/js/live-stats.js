@@ -33,11 +33,8 @@ async function fetchDeviceStats(deviceId) {
 }
 
 async function fetchAllFleetStats(deviceIds) {
-  const results = {};
-  for (const id of deviceIds) {
-    results[id] = await fetchDeviceStats(id);
-  }
-  return results;
+  const entries = await Promise.all(deviceIds.map(async id => [id, await fetchDeviceStats(id)]));
+  return Object.fromEntries(entries);
 }
 
 async function safeFetch(url) {

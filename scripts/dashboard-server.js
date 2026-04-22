@@ -83,7 +83,7 @@ async function handleApi(req, res) {
   }
   if (u === '/api/events/stream') return require('./sse-handler').stream(req, res);
   if (u.startsWith('/api/events')) { const { readEvents } = require('./global/event-reader'); return jsonRes(res, 200, readEvents(u)); }
-  if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
+  if (u === '/api/github/summary') { try { const { getSummary } = require('./github-api'); return jsonRes(res, 200, await getSummary()); } catch(e) { return jsonRes(res, 500, {error:e.message}); } }
   if (u === '/api/governance') {
     try { const rs = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'repo-scope.json'), 'utf8')); const gh = JSON.parse(fs.readFileSync(path.join(ROOT, 'hooks', 'global-standards.json'), 'utf8')); return jsonRes(res, 200, { enabled: rs.default_enabled, repoScope: rs, hooks: gh.hooks }); } catch (e) { return jsonRes(res, 500, { error: e.message }); }
   }

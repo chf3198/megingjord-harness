@@ -8,7 +8,7 @@ async function pollGitHub() {
   if (_ghLoading) return _ghCache;
   _ghLoading = true;
   try {
-    const r = await fetch('/api/github/summary');
+    const r = await fetch('/api/github/summary', { signal: AbortSignal.timeout(4000) });
     if (r.ok) _ghCache = await r.json();
   } catch (e) { console.warn('github-monitor: fetch failed:', e.message); }
   _ghLoading = false;
