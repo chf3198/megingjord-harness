@@ -1,4 +1,4 @@
-// Context Topology — SVG zones, type-differentiated nodes, and flow arrows
+// Context Topology — SVG zones, sub-groups, type-differentiated nodes, and flow arrows
 const CF_TYPE_STYLE = {
   HW:    {rx:4,  sw:2,   stroke:'var(--text-muted)', fill:'var(--surface)'},
   SW:    {rx:8,  sw:1.5, stroke:'var(--blue)',        fill:'color-mix(in srgb,var(--blue) 8%,var(--bg))'},
@@ -22,7 +22,10 @@ function cfDefs() {
     .cf-zl{stroke:var(--blue);fill:color-mix(in srgb,var(--blue) 4%,transparent)}
     .cf-zt{stroke:var(--yellow);fill:color-mix(in srgb,var(--yellow) 3%,transparent)}
     .cf-zc{stroke:var(--text-muted);fill:color-mix(in srgb,var(--text-muted) 3%,transparent)}
+    .cf-sg{stroke:var(--text-muted);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--text-muted) 5%,transparent);rx:6}
+    .cf-oc{stroke:var(--yellow);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--yellow) 6%,transparent)}
     .cf-zlbl{font-size:8px;font-weight:700;fill:var(--text-muted);pointer-events:none}
+    .cf-sglbl{font-size:7px;font-weight:600;fill:var(--text-muted);pointer-events:none}
     .cf-nm{font-size:8.5px;fill:var(--text);font-weight:700;pointer-events:none}
     .cf-sb{font-size:6.5px;fill:var(--text-muted);pointer-events:none}
     .cf-tb{font-size:6px;font-weight:800;pointer-events:none}
@@ -36,14 +39,18 @@ function cfZones(zones) {
   return zones.map(z=>`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="8" class="cf-zone cf-z${z.k}"/>
     <text x="${z.x+8}" y="${z.y+13}" class="cf-zlbl">${z.label}</text>`).join('');
 }
+function cfSubGroups(groups) {
+  return (groups||[]).map(g=>`<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="6" class="${g.cls||'cf-sg'}"/>
+    <text x="${g.x+6}" y="${g.y+11}" class="cf-sglbl">${g.label}</text>`).join('');
+}
 function cfNodes(nodes, liveMap) {
-  const sc={healthy:'var(--green)',degraded:'var(--yellow)',offline:'var(--red)',unknown:'var(--text-muted)'};
-  const NW=76,NH=44;
+  const sc={healthy:'var(--green)',online:'var(--green)',degraded:'var(--yellow)',offline:'var(--red)',unknown:'var(--text-muted)'};
+  const NW=72,NH=42;
   return nodes.map(n=>{
     const st=(liveMap||{})[n.label]||'unknown';
     const ts=CF_TYPE_STYLE[n.type]||CF_TYPE_STYLE.SW;
     const sd=n.type==='STORE'?'stroke-dasharray="3,2"':'';
-    const hp=st==='healthy'?' class="cfp"':'';
+    const hp=st==='healthy'||st==='online'?' class="cfp"':'';
     return `<g class="cf-ng"><title>${n.tip}</title>
     <rect x="${n.x-NW/2}" y="${n.y-NH/2}" width="${NW}" height="${NH}" rx="${ts.rx}" ${sd} fill="${ts.fill}" stroke="${ts.stroke}" stroke-width="${ts.sw}"/>
     <circle cx="${n.x+NW/2-6}" cy="${n.y-NH/2+7}" r="4" fill="${sc[st]||sc.unknown}"${hp}/>
