@@ -57,9 +57,9 @@ function cfNodes(nodes, liveMap) {
     <rect x="${n.x-NW/2}" y="${n.y-NH/2}" width="${NW}" height="${NH}" rx="${ts.rx}" ${sd} fill="${ts.fill}" stroke="${ts.stroke}" stroke-width="${ts.sw}"/>
     <circle cx="${n.x+NW/2-8}" cy="${n.y-NH/2+9}" r="5" fill="${sc[st]||sc.unknown}"${hp}/>
     <text x="${n.x-NW/2+6}" y="${n.y-NH/2+12}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
-    <text x="${n.x}" y="${n.y+2}" text-anchor="middle" style="font-size:14px;pointer-events:none">${n.icon}</text>
-    <text x="${n.x}" y="${n.y+16}" text-anchor="middle" class="cf-nm">${n.label}</text>
-    <text x="${n.x}" y="${n.y+28}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
+    <text x="${n.x}" y="${n.y}" text-anchor="middle" style="font-size:14px;pointer-events:none">${n.icon}</text>
+    <text x="${n.x}" y="${n.y+13}" text-anchor="middle" class="cf-nm">${n.label}</text>
+    <text x="${n.x}" y="${n.y+23}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
   }).join('');
 }
 function cfArrows(nodes,arrows,isActive){
