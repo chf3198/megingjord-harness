@@ -5,9 +5,10 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.4rem;
+  overflow-x: auto;
 }
 
-.cf-svg { width:900px; height:300px; display:block; }
+.cf-svg { width:984px; height:356px; display:block; }
 
 .cb-bar {
   display: flex; height: 8px; border-radius: 4px;
@@ -85,7 +86,6 @@
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 0.2rem;
 }
-.cf-wrap { overflow-x:auto; }
 .cf-resources { display:flex; flex-wrap:wrap; gap:0.3rem; padding:0.15rem 0.2rem 0; }
 .cf-res-group { display:flex; align-items:center; gap:0.2rem; font-size:0.6rem; }
 .cf-res-node { color:var(--text-muted); min-width:62px; font-weight:600; }
