@@ -88,5 +88,5 @@
 #panel-llm-context { grid-row: 3; grid-column: 1; }
 #panel-governance { grid-column: 2; }
 @media (max-width:1023px) and (min-width:641px) { .header{padding:0.4rem 0.75rem;} .header-nav button{padding:0.15rem 0.45rem;font-size:0.78rem;} .dashboard-grid{gap:0.35rem;padding:0.35rem;} }
-@media (max-width:800px) and (min-width:641px) { .view-live,.view-logs,.view-fleet,.view-ops{grid-template-columns:1fr;} #panel-github,#panel-llm-context,#panel-governance{grid-row:auto;grid-column:auto;} }
+@media (max-width:800px) and (min-width:641px) { .view-logs,.view-fleet,.view-ops{grid-template-columns:1fr;} #panel-github,#panel-llm-context,#panel-governance{grid-row:auto;grid-column:auto;} }
 @media (max-width: 640px) { .header{flex-wrap:wrap;gap:0.4rem;padding:0.5rem 0.75rem;} .header-brand h1{font-size:0.95rem;} .header-nav,.header-actions{flex-wrap:wrap;} .header-nav button,.header-actions button{min-height:44px;min-width:44px;} .header-nav button{padding:0.4rem 0.6rem;} .header-actions button{padding:0.4rem;} .dashboard-grid{grid-template-columns:1fr;height:auto;overflow-y:auto;} .view-wiki{grid-template-columns:1fr;} .log-scroll{max-height:40vh;} #panel-github,#panel-governance{grid-row:auto;grid-column:auto;} }
