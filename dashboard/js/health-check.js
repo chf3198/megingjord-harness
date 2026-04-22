@@ -2,7 +2,7 @@
 // 4-state enum: online | degraded | offline | unknown
 
 const HEALTH_TIMEOUT_MS = 5000;
-const OPENCLAW_TIMEOUT_MS = 8000;
+const OPENCLAW_TIMEOUT_MS = 5000;
 
 async function checkOllama(deviceId) {
   const t0 = Date.now();
