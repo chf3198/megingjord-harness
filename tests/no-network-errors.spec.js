@@ -38,4 +38,22 @@ test.describe('Network integrity on page load', () => {
     results.forEach((r, i) => expect(r.status(), `${assets[i]} failed`).toBe(200));
     expect(elapsed, `Concurrent asset load took ${elapsed}ms (>2000ms = event loop blocked)`).toBeLessThan(2000);
   });
+
+  test('Context Flow SVG text legible at 725px viewport (#382)', async ({ page }) => {
+    await page.setViewportSize({ width: 725, height: 642 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(3000);
+    const result = await page.evaluate(() => {
+      const svg = document.querySelector('.cf-svg');
+      if (!svg) return { error: 'no svg' };
+      const zlbls = [...svg.querySelectorAll('.cf-zlbl')].map(t => t.getBoundingClientRect().height);
+      const sglbls = [...svg.querySelectorAll('.cf-sglbl')].map(t => t.getBoundingClientRect().height);
+      const overflows = document.querySelector('.cf-wrap')?.scrollWidth > document.querySelector('.cf-wrap')?.clientWidth;
+      return { zlbls, sglbls, overflows };
+    });
+    expect(result.error, 'Context Flow SVG not found').toBeUndefined();
+    expect(result.overflows, 'Context Flow overflows at 725px').toBe(false);
+    result.zlbls.forEach((h, i) => expect(h, `Zone label ${i} height ${h}px < 10px`).toBeGreaterThanOrEqual(10));
+    result.sglbls.forEach((h, i) => expect(h, `Sub-group label ${i} height ${h}px < 9px`).toBeGreaterThanOrEqual(9));
+  });
 });
