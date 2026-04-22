@@ -24,12 +24,12 @@ function cfDefs() {
     .cf-zc{stroke:var(--text-muted);fill:color-mix(in srgb,var(--text-muted) 3%,transparent)}
     .cf-sg{stroke:var(--text-muted);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--text-muted) 5%,transparent);rx:6}
     .cf-oc{stroke:var(--yellow);stroke-width:1;stroke-dasharray:3,2;fill:color-mix(in srgb,var(--yellow) 6%,transparent)}
-    .cf-zlbl{font-size:8px;font-weight:700;fill:var(--text-muted);pointer-events:none}
-    .cf-sglbl{font-size:7px;font-weight:600;fill:var(--text-muted);pointer-events:none}
-    .cf-nm{font-size:8.5px;fill:var(--text);font-weight:700;pointer-events:none}
-    .cf-sb{font-size:6.5px;fill:var(--text-muted);pointer-events:none}
-    .cf-tb{font-size:6px;font-weight:800;pointer-events:none}
-    .cf-lbl2{font-size:6.5px;fill:var(--text-muted);font-style:italic}
+    .cf-zlbl{font-size:8.5px;font-weight:700;fill:var(--text-muted);pointer-events:none}
+    .cf-sglbl{font-size:7.5px;font-weight:600;fill:var(--text-muted);pointer-events:none}
+    .cf-nm{font-size:9.5px;fill:var(--text);font-weight:700;pointer-events:none}
+    .cf-sb{font-size:7px;fill:var(--text-muted);pointer-events:none}
+    .cf-tb{font-size:6.5px;font-weight:800;pointer-events:none}
+    .cf-lbl2{font-size:7px;fill:var(--text-muted);font-style:italic}
     .cf-ng:hover rect{filter:brightness(1.4)}
     @keyframes cfpulse{0%,100%{opacity:.4}50%{opacity:1}}
     circle.cfp{animation:cfpulse 1.5s ease-in-out infinite}
@@ -45,7 +45,7 @@ function cfSubGroups(groups) {
 }
 function cfNodes(nodes, liveMap) {
   const sc={healthy:'var(--green)',online:'var(--green)',degraded:'var(--yellow)',offline:'var(--red)',unknown:'var(--text-muted)'};
-  const NW=72,NH=42;
+  const NW=80,NH=46;
   return nodes.map(n=>{
     const st=(liveMap||{})[n.label]||'unknown';
     const ts=CF_TYPE_STYLE[n.type]||CF_TYPE_STYLE.SW;
@@ -53,11 +53,11 @@ function cfNodes(nodes, liveMap) {
     const hp=st==='healthy'||st==='online'?' class="cfp"':'';
     return `<g class="cf-ng"><title>${n.tip}</title>
     <rect x="${n.x-NW/2}" y="${n.y-NH/2}" width="${NW}" height="${NH}" rx="${ts.rx}" ${sd} fill="${ts.fill}" stroke="${ts.stroke}" stroke-width="${ts.sw}"/>
-    <circle cx="${n.x+NW/2-6}" cy="${n.y-NH/2+7}" r="4" fill="${sc[st]||sc.unknown}"${hp}/>
-    <text x="${n.x-NW/2+5}" y="${n.y-NH/2+10}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
-    <text x="${n.x}" y="${n.y}" text-anchor="middle" style="font-size:11px;pointer-events:none">${n.icon}</text>
-    <text x="${n.x}" y="${n.y+12}" text-anchor="middle" class="cf-nm">${n.label}</text>
-    <text x="${n.x}" y="${n.y+21}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
+    <circle cx="${n.x+NW/2-7}" cy="${n.y-NH/2+8}" r="4.5" fill="${sc[st]||sc.unknown}"${hp}/>
+    <text x="${n.x-NW/2+5}" y="${n.y-NH/2+11}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
+    <text x="${n.x}" y="${n.y+1}" text-anchor="middle" style="font-size:12px;pointer-events:none">${n.icon}</text>
+    <text x="${n.x}" y="${n.y+14}" text-anchor="middle" class="cf-nm">${n.label}</text>
+    <text x="${n.x}" y="${n.y+24}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
   }).join('');
 }
 function cfArrows(nodes,arrows,isActive){
