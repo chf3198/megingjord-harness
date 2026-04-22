@@ -34,7 +34,7 @@ function cfDefs() {
 .cf-cloud-path{filter:url(#cfGlowB)}.cf-infer-path{filter:url(#cfGlowG)}
 .cf-ng:hover rect{filter:brightness(1.5);transition:filter 0.15s}
 @keyframes cfpulse{0%,100%{opacity:.3}50%{opacity:1}}
-circle.cfp{animation:cfpulse 1.4s ease-in-out infinite}
+circle.cfp{animation:cfpulse 1.4s ease-in-out 4;animation-fill-mode:forwards}
 .cfpkt{filter:drop-shadow(0 0 4px currentColor)}</style>`;
 }
 function cfZones(zones) {
@@ -73,7 +73,7 @@ function cfArrows(nodes,arrows,isActive){
     const dk=ft.dash?'stroke-dasharray="6,3"':'';
     const pid=`cfp${i}`;
     const mx=(f.x+t.x)/2, my=a.curve?Math.min(f.y,t.y)-72:(f.y+t.y)/2-6;
-    const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="indefinite"><mpath href="#${pid}"/></animateMotion></circle>`:'';
+    const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="3"><mpath href="#${pid}"/></animateMotion></circle>`:'';
     const gp=ft.cls==='cf-cloud-path'
       ?`<path d="${d}" fill="none" stroke="#1D4ED8" stroke-width="28" opacity="0.55"/><path d="${d}" fill="none" stroke="#93C5FD" stroke-width="12" opacity="0.7"/><path d="${d}" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.6"/>`
       :ft.cls==='cf-infer-path'?`<path d="${d}" fill="none" stroke="#065F46" stroke-width="12" opacity="0.5"/>` :'';

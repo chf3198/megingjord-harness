@@ -50,9 +50,9 @@ function renderContextFlow(devices, fleetStats, isActive, liveQuotas) {
     {from:4,to:5, type:'hosts',   label:'hosts',   tip:'Win Laptop hosts OpenClaw'},
     {from:0,to:11,type:'github',  label:'gh cli',  tip:'VS Code → GitHub via gh CLI'},
   ];
-  const svg=`<svg viewBox="0 0 ${W} ${H}" height="${H}" class="cf-svg" role="img" aria-label="Fleet topology">
+  const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" class="cf-svg" role="img" aria-label="Fleet topology">
     <defs>${cfDefs()}</defs>${cfZones(zones)}${cfSubGroups(subs)}${cfNodes(nodes,liveMap)}${cfArrows(nodes,arrows,isActive)}</svg>`;
-  return `<div class="cf-wrap">${svg}${cfTypeLegend()}${contextBudgetLegend()}${typeof cfResourcePills==='function'?cfResourcePills(liveQuotas):''}</div>`;
+  return `<div class="cf-wrap">${svg}</div>`;
 }
 function cfTypeLegend() {
   const types=[['SW','#3B82F6','Software'],['HW','#6B7280','Hardware'],['LLM','#10B981','AI Model'],['SVC','#F59E0B','Cloud Svc']];
