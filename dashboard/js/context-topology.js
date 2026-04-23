@@ -68,6 +68,13 @@ function cfNodes(nodes, liveMap) {
     <text x="${n.x}" y="${n.y+23}" text-anchor="middle" class="cf-sb">${n.sub}</text></g>`;
   }).join('');
 }
+/**
+ * Render SVG arrow paths and animated packets between Context Flow nodes.
+ * @param {Array} nodes - topology nodes with x,y coordinates
+ * @param {Array} arrows - arrow definitions with from, to, type, label
+ * @param {boolean} isActive - whether active baton tickets exist (enables animations)
+ * @returns {string} SVG path and group elements
+ */
 function cfArrows(nodes,arrows,isActive){
   return arrows.map((a,i)=>{
     const f=nodes[a.from],t=nodes[a.to];

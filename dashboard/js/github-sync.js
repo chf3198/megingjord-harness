@@ -44,7 +44,7 @@ function syncWithGitHub(ghIssues) {
     const ghStatus = gh.state === 'closed' ? 'done'
       : ghStatusFromLabels(gh.labels);
     const ghRole = ghRoleFromLabels(gh.labels);
-    const fallbackStatus = gh.state === 'open' ? 'in-progress' : 'backlog';
+    const fallbackStatus = gh.state === 'open' ? 'backlog' : 'backlog';
     synced.push({
       issue: gh.number,
       title: gh.title || existing.title || '',
