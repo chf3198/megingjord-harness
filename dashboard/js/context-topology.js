@@ -10,7 +10,7 @@ const CF_TYPE_LBL = {HW:'HW', SW:'SW', LLM:'LLM', SVC:'SVC', STORE:'DB'};
 const FLOW_TYPE = {
   internal: {color:'#4B5563',head:'cfHd', dash:false,dur:0,     op:0.5, sw:1.5,cls:''},
   hosts:    {color:'#4B5563',head:'cfHd', dash:true, dur:0,     op:0.35,sw:1.5,cls:''},
-  cloud:    {color:'#3B82F6',head:'cfHdB',dash:false,dur:'2s',  op:1.0, sw:5,  cls:'cf-cloud-path'},
+  cloud:    {color:'#3B82F6',head:'cfHdB',dash:false,dur:'2s',  op:0.9, sw:2,  cls:'cf-cloud-path'},
   local:    {color:'#F59E0B',head:'cfHdY',dash:true, dur:'3s',  op:0.9, sw:2,  cls:''},
   inference:{color:'#10B981',head:'cfHdG',dash:false,dur:'1.8s',op:0.9, sw:2,  cls:'cf-infer-path'},
   github:   {color:'#8B5CF6',head:'cfHdP',dash:false,dur:'3.5s',op:0.8, sw:2,  cls:''},
@@ -24,27 +24,33 @@ function cfDefs() {
 .cf-zl{stroke:#3B82F6;fill:rgba(59,130,246,0.15)}.cf-zt{stroke:#8B5CF6;fill:rgba(139,92,246,0.12)}
 .cf-zc{stroke:#F59E0B;fill:rgba(245,158,11,0.12)}.cf-sg{stroke:#4B5563;stroke-width:1.5;stroke-dasharray:4,2;fill:rgba(75,85,99,0.1)}
 .cf-oc{stroke:#F59E0B;stroke-width:1.5;stroke-dasharray:4,2;fill:rgba(245,158,11,0.1)}
-.cf-zlbl{font-size:11px;font-weight:700;pointer-events:none}
+.cf-zlbl{font-size:11px;font-weight:700;pointer-events:none;paint-order:stroke;stroke:#0d1117;stroke-width:3px}
 .cf-zlbl-l{fill:#3B82F6}.cf-zlbl-t{fill:#8B5CF6}.cf-zlbl-c{fill:#F59E0B}
-.cf-sglbl{font-size:9px;font-weight:600;fill:#9CA3AF;pointer-events:none}
+.cf-sglbl{font-size:9px;font-weight:600;fill:#9CA3AF;pointer-events:none;paint-order:stroke;stroke:#0d1117;stroke-width:2px}
 .cf-nm{font-size:13px;fill:#E6EDF3;font-weight:700;pointer-events:none}
 .cf-sb{font-size:10px;fill:#A3AEBF;pointer-events:none}
 .cf-tb{font-size:8px;font-weight:800;pointer-events:none}
 .cf-lbl2{font-size:9px;fill:#9CA3AF;font-style:italic}.cf-lbl2-bg{fill:#0d1117}
 .cf-cloud-path{filter:url(#cfGlowB)}.cf-infer-path{filter:url(#cfGlowG)}
-.cf-ng:hover rect{filter:brightness(1.5);transition:filter 0.15s}
+.cf-ng{cursor:pointer}.cf-ng:hover rect{filter:brightness(1.5);transition:filter 0.15s}
 @keyframes cfpulse{0%,100%{opacity:.3}50%{opacity:1}}
 circle.cfp{animation:cfpulse 1.4s ease-in-out 4;animation-fill-mode:forwards}
 .cfpkt{filter:drop-shadow(0 0 4px currentColor)}</style>`;
 }
-function cfZones(zones) {
-  return zones.map(z=>`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="8" class="cf-zone cf-z${z.k}"/>
-    <text x="${z.x+10}" y="${z.y+16}" class="cf-zlbl cf-zlbl-${z.k}">${z.label}</text>`).join('');
+function cfZoneRects(zones) {
+  return zones.map(z=>`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="8" class="cf-zone cf-z${z.k}"/>`).join('');
 }
-function cfSubGroups(groups) {
-  return (groups||[]).map(g=>`<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="6" class="${g.cls||'cf-sg'}"/>
-    <text x="${g.x+8}" y="${g.y+13}" class="cf-sglbl">${g.label}</text>`).join('');
+function cfZoneLabels(zones) {
+  return zones.map(z=>`<text x="${z.x+6}" y="${z.y-4}" class="cf-zlbl cf-zlbl-${z.k}">${z.label}</text>`).join('');
 }
+function cfSubRects(groups) {
+  return (groups||[]).map(g=>`<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="6" class="${g.cls||'cf-sg'}"/>`).join('');
+}
+function cfSubLabels(groups) {
+  return (groups||[]).map(g=>`<text x="${g.x+6}" y="${g.y-3}" class="cf-sglbl">${g.label}</text>`).join('');
+}
+function cfZones(z){return cfZoneRects(z)+cfZoneLabels(z);}
+function cfSubGroups(g){return cfSubRects(g)+cfSubLabels(g);}
 function cfNodes(nodes, liveMap) {
   const sc={healthy:'#22C55E',online:'#22C55E',degraded:'#EAB308',offline:'#EF4444',unknown:'#6B7280'};
   const NW=88,NH=50;
@@ -53,7 +59,7 @@ function cfNodes(nodes, liveMap) {
     const ts=CF_TYPE_STYLE[n.type]||CF_TYPE_STYLE.SW;
     const sd=n.type==='STORE'?'stroke-dasharray="3,2"':'';
     const hp=st==='healthy'||st==='online'?' class="cfp"':'';
-    return `<g class="cf-ng"><title>${n.tip}</title>
+    return `<g class="cf-ng" onclick="this.parentNode.appendChild(this)"><title>${n.tip}</title>
     <rect x="${n.x-NW/2}" y="${n.y-NH/2}" width="${NW}" height="${NH}" rx="${ts.rx}" ${sd} fill="${ts.fill}" stroke="${ts.stroke}" stroke-width="${ts.sw}"/>
     <circle cx="${n.x+NW/2-8}" cy="${n.y-NH/2+9}" r="5" fill="${sc[st]||sc.unknown}"${hp}/>
     <text x="${n.x-NW/2+6}" y="${n.y-NH/2+12}" fill="${ts.stroke}" class="cf-tb">${CF_TYPE_LBL[n.type]||''}</text>
@@ -75,8 +81,8 @@ function cfArrows(nodes,arrows,isActive){
     const mx=(f.x+t.x)/2, my=a.curve?Math.min(f.y,t.y)-72:(f.y+t.y)/2-6;
     const pkt=(isActive&&ft.dur)?`<circle r="3" fill="${ft.color}" class="cfpkt" opacity="0.95"><animateMotion dur="${ft.dur}" repeatCount="3"><mpath href="#${pid}"/></animateMotion></circle>`:'';
     const gp=ft.cls==='cf-cloud-path'
-      ?`<path d="${d}" fill="none" stroke="#1D4ED8" stroke-width="28" opacity="0.55"/><path d="${d}" fill="none" stroke="#93C5FD" stroke-width="12" opacity="0.7"/><path d="${d}" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.6"/>`
-      :ft.cls==='cf-infer-path'?`<path d="${d}" fill="none" stroke="#065F46" stroke-width="12" opacity="0.5"/>` :'';
+      ?`<path d="${d}" fill="none" stroke="#3B82F6" stroke-width="8" opacity="0.25"/>`
+      :ft.cls==='cf-infer-path'?`<path d="${d}" fill="none" stroke="#065F46" stroke-width="6" opacity="0.4"/>` :'';
     return `${gp}<path id="${pid}" d="${d}" fill="none" stroke="${ft.color}" stroke-width="${ft.sw}" ${dk} opacity="${ft.op}" marker-end="url(#${ft.head})"><title>${a.tip||''}</title></path>${pkt}
     ${a.label?`<rect x="${mx-20}" y="${my-8}" width="40" height="13" rx="3" fill="#0d1117" opacity="0.75"/><text x="${mx}" y="${my+3}" text-anchor="middle" class="cf-lbl2">${a.label}</text>`:''}`;
   }).join('');
