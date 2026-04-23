@@ -85,3 +85,16 @@ def post_merge_messages(
             "and docs are synchronized."
         ]
     return []
+
+
+def wiki_pending_message(cwd: str, flags: dict, ops: dict) -> str | None:
+    """Return wiki-ingest reminder when significant work happened."""
+    if not (Path(cwd) / "wiki" / "log.md").is_file():
+        return None
+    touched = any(flags.get(k) for k in ("code_touched", "docs_touched", "extension_touched"))
+    if not touched or ops.get("issue_close"):
+        return None
+    return (
+        "WIKI PENDING — Significant work detected. Before session end, "
+        "append wiki/log.md and update wiki/index.md if new pages were created."
+    )

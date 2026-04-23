@@ -159,4 +159,11 @@ Updated **Ticket 121 — Epic: Codebase & Governance Quality** to address identi
 - **Git Workflow**: Feature branches and merge commits are not optional — they preserve history
 - **Handoff Artifacts**: Each role needs to enumerate what the next role must verify
 
+### Wiki Updates Pending (Mandatory in Future Handoffs)
+
+- Update [[llm-wiki-implementation-plan]] when P0/P1/P2 tasks move to completed.
+- Append new `wiki/log.md` entry for each significant implementation session.
+- Keep `wiki/index.md` page counts and last-updated date synchronized with actual pages.
+- Create a synthesis page when 3+ concepts are jointly exercised in one session.
+
 ---

@@ -37,6 +37,7 @@ def main() -> int:
 
     ticket = state.get("active_ticket")
     roles = state.get("roles", {})
+    flags = state.get("flags", {})
     active_role = next(
         (r for r in ("manager", "collaborator", "admin", "consultant")
          if roles.get(r)), "none"
@@ -46,6 +47,8 @@ def main() -> int:
     if ticket:
         parts.append(f"Active ticket: #{ticket}.")
     parts.append(f"Current baton: {active_role}.")
+    if any(flags.get(k) for k in ("code_touched", "docs_touched", "extension_touched")):
+        parts.append("If significant work is complete, add a wiki log entry before stop.")
 
     out = {
         "hookSpecificOutput": {
