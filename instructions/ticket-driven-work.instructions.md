@@ -76,6 +76,7 @@ Each status names the active agent type. One glance = who owns it now.
 4. **Link ticket to branch** — branch: `<type>/<issue#>-<slug>`.
 5. **Link ticket to PR** — PR body includes `Closes #N`.
 6. **Enforce ticket closure** — close only after merge + Consultant CLOSEOUT.
+7. **One symptom per ticket** — if a UAT failure surface has multiple distinct symptoms (e.g. panel clipping AND label overflow), each symptom gets its own ticket. Never group unrelated layout bugs under one issue.
 
 ## Linking Rules
 

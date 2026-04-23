@@ -1,16 +1,14 @@
-// Dashboard App — Alpine.js root component
+// Dashboard App — Alpine.js root component (see app-actions.js for user actions)
+/** Alpine root: devices, services, quotas, baton, tickets, activity. @returns {Object} */
 function dashboardApp() {
   return {
     devices: [], services: [], quotas: [], liveQuotas: [],
     fleetStats: {}, routerStats: {},
     config: { refreshSec: 5, highContrast: false },
     currentView: 'live', helpDevMode: false,
-    batonState: [],
-    ticketLog: [],
-    activityLog: [],
-    governanceState: {},
-    wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
-    githubData: null,
+    batonState: [], ticketLog: [], activityLog: [],
+    governanceState: {}, wikiHealth: { loaded: false },
+    wikiMetrics: null, wikiPages: [], githubData: null,
     fleetHealthLog: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
@@ -64,7 +62,7 @@ function dashboardApp() {
           if (typeof syncWithGitHub === 'function' && this.githubData?.issues?.all)
             this.ticketLog = syncWithGitHub(this.githubData.issues.all); }
         this.batonState = this.ticketLog.length
-          ? this.ticketLog.filter(t => !['done','cancelled'].includes(t.status))
+          ? this.ticketLog.filter(t => ['in-progress','review'].includes(t.status))
               .map(t => ({ ...t, activeRole: t.activeRole || inferRole(t.status) }))
           : (evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog())));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();

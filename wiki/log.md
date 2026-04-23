@@ -42,3 +42,10 @@ Total wiki pages now: 33.
 Synthesis from deep audit of 40 JS files. 10 gold rules
 covering namespace isolation, error handling, Alpine v3 API,
 Playwright config, script loading. Epic #290.
+
+## [2026-04-23] ingest | LLM Wiki Optimal Implementation Plan
+Research synthesis from web sources: Anthropic Claude Code Best Practices
+(2026), Mem0 April 2026 memory algorithm, Lilian Weng agent taxonomy,
+Karpathy/Lutke context engineering (Jun 2025). Five gaps identified in
+current wiki implementation with tiered P0/P1/P2 remediation plan.
+Total wiki pages now: 51.

@@ -10,6 +10,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from governance_state import ensure_state, reset_state
+from wiki_router import route_wiki_context
 from wiki_wisdom import baton_protocol, governance_enforcement, post_merge_checklist
 
 
@@ -38,6 +39,8 @@ def main() -> int:
         signals.append("readme-present")
     if (cwd / "CHANGELOG.md").exists() or (cwd / "vscode-extension" / "CHANGELOG.md").exists():
         signals.append("changelog-present")
+    if (cwd / "wiki").exists():
+        signals.append("wiki-present")
 
     for fname in ["CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", "SUPPORT.md"]:
         found = (cwd / fname).exists() or (cwd / ".github" / fname).exists()
@@ -74,6 +77,7 @@ def main() -> int:
     ]
     if gaps:
         context_parts.append(f"Health gaps: {', '.join(gaps)}.")
+    context_parts.extend(route_wiki_context(cwd, repo_type, signals))
     context_parts.append(postmerge_msg)
 
     out = {

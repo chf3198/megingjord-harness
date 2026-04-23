@@ -15,7 +15,9 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from git_checks import detect_session_signals, detect_uncommitted_changes
 from governance_state import ensure_state, save_state
-from stop_checks import check_admin_ops, check_uncommitted, post_merge_messages
+from stop_checks import (
+    check_admin_ops, check_uncommitted, post_merge_messages, wiki_pending_message,
+)
 
 
 def main() -> int:
@@ -49,6 +51,9 @@ def main() -> int:
             messages.append(msg)
 
     messages.extend(post_merge_messages(signals, bool(messages)))
+    wiki_msg = wiki_pending_message(cwd, flags, ops)
+    if wiki_msg:
+        messages.append(wiki_msg)
 
     drift = state.get("drift", {})
     total_c = drift.get("commits", 0)

@@ -70,6 +70,7 @@ The LLM updates this on every ingest operation.
 
 ## Recent Additions
 
+- [[llm-wiki-implementation-plan]] — LLM Wiki Optimal Implementation Plan (Apr 2026 research synthesis)
 - [[dashboard-comparable-tools]] — Dashboard Comparable Tools Research
 - [[js-code-quality-practices]] — JS Code Quality Practices
 - [[nodejs-install-patterns]] — Node.js Install Patterns
@@ -77,4 +78,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 50 | **Last updated**: 2026-04-21
+**Pages**: 51 | **Last updated**: 2026-04-23
