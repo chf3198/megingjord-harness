@@ -25,11 +25,29 @@ plain globals consumed by `app.js` (the Alpine root component).
 | `baton-flow.js` | Role baton state and rendering |
 | `event-bus.js` | SSE-backed live event polling |
 | `fleet-topology.js` | Network graph panel |
+| `github-sync.js` | Sync baton/ticket state with GitHub API |
 | `health-check.js` | Ollama/OpenClaw liveness probes |
 | `live-stats.js` | Ollama telemetry fetch + formatBytes |
 | `quota-tracker.js` | Free-tier API quota display |
 | `render-panels.js` | Panel HTML rendering helpers |
 | `wiki-panel.js` | Wiki health and metrics panel |
+
+## Baton State Filtering
+
+The Agent Baton panel displays only **active** tickets (v3.0.2+):
+- Shows tickets with status `in-progress` or `review` only
+- Filters out `backlog`, `done`, `cancelled`, `blocked`
+- GitHub issues without explicit `status:*` label default to `backlog`
+- Prevents flooding from 300+ untagged issues
+- See [role-baton-routing.instructions.md](../instructions/role-baton-routing.instructions.md) for status lifecycle
+
+## Context Flow Topology
+
+Context Flow diagram (Live panel) renders fleet topology:
+- Shows CB-2, Tailscale mesh, cloud/internet zones
+- Animated data packets flow along arrows when active baton exists
+- Nodes indicate device status (online/offline/degraded)
+- Requires `isActive` param to enable packet animations (v3.0.2+)
 
 ## Rules
 
