@@ -47,7 +47,7 @@ function cfSubRects(groups) {
   return (groups||[]).map(g=>`<rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="6" class="${g.cls||'cf-sg'}"/>`).join('');
 }
 function cfSubLabels(groups) {
-  return (groups||[]).map(g=>`<text x="${g.x+6}" y="${g.y-3}" class="cf-sglbl">${g.label}</text>`).join('');
+  return (groups||[]).map(g=>`<text x="${g.x+6}" y="${g.y+13}" class="cf-sglbl">${g.label}</text>`).join('');
 }
 function cfZones(z){return cfZoneRects(z)+cfZoneLabels(z);}
 function cfSubGroups(g){return cfSubRects(g)+cfSubLabels(g);}

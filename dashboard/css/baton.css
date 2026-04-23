@@ -14,11 +14,13 @@
 
 .baton-row {
   border: 1px solid var(--border); border-radius: 4px;
-  padding: 0.25rem 0.4rem; background: var(--bg);
-  display: flex; flex-direction: column; gap: 0.2rem; min-height: 0;
+  padding: 0.35rem 0.45rem; background: var(--bg);
+  display: flex; flex-direction: column; gap: 0.3rem;
+  min-height: 3.1rem; flex: 0 0 auto;
 }
 
-.baton-meta { display:flex; flex-wrap:wrap; gap:0.2rem; align-items:center; min-width:0; width:100%; }
+.baton-meta { display:flex; flex-wrap:wrap; gap:0.22rem; align-items:center;
+  min-width:0; width:100%; line-height:1.25; }
 
 .baton-issue { font-size: 0.9rem; font-weight: 700; color: var(--blue); }
 .baton-title { font-size: 0.75rem; color: var(--text); font-weight: 500;
