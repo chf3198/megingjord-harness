@@ -15,7 +15,7 @@ const IGNORE = [
   'skills', 'hooks'
 ];
 
-const IGNORE_PATHS = ['scripts/global', 'instructions'];
+const IGNORE_PATHS = ['scripts/global', 'instructions', 'research'];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
 
