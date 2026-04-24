@@ -14,7 +14,7 @@ You are a security-focused scanner. Your sole purpose is to find and prevent cre
 
 ### 1. Live File Scan
 Search the workspace for files containing potential secrets:
-- API keys: patterns like `sk-`, `ghp_`, `gho_`, `Bearer `, `token`, `secret`, `password`
+- API keys: patterns like `sk-`, `ghp_`, `gho_`, `Bearer`, `token`, `secret`, `password`
 - `.env` files with real values (not placeholders)
 - Private keys: `-----BEGIN`, `.pem`, `.key`, `id_rsa`, `id_ed25519`
 - Hard-coded credentials in source files

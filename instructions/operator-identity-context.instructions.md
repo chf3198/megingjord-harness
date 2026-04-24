@@ -39,4 +39,3 @@ Load and apply the `operator-identity-context` skill at the start of every task.
    - Each role emits a named handoff artifact (`MANAGER_HANDOFF`, `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`) before the next role begins.
 
 6. **Self-anneal check:** If you catch yourself writing "you will need to…", "please manually…", or "the user must…" — stop, invoke the research protocol from the `operator-identity-context` skill, and find the automation path instead.
-

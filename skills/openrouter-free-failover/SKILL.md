@@ -237,8 +237,6 @@ Run at session start and after any reported model degradation or failover exhaus
 
 ### Troubleshoot failures
 
-### Troubleshoot failures
-
 ```bash
 # Check model status and auth
 openclaw models status --probe

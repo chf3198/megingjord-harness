@@ -74,7 +74,6 @@ required governance files are missing. Server-side, tamper-resistant.
 See also: [[copilot-hooks-api]], [[governance-enforcement]],
 [[baton-protocol]], [[agent-drift]]
 
-
 [copilot-hooks-api]: ../sources/copilot-hooks-api.md "Copilot Chat Hooks API"
 [governance-enforcement]: governance-enforcement.md "Governance Enforcement"
 [baton-protocol]: baton-protocol.md "Baton Protocol (Role Handoff)"
