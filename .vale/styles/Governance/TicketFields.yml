@@ -1,0 +1,8 @@
+extends: existence
+message: "Ticket missing required field: '%s'"
+level: error
+scope: raw
+tokens:
+  - "^Priority:"
+  - "^Type:"
+  - "^Status:"
