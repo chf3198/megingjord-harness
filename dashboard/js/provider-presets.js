@@ -1,4 +1,4 @@
-(function() { // Provider Presets — auto-fill config for known LLM providers
+// Provider Presets — auto-fill config for known LLM providers
 // Each preset: {label, tier, apiFormat, healthEndpoint, modelsEndpoint, authType, baseUrl}
 const _p = (l,t,f,h,m,a,u,o)=>({label:l,tier:t,apiFormat:f,healthEndpoint:h,modelsEndpoint:m,authType:a,baseUrl:u,...o});
 const _oc = 'openai-compat', _v1 = '/v1/models';
@@ -32,4 +32,3 @@ function listProviderPresets() {
   }));
 }
 if(typeof module!=="undefined")module.exports={PROVIDER_PRESETS,getProviderPreset,listProviderPresets};else Object.assign(window,{PROVIDER_PRESETS,getProviderPreset,listProviderPresets});
-})();

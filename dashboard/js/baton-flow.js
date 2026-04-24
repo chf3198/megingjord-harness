@@ -1,4 +1,6 @@
-/* global esc, getTicketLog, pruneStaleBaton, detectMissingEvents, getTicketTimeline */
+// Baton Flow — Multi-ticket parallel agent baton visualization
+// Shows Manager→Collaborator→Admin→Consultant per ticket
+
 const BATON_ROLES = [
   { id: 'manager', icon: '🎯', label: 'Mgr' },
   { id: 'collaborator', icon: '🔧', label: 'Collab' },
@@ -7,19 +9,17 @@ const BATON_ROLES = [
 ];
 
 function renderBatonFlow(batonState) {
-  let tickets = normalizeBaton(batonState);
-  if (typeof pruneStaleBaton === 'function') {
-    const logSnapshot = typeof getTicketLog === 'function' ? getTicketLog() : [];
-    tickets = pruneStaleBaton(tickets, logSnapshot);
+  const tickets = normalizeBaton(batonState);
+  if (!tickets.length) {
+    return `<div class="baton-flow"><div class="baton-empty">🎯 No active tickets<br>
+      <small>Baton activates when issues are assigned to a role.</small></div></div>`;
   }
-  const INACTIVE = new Set(['done', 'cancelled', 'backlog']);
-  const activelyWorked = tickets.filter(t => !INACTIVE.has(t.status));
-  if (!activelyWorked.length) {
-    return `<div class="baton-flow"><div class="baton-empty">🎯 No tickets in active LLM work<br>
-      <small>Open tickets appear here automatically. See Ticket Log for full history.</small></div></div>`;
-  }
-  const rows = activelyWorked.map(renderBatonRow).join('');
-  return `<div class="baton-flow">${rows}</div>`;
+  const active = tickets.filter(t =>
+    !['done','cancelled'].includes(t.status));
+  const html = active.length
+    ? active.map(renderBatonRow).join('')
+    : `<div class="baton-empty">✅ All active tickets completed — see Ticket Log</div>`;
+  return `<div class="baton-flow">${html}</div>`;
 }
 
 function renderBatonRow(t) {
@@ -38,7 +38,7 @@ function renderBatonRow(t) {
   const badge = statusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
   const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
-  const title = t.title ? `<span class="baton-title" title="${esc(t.title)}">${esc(t.title)}</span>` : '';
+  const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
   const epic = t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
   const gaps = typeof detectMissingEvents === 'function'
     ? detectMissingEvents(t.issue) : [];
@@ -84,8 +84,8 @@ function renderTimeline(issue) {
     const r = BATON_ROLES.find(x => x.id === h.role);
     const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
     const ttl = `${roleDesc[h.role] || h.role} \u2014 at ${t}`;
-    return `<span class="tl-step" title="${esc(ttl)}">${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;
-  }).join('');
+    return `<span class="tl-step" title="${esc(ttl)}" data-tip="tl-step">`
+      + `${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;  }).join('');
   return `<div class="baton-timeline" title="Baton handoff history">${items}</div>`;
 }
 
@@ -93,8 +93,6 @@ function buildBatonState(routerLog) {
   if (!routerLog || !routerLog.length) return [];
   const last = routerLog[0];
   const roleMap = { router: 'manager', implementer: 'collaborator', quick: 'admin' };
-  const title = last.task ? last.task.replace(/#\d+\s*/g, '').trim() : '';
   return [{ activeRole: roleMap[last.agent] || 'manager',
-    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress', title }];
+    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress' }];
 }
-Object.assign(window, { renderBatonFlow, buildBatonState });

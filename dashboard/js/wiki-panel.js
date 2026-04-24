@@ -47,7 +47,7 @@ function formatWikiTime(iso) {
     if (sec < 60) return `${sec}s ago`;
     if (sec < 3600) return `${Math.floor(sec / 60)}m ago`;
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch (e) { console.warn('wiki-panel: time format failed:', e.message); return 'unknown'; }
+  } catch { return 'unknown'; }
 }
 
 async function fetchWikiHealth() {
@@ -55,8 +55,7 @@ async function fetchWikiHealth() {
     const r = await fetch('/api/wiki-health');
     if (!r.ok) throw new Error(r.status);
     return await r.json();
-  } catch (e) {
-    console.warn('wiki-panel: fetchWikiHealth failed:', e.message);
+  } catch {
     return {
       loaded: false, pages: 0, dirs: 0, issues: 0,
       broken: [], orphans: [], frontmatter: [], indexSync: [],

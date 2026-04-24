@@ -1,4 +1,5 @@
-/* global listProviderPresets, getProviderPreset, esc */
+// Settings Form — Add/Edit resource dialog
+// Renders provider-aware form with preset auto-fill
 
 function renderResourceForm(existing) {
   const presets = listProviderPresets();
@@ -49,5 +50,3 @@ function applyPreset(providerId) {
   if (keyLabel) keyLabel.textContent = p.authLabel || 'API Key';
   if (keyInput) keyInput.placeholder = p.authPlaceholder || 'sk-...';
 }
-
-Object.assign(window, { renderResourceForm, applyPreset });

@@ -1,4 +1,4 @@
-/* Settings Panel — fleet resource management + modal */
+/* Settings Panel — fleet resource management */
 .settings-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .settings-table th { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--border); }
 .settings-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
@@ -10,22 +10,20 @@
 }
 .settings-actions button:hover, .btn-label:hover { border-color: var(--accent, #58a6ff); }
 .settings-empty { padding: 24px; text-align: center; color: var(--muted); }
+.settings-form { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; }
+#settings-form-container:empty { display: none; }
+.settings-form label { display: block; margin: 8px 0; font-size: 0.85rem; }
+.settings-form input, .settings-form select {
+  display: block; width: 100%; padding: 6px 8px; margin-top: 4px;
+  background: var(--input-bg, #0d1117); color: var(--text); border: 1px solid var(--border);
+  border-radius: 4px; font-size: 0.85rem;
+}
+.settings-form input[type="checkbox"] { display: inline; width: auto; margin-right: 6px; }
+.form-btns { display: flex; gap: 8px; margin-top: 12px; }
+.form-btns button { padding: 6px 16px; border-radius: 6px; cursor: pointer; }
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .dot-ok { background: #3fb950; } .dot-err { background: #f85149; } .dot-warn { background: #d29922; }
 .auth-ok { color: #3fb950; font-size: 0.8rem; }
 .auth-missing { color: #f85149; cursor: pointer; font-size: 0.8rem; text-decoration: underline dotted; }
 .host-badge { background: #1f6feb; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
-.secret-cell { display: inline-flex; align-items: center; gap: 4px; font-family: monospace; font-size: 0.78rem; }
-.eye-toggle { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 0 2px; opacity: 0.6; }
-.eye-toggle:hover { opacity: 1; }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-.modal-card { background: var(--surface); border: 1px solid var(--blue); border-radius: 12px; padding: 1.2rem; width: 90%; max-width: 420px; }
-.modal-card h3 { margin-bottom: 0.8rem; color: var(--blue); }
-.modal-card label { display: block; margin: 6px 0; font-size: 0.82rem; }
-.modal-card input, .modal-card select { display: block; width: 100%; padding: 6px 8px; margin-top: 4px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; font-size: 0.82rem; }
-.modal-card input[type="checkbox"] { display: inline; width: auto; }
-.modal-btns { display: flex; gap: 8px; margin-top: 14px; }
-.modal-btns button { padding: 6px 16px; border-radius: 6px; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--text); }
-.modal-save { background: var(--blue) !important; color: #000 !important; border-color: var(--blue) !important; }
-#settings-modal-overlay:not(.modal-open) { display: none; }
 .host-row { background: rgba(31,111,235,0.06); }

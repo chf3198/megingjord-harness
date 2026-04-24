@@ -17,8 +17,7 @@ async function loadDevices() {
       local: !!d.local,
       status: 'unknown'
     }));
-  } catch (e) {
-    console.warn('device-monitor: loadDevices failed:', e.message);
+  } catch {
     return [];
   }
 }
@@ -40,8 +39,7 @@ async function loadServices() {
       quotas: s.quotas,
       status: s.status
     }));
-  } catch (e) {
-    console.warn('device-monitor: loadServices failed:', e.message);
+  } catch {
     return [];
   }
 }

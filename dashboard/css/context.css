@@ -5,10 +5,9 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.4rem;
-  overflow-x: auto;
 }
 
-.cf-svg { width:100%; height:auto; display:block; min-width:320px; }
+.cf-svg { width: 100%; height: auto; max-height: 240px; }
 
 .cb-bar {
   display: flex; height: 8px; border-radius: 4px;
@@ -43,8 +42,12 @@
   margin-bottom: 0.3rem; display: flex; gap: 0.6rem;
 }
 
-.ctx-cloud-dot::before { content: '●'; margin-right: 3px; color: var(--blue); }
-.ctx-local-dot::before { content: '●'; margin-right: 3px; color: var(--yellow); }
+.ctx-cloud-dot::before, .ctx-local-dot::before {
+  content: '●'; margin-right: 3px;
+}
+
+.ctx-cloud-dot::before { color: var(--blue); }
+.ctx-local-dot::before { color: var(--yellow); }
 
 .ctx-row {
   display: flex; align-items: center; gap: 0.3rem;
@@ -79,19 +82,14 @@
 
 .ctx-bar.ctx-cloud { background: var(--blue); opacity: 0.7; }
 .ctx-bar.ctx-local { background: var(--yellow); opacity: 0.7; }
-.ctx-val { font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; }
+
+.ctx-val {
+  font-size: 0.62rem; color: var(--text-muted);
+  white-space: nowrap;
+}
 
 .ctx-mult {
   font-size: 0.58rem; color: var(--text-muted);
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 0.2rem;
 }
-.cf-resources { display:flex; flex-wrap:wrap; gap:0.3rem; padding:0.15rem 0.2rem 0; }
-.cf-res-group { display:flex; align-items:center; gap:0.2rem; font-size:0.6rem; }
-.cf-res-node { color:var(--text-muted); min-width:62px; font-weight:600; }
-.cf-pill { border:1px solid var(--border); border-radius:4px; padding:0 0.2rem; font-size:0.6rem; white-space:nowrap; cursor:default; }
-.cf-legend-bar { display:flex; gap:0.3rem; flex-wrap:wrap; align-items:center; padding:0.1rem 0.2rem; font-size:0.6rem; color:var(--text-muted); border-top:1px dashed var(--border); margin-top:0.15rem; }
-.cf-tleg { display:flex; align-items:center; gap:0.15rem; white-space:nowrap; }
-.cf-tbadge { border:1px solid; border-radius:3px; padding:0 0.15rem; font-size:0.56rem; font-weight:800; }
-.cf-fline { display:inline-block; width:14px; height:2px; border-radius:1px; vertical-align:middle; }
-.cf-leg-sep { color:var(--border); padding:0 0.1rem; }
