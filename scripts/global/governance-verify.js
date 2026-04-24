@@ -7,6 +7,9 @@ const asJson = args.includes('--json');
 const root = path.resolve(__dirname, '..', '..');
 const dir = path.join(root, 'tickets');
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort();
+const workflowsDir = path.join(root, '.github', 'workflows');
+const readyCutoffMs = 24 * 60 * 60 * 1000;
+const nowMs = Date.now();
 
 const childrenFromSection = txt => {
   const m = txt.match(/\nChildren:\n([\s\S]*?)(\n\n|\n##\s)/);
@@ -22,17 +25,36 @@ const parse = txt => ({
   children: childrenFromSection(txt),
   hasCloseout: /##\s+CONSULTANT_CLOSEOUT/m.test(txt),
   hasEvidence: /##\s+GitHub Evidence Block/m.test(txt),
+  hasBlocker: /BLOCKER_NOTE|owner\s*:|unblock_condition\s*:|eta_or_review_time\s*:/i.test(txt),
 });
 
 const all = new Map();
 for (const f of files) {
   const p = path.join(dir, f);
   const txt = fs.readFileSync(p, 'utf8');
-  all.set(parse(txt).number, { file: f, ...parse(txt) });
+  const stat = fs.statSync(p);
+  all.set(parse(txt).number, { file: f, mtimeMs: stat.mtimeMs, ...parse(txt) });
 }
 
 const terminal = s => /^done\s*\(`closed`\)/i.test(s) || /^cancelled/i.test(s);
 const issues = [];
+const hints = [];
+
+const needsMergeGroup = ['lint.yml', 'branch-name.yml'];
+for (const wf of needsMergeGroup) {
+  const p = path.join(workflowsDir, wf);
+  if (!fs.existsSync(p)) {
+    issues.push(`.github/workflows/${wf}: missing workflow file`);
+    hints.push({ code: 'workflow_missing', file: `.github/workflows/${wf}` });
+    continue;
+  }
+  const yml = fs.readFileSync(p, 'utf8');
+  const hasMergeGroup = /\n\s*merge_group\s*:/m.test(yml);
+  if (!hasMergeGroup) {
+    issues.push(`.github/workflows/${wf}: missing merge_group trigger`);
+    hints.push({ code: 'merge_group_missing', file: `.github/workflows/${wf}` });
+  }
+}
 
 for (const t of all.values()) {
   if (!/^P[0-3]$/.test(t.priority)) issues.push(`${t.file}: missing/invalid Priority`);
@@ -44,6 +66,13 @@ for (const t of all.values()) {
     const openKids = kids.filter(n => !terminal(all.get(n).status));
     if (openKids.length) issues.push(`${t.file}: epic closed with open children ${openKids.join(', ')}`);
   }
+  const isReady = /^ready\b/i.test(t.status);
+  const isP0P1 = /^P[01]$/.test(t.priority);
+  const staleReady = nowMs - t.mtimeMs > readyCutoffMs;
+  if (isReady && isP0P1 && staleReady && !t.hasBlocker) {
+    issues.push(`${t.file}: ready >24h without BLOCKER_NOTE fields`);
+    hints.push({ code: 'ready_sla_violation', file: t.file, ticket: t.number });
+  }
 }
 
 const result = {
@@ -51,6 +80,7 @@ const result = {
   failedChecks: issues.length,
   status: issues.length ? 'fail' : 'pass',
   issues,
+  remediationHints: hints,
   runAt: new Date().toISOString(),
 };
 
