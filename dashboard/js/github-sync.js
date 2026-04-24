@@ -1,9 +1,9 @@
 // GitHub Sync — reconcile baton/ticket state with GitHub API
 // Called during refreshAll() to fix state/label/assignment drift
+/* global getTicketLog */
 
 (function() {
 
-/** Map GitHub label to baton status */
 function ghStatusFromLabels(labels) {
   const map = {
     'status:in-progress': 'in-progress', 'status:todo': 'todo',
@@ -16,7 +16,6 @@ function ghStatusFromLabels(labels) {
   return null;
 }
 
-/** Map GitHub label to baton role */
 function ghRoleFromLabels(labels) {
   const map = {
     'role:manager': 'manager', 'role:collaborator': 'collaborator',
@@ -61,7 +60,6 @@ function syncWithGitHub(ghIssues) {
   return synced.sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 
-/** Infer baton role from ticket status when no role label exists */
 function inferRole(status) {
   const map = {
     'backlog': null, 'todo': 'manager', 'in-progress': 'collaborator',

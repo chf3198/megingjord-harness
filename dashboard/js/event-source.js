@@ -1,3 +1,4 @@
+/* global addActivity, eventToActivity, mergeBatonEvents, pollEventBus */
 (function() { // SSE Event Source — live push from /api/events/stream
 // Falls back to polling on error or unsupported environments
 
@@ -6,7 +7,6 @@ let _fallbackTimer = null;
 const SSE_URL = '/api/events/stream';
 const FALLBACK_MS = 5000;
 
-/** Connect SSE and dispatch events into Alpine state */
 function connectSSE(app) {
   if (typeof EventSource === 'undefined') return startFallback(app);
   try { _eventSource = new EventSource(SSE_URL); } catch (e) { console.warn('event-source: SSE init failed:', e.message); return startFallback(app); }

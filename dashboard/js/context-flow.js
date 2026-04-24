@@ -1,14 +1,8 @@
+/* global cfDefs, cfZoneRects, cfSubRects, cfNodes, cfArrows, cfSubLabels, cfZoneLabels */
 // Context Flow — 700px canvas (#384 label/cloud/z-order fix)
-// Layout constants — derive all coordinates from these
 const CF_W=700, CF_H=298;   // canvas viewport
-const CF_ZONE_Y=28;         // zone top edge
-const CF_ZONE_H=260;        // zone height (bottom=288)
-const CF_SUB_PAD=8;         // sub-group inset from zone top/left
-const CF_CLOUD_X=477;       // cloud zone left edge
-const CF_CLOUD_C1=527;      // cloud node column 1 (x center)
-const CF_CLOUD_C2=622;      // cloud node column 2 (x center)
 
-function renderContextFlow(devices, fleetStats, isActive, liveQuotas) {
+function renderContextFlow(devices, fleetStats, isActive) {
   const W=CF_W, H=CF_H;
   const dm={}; (devices||[]).forEach(d=>{dm[d.id]=d.status;});
   const wl=dm['windows-laptop']||'unknown', sl=dm['penguin-1']||'unknown';
@@ -63,4 +57,6 @@ function renderContextFlow(devices, fleetStats, isActive, liveQuotas) {
     <defs>${cfDefs()}</defs>${cfZoneRects(zones)}${cfSubRects(subs)}${cfNodes(nodes,liveMap)}${cfArrows(nodes,arrows,isActive)}${cfSubLabels(subs)}${cfZoneLabels(zones)}</svg>`;
   return `<div class="cf-wrap">${svg}</div>`;
 }
+
+window.renderContextFlow = renderContextFlow;
 

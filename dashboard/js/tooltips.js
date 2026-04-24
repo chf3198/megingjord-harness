@@ -1,3 +1,4 @@
+/* global esc, filterHelpSections, Alpine */
 // Tooltips + Help panel
 const TIP_COPY = {
   refresh: ['Refresh', 'Polls all endpoints now.', 'fleet', 'controls'],
@@ -63,7 +64,7 @@ function initTooltips(app) {
       + `<button class="tip-nav" onclick="_tipNav('${view}','${helpId}')"
           >Help: ${esc(t)} →</button>`;
     const rect = node.getBoundingClientRect(), tw = 220;
-    let left = Math.max(4, Math.min(
+    const left = Math.max(4, Math.min(
       rect.left + rect.width / 2 - tw / 2, innerWidth - tw - 4));
     let top = rect.bottom + 2;
     if (top + 80 > innerHeight) top = rect.top - 80;
@@ -95,3 +96,4 @@ function toggleHelpMode() {
   const d = Alpine.$data(el);
   d.helpDevMode = !d.helpDevMode;
 }
+Object.assign(window, { filterHelp, initTooltips, clearTooltip, toggleHelpMode });

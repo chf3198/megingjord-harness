@@ -1,4 +1,4 @@
-// Baton Flow — Multi-ticket parallel agent baton visualization
+/* global esc, getTicketLog, pruneStaleBaton, detectMissingEvents, getTicketTimeline */
 const BATON_ROLES = [
   { id: 'manager', icon: '🎯', label: 'Mgr' },
   { id: 'collaborator', icon: '🔧', label: 'Collab' },
@@ -97,3 +97,4 @@ function buildBatonState(routerLog) {
   return [{ activeRole: roleMap[last.agent] || 'manager',
     issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress', title }];
 }
+Object.assign(window, { renderBatonFlow, buildBatonState });
