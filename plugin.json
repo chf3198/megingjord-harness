@@ -1,7 +1,7 @@
 {
   "name": "devenv-ops",
   "description": "AI agent governance harness — skills, agents, hooks for structured development workflows",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "author": "chf3198",
   "skills": [
     "skills/docs-drift-maintenance",
