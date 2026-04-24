@@ -1,5 +1,5 @@
-// Dashboard App — Alpine.js root component (see app-actions.js for user actions)
-/** Alpine root: devices, services, quotas, baton, tickets, activity. @returns {Object} */
+/* global loadDashboardConfig, initTooltips, loadWikiPages, connectSSE, addActivity, loadDevices, loadServices, buildQuotaList, runHealthChecks, fetchAllFleetStats, fetchAllLiveQuotas, fetchRouterLaneStats, pollEventBus, mergeHealthStatus, getTicketLog, fetchWikiHealth, fetchWikiMetrics, pollGitHub, pruneClosedFromGitHub, syncWithGitHub, inferRole, getBatonState, buildBatonState, getRouterLog, fetchFleetHealthLog, fetchGovernanceState, saveDashboardConfig, setDashboardView, isDashboardView, toggleDashboardTips, runDashboardQuickTest */
+/** Dashboard Alpine root state. @returns {Object} Alpine component state. */
 function dashboardApp() {
   return {
     devices: [], services: [], quotas: [], liveQuotas: [],
@@ -72,7 +72,6 @@ function dashboardApp() {
         this.loading = false;
       }
     },
-
     scheduleRefresh() {
       if (this.refreshTimer) clearInterval(this.refreshTimer);
       if (!this.autoRefreshEnabled) return;
@@ -92,7 +91,8 @@ function dashboardApp() {
     setView(view) { setDashboardView(this, view); },
     isView(view) { return isDashboardView(this, view); },
     toggleTips() { toggleDashboardTips(this); },
-    toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
-    runQuickTest() { return runDashboardQuickTest(this); }
+    toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; }, runQuickTest() { return runDashboardQuickTest(this); }
   };
 }
+
+window.dashboardApp = dashboardApp;

@@ -1,5 +1,4 @@
-// Settings Modal — secure edit modal + secret masking
-// Replaces inline editing with modal overlay + eye toggle
+/* global loadFleetResources, listProviderPresets, getProviderPreset, esc */
 
 function openEditModal(id) {
   const list = loadFleetResources();
@@ -66,7 +65,7 @@ function maskSecret(key) {
   return '••••••••' + (key.length > 4 ? key.slice(-4) : '');
 }
 
-let _revealTimers = {};
+const _revealTimers = {};
 function toggleReveal(id) {
   const el = document.querySelector(`[data-secret-id="${id}"]`);
   if (!el) return;
@@ -86,3 +85,5 @@ function toggleReveal(id) {
     el.dataset.revealed = 'false';
   }, 5000);
 }
+
+Object.assign(window, { openEditModal, closeModal, toggleReveal });

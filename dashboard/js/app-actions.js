@@ -1,5 +1,4 @@
-// Dashboard actions split out to keep app.js compact
-
+/* global saveDashboardConfig, clearTooltip, Alpine, buildParallelTickets, addActivity, advanceTicket, AGENT_NAMES, mockRouterEntry, addRouterLogEntry */
 function setDashboardView(app, view) {
   app.currentView = view;
 }
@@ -97,3 +96,5 @@ async function runDashboardQuickTest(app) {
   addActivity(app.activityLog, 'test',
     `Stress test complete: ${app.testRun.ok} checks`);
 }
+
+Object.assign(window, { setDashboardView, isDashboardView, toggleDashboardTips, setRefreshSec, runDashboardQuickTest });

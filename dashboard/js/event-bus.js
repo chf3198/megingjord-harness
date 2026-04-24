@@ -1,3 +1,4 @@
+/* global addActivity, addRouterLogEntry */
 (function() { // Event Bus Client — polls /api/events for live dashboard updates _batonTickets: active baton only (backlog→consultant, never closed)
 // _ticketLog: full audit trail of all tickets, all statuses
 
@@ -6,11 +7,6 @@ const _batonTickets = {};   // issue → ticket (active baton only)
 const _batonHistory = {};   // issue → [{role, ts}] for timeline
 const _ticketLog = {};      // issue → ticket (all, including closed)
 const CLOSED_STATUSES = new Set(['done', 'cancelled']);
-const STATUS_ROLE_MAP = {
-  backlog: null, todo: 'manager', 'in-progress': 'collaborator',
-  'ready-for-testing': 'admin', testing: 'admin',
-  'passed-testing': 'admin', done: 'consultant', cancelled: null,
-};
 
 async function fetchEvents(since) {
   const url = since
@@ -36,7 +32,6 @@ function eventToActivity(e) {
   return { type, message: msg, detail: e.issue ? `#${e.issue}` : '' };
 }
 
-/** Merge events into persistent baton ticket map and ticket log */
 function mergeBatonEvents(events) {
   const now = Date.now();
   for (const e of events) {
@@ -76,7 +71,6 @@ function getTicketLog() {
 }
 function getTicketTimeline(issue) { return _batonHistory[issue] || []; }
 
-/** Detect governance gaps: skipped baton roles */
 function detectMissingEvents(issue) {
   const exp = ['manager','collaborator','admin','consultant'];
   const roles = (_batonHistory[issue]||[]).map(h=>h.role);

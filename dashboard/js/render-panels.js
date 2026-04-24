@@ -1,11 +1,10 @@
-// Render Panels — JS template functions for Alpine x-html
+/* global loadFleetSettings, buildServiceCosts */ // Render Panels — JS template functions for Alpine x-html
 function esc(s) {
-  if (s == null) return '';
+  if (s === null || s === undefined) return '';
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;').replace(/`/g, '&#96;');
 }
-
 function renderDeviceCards(devices) {
   if (!devices.length) {
     return '<div class="card"><p>No devices loaded yet.</p></div>';
@@ -60,7 +59,7 @@ function renderQuotaPanel(live, statics) {
       <div class="quota-bar"><div class="progress-fill
         ${q.percent > 80 ? 'warn' : 'ok'}"
         style="width:${Math.max(q.percent, 2)}%"></div></div>
-      <span class="quota-val">${note || (q.used != null && q.used !== 0 ? `${q.used}/${q.limit}` : `—/${q.limit}`)}</span>
+      <span class="quota-val">${note || ((q.used !== null && q.used !== undefined) && q.used !== 0 ? `${q.used}/${q.limit}` : `—/${q.limit}`)}</span>
     </div>`;
   };
   const a = live.map(renderRow).join('');
@@ -72,7 +71,7 @@ function renderFleetStats(stats) {
   const rows = Object.entries(stats);
   if (!rows.length) return '<div class="stat-card"><p class="stat-offline">No live stats yet.</p></div>';
   return rows.map(([id, st]) => {
-    if (!st.online) return `<div class="stat-card">
+    if (st.online !== true) return `<div class="stat-card">
       <div class="stat-header"><strong>${esc(id)}</strong></div>
       <p class="stat-offline">Device offline</p></div>`;
     const pct = Math.min(100, st.running.length * 33);
@@ -98,3 +97,4 @@ function renderFleetStats(stats) {
       <ul class="model-list">${models}</ul></div>`;
   }).join('');
 }
+Object.assign(window, { esc, renderDeviceCards, renderServiceCards, renderQuotaPanel, renderFleetStats });

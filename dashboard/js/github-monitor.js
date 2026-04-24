@@ -1,5 +1,5 @@
+/* global esc */
 (function() { /* GitHub Monitor — dashboard panel for repo activity */
-/* globals: called from app.js, data from /api/github/summary */
 
 let _ghCache = null;
 let _ghLoading = false;

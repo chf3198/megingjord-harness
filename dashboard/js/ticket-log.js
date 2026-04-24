@@ -1,3 +1,4 @@
+/* global esc, renderBatonFilterBar */
 // Ticket Log — full audit trail of all tickets (all statuses)
 // Separate from Agent Baton which shows only active-baton tickets
 
@@ -70,3 +71,4 @@ function renderTicketRow(t) {
     ${comment}
   </div>`;
 }
+Object.assign(window, { renderTicketLog });

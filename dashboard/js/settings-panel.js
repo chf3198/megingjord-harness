@@ -1,5 +1,4 @@
-// Settings Panel — render fleet resource CRUD UI
-// Modal editing + secret masking (no inline secrets)
+/* global esc, maskSecret */
 
 function renderSettingsPanel(resources, probeResults, hostInfo) {
   const hostRow = hostInfo ? renderHostRow(hostInfo) : '';
@@ -79,3 +78,5 @@ async function fetchHostInfo() {
     return r.ok ? r.json() : null;
   } catch (e) { console.warn('settings-panel: fetchHostInfo failed:', e.message); return null; }
 }
+
+Object.assign(window, { renderSettingsPanel, fetchHostInfo });

@@ -1,5 +1,4 @@
-// Settings Actions — wiring for Add/Edit/Delete/Export/Import
-// Uses modal editing via settings-modal.js
+/* global openEditModal, deleteFleetResource, getProviderPreset, updateFleetResource, addFleetResource, closeModal, loadFleetResources, probeAllResources, exportFleetConfig, importFleetConfig, renderSettingsPanel */
 
 function showAddResource() { openEditModal(); }
 
@@ -77,3 +76,5 @@ function refreshSettingsView() {
   const res = loadFleetResources();
   el.innerHTML = renderSettingsPanel(res, window._lastProbeResults, window._hostInfo);
 }
+
+Object.assign(window, { showAddResource, editResource, removeResource, saveResourceForm, closeForm, probeAll, exportConfig, importConfig });
