@@ -16,6 +16,7 @@ const IGNORE = [
 ];
 
 const IGNORE_PATHS = ['scripts/global', 'instructions', 'research'];
+const IGNORE_FILES = ['CHANGELOG.md', 'CHANGELOG-archive.md'];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
 
@@ -23,6 +24,7 @@ function walk(dir) {
   const files = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (IGNORE.includes(entry.name)) continue;
+    if (IGNORE_FILES.includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     const rel = path.relative(ROOT, full);
     if (IGNORE_PATHS.some(p => rel.startsWith(p))) continue;
