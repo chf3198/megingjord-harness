@@ -44,7 +44,7 @@ Run `node scripts/global/fleet-config.js profile` for current state.
 - **JSON for structured data** (inventory/, config)
 - **Markdown for prose** (research/, ADRs, skills)
 - **No build step** — dashboard is static HTML/JS/CSS
-- **Branch before editing global resources**
+- **Branch before editing global resources** and keep one live worktree per agent; see `research/concurrent-agent-worktrees-2026-04-24.md`
 
 ## Commands
 
@@ -61,7 +61,7 @@ npm test               # E2E tests
 
 ## Git Workflow
 
-1. `git checkout -b skill/<name>` or `feat/<topic>`
+1. Use a dedicated agent worktree, then `git checkout -b skill/<name>` or `feat/<topic>`
 2. Make changes, test behavior in Copilot Chat
 3. `git checkout main && git merge feat/... --no-ff`
 4. `npm run deploy:apply` after merge

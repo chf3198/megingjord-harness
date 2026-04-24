@@ -27,6 +27,13 @@ This repo is the **development workbench** for the entire `~/.copilot/` system:
 - **Branch before editing global resources**: `git checkout -b skill/<name>` or `feat/<topic>`
 - **Test before deploying**: verify agent behavior in a test chat session.
 
+## Concurrent session safety
+
+- Never share one live checkout between Copilot, Claude Code, and Codex.
+- Give each agent its own worktree + branch, then merge through PRs.
+- Quarantine collisions in a rescue worktree instead of cleaning in place.
+- See `research/concurrent-agent-worktrees-2026-04-24.md`.
+
 ## Team&Model signing
 
 - AI-authored governed artifacts must include human alias + structured `Team&Model` provenance.
