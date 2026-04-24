@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.1.0] - 2026-04-24
+
+### Added — Model Routing Telemetry (#411)
+- `model-routing-engine.js`: policy-driven routing; classifies tasks, applies rollback logic
+- `model-routing-telemetry.js`: records per-dispatch events to `~/.copilot/logs/`
+- `model-routing-policy.json`: task-class → model-id + multiplier policy
+- `npm run router:weekly`: weekly cost/quality scorecard from telemetry log
+- `fleet-live-indicator.js`: real-time CLI system status (Ollama, memory, OpenClaw)
+
+### Added — Governance Verifier (#412)
+- `governance-verify.js`: scans `tickets/*.md` for ADR-010 violations; `--json` output
+
+### Changed — Governance Instructions (#409)
+- `ticket-driven-work.instructions.md`: GitHub evidence block, Ready-SLA contract, exception schema
+- `epic-governance.instructions.md`: re-scope-before-close rule
+- `workflow-resilience.instructions.md`: ready-stall blocker note minimum fields
+- CI workflows: `merge_group` trigger, stable job names, path filters, concurrency groups
+
+### Fixed — Dashboard JS ESLint Compliance (#410)
+- Added `/* global */` directives to 15 dashboard JS modules
+- Exported public APIs via `Object.assign(window, {})` in provider modules
+- Null-safety: strict equality guards in `render-panels.js`
+
 ## [3.0.2] - 2026-04-23
 
 ### Fixed — Agent Baton Filtering (#122)

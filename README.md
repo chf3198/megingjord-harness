@@ -61,17 +61,20 @@ devenv-ops (source of truth)          ~/.copilot/ (runtime)
   instructions/    (12) ──deploy──▶   instructions/
   agents/           (8) ──deploy──▶   agents/
   hooks/           (19) ──deploy──▶   hooks/
-  scripts/global/  (17) ──deploy──▶   scripts/
+  scripts/global/  (32) ──deploy──▶   scripts/
 ```
 
 ## Develop the Harness
 
 ```bash
-npm run setup          # Install deps
-npm start              # Dashboard on :8090
-npm run deploy:apply   # Deploy repo → ~/.copilot/
-npm run lint           # ≤100-line file check
-npm test               # Playwright E2E tests
+npm run setup             # Install deps
+npm start                 # Dashboard on :8090
+npm run deploy:apply      # Deploy repo → ~/.copilot/
+npm run lint              # ≤100-line file check
+npm test                  # Playwright E2E tests
+npm run router:weekly     # Weekly model routing cost/quality scorecard
+node scripts/global/governance-verify.js        # Local ticket integrity check
+node scripts/global/fleet-live-indicator.js     # Real-time fleet status (CLI)
 ```
 
 ## Enable for Other Repos

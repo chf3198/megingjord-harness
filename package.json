@@ -1,6 +1,6 @@
 {
   "name": "devenv-ops",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "AI agent governance harness — 24 skills, extensible agents, hooks, and wiki as a VS Code Agent Plugin",
   "private": true,
   "scripts": {
