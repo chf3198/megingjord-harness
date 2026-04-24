@@ -18,7 +18,7 @@ function loadFleetSettings() {
       openclawPort: saved.openclawPort || defaults.openclawPort,
       ollamaPort: saved.ollamaPort || defaults.ollamaPort,
       autoDetect: saved.autoDetect !== undefined ? saved.autoDetect : true };
-  } catch (e) { console.warn('fleet-settings: load failed:', e.message); return defaults; }
+  } catch { return defaults; }
 }
 
 function saveFleetSettings(settings) {

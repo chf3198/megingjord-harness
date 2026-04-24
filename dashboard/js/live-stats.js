@@ -33,8 +33,11 @@ async function fetchDeviceStats(deviceId) {
 }
 
 async function fetchAllFleetStats(deviceIds) {
-  const entries = await Promise.all(deviceIds.map(async id => [id, await fetchDeviceStats(id)]));
-  return Object.fromEntries(entries);
+  const results = {};
+  for (const id of deviceIds) {
+    results[id] = await fetchDeviceStats(id);
+  }
+  return results;
 }
 
 async function safeFetch(url) {
@@ -44,8 +47,7 @@ async function safeFetch(url) {
     });
     if (!r.ok) return null;
     return await r.json();
-  } catch (e) {
-    console.warn('live-stats: fetch failed:', e.message);
+  } catch {
     return null;
   }
 }

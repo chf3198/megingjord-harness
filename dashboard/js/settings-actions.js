@@ -1,8 +1,18 @@
-/* global openEditModal, deleteFleetResource, getProviderPreset, updateFleetResource, addFleetResource, closeModal, loadFleetResources, probeAllResources, exportFleetConfig, importFleetConfig, renderSettingsPanel */
+// Settings Actions — wiring for Add/Edit/Delete/Export/Import
+// Integrates credential-store, fleet-probe, settings-form
 
-function showAddResource() { openEditModal(); }
+function showAddResource() {
+  const panel = document.getElementById('settings-form-container');
+  if (panel) panel.innerHTML = renderResourceForm();
+}
 
-function editResource(id) { openEditModal(id); }
+function editResource(id) {
+  const list = loadFleetResources();
+  const r = list.find(x => x.id === id);
+  if (!r) return;
+  const panel = document.getElementById('settings-form-container');
+  if (panel) panel.innerHTML = renderResourceForm(r);
+}
 
 function removeResource(id) {
   if (!confirm('Remove this resource?')) return;
@@ -38,7 +48,10 @@ function saveResourceForm(existingId) {
   refreshSettingsView();
 }
 
-function closeForm() { closeModal(); }
+function closeForm() {
+  const panel = document.getElementById('settings-form-container');
+  if (panel) panel.innerHTML = '';
+}
 
 async function probeAll() {
   const res = loadFleetResources();
@@ -76,5 +89,3 @@ function refreshSettingsView() {
   const res = loadFleetResources();
   el.innerHTML = renderSettingsPanel(res, window._lastProbeResults, window._hostInfo);
 }
-
-Object.assign(window, { showAddResource, editResource, removeResource, saveResourceForm, closeForm, probeAll, exportConfig, importConfig });

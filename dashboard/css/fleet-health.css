@@ -28,15 +28,3 @@
 .fleet-log-device { font-weight: 600; min-width: 80px; }
 .fleet-log-status { color: var(--text-muted); }
 .fleet-log-detail { color: var(--text-muted); font-size: 0.68rem; margin-left: auto; }
-
-/* 4-state health badge: online | degraded | offline | unknown */
-.health-badge {
-  border-radius: 4px; padding: 0 0.25rem; font-size: 0.6rem;
-  font-weight: 700; white-space: nowrap; display: inline-block;
-}
-.health-badge.online   { background: #1a4a1a; color: #4caf50; border: 1px solid #4caf50; }
-.health-badge.degraded { background: #3a2e00; color: #ffc107; border: 1px solid #ffc107; }
-.health-badge.offline  { background: #4a1a1a; color: #f44336; border: 1px solid #f44336; }
-.health-badge.unknown  { background: #2a2a2a; color: #888;    border: 1px solid #555;    }
-.health-badge.stale    { opacity: 0.55; }
-.health-badge.healthy  { background: #1a4a1a; color: #4caf50; border: 1px solid #4caf50; }

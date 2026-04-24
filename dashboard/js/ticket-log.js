@@ -1,4 +1,3 @@
-/* global esc, renderBatonFilterBar */
 // Ticket Log — full audit trail of all tickets (all statuses)
 // Separate from Agent Baton which shows only active-baton tickets
 
@@ -18,30 +17,14 @@ function renderTicketLog(tickets) {
     return `<div class="tlog-empty">📋 No ticket history yet.<br>
       <span style="font-size:0.75rem">Tickets appear once events are emitted.</span></div>`;
   }
-  // Group all tickets by epic (epics first, then sub-tickets collapsed)
-  const epics = {}, standalone = [];
-  for (const t of tickets) {
-    if (t.epic) { (epics[t.epic] = epics[t.epic] || []).push(t); }
-    else if ((t.labels || []).some(l => l === 'type:epic')) {
-      (epics[t.issue] = epics[t.issue] || []).unshift(t);
-    } else { standalone.push(t); }
-  }
-  // Build filter bar for ticket log
-  const filterBar = typeof renderBatonFilterBar === 'function'
-    ? renderBatonFilterBar(tickets) : '';
-  let html = filterBar;
-  for (const [epicId, items] of Object.entries(epics).sort((a,b) => b[0]-a[0])) {
-    const parent = items.find(i => String(i.issue) === String(epicId));
-    const children = items.filter(i => String(i.issue) !== String(epicId));
-    const label = parent ? `Epic #${epicId}: ${esc(parent.title)}` : `Epic #${epicId}`;
-    const count = children.length;
-    html += `<details class="tlog-epic-group">
-      <summary class="tlog-epic-header">${label} <span class="tlog-count">(${count} sub)</span></summary>
-      ${parent ? renderTicketRow(parent) : ''}
-      ${renderTicketSection(null, children)}
-    </details>`;
-  }
-  if (standalone.length) html += renderTicketSection('Standalone', standalone);
+  const open = tickets.filter(t => !['done','cancelled'].includes(t.status));
+  const closed = tickets.filter(t =>  ['done','cancelled'].includes(t.status));
+  let html = '';
+  if (open.length) html += renderTicketSection('Active / Backlog', open);
+  if (closed.length) html += `<details class="tlog-closed-group" open>
+    <summary>📁 ${closed.length} closed / cancelled</summary>
+    ${renderTicketSection(null, closed)}
+  </details>`; // done = closed successfully; cancelled = abandoned
   return `<div class="tlog-wrap">${html}</div>`;
 }
 
@@ -59,16 +42,10 @@ function renderTicketRow(t) {
   const role = t.activeRole
     ? `<span class="tlog-role">${esc(t.activeRole)}</span>` : '';
   const agent = t.agent ? `<span class="tlog-agent">🎭 ${esc(t.agent)}</span>` : '';
-  const tags = (t.labels || []).map(l =>
-    `<span class="tlog-tag">${esc(l)}</span>`).join('');
-  const comment = t.lastComment
-    ? `<div class="tlog-comment">${esc(t.lastComment.substring(0, 80))}${t.lastComment.length > 80 ? '…' : ''}</div>` : '';
   return `<div class="tlog-row ${m.cls}">
     <span class="tlog-status">${m.icon}</span>
     <span class="tlog-id">#${t.issue}</span>
     ${epic}${title}
-    <span class="tlog-badges">${tags}${role}${agent}</span>
-    ${comment}
+    <span class="tlog-badges">${role}${agent}</span>
   </div>`;
 }
-Object.assign(window, { renderTicketLog });

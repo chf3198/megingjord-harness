@@ -1,15 +1,17 @@
-/* global loadFleetSettings, buildServiceCosts */ // Render Panels — JS template functions for Alpine x-html
+// Render Panels — JS template functions for Alpine x-html
+
 function esc(s) {
-  if (s === null || s === undefined) return '';
+  if (s == null) return '';
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;').replace(/`/g, '&#96;');
 }
+
 function renderDeviceCards(devices) {
   if (!devices.length) {
     return '<div class="card"><p>No devices loaded yet.</p></div>';
   }
-  return devices.map(d => `<div class="card device-card ${d.status}" title="${esc(d.alias)}: ${esc(d.role)} · ${esc(d.ram)} RAM · ${d.modelCount} models · ${d.status}">
+  return devices.map(d => `<div class="card device-card ${d.status}">
     <div class="card-header"><strong>${esc(d.alias)}</strong>
       <span class="badge ${d.status}">${d.status}</span></div>
     <div class="card-body">
@@ -19,7 +21,6 @@ function renderDeviceCards(devices) {
     </div></div>`).join('');
 }
 
-const _ocUrl = (typeof loadFleetSettings === 'function' ? loadFleetSettings() : {}).endpoints?.openclaw || 'http://localhost:4000';
 const SERVICE_URLS = {
   'copilot-pro': 'https://github.com/settings/copilot',
   'cloudflare': 'https://dash.cloudflare.com/',
@@ -27,7 +28,7 @@ const SERVICE_URLS = {
   'groq': 'https://console.groq.com/',
   'cerebras': 'https://cloud.cerebras.ai/',
   'openrouter': 'https://openrouter.ai/activity',
-  'openclaw': _ocUrl + '/ui/'
+  'openclaw': (window.__fleetConfig?.openclawURL || '') + '/ui/'
 };
 
 function renderServiceCards(services) {
@@ -35,7 +36,7 @@ function renderServiceCards(services) {
   return services.map(s => {
     const url = SERVICE_URLS[s.id] || '';
     const link = url ? `<p><a href="${esc(url)}" target="_blank" rel="noopener" class="svc-link">Open dashboard ↗</a></p>` : '';
-    return `<div class="card service-card ${s.status}" title="${esc(s.name)}: ${s.status} · ${esc(s.cost)}">
+    return `<div class="card service-card ${s.status}">
       <div class="card-header"><strong>${esc(s.name)}</strong>
         <span class="badge ${s.status}">${s.status}</span></div>
       <div class="card-body">
@@ -59,7 +60,7 @@ function renderQuotaPanel(live, statics) {
       <div class="quota-bar"><div class="progress-fill
         ${q.percent > 80 ? 'warn' : 'ok'}"
         style="width:${Math.max(q.percent, 2)}%"></div></div>
-      <span class="quota-val">${note || ((q.used !== null && q.used !== undefined) && q.used !== 0 ? `${q.used}/${q.limit}` : `—/${q.limit}`)}</span>
+      <span class="quota-val">${note || `${q.used ?? q.usage ?? 0}/${q.limit}`}</span>
     </div>`;
   };
   const a = live.map(renderRow).join('');
@@ -71,7 +72,7 @@ function renderFleetStats(stats) {
   const rows = Object.entries(stats);
   if (!rows.length) return '<div class="stat-card"><p class="stat-offline">No live stats yet.</p></div>';
   return rows.map(([id, st]) => {
-    if (st.online !== true) return `<div class="stat-card">
+    if (!st.online) return `<div class="stat-card">
       <div class="stat-header"><strong>${esc(id)}</strong></div>
       <p class="stat-offline">Device offline</p></div>`;
     const pct = Math.min(100, st.running.length * 33);
@@ -97,4 +98,3 @@ function renderFleetStats(stats) {
       <ul class="model-list">${models}</ul></div>`;
   }).join('');
 }
-Object.assign(window, { esc, renderDeviceCards, renderServiceCards, renderQuotaPanel, renderFleetStats });

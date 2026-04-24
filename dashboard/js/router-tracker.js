@@ -1,4 +1,4 @@
-(function() { // Router metrics + LLM choice log for dashboard
+// Router metrics + LLM choice log for dashboard
 let routerMetrics = {
   sessions: {},
   laneDistribution: { free: 0, fleet: 0, premium: 0 }
@@ -11,8 +11,7 @@ async function loadRouterMetrics() {
     if (!r.ok) return { free: 0, fleet: 0, premium: 0 };
     const data = await r.json();
     return data.lanes || { free: 0, fleet: 0, premium: 0 };
-  } catch (e) {
-    console.warn('router-tracker: fetchLaneStats failed:', e.message);
+  } catch {
     return { free: 0, fleet: 0, premium: 0 };
   }
 }
@@ -88,5 +87,3 @@ function renderRouterLog() {
       <th>Model</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
-Object.assign(window,{routerMetrics,routerLog,loadRouterMetrics,fetchRouterLaneStats,addRouterLogEntry,getRouterLog,renderRouterPanel,renderRouterLog});
-})();

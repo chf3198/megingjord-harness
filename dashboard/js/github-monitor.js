@@ -1,5 +1,5 @@
-/* global esc */
-(function() { /* GitHub Monitor — dashboard panel for repo activity */
+/* GitHub Monitor — dashboard panel for repo activity */
+/* globals: called from app.js, data from /api/github/summary */
 
 let _ghCache = null;
 let _ghLoading = false;
@@ -8,9 +8,9 @@ async function pollGitHub() {
   if (_ghLoading) return _ghCache;
   _ghLoading = true;
   try {
-    const r = await fetch('/api/github/summary', { signal: AbortSignal.timeout(4000) });
+    const r = await fetch('/api/github/summary');
     if (r.ok) _ghCache = await r.json();
-  } catch (e) { console.warn('github-monitor: fetch failed:', e.message); }
+  } catch { /* keep stale cache */ }
   _ghLoading = false;
   return _ghCache;
 }
@@ -56,4 +56,3 @@ function renderGitHubMonitor(gh) {
     <div class="gh-branches"><h4>Active Branches</h4>${branchList || 'None'}</div>`;
 }
 if(typeof module!=="undefined")module.exports={pollGitHub,ghIcon,renderGitHubMonitor};else Object.assign(window,{pollGitHub,ghIcon,renderGitHubMonitor});
-})();

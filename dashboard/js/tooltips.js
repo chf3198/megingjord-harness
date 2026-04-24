@@ -1,4 +1,3 @@
-/* global esc, filterHelpSections, Alpine */
 // Tooltips + Help panel
 const TIP_COPY = {
   refresh: ['Refresh', 'Polls all endpoints now.', 'fleet', 'controls'],
@@ -31,8 +30,7 @@ const TIP_COPY = {
   'wiki-reader': ['Wiki Reader', 'Browse and search research/ markdown pages.', 'wiki', 'use-wiki-reader'],
   devices: ['Fleet Devices', 'Device inventory: name, Tailscale IP, RAM, OS, role.', 'fleet', 'use-devices'],
   services: ['Services', 'API service cards: endpoint, status, last checked.', 'fleet', 'use-services'],
-  config: ['Settings', 'Dashboard preferences: refresh interval, contrast, tooltips.', 'settings', 'use-config'],
-  'view-settings': ['Settings', 'Dashboard preferences and configuration.', 'settings', 'use-config'],
+  config: ['Settings', 'Dashboard preferences: refresh interval, contrast, tooltips.', 'fleet', 'use-config'],
   'test-panel': ['Stress Test', 'Simulates 5 parallel tickets + mock events. ~60s.', 'fleet', 'use-stress'],
   'tl-step': ['Baton handoff', 'Role icon + time the baton was received. Hover for role description.', 'fleet', 'use-baton'],
 };
@@ -64,7 +62,7 @@ function initTooltips(app) {
       + `<button class="tip-nav" onclick="_tipNav('${view}','${helpId}')"
           >Help: ${esc(t)} →</button>`;
     const rect = node.getBoundingClientRect(), tw = 220;
-    const left = Math.max(4, Math.min(
+    let left = Math.max(4, Math.min(
       rect.left + rect.width / 2 - tw / 2, innerWidth - tw - 4));
     let top = rect.bottom + 2;
     if (top + 80 > innerHeight) top = rect.top - 80;
@@ -96,4 +94,3 @@ function toggleHelpMode() {
   const d = Alpine.$data(el);
   d.helpDevMode = !d.helpDevMode;
 }
-Object.assign(window, { filterHelp, initTooltips, clearTooltip, toggleHelpMode });

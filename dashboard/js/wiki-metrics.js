@@ -1,21 +1,12 @@
-(function() { // Wiki Metrics — client-side display for wiki usage and health grade
+// Wiki Metrics — client-side display for wiki usage and health grade
 
 let _wikiMetrics = null;
-
-function _fallbackMetrics() {
-  return { totalAccess: 0, sections: {},
-    grade: '?', score: 0, gradeReasons: ['Metrics API unavailable'] };
-}
 
 async function fetchWikiMetrics() {
   try {
     const r = await fetch('/api/wiki-metrics');
     if (r.ok) _wikiMetrics = await r.json();
-    else if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
-  } catch (e) {
-    console.warn('wiki-metrics: fetch failed:', e.message);
-    if (!_wikiMetrics) _wikiMetrics = _fallbackMetrics();
-  }
+  } catch { /* keep stale */ }
   return _wikiMetrics;
 }
 
@@ -29,7 +20,7 @@ function gradeColor(g) {
 }
 
 function renderWikiMetrics(m, health) {
-  if (!m) return '<div class="wiki-metrics-empty">📊 No metrics available — browse wiki pages to generate usage data.</div>';
+  if (!m) return '<div class="wiki-metrics-empty">Loading usage metrics…</div>';
   const grade = m.grade || '?';
   const cls = gradeColor(grade);
   const total = m.totalAccess || 0;
@@ -78,12 +69,3 @@ function renderIssueDrilldowns(h) {
     </details>`
   ).join('') || '<div class="wm-all-ok">✅ No structural issues</div>';
 }
-
-function renderWikiHealthAndMetrics(metrics, health) {
-  const healthBar = health?.loaded
-    ? `<div class="wm-health-bar">📚 ${health.pages} pages · ${health.dirs} categories · <span class="badge ${health.issues===0?'healthy':'degraded'}">${health.issues} issues</span></div>`
-    : '<div class="wiki-muted">Scanning wiki…</div>';
-  return `<div class="wiki-health-metrics">${healthBar}${renderWikiMetrics(metrics, health)}</div>`;
-}
-Object.assign(window,{fetchWikiMetrics,trackWikiAccess,gradeColor,renderWikiMetrics,renderIssueDrilldowns,renderWikiHealthAndMetrics});
-})();

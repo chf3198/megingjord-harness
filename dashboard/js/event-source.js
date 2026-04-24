@@ -1,5 +1,4 @@
-/* global addActivity, eventToActivity, mergeBatonEvents, pollEventBus */
-(function() { // SSE Event Source — live push from /api/events/stream
+// SSE Event Source — live push from /api/events/stream
 // Falls back to polling on error or unsupported environments
 
 let _eventSource = null;
@@ -7,9 +6,10 @@ let _fallbackTimer = null;
 const SSE_URL = '/api/events/stream';
 const FALLBACK_MS = 5000;
 
+/** Connect SSE and dispatch events into Alpine state */
 function connectSSE(app) {
   if (typeof EventSource === 'undefined') return startFallback(app);
-  try { _eventSource = new EventSource(SSE_URL); } catch (e) { console.warn('event-source: SSE init failed:', e.message); return startFallback(app); }
+  try { _eventSource = new EventSource(SSE_URL); } catch { return startFallback(app); }
 
   _eventSource.addEventListener('connected', () => {
     addActivity(app.activityLog, 'system', 'SSE connected', 'Live push active');
@@ -38,13 +38,13 @@ function handleSSEvent(app, event) {
     if (data.role && data.issue) {
       app.batonState = mergeBatonEvents([data]);
     }
-  } catch (e) { console.warn('event-source: malformed event:', e.message); }
+  } catch { /* skip malformed */ }
 }
 
 function startFallback(app) {
   if (_fallbackTimer) return;
   _fallbackTimer = setInterval(async () => {
-    try { await pollEventBus(app.activityLog); } catch (e) { console.warn('event-source: fallback poll failed:', e.message); }
+    try { await pollEventBus(app.activityLog); } catch { /* ignore */ }
   }, FALLBACK_MS);
 }
 
@@ -53,5 +53,3 @@ function disconnectSSE() {
   if (_eventSource) { _eventSource.close(); _eventSource = null; }
   if (_fallbackTimer) { clearInterval(_fallbackTimer); _fallbackTimer = null; }
 }
-Object.assign(window,{connectSSE,disconnectSSE});
-})();
