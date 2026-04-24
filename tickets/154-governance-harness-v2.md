@@ -19,3 +19,9 @@ Acceptance Criteria:
 ## MANAGER_HANDOFF
 
 - Status transition: `triage -> ready`
+
+## BLOCKER_NOTE
+
+- owner: manager
+- unblock_condition: begin after verifier v3 adoption period baseline is collected.
+- eta_or_review_time: 2026-04-30 governance queue review.
