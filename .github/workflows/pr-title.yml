@@ -1,0 +1,43 @@
+name: PR Title (Conventional Commits)
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+concurrency:
+  group: pr-title-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr_title_required:
+    name: pr-title-required
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Pass merge_group without validation
+        if: github.event_name == 'merge_group'
+        run: echo "merge_group event — skipping PR title check" && exit 0
+
+      - name: Validate PR title (Conventional Commits)
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            chore
+            content
+            perf
+            refactor
+            docs
+            style
+            test
+          requireScope: false
+          subjectPattern: ^.{1,60}$
+          subjectPatternError: >
+            PR title subject must be ≤60 characters.
+            Format: type(scope): subject #N
