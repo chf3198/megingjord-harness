@@ -27,6 +27,12 @@ This repo is the **development workbench** for the entire `~/.copilot/` system:
 - **Branch before editing global resources**: `git checkout -b skill/<name>` or `feat/<topic>`
 - **Test before deploying**: verify agent behavior in a test chat session.
 
+## Team&Model signing
+
+- AI-authored governed artifacts must include human alias + structured `Team&Model` provenance.
+- Repo-local overrides may tighten the format, but must not remove provenance.
+- See `instructions/team-model-signing.instructions.md`.
+
 ## Development → Deploy workflow
 
 ```
