@@ -18,41 +18,43 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const labels = context.payload.issue.labels.map(l => l.name);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
             const issueNum = context.payload.issue.number;
-
+            const marker = '<!-- adr-010-label-lint -->';
+            const issue = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
+            const labels = issue.labels.map(label => label.name);
             const statusLabels = labels.filter(l => l.startsWith('status:'));
             const roleLabels   = labels.filter(l => l.startsWith('role:'));
             const violations   = [];
-
-            // Rule 1: exactly one status: label at all times
             if (statusLabels.length === 0) {
               violations.push('**Rule 1**: No `status:` label found. Every issue must have exactly one.');
             } else if (statusLabels.length > 1) {
               violations.push(`**Rule 1**: Multiple \`status:\` labels found: ${statusLabels.join(', ')}. Only one is allowed.`);
             }
-
-            // Rule 2: at most one role: label
             if (roleLabels.length > 1) {
               violations.push(`**Rule 2**: Multiple \`role:\` labels found: ${roleLabels.join(', ')}. Only one is allowed.`);
             }
-
-            // Rule 3: status:done must have no role: label
             if (statusLabels.includes('status:done') && roleLabels.length > 0) {
               violations.push(`**Rule 3**: \`status:done\` issues must not have a \`role:\` label. Remove: ${roleLabels.join(', ')}.`);
             }
-
-            // Rule 4: status:backlog must have no role: label
             if (statusLabels.includes('status:backlog') && roleLabels.length > 0) {
               violations.push(`**Rule 4**: \`status:backlog\` issues must not have a \`role:\` label. Remove: ${roleLabels.join(', ')}.`);
             }
-
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issueNum, per_page: 100,
+            });
+            const lintComment = comments.find(comment => comment.body?.includes(marker));
             if (violations.length === 0) {
+              if (lintComment) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: lintComment.id });
+              }
               console.log(`Issue #${issueNum}: label rules OK`);
               return;
             }
-
             const body = [
+              marker,
+              '',
               '## ⚠️ ADR-010 Label Lint Violation',
               '',
               `Issue #${issueNum} has invalid label combinations:`,
@@ -65,12 +67,11 @@ jobs:
               '',
               '_This comment was posted by the label-lint workflow._',
             ].join('\n');
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNum,
-              body,
-            });
-
+            if (lintComment?.body !== body) {
+              if (lintComment) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: lintComment.id, body });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number: issueNum, body });
+              }
+            }
             core.setFailed(`Label violations on #${issueNum}: ${violations.length} rule(s) broken.`);

@@ -1,49 +1,61 @@
 #!/usr/bin/env node
 'use strict';
-// Atomic baton label transition — single gh issue edit to prevent ADR-010 race.
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const TRANSITIONS = {
-  triage:      ['ready'],
-  ready:       ['in-progress'],
-  'in-progress':['testing'],
-  testing:     ['review'],
-  review:      ['done'],
+  backlog: ['ready', 'in-progress'],
+  triage: ['ready'],
+  ready: ['in-progress'],
+  'in-progress': ['testing'],
+  testing: ['review'],
+  review: ['done'],
 };
 const ROLE_FOR = {
-  triage: 'manager', 'in-progress': 'collaborator',
-  testing: 'admin', review: 'consultant',
+  'in-progress': 'collaborator',
+  testing: 'admin',
+  review: 'consultant',
 };
 
-const [,, issue, fromStatus, toStatus, extra] = process.argv;
+const [,, issue, fromStatus, toStatus, ...extras] = process.argv;
+const force = extras.includes('--force');
+const dryRun = extras.includes('--dry-run');
 if (!issue || !fromStatus || !toStatus) {
-  console.error('Usage: issue-transition.js <issue#> <from-status> <to-status> [--force]');
+  console.error('Usage: issue-transition.js <issue#> <from-status> <to-status> [--force] [--dry-run]');
   process.exit(1);
 }
 
-const allowed = TRANSITIONS[fromStatus];
-if (!allowed?.includes(toStatus) && extra !== '--force') {
+const allowed = TRANSITIONS[fromStatus] || [];
+if (!allowed.includes(toStatus) && !force) {
   console.error(`Invalid transition: ${fromStatus} → ${toStatus}`);
-  console.error(`Allowed from ${fromStatus}: ${allowed?.join(', ') || 'none'}`);
+  console.error(`Allowed from ${fromStatus}: ${allowed.join(', ') || 'none'}`);
   process.exit(1);
 }
 
-const adds = [`status:${toStatus}`];
-const removes = [`status:${fromStatus}`];
+function gh(args, input) {
+  return execFileSync('gh', args, {
+    encoding: 'utf8',
+    input: input ? JSON.stringify(input) : undefined,
+  }).trim();
+}
 
-const fromRole = ROLE_FOR[fromStatus];
-const toRole = ROLE_FOR[toStatus];
-if (fromRole) removes.push(`role:${fromRole}`);
-if (toRole) adds.push(`role:${toRole}`);
-
-const addFlags = adds.map(l => `--add-label "${l}"`).join(' ');
-const removeFlags = removes.map(l => `--remove-label "${l}"`).join(' ');
-const cmd = `gh issue edit ${issue} ${addFlags} ${removeFlags}`;
-
-try {
-  execSync(cmd, { stdio: 'inherit' });
-  console.log(`#${issue}: ${fromStatus}(${fromRole||'-'}) → ${toStatus}(${toRole||'-'})`);
-} catch (e) {
-  console.error('Transition failed:', e.message);
+const repo = gh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner']);
+const data = JSON.parse(gh(['api', `repos/${repo}/issues/${issue}`]));
+const labels = data.labels.map(label => label.name);
+const current = labels.filter(label => label.startsWith('status:')).map(label => label.slice(7));
+if (!force && !current.includes(fromStatus)) {
+  console.error(`Issue #${issue} is not currently at status:${fromStatus}`);
+  console.error(`Current status labels: ${current.join(', ') || 'none'}`);
   process.exit(1);
 }
+
+const next = labels.filter(label => !label.startsWith('status:') && !label.startsWith('role:'));
+next.push(`status:${toStatus}`);
+if (ROLE_FOR[toStatus]) next.push(`role:${ROLE_FOR[toStatus]}`);
+
+if (dryRun) {
+  console.log(JSON.stringify({ issue: Number(issue), repo, labels: next }, null, 2));
+  process.exit(0);
+}
+
+gh(['api', `repos/${repo}/issues/${issue}/labels`, '-X', 'PUT', '--input', '-'], { labels: next });
+console.log(`#${issue}: ${fromStatus}(${ROLE_FOR[fromStatus] || '-'}) → ${toStatus}(${ROLE_FOR[toStatus] || '-'})`);
