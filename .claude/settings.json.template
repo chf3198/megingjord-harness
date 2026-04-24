@@ -1,0 +1,44 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/baton_gate.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/pretool_guard.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/posttool_reminders.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/stop_checks.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/stop_reminder.py"
+          }
+        ]
+      }
+    ]
+  }
+}
