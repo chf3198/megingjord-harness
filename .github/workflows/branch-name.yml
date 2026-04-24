@@ -2,15 +2,26 @@ name: Branch Name
 on:
   pull_request:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+concurrency:
+  group: branch-name-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
+  branch_name_required:
+    name: branch-name-required
     runs-on: ubuntu-latest
     steps:
       - name: Validate branch name
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
+          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            echo "merge_group event: branch-name check not applicable; passing required check."
+            exit 0
+          fi
           if [[ -z "$BRANCH" ]]; then exit 0; fi
           VALID='^(feat|fix|hotfix)/[0-9]+-|^(chore|skill)/[a-z0-9]|^main$|^develop$'
           if ! echo "$BRANCH" | grep -qE "$VALID"; then

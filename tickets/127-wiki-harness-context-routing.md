@@ -3,7 +3,8 @@
 Priority: P1 (High)
 Type: Task
 Area: hooks
-Status: review (`role:consultant`)
+Status: done (`closed`)
+Parent: #120
 Branch: `hook/127-wiki-harness-implementation`
 
 ## Manager Scope
@@ -70,4 +71,14 @@ See: `research/consultant-closeout-127.md`
 
 Decision:
 - Approved with low risk
-- Ready for commit/push/PR/merge and atomic issue close
+- Revalidated on 2026-04-23: `npm run lint` ✅, `npm test` ✅ (31/31 passing)
+- Ticket closed
+
+## GitHub Evidence Block
+
+- Issue reference/state: `#127` documented as `done`/`closed`.
+- Applied labels: Priority/Type/Area/Parent/Branch captured in artifact.
+- Linked PR/merge evidence: N/A in local markdown workflow session.
+- Validation evidence summary: hook routing/reminder/precompact changes + lint/test pass evidence.
+- Verification timestamp (UTC): `2026-04-24T04:53:24Z`
+- Exact commands/check outputs used for closure: `npm run lint` and `npm test` passed in governance remediation reruns.

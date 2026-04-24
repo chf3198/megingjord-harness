@@ -15,6 +15,14 @@ Run `workflow-self-anneal` skill when any of these conditions is true:
 - Repeated carryover or blocked items across iterations.
 - PR review or merge latency repeatedly breaches targets.
 - Reopened issues or defects trend upward.
+- Ticket/epic local markdown state diverges from observable GitHub issue/PR evidence.
+- Any P0/P1 ticket remains `status:ready` for more than 24h without a blocker note.
+
+Ready-stall blocker note minimum fields:
+- `BLOCKER_NOTE`
+- `owner`
+- `unblock_condition`
+- `eta_or_review_time`
 
 ## Self-annealing constraints
 

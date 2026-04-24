@@ -62,6 +62,13 @@ The LLM updates this on every ingest operation.
 - [[linting-governance-rationale]] — Linting Governance: Rationale and Scope
 - [[linting-governance-tooling]] — Linting Governance: Tooling and Config
 - [[linting-governance-rollout]] — Linting Governance: Adoption and Rollout
+- [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization and Alternatives (2026)
+- [[fleet-live-usage-indicator-options-2026]] — Fleet Live Usage Indicator Options (2026)
+- [[global-governance-self-anneal-2026]] — Global Governance Self-Anneal (2026)
+- [[cost-efficiency-self-anneal-2026]] — Cost→Quality Self-Anneal (2026)
+- [[governance-workflow-hardening-2026]] — Governance Workflow Hardening (2026)
+- [[governance-verification-harness-2026]] — Governance Verification Harness (2026)
+- [[governance-agile-github-remediation-2026]] — Governance + Agile + GitHub Remediation (2026)
 
 ## Syntheses
 
@@ -75,7 +82,14 @@ The LLM updates this on every ingest operation.
 - [[js-code-quality-practices]] — JS Code Quality Practices
 - [[nodejs-install-patterns]] — Node.js Install Patterns
 - [[nodejs-project-organization]] — Node.js Project Organization
+- [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization and Alternatives (2026)
+- [[fleet-live-usage-indicator-options-2026]] — Fleet Live Usage Indicator Options (2026)
+- [[global-governance-self-anneal-2026]] — Global Governance Self-Anneal (2026)
+- [[cost-efficiency-self-anneal-2026]] — Cost→Quality Self-Anneal (2026)
+- [[governance-workflow-hardening-2026]] — Governance Workflow Hardening (2026)
+- [[governance-verification-harness-2026]] — Governance Verification Harness (2026)
+- [[governance-agile-github-remediation-2026]] — Governance + Agile + GitHub Remediation (2026)
 
 ---
 
-**Pages**: 51 | **Last updated**: 2026-04-23
+**Pages**: 58 | **Last updated**: 2026-04-23

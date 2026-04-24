@@ -47,6 +47,13 @@ An epic may close **only when ALL of these are true**:
 3. CONSULTANT_CLOSEOUT comment posted on the epic
 4. Epic-level resolution label applied (`resolution:released` or `resolution:cancelled`)
 
+## Re-scope-before-close rule
+
+- If original epic acceptance criteria cannot be completed within current tranche,
+  Manager must publish an explicit re-scope artifact before review/close.
+- Post-hoc scope normalization at Consultant closeout is forbidden.
+- Re-scope artifact must list deferred scope and linked follow-on child tickets.
+
 ## Branch Naming
 
 Branches are created for **child tickets**, never for epics directly.

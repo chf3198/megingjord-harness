@@ -84,6 +84,32 @@ Each status names the active agent type. One glance = who owns it now.
 - Commit: `feat(skills): implement ticket-as-baton governance #11`
 - PR: Body must include `Closes #11` + validation evidence
 
+## GitHub evidence block (required for closeout)
+
+Before `status:done` + close, ticket artifacts must include a concise evidence block:
+- Issue reference and terminal state
+- Applied status/role/priority/area labels (or explicit N/A)
+- Linked PR/merge evidence (or explicit N/A + reason)
+- Validation evidence summary used by Admin/Consultant
+- Verification timestamp and exact command/check outputs used for closure
+
+If evidence is missing, Consultant must not close the ticket.
+
+## Ready-SLA escalation contract (P0/P1)
+
+- If a P0/P1 ticket remains `status:ready` for >24h, Manager must add one of:
+	1) `BLOCKER_NOTE` with owner + unblock condition + ETA, or
+	2) escalation comment linking a follow-up owner action.
+- Tickets without blocker/escalation evidence are governance violations.
+
+## Approved exception schema (closure evidence)
+
+When PR/merge proof is unavailable, use explicit exception fields in evidence block:
+- `exception_type`: `local-markdown-workflow` | `external-system-unavailable`
+- `exception_reason`: concise rationale
+- `exception_approver`: `manager|admin|consultant`
+- `exception_time_utc`: ISO timestamp
+
 ## Epic Rules
 
 See `epic-governance.instructions.md` for epic status advancement, role label, progress tracking, and close conditions.
