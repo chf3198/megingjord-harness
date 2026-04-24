@@ -1,0 +1,57 @@
+name: Label Completeness
+
+on:
+  issues:
+    types: [opened, labeled, unlabeled]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: label-completeness-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-labels:
+    name: check-labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.issue.labels.map(l => l.name);
+            const missing = [];
+
+            if (!labels.some(l => l.startsWith('type:'))) missing.push('`type:*`');
+            if (!labels.some(l => l.startsWith('status:'))) missing.push('`status:*`');
+            if (!labels.some(l => l.startsWith('priority:'))) missing.push('`priority:*`');
+            if (!labels.some(l => l.startsWith('area:'))) missing.push('`area:*`');
+
+            if (missing.length === 0) {
+              core.info('All required label categories present');
+              return;
+            }
+
+            const issueNum = context.payload.issue.number;
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: issueNum,
+              body: [
+                '⚠️ **Label Governance Violation — Missing Required Labels**',
+                '',
+                `Missing categories: ${missing.join(', ')}`,
+                '',
+                '**Required label set** (ADR-010):',
+                '| Category | Examples |',
+                '|---|---|',
+                '| `type:*` | `type:task` `type:bug` `type:epic` `type:story` |',
+                '| `status:*` | `status:backlog` `status:triage` `status:in-progress` |',
+                '| `priority:*` | `priority:P1` `priority:P2` `priority:P3` |',
+                '| `area:*` | `area:infra` `area:dashboard` `area:scripts` |',
+                '',
+                'Add the missing labels to resolve this check.'
+              ].join('\n')
+            });
+
+            core.setFailed(`Missing required label categories: ${missing.join(', ')}`);
