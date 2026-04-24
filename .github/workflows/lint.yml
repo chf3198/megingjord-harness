@@ -2,17 +2,41 @@ name: Lint
 on:
   pull_request:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/**'
+      - 'dashboard/**'
+      - 'scripts/**'
+      - 'hooks/**'
+      - 'instructions/**'
+      - 'skills/**'
+      - 'tests/**'
+      - 'package.json'
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  lint_required:
+    name: lint-required
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'npm-shrinkwrap.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
       - run: npm install --no-audit --no-fund
       - name: 100-line file limit
         run: npm run lint

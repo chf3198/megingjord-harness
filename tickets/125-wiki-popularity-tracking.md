@@ -1,25 +1,31 @@
 # Ticket 125 — Wiki Section Popularity shows only 4 articles
 
-**Status:** done
-**Priority:** P2 — Feature underutilized
-**Role:** Collaborator
-**Epic:** 120
+Priority: P2 (Normal)
+Type: Bug
+Area: dashboard
+Status: ready
+Parent: none
 
-## Problem
-Wiki Health & Metrics → Section Popularity shows only 4 articles with
-1 access each. Access tracking relies on manual click events via
-`trackWikiAccess()`. Until users click individual article links the
-sections never register in popularity metrics.
+## Manager Scope
 
-## Root Cause
-`trackWikiAccess` is only triggered by user click. No auto-seeding occurs
-when wiki pages first load. The metrics API has no baseline data.
+Objective:
+- Ensure Wiki section popularity has baseline category coverage without requiring manual clicks.
 
-## Acceptance Criteria
-- When wiki pages load, all section categories are auto-tracked once.
-- Section popularity bars show all categories, not just clicked ones.
-- Tracking does not double-count on re-renders.
+Current Necessity Review:
+- Still necessary. `dashboard/js/wiki-reader.js` currently tracks clicks only.
+- No one-time auto-seed path exists for loaded section categories.
+- Follow-on note: deferred from closed epic #120 via explicit re-scope artifact.
 
-## Fix Location
-- `dashboard/js/wiki-reader.js` — call `trackWikiAccess` per section
-  after `loadWikiPages()` resolves, guarded by session flag.
+Acceptance Criteria:
+1. On first wiki load per session, each category is tracked once.
+2. Popularity bars include all categories with non-zero baseline visibility.
+3. Re-renders do not double-count.
+
+Implementation Targets:
+- `dashboard/js/wiki-reader.js`
+- `dashboard/js/wiki-metrics.js` (if helper/state needed)
+
+## MANAGER_HANDOFF
+
+- Status transition: `triage -> ready`
+- Ready for collaborator implementation.

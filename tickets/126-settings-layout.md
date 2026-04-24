@@ -1,23 +1,30 @@
 # Ticket 126 — Settings view layout and organization
 
-**Status:** done
-**Priority:** P1 — Poor UX impeding daily use
-**Role:** Collaborator
-**Epic:** none
+Priority: P1 (High)
+Type: Task
+Area: dashboard
+Status: ready
+Parent: none
 
-## Problem
-1. Fleet Resources cards overflow horizontally on narrow viewports.
-2. Config and Resources panels are two separate full-width sections that
-   look disconnected.
-3. API keys and device configs require scrolling to find edit controls.
-4. Modal overlay exists but is not visually obvious enough.
+## Manager Scope
 
-## Acceptance Criteria
-- No horizontal scrolling in the Fleet Resources grid at any viewport.
-- Cards wrap and stack cleanly at ≤900px width.
-- Settings header explains how to edit (modal hint visible).
-- Config panel and Resources panel have a consistent visual structure.
+Objective:
+- Complete settings UX/layout hardening for narrow viewports and edit discoverability.
 
-## Fix Location
-- `dashboard/css/settings.css` — fix grid overflow, card widths, layout
-- `dashboard/index.html` — add modal hint banner to settings section
+Current Necessity Review:
+- Still necessary. Current settings UI remains split into separate full-width panels and does not include the explicit modal-edit hint from AC.
+
+Acceptance Criteria:
+1. No horizontal overflow in resources table/cards on narrow widths.
+2. Config + resource sections present a consistent, connected structure.
+3. Visible hint explains editing flow via modal controls.
+
+Implementation Targets:
+- `dashboard/css/settings.css`
+- `dashboard/index.html`
+- `dashboard/js/settings-panel.js` (if structural hints/actions are added)
+
+## MANAGER_HANDOFF
+
+- Status transition: `triage -> ready`
+- Ready for collaborator implementation.

@@ -1,10 +1,8 @@
 # Wiki Log
-
 Append-only chronological record of wiki operations.
 Each entry uses a parseable prefix for CLI filtering.
 
 ## Format
-
 ```
 ## [YYYY-MM-DD] operation | Subject
 Brief description of what happened.
@@ -49,3 +47,53 @@ Research synthesis from web sources: Anthropic Claude Code Best Practices
 Karpathy/Lutke context engineering (Jun 2025). Five gaps identified in
 current wiki implementation with tiered P0/P1/P2 remediation plan.
 Total wiki pages now: 51.
+
+## [2026-04-23] ingest | OpenClaw Windows optimization and alternatives
+Research synthesis added from LiteLLM reliability/routing docs, Ollama API,
+llama.cpp performance guidance, and LocalAI overview. Captures decision to
+keep OpenClaw as control plane and harden endpoint reliability/fallbacks.
+Total wiki pages now: 52.
+
+## [2026-04-23] update | Windows OpenClaw endpoint hardening
+External IT lane completed on windows-laptop: OpenClaw gateway changed from
+loopback `127.0.0.1:18789` to tailnet `100.78.22.13:4000`, restoring fleet
+health probe success at `/health` and unblocking harness hardening work.
+
+## [2026-04-23] ingest | Fleet live usage indicator options
+Research captured for low-resource live visibility on fleet devices.
+Validated on-demand model runtime behavior and recommended terminal-first
+indicator with optional browser mirror. Total wiki pages now: 53.
+
+## [2026-04-23] update | Fleet warm-pool guidance
+Added validated `keep_alive` warm-pool guidance and clarified that terminal
+log/`ollama ps` views provide low-overhead live activity visibility.
+
+## [2026-04-23] update | Fleet indicator UAT stress harness
+Implemented single-line terminal rendering to prevent scrollback growth and
+added bounded stress scripts (`.sh` and `.js`) for operator UAT validation.
+
+## [2026-04-23] ingest | Global governance self-anneal
+Formal governance anneal report added with root-cause/risk analysis and
+instruction hardening actions for baton, epic closure, and divergence triggers.
+Total wiki pages now: 54.
+
+## [2026-04-23] update | Governance anneal web corroboration
+Backfilled external GitHub Docs evidence for issue lifecycle, label governance,
+and PR-linked auto-close semantics; updated research and wiki source references.
+
+## [2026-04-23] ingest | Cost→quality self-anneal research
+Added web-corroborated cost-benefit analysis for model routing, CI path filters,
+concurrency, caching, and selective test execution. Created implementation-ready
+task set (#144–#146). Total wiki pages now: 55.
+
+## [2026-04-23] ingest | Governance workflow hardening design
+Added web-refreshed governance research for protected branches, merge queues,
+and project automation. Finalized design and created implementation tickets
+(#151–#154). Total wiki pages now: 56.
+
+## [2026-04-23] ingest | Governance verification harness checklist
+Added executable pre-close governance verification script and evidence checklist
+for Admin/Consultant closeout phases. Total wiki pages now: 57.
+
+## [2026-04-23] ingest | Governance + Agile + GitHub remediation
+Added remediation research + final ticket pack (#159–#162) for epic-child terminality, evidence completeness, merge queue checks, and ready-SLA controls. Total wiki pages now: 58.
