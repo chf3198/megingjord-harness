@@ -42,6 +42,16 @@ body:
         - infrastructure
     validations:
       required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P1 — urgent
+        - P2 — normal
+        - P3 — low
+    validations:
+      required: true
   - type: input
     id: timebox
     attributes:
