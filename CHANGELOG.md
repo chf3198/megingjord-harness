@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
+
+### Added — Atomic Label Transitions (#417)
+- `scripts/global/issue-transition.js`: single `gh issue edit` call validates and executes baton transitions, eliminating ADR-010 label-lint race conditions
+- `npm run issue:transition` script
+
+### Added — DangerJS PR Governance (#418)
+- `Dangerfile.js`: enforces ticket-first (`Closes #N`), branch naming, Conventional Commits, and `#N` title suffix on all PRs
+- `.github/workflows/danger.yml`: `danger-required` CI check gates all PRs to main
+
+### Added — PR Title Enforcement (#419)
+- `.github/workflows/pr-title.yml`: `pr-title-required` CI check via `amannn/action-semantic-pull-request@v5`; enforces type, scope, and ≤60-char subject
+
+### Added — PreToolUse Commit Hook (#420)
+- `hooks/scripts/baton_gate.py`: blocks `git commit` without `#N` issue reference in message; hints branch number
+- `.claude/settings.json.template`: documents required Claude Code hook registration
+
+### Added — Governance Document Linting (#421)
+- `.vale.ini` + `.vale/styles/Governance/TicketFields.yml`: enforces `Priority:`, `Type:`, `Status:` fields in tickets and instructions at error level
+- `.markdownlint.json` + `.markdownlintignore`: markdownlint CI with zero-error baseline
+- `lint:md` npm script; CI `lint-required` job extended
+
+### Added — release-please Automation (#422)
+- `.github/workflows/release-please.yml`: auto-generates release PRs with CHANGELOG diffs on every push to main
+- `.release-please-config.json`: node release-type; bumps `package.json` + `plugin.json`
+- `.release-please-manifest.json`: baseline `3.1.0`
+
+### Added — Baton Gate Chain (#423)
+- GitHub Environments: `collaborator-gate`, `admin-gate`, `consultant-gate` with Required Reviewer
+- `.github/workflows/baton-gates.yml`: chained environment jobs; each gate pauses for explicit operator approval
+- `CONTRIBUTING.md`: Baton Gate Chain section documenting gate semantics
+
 ## [3.1.0] - 2026-04-24
 
 ### Added — Model Routing Telemetry (#411)
