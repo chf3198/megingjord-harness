@@ -15,6 +15,10 @@ on:
       - 'skills/**'
       - 'tests/**'
       - 'package.json'
+      - '**/*.md'
+      - '.vale.ini'
+      - '.vale/**'
+      - '.markdownlint.json'
 
 concurrency:
   group: lint-${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,3 +45,12 @@ jobs:
       - run: npm install --no-audit --no-fund
       - name: 100-line file limit
         run: npm run lint
+      - name: Markdown lint
+        run: npm run lint:md
+      - name: Vale prose lint
+        uses: errata-ai/vale-action@v2
+        with:
+          files: '.'
+          reporter: github-pr-check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

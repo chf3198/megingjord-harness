@@ -62,4 +62,3 @@ For feature-adds and behavior changes, evaluate all applicable surfaces:
 - Keep wording precise, testable, and user-actionable.
 - Avoid speculative claims unsupported by current implementation.
 - "All tests pass" does not imply docs are complete.
-
