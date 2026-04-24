@@ -1,0 +1,33 @@
+name: Baton Gates
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: baton-gates-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collaborator-gate:
+    name: collaborator-gate
+    runs-on: ubuntu-latest
+    environment: collaborator-gate
+    steps:
+      - run: echo "COLLABORATOR_HANDOFF acknowledged — work validated"
+
+  admin-gate:
+    name: admin-gate
+    needs: [collaborator-gate]
+    runs-on: ubuntu-latest
+    environment: admin-gate
+    steps:
+      - run: echo "ADMIN_HANDOFF acknowledged — CI gates verified"
+
+  consultant-gate:
+    name: consultant-gate
+    needs: [admin-gate]
+    runs-on: ubuntu-latest
+    environment: consultant-gate
+    steps:
+      - run: echo "CONSULTANT_CLOSEOUT acknowledged — ready to merge"
