@@ -1,0 +1,26 @@
+{
+  "lastUpdated": "2026-04-24",
+  "defaultAliasSeed": "Nova",
+  "roleSurnames": {
+    "manager": "Mason",
+    "collaborator": "Harper",
+    "admin": "Reyes",
+    "consultant": "Vale"
+  },
+  "registry": [
+    { "team": "codex", "modelPattern": "^gpt-5\\.4$", "aliasSeed": "Quill" },
+    { "team": "codex", "modelPattern": "gpt-5.*codex", "aliasSeed": "Caden" },
+    { "team": "copilot", "modelPattern": "sonnet", "aliasSeed": "Soren" },
+    { "team": "copilot", "modelPattern": "opus", "aliasSeed": "Orion" },
+    { "team": "copilot", "modelPattern": "gpt-5.*mini", "aliasSeed": "Milo" },
+    { "team": "claude-code", "modelPattern": "sonnet", "aliasSeed": "Clio" },
+    { "team": "claude-code", "modelPattern": "opus", "aliasSeed": "Orla" },
+    { "team": "openclaw", "modelPattern": "qwen", "aliasSeed": "Quinn", "devicePattern": "^windows-laptop$" },
+    { "team": "openclaw", "modelPattern": "mistral", "aliasSeed": "Mira", "devicePattern": "^windows-laptop$" },
+    { "team": "openclaw", "modelPattern": "phi", "aliasSeed": "Fia", "devicePattern": "^windows-laptop$" },
+    { "team": "*", "modelPattern": "qwen", "aliasSeed": "Quinn" },
+    { "team": "*", "modelPattern": "mistral", "aliasSeed": "Mira" },
+    { "team": "*", "modelPattern": "phi", "aliasSeed": "Fia" },
+    { "team": "*", "modelPattern": "gemma", "aliasSeed": "Gemma" }
+  ]
+}
