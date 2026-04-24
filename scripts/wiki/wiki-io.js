@@ -5,7 +5,7 @@ const path = require('path');
 
 const WIKI_DIR = path.join(__dirname, '../../wiki');
 
-/** Parse YAML-ish frontmatter from markdown */
+/** Parse YAML-ish frontmatter from markdown. */
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: content };
@@ -17,7 +17,7 @@ function parseFrontmatter(content) {
   return { frontmatter: fm, body: match[2] };
 }
 
-/** Add an entry to wiki/index.md under the appropriate section */
+/** Add an entry to wiki/index.md under the appropriate section. */
 function updateIndex(slug, title, type) {
   const indexPath = path.join(WIKI_DIR, 'index.md');
   let content = fs.readFileSync(indexPath, 'utf-8');
@@ -26,12 +26,6 @@ function updateIndex(slug, title, type) {
     concept: '## Concepts',
     source: '## Source Summaries',
     synthesis: '## Syntheses',
-  };
-  const dirMap = {
-    entity: 'entities',
-    concept: 'concepts',
-    source: 'sources',
-    synthesis: 'syntheses',
   };
   const section = sectionMap[type] || '## Source Summaries';
   const entry = `- [[${slug}]] — ${title}`;
@@ -49,7 +43,6 @@ function updateIndex(slug, title, type) {
   }
 
   // Update stats line
-  const dir = path.join(WIKI_DIR, dirMap[type] || 'sources');
   const pages = countPages();
   content = content.replace(
     /\*\*Pages\*\*:.*$/m,
@@ -58,14 +51,14 @@ function updateIndex(slug, title, type) {
   fs.writeFileSync(indexPath, content);
 }
 
-/** Append a log entry to wiki/log.md */
+/** Append a log entry to wiki/log.md. */
 function appendLog(date, operation, subject) {
   const logPath = path.join(WIKI_DIR, 'log.md');
   const entry = `\n## [${date}] ${operation} | ${subject}\n`;
   fs.appendFileSync(logPath, entry);
 }
 
-/** Count all .md files in wiki subdirs (not index/log) */
+/** Count all .md files in wiki subdirs (not index/log). */
 function countPages() {
   const dirs = ['entities', 'concepts', 'sources', 'syntheses'];
   let count = 0;
@@ -77,7 +70,7 @@ function countPages() {
   return count;
 }
 
-/** List all wiki page slugs with their paths */
+/** List all wiki page slugs with their paths. */
 function listPages() {
   const dirs = ['entities', 'concepts', 'sources', 'syntheses'];
   const pages = [];

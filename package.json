@@ -17,6 +17,7 @@
     "health": "node scripts/health-check.js",
     "router:smoke": "node scripts/global/task-router-smoke.js",
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
+    "router:weekly": "node scripts/global/model-routing-weekly-report.js",
     "repo:scope": "node scripts/global/repo-scope.js",
     "ticket:create": "node scripts/global/ticket-create.js",
     "wiki:ingest": "node scripts/wiki/ingest.js",

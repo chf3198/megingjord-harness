@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "defaultLane": "free",
+  "taskClasses": {
+    "routine": ["search", "grep", "read", "docs", "simple"],
+    "coding": ["implement", "refactor", "tests", "integration"],
+    "architecture": ["architecture", "design", "risk", "security", "concurrency"]
+  },
+  "escalationRules": {
+    "premiumOn": ["failed", "stuck", "unclear", "cross-system", "trade-off"],
+    "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
+  },
+  "models": {
+    "free": { "id": "gpt-5-mini", "mult": 0 },
+    "fleet": { "id": "qwen2.5-7b", "mult": 0 },
+    "premium": { "id": "Claude Sonnet 4.6", "mult": 1 },
+    "fallback": { "id": "gpt-5-mini", "mult": 0 }
+  },
+  "rollback": {
+    "enabled": true,
+    "windowDays": 7,
+    "minSuccessRate": 0.75,
+    "maxPremiumShare": 0.45,
+    "forceLane": "free"
+  }
+}
