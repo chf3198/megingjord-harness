@@ -93,3 +93,7 @@ Install tools via CLI as needed. Don't ask permission.
 - **DO consult user**: Design decisions, architecture choices
 - **DO NOT ask user**: Git practices, lint fixes, test execution
 - **NEVER ask user to run tests**: Agent runs all automated checks
+
+## Team&Model Signing
+
+AI-authored baton artifacts, PR evidence, and governance docs must include human alias + structured `Team&Model` provenance.

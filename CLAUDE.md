@@ -8,6 +8,7 @@ and AI agent governance. All instructions below are binding for Claude Code sess
 @instructions/role-baton-routing.instructions.md
 @instructions/ticket-driven-work.instructions.md
 @instructions/operator-identity-context.instructions.md
+@instructions/team-model-signing.instructions.md
 @instructions/global-standards.instructions.md
 @instructions/global-task-router.instructions.md
 @instructions/github-governance.instructions.md
