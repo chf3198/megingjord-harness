@@ -3,6 +3,7 @@
 const { execSync } = require('child_process');
 const { classifyPrompt } = require('./task-router');
 const { chatComplete } = require('./openclaw-chat');
+const { chatComplete: ollamaChat } = require('./ollama-direct');
 const { getProfile } = require('./fleet-config');
 const { resolveRouting } = require('./model-routing-engine');
 const { recordTelemetry } = require('./model-routing-telemetry');
@@ -37,6 +38,12 @@ async function buildDecision(route, resolved) {
       ? safe('node scripts/global/openclaw-preflight.js --json')
       : { ok: true, out: 'dry-run: preflight skipped' };
     if (execute && !preflight.ok) {
+      if (prompt) {
+        const selectedModel = model || resolved.modelId || route.recommendedModel;
+        const chat = await ollamaChat(prompt, { model: selectedModel });
+        if (chat.ok) safe('node scripts/global/openclaw-lane-log.js record openclaw coding');
+        return { action: chat.ok ? 'dispatched-ollama-direct' : 'fleet-unavailable', preflight, chat };
+      }
       return { action: 'fleet-unavailable', preflight };
     }
     if (execute && prompt) {
