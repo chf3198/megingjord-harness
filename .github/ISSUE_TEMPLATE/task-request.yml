@@ -1,6 +1,6 @@
 name: Task
 description: Request a feature, improvement, or work item
-labels: ["type:task", "status:backlog"]
+labels: ["type:task", "status:backlog", "area:dashboard", "priority:P2"]
 body:
   - type: input
     id: summary
