@@ -10,11 +10,11 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --apply) APPLY=true ;;
     --target) TARGET="${2:-copilot}"; shift ;;
-    *) echo "Usage: deploy.sh [--apply] [--target copilot|codex|both]"; exit 1 ;;
+    *) echo "Usage: deploy.sh [--apply] [--target copilot|codex|claude|both]"; exit 1 ;;
   esac
   shift
 done
-[[ "$TARGET" =~ ^(copilot|codex|both)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
+[[ "$TARGET" =~ ^(copilot|codex|claude|both)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
 $APPLY && CODEX_ARGS+=(--apply)
 deploy_dir() {
   local src="$1" dest="$2" label="$3"
@@ -59,10 +59,10 @@ if [[ "$TARGET" == "codex" || "$TARGET" == "both" ]]; then
   node "$ROOT/scripts/global/codex-runtime.js" deploy "${CODEX_ARGS[@]}"
 fi
 [[ "$TARGET" == "codex" ]] && exit 0
-
-echo "Source: $ROOT"
-echo "Target: $COPILOT"
-echo ""
+if [[ "$TARGET" == "claude" ]]; then
+  $APPLY && rsync -a --exclude='*.local*' "$ROOT/.claude/" "$HOME/.claude/" && echo "✅ .claude/ → ~/.claude/" || echo "(dry run) Would deploy .claude/ → ~/.claude/"
+  exit 0; fi
+echo "Source: $ROOT → $COPILOT"
 if ! $APPLY; then
   echo "=== DRY RUN (pass --apply to deploy) ==="
   echo ""
@@ -96,5 +96,4 @@ for wf in "$ROOT/wiki/index.md" "$ROOT/wiki/log.md" "$ROOT/WIKI.md"; do
 done
 rsync -a --exclude='__pycache__' --exclude='state/' "$ROOT/hooks/" "$COPILOT/hooks/"
 echo "── Hooks ── ✅ Deployed (excluding cache/state)"
-echo ""
 echo "Done. Backup at: $BACKUP"
