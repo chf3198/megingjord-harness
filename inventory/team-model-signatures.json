@@ -7,9 +7,16 @@
     "admin": "Reyes",
     "consultant": "Vale"
   },
+  "teamModelSpec": {
+    "format": "team:model@substrate",
+    "teamValues": ["copilot", "codex", "claude-code", "openclaw"],
+    "substrates": ["github-copilot", "claude-code-cli", "codex-cli", "openclaw-gateway"],
+    "note": "gpt-5.*codex models belong to team 'codex', not 'copilot'"
+  },
   "registry": [
     { "team": "codex", "modelPattern": "^gpt-5\\.4$", "aliasSeed": "Quill" },
     { "team": "codex", "modelPattern": "gpt-5.*codex", "aliasSeed": "Caden" },
+    { "team": "copilot", "modelPattern": "^claude-[34]", "aliasSeed": "Soren" },
     { "team": "copilot", "modelPattern": "sonnet", "aliasSeed": "Soren" },
     { "team": "copilot", "modelPattern": "opus", "aliasSeed": "Orion" },
     { "team": "copilot", "modelPattern": "gpt-5.*mini", "aliasSeed": "Milo" },
