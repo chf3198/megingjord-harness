@@ -58,4 +58,9 @@ if (dryRun) {
 }
 
 gh(['api', `repos/${repo}/issues/${issue}/labels`, '-X', 'PUT', '--input', '-'], { labels: next });
+if (toStatus === 'in-progress') {
+  const { classifyPrompt } = require('./task-router');
+  const route = classifyPrompt(data.title);
+  console.log(`task-route: lane=${route.lane} model=${route.recommendedModel} (confidence: ${route.confidence})`);
+}
 console.log(`#${issue}: ${fromStatus}(${ROLE_FOR[fromStatus] || '-'}) → ${toStatus}(${ROLE_FOR[toStatus] || '-'})`);
