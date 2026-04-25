@@ -73,6 +73,18 @@ By default the repo-scope tool updates both Copilot and Codex harness scope file
 - [Contributing](.github/CONTRIBUTING.md)
 - [Security](.github/SECURITY.md)
 
+## Label Taxonomy (ADR-010)
+
+Every issue must carry one label from each dimension:
+
+| Dimension | Values |
+|---|---|
+| `status:` | `backlog` · `triage` · `ready` · `in-progress` · `testing` · `review` · `done` · `cancelled` |
+| `type:` | `epic` · `story` · `task` · `bug` · `doc` · `research` |
+| `area:` | `dashboard` · `hooks` · `skills` · `instructions` · `agents` · `scripts` · `infra` · `knowledge` |
+| `priority:` | `P1` (critical) · `P2` (normal) · `P3` (low) |
+| `role:` | `manager` · `collaborator` · `admin` · `consultant` (active baton only) |
+
 ## License
 
 [PolyForm Noncommercial 1.0.0](LICENSE) — free for personal, educational, nonprofit, and government use. Commercial use requires explicit permission.
