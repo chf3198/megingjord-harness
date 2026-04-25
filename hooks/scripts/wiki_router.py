@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 """Task-adaptive wiki context snippets for SessionStart hooks."""
+import sys
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from runtime_paths import wiki_candidates
+
+
+def _resolve_wiki(cwd: Path) -> Path | None:
+    """Return first valid wiki dir: local cwd/wiki, then global candidates."""
+    local = cwd / "wiki"
+    if local.is_dir():
+        return local
+    for candidate in wiki_candidates():
+        if candidate.is_dir():
+            return candidate
+    return None
 
 
 def _read(path: Path) -> str:
@@ -39,8 +57,8 @@ def _recent_from_index(index_text: str, limit: int = 3) -> str:
 
 def route_wiki_context(cwd: Path, repo_type: str, signals: list[str]) -> list[str]:
     """Return small, high-value wiki snippets based on repo signals."""
-    wiki = cwd / "wiki"
-    if not wiki.is_dir():
+    wiki = _resolve_wiki(cwd)
+    if wiki is None:
         return []
     msgs = []
     index_text = _read(wiki / "index.md")
