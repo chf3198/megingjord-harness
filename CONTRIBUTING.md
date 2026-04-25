@@ -53,6 +53,15 @@ description: One-line description
 
 Symlinks auto-resolve to root `plugin.json`.
 
+## Claude Code Runtime Install
+
+Deploy hooks, agents, and slash commands to the Claude Code runtime:
+
+```bash
+npm run deploy:claude:apply   # .claude/ → ~/.claude/
+npm run sync:claude            # ~/.claude/ → .claude/ (pull back)
+```
+
 ## Constraints
 
 - **≤100 lines** per file (lint-enforced)

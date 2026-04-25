@@ -11,12 +11,12 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true ;;
     --target) TARGET="${2:-copilot}"; shift ;;
-    *) echo "Usage: sync.sh [--dry-run] [--target copilot|codex|both]"; exit 1 ;;
+    *) echo "Usage: sync.sh [--dry-run] [--target copilot|codex|claude|both]"; exit 1 ;;
   esac
   shift
 done
 
-[[ "$TARGET" =~ ^(copilot|codex|both)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
+[[ "$TARGET" =~ ^(copilot|codex|claude|both)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
 $DRY_RUN && CODEX_ARGS+=(--dry-run)
 
 sync_dir() {
@@ -64,11 +64,10 @@ if [[ "$TARGET" == "codex" || "$TARGET" == "both" ]]; then
   node "$ROOT/scripts/global/codex-runtime.js" sync "${CODEX_ARGS[@]}"
 fi
 [[ "$TARGET" == "codex" ]] && exit 0
-
-$DRY_RUN && echo "=== DRY RUN — no changes will be made ===" && echo ""
-echo "Syncing from: $COPILOT"
-echo "Into:         $ROOT"
-echo ""
+if [[ "$TARGET" == "claude" ]]; then
+  $DRY_RUN && echo "(dry run) Would sync ~/.claude/ → .claude/" || rsync -a --exclude='*.local*' "$HOME/.claude/" "$ROOT/.claude/" && echo "✅ ~/.claude/ → .claude/"
+  exit 0; fi
+echo "Syncing from: $COPILOT → $ROOT"
 sync_dir "$COPILOT/skills" "$ROOT/skills" "Skills"
 sync_files "$COPILOT/instructions" "$ROOT/instructions" "Instructions"
 sync_files "$COPILOT/scripts" "$ROOT/scripts/global" "Global Scripts"
@@ -96,5 +95,4 @@ if [[ -d "$COPILOT/hooks" ]]; then
     echo "  ✅ Hooks synced"
   fi
 fi
-echo ""
 echo "Done. Review changes with: git diff --stat"

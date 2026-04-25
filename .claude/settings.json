@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/global/issue-transition.js 457 in-progress testing)",
+      "Bash(node scripts/global/issue-transition.js 457 testing review)",
+      "Bash(node scripts/global/issue-transition.js 457 review done)",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -m json.tool .claude/settings.json)",
+      "Bash(awk '{if \\($1+0 <= 100\\) print}')",
+      "Bash(python3 -)"
+    ],
+    "additionalDirectories": [
+      "/home/curtisfranks/devenv-ops/.claude"
+    ]
+  }
+}
