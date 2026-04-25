@@ -1,98 +1,78 @@
 # devenv-ops
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-purple.svg)](LICENSE)
-[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-24%20skills-blue.svg)](plugin.json)
+[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-governance%20harness-blue.svg)](plugin.json)
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 
-**AI agent governance harness — skills, agents, hooks, and wiki.**
+**Governance-first AI agent harness for Copilot, Claude Code, and Codex.**
 
-Install as a VS Code Agent Plugin to get 24 governance skills,
-8 custom agents, and wiki seed content. No build step required.
+This repo is the development source for shared runtime assets deployed into `~/.copilot/`, `~/.codex/`, and `~/.agents/skills/`.
 
-## Install as Agent Plugin
+## Install
 
-In VS Code (with Copilot), run:
-> `Chat: Install Plugin From Source` → paste this repo's Git URL.
+Copilot plugin:
+- In VS Code, run `Chat: Install Plugin From Source` and paste this repo’s Git URL.
 
-Works in VS Code, Copilot CLI, and Claude Code.
+Codex runtime:
+- `npm run deploy:codex:apply`
+
+Both runtimes:
+- `npm run deploy:both:apply`
+
+## Runtime mapping
+
+| Source | Runtime target |
+|---|---|
+| `skills/` | `~/.copilot/skills/` and `~/.agents/skills/` |
+| `instructions/` | `~/.copilot/instructions/` |
+| `hooks/` | `~/.copilot/hooks/` and `~/.codex/devenv-ops/hooks/` |
+| `scripts/global/` | `~/.copilot/scripts/` and `~/.codex/devenv-ops/scripts/` |
+| `.codex/` | `~/.codex/AGENTS.md`, `config.toml`, `hooks.json`, and `rules/` |
+| `agents/` | `~/.copilot/agents/` |
+| `wiki/` | `~/.copilot/wiki/` and `~/.codex/devenv-ops/wiki/` |
 
 ## What You Get
 
-| Category | Count | Examples |
-|----------|-------|---------|
-| **Skills** | 24 | Role baton orchestration, GitHub governance, secret prevention, drift detection |
-| **Agents** | 8 | @architect, @implementer, @quick, @planner, @router, @governance-auditor |
-| **Wiki** | 15 seed articles | Agent drift, baton protocol, self-annealing, wiki pattern |
-| **Hooks** | 19 | Global standards enforcement, repo scoping |
-
-## How It Works
-
-```
- User Prompt ──▶ @router (Sonnet) ──▶ classifies ──┐
-                                                    │
-         ┌──────────────────────────────────────────┘
-         │
-         ├─▶ 🧠 @architect   (Opus 4.6)   complex / architecture
-         ├─▶ ⚡ @implementer (Sonnet 4.6)  standard coding
-         ├─▶ 🏎️ @quick       (GPT-5 mini)  fast lookups
-         └─▶ 📋 @planner     (Opus 4.6)   read-only research
-```
-
-Custom agents override VS Code Copilot AUTO model selection via
-`model` frontmatter — each pinned to the optimal model for its tier.
-
-## Tech Stack
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| AI Runtime | VS Code Copilot + 8 custom agents | LLM task routing |
-| Dashboard | Alpine.js, vanilla JS/CSS | Fleet monitoring (≤50 MB) |
-| Fleet | Ollama, OpenClaw (LiteLLM) | Local/remote inference |
-| Network | Tailscale VPN mesh | Cross-device connectivity |
-| APIs | OpenRouter, Cloudflare AI, Google AI | Free-tier access |
-| QA | Playwright + Chrome DevTools Protocol | E2E + perf tests |
-| Deploy | Bash rsync scripts | `~/.copilot/` deployment |
-
-## Architecture
-
-```
-devenv-ops (source of truth)          ~/.copilot/ (runtime)
-  skills/          (35) ──deploy──▶   skills/
-  instructions/    (12) ──deploy──▶   instructions/
-  agents/           (8) ──deploy──▶   agents/
-  hooks/           (19) ──deploy──▶   hooks/
-  scripts/global/  (32) ──deploy──▶   scripts/
-```
+- Governance skills, role-baton instructions, routing, secret prevention, wiki knowledge, and dashboard tooling.
+- Custom Copilot agents plus Codex/Copilot deploy and sync tooling.
+- Shared Team&Model signing and GitHub ticket / PR governance.
 
 ## Develop the Harness
 
 ```bash
-npm run setup             # Install deps
-npm start                 # Dashboard on :8090
-npm run deploy:apply      # Deploy repo → ~/.copilot/
-npm run lint              # ≤100-line file check
-npm test                  # Playwright E2E tests
-npm run router:weekly     # Weekly model routing cost/quality scorecard
-node scripts/global/governance-verify.js        # Local ticket integrity check
-node scripts/global/fleet-live-indicator.js     # Real-time fleet status (CLI)
+npm run setup              # Install deps
+npm start                  # Dashboard on :8090
+npm run lint               # ≤100-line file check
+npm test                   # Playwright E2E tests
+npm run deploy:apply       # Deploy repo → Copilot runtime
+npm run deploy:codex:apply # Deploy repo → Codex runtime
+npm run deploy:both:apply  # Deploy repo → Copilot + Codex runtimes
 ```
 
-## Enable for Other Repos
+## Enable in Other Repos
 
 ```bash
 npm run repo:scope -- enable /path/to/repo
-npm run repo:scope -- disable /path/to/repo
+npm run repo:scope -- enable /path/to/repo --target=codex
 npm run repo:scope -- list
 ```
+
+By default the repo-scope tool updates both Copilot and Codex harness scope files.
+
+## Working Rules
+
+- Never share one live checkout between Copilot, Claude Code, and Codex.
+- Give each agent family its own worktree and branch.
+- Never edit deployed runtimes directly.
+- Validate with `npm run lint` and `npm test` before closeout.
 
 ## Help
 
 - [Bug reports](https://github.com/chf3198/devenv-ops/issues/new?template=bug-report.yml)
 - [Feature requests](https://github.com/chf3198/devenv-ops/issues/new?template=feature_request.md)
-- [Support guide](SUPPORT.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
+- [Contributing](.github/CONTRIBUTING.md)
+- [Security](.github/SECURITY.md)
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE) — free for personal,
-educational, nonprofit, and government use. Commercial use
-requires explicit permission.
+[PolyForm Noncommercial 1.0.0](LICENSE) — free for personal, educational, nonprofit, and government use. Commercial use requires explicit permission.

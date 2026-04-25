@@ -6,6 +6,8 @@ Falls back to short defaults if wiki pages are missing.
 import re
 from pathlib import Path
 
+from runtime_paths import wiki_candidates
+
 _WIKI_ROOT = None
 
 
@@ -13,9 +15,7 @@ def _find_wiki() -> Path | None:
     global _WIKI_ROOT
     if _WIKI_ROOT is not None:
         return _WIKI_ROOT
-    for c in [Path.home() / ".copilot" / "wiki",
-              Path(__file__).resolve().parent.parent.parent / "wiki",
-              Path.home() / "devenv-ops" / "wiki"]:
+    for c in wiki_candidates():
         if c.is_dir():
             _WIKI_ROOT = c
             return c

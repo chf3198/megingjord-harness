@@ -52,7 +52,7 @@ def main() -> int:
             "CHANGELOG(s), design docs, contribution/governance docs."
         )
 
-    if tool in {"run_in_terminal", "terminal", "runTerminalCommand"}:
+    if tool in {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}:
         if RE_GIT_PUSH.search(joined):
             messages.append(post_merge_checklist())
         elif RE_GIT_COMMIT.search(joined):

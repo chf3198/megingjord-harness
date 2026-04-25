@@ -7,29 +7,31 @@ One DevEnv Ops init path should install a governance-first harness for Copilot, 
 ## Verified Codex surfaces
 
 - `$CODEX_HOME/AGENTS.md` and `AGENTS.override.md` for global instructions.
-- Repo-tree `AGENTS.md` files for local overrides.
-- `$CODEX_HOME/skills/` for reusable skills.
-- `~/.codex/config.toml` for model instructions, MCP, and extra tools.
-- Plugins/MCP as tool extensions.
-- Codex docs also expose Rules and Hooks as configuration areas; treat them as later installer targets once stable file paths are confirmed.
+- Repo-tree `AGENTS.md` files plus `project_doc_fallback_filenames` for local overrides.
+- `~/.agents/skills/` for user-level reusable skills.
+- `~/.codex/config.toml` plus trusted repo `.codex/config.toml` for config layers.
+- `~/.codex/hooks.json` / repo `.codex/hooks.json` for native hooks.
+- `~/.codex/rules/` / repo `.codex/rules/` for native command rules.
+- Plugins/MCP as tool extensions, with `.codex-plugin/plugin.json` as the local plugin manifest format.
 
 ## Runtime mapping
 
 | Concern | Copilot | Claude Code | Codex |
 |---|---|---|---|
 | Global baseline | `~/.copilot/instructions/` | `CLAUDE.md` + deployed hooks | `$CODEX_HOME/AGENTS.md` + `config.toml` |
-| Reusable skills | `~/.copilot/skills/` | `.claude/commands/` | `$CODEX_HOME/skills/` |
+| Reusable skills | `~/.copilot/skills/` | `.claude/commands/` | `~/.agents/skills/` |
 | Agents/subagents | `~/.copilot/agents/` | `.claude/agents/` | Codex subagents/future mapping |
-| Tool integration | hooks + scripts | `.claude/settings.json` hooks | MCP/plugins/config |
+| Tool integration | hooks + scripts | `.claude/settings.json` hooks | `hooks.json`, `rules/`, MCP, plugins, config |
 | Repo override | `.github/copilot-instructions.md` | `CLAUDE.md` + repo files | repo `AGENTS.md` |
 
 ## Codex init contract
 
 1. Install or merge the global baseline into `$CODEX_HOME/AGENTS.md`.
-2. Sync shared skills into `$CODEX_HOME/skills/`.
+2. Sync shared skills into `~/.agents/skills/`.
 3. Merge Codex MCP/config entries into `~/.codex/config.toml`.
-4. Create or update repo `AGENTS.md` with repo-local governance overlays.
-5. Keep ticket, PR, and git governance in the repo, not in the home directory.
+4. Install user-level hooks and rules into `~/.codex/hooks.json` and `~/.codex/rules/`.
+5. Keep managed support assets namespaced under `~/.codex/devenv-ops/`.
+6. Keep ticket, PR, and git governance in the repo, not in the home directory.
 
 ## Precedence
 
@@ -56,30 +58,9 @@ Examples:
 - `copilot:claude-sonnet-4.6@github-copilot`
 - `fleet:mistral@openclaw/windows-laptop`
 
-## Human alias convention
+## Implementation status after #468
 
-- Human alias is display-friendly; structured provenance is source of truth.
-- Given name derives from team + model family.
-- Surname derives from Agile role.
-- Role surnames: Manager=`Mason`, Collaborator=`Harper`, Admin=`Reyes`, Consultant=`Vale`.
-- Example: `Quill Mason | codex:gpt-5.4@local | role:manager`
-
-## Required signing surfaces
-
-- GitHub baton artifacts and exception notes
-- PR descriptions and review/closeout evidence
-- AI-authored governance/design docs
-- AI-authored commits via trailers when the toolchain permits
-
-## Git trailer contract
-
-- `AI-Signature: <human-alias>`
-- `AI-Team-Model: <team>:<model>@<substrate>[/<device>]`
-- `AI-Role: <role>`
-
-## Implementation next steps
-
-- Extend deploy/sync to manage Codex home targets.
-- Add repo-init scaffolding for Codex-aware `AGENTS.md`.
-- Add helpers or hooks that stamp commit/PR trailers and bodies.
-- Keep signing rules global, but let repos add stricter local variants.
+- Deploy/sync target `~/.agents/skills/`, `~/.codex/config.toml`, `~/.codex/hooks.json`, `~/.codex/rules/`, and namespaced support assets under `~/.codex/devenv-ops/`.
+- Shared governance hooks resolve runtime-sensitive state, wiki, task-router, and repo-scope paths for Codex as well as Copilot.
+- Repo docs and command surfaces expose Codex deploy/sync flows as first-class operations.
+- Plugin packaging remains a future enhancement, but the installer now uses currently documented Codex-native surfaces directly.

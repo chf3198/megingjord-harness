@@ -54,7 +54,7 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
             flags["code_touched"] = True
             roles["collaborator"] = True
 
-    if tool not in {"run_in_terminal", "terminal", "runTerminalCommand"}:
+    if tool not in {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}:
         return
 
     _match_ops = [

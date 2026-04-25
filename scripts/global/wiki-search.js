@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 // wiki-search.js — Global wiki search (works from any repo)
-// Deployed to ~/.copilot/scripts/wiki-search.js
-// Usage: node ~/.copilot/scripts/wiki-search.js "your question"
+// Deployed to ~/.copilot/scripts/wiki-search.js and ~/.codex/devenv-ops/scripts/wiki-search.js
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const WIKI_DIR = process.env.WIKI_DIR
-  || path.join(process.env.HOME || '', '.copilot', 'wiki');
+const WIKI_DIR = process.env.WIKI_DIR || [
+  path.join(process.env.HOME || '', '.copilot', 'wiki'),
+  path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'devenv-ops', 'wiki'),
+].find((dir) => fs.existsSync(dir));
 
 function listPages() {
   const dirs = ['entities', 'concepts', 'sources', 'syntheses'];
@@ -42,7 +44,7 @@ function main() {
   }
   if (!fs.existsSync(WIKI_DIR)) {
     console.error(`❌ Wiki not found at ${WIKI_DIR}`);
-    console.error('Run: npm run deploy:apply (in devenv-ops)');
+    console.error('Run: npm run deploy:apply or npm run deploy:codex:apply (in devenv-ops)');
     process.exit(1);
   }
   const pages = listPages();

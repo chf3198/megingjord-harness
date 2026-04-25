@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-CONFIG_PATH = Path.home() / ".copilot" / "hooks" / "repo-scope.json"
+from runtime_paths import repo_scope_candidates
 
 
 def _norm(path: str) -> str:
@@ -13,20 +13,18 @@ def _norm(path: str) -> str:
 
 
 def is_repo_enabled(cwd: str) -> bool:
-    try:
-        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return False
-
-    default_enabled = bool(data.get("default_enabled", False))
-    enabled = data.get("enabled_repos", [])
-    if not isinstance(enabled, list):
-        return default_enabled
-
     cur = _norm(cwd)
-    for item in enabled:
-        if not isinstance(item, str):
+    fallback = False
+    for cfg in repo_scope_candidates():
+        try:
+            data = json.loads(cfg.read_text(encoding="utf-8"))
+        except Exception:
             continue
-        if _norm(item) == cur:
-            return True
-    return default_enabled
+        enabled = data.get("enabled_repos", [])
+        fallback = fallback or bool(data.get("default_enabled", False))
+        if not isinstance(enabled, list):
+            continue
+        for item in enabled:
+            if isinstance(item, str) and _norm(item) == cur:
+                return True
+    return fallback

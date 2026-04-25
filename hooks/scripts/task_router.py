@@ -2,13 +2,12 @@
 """Task router helpers for prompt classification and state persistence."""
 import json
 import subprocess
-from pathlib import Path
+
+from runtime_paths import script_candidates
 
 
 def _candidates() -> list[Path]:
-    repo = Path(__file__).resolve().parents[2] / "scripts" / "global" / "task-router.js"
-    runtime = Path.home() / ".copilot" / "scripts" / "task-router.js"
-    return [repo, runtime]
+    return script_candidates("task-router.js")
 
 
 def classify_prompt(prompt: str) -> dict | None:

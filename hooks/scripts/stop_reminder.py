@@ -63,11 +63,8 @@ def main() -> int:
 
     out = {"systemMessage": "\n\n".join(messages)}
     if block_reason:
-        out["hookSpecificOutput"] = {
-            "hookEventName": "Stop",
-            "decision": "block",
-            "reason": block_reason,
-        }
+        out["decision"] = "block"
+        out["reason"] = block_reason
 
     if not block_reason:
         roles["consultant"] = True
