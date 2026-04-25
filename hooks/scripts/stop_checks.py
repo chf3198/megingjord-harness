@@ -29,7 +29,6 @@ ADMIN_STEPS = (
 def check_uncommitted(
     uncommitted: list[str],
 ) -> tuple[str | None, str | None]:
-    """Check for uncommitted code files. Returns (block_reason, message)."""
     if not uncommitted:
         return None, None
     code_files = [
@@ -76,7 +75,6 @@ def check_admin_ops(
 def post_merge_messages(
     signals: list[str], has_messages: bool,
 ) -> list[str]:
-    """Generate post-merge governance checklist messages."""
     if "code-changed" in signals or "extension-changed" in signals:
         return [post_merge_checklist()]
     if not has_messages:
@@ -88,13 +86,14 @@ def post_merge_messages(
 
 
 def wiki_pending_message(cwd: str, flags: dict, ops: dict) -> str | None:
-    """Return wiki-ingest reminder when significant work happened."""
-    if not (Path(cwd) / "wiki" / "log.md").is_file():
-        return None
     touched = any(flags.get(k) for k in ("code_touched", "docs_touched", "extension_touched"))
     if not touched or ops.get("issue_close"):
         return None
-    return (
-        "WIKI PENDING — Significant work detected. Before session end, "
-        "append wiki/log.md and update wiki/index.md if new pages were created."
-    )
+    if (Path(cwd) / "wiki" / "log.md").is_file():
+        return ("WIKI PENDING — Significant work detected. Before session end, "
+                "append wiki/log.md and update wiki/index.md if new pages were created.")
+    from runtime_paths import wiki_candidates
+    if any((c / "log.md").is_file() for c in wiki_candidates()):
+        return ("WIKI PENDING (cross-repo) — Significant work detected. "
+                "Update wiki/log.md and wiki/index.md in devenv-ops before session end.")
+    return None
