@@ -53,6 +53,19 @@
       }
     }
   },
+  "closure_evidence": {
+    "required": ["github_evidence_block", "consultant_closeout_present"],
+    "recommended": ["test_coverage_delta", "docs_updated"],
+    "github_evidence_block": "PR link + CI status (pass/fail)",
+    "consultant_closeout_present": "## CONSULTANT_CLOSEOUT section with Signed-by present",
+    "test_coverage_delta": "Coverage % before/after (soft requirement)",
+    "docs_updated": "Link to updated doc or explicit 'N/A' with reason"
+  },
+  "baton_independence": {
+    "rule": "ADMIN_HANDOFF agent must differ from COLLABORATOR_HANDOFF agent",
+    "detection": "Compare Signed-by field in each baton section",
+    "violation_action": "Flag as governance violation; block status:done transition"
+  },
   "detection_order": [
     "vscode-extension",
     "web-app",

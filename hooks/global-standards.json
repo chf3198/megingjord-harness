@@ -1,4 +1,16 @@
 {
+  "pr_policy": {
+    "batch_threshold": {
+      "max_files_changed": 10,
+      "max_lines_diff": 500,
+      "rationale": "Keeps PRs reviewable; split larger changes into stacked PRs",
+      "enforcement": "BLOCKER_NOTE required in ticket if threshold exceeded with justification"
+    },
+    "independent_verification": {
+      "rule": "ADMIN_HANDOFF signer must differ from COLLABORATOR_HANDOFF signer",
+      "rationale": "Prevents self-approval; ensures cross-agent review"
+    }
+  },
   "hooks": {
     "SessionStart": [
       {

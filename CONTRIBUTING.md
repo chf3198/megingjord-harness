@@ -87,14 +87,10 @@ Use the appropriate template when opening issues:
 - **Epic** → `epic.yml`
 - **Research** → `research.yml`
 
-## Baton Gate Chain (CI enforcement)
+## Baton Gate Chain
 
-Every PR runs the `baton-gates.yml` workflow with three sequential environment gates:
-
-| Gate | Environment | Approves |
-|---|---|---|
-| `collaborator-gate` | `collaborator-gate` | COLLABORATOR_HANDOFF — work validated |
-| `admin-gate` | `admin-gate` | ADMIN_HANDOFF — CI gates verified |
-| `consultant-gate` | `consultant-gate` | CONSULTANT_CLOSEOUT — ready to merge |
-
-Each gate pauses for explicit operator approval before the next fires. The chain cannot be bypassed — admin-gate cannot run until collaborator-gate is approved, and consultant-gate cannot run until admin-gate is approved.
+Every PR runs `baton-gates.yml`: collaborator-gate → admin-gate → consultant-gate. Each gate
+requires explicit approval before the next fires. **All baton sections require** `Signed-by:` /
+`Team&Model:` / `Role:` (#485). Admin signer must differ from Collaborator (#494). PRs >10
+files or >500 LOC require a BLOCKER_NOTE (#492). Closure requires GitHub Evidence Block +
+CONSULTANT_CLOSEOUT (#493).
