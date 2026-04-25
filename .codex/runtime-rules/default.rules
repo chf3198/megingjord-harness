@@ -1,0 +1,18 @@
+# Prompt before running risky history-rewriting Git commands outside the sandbox.
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "prompt",
+    justification = "Force pushes can rewrite shared history.",
+)
+
+prefix_rule(
+    pattern = ["git", "reset", "--hard"],
+    decision = "prompt",
+    justification = "Hard resets can discard governed work.",
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", "close"],
+    decision = "prompt",
+    justification = "Issue closure must follow baton closeout evidence.",
+)

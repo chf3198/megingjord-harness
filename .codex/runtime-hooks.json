@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "startup|resume|clear",
+      "hooks": [{
+        "type": "command",
+        "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/session_context.py\"",
+        "timeout": 10,
+        "statusMessage": "Loading DevEnv Ops governance context"
+      }]
+    }],
+    "UserPromptSubmit": [{
+      "hooks": [
+        { "type": "command", "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/manager_ticket_gate.py\"", "timeout": 10 },
+        { "type": "command", "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/userprompt_gate.py\"", "timeout": 10 }
+      ]
+    }],
+    "PreToolUse": [{
+      "matcher": "Bash|apply_patch|Edit|Write",
+      "hooks": [
+        { "type": "command", "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/commit_ticket_gate.py\"", "timeout": 10 },
+        { "type": "command", "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/pretool_guard.py\"", "timeout": 10 }
+      ]
+    }],
+    "PostToolUse": [{
+      "matcher": "Bash|apply_patch|Edit|Write",
+      "hooks": [{
+        "type": "command",
+        "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/posttool_reminders.py\"",
+        "timeout": 10
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "DEVENT_OPS_RUNTIME=codex /usr/bin/python3 \"$HOME/.codex/devenv-ops/hooks/stop_reminder.py\"",
+        "timeout": 10
+      }]
+    }]
+  }
+}

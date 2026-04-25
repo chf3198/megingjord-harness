@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Governance state persistence: load, save, ensure, reset."""
 from __future__ import annotations
-
 import hashlib
 import json
 import os
@@ -9,8 +8,9 @@ from pathlib import Path
 from typing import Any
 
 from repo_detection import detect_repo_type
+from runtime_paths import state_root
 
-STATE_ROOT = Path.home() / ".copilot" / "hooks" / "state"
+STATE_ROOT = state_root()
 
 
 def _repo_key(cwd: str) -> str:
@@ -18,40 +18,24 @@ def _repo_key(cwd: str) -> str:
 
 
 def state_path(cwd: str) -> Path:
-    return STATE_ROOT / f"repo-{_repo_key(cwd)}.json"
+    return state_root() / f"repo-{_repo_key(cwd)}.json"
 
 
 def _default_state(cwd: str) -> dict[str, Any]:
-    return {
-        "cwd": cwd,
-        "repo_type": detect_repo_type(cwd),
-        "routing": {
-            "lane": "free", "backend": "auto",
-            "recommended_model": "Auto",
-            "confidence": "medium", "rationale": "default",
-        },
-        "roles": {
-            "manager": False, "collaborator": False,
-            "admin": False, "consultant": False,
-        },
-        "flags": {
-            "code_touched": False, "docs_touched": False,
-            "extension_touched": False,
-        },
-        "admin_ops": {
-            "version_check": False, "commit": False,
-            "push": False, "pr_create": False,
-            "ci_green": False, "merge": False,
-            "publish": False, "release_integrity": False,
-            "gh_release": False, "issue_close": False,
-            "issue_linked": False, "visual_qa": False,
-        },
-        "drift": {
-            "commits": 0, "commits_with_ticket": 0,
-            "branches": 0, "branches_compliant": 0,
-            "edits_gated": 0, "edits_ungated": 0,
-        },
-    }
+    return {"cwd": cwd, "repo_type": detect_repo_type(cwd), "routing": {
+        "lane": "free", "backend": "auto", "recommended_model": "Auto",
+        "confidence": "medium", "rationale": "default"},
+        "roles": {"manager": False, "collaborator": False,
+                  "admin": False, "consultant": False},
+        "flags": {"code_touched": False, "docs_touched": False,
+                  "extension_touched": False},
+        "admin_ops": {"version_check": False, "commit": False, "push": False,
+                      "pr_create": False, "ci_green": False, "merge": False,
+                      "publish": False, "release_integrity": False,
+                      "gh_release": False, "issue_close": False,
+                      "issue_linked": False, "visual_qa": False},
+        "drift": {"commits": 0, "commits_with_ticket": 0, "branches": 0,
+                  "branches_compliant": 0, "edits_gated": 0, "edits_ungated": 0}}
 
 
 def load_state(cwd: str) -> dict[str, Any]:
@@ -62,10 +46,10 @@ def load_state(cwd: str) -> dict[str, Any]:
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             return _default_state(cwd)
-        defaults = _default_state(cwd)
+        defaults, keys = _default_state(cwd), ("routing", "roles", "flags", "admin_ops", "drift")
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
-        for key in ("routing", "roles", "flags", "admin_ops", "drift"):
+        for key in keys:
             if key not in data:
                 data[key] = defaults[key]
             elif isinstance(defaults[key], dict):
@@ -80,9 +64,7 @@ def save_state(state: dict[str, Any]) -> None:
     cwd = str(state.get("cwd") or os.getcwd())
     path = state_path(cwd)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(state, indent=2, sort_keys=True), encoding="utf-8"
-    )
+    path.write_text(json.dumps(state, indent=2, sort_keys=True), encoding="utf-8")
 
 
 def ensure_state(cwd: str) -> dict[str, Any]:

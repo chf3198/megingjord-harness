@@ -22,7 +22,7 @@ def main() -> int:
 
     cwd = Path(payload.get("cwd") or os.getcwd())
     source = str(payload.get("source") or "")
-    if source == "new":
+    if source in {"new", "startup", "clear"}:
         state = reset_state(str(cwd))
     else:
         state = ensure_state(str(cwd))

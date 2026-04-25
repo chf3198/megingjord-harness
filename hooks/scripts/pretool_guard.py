@@ -9,6 +9,7 @@ from admin_patterns import (  # noqa: E501
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
 from governance_state import ensure_state
+from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
@@ -26,7 +27,7 @@ def check_terminal(joined: str, state: dict) -> int | None:
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc, fix/<ticket#>-desc, skill/<name>, or chore/<desc>.")
-    if ".copilot/hooks/scripts" in joined:
+    if any(marker in joined for marker in runtime_hook_paths()):
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening or bypass logic.")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
         return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
@@ -67,7 +68,7 @@ def main() -> int:
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file"}:
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
-    if tool in {"run_in_terminal","terminal","runTerminalCommand"}:
+    if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
         result = check_terminal("\n".join(values), state)
         if result is not None: return result
     suspicious = [v for v in values if "/" in v or "." in v]

@@ -1,7 +1,7 @@
 {
   "name": "devenv-ops",
   "version": "3.1.0",
-  "description": "AI agent governance harness — 24 skills, extensible agents, hooks, and wiki as a VS Code Agent Plugin",
+  "description": "AI agent governance harness — multi-runtime skills, hooks, agents, wiki, and Codex/Copilot install tooling",
   "private": true,
   "scripts": {
     "prepare": "cp hooks/scripts/validate-branch-name.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
@@ -12,8 +12,16 @@
     "lint:router": "node scripts/lint-router.js",
     "sync": "bash scripts/sync.sh",
     "sync:dry": "bash scripts/sync.sh --dry-run",
+    "sync:codex": "bash scripts/sync.sh --target codex",
+    "sync:codex:dry": "bash scripts/sync.sh --dry-run --target codex",
+    "sync:both": "bash scripts/sync.sh --target both",
+    "sync:both:dry": "bash scripts/sync.sh --dry-run --target both",
     "deploy": "bash scripts/deploy.sh",
     "deploy:apply": "bash scripts/deploy.sh --apply",
+    "deploy:codex": "bash scripts/deploy.sh --target codex",
+    "deploy:codex:apply": "bash scripts/deploy.sh --apply --target codex",
+    "deploy:both": "bash scripts/deploy.sh --target both",
+    "deploy:both:apply": "bash scripts/deploy.sh --apply --target both",
     "health": "node scripts/health-check.js",
     "router:smoke": "node scripts/global/task-router-smoke.js",
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
@@ -40,6 +48,7 @@
   },
   "keywords": [
     "devops",
+    "codex",
     "copilot-skills",
     "monitoring",
     "dashboard"

@@ -17,7 +17,7 @@ function skillRoutingBody() {
 
 1. Read .github/copilot-instructions.md first.
 2. Apply nearest AGENTS.md instructions.
-3. Prefer reusable global skills from ~/.copilot/skills before ad-hoc reasoning.
+3. Prefer reusable global skills from ~/.copilot/skills or ~/.agents/skills before ad-hoc reasoning.
 4. For every task, invoke \`role-baton-orchestrator\` first (Manager → Collaborator → Admin → Consultant).
 5. For repository workflow routing, invoke:
    - \`repo-standards-router\` for task classification and gates

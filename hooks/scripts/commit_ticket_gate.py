@@ -55,7 +55,7 @@ def main() -> int:
         payload.get("tool_input"), dict) else [])
     joined = "\n".join(str(v) for v in values)
 
-    if tool not in {"run_in_terminal", "terminal"}:
+    if tool not in {"run_in_terminal", "terminal", "Bash"}:
         return 0
 
     if "git commit" not in joined:
