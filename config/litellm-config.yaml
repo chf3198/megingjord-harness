@@ -1,0 +1,51 @@
+# LiteLLM gateway config — devenv-ops routing backbone
+# Deploy on windows-laptop: pip install litellm[proxy] && litellm --config litellm-config.yaml
+# Self-hosted only (AC8). Sensitive keys via environment variables, never committed.
+
+model_list:
+  - model_name: fleet-primary
+    litellm_params:
+      model: ollama/qwen2.5:7b-instruct
+      api_base: http://localhost:11434
+  - model_name: fleet-fallback
+    litellm_params:
+      model: ollama/mistral:latest
+      api_base: http://localhost:11434
+  - model_name: haiku
+    litellm_params:
+      model: claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+  - model_name: sonnet
+    litellm_params:
+      model: claude-sonnet-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+router_settings:
+  routing_strategy: least-busy
+  fallbacks:
+    - fleet-primary:
+        - fleet-fallback
+        - haiku
+        - sonnet
+  num_retries: 2
+  timeout: 120
+
+litellm_settings:
+  success_callback: []
+  failure_callback: []
+  drop_params: true
+
+budget_manager:
+  total_budget: 50.00
+  duration: monthly
+  budget_alerts:
+    - threshold: 0.80
+      email: chf3198@yahoo.com
+
+# Environment variables required on deployment host:
+# ANTHROPIC_API_KEY=sk-ant-... (never commit the real key)
+# Optional: LITELLM_MASTER_KEY=sk-... (gateway auth token)
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL

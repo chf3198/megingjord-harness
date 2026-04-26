@@ -2,7 +2,7 @@
 'use strict';
 // Cascade dispatch: Ollama → heuristic gate → judge gate → escalation signal.
 
-const { chatComplete: ollamaChat, healthCheck } = require('./ollama-direct');
+const { chatComplete: ollamaChat, healthCheck } = require('./litellm-client');
 const { recordTelemetry } = require('./model-routing-telemetry');
 const { getProfile } = require('./fleet-config');
 const { judgeResponse } = require('./local-judge');
