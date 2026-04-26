@@ -74,7 +74,7 @@ Each status names the active agent type. One glance = who owns it now.
 2. **Apply full label set** — type + status:backlog + priority + area.
 3. **Write scope comment** — objective, AC, constraints.
 4. **Link ticket to branch** — branch: `<type>/<issue#>-<slug>`.
-5. **Link ticket to PR** — PR body includes `Closes #N`.
+5. **Link ticket to PR** — PR body includes `Refs #N` (not `Closes #N`). Issue close is Consultant authority after CONSULTANT_CLOSEOUT.
 6. **Enforce ticket closure** — close only after merge + Consultant CLOSEOUT.
 7. **One symptom per ticket** — if a UAT failure surface has multiple distinct symptoms (e.g. panel clipping AND label overflow), each symptom gets its own ticket. Never group unrelated layout bugs under one issue.
 
@@ -82,7 +82,7 @@ Each status names the active agent type. One glance = who owns it now.
 
 - Branch: `feat/11-ticket-baton-system`
 - Commit: `feat(skills): implement ticket-as-baton governance #11`
-- PR: Body must include `Closes #11` + validation evidence
+- PR: Body must include `Refs #11` + validation evidence (not `Closes #11`)
 
 ## GitHub evidence block (required for closeout)
 
