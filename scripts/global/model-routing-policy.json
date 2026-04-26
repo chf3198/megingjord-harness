@@ -11,10 +11,11 @@
     "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
   },
   "models": {
-    "free": { "id": "gpt-5-mini", "mult": 0 },
-    "fleet": { "id": "qwen2.5-7b", "mult": 0 },
-    "premium": { "id": "Claude Sonnet 4.6", "mult": 1 },
-    "fallback": { "id": "gpt-5-mini", "mult": 0 }
+    "free": { "id": "auto", "mult": 0 },
+    "fleet": { "id": "qwen2.5:7b-instruct", "mult": 0, "endpoint": "ollama" },
+    "haiku": { "id": "claude-haiku-4-5-20251001", "mult": 0.08 },
+    "premium": { "id": "claude-sonnet-4-6", "mult": 1 },
+    "fallback": { "id": "claude-haiku-4-5-20251001", "mult": 0.08 }
   },
   "rollback": {
     "enabled": true,
