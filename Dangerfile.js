@@ -7,12 +7,12 @@ const body = pr.body || '';
 const title = pr.title || '';
 const branch = pr.head.ref || '';
 
-// Rule 1: PR body must reference a closing issue
-const closesRef = /closes?\s+#\d+/i;
-if (!closesRef.test(body)) {
+// Rule 1: PR body must reference an issue via Refs or Closes
+const issueRef = /(refs?|closes?)\s+#\d+/i;
+if (!issueRef.test(body)) {
   fail(
-    '**Ticket-first violation**: PR body must contain `Closes #N` to link ' +
-    'a GitHub issue. Every change requires a pre-existing ticket.'
+    '**Ticket-first violation**: PR body must contain `Refs #N` (or `Closes #N`) ' +
+    'to link a GitHub issue. Every change requires a pre-existing ticket.'
   );
 }
 

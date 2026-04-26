@@ -4,7 +4,8 @@
 
 ## Linked Issue
 
-Closes #<!-- issue number -->
+Refs #<!-- issue number -->
+<!-- Note: Consultant closes the issue explicitly via gh issue close after CONSULTANT_CLOSEOUT. Do NOT use "Closes #N" — it auto-closes the issue before Consultant review. -->
 
 ## Changes
 
