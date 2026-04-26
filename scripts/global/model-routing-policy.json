@@ -1,26 +1,68 @@
 {
-  "version": "1.0.0",
+  "version": "2.0.0",
   "defaultLane": "free",
   "taskClasses": {
-    "routine": ["search", "grep", "read", "docs", "simple"],
-    "coding": ["implement", "refactor", "tests", "integration"],
-    "architecture": ["architecture", "design", "risk", "security", "concurrency"]
+    "routine": ["search", "grep", "read", "docs", "simple", "list", "find"],
+    "coding": ["implement", "refactor", "tests", "integration", "generate", "config"],
+    "architecture": ["architecture", "design", "risk", "security", "concurrency", "multi-file"]
   },
   "escalationRules": {
     "premiumOn": ["failed", "stuck", "unclear", "cross-system", "trade-off"],
     "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
   },
   "models": {
-    "free": { "id": "gpt-5-mini", "mult": 0 },
-    "fleet": { "id": "qwen2.5-7b", "mult": 0 },
-    "premium": { "id": "Claude Sonnet 4.6", "mult": 1 },
-    "fallback": { "id": "gpt-5-mini", "mult": 0 }
+    "free":    { "id": "auto",                       "mult": 0,    "costPer1kTokens": 0 },
+    "fleet":   { "id": "qwen2.5:7b-instruct",        "mult": 0,    "costPer1kTokens": 0,      "endpoint": "ollama" },
+    "haiku":   { "id": "claude-haiku-4-5-20251001",  "mult": 0.08, "costPer1kTokens": 0.00088 },
+    "premium": { "id": "claude-sonnet-4-6",           "mult": 1,    "costPer1kTokens": 0.009   },
+    "fallback":{ "id": "claude-haiku-4-5-20251001",  "mult": 0.08, "costPer1kTokens": 0.00088 }
+  },
+  "capability_matrix": {
+    "_doc": "Per-dimension tier thresholds. Manager uses this for ticket assignment.",
+    "reasoning_depth": {
+      "fleet":   "single-hop lookup, extraction, slot-filling",
+      "haiku":   "2-3 step reasoning, structured output with schema",
+      "premium": "multi-hop chain-of-thought, planning, proof"
+    },
+    "code_complexity": {
+      "fleet":   "autocomplete, boilerplate, single-function (<30 lines), config gen",
+      "haiku":   "single-file refactor, test generation, bug fix with clear root cause",
+      "premium": "multi-file refactor, cross-module debugging, architecture design"
+    },
+    "context_length": {
+      "fleet":   "<8K tokens (7B model effective window)",
+      "haiku":   "8K-32K tokens",
+      "premium": ">32K tokens or coherence across large context required"
+    },
+    "tool_call_chain": {
+      "fleet":   "1-2 tool calls, well-specified inputs, structured outputs",
+      "haiku":   "3-4 tool calls with retry, moderate output variance",
+      "premium": "5+ tool calls, long-horizon agent plan, error amplification risk"
+    },
+    "ambiguity_level": {
+      "fleet":   "well-specified with clear output schema, in-distribution task",
+      "haiku":   "multi-constraint with some ambiguity, defined acceptance criteria",
+      "premium": "underspecified, competing constraints, OOD novel task"
+    },
+    "escalation_direct_to_premium": [
+      "security review", "vulnerability audit", "architecture design",
+      "incident response", "cross-system trade-off", "concurrency analysis"
+    ]
+  },
+  "cascade": {
+    "enabled": true,
+    "tiers": ["fleet", "haiku", "premium"],
+    "qualityThresholds": {
+      "minResponseLength": 30,
+      "structuralValidation": true,
+      "confidenceLevels": { "high": "return", "low": "escalate_to_haiku" }
+    }
   },
   "rollback": {
     "enabled": true,
     "windowDays": 7,
     "minSuccessRate": 0.75,
-    "maxPremiumShare": 0.45,
-    "forceLane": "free"
+    "maxPremiumShare": 0.20,
+    "forceLane": "fleet"
   }
 }

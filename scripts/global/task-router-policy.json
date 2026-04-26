@@ -4,23 +4,23 @@
   "lanes": {
     "free": {
       "backend": "auto",
-      "recommendedModel": "Auto",
+      "recommendedModel": "claude-haiku-4-5-20251001",
       "keywords": [
         "search", "grep", "find", "explain", "read", "docs",
         "rename", "boilerplate", "simple", "small", "single-file"
       ]
     },
     "fleet": {
-      "backend": "openclaw",
-      "recommendedModel": "qwen2.5-7b",
+      "backend": "ollama",
+      "recommendedModel": "qwen2.5:7b-instruct",
       "keywords": [
         "multi-file", "tests", "refactor", "implement", "migration",
         "pattern", "transform", "integration", "batch", "known"
       ]
     },
     "premium": {
-      "backend": "sonnet",
-      "recommendedModel": "Claude Sonnet 4.6",
+      "backend": "anthropic",
+      "recommendedModel": "claude-sonnet-4-6",
       "keywords": [
         "architecture", "ambiguous", "complex", "hard", "risk",
         "security", "performance", "concurrency", "incident", "design"

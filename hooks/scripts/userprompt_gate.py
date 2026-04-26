@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""UserPromptSubmit hook: pre-closeout governance gating hints."""
+"""UserPromptSubmit hook: routing context + pre-closeout governance gating."""
 import json
 import os
 import re
@@ -12,10 +12,26 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from governance_state import ensure_state, save_state
 from repo_scope import is_repo_enabled
+from routing_context import build_route_context, run_fleet_cascade
+from semantic_router import classify as semantic_classify
 from task_router import apply_route, classify_prompt
 
+FINISH_RE = re.compile(
+    r"\b(done|finish|finished|complete|completed|close out|wrap up|ship|release)\b",
+    re.IGNORECASE,
+)
+_ADMIN_KEYS = ("commit", "push", "pr_create", "ci_green", "merge")
+_EXT_KEYS = ("publish", "release_integrity", "gh_release")
 
-FINISH_RE = re.compile(r"\b(done|finish|finished|complete|completed|close out|wrap up|ship|release)\b", re.IGNORECASE)
+
+def _admin_missing(state: dict) -> list[str]:
+    flags, ops = state.get("flags", {}), state.get("admin_ops", {})
+    missing = []
+    if flags.get("code_touched"):
+        missing += [k for k in _ADMIN_KEYS if not ops.get(k)]
+    if state.get("repo_type") == "vscode-extension" and flags.get("extension_touched"):
+        missing += [k for k in _EXT_KEYS if not ops.get(k)]
+    return missing
 
 
 def main() -> int:
@@ -26,64 +42,54 @@ def main() -> int:
 
     prompt = str(payload.get("prompt", ""))
     cwd = str(payload.get("cwd") or os.getcwd())
-
     if not is_repo_enabled(cwd):
         return 0
 
     state = ensure_state(cwd)
+    # Layer 0: semantic pre-classifier (zero cost, <1ms)
+    semantic = semantic_classify(prompt)
+    # Layer 1+: keyword classifier (falls through if semantic is unclear)
     route = classify_prompt(prompt)
+    if semantic.get("tier") and semantic.get("confidence") == "high":
+        lane_map = {"free": "free", "fleet": "fleet", "premium": "premium"}
+        if semantic["tier"] in lane_map:
+            route = route or {}
+            route["lane"] = lane_map[semantic["tier"]]
+            route["rationale"] = f"semantic:{semantic['intent']}"
     apply_route(state, route)
+
+    words = prompt.split()
+    cascade_result = None
+    if route and route.get("lane") == "fleet" and len(words) >= 6:
+        cascade_result = run_fleet_cascade(prompt, state)
+
     save_state(state)
 
-    route_msg = None
-    if route and len(prompt.split()) >= 6:
-        route_msg = (
-            "Task router: lane={lane}, backend={backend}, model={model}, "
-            "confidence={confidence}."
-        ).format(
-            lane=route.get("lane", "free"),
-            backend=route.get("backend", "auto"),
-            model=route.get("recommendedModel", "Auto"),
-            confidence=route.get("confidence", "medium"),
-        )
+    context_parts = []
+    if cascade_result and cascade_result.get("ok") and not cascade_result.get("escalation_needed"):
+        context_parts.append(f"[Fleet response]\n{cascade_result['content']}\n[/Fleet response]")
+    if route and len(words) >= 6:
+        context_parts.append(build_route_context(route, cascade_result))
 
     if not FINISH_RE.search(prompt):
-        if route_msg:
-            print(json.dumps({
-                "hookSpecificOutput": {
-                    "hookEventName": "UserPromptSubmit",
-                    "additionalContext": route_msg,
-                }
-            }))
+        if context_parts:
+            print(json.dumps({"hookSpecificOutput": {
+                "hookEventName": "UserPromptSubmit",
+                "additionalContext": "\n\n".join(context_parts),
+            }}))
         return 0
 
-    flags = state.get("flags", {})
-    ops = state.get("admin_ops", {})
-    repo_type = state.get("repo_type", "generic")
-
-    missing = []
-    if flags.get("code_touched", False):
-        missing.extend([k for k in ("commit", "push", "pr_create", "ci_green", "merge") if not ops.get(k, False)])
-    if repo_type == "vscode-extension" and flags.get("extension_touched", False):
-        missing.extend([k for k in ("publish", "release_integrity", "gh_release") if not ops.get(k, False)])
-
+    missing = _admin_missing(state)
     if not missing:
         return 0
 
-    extra = (
-        "Finish intent detected, but Admin baton is incomplete. "
-        "Missing required steps: " + ", ".join(missing) + "."
-    )
-    if route_msg:
-        extra = route_msg + " " + extra
-    out = {
-        "hookSpecificOutput": {
-            "hookEventName": "UserPromptSubmit",
-            "additionalContext": extra,
-        },
+    msg = "Finish intent detected, but Admin baton is incomplete. Missing: " + ", ".join(missing) + "."
+    if context_parts:
+        msg = context_parts[-1] + " " + msg
+    print(json.dumps({
+        "hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": msg},
         "systemMessage": "Governance gate: completion requested before required Admin steps were recorded.",
-    }
-    print(json.dumps(out))
+    }))
     return 0
 
 
