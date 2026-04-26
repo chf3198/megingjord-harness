@@ -91,9 +91,10 @@ Use the appropriate template when opening issues:
 ## Baton Gate Chain
 
 Every PR runs `baton-gates.yml`: collaborator-gate → admin-gate → consultant-gate. Each gate
-requires explicit approval before the next fires. **All baton sections require** `Signed-by:` /
-`Team&Model:` / `Role:` (#485). Admin signer must differ from Collaborator (#494). PRs >10
-files or >500 LOC require a BLOCKER_NOTE (#492). Closure requires GitHub Evidence Block +
-CONSULTANT_CLOSEOUT (#493).
+checks the PR body/comments for its artifact string — no human approval needed (#516). **PR
+body must include all three**: `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`.
+All sections require `Signed-by:` / `Team&Model:` / `Role:` (#485). Admin ≠ Collaborator
+(#494). PRs >10 files or >500 LOC: BLOCKER_NOTE (#492). Evidence Block + CLOSEOUT (#493).
 
-**Admin must verify before merging**: (1) `pr-title-required` green (subject ≤60 chars, Conventional Commits); (2) `collaborator-gate` green; (3) all other required checks green. Merge with pending/failing checks is an Admin governance failure (#511).
+**Admin must verify before merging**: (1) `pr-title-required` green (≤60 chars); (2) all three
+gates green; (3) artifact strings present in PR body. Merge with failing checks is Admin:F (#511).

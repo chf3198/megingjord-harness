@@ -12,22 +12,64 @@ jobs:
   collaborator-gate:
     name: collaborator-gate
     runs-on: ubuntu-latest
-    environment: collaborator-gate
     steps:
-      - run: echo "COLLABORATOR_HANDOFF acknowledged — work validated"
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, per_page: 100,
+            });
+            const all = body + '\n' + comments.map(c => c.body).join('\n');
+            if (!all.includes('COLLABORATOR_HANDOFF')) {
+              core.setFailed(
+                'COLLABORATOR_HANDOFF artifact not found in PR body or comments. ' +
+                'Collaborator must emit this string before Admin can proceed.'
+              );
+            }
 
   admin-gate:
     name: admin-gate
     needs: [collaborator-gate]
     runs-on: ubuntu-latest
-    environment: admin-gate
     steps:
-      - run: echo "ADMIN_HANDOFF acknowledged — CI gates verified"
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, per_page: 100,
+            });
+            const all = body + '\n' + comments.map(c => c.body).join('\n');
+            if (!all.includes('ADMIN_HANDOFF')) {
+              core.setFailed(
+                'ADMIN_HANDOFF artifact not found in PR body or comments. ' +
+                'Admin must emit this string after verifying all CI checks pass.'
+              );
+            }
 
   consultant-gate:
     name: consultant-gate
     needs: [admin-gate]
     runs-on: ubuntu-latest
-    environment: consultant-gate
     steps:
-      - run: echo "CONSULTANT_CLOSEOUT acknowledged — ready to merge"
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: pr.number, per_page: 100,
+            });
+            const all = body + '\n' + comments.map(c => c.body).join('\n');
+            if (!all.includes('CONSULTANT_CLOSEOUT')) {
+              core.setFailed(
+                'CONSULTANT_CLOSEOUT artifact not found in PR body or comments. ' +
+                'Consultant must emit this string after independent review.'
+              );
+            }
