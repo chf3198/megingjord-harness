@@ -67,6 +67,7 @@ npm run sync:claude            # ~/.claude/ → .claude/ (pull back)
 - **≤100 lines** per file (lint-enforced)
 - **Branch before editing**: `feat/<issue>-<slug>`
 - **Conventional commits**: `feat(scope):`, `fix(scope):`
+- **settings.json drift**: Permission approvals auto-append to `.claude/settings.json`. Commit these via `chore:` commit with ticket ref before branching (#506).
 - Run `npm run lint` before pushing
 
 ## PR Checklist

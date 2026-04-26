@@ -1,6 +1,6 @@
 name: Label Lint (ADR-010)
 # Enforces ticket status/role binding rules defined in ADR-010
-# Rules: single status, single role, no role on closed/done, backlog = no role
+# Rules: single status, single role, no role on closed/done, backlog=no role, triage=manager
 
 on:
   issues:
@@ -40,6 +40,9 @@ jobs:
             }
             if (statusLabels.includes('status:backlog') && roleLabels.length > 0) {
               violations.push(`**Rule 4**: \`status:backlog\` issues must not have a \`role:\` label. Remove: ${roleLabels.join(', ')}.`);
+            }
+            if (statusLabels.includes('status:triage') && !roleLabels.includes('role:manager')) {
+              violations.push('**Rule 5**: `status:triage` issues must have `role:manager`. Epics always carry this label.');
             }
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
