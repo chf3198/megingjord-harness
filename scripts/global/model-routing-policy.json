@@ -59,11 +59,12 @@
     }
   },
   "judge": {
-    "_doc": "Layer 2 local judge gate. phi3:mini as independent judge (Phi-3 family, different arch from qwen2.5 generator). Selene-1-Mini unavailable in Ollama registry as of 2026-04-26.",
-    "enabled": true,
+    "_doc": "Layer 2 judge gate. Disabled: CPU inference on windows-laptop yields ~10s latency (AC7 needs ≤800ms). Enable when GPU confirmed. phi3:mini is the model; llama3.1:8b is now also available.",
+    "enabled": false,
     "model": "phi3:mini",
     "threshold": 0.7,
-    "fallback_on_error": true
+    "fallback_on_error": true,
+    "requires_gpu": true
   },
   "rollback": {
     "enabled": true,
