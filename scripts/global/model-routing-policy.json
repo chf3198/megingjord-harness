@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "defaultLane": "free",
   "taskClasses": {
     "routine": ["search", "grep", "read", "docs", "simple", "list", "find"],
@@ -57,6 +57,13 @@
       "structuralValidation": true,
       "confidenceLevels": { "high": "return", "low": "escalate_to_haiku" }
     }
+  },
+  "judge": {
+    "_doc": "Layer 2 local judge gate. phi3:mini as independent judge (Phi-3 family, different arch from qwen2.5 generator). Selene-1-Mini unavailable in Ollama registry as of 2026-04-26.",
+    "enabled": true,
+    "model": "phi3:mini",
+    "threshold": 0.7,
+    "fallback_on_error": true
   },
   "rollback": {
     "enabled": true,

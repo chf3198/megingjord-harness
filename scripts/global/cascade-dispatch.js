@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 'use strict';
-// Cascade dispatch: Ollama (free) → quality gate → escalation signal.
-// Implements FrugalGPT-style adequacy scoring for 3-tier cost routing.
+// Cascade dispatch: Ollama → heuristic gate → judge gate → escalation signal.
 
 const { chatComplete: ollamaChat, healthCheck } = require('./ollama-direct');
 const { recordTelemetry } = require('./model-routing-telemetry');
 const { getProfile } = require('./fleet-config');
-
-const DEFAULTS = { minLength: 30, timeoutMs: 8000 };
+const { judgeResponse } = require('./local-judge');
+const policy = require('./model-routing-policy.json');
 
 function hints(prompt) {
   const t = prompt.toLowerCase();
@@ -19,8 +18,7 @@ function hints(prompt) {
 }
 
 function assessQuality(content, h) {
-  if (!content || content.trim().length < DEFAULTS.minLength)
-    return { pass: false, reason: 'too_short' };
+  if (!content || content.trim().length < 30) return { pass: false, reason: 'too_short' };
   if (h.expectsCode && !/`|function|def |class |=>|const |let |var /.test(content))
     return { pass: false, reason: 'no_code_structure' };
   if (h.expectsJson) {
@@ -31,7 +29,7 @@ function assessQuality(content, h) {
   return { pass: true, reason: 'ok' };
 }
 
-async function tryOllama(prompt, model, timeoutMs) {
+async function tryOllama(prompt, model) {
   const health = await healthCheck();
   if (!health.ok) return { ok: false, reason: 'ollama_unreachable', tier: 'local' };
   const result = await ollamaChat(prompt, { model, maxTokens: 1024 });
@@ -43,9 +41,7 @@ async function cascade(prompt, opts = {}) {
   const model = opts.model || 'qwen2.5:7b-instruct';
   const h = hints(prompt);
   const start = Date.now();
-
-  // Tier 1: local Ollama
-  const local = await tryOllama(prompt, model, opts.timeoutMs || DEFAULTS.timeoutMs);
+  const local = await tryOllama(prompt, model);
   const latency = Date.now() - start;
 
   if (!local.ok) {
@@ -56,16 +52,27 @@ async function cascade(prompt, opts = {}) {
   }
 
   const quality = assessQuality(local.content, h);
-  recordTelemetry({ lane: 'fleet', model, outcome: quality.pass ? 'ok' : 'escalate',
-    escalation: quality.pass ? null : 'haiku', quality_reason: quality.reason,
-    response_length: local.content.length, latency_ms: latency, execute: true });
-
   if (!quality.pass) {
+    recordTelemetry({ lane: 'fleet', model, outcome: 'escalate', escalation: 'haiku',
+      quality_reason: quality.reason, response_length: local.content.length,
+      latency_ms: latency, execute: true });
     return { ok: true, content: local.content, tier: 'local', confidence: 'low',
       escalation_needed: true, suggested_tier: 'haiku', quality_reason: quality.reason };
   }
-  return { ok: true, content: local.content, tier: 'local',
-    confidence: 'high', escalation_needed: false, model };
+
+  // Layer 2: judge gate (semantic quality, independent model)
+  const jcfg = policy.judge;
+  const j = jcfg?.enabled ? await judgeResponse(prompt, local.content, { threshold: jcfg.threshold }) : null;
+  const judgePass = !j || !j.ok || j.decision === 'return';
+  recordTelemetry({ lane: 'fleet', model, outcome: judgePass ? 'ok' : 'escalate',
+    escalation: judgePass ? null : 'haiku', quality_reason: quality.reason,
+    ...(j?.ok && { judge_model: j.judge_model, judge_score: j.judge_score, judge_decision: j.decision }),
+    response_length: local.content.length, latency_ms: latency, execute: true });
+  if (!judgePass)
+    return { ok: true, content: local.content, tier: 'local', confidence: 'low',
+      escalation_needed: true, suggested_tier: 'haiku', quality_reason: 'judge_low_score' };
+  return { ok: true, content: local.content, tier: 'local', confidence: 'high',
+    escalation_needed: false, model };
 }
 
 async function main() {
@@ -73,9 +80,7 @@ async function main() {
   const prompt = args[args.indexOf('--prompt') + 1] || '';
   const model = args[args.indexOf('--model') + 1] || undefined;
   const json = args.includes('--json');
-
   if (!prompt) { console.error('--prompt required'); process.exit(1); }
-
   const profile = getProfile();
   if (profile.mode === 'solo') {
     const r = { ok: false, tier: 'local', escalation_needed: true,
@@ -83,11 +88,11 @@ async function main() {
     console.log(json ? JSON.stringify(r) : `escalation_needed=true reason=fleet_unavailable`);
     return;
   }
-
   const result = await cascade(prompt, { model });
   if (json) { console.log(JSON.stringify(result, null, 2)); return; }
   if (result.ok) console.log(result.content);
-  if (result.escalation_needed) process.stderr.write(`[cascade] escalate→${result.suggested_tier}: ${result.reason || result.quality_reason}\n`);
+  if (result.escalation_needed)
+    process.stderr.write(`[cascade] escalate→${result.suggested_tier}: ${result.reason || result.quality_reason}\n`);
 }
 
 if (require.main === module) main().catch(e => { console.error(e.message); process.exit(1); });
