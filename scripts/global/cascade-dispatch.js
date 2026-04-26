@@ -62,11 +62,12 @@ async function cascade(prompt, opts = {}) {
 
   // Layer 2: judge gate (semantic quality, independent model)
   const jcfg = policy.judge;
-  const j = jcfg?.enabled ? await judgeResponse(prompt, local.content, { threshold: jcfg.threshold }) : null;
+  const j = jcfg?.enabled ? await judgeResponse(prompt, local.content, { threshold: jcfg.threshold, judgeModel: jcfg.model }) : null;
   const judgePass = !j || !j.ok || j.decision === 'return';
   recordTelemetry({ lane: 'fleet', model, outcome: judgePass ? 'ok' : 'escalate',
     escalation: judgePass ? null : 'haiku', quality_reason: quality.reason,
-    ...(j?.ok && { judge_model: j.judge_model, judge_score: j.judge_score, judge_decision: j.decision }),
+    ...(j?.ok && { judge_model: j.judge_model, judge_score: j.judge_score,
+      judge_decision: j.decision, judge_latency_ms: j.latency_ms }),
     response_length: local.content.length, latency_ms: latency, execute: true });
   if (!judgePass)
     return { ok: true, content: local.content, tier: 'local', confidence: 'low',

@@ -2,9 +2,13 @@
 'use strict';
 // Unified fleet client: LiteLLM gateway (preferred) → direct Ollama (fallback).
 // Activates when LITELLM_URL env var or fleet-config OpenClaw URL resolves.
+// Uses named LiteLLM route groups to trigger fallback chain from litellm-config.yaml.
 
 const { chatComplete: ollamaChat, healthCheck: ollamaHealth } = require('./ollama-direct');
 const { getOpenClawURL } = require('./fleet-config');
+
+// Map Ollama model IDs to LiteLLM named groups (triggers fallback chain).
+const NAMED_GROUPS = { 'qwen2.5:7b-instruct': 'fleet-primary', 'mistral:latest': 'fleet-fallback' };
 
 function getLiteLLMUrl() {
   return process.env.LITELLM_URL || getOpenClawURL();
@@ -13,7 +17,7 @@ function getLiteLLMUrl() {
 async function litellmChat(prompt, opts = {}) {
   const url = opts.url || getLiteLLMUrl();
   if (!url) return { ok: false, error: 'no_litellm_url' };
-  const model = opts.model ? `ollama/${opts.model}` : 'ollama/qwen2.5:7b-instruct';
+  const model = opts.litellmModel || NAMED_GROUPS[opts.model] || 'fleet-primary';
   const body = JSON.stringify({
     model,
     messages: [{ role: 'user', content: prompt }],

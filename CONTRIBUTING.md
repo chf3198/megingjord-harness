@@ -95,3 +95,5 @@ requires explicit approval before the next fires. **All baton sections require**
 `Team&Model:` / `Role:` (#485). Admin signer must differ from Collaborator (#494). PRs >10
 files or >500 LOC require a BLOCKER_NOTE (#492). Closure requires GitHub Evidence Block +
 CONSULTANT_CLOSEOUT (#493).
+
+**Admin must verify before merging**: (1) `pr-title-required` green (subject ≤60 chars, Conventional Commits); (2) `collaborator-gate` green; (3) all other required checks green. Merge with pending/failing checks is an Admin governance failure (#511).
