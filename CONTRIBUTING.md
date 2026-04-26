@@ -96,5 +96,5 @@ body must include all three**: `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULT
 All sections require `Signed-by:` / `Team&Model:` / `Role:` (#485). Admin ≠ Collaborator
 (#494). PRs >10 files or >500 LOC: BLOCKER_NOTE (#492). Evidence Block + CLOSEOUT (#493).
 
-**Admin must verify before merging**: (1) `pr-title-required` green (≤60 chars); (2) all three
-gates green; (3) artifact strings present in PR body. Merge with failing checks is Admin:F (#511).
+**Admin before merging**: (1) `pr-title-required` ≤60 chars; (2) all gates green; (3) artifact strings in PR body (#511).
+**Lane**: `code-change` (full baton, default) · `docs/research` (Manager+Consultant) · `config-only` (Admin+Consultant). Skipped-role artifacts use `N/A` markers. See role-baton-routing.instructions.md §Multi-lane DoD.

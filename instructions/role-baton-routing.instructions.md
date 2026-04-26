@@ -54,6 +54,29 @@ Transition guards:
 - Emit the named handoff artifact at each transition before the next role begins.
 - If a role cannot proceed due to missing evidence, stop and request the missing evidence from tooling/research (not from the user by default).
 
+## Multi-lane Definition of Done
+
+Select the lane at ticket-creation based on work type. Label the ticket `lane:docs-research` or `lane:config-only` when using a reduced lane; absence implies code-change.
+
+| Lane | Work type | Required roles | Artifacts |
+|---|---|---|---|
+| **code-change** | Code, deploy, infra (default) | Manager → Collaborator → Admin → Consultant | All four handoffs |
+| **docs/research** | Research, docs-only, instruction/README/CHANGELOG files | Manager → Consultant | MANAGER_HANDOFF + CONSULTANT_CLOSEOUT |
+| **config-only** | Trivial config (JSON value, label, settings.json) with no design decision | Admin → Consultant | ADMIN_HANDOFF + CONSULTANT_CLOSEOUT |
+
+**Lane selection rules**:
+- Default is **code-change** when in doubt.
+- docs/research: PR changes only documentation/instruction/research files — no executable code.
+- config-only: single well-understood value change; if scoping or risk analysis needed, use code-change.
+
+**Reduced-lane baton-gate compliance**: `baton-gates.yml` checks for all three artifact strings.
+For skipped roles, include an explicit N/A marker in the PR body, e.g.:
+`COLLABORATOR_HANDOFF: N/A — docs/research lane` and `ADMIN_HANDOFF: N/A — docs/research lane`.
+The string presence satisfies the gate; the N/A suffix preserves the audit trail.
+
+**Invariants across all lanes**: Every lane requires a GitHub issue, `Refs #N` in the PR body,
+`CONSULTANT_CLOSEOUT`, and explicit N/A markers for any skipped-role artifacts.
+
 ## Trivial-task escape
 
 Skip baton only when ALL of these are true:
