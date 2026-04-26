@@ -13,6 +13,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from governance_state import ensure_state, save_state
 from repo_scope import is_repo_enabled
 from routing_context import build_route_context, run_fleet_cascade
+from semantic_router import classify as semantic_classify
 from task_router import apply_route, classify_prompt
 
 FINISH_RE = re.compile(
@@ -45,7 +46,16 @@ def main() -> int:
         return 0
 
     state = ensure_state(cwd)
+    # Layer 0: semantic pre-classifier (zero cost, <1ms)
+    semantic = semantic_classify(prompt)
+    # Layer 1+: keyword classifier (falls through if semantic is unclear)
     route = classify_prompt(prompt)
+    if semantic.get("tier") and semantic.get("confidence") == "high":
+        lane_map = {"free": "free", "fleet": "fleet", "premium": "premium"}
+        if semantic["tier"] in lane_map:
+            route = route or {}
+            route["lane"] = lane_map[semantic["tier"]]
+            route["rationale"] = f"semantic:{semantic['intent']}"
     apply_route(state, route)
 
     words = prompt.split()
