@@ -1,6 +1,6 @@
 name: Bug Report
 description: Report a defect in dashboard, hooks, scripts, or agents
-labels: ["type:bug", "status:backlog", "area:dashboard", "priority:P2"]
+labels: ["type:bug", "status:backlog", "priority:P2"]
 body:
   - type: input
     id: summary

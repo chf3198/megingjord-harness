@@ -44,6 +44,12 @@ jobs:
             if (statusLabels.includes('status:triage') && !roleLabels.includes('role:manager')) {
               violations.push('**Rule 5**: `status:triage` issues must have `role:manager`. Epics always carry this label.');
             }
+            const areaLabels = labels.filter(l => l.startsWith('area:'));
+            if (areaLabels.length === 0) {
+              violations.push('**Rule 6**: No `area:` label found. Every issue must have exactly one `area:*` label (auto-label-area.yml applies it on open).');
+            } else if (areaLabels.length > 1) {
+              violations.push(`**Rule 6**: Multiple \`area:\` labels found: ${areaLabels.join(', ')}. Only one is allowed.`);
+            }
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
             });
