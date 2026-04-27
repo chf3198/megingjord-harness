@@ -34,3 +34,7 @@
 .auth-missing { color: #f85149; cursor: pointer; font-size: 0.8rem; text-decoration: underline dotted; }
 .host-badge { background: #1f6feb; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
 .host-row { background: rgba(31,111,235,0.06); }
+.settings-lock-bar { margin-bottom: 10px; }
+.settings-lock-btn { padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.82rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+.settings-lock-btn.locked { border-color: #d29922; color: #d29922; }
+.settings-lock-btn.unlocked { border-color: #3fb950; color: #3fb950; }

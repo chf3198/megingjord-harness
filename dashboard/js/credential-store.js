@@ -59,3 +59,11 @@ function reorderFleetResources(orderedIds) {
   const rest = list.filter(r => !orderedIds.includes(r.id));
   saveFleetResources([...ordered, ...rest]);
 }
+
+const FLEET_AUDIT_KEY = 'devenv-fleet-audit';
+function logAuditEntry(action, resourceId) {
+  const log = JSON.parse(localStorage.getItem(FLEET_AUDIT_KEY) || '[]');
+  log.push({ action, resourceId: resourceId || null, ts: new Date().toISOString() });
+  if (log.length > 200) log.splice(0, log.length - 200);
+  localStorage.setItem(FLEET_AUDIT_KEY, JSON.stringify(log));
+}
