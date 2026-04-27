@@ -1,7 +1,14 @@
 /* Settings Panel — fleet resource management */
-.settings-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.settings-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
 .settings-table th { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--border); }
-.settings-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.settings-table th:nth-child(1) { width: 18%; }
+.settings-table th:nth-child(2) { width: 13%; }
+.settings-table th:nth-child(3) { width: 8%; }
+.settings-table th:nth-child(4) { width: 24%; }
+.settings-table th:nth-child(5) { width: 13%; }
+.settings-table th:nth-child(6) { width: 10%; }
+.settings-table th:nth-child(7) { width: 9%; }
+.settings-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .settings-row:hover { background: var(--hover-bg, rgba(255,255,255,0.05)); }
 .settings-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .settings-actions button, .btn-label {
