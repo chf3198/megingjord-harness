@@ -3,7 +3,7 @@
 Priority: P1 (High)
 Type: Task
 Area: scripts
-Status: in-progress
+Status: done (`closed`)
 Parent: #397
 
 ## Manager Scope
@@ -38,3 +38,37 @@ Acceptance Criteria:
 - Signed-by: Nova Harper
 - Team&Model: copilot:gpt-5.4@local
 - Role: collaborator
+
+## ADMIN_HANDOFF
+
+- Validation gates executed:
+	- `npx eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 scripts/global/epic-evidence.js scripts/global/issue-transition.js` ✅
+	- `npm run lint:md` ✅
+	- `npm run governance:epic -- 331 --json` ✅
+	- `node scripts/global/governance-verify.js --json` → no new `534` failures; unrelated historical failures remain ✅
+	- `tests/unit-modules.spec.js` ✅
+- Linked PR: #535
+- Signed-by: Nova Reyes
+- Team&Model: copilot:gpt-5.4@local
+- Role: admin
+
+## CONSULTANT_CLOSEOUT
+
+Decision:
+- Approved and closed.
+- Root-cause control now prevents missing child coverage and invalid PR references from slipping through epic closeout.
+
+Critique:
+- Scope is tight and directly addresses the evidence-integrity gap observed on Epic #331.
+- Risk is low because the change is limited to governance tooling and policy text.
+
+- Signed-by: Nova Vale
+- Team&Model: copilot:gpt-5.4@local
+- Role: consultant
+
+## GitHub Evidence Block
+
+- Issue reference/state: `#534` terminal `done` / `closed`.
+- Applied labels: `type:task`, `priority:P1`, `area:governance`, terminal closeout state on GitHub issue.
+- Linked PR/merge evidence: #535.
+- Validation evidence summary: focused JS lint + markdown lint + Epic #331 regression pass + targeted governance verification + unit-modules test pass.
