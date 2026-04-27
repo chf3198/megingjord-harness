@@ -38,6 +38,12 @@ When any child ticket is closed, the Manager posts a progress update to the epic
 - Remaining children: #X, #Y, #Z
 ```
 
+Evidence integrity requirements:
+- Progress updates must cover every closed linked child exactly once before epic closeout.
+- `CONSULTANT_CLOSEOUT` must reference the full linked-child set for the epic.
+- Any `PR #N` reference in epic closeout must resolve to a real pull request.
+- Stale automated governance comments should be removed once the epic is normalized.
+
 ## Epic Close Conditions
 
 An epic may close **only when ALL of these are true**:
@@ -46,6 +52,7 @@ An epic may close **only when ALL of these are true**:
 2. Epic is at `status:review` with `role:consultant`
 3. CONSULTANT_CLOSEOUT comment posted on the epic
 4. Epic-level resolution label applied (`resolution:released` or `resolution:cancelled`)
+5. Evidence-integrity verification passes or has an explicit Manager-approved emergency override
 
 ## Re-scope-before-close rule
 

@@ -15,6 +15,7 @@ const ROLE_FOR = {
   testing: 'admin',
   review: 'consultant',
 };
+const { verifyEpicEvidence } = require('./epic-evidence');
 
 const [,, issue, fromStatus, toStatus, ...extras] = process.argv;
 const force = extras.includes('--force');
@@ -46,6 +47,15 @@ if (!force && !current.includes(fromStatus)) {
   console.error(`Issue #${issue} is not currently at status:${fromStatus}`);
   console.error(`Current status labels: ${current.join(', ') || 'none'}`);
   process.exit(1);
+}
+if (toStatus === 'done' && labels.includes('type:epic')) {
+  const report = verifyEpicEvidence(issue);
+  report.warnings.forEach(item => console.warn(`Warning: ${item}`));
+  if (report.errors.length && !force) {
+    report.errors.forEach(item => console.error(item));
+    console.error('Use --force only for explicit emergency override.');
+    process.exit(1);
+  }
 }
 
 const next = labels.filter(label => !label.startsWith('status:') && !label.startsWith('role:'));
