@@ -1,0 +1,54 @@
+name: Auto-label area (ADR-010)
+# Parses the Area dropdown from issue body on open and applies the correct area:* label.
+# Removes any stale area:* labels left by templates before applying the correct one.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  auto-label-area:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply area label from form dropdown
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const num   = context.payload.issue.number;
+            const body  = context.payload.issue.body || '';
+
+            // Parse area dropdown — GitHub forms render: "### Area\n\n<value>"
+            const match = body.match(/###\s*Area\s*\n+([^\n#]+)/i);
+            const area  = match ? match[1].trim().toLowerCase() : null;
+
+            const areaMap = {
+              'dashboard':      'area:dashboard',
+              'hooks':          'area:hooks',
+              'skills':         'area:skills',
+              'instructions':   'area:instructions',
+              'agents':         'area:agents',
+              'scripts':        'area:scripts',
+              'infrastructure': 'area:infra',
+            };
+
+            const targetLabel = area ? areaMap[area] : null;
+            if (!targetLabel) {
+              console.log(`No area dropdown found or unrecognised value "${area}" — skipping`);
+              return;
+            }
+
+            // Remove stale area:* labels (e.g. area:dashboard hardcoded in old templates)
+            const issue = (await github.rest.issues.get({ owner, repo, issue_number: num })).data;
+            const stale = issue.labels.map(l => l.name).filter(l => l.startsWith('area:') && l !== targetLabel);
+            for (const l of stale) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: num, name: l }).catch(() => {});
+            }
+
+            await github.rest.issues.addLabels({ owner, repo, issue_number: num, labels: [targetLabel] });
+            console.log(`Applied ${targetLabel} to #${num}`);
