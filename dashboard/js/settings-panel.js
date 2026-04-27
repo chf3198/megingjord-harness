@@ -1,23 +1,33 @@
 // Settings Panel — render fleet resource CRUD UI
 // Alpine.js integration via global functions
 
+function renderLockToggle() {
+  const locked = window._fleetLocked !== false;
+  const cls = locked ? 'locked' : 'unlocked';
+  const label = locked ? '🔒 Locked — click to edit' : '🔓 Unlocked — click to lock';
+  return `<div class="settings-lock-bar"><button onclick="toggleFleetLock()"
+    class="settings-lock-btn ${cls}" aria-label="${label}">${label}</button></div>`;
+}
+
 function renderSettingsPanel(resources, probeResults, hostInfo) {
   const hostRow = hostInfo ? renderHostRow(hostInfo) : '';
-  if (!resources.length && !hostInfo) return renderEmptySettings();
+  if (!resources.length && !hostInfo) return renderLockToggle() + renderEmptySettings();
+  const locked = window._fleetLocked !== false;
   const rows = resources.map(r => {
     const probe = (probeResults || []).find(p => p.id === r.id);
     const st = probe?.status || r.status || 'unknown';
     const cls = st === 'healthy' || st === 'ready' ? 'ok' : st === 'offline' || st === 'no-key' ? 'err' : 'warn';
     const authBadge = authStatus(r);
+    const actions = locked ? '' :
+      `<button onclick="editResource('${r.id}')">✏️</button>
+       <button onclick="removeResource('${r.id}')">🗑️</button>`;
     return `<tr class="settings-row">
       <td><span class="dot dot-${cls}"></span> ${esc(r.name)}</td>
       <td>${esc(r.provider)}</td><td>${esc(r.tier)}</td>
       <td title="${esc(r.baseUrl)}">${esc(r.baseUrl)}</td><td>${authBadge}</td><td>${st}</td>
-      <td><button onclick="editResource('${r.id}')">✏️</button>
-       <button onclick="removeResource('${r.id}')">🗑️</button></td>
-    </tr>`;
+      <td>${actions}</td></tr>`;
   }).join('');
-  return `<table class="settings-table"><thead><tr>
+  return `${renderLockToggle()}<table class="settings-table"><thead><tr>
     <th>Name</th><th>Provider</th><th>Tier</th>
     <th>URL</th><th>Auth</th><th>Status</th><th>Actions</th>
   </tr></thead><tbody>${hostRow}${rows}</tbody></table>

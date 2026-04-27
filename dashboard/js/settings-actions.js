@@ -1,12 +1,21 @@
 // Settings Actions — wiring for Add/Edit/Delete/Export/Import
 // Integrates credential-store, fleet-probe, settings-form
 
+window._fleetLocked = true; // always locked on page load
+
+function toggleFleetLock() {
+  window._fleetLocked = !window._fleetLocked;
+  logAuditEntry(window._fleetLocked ? 'lock' : 'unlock', null);
+  refreshSettingsView();
+}
+
 function showAddResource() {
   const panel = document.getElementById('settings-form-container');
   if (panel) panel.innerHTML = renderResourceForm();
 }
 
 function editResource(id) {
+  if (window._fleetLocked) return;
   const list = loadFleetResources();
   const r = list.find(x => x.id === id);
   if (!r) return;
@@ -15,7 +24,9 @@ function editResource(id) {
 }
 
 function removeResource(id) {
+  if (window._fleetLocked) return;
   if (!confirm('Remove this resource?')) return;
+  logAuditEntry('delete', id);
   deleteFleetResource(id);
   refreshSettingsView();
 }
@@ -40,6 +51,7 @@ function saveResourceForm(existingId) {
     enabled: document.getElementById('rf-enabled').checked
   };
   if (existingId) {
+    logAuditEntry('edit', existingId);
     updateFleetResource(existingId, resource);
   } else {
     addFleetResource(resource);
@@ -54,18 +66,14 @@ function closeForm() {
 }
 
 async function probeAll() {
-  const res = loadFleetResources();
-  const results = await probeAllResources(res);
-  window._lastProbeResults = results;
+  window._lastProbeResults = await probeAllResources(loadFleetResources());
   refreshSettingsView();
 }
 
 function exportConfig() {
-  const json = exportFleetConfig();
-  const blob = new Blob([json], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `fleet-config-${Date.now()}.json`;
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([exportFleetConfig()], { type: 'application/json' })),
+    download: `fleet-config-${Date.now()}.json` });
   a.click(); URL.revokeObjectURL(a.href);
 }
 
