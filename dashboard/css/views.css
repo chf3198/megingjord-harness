@@ -72,7 +72,7 @@
 .view-live { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; }
 .view-logs { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 .view-fleet { grid-template-columns: 1fr 1fr; }
-#panel-settings { grid-row: span 2; }
+#panel-settings { grid-column: 1 / -1; }
 #panel-devices > div, #panel-services > div { max-height: 12rem; }
 .view-ops { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; }
 .view-wiki { grid-template-columns: 1fr 2fr; } .view-help { grid-template-columns: 1fr; }

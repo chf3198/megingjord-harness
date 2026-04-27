@@ -12,7 +12,7 @@ function renderSettingsPanel(resources, probeResults, hostInfo) {
     return `<tr class="settings-row">
       <td><span class="dot dot-${cls}"></span> ${esc(r.name)}</td>
       <td>${esc(r.provider)}</td><td>${esc(r.tier)}</td>
-      <td>${esc(r.baseUrl)}</td><td>${authBadge}</td><td>${st}</td>
+      <td title="${esc(r.baseUrl)}">${esc(r.baseUrl)}</td><td>${authBadge}</td><td>${st}</td>
       <td><button onclick="editResource('${r.id}')">✏️</button>
        <button onclick="removeResource('${r.id}')">🗑️</button></td>
     </tr>`;
