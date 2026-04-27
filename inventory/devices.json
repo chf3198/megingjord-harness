@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-11",
+  "lastUpdated": "2026-04-26",
   "devices": [
     {
       "id": "penguin-1",
@@ -51,22 +51,25 @@
       "ollama": true,
       "ollamaHost": "0.0.0.0",
       "ollamaModels": [
+        "mistral-nemo:latest",
+        "llama3.1:8b",
+        "phi3:medium",
         "mistral:latest",
         "phi3:mini",
         "qwen2.5:7b-instruct"
       ],
-      "services": [
-        "ollama",
-        "openclaw"
-      ],
-      "openclaw": {
-        "version": "2026.4.9",
-        "heartbeat": "30m",
-        "agents": [
-          "main"
-        ]
+      "ollamaInferenceMode": "cpu",
+      "ollamaWarmTokPerSec": 7.3,
+      "gpu": null,
+      "litellm": {
+        "status": "not-running",
+        "port": 4000,
+        "deployScript": "scripts/windows-laptop/start-litellm.ps1"
       },
-      "notes": "Best inference node. Can run 7B models."
+      "services": [
+        "ollama"
+      ],
+      "notes": "Best inference node. CPU inference ~7.3 tok/s. LiteLLM pending deploy (run start-litellm.ps1). No discrete GPU confirmed — judge gate disabled."
     },
     {
       "id": "chromebook-2",
