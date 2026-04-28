@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "defaultLane": "free",
   "lanes": {
     "free": {
@@ -13,6 +13,7 @@
     "fleet": {
       "backend": "ollama",
       "recommendedModel": "qwen2.5:7b-instruct",
+      "selection": "capability-tags",
       "keywords": [
         "multi-file", "tests", "refactor", "implement", "migration",
         "pattern", "transform", "integration", "batch", "known"
@@ -30,5 +31,9 @@
   "escalation": {
     "premiumOn": ["failed", "stuck", "unclear", "cross-system", "trade-off"],
     "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
+  },
+  "fleetSelection": {
+    "source": "inventory/devices.json",
+    "fields": ["routing.inferenceClass", "routing.priority", "routing.preferredFor"]
   }
 }

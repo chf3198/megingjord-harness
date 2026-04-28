@@ -1,96 +1,45 @@
 {
-  "lastUpdated": "2026-04-26",
+  "lastUpdated": "2026-04-28",
   "devices": [
     {
-      "id": "penguin-1",
-      "alias": "SML Chromebook",
-      "role": "sml-agent",
-      "os": "ChromeOS Linux (LXC)",
-      "kernel": "6.6.99",
-      "arch": "x86_64",
-      "ram": {
-        "total": "2.7GB",
-        "available": "~0.88GB"
-      },
-      "disk": {
-        "total": "~10GB",
-        "free": "~2.5GB"
-      },
-      "swap": "none (kernel-blocked)",
-      "tailscale": true,
-      "tailscaleIP": "100.86.248.35",
-      "ollama": true,
-      "ollamaModels": [
-        "qwen3.5:0.8b",
-        "gemma3:270m",
-        "tinyllama:latest",
-        "lfm2.5-thinking:1.2b"
-      ],
-      "ollamaHost": "0.0.0.0",
-      "services": [
-        "ollama"
-      ],
-      "notes": "Cannot run models >~800MB RAM"
+      "id": "penguin-1", "alias": "SML Chromebook", "role": "sml-agent", "os": "ChromeOS Linux (LXC)",
+      "kernel": "6.6.99", "arch": "x86_64", "ram": { "total": "2.7GB", "available": "~0.88GB" },
+      "disk": { "total": "~10GB", "free": "~2.5GB" }, "swap": "none (kernel-blocked)", "tailscale": true,
+      "tailscaleIP": "100.86.248.35", "ollama": true, "ollamaHost": "0.0.0.0",
+      "ollamaModels": ["qwen3.5:0.8b", "gemma3:270m", "tinyllama:latest", "lfm2.5-thinking:1.2b"],
+      "services": ["ollama"], "routing": {
+        "tier": "micro", "inferenceClass": "tiny", "capabilities": ["ollama"], "modelClass": ["sub-2b"],
+        "priority": 10, "preferredFor": ["search", "grep", "read", "docs"]
+      }, "notes": "Cannot run models >~800MB RAM"
     },
     {
-      "id": "windows-laptop",
-      "alias": "OpenClaw Host",
-      "role": "primary-inference",
-      "os": "Windows",
-      "arch": "x86_64",
-      "ram": {
-        "total": "16GB",
-        "available": "~8.8GB"
-      },
-      "disk": {
-        "total": "unknown",
-        "free": "~39.5GB"
-      },
-      "tailscale": true,
-      "tailscaleIP": "100.78.22.13",
-      "ollama": true,
-      "ollamaHost": "0.0.0.0",
-      "ollamaModels": [
-        "mistral-nemo:latest",
-        "llama3.1:8b",
-        "phi3:medium",
-        "mistral:latest",
-        "phi3:mini",
-        "qwen2.5:7b-instruct"
-      ],
-      "ollamaInferenceMode": "cpu",
-      "ollamaWarmTokPerSec": 7.3,
-      "gpu": null,
-      "litellm": {
-        "status": "not-running",
-        "port": 4000,
-        "deployScript": "scripts/windows-laptop/start-litellm.ps1"
-      },
-      "services": [
-        "ollama"
-      ],
-      "notes": "Best inference node. CPU inference ~7.3 tok/s. LiteLLM pending deploy (run start-litellm.ps1). No discrete GPU confirmed — judge gate disabled."
+      "id": "windows-laptop", "alias": "OpenClaw Host", "role": "primary-inference", "os": "Windows", "arch": "x86_64",
+      "ram": { "total": "16GB", "available": "~8.8GB" }, "disk": { "total": "unknown", "free": "~39.5GB" },
+      "tailscale": true, "tailscaleIP": "100.78.22.13", "ollama": true, "ollamaHost": "0.0.0.0",
+      "ollamaModels": ["mistral-nemo:latest", "llama3.1:8b", "phi3:medium", "mistral:latest", "phi3:mini", "qwen2.5:7b-instruct"],
+      "ollamaInferenceMode": "cpu", "ollamaWarmTokPerSec": 7.3, "gpu": null,
+      "litellm": { "status": "not-running", "port": 4000, "deployScript": "scripts/windows-laptop/start-litellm.ps1" },
+      "services": ["ollama"], "routing": {
+        "tier": "standard", "inferenceClass": "coding", "capabilities": ["ollama", "openclaw-gateway"],
+        "modelClass": ["7b"], "priority": 40, "preferredFor": ["integration", "tests", "migration", "workflow"]
+      }, "notes": "CPU inference ~7.3 tok/s. OpenClaw host and fallback fleet target."
     },
     {
-      "id": "chromebook-2",
-      "alias": "Dev Chromebook",
-      "role": "primary-dev",
-      "os": "ChromeOS Linux (LXC)",
-      "arch": "x86_64",
-      "ram": {
-        "total": "~6.3GB",
-        "available": "~2.1GB"
-      },
-      "disk": {
-        "total": "~25GB",
-        "free": "~8GB"
-      },
-      "tailscale": true,
-      "local": true,
-      "ollama": false,
-      "ollamaModels": [],
-      "services": ["vscode", "copilot"],
-      "notes": "Primary dev workstation. Runs this dashboard."
+      "id": "36gbwinresource", "alias": "36GB Windows Resource", "role": "primary-fleet-inference", "os": "Windows 10 Pro", "arch": "x86_64",
+      "ram": { "total": "32GB", "available": "~28GB" }, "disk": { "total": "~477GB", "free": "~410GB" },
+      "cpu": "Intel Core i5-9400H", "gpu": "NVIDIA Quadro T2000 (4GB)", "tailscale": true,
+      "tailscaleIP": "100.91.113.16", "ollama": true, "ollamaHost": "0.0.0.0",
+      "ollamaModels": ["qwen2.5:7b-instruct", "qwen2.5-coder:7b"], "services": ["ollama"], "routing": {
+        "tier": "performance", "inferenceClass": "heavy-coding", "capabilities": ["ollama", "gpu-inference"],
+        "modelClass": ["7b", "8b-14b"], "priority": 100, "preferredFor": ["implement", "refactor", "tests", "batch", "multi-file"]
+      }, "notes": "Primary fleet inference node. Target for heavy local coding workloads."
+    },
+    {
+      "id": "chromebook-2", "alias": "Dev Chromebook", "role": "primary-dev", "os": "ChromeOS Linux (LXC)", "arch": "x86_64",
+      "ram": { "total": "~6.3GB", "available": "~2.1GB" }, "disk": { "total": "~25GB", "free": "~8GB" },
+      "tailscale": true, "local": true, "ollama": false, "ollamaModels": [], "services": ["vscode", "copilot"], "routing": {
+        "tier": "micro", "inferenceClass": "tiny", "capabilities": ["dev-host"], "modelClass": [], "priority": 0, "preferredFor": []
+      }, "notes": "Primary dev workstation. Runs this dashboard."
     }
   ]
 }

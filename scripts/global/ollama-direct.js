@@ -2,7 +2,7 @@
 'use strict';
 // Direct Ollama native-API client — fallback when OpenClaw/LiteLLM is unavailable.
 
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.78.22.13:11434';
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5:7b-instruct';
 const TIMEOUT_MS = 120000;
 
