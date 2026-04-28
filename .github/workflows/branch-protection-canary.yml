@@ -18,6 +18,7 @@ jobs:
     permissions:
       issues: write
       contents: read
+      administration: read
     steps:
       - uses: actions/github-script@v7
         with:
@@ -26,24 +27,57 @@ jobs:
               'collaborator-gate', 'admin-gate', 'consultant-gate',
               'lint-required', 'pr-title-required',
             ];
+            const { owner, repo } = context.repo;
+
+            // Helper: find open CANARY ALERT issues (dedup guard)
+            async function findOpenAlerts() {
+              const { data } = await github.rest.issues.listForRepo({
+                owner, repo, state: 'open', labels: 'area:infra',
+                per_page: 50,
+              });
+              return data.filter(i => i.title.startsWith('[CANARY ALERT]'));
+            }
+
+            // Helper: close open alerts with a resolution comment
+            async function closeAlerts(alerts, comment) {
+              for (const alert of alerts) {
+                await github.rest.issues.createComment(
+                  { owner, repo, issue_number: alert.number, body: comment });
+                await github.rest.issues.update(
+                  { owner, repo, issue_number: alert.number, state: 'closed' });
+              }
+            }
+
             let protection;
             try {
               const r = await github.rest.repos.getBranchProtection({
-                owner: context.repo.owner, repo: context.repo.repo,
-                branch: 'main',
+                owner, repo, branch: 'main',
               });
               protection = r.data;
             } catch (e) {
-              const msg = `Branch protection missing or inaccessible: ${e.message}`;
-              await github.rest.issues.create({
-                owner: context.repo.owner, repo: context.repo.repo,
-                title: '[CANARY ALERT] Branch protection absent on main',
-                body: `## Protection Regression Detected\n\n${msg}\n\nImmediate action required: re-enable via #537 procedure.`,
-                labels: ['priority:P1', 'area:infra'],
-              });
+              // Distinguish permission errors from genuine absence
+              const isPermission = e.status === 403;
+              const tag = isPermission ? 'inaccessible' : 'absent';
+              const msg = `Branch protection ${tag}: ${e.message}`;
+              if (isPermission) {
+                core.warning(`${msg} — token lacks administration:read; skipping alert.`);
+                return;
+              }
+              const open = await findOpenAlerts();
+              if (!open.length) {
+                await github.rest.issues.create({
+                  owner, repo,
+                  title: '[CANARY ALERT] Branch protection absent on main',
+                  body: `## Protection Regression Detected\n\n${msg}\n\nImmediate action required: re-enable via #537 procedure.`,
+                  labels: ['priority:P1', 'area:infra'],
+                });
+              } else {
+                core.warning(`Open alert already exists (#${open[0].number}); skipping duplicate.`);
+              }
               core.setFailed(msg);
               return;
             }
+
             const violations = [];
             if (!protection.enforce_admins?.enabled) {
               violations.push('enforce_admins disabled — LLM Admin can self-approve through gates');
@@ -56,10 +90,18 @@ jobs:
             if (!protection.required_status_checks?.strict) {
               violations.push('Branch not required to be up to date before merge');
             }
+
             if (!violations.length) {
               console.log('Branch protection healthy. All required checks present.');
+              const open = await findOpenAlerts();
+              if (open.length) {
+                await closeAlerts(open,
+                  '✅ Branch protection verified healthy by canary. Auto-closing false-positive alert.');
+                console.log(`Auto-closed ${open.length} stale alert(s).`);
+              }
               return;
             }
+
             const body = [
               '## Branch Protection Regression',
               '',
@@ -69,9 +111,19 @@ jobs:
               '',
               'Restore configuration per #537 procedure immediately.',
             ].join('\n');
-            await github.rest.issues.create({
-              owner: context.repo.owner, repo: context.repo.repo,
-              title: '[CANARY ALERT] Branch protection regression on main',
-              body, labels: ['priority:P1', 'area:infra'],
-            });
+
+            const open = await findOpenAlerts();
+            if (!open.length) {
+              await github.rest.issues.create({
+                owner, repo,
+                title: '[CANARY ALERT] Branch protection regression on main',
+                body, labels: ['priority:P1', 'area:infra'],
+              });
+            } else {
+              // Update body of existing alert instead of duplicating
+              await github.rest.issues.update({
+                owner, repo, issue_number: open[0].number, body,
+              });
+              core.warning(`Updated existing alert #${open[0].number} instead of creating duplicate.`);
+            }
             core.setFailed(`Protection violations: ${violations.join('; ')}`);

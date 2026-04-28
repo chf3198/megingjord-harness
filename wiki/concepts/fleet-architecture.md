@@ -1,3 +1,9 @@
+---
+title: "Fleet Architecture"
+type: concept
+created: 2026-04-28
+status: active
+---
 # Fleet Architecture
 
 > Network zones, hardware nodes, software stacks, and message flow.

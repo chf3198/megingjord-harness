@@ -59,8 +59,8 @@
     }
   },
   "judge": {
-    "_doc": "Layer 2 judge gate. Disabled: CPU inference on windows-laptop yields ~10s latency (AC7 needs ≤800ms). Enable when GPU confirmed. phi3:mini is the model; llama3.1:8b is now also available.",
-    "enabled": false,
+    "_doc": "Layer 2 judge gate enabled: GPU-backed fleet node is available (36gbwinresource).",
+    "enabled": true,
     "model": "phi3:mini",
     "threshold": 0.7,
     "fallback_on_error": true,

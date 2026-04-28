@@ -2,6 +2,19 @@
 
 ## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
 
+### Added — Fleet Capability Tagging (Epic #561)
+- `inventory/devices.json`: added `routing` capability tags for all devices and registered `36gbwinresource` as `performance`/`heavy-coding` primary fleet node
+- `research/fleet-capability-tagging-research.md`: capability-tag survey and internal wiki gap analysis
+- `research/adr-fleet-capability-tags.md`: accepted schema contract for router-readable fleet metadata
+- `wiki/entities/36gbwinresource.md`: new fleet entity profile
+
+### Changed — Router Fleet Targeting (Epic #561)
+- `scripts/global/task-router.js`: fleet lane now selects `targetDevice` and `targetOllamaUrl` from inventory capability tags
+- `scripts/global/task-router-policy.json`: capability-tag selection metadata added
+- `scripts/global/model-routing-policy.json`: judge gate enabled after GPU fleet node confirmation
+- `scripts/global/ollama-direct.js`: default direct endpoint moved to `36gbwinresource`
+- `wiki/concepts/model-routing.md`, `wiki/sources/devenv-fleet-topology.md`: updated topology and routing order
+
 ### Added — Atomic Label Transitions (#417)
 - `scripts/global/issue-transition.js`: single `gh issue edit` call validates and executes baton transitions, eliminating ADR-010 label-lint race conditions
 - `npm run issue:transition` script

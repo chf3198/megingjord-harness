@@ -2,7 +2,7 @@
 title: "DevEnv Fleet Topology"
 type: source
 created: 2026-04-14
-updated: 2026-04-14
+updated: 2026-04-28
 tags: []
 sources: [raw/articles/devenv-fleet-topology.md]
 related: []
@@ -13,13 +13,16 @@ status: draft
 
 ## Summary
 
-## Summary
-A three-device development and inference setup using Tailscale mesh is described. The devices include a primary Chromebook (penguin) for the IDE host, a secondary Chromebook (penguin-1) for Ollama with limited resources, and a Windows laptop (windows-laptop) for running OpenClaw/LiteLLM gateway and more resource-intensive Ollama tasks. The routing strategy separates fleet-lane tasks to OpenClaw, free-lane tasks to local tools or free cloud APIs, and premium-lane tasks to Copilot Pro. The setup has constraints due to limited RAM on the primary Chromebook, with inference offloaded to the laptop via Tailscale VPN, and a memory watchdog monitoring for OOM conditions during heavy operations.
+The fleet is now a four-device Tailscale mesh with capability-tag-aware routing.
+`36gbwinresource` is the primary heavy-coding inference node, `windows-laptop`
+is the standard fallback and OpenClaw host, `penguin-1` handles tiny-model work,
+and `chromebook-2` remains the primary dev workstation.
 
 ## Entities
-- penguin (Primary Chromebook IDE host)
+- chromebook-2 (Primary Chromebook IDE host)
 - penguin-1 (Secondary Chromebook)
 - windows-laptop (inference host)
+- 36gbwinresource (GPU inference host)
 - VS Code
 - Copilot agent
 - dashboard server
@@ -33,10 +36,9 @@ A three-device development and inference setup using Tailscale mesh is described
 - memory watchdog
 
 ## Concepts
-- Three-device development and inference setup using Tailscale mesh.
-- Routing strategy for different types of tasks.
-- Limited RAM constraint on primary Chromebook.
-- Offloading inference to a more powerful device via Tailscale VPN.
-- Monitoring for Out Of Memory (OOM) conditions with a memory watchdog.
+- Four-device development and inference setup using Tailscale mesh.
+- Capability-tag-driven task→resource routing.
+- Priority-based fleet target selection for coding workloads.
+- Offloading heavy local inference to GPU-backed Windows resource.
 
 *Source: raw/articles/devenv-fleet-topology.md*

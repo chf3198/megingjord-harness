@@ -1,3 +1,9 @@
+---
+title: "Epic Governance"
+type: concept
+created: 2026-04-28
+status: active
+---
 # Epic Governance
 
 ## Summary

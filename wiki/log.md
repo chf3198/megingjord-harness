@@ -97,3 +97,4 @@ for Admin/Consultant closeout phases. Total wiki pages now: 57.
 
 ## [2026-04-23] ingest | Governance + Agile + GitHub remediation
 Added remediation research + final ticket pack (#159–#162) for epic-child terminality, evidence completeness, merge queue checks, and ready-SLA controls. Total wiki pages now: 58.
+## [2026-04-28] anneal | 4 fixes applied

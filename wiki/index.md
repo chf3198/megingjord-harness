@@ -18,6 +18,7 @@ The LLM updates this on every ingest operation.
 - [[tailscale-mesh]] — Tailscale VPN Mesh
 - [[copilot-pro]] — GitHub Copilot Pro
 
+- [[36gbwinresource]]
 ## Concepts
 
 - [[baton-protocol]] — Baton Protocol (Role Handoff) [v1.0]
@@ -33,6 +34,7 @@ The LLM updates this on every ingest operation.
 - [[github-integration]] — GitHub API Integration & Dashboard Monitoring
 - [[linting-governance]] — Global Linting Governance
 
+- [[fleet-architecture]]
 ## Source Summaries
 
 - [[karpathy-llm-wiki-pattern]] — Karpathy LLM Wiki Pattern
@@ -49,6 +51,7 @@ The LLM updates this on every ingest operation.
 - [[agile-roles-cross-verification]] — Cross-Verification Matrix
 - [[copilot-governance-actions]] — Copilot Governance Tied to Actions
 - [[dashboard-world-class-research]] — Dashboard Excellence Research
+- [[fleet-capability-tagging-patterns-2026-04-28]] — Fleet Capability Tagging Patterns
 - [[free-tier-inventory]] — Free-Tier AI Service Inventory
 - [[hardware-evaluation]] — Hardware Evaluation
 - [[help-best-practices]] — Help Article Best Practices

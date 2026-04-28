@@ -1,6 +1,8 @@
 ---
 title: Context Flow
 type: concepts
+created: 2026-04-14
+status: draft
 tags: []
 ---
 # Context Flow — How LLM Context Moves Through the Fleet
@@ -67,5 +69,6 @@ Response returned via Tailscale mesh
 - [model-routing](model-routing.md) — AUTO selection logic
 - [copilot-pro](../entities/copilot-pro.md)
 - [openclaw](../entities/openclaw.md)
+- [[fleet-capability-tagging-patterns-2026-04-28]]
 
 See also: [[wiki-pattern]], [[dashboard-comparable-tools]], [[dashboard-world-class-research]]

@@ -40,7 +40,10 @@ async function buildDecision(route, resolved) {
     if (execute && !preflight.ok) {
       if (prompt) {
         const selectedModel = model || resolved.modelId || route.recommendedModel;
-        const chat = await ollamaChat(prompt, { model: selectedModel });
+        const chat = await ollamaChat(prompt, {
+          model: selectedModel,
+          ollamaUrl: route.targetOllamaUrl || process.env.OLLAMA_URL
+        });
         if (chat.ok) safe('node scripts/global/openclaw-lane-log.js record openclaw coding');
         return { action: chat.ok ? 'dispatched-ollama-direct' : 'fleet-unavailable', preflight, chat };
       }
