@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased] — Proactive Ticket Lifecycle Governance (Epic #432)
+
+### Added — CONSULTANT_CLOSEOUT Re-open Gate (#438)
+- `.github/workflows/closeout-gate.yml`: fires on `issues: [closed]`; re-opens issues closed without `CONSULTANT_CLOSEOUT` comment; exempts `not_planned` closes and `type:epic` issues
+
+### Added — Label Completeness Validator (#434)
+- `.github/workflows/label-completeness.yml`: validates `type:*`, `status:*`, `priority:*`, `area:*` on `issues: [opened, labeled, unlabeled]`; posts violation comment and fails check
+
+### Added — Issue Title Format Linter (#435)
+- `.github/workflows/issue-title-lint.yml`: validates plain imperative ≤72 chars, no Conventional Commits prefix, no bracket tags on `issues: [opened, edited]`
+
+### Added — Epic Role Guard (#436)
+- `.github/workflows/epic-role-guard.yml`: enforces `type:epic` always carries `role:manager`; auto-re-adds if removed
+
+### Added — Stale and P1 Ready-Stall Detectors (#439)
+- `.github/workflows/stale.yml`: `actions/stale@v9`; labels stale after 30 days idle, never auto-closes, exempts active-status issues
+- `.github/workflows/p1-ready-stall.yml`: 6h cron; posts escalation on P1 `status:ready` issues >24h without `BLOCKER_NOTE`
+
+### Added — Epic Staleness Detector (#437)
+- `.github/workflows/epic-staleness.yml`: daily cron; uses native sub-issues REST API (GA Dec 2024) to detect Epic status/child mismatches; posts advisory comment
+
+### Fixed — Issue Form Required Fields (#440)
+- `epic.yml`: added required `area` dropdown
+- `research.yml`: added required `priority` dropdown
+
 ## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
 
 ### Added — Atomic Label Transitions (#417)
