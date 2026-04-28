@@ -1,0 +1,74 @@
+name: Compliance Report
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  compliance-report:
+    name: compliance-report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: read
+      checks: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', base: 'main', per_page: 50,
+            });
+            const report = { generated: new Date().toISOString(), prs: [], anomalies: [] };
+            for (const pr of prs) {
+              const body = pr.body || '';
+              const refsMatch = body.match(/Refs\s+#(\d+)/i);
+              const linkedNum = refsMatch ? parseInt(refsMatch[1]) : null;
+              let issueStatus = null, comments = [], firstPassRate = null;
+              if (linkedNum) {
+                const { data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+                }).catch(() => ({ data: null }));
+                issueStatus = issue?.labels?.map(l => l.name).find(l => l.startsWith('status:'));
+                const { data: c } = await github.rest.issues.listComments({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: linkedNum, per_page: 100,
+                });
+                comments = c;
+              }
+              const ARTIFACTS = ['MANAGER_HANDOFF','COLLABORATOR_HANDOFF','ADMIN_HANDOFF','CONSULTANT_CLOSEOUT'];
+              const times = ARTIFACTS.map(a => comments.find(c => c.body.includes(a))?.created_at).filter(Boolean);
+              let anomaly = null;
+              if (times.length === 4) {
+                const spanMs = new Date(times[3]) - new Date(times[0]);
+                if (spanMs < 300_000) anomaly = `rapid-baton (${Math.round(spanMs/1000)}s)`;
+              }
+              const teamModel = comments.find(c => c.body.includes('COLLABORATOR_HANDOFF'))
+                ?.body?.match(/Team&Model:\s*(\S+)/)?.[1] ?? 'unknown';
+              const ageH = Math.round((Date.now() - new Date(pr.created_at)) / 3_600_000);
+              const entry = { pr: pr.number, title: pr.title, linkedIssue: linkedNum,
+                issueStatus, teamModel, ageHours: ageH, anomaly };
+              report.prs.push(entry);
+              if (anomaly) report.anomalies.push({ pr: pr.number, linkedIssue: linkedNum, anomaly });
+            }
+            const fs = require('fs');
+            fs.writeFileSync('.github/compliance-report.json', JSON.stringify(report, null, 2));
+            const summary = [`## Governance Compliance Report — ${report.generated.slice(0,10)}`,
+              `**Open PRs:** ${report.prs.length}`,
+              report.anomalies.length ? `**⚠ Timing anomalies:** ${report.anomalies.map(a=>`#${a.pr} (${a.anomaly})`).join(', ')}` : '**Anomalies:** none',
+              '', '| PR | Issue | Status | Team | Age |',
+              '|---|---|---|---|---|',
+              ...report.prs.map(p=>`| #${p.pr} | ${p.linkedIssue?'#'+p.linkedIssue:'—'} | ${p.issueStatus??'—'} | ${p.teamModel} | ${p.ageHours}h |`),
+            ].join('\n');
+            core.summary.addRaw(summary);
+            await core.summary.write();
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/compliance-report.json
+          git diff --cached --quiet || git commit -m "chore(governance): update compliance report"
+          git push
