@@ -52,8 +52,10 @@ function classifyPrompt(prompt) {
     premium: premium + premiumBoost
   };
   let lane = policy.defaultLane;
+  const fleetMin = policy.fleetMinScore ?? 2;
   if (totals.premium >= 2 && totals.premium >= totals.fleet) lane = 'premium';
-  else if (totals.fleet >= 2) lane = 'fleet';
+  else if (totals.fleet >= fleetMin) lane = 'fleet';
+  else if (totals.free >= 2) lane = 'free';
   const selected = policy.lanes[lane];
   const target = lane === 'fleet' ? pickFleetTarget(prompt) : null;
   const confidence = lane === 'free' && free < 2 ? 'medium' : 'high';

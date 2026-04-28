@@ -1,28 +1,31 @@
 #!/usr/bin/env node
 'use strict';
-const { execSync } = require('child_process');
+// Fleet dispatch — always executes against Ollama when lane=fleet. [Refs #574]
 const { classifyPrompt } = require('./task-router');
-const { chatComplete } = require('./openclaw-chat');
 const { chatComplete: ollamaChat } = require('./ollama-direct');
 const { getProfile } = require('./fleet-config');
 const { resolveRouting } = require('./model-routing-engine');
 const { recordTelemetry } = require('./model-routing-telemetry');
+const policy = require('./model-routing-policy.json');
 
 const args = process.argv.slice(2);
 const prompt = (args[args.indexOf('--prompt') + 1]) || '';
 const modelIdx = args.indexOf('--model');
 const model = modelIdx !== -1 ? args[modelIdx + 1] : undefined;
 const json = args.includes('--json');
-const execute = args.includes('--execute');
 
-function safe(cmd) {
+// Fleet target resolution — primary: 36gbwinresource (GPU), fallback: windows-laptop
+function resolveFleetUrl(route) {
+  const primary = policy.fleetTargets?.primary;
+  if (primary?.ollamaUrl) return primary.ollamaUrl;
+  return route.targetOllamaUrl || process.env.OLLAMA_URL || 'http://100.91.113.16:11434';
+}
+
+async function tryOllama(targetUrl, selectedModel) {
   try {
-    const out = execSync(cmd, { encoding: 'utf8' }).trim();
-    return { ok: true, out };
-  } catch (e) {
-    const out = (e.stdout || e.message || '').toString().trim();
-    return { ok: false, out };
-  }
+    const result = await ollamaChat(prompt, { model: selectedModel, ollamaUrl: targetUrl });
+    return result;
+  } catch { return { ok: false, error: 'exception' }; }
 }
 
 async function buildDecision(route, resolved) {
@@ -32,30 +35,18 @@ async function buildDecision(route, resolved) {
   if (resolved.lane === 'fleet') {
     const profile = getProfile();
     if (profile.mode === 'solo') {
-      return { action: 'fleet-solo-fallback', reason: 'No fleet nodes reachable — using cloud fallback' };
+      return { action: 'fleet-solo-fallback', reason: 'No fleet nodes reachable' };
     }
-    const preflight = execute
-      ? safe('node scripts/global/openclaw-preflight.js --json')
-      : { ok: true, out: 'dry-run: preflight skipped' };
-    if (execute && !preflight.ok) {
-      if (prompt) {
-        const selectedModel = model || resolved.modelId || route.recommendedModel;
-        const chat = await ollamaChat(prompt, {
-          model: selectedModel,
-          ollamaUrl: route.targetOllamaUrl || process.env.OLLAMA_URL
-        });
-        if (chat.ok) safe('node scripts/global/openclaw-lane-log.js record openclaw coding');
-        return { action: chat.ok ? 'dispatched-ollama-direct' : 'fleet-unavailable', preflight, chat };
-      }
-      return { action: 'fleet-unavailable', preflight };
+    if (!prompt) return { action: 'route-fleet', reason: 'no prompt to dispatch' };
+    const selectedModel = model || resolved.modelId || route.recommendedModel;
+    const primaryUrl = resolveFleetUrl(route);
+    let chat = await tryOllama(primaryUrl, selectedModel);
+    // Graceful fallback on 502/504 or network error
+    if (!chat.ok && policy.fleetTargets?.fallback?.ollamaUrl) {
+      chat = await tryOllama(policy.fleetTargets.fallback.ollamaUrl, selectedModel);
     }
-    if (execute && prompt) {
-      const selectedModel = model || resolved.modelId || route.recommendedModel;
-      const chat = await chatComplete(prompt, { model: selectedModel });
-      if (chat.ok) safe('node scripts/global/openclaw-lane-log.js record openclaw task-router');
-      return { action: chat.ok ? 'dispatched-openclaw' : 'fleet-error', preflight, chat };
-    }
-    return { action: 'route-openclaw', preflight };
+    if (!chat.ok) return { action: 'fleet-unavailable', reason: chat.error };
+    return { action: 'dispatched-fleet', chat, targetUrl: primaryUrl };
   }
   return { action: 'recommend-sonnet', reason: 'premium lane' };
 }
@@ -65,10 +56,10 @@ async function main() {
   const resolved = resolveRouting(prompt, route);
   const effectiveRoute = { ...route, lane: resolved.lane, recommendedModel: resolved.modelId };
   const decision = await buildDecision(effectiveRoute, resolved);
-  const outcome = decision.action === 'fleet-error' || decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
+  const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
   recordTelemetry({ lane: resolved.lane, model: resolved.modelId, multiplier: resolved.multiplier,
-    taskClass: resolved.taskClass, rollbackApplied: resolved.rollbackApplied, outcome, execute });
-  const result = { route: effectiveRoute, routing: resolved, decision, execute };
+    taskClass: resolved.taskClass, rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
+  const result = { route: effectiveRoute, routing: resolved, decision };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
   } else {
@@ -78,7 +69,7 @@ async function main() {
     if (decision.chat?.ok) console.log('\n' + decision.chat.content);
     if (decision.chat && !decision.chat.ok) console.error('Fleet error:', decision.chat.error);
   }
-  process.exit(decision.action === 'fleet-error' ? 1 : 0);
+  process.exit(decision.action === 'fleet-unavailable' ? 1 : 0);
 }
 
 main().catch(e => { console.error(e.message); process.exit(1); });
