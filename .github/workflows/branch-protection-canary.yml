@@ -1,0 +1,77 @@
+name: Branch Protection Canary
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/branch-protection-canary.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: branch-protection-canary
+  cancel-in-progress: true
+
+jobs:
+  canary:
+    name: branch-protection-canary
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const REQUIRED = [
+              'collaborator-gate', 'admin-gate', 'consultant-gate',
+              'lint-required', 'pr-title-required',
+            ];
+            let protection;
+            try {
+              const r = await github.rest.repos.getBranchProtection({
+                owner: context.repo.owner, repo: context.repo.repo,
+                branch: 'main',
+              });
+              protection = r.data;
+            } catch (e) {
+              const msg = `Branch protection missing or inaccessible: ${e.message}`;
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: '[CANARY ALERT] Branch protection absent on main',
+                body: `## Protection Regression Detected\n\n${msg}\n\nImmediate action required: re-enable via #537 procedure.`,
+                labels: ['priority:P1', 'area:infra'],
+              });
+              core.setFailed(msg);
+              return;
+            }
+            const violations = [];
+            if (!protection.enforce_admins?.enabled) {
+              violations.push('enforce_admins disabled — LLM Admin can self-approve through gates');
+            }
+            const contexts = protection.required_status_checks?.contexts ?? [];
+            const missing = REQUIRED.filter(c => !contexts.includes(c));
+            if (missing.length) {
+              violations.push(`Required checks missing: ${missing.join(', ')}`);
+            }
+            if (!protection.required_status_checks?.strict) {
+              violations.push('Branch not required to be up to date before merge');
+            }
+            if (!violations.length) {
+              console.log('Branch protection healthy. All required checks present.');
+              return;
+            }
+            const body = [
+              '## Branch Protection Regression',
+              '',
+              'The following violations were detected on `main`:',
+              '',
+              ...violations.map(v => `- ${v}`),
+              '',
+              'Restore configuration per #537 procedure immediately.',
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: '[CANARY ALERT] Branch protection regression on main',
+              body, labels: ['priority:P1', 'area:infra'],
+            });
+            core.setFailed(`Protection violations: ${violations.join('; ')}`);
