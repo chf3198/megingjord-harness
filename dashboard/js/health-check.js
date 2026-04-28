@@ -4,17 +4,23 @@
 const HEALTH_TIMEOUT_MS = 5000;
 
 async function checkOllama(deviceId) {
-  try {
-    const r = await fetch(`/api/fleet/${deviceId}/api/tags`, {
-      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS)
-    });
-    if (!r.ok) return { status: 'error', models: [] };
-    const data = await r.json();
-    const models = (data.models || []).map(m => m.name);
-    return { status: 'healthy', models };
-  } catch {
-    return { status: 'offline', models: [] };
+  const probe = () => fetch(`/api/fleet/${deviceId}/api/tags`, {
+    signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS)
+  });
+  for (let i = 0; i < 2; i++) {
+    try {
+      if (i > 0) await new Promise(r => setTimeout(r, 500));
+      const r = await probe();
+      if (r.status === 502 || r.status === 504) {
+        if (i < 1) continue;
+        return { status: 'offline', models: [] };
+      }
+      if (!r.ok) return { status: 'error', models: [] };
+      const data = await r.json();
+      return { status: 'healthy', models: (data.models || []).map(m => m.name) };
+    } catch { if (i < 1) continue; }
   }
+  return { status: 'offline', models: [] };
 }
 
 async function checkOpenClaw(deviceId) {
@@ -23,9 +29,8 @@ async function checkOpenClaw(deviceId) {
     const r = await fetch(url, {
       signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS)
     });
-    return r.ok
-      ? { status: 'healthy' }
-      : { status: 'error' };
+    if (r.status === 502 || r.status === 504) return { status: 'offline' };
+    return r.ok ? { status: 'healthy' } : { status: 'error' };
   } catch {
     return { status: 'offline' };
   }

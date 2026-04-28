@@ -13,7 +13,7 @@ function renderDeviceCards(devices) {
   }
   return devices.map(d => `<div class="card device-card ${d.status}">
     <div class="card-header"><strong>${esc(d.alias)}</strong>
-      <span class="badge ${d.status}">${d.status}</span></div>
+      <span class="badge ${d.status}">${d.status==='offline'?'unreachable':d.status==='error'?'service error':d.status}</span></div>
     <div class="card-body">
       <p><span class="label">Role:</span> ${esc(d.role)}</p>
       <p><span class="label">RAM:</span> ${esc(d.ram)}</p>
