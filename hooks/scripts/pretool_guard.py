@@ -9,10 +9,12 @@ from admin_patterns import (  # noqa: E501
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
 from governance_state import ensure_state
+from live_checks import ci_all_pass, linked_issue_has_collab_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
+RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 
 def emit(decision: str, reason: str, extra: str | None = None) -> int:
     hook = {"hookEventName":"PreToolUse","permissionDecision":decision,"permissionDecisionReason":reason}
@@ -20,22 +22,26 @@ def emit(decision: str, reason: str, extra: str | None = None) -> int:
     print(json.dumps({"hookSpecificOutput": hook}))
     return 0
 
-def check_terminal(joined: str, state: dict) -> int | None:
+def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
-        return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc, fix/<ticket#>-desc, skill/<name>, or chore/<desc>.")
+        return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
     if any(marker in joined for marker in runtime_hook_paths()):
-        return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening or bypass logic.")
+        return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening.")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
         return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
     if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
         return emit("deny","Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
         if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
-        if not ops.get("ci_green"): return emit("deny","Merge blocked: CI-green not recorded.")
+        pr_m = RE_PR_REF.search(joined)
+        if pr_m and not ci_all_pass(pr_m.group(1), cwd):
+            return emit("deny","Merge blocked: not all required CI checks pass (live API check).")
+        elif not pr_m and not ops.get("ci_green"):
+            return emit("deny","Merge blocked: CI-green not recorded.")
     if RE_VSCE_PUBLISH.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("merge"): return emit("deny","Publish blocked: merge not recorded.")
     if RE_GH_RELEASE_CREATE.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
@@ -45,8 +51,10 @@ def check_terminal(joined: str, state: dict) -> int | None:
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
         if "gh issue edit" not in joined and "--remove-label" not in joined:
-            return emit("ask","Issue close should normalize labels first.","Remove execution role labels and stale nonterminal status labels before or alongside close.")
+            return emit("ask","Issue close should normalize labels first.","Remove execution role labels before close.")
     if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined) and not ops.get("commit"):
+        if not linked_issue_has_collab_handoff(cwd):
+            return emit("deny","PR creation blocked: COLLABORATOR_HANDOFF not found on linked issue.")
         return emit("ask","PR creation before commit. Confirm intentional.")
     if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):
         return emit("ask","CI checks before PR creation. Confirm intentional.")
@@ -57,10 +65,8 @@ def check_terminal(joined: str, state: dict) -> int | None:
     return None
 
 def main() -> int:
-    try:
-        payload = json.load(sys.stdin)
-    except Exception:
-        return 0
+    try: payload = json.load(sys.stdin)
+    except Exception: return 0
     tool = str(payload.get("tool_name",""))
     values = list(iter_strings(payload.get("tool_input",{})))
     cwd = str(payload.get("cwd","")) or str(Path.cwd())
@@ -69,7 +75,7 @@ def main() -> int:
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
-        result = check_terminal("\n".join(values), state)
+        result = check_terminal("\n".join(values), state, cwd)
         if result is not None: return result
     suspicious = [v for v in values if "/" in v or "." in v]
     if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example") for p in suspicious):
