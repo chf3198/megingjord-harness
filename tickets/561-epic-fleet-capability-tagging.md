@@ -11,4 +11,4 @@
 - #566 Wiki update (backlog — blocked by #564)
 
 ## Blocking Risk
-#560 branch protection canary must be resolved.
+Issue #560 branch protection canary must be resolved.

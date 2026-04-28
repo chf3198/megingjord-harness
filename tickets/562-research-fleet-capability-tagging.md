@@ -14,4 +14,4 @@ Research capability-tagging patterns and expand Karpathy Wiki evidence to suppor
 - Wiki ingest evidence (raw article + ingest run)
 
 ## Gate
-#563 remains blocked until this ticket reaches done.
+Issue #563 remains blocked until this ticket reaches done.

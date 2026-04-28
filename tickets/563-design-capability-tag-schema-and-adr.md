@@ -14,4 +14,4 @@ Define the device capability-tag taxonomy and router consumption contract.
 - research/adr-fleet-capability-tags.md
 
 ## Gate
-#564 remains blocked until ADR from this ticket is merged.
+Issue #564 remains blocked until ADR from this ticket is merged.
