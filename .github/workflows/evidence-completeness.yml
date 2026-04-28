@@ -1,0 +1,80 @@
+name: Evidence Completeness
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: evidence-completeness-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence-completeness:
+    name: evidence-completeness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            const prCreatedAt = new Date(pr.created_at);
+            const violations = [];
+
+            // 1. Linked issue — require Refs #N
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) {
+              core.setFailed('No linked issue (Refs #N missing). Add Refs #N to PR body.');
+              return;
+            }
+            const linkedNum = parseInt(refsMatch[1]);
+
+            // 2. Issue must be OPEN and not type:epic
+            let issue;
+            try {
+              const r = await github.rest.issues.get({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: linkedNum,
+              });
+              issue = r.data;
+            } catch (e) {
+              core.setFailed(`Issue #${linkedNum} not found: ${e.message}`);
+              return;
+            }
+            if (issue.state !== 'open') violations.push(`Issue #${linkedNum} is ${issue.state} — must be OPEN`);
+            const labels = issue.labels.map(l => l.name);
+            if (labels.includes('type:epic')) {
+              violations.push(`Issue #${linkedNum} is type:epic — PRs must link to child tickets, not epics`);
+            }
+
+            // 3. Branch-to-issue binding: N in branch name must equal N in Refs #N
+            const branch = pr.head.ref;
+            const branchMatch = branch.match(/^(?:feat|fix|hotfix)\/(\d+)-/);
+            if (branchMatch && branchMatch[1] !== String(linkedNum)) {
+              violations.push(`Branch #${branchMatch[1]} ≠ Refs #${linkedNum} — branch must be for the linked issue`);
+            }
+
+            // 4. COLLABORATOR_HANDOFF must predate PR creation by ≥60s
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedNum, per_page: 100,
+            });
+            const handoff = comments.find(c => c.body.includes('COLLABORATOR_HANDOFF'));
+            if (!handoff) {
+              violations.push(`COLLABORATOR_HANDOFF not found on issue #${linkedNum}`);
+            } else {
+              const lagMs = prCreatedAt - new Date(handoff.created_at);
+              if (lagMs < 60_000) {
+                violations.push(
+                  `COLLABORATOR_HANDOFF posted ${Math.round(lagMs / 1000)}s before PR — ` +
+                  'must predate PR creation by ≥60s (retroactive planting check)'
+                );
+              }
+            }
+
+            if (violations.length) {
+              core.setFailed(
+                `Evidence completeness violations on issue #${linkedNum}:\n` +
+                violations.map(v => `  • ${v}`).join('\n')
+              );
+            }
