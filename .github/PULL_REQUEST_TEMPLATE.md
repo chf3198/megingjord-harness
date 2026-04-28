@@ -13,10 +13,13 @@ Refs #<!-- issue number -->
 
 ## Role Evidence
 
-- **Manager**: <!-- MANAGER_HANDOFF reference or "inline scope" -->
-- **Collaborator**: <!-- validation gates passed -->
-- **Admin**: <!-- commit/push/PR/CI/merge evidence -->
-- **Consultant**: <!-- critique summary or "pending" -->
+<!-- IMPORTANT: Baton CI gates check the LINKED ISSUE (#N above), not this PR body.
+     Post each artifact as a comment on the linked issue. Strings here do NOT satisfy gates. -->
+
+- **Manager**: <!-- link to MANAGER_HANDOFF comment on linked issue -->
+- **Collaborator**: <!-- link to COLLABORATOR_HANDOFF comment on linked issue -->
+- **Admin**: <!-- link to ADMIN_HANDOFF comment on linked issue -->
+- **Consultant**: <!-- link to CONSULTANT_CLOSEOUT comment on linked issue -->
 
 ## Validation
 

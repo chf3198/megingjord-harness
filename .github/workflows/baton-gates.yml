@@ -16,17 +16,24 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const body = pr.body || '';
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) {
+              core.setFailed(
+                'No linked issue found. Add "Refs #N" to PR body so the baton trail can be verified.'
+              );
+              return;
+            }
+            const linkedIssue = parseInt(refsMatch[1]);
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: pr.number, per_page: 100,
+              issue_number: linkedIssue, per_page: 100,
             });
-            const all = body + '\n' + comments.map(c => c.body).join('\n');
-            if (!all.includes('COLLABORATOR_HANDOFF')) {
+            const trail = comments.map(c => c.body).join('\n');
+            if (!trail.includes('COLLABORATOR_HANDOFF')) {
               core.setFailed(
-                'COLLABORATOR_HANDOFF artifact not found in PR body or comments. ' +
-                'Collaborator must emit this string before Admin can proceed.'
+                `COLLABORATOR_HANDOFF not found in issue #${linkedIssue} comments. ` +
+                'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
             }
 
@@ -38,17 +45,19 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const body = pr.body || '';
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: pr.number, per_page: 100,
+              issue_number: linkedIssue, per_page: 100,
             });
-            const all = body + '\n' + comments.map(c => c.body).join('\n');
-            if (!all.includes('ADMIN_HANDOFF')) {
+            const trail = comments.map(c => c.body).join('\n');
+            if (!trail.includes('ADMIN_HANDOFF')) {
               core.setFailed(
-                'ADMIN_HANDOFF artifact not found in PR body or comments. ' +
-                'Admin must emit this string after verifying all CI checks pass.'
+                `ADMIN_HANDOFF not found in issue #${linkedIssue} comments. ` +
+                'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
             }
 
@@ -60,16 +69,18 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const body = pr.body || '';
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: pr.number, per_page: 100,
+              issue_number: linkedIssue, per_page: 100,
             });
-            const all = body + '\n' + comments.map(c => c.body).join('\n');
-            if (!all.includes('CONSULTANT_CLOSEOUT')) {
+            const trail = comments.map(c => c.body).join('\n');
+            if (!trail.includes('CONSULTANT_CLOSEOUT')) {
               core.setFailed(
-                'CONSULTANT_CLOSEOUT artifact not found in PR body or comments. ' +
-                'Consultant must emit this string after independent review.'
+                `CONSULTANT_CLOSEOUT not found in issue #${linkedIssue} comments. ` +
+                'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
             }
