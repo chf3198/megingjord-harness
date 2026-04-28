@@ -37,3 +37,43 @@ test.describe('Node.js module exports', () => {
     expect(ghIcon('unknown')).toBe('⬜');
   });
 });
+
+test.describe('Judge gate wiring — #512', () => {
+  test('model-routing-policy has judge.enabled=true and judge.model set', () => {
+    const policy = require('../scripts/global/model-routing-policy.json');
+    expect(policy.judge.enabled).toBe(true);
+    expect(typeof policy.judge.model).toBe('string');
+    expect(policy.judge.model.length).toBeGreaterThan(0);
+    expect(typeof policy.judge.threshold).toBe('number');
+  });
+
+  test('local-judge exports JUDGE_MODEL and DEFAULT_THRESHOLD', () => {
+    const { JUDGE_MODEL, DEFAULT_THRESHOLD } = require('../scripts/global/local-judge.js');
+    expect(typeof JUDGE_MODEL).toBe('string');
+    expect(DEFAULT_THRESHOLD).toBe(0.7);
+  });
+
+  test('cascade-dispatch assessQuality rejects short content', () => {
+    const { assessQuality, hints } = require('../scripts/global/cascade-dispatch.js');
+    const h = hints('write a function');
+    const result = assessQuality('short', h);
+    expect(result.pass).toBe(false);
+    expect(result.reason).toBe('too_short');
+  });
+
+  test('cascade-dispatch assessQuality passes adequate plain response', () => {
+    const { assessQuality, hints } = require('../scripts/global/cascade-dispatch.js');
+    const h = hints('explain what a variable is');
+    const long = 'A variable is a named storage location in memory. '.repeat(3);
+    const result = assessQuality(long, h);
+    expect(result.pass).toBe(true);
+  });
+
+  test('cascade-dispatch source wires judgeModel from policy to judgeResponse', () => {
+    const fs = require('fs'), path = require('path');
+    const src = fs.readFileSync(
+      path.join(__dirname, '../scripts/global/cascade-dispatch.js'), 'utf8');
+    expect(src).toContain('judgeModel: jcfg.model');
+    expect(src).toContain('judge_latency_ms: j.latency_ms');
+  });
+});
