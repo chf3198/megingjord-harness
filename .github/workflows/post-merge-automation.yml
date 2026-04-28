@@ -1,0 +1,79 @@
+name: Post-Merge Automation
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  schedule:
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  consultant-activation:
+    name: consultant-activation
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) return;
+            const linkedNum = parseInt(refsMatch[1]);
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+            });
+            const labels = issue.labels.map(l => l.name);
+            if (!labels.includes('status:testing')) return; // not at testing → skip
+
+            const remove = labels.filter(l => /^(status:|role:admin)/.test(l));
+            for (const l of remove) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: linkedNum, name: l,
+              }).catch(() => {});
+            }
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedNum, labels: ['status:review', 'role:consultant'],
+            });
+            const sha = context.payload.pull_request.merge_commit_sha?.slice(0, 7);
+            const prUrl = context.payload.pull_request.html_url;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+              body: `**Consultant action required** — PR merged (${sha}, ${prUrl})\n\nIssue is now \`status:review\`. Consultant must:\n1. Independently critique the implementation\n2. Post \`CONSULTANT_CLOSEOUT\` as a comment on this issue\n3. Run \`gh issue close ${linkedNum}\` after closeout\n\nTimestamp: ${new Date().toISOString()}`,
+            });
+
+  stale-review-check:
+    name: stale-review-check
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'status:review', state: 'open', per_page: 50,
+            });
+            const cutoff = Date.now() - 72 * 60 * 60 * 1000;
+            for (const issue of issues) {
+              if (new Date(issue.updated_at) > new Date(cutoff)) continue;
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number, per_page: 100,
+              });
+              const hasCloseout = comments.some(c => c.body.includes('CONSULTANT_CLOSEOUT'));
+              const hasStale = comments.some(c => c.body.includes('stale-review-reminder'));
+              if (!hasCloseout && !hasStale) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
+                  body: `**stale-review-reminder** — Issue #${issue.number} has been at \`status:review\` for >72h without \`CONSULTANT_CLOSEOUT\`. Consultant review is required before this work can close.`,
+                });
+              }
+            }
