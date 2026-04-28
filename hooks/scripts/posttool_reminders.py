@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PostToolUse hook: governance reminders for docs/release hygiene."""
+"""PostToolUse hook: governance reminders for docs/release hygiene + context re-injection."""
 import json
 import re
 import sys
@@ -11,17 +11,13 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from admin_patterns import RE_GIT_COMMIT, RE_GIT_PUSH, iter_strings
 from governance_state import ensure_state, mark_tool_activity, save_state
+from precompact_anchor import ANCHOR
 from wiki_wisdom import governance_enforcement, post_merge_checklist
 
-DOC_TRIGGER_RE = re.compile(
-    r"(^|/)(README\.md|CHANGELOG\.md|docs/|\.github/workflows/|"
-    r"\.github/CONTRIBUTING\.md|\.github/PULL_REQUEST_TEMPLATE\.md|"
-    r"package\.json|pyproject\.toml|Cargo\.toml|pom\.xml|\.vscodeignore)$"
-)
-CODE_TRIGGER_RE = re.compile(
-    r"(^|/)(mem-watchdog\.sh|install\.sh|mem-watchdog\.service|"
-    r"vscode-extension/.*\.(js|ts|json)|scripts/.*\.sh|tests/.*\.sh)$"
-)
+GOVERNANCE_ANCHOR_INTERVAL = 15
+
+DOC_TRIGGER_RE = re.compile(r"(^|/)(README\.md|CHANGELOG\.md|docs/|\.github/workflows/|\.github/CONTRIBUTING\.md|\.github/PULL_REQUEST_TEMPLATE\.md|package\.json|pyproject\.toml|Cargo\.toml|pom\.xml|\.vscodeignore)$")  # noqa: E501
+CODE_TRIGGER_RE = re.compile(r"(^|/)(mem-watchdog\.sh|install\.sh|mem-watchdog\.service|vscode-extension/.*\.(js|ts|json)|scripts/.*\.sh|tests/.*\.sh)$")  # noqa: E501
 
 
 def main() -> int:
@@ -37,12 +33,20 @@ def main() -> int:
     cwd = str(payload.get("cwd", "")) or str(Path.cwd())
     state = ensure_state(cwd)
     mark_tool_activity(state, payload)
-    save_state(state)
 
     flags = state.get("flags", {})
     ops = state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     messages = []
+
+    # Periodic governance anchor re-injection every N bash calls
+    if tool in {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}:
+        ctr = state.get("bash_call_ctr", 0) + 1
+        state["bash_call_ctr"] = 0 if ctr >= GOVERNANCE_ANCHOR_INTERVAL else ctr
+        if ctr >= GOVERNANCE_ANCHOR_INTERVAL:
+            messages.insert(0, f"[GOVERNANCE ANCHOR — periodic reminder] {ANCHOR}")
+
+    save_state(state)
 
     if any(DOC_TRIGGER_RE.search(v) for v in values):
         messages.append(governance_enforcement())

@@ -1,0 +1,57 @@
+name: Closeout Lint
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: closeout-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  closeout-schema:
+    name: closeout-schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) return; // no linked issue — baton-gates will catch missing Refs #N
+
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const closeout = comments.find(c => c.body.includes('CONSULTANT_CLOSEOUT'));
+            if (!closeout) return; // not yet at closeout — baton-gates enforces existence
+
+            const text = closeout.body;
+            const violations = [];
+
+            // Required fields in CONSULTANT_CLOSEOUT
+            if (!text.includes('Signed-by:')) violations.push('Missing Signed-by field');
+            if (!text.includes('Team&Model:')) violations.push('Missing Team&Model field');
+            if (!text.includes('Role: consultant')) violations.push('Missing Role: consultant');
+
+            // Cross-team check: Team&Model in CONSULTANT_CLOSEOUT must differ from COLLABORATOR_HANDOFF
+            const collab = comments.find(c => c.body.includes('COLLABORATOR_HANDOFF'));
+            if (collab) {
+              const collabTeam = (collab.body.match(/Team&Model:\s*(\S+)/) || [])[1];
+              const closeoutTeam = (text.match(/Team&Model:\s*(\S+)/) || [])[1];
+              if (collabTeam && closeoutTeam && collabTeam === closeoutTeam) {
+                violations.push(
+                  `CONSULTANT_CLOSEOUT Team&Model (${closeoutTeam}) matches COLLABORATOR_HANDOFF — independent review requires a different team`
+                );
+              }
+            }
+
+            if (violations.length) {
+              core.warning(
+                `CONSULTANT_CLOSEOUT schema issues on issue #${linkedIssue}:\n` +
+                violations.map(v => `  - ${v}`).join('\n') +
+                '\nFix before claiming Consultant closeout complete.'
+              );
+            }

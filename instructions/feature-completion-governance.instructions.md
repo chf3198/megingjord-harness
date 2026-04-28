@@ -2,23 +2,9 @@
 applyTo: "**"
 ---
 
-When asked to "complete" a feature-add (or equivalent language), completion requires all four role batons:
-
-1) Manager complete → `MANAGER_HANDOFF` emitted, `status:ready` set
-2) Collaborator complete → `COLLABORATOR_HANDOFF` emitted, `status:testing` set
-3) Admin complete → `ADMIN_HANDOFF` emitted, `status:review` set
-4) Consultant closeout → `CONSULTANT_CLOSEOUT` emitted, `status:done` set, issue closed
-
-Each role must emit its named artifact before the next role begins.
-Do not stop at "tests pass". Tests passing only closes Collaborator.
-
-## Ticket-first requirement
-
-Before any implementation begins, a GitHub issue **must** exist:
-- Manager creates via `gh issue create` or links to an existing issue.
-- All commits reference the issue (`#N`).
-- PR links to the issue with `Refs #N` in the body (not `Closes #N`).
-- Issue is closed explicitly by Consultant via `gh issue close` after CONSULTANT_CLOSEOUT — never by PR auto-close.
+When asked to "complete" a feature-add (or equivalent language), all four baton roles are required.
+Do not stop at "tests pass" — tests passing only closes Collaborator.
+See `role-baton-routing.instructions.md` for the full sequence.
 
 ## Admin completion contract (required before claiming done)
 
