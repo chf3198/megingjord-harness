@@ -14,6 +14,11 @@ function readLocalSandboxBranches() {
   return out ? out.split('\n').filter(Boolean) : [];
 }
 
+function readRemoteSandboxBranches() {
+  const out = run('git for-each-ref --format="%(refname:short)" refs/remotes/origin/sandbox/');
+  return out ? out.split('\n').filter(Boolean) : [];
+}
+
 function aheadBehind(branch) {
   const out = run(`git rev-list --left-right --count ${branch}...origin/main`);
   const [ahead, behind] = out.split(/\s+/).map(Number);
@@ -28,23 +33,28 @@ function dirtyInBranch(branch) {
   return head.includes(`## ${branch}`) ? changed : 0;
 }
 
+function inspectBranch(branch, usingRemote, issues) {
+  const logicalBranch = branch.replace(/^origin\//, '');
+  if (!sandboxRx.test(logicalBranch)) {
+    issues.push(`${logicalBranch}: invalid sandbox naming.`);
+    return;
+  }
+  const { ahead, behind } = aheadBehind(branch);
+  if (ahead > 0) issues.push(`${logicalBranch}: ahead of origin/main by ${ahead} commits.`);
+  if (behind > maxBehind) issues.push(`${logicalBranch}: behind origin/main by ${behind} commits (max ${maxBehind}).`);
+  if (usingRemote) return;
+  const dirtyCount = dirtyInBranch(logicalBranch);
+  if (dirtyCount > 0) issues.push(`${logicalBranch}: has ${dirtyCount} local changes while on sandbox launcher.`);
+}
+
 function check() {
   run('git fetch origin --prune');
   const issues = [];
-  const branches = readLocalSandboxBranches();
-  if (!branches.length) issues.push('No local sandbox/* branches found.');
-
-  for (const branch of branches) {
-    if (!sandboxRx.test(branch)) {
-      issues.push(`${branch}: invalid sandbox naming.`);
-      continue;
-    }
-    const { ahead, behind } = aheadBehind(branch);
-    if (ahead > 0) issues.push(`${branch}: ahead of origin/main by ${ahead} commits.`);
-    if (behind > maxBehind) issues.push(`${branch}: behind origin/main by ${behind} commits (max ${maxBehind}).`);
-    const dirtyCount = dirtyInBranch(branch);
-    if (dirtyCount > 0) issues.push(`${branch}: has ${dirtyCount} local changes while on sandbox launcher.`);
-  }
+  const localBranches = readLocalSandboxBranches();
+  const usingRemote = !localBranches.length;
+  const branches = usingRemote ? readRemoteSandboxBranches() : localBranches;
+  if (!branches.length) issues.push('No sandbox/* branches found locally or on origin.');
+  for (const branch of branches) inspectBranch(branch, usingRemote, issues);
 
   return {
     checkedBranches: branches.length,
