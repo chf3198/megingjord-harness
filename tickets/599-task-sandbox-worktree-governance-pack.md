@@ -1,4 +1,4 @@
-# #598 Task: Sandbox worktree governance pack
+# #599 Task: Sandbox worktree governance pack
 
 **Type**: task | **Status**: in-progress | **Priority**: P1 | **Lane**: code-change
 **Labels**: type:task, status:in-progress, area:governance, area:scripts, area:instructions
