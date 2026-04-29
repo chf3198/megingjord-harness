@@ -1,6 +1,6 @@
 {
   "name": "devenv-ops",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "AI agent governance harness — multi-runtime skills, hooks, agents, wiki, and Codex/Copilot install tooling",
   "private": true,
   "scripts": {
