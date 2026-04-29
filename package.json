@@ -8,6 +8,7 @@
     "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
+    "cost-report": "node scripts/global/cost-report.js",
     "lint:readability": "node scripts/lint-readability.js",
     "lint:router": "node scripts/lint-router.js",
     "sync": "bash scripts/sync.sh",
