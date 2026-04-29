@@ -1,11 +1,11 @@
 {
-  "name": "codex",
+  "name": "aegis-harness",
   "version": "3.2.0",
-  "description": "Codex: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
+  "description": "Aegis: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
     "prepare": "bash scripts/install-git-hooks.sh",
-    "setup": "npm install && echo '✅ codex ready — run: npm start'",
+    "setup": "npm install && echo '✅ aegis ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "worktree:start": "bash scripts/worktree-session-start.sh",
     "lint": "node scripts/lint.js",

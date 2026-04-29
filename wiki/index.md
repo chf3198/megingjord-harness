@@ -1,6 +1,6 @@
-# Codex Wiki Index
+# Aegis Wiki Index
 
-Knowledge base for the **Codex governance-first AI agent harness**.
+Knowledge base for the **Aegis governance-first AI agent harness**.
 Content-oriented catalog of every page in the wiki.
 The LLM updates this on every ingest operation.
 

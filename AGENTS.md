@@ -1,4 +1,4 @@
-# AGENTS.md — Codex baseline
+# AGENTS.md — Aegis baseline
 
 ## Agent startup protocol (required)
 

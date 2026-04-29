@@ -16,16 +16,16 @@ skills, governance, architecture, and research.
 |---|---|---|
 | **Search** | Any repo | `node ~/.copilot/scripts/wiki-search.js "query"` |
 | **Read** | Any repo | Read `~/.copilot/wiki/index.md` then drill into pages |
-| **Ingest** | Codex only | `npm run wiki:ingest -- raw/articles/<file>.md` |
-| **Lint** | Codex only | `npm run wiki:lint` |
-| **Anneal** | Codex only | `npm run wiki:anneal` |
+| **Ingest** | Aegis only | `npm run wiki:ingest -- raw/articles/<file>.md` |
+| **Lint** | Aegis only | `npm run wiki:lint` |
+| **Anneal** | Aegis only | `npm run wiki:anneal` |
 
 ## When to Use the Wiki
 
 - Before research tasks: check if the wiki already has compiled knowledge
 - When answering questions about fleet topology, governance, or architecture
 - When cross-referencing skills, instructions, or ADR decisions
-- After completing significant work: suggest wiki updates in Codex
+- After completing significant work: suggest wiki updates in Aegis
 
 ## Wiki Structure
 
@@ -37,7 +37,7 @@ skills, governance, architecture, and research.
 
 ## Rules
 
-- Wiki at `~/.copilot/wiki/` is **read-only** from non-Codex repos
-- Never edit `~/.copilot/wiki/` directly — changes flow through Codex
+- Wiki at `~/.copilot/wiki/` is **read-only** from non-Aegis repos
+- Never edit `~/.copilot/wiki/` directly — changes flow through Aegis
 - Cite wiki pages with `[[page-name]]` wikilink syntax
-- If wiki content is stale, note it for Codex maintenance
+- If wiki content is stale, note it for Aegis maintenance

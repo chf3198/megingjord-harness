@@ -1,8 +1,8 @@
 // Help User Sections — task-oriented help for dashboard operators
 
 const HELP_USER_SECTIONS = [
-  { id: 'start-what', title: '🚀 What is Codex?',
-    body: 'Codex is a fleet operations dashboard for monitoring devices, AI services, and Agile agent workflows. The <strong>Fleet view</strong> shows the baton pipeline, health log, activity feed, and context flow. <strong>Ops</strong> shows quotas, router, governance, and ticket log. <strong>Resources</strong> has device/service cards. <strong>Wiki</strong> is the research browser. Every panel has a <strong>? button</strong> for context-sensitive help.' },
+  { id: 'start-what', title: '🚀 What is Aegis?',
+    body: 'Aegis is a fleet operations dashboard for monitoring devices, AI services, and Agile agent workflows. The <strong>Fleet view</strong> shows the baton pipeline, health log, activity feed, and context flow. <strong>Ops</strong> shows quotas, router, governance, and ticket log. <strong>Resources</strong> has device/service cards. <strong>Wiki</strong> is the research browser. Every panel has a <strong>? button</strong> for context-sensitive help.' },
   { id: 'start-tour', title: '🗺️ Dashboard tour',
     body: '<strong>Nav bar</strong>: 🔴 Live · 📜 Logs · 📊 Ops · 🌐 Fleet · 📚 Wiki · 📘 Help. <strong>Header buttons</strong>: ↻ refresh now · ⏱️ toggle auto-refresh · 🧪 stress test · 💡 toggle tooltips · ◐ high contrast. <strong>Each panel h2</strong> has a <strong>? button</strong> — click or hover for panel-specific help when tooltips are on.' },
   { id: 'use-baton', title: '🔄 Agent Baton — reading ticket pipelines',

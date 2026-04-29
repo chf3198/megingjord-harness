@@ -1,4 +1,4 @@
-# Contributing to Codex
+# Contributing to Aegis
 
 ## Universal vs Personal Skills
 
