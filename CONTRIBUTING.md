@@ -1,4 +1,4 @@
-# Contributing to devenv-ops
+# Contributing to Megingjord
 
 ## Universal vs Personal Skills
 

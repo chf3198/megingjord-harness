@@ -1,4 +1,4 @@
-# AGENTS.md — devenv-ops baseline
+# AGENTS.md — Megingjord baseline
 
 ## Agent startup protocol (required)
 

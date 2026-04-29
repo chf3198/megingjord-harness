@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0] — Rebrand: DevEnv Ops → Megingjord (2026-04-29)
+
+### Changed — Global Rebrand
+- Package name: `devenv-ops` → `megingjord-harness`
+- Repository title: "devenv-ops" → "Megingjord"
+- Core documentation and plugin metadata updated to Megingjord branding
+- Added `NAMING_RESEARCH_2026.md` with naming research and recommendation
+
+### Why Rebrand?
+Megingjord better positions the harness as a **governance-first** AI agent orchestration tool. Research into current naming patterns identified Megingjord as:
+- **Distinctive + memorable** (vs. generic "DevOps" nomenclature)
+- **Governance-aligned semantics** (protection, guardrails, policy)
+- **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
+
 ## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
 
 ### Added — Fleet Capability Tagging (Epic #561)

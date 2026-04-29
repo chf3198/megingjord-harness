@@ -1,9 +1,9 @@
 const { test, expect } = require('@playwright/test');
 
-test.describe('DevEnv Ops Dashboard', () => {
+test.describe('Megingjord Dashboard', () => {
   test('loads with Live view and shows header', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText('DevEnv Ops');
+    await expect(page.locator('h1')).toContainText('Megingjord');
     // Live view is default — baton and activity panels visible
     await expect(page.locator('#panel-baton h2')).toContainText('Agent Baton');
     await expect(page.locator('#panel-activity h2')).toContainText('Live Activity');
