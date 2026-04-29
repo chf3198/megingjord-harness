@@ -4,21 +4,21 @@
 
 ### 🐛 Bug Reports
 
-Found a bug? [Open an issue](https://github.com/chf3198/devenv-ops/issues/new?template=bug-report.yml)
+Found a bug? [Open an issue](https://github.com/chf3198/megingjord-harness/issues/new?template=bug-report.yml)
 using the bug report template.
 
 ### 💡 Feature Requests
 
-Have an idea? [Open a feature request](https://github.com/chf3198/devenv-ops/issues/new?template=feature_request.md).
+Have an idea? [Open a feature request](https://github.com/chf3198/megingjord-harness/issues/new?template=feature_request.md).
 
 ### ❓ Questions
 
-For general questions about using devenv-ops as an Agent Plugin:
+For general questions about using Megingjord Harness as an Agent Plugin:
 
 1. Check the [README](README.md) for install and usage instructions
 2. Check [CONTRIBUTING](CONTRIBUTING.md) for development workflow
-3. Search [existing issues](https://github.com/chf3198/devenv-ops/issues)
-4. If still stuck, [open a discussion](https://github.com/chf3198/devenv-ops/discussions)
+3. Search [existing issues](https://github.com/chf3198/megingjord-harness/issues)
+4. If still stuck, [open a discussion](https://github.com/chf3198/megingjord-harness/discussions)
 
 ## Plugin Installation Help
 
