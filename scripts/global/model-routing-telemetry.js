@@ -7,26 +7,26 @@ const FILE = path.join(__dirname, '..', '..', 'logs', 'model-routing-telemetry.j
 
 function ensureDir() { fs.mkdirSync(path.dirname(FILE), { recursive: true }); }
 
+const MAX_ENTRIES = 100;
+
 function recordTelemetry(entry) {
   ensureDir();
-  // Extended schema: includes cascade fields, quality assessment, semantic intent
   const row = {
     ts: new Date().toISOString(),
     lane: entry.lane || 'free',
     model: entry.model || 'unknown',
     multiplier: entry.multiplier ?? 0,
     taskClass: entry.taskClass || 'routine',
-    semanticIntent: entry.semanticIntent || null,
-    promptTokens: entry.promptTokens || null,
-    responseLength: entry.response_length || entry.responseLength || null,
+    complexityScore: entry.complexityScore ?? entry.complexity ?? null,
     latencyMs: entry.latency_ms || entry.latencyMs || null,
     outcome: entry.outcome || 'ok',
-    escalation: entry.escalation || null,
-    qualityReason: entry.quality_reason || entry.qualityReason || null,
     rollbackApplied: entry.rollbackApplied || false,
     execute: entry.execute || false,
   };
-  fs.appendFileSync(FILE, JSON.stringify(row) + '\n');
+  const existing = fs.existsSync(FILE)
+    ? fs.readFileSync(FILE, 'utf8').split('\n').filter(Boolean) : [];
+  const lines = [...existing.slice(-(MAX_ENTRIES - 1)), JSON.stringify(row)];
+  fs.writeFileSync(FILE, lines.join('\n') + '\n');
   return row;
 }
 

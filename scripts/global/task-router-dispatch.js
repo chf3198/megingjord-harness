@@ -58,7 +58,8 @@ async function main() {
   const decision = await buildDecision(effectiveRoute, resolved);
   const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
   recordTelemetry({ lane: resolved.lane, model: resolved.modelId, multiplier: resolved.multiplier,
-    taskClass: resolved.taskClass, rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
+    taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
+    rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
   const result = { route: effectiveRoute, routing: resolved, decision };
   if (json) {
     console.log(JSON.stringify(result, null, 2));
