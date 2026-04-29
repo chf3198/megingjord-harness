@@ -36,14 +36,18 @@ function shouldRollback(policy) {
 function resolveRouting(prompt, route) {
   const policy = loadPolicy();
   const rollbackApplied = shouldRollback(policy);
-  const lane = rollbackApplied ? policy.rollback.forceLane : route.lane;
+  let lane = rollbackApplied ? policy.rollback.forceLane : route.lane;
+  const cx = route.complexity ?? 0.5;
+  const thresh = policy.complexityThresholds || {};
+  if (lane === 'premium' && cx < (thresh.premium ?? 0.7)) lane = cx < (thresh.haiku ?? 0.3) ? 'fleet' : 'haiku';
   const model = policy.models[lane] || policy.models.fallback;
   return {
     lane,
     modelId: model.id,
     multiplier: model.mult,
     taskClass: classifyTask(prompt, policy.taskClasses),
-    rollbackApplied
+    rollbackApplied,
+    complexity: cx
   };
 }
 
