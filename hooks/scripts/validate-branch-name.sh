@@ -6,6 +6,13 @@
 BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null)
 if [ -z "$BRANCH" ]; then exit 0; fi
 
+if echo "$BRANCH" | grep -qE "^sandbox/"; then
+  echo "❌ Commits on sandbox launcher branches are blocked: '$BRANCH'"
+  echo "   Create a task branch first (feat/<ticket#>-<desc>, fix/<ticket#>-<desc>)."
+  echo "   Tip: bash scripts/worktree-session-start.sh <copilot|codex|claude-code> feat/<ticket#>-<desc>"
+  exit 1
+fi
+
 # Allowed patterns
 VALID="^(feat|fix|chore|skill|hotfix)/[a-z0-9][-a-z0-9]*$|^main$|^develop$"
 
