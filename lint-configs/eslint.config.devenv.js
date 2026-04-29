@@ -14,31 +14,34 @@ export default [
       ecmaVersion: 2022,
       sourceType: 'module',
       globals: {
-        ...globals.browser,  // window, document, setTimeout, performance, etc.
-        ...globals.node,     // require, module, process, __dirname, etc.
+        ...globals.browser, // window, document, setTimeout, performance, etc.
+        ...globals.node, // require, module, process, __dirname, etc.
       },
     },
     rules: {
       // --- eslint:recommended subset (critical rules) ---
       'no-unused-vars': 'warn',
-      'no-undef': 'warn',       // warn not error — cross-file globals are valid in browser multi-script
+      'no-undef': 'warn', // warn not error — cross-file globals are valid in browser multi-script
       'no-console': 'off',
-      'eqeqeq': ['warn', 'always'],  // baseline violations waived; enforce on new code
+      eqeqeq: ['warn', 'always'], // baseline violations waived; enforce on new code
       'no-var': 'error',
       'prefer-const': 'warn',
 
       // --- Tier 1: JSDoc documentation (P0) ---
       // Require JSDoc on exported/public functions
-      'jsdoc/require-jsdoc': ['warn', {
-        require: {
-          FunctionDeclaration: true,
-          MethodDefinition: true,
-          ClassDeclaration: true,
-          ArrowFunctionExpression: false,
-          FunctionExpression: false,
+      'jsdoc/require-jsdoc': [
+        'warn',
+        {
+          require: {
+            FunctionDeclaration: true,
+            MethodDefinition: true,
+            ClassDeclaration: true,
+            ArrowFunctionExpression: false,
+            FunctionExpression: false,
+          },
+          publicOnly: true,
         },
-        publicOnly: true,
-      }],
+      ],
       'jsdoc/require-description': ['warn', { contexts: ['FunctionDeclaration'] }],
       'jsdoc/require-param': 'warn',
       'jsdoc/require-param-description': 'warn',
@@ -53,12 +56,6 @@ export default [
   },
   {
     // Ignore generated, test, and vendor paths
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-      'coverage/**',
-      '**/*.min.js',
-    ],
+    ignores: ['node_modules/**', 'dist/**', 'build/**', 'coverage/**', '**/*.min.js'],
   },
 ];

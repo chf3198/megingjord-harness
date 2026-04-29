@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
       - uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -43,8 +43,12 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
       - run: npm install --no-audit --no-fund
+      - name: Formatting check
+        run: npm run format:check
       - name: 100-line file limit
         run: npm run lint
+      - name: Readability gate
+        run: npm run lint:readability:ci
       - name: Markdown lint
         run: npm run lint:md
       - name: Vale prose lint
