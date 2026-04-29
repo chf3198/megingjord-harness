@@ -72,19 +72,19 @@ The LLM updates this on every ingest operation.
 - [[governance-workflow-hardening-2026]] — Governance Workflow Hardening (2026)
 - [[governance-verification-harness-2026]] — Governance Verification Harness (2026)
 - [[governance-agile-github-remediation-2026]] — Governance + Agile + GitHub Remediation (2026)
+- [[readability-commenting-toolchain-2026-04-29]] — Readability & Commenting Toolchain Research (2026-04-29)
 
 ## Syntheses
 
 - [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
 - [[dashboard-codebase-gold-rules]] — Dashboard Codebase Gold Rules
+- [[global-readability-governance-harness]] — Global Readability Governance for DevEnv Ops Harness
 
 ## Recent Additions
 
 - [[llm-wiki-implementation-plan]] — LLM Wiki Optimal Implementation Plan (Apr 2026 research synthesis)
 - [[dashboard-comparable-tools]] — Dashboard Comparable Tools Research
 - [[js-code-quality-practices]] — JS Code Quality Practices
-- [[nodejs-install-patterns]] — Node.js Install Patterns
-- [[nodejs-project-organization]] — Node.js Project Organization
 - [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization and Alternatives (2026)
 - [[fleet-live-usage-indicator-options-2026]] — Fleet Live Usage Indicator Options (2026)
 - [[global-governance-self-anneal-2026]] — Global Governance Self-Anneal (2026)
@@ -92,7 +92,9 @@ The LLM updates this on every ingest operation.
 - [[governance-workflow-hardening-2026]] — Governance Workflow Hardening (2026)
 - [[governance-verification-harness-2026]] — Governance Verification Harness (2026)
 - [[governance-agile-github-remediation-2026]] — Governance + Agile + GitHub Remediation (2026)
+- [[readability-commenting-toolchain-2026-04-29]] — Readability & Commenting Toolchain Research (2026-04-29)
+- [[global-readability-governance-harness]] — Global Readability Governance for DevEnv Ops Harness
 
 ---
 
-**Pages**: 58 | **Last updated**: 2026-04-23
+**Pages**: 60 | **Last updated**: 2026-04-29
