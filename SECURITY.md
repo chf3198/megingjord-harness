@@ -7,7 +7,7 @@ report it responsibly. **Do not open a public issue.**
 
 ### Preferred: GitHub Private Vulnerability Reporting
 
-1. Go to the [Security tab](https://github.com/chf3198/devenv-ops/security)
+1. Go to the [Security tab](https://github.com/chf3198/megingjord-harness/security)
 2. Click **Report a vulnerability**
 3. Provide a description, steps to reproduce, and impact assessment
 
@@ -24,7 +24,7 @@ Contact the maintainer via the information listed on
 
 ## Scope
 
-This policy covers the devenv-ops repository, including:
+This policy covers the megingjord-harness repository, including:
 
 - Skills, agents, hooks, and instructions
 - Dashboard (Alpine.js web app)
