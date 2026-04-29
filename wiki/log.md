@@ -48,7 +48,20 @@ Karpathy/Lutke context engineering (Jun 2025). Five gaps identified in
 current wiki implementation with tiered P0/P1/P2 remediation plan.
 Total wiki pages now: 51.
 
-## [2026-04-23] ingest | OpenClaw Windows optimization and alternatives
+## [2026-04-29] ingest | Documentation Excellence for AI Agent Harnesses
+Research synthesis integrating three frameworks: Divio Four-Layer Model
+(tutorials/how-to/reference/explanation), Write the Docs best practices
+(audience clarity, accessibility, docs-as-code), Google Developer Style Guide
+(voice, terminology consistency). Cutting-edge recommendations for agent harness
+documentation synchronization. Cross-references: [[help-best-practices]], [[wiki-pattern]].
+Total wiki pages now: 63.
+
+## [2026-04-29] create | Documentation Modernization Strategy for DevEnv Ops
+Strategic synthesis combining documentation excellence research with DevEnv Ops
+specifics. Proposes unified Divio four-layer architecture, style unification,
+automated drift detection, HELP ↔ wiki linkage, GitHub profile sync. Four-phase
+rollout with CI gates, drift detector npm script, success metrics. Epic-ready brief.
+Total wiki pages now: 64.## [2026-04-23] ingest | OpenClaw Windows optimization and alternatives
 Research synthesis added from LiteLLM reliability/routing docs, Ollama API,
 llama.cpp performance guidance, and LocalAI overview. Captures decision to
 keep OpenClaw as control plane and harden endpoint reliability/fallbacks.
