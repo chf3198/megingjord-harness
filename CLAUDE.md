@@ -1,7 +1,9 @@
-# devenv-ops — Claude Code Governance
+# Codex — Claude Code Governance
 
 This project uses a structured Agile baton workflow, GitHub ticketing standards,
 and AI agent governance. All instructions below are binding for Claude Code sessions.
+
+> **Codex governance harness** — Rebranded from DevEnv Ops (2026-04-29).
 
 ## Instructions
 

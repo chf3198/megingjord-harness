@@ -1,10 +1,12 @@
-# devenv-ops
+# Codex
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-purple.svg)](LICENSE)
-[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-governance%20harness-blue.svg)](plugin.json)
+[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-Codex%20Harness-blue.svg)](plugin.json)
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 
-**Governance-first AI agent harness for Copilot, Claude Code, and Codex.**
+**Codex: Governance-first AI agent harness for Copilot, Claude Code, and Codex.**
+
+> **Formerly DevEnv Ops** — Rebranded to Codex for stronger market positioning and internal consistency.
 
 This repo is the development source for shared runtime assets deployed into `~/.copilot/`, `~/.codex/`, and `~/.agents/skills/`.
 

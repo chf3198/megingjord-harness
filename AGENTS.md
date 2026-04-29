@@ -1,4 +1,4 @@
-# AGENTS.md — devenv-ops baseline
+# AGENTS.md — Codex baseline
 
 ## Agent startup protocol (required)
 

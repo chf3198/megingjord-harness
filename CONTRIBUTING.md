@@ -1,4 +1,4 @@
-# Contributing to devenv-ops
+# Contributing to Codex
 
 ## Universal vs Personal Skills
 

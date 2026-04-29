@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.2.0] — Rebrand: DevEnv Ops → Codex (2026-04-29)
+
+### Changed — Global Rebrand
+- Package name: `devenv-ops` → `codex`
+- Repository title: "devenv-ops" → "Codex"
+- Core documentation and plugin metadata updated to Codex branding
+- Added `NAMING_RESEARCH_2026.md` with naming research and recommendation
+
+### Why Rebrand?
+Codex better positions the harness as a **governance-first** AI agent orchestration tool. Research into current naming patterns identified Codex as:
+- **Distinctive + memorable** (vs. generic "DevOps" nomenclature)
+- **Already in use internally** (Codex CLI, skills)
+- **Stronger market differentiation** for positioning
+
 ## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
 
 ### Added — Fleet Capability Tagging (Epic #561)
