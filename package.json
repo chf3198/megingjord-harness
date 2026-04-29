@@ -4,12 +4,16 @@
   "description": "AI agent governance harness — multi-runtime skills, hooks, agents, wiki, and Codex/Copilot install tooling",
   "private": true,
   "scripts": {
-    "prepare": "cp hooks/scripts/validate-branch-name.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit",
+    "prepare": "bash scripts/install-git-hooks.sh",
     "setup": "npm install && echo '✅ devenv-ops ready — run: npm start'",
     "start": "node scripts/dashboard-server.js",
     "lint": "node scripts/lint.js",
+    "format": "prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js",
+    "format:check": "prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js",
     "cost-report": "node scripts/global/cost-report.js",
     "lint:readability": "node scripts/lint-readability.js",
+    "lint:readability:ci": "node scripts/lint-readability.js --max-warnings=389",
+    "readability:snapshot": "bash scripts/readability-snapshot.sh",
     "lint:router": "node scripts/lint-router.js",
     "sync": "bash scripts/sync.sh",
     "sync:dry": "bash scripts/sync.sh --dry-run",
@@ -29,6 +33,7 @@
     "deploy:claude:apply": "bash scripts/deploy.sh --apply --target claude",
     "health": "node scripts/health-check.js",
     "router:smoke": "node scripts/global/task-router-smoke.js",
+    "toolchain:readability:install": "node scripts/global/install-readability-toolchain.js",
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
     "router:cascade": "node scripts/global/cascade-dispatch.js",
     "router:weekly": "node scripts/global/model-routing-weekly-report.js",
@@ -70,7 +75,8 @@
     "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^17.5.0",
-    "markdownlint-cli2": "^0.17.2"
+    "markdownlint-cli2": "^0.17.2",
+    "prettier": "^3.6.2"
   },
   "dependencies": {
     "dotenv": "^17.4.1"

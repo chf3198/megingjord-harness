@@ -3,6 +3,7 @@
 ## Universal vs Personal Skills
 
 Skills are categorized in `skills/.plugin-triage.json`:
+
 - **Universal** (24): Ship in `plugin.json` for all consumers
 - **Personal** (11): Deploy only via `deploy.sh` to `~/.copilot/`
 
@@ -28,11 +29,17 @@ Skills are categorized in `skills/.plugin-triage.json`:
 name: skill-name
 description: One-line description
 ---
+
 # skill-name — Title
+
 ## Purpose
+
 ## Scope
+
 ## Constraints
+
 ## Instructions
+
 ## Verification
 ```
 
@@ -45,11 +52,11 @@ description: One-line description
 
 ## Cross-Tool Compatibility
 
-| Tool | Detection Path |
-|------|---------------|
-| VS Code Copilot | `plugin.json` (root) |
-| Claude Code | `.claude-plugin/plugin.json` (symlink) |
-| GitHub Copilot | `.github/plugin/plugin.json` (symlink) |
+| Tool            | Detection Path                         |
+| --------------- | -------------------------------------- |
+| VS Code Copilot | `plugin.json` (root)                   |
+| Claude Code     | `.claude-plugin/plugin.json` (symlink) |
+| GitHub Copilot  | `.github/plugin/plugin.json` (symlink) |
 
 Symlinks auto-resolve to root `plugin.json`.
 
@@ -68,25 +75,18 @@ npm run sync:claude            # ~/.claude/ → .claude/ (pull back)
 - **Branch before editing**: `feat/<issue>-<slug>`
 - **Conventional commits**: `feat(scope):`, `fix(scope):`
 - **settings.json drift**: Permission approvals auto-append to `.claude/settings.json`. Commit these via `chore:` commit with ticket ref before branching (#506).
-- Run `npm run lint` before pushing
+- Run `npm run format:check && npm run lint && npm run lint:readability:ci` before pushing
 
 ## PR Checklist
 
 Before submitting a pull request, verify:
 
-- [ ] `npm run lint` passes (no new violations)
+- [ ] `npm run format:check && npm run lint` passes
+- [ ] `npm run lint:readability:ci` passes (no readability regressions)
 - [ ] `npm run validate:triage` passes (if skills changed)
 - [ ] `npm run validate:compat` passes (if plugin.json changed)
 - [ ] All new files ≤100 lines
 - [ ] Conventional commit message format used
-
-## Issue Templates
-
-Use the appropriate template when opening issues:
-- **Bug report** → `bug-report.yml`
-- **Feature request** → `feature_request.md`
-- **Epic** → `epic.yml`
-- **Research** → `research.yml`
 
 ## Baton Gate Chain
 

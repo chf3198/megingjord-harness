@@ -12,6 +12,19 @@ on:
     branches: [main]
 
 jobs:
+  format-check:
+    name: Prettier (format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run Prettier check
+        run: npx prettier --check .
+
   lint-js:
     name: ESLint (JS/TS)
     runs-on: ubuntu-latest
@@ -24,7 +37,7 @@ jobs:
       - run: npm ci
       - name: Run ESLint
         run: npx eslint --no-eslintrc -c lint-configs/eslint.config.devenv.js \
-               --ext .js,.ts .
+          --ext .js,.ts .
 
   lint-python:
     name: Ruff (Python)
