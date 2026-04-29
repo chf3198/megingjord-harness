@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aegis — Fleet Operations Center</title>
+    <title>Megingjord — Fleet Operations Center</title>
     <link rel="stylesheet" href="css/app.css"><link rel="stylesheet" href="css/stats.css"><link rel="stylesheet" href="css/router.css"><link rel="stylesheet" href="css/config.css"><link rel="stylesheet" href="css/views.css"><link rel="stylesheet" href="css/topology.css">
     <link rel="stylesheet" href="css/baton.css"><link rel="stylesheet" href="css/ticket-log.css"><link rel="stylesheet" href="css/activity.css"><link rel="stylesheet" href="css/wiki.css"><link rel="stylesheet" href="css/wiki-metrics.css"><link rel="stylesheet" href="css/fleet-health.css"><link rel="stylesheet" href="css/governance.css"><link rel="stylesheet" href="css/context.css"><link rel="stylesheet" href="css/github.css"><link rel="stylesheet" href="css/settings.css">
     <script defer src="js/alpine.min.js"></script>
@@ -26,7 +26,7 @@
 <body x-cloak x-data="dashboardApp()" x-init="init()">
     <a href="#main-content" class="skip-link">Skip to content</a>
     <header class="header">
-        <div class="header-brand"><h1>🖥️ Aegis</h1><span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span></div>
+        <div class="header-brand"><h1>🖥️ Megingjord</h1><span class="status-badge" :class="overallStatus"><span x-text="overallStatus"></span></span></div>
         <nav class="header-nav" aria-label="Dashboard views">
             <button @click="setView('live')" :class="{active:isView('live')}" data-tip="view-live" title="Live">🔴 Live</button>
             <button @click="setView('logs')" :class="{active:isView('logs')}" data-tip="view-logs" title="Logs">📜 Logs</button>
@@ -94,4 +94,4 @@
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width">
             <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>
     </main>
-    <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>aegis v3.2.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>
+    <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>megingjord v3.2.0</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>

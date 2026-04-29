@@ -1,9 +1,9 @@
-# Aegis — Claude Code Governance
+# Megingjord — Claude Code Governance
 
 This project uses a structured Agile baton workflow, GitHub ticketing standards,
 and AI agent governance. All instructions below are binding for Claude Code sessions.
 
-> **Aegis governance harness** — Rebranded from DevEnv Ops (2026-04-29).
+> **Megingjord governance harness** — Rebranded from DevEnv Ops (2026-04-29).
 
 ## Instructions
 

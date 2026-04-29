@@ -1,4 +1,4 @@
-# AGENTS.md — Aegis baseline
+# AGENTS.md — Megingjord baseline
 
 ## Agent startup protocol (required)
 

@@ -1,4 +1,4 @@
-# Aegis Rebrand Naming Research (2026-04-29)
+# Megingjord Rebrand Naming Research (2026-04-29)
 
 **Date**: 2026-04-29  
 **Last Updated**: 2026-04-29
@@ -7,8 +7,9 @@
 
 | Option | Type | Marketability | Distinctiveness | Notes |
 |---|---|---:|---:|---|
-| Aegis | Real word/evocative | 9/10 | 8/10 | Strong governance + protection connotation |
+| Megingjord | Norse/mythic | 8/10 | 10/10 | Thor's power-belt reference; highly distinctive |
 | Codex | Real word/evocative | 9/10 | 8/10 | Rejected: OpenAI product-name conflict |
+| Aegis | Real word/evocative | 9/10 | 3/10 | Rejected: common/disambiguated name across domains |
 | Orchestrate | Descriptive | 6/10 | 5/10 | Too generic in DevOps space |
 | Nexus | Evocative | 7/10 | 4/10 | High collision risk |
 | Forge | Evocative | 7/10 | 4/10 | Common across developer tooling |
@@ -19,8 +20,9 @@
 1. **Naming structure fit**: modern developer products perform better with short, evocative names than descriptor-heavy names.
 2. **Category trend**: Product Hunt + GitHub trending show short names (single token, 1–3 syllables) with strong recall.
 3. **Differentiation requirement**: "DevEnv Ops Harness" is descriptive but low-brand and low memorability.
-4. **Positioning alignment**: "Aegis" maps directly to protection, governance, and guardrails.
+4. **Positioning alignment**: "Megingjord" (Thor's power-belt) maps to strength, protection, and governance posture.
 5. **Risk handling**: "Codex" was eliminated due direct naming conflict with OpenAI's coding AI product line.
+6. **Uniqueness check**: "Aegis" was eliminated due broad existing use and weak distinctiveness.
 
 ## Source Links
 
@@ -32,14 +34,14 @@
 
 ## Decision
 
-Adopt **Aegis** as the public app name and primary brand.
+Adopt **Megingjord** as the public app name and primary brand.
 
 ## Actionable Next Steps
 
 1. Update `package.json` + `plugin.json` names and versions.
 2. Update top-level docs (`README.md`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`).
 3. Add changelog entry for rebrand release (`v3.2.0`).
-4. Update instruction/wiki references from "devenv-ops" to "Aegis" where user-facing.
+4. Update instruction/wiki references from "devenv-ops" to "Megingjord" where user-facing.
 5. Follow-up: reserve canonical domain + verify trademark path before public launch.
 
 ## Team&Model

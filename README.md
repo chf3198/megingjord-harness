@@ -1,12 +1,12 @@
-# Aegis
+# Megingjord
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20NC%201.0-purple.svg)](LICENSE)
-[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-Aegis%20Harness-blue.svg)](plugin.json)
+[![Agent Plugin](https://img.shields.io/badge/Agent%20Plugin-Megingjord%20Harness-blue.svg)](plugin.json)
 [![Node ≥22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 
-**Aegis: Governance-first AI agent harness for Copilot, Claude Code, and Codex.**
+**Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex.**
 
-> **Formerly DevEnv Ops** — Rebranded to Aegis. (Codex name rejected due OpenAI product-name conflict.)
+> **Formerly DevEnv Ops** — Rebranded to Megingjord. (Codex rejected due OpenAI product-name conflict; Aegis rejected as too common.)
 
 This repo is the development source for shared runtime assets deployed into `~/.copilot/`, `~/.codex/`, and `~/.agents/skills/`.
 

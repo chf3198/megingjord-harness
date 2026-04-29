@@ -1,4 +1,4 @@
-# Contributing to Aegis
+# Contributing to Megingjord
 
 ## Universal vs Personal Skills
 
