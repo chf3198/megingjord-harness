@@ -73,12 +73,14 @@ The LLM updates this on every ingest operation.
 - [[governance-verification-harness-2026]] — Governance Verification Harness (2026)
 - [[governance-agile-github-remediation-2026]] — Governance + Agile + GitHub Remediation (2026)
 - [[readability-commenting-toolchain-2026-04-29]] — Readability & Commenting Toolchain Research (2026-04-29)
+- [[documentation-excellence-2026-04-29]] — Documentation Excellence for AI Agent Harnesses (2026)
 
 ## Syntheses
 
 - [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
 - [[dashboard-codebase-gold-rules]] — Dashboard Codebase Gold Rules
 - [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack
+- [[documentation-modernization-strategy-2026]] — Documentation Modernization Strategy for DevEnv Ops
 
 ## Recent Additions
 
@@ -97,4 +99,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 62 | **Last updated**: 2026-04-29
+**Pages**: 64 | **Last updated**: 2026-04-29
