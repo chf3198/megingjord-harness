@@ -30,8 +30,26 @@ git worktree add -b sandbox/claude-code ../devenv-ops-claude-code origin/main
 
 1. Open one VS Code window per worktree.
 2. Start one agent family per window.
-3. Create the task branch inside that agent's worktree only.
-4. Merge reviewed work back through GitHub.
+3. Reset launcher branch to `origin/main` before new work.
+4. Create the task branch inside that agent's worktree only.
+5. Merge reviewed work back through GitHub.
+
+### Mandatory launcher reset
+
+Use one command at session start:
+
+```bash
+bash scripts/worktree-session-start.sh <copilot|codex|claude-code> feat/<issue#>-<slug>
+```
+
+This command:
+
+- fetches latest refs,
+- hard-resets the sandbox launcher branch to `origin/main`,
+- clears local residue,
+- and switches to a ticket-linked task branch.
+
+Do not commit directly on `sandbox/*` launcher branches.
 
 ## Recovery
 

@@ -65,7 +65,7 @@ The LLM updates this on every ingest operation.
 - [[linting-governance-rationale]] — Linting Governance: Rationale and Scope
 - [[linting-governance-tooling]] — Linting Governance: Tooling and Config
 - [[linting-governance-rollout]] — Linting Governance: Adoption and Rollout
-- [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization and Alternatives (2026)
+- [[sandbox-worktree-governance-2026-04-29]] — Sandbox Worktree Governance Pack (2026-04-29)
 - [[fleet-live-usage-indicator-options-2026]] — Fleet Live Usage Indicator Options (2026)
 - [[global-governance-self-anneal-2026]] — Global Governance Self-Anneal (2026)
 - [[cost-efficiency-self-anneal-2026]] — Cost→Quality Self-Anneal (2026)
@@ -78,7 +78,7 @@ The LLM updates this on every ingest operation.
 
 - [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
 - [[dashboard-codebase-gold-rules]] — Dashboard Codebase Gold Rules
-- [[global-readability-governance-harness]] — Global Readability Governance for DevEnv Ops Harness
+- [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack
 
 ## Recent Additions
 
@@ -97,4 +97,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 60 | **Last updated**: 2026-04-29
+**Pages**: 62 | **Last updated**: 2026-04-29

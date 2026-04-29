@@ -95,6 +95,6 @@ and project automation. Finalized design and created implementation tickets
 Added executable pre-close governance verification script and evidence checklist
 for Admin/Consultant closeout phases. Total wiki pages now: 57.
 
-## [2026-04-23] ingest | Governance + Agile + GitHub remediation
-Added remediation research + final ticket pack (#159–#162) for epic-child terminality, evidence completeness, merge queue checks, and ready-SLA controls. Total wiki pages now: 58.
-## [2026-04-28] anneal | 4 fixes applied
+## [2026-04-29] ingest | Sandbox worktree governance pack
+Added source+synthesis pages for launcher-branch controls, reset workflow, and merge-group-safe CI governance checks.
+Last updated with supporting research and runbook alignment.
