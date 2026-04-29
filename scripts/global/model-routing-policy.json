@@ -49,6 +49,23 @@
       "incident response", "cross-system trade-off", "concurrency analysis"
     ]
   },
+  "fleetTargets": {
+    "primary": {
+      "deviceId": "36gbwinresource",
+      "ollamaUrl": "http://100.91.113.16:11434",
+      "inferenceClass": "heavy-coding",
+      "warmTokPerSec": 32.3,
+      "gpu": true
+    },
+    "fallback": {
+      "deviceId": "windows-laptop",
+      "ollamaUrl": "http://100.78.22.13:11434",
+      "inferenceClass": "coding",
+      "warmTokPerSec": 7.3,
+      "gpu": false,
+      "note": "Set OLLAMA_KEEP_ALIVE=24h on this host — see research/ollama-keepalive-runbook.md"
+    }
+  },
   "cascade": {
     "enabled": true,
     "tiers": ["fleet", "haiku", "premium"],
