@@ -1,6 +1,11 @@
 {
-  "version": "2.1.0",
-  "defaultLane": "free",
+  "version": "2.2.0",
+  "defaultLane": "fleet",
+  "complexityThresholds": {
+    "_doc": "Numeric complexity score gates. fleet=[0,0.3), haiku=[0.3,0.7), premium=[0.7,1.0]",
+    "haiku": 0.3,
+    "premium": 0.7
+  },
   "taskClasses": {
     "routine": ["search", "grep", "read", "docs", "simple", "list", "find"],
     "coding": ["implement", "refactor", "tests", "integration", "generate", "config"],
