@@ -7,6 +7,7 @@ const policyPath = path.join(__dirname, 'task-router-policy.json');
 const inventoryPath = path.join(__dirname, '..', '..', 'inventory', 'devices.json');
 const policy = JSON.parse(fs.readFileSync(policyPath, 'utf8'));
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
+const aiRules = require('../../inventory/ai-models.json').optimizationStrategy || {};
 
 function score(prompt, list) {
   const text = String(prompt || '').toLowerCase();
@@ -56,11 +57,15 @@ function classifyPrompt(prompt) {
   if (totals.premium >= 2 && totals.premium >= totals.fleet) lane = 'premium';
   else if (totals.fleet >= fleetMin) lane = 'fleet';
   else if (totals.free >= 2) lane = 'free';
+  const totalScore = Object.values(totals).reduce((s, v) => s + v, 0) + 0.01;
+  const complexity = +(Math.min(1.0, totals.premium / totalScore)).toFixed(2);
+  if (aiRules.rule3 && complexity < 0.7 && lane === 'premium') lane = 'fleet';
   const selected = policy.lanes[lane];
   const target = lane === 'fleet' ? pickFleetTarget(prompt) : null;
   const confidence = lane === 'free' && free < 2 ? 'medium' : 'high';
   return {
     lane,
+    complexity,
     backend: selected.backend,
     recommendedModel: selected.recommendedModel,
     targetDevice: target?.targetDevice || null,
