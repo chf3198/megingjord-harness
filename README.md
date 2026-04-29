@@ -1,6 +1,6 @@
 # Megingjord Harness
 
-![Megingjord Banner](https://capsule-render.vercel.app/api?type=waving&height=180&text=Megingjord%20Harness&fontSize=44&fontColor=ffffff&color=0:1f6feb,100:5f2c82&desc=Governance-first%20AI%20agent%20orchestration%20for%20Copilot%20%7C%20Claude%20Code%20%7C%20Codex&descAlignY=68)
+![Megingjord Banner](.github/assets/megingjord-banner.svg)
 
 [![License: PolyForm NC](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue.svg)](LICENSE)
 [![Node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
