@@ -15,7 +15,7 @@ const IGNORE = [
   'skills', 'hooks'
 ];
 
-const IGNORE_PATHS = ['scripts/global', 'instructions', 'research'];
+const IGNORE_PATHS = ['scripts/global', 'instructions', 'research', 'docs/howto'];
 const IGNORE_FILES = ['CHANGELOG.md', 'CHANGELOG-archive.md'];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
