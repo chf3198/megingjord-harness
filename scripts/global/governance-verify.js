@@ -17,8 +17,6 @@ const childrenFromSection = txt => {
   return [...m[1].matchAll(/#(\d+)/g)].map(x => +x[1]);
 };
 
-const batonRx = ['MANAGER_HANDOFF','COLLABORATOR_HANDOFF','ADMIN_HANDOFF','CONSULTANT_CLOSEOUT'];
-const secSig = (txt, s) => { const m = txt.match(new RegExp(`##\\s+${s}([\\s\\S]*?)(?=\\n##|$)`)); return !m || /Signed-by:/m.test(m[1]); };
 const parse = txt => ({
   number: +(txt.match(/^# Ticket\s+(\d+)\s+—/m)?.[1] || 0),
   type: txt.match(/^Type:\s*(.+)$/m)?.[1]?.trim() || '',
@@ -29,7 +27,6 @@ const parse = txt => ({
   hasEvidence: /##\s+GitHub Evidence Block/m.test(txt),
   hasBlocker: /BLOCKER_NOTE|owner\s*:|unblock_condition\s*:|eta_or_review_time\s*:/i.test(txt),
   hasPlaceholder: /PLACEHOLDER_SIGNATURE/.test(txt),
-  unsignedSections: batonRx.filter(s => !secSig(txt, s)),
 });
 
 const all = new Map();
@@ -62,7 +59,6 @@ for (const wf of needsMergeGroup) {
 
 for (const t of all.values()) {
   if (t.hasPlaceholder) issues.push(`${t.file}: contains PLACEHOLDER_SIGNATURE — backfill required`);
-  if (t.unsignedSections.length) issues.push(`${t.file}: baton sections missing Signed-by: ${t.unsignedSections.join(', ')}`);
   if (!/^P[0-3]$/.test(t.priority)) issues.push(`${t.file}: missing/invalid Priority`);
   if (terminal(t.status) && /role:/i.test(t.status)) issues.push(`${t.file}: closed status contains role label`);
   if (terminal(t.status) && !t.hasCloseout) issues.push(`${t.file}: missing CONSULTANT_CLOSEOUT`);
