@@ -19,6 +19,13 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Request Queuing + Exponential Backoff (#670)
+
+### Added — Rate-Limit Resilience
+- `scripts/global/backoff.js`: `backoff(attempt, opts)` — exponential delay with 20% jitter, capped at 60s; `isRateLimitError(err)` — matches HTTP 429/503 and message patterns
+- `scripts/global/request-queue.js`: `RequestQueue` with priority lanes (urgent/normal/low), RPS throttle, adaptive backpressure (RPS drops on task failure), max queue 500, `getStats()`, `drain()`
+- `scripts/global/cascade-dispatch.js`: `tryOllama` now retries up to 3 times on rate-limit errors using `backoff.js`; graceful escalation after max retries
+
 ## [Unreleased] — Instruction Token Footprint Reduction (#667)
 
 ### Changed — Instruction Optimization
