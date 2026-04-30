@@ -43,6 +43,7 @@
     "routing:report": "node scripts/global/routing-baseline-report.js --days 7",
     "routing:calibrate": "node scripts/global/cascade-calibrate.js",
     "governance:drift": "node scripts/global/governance-drift-classifier.js --json",
+    "governance:epics": "node scripts/global/epic-close-validator.js",
     "governance:epic": "node scripts/global/epic-evidence.js",
     "governance:verify": "node scripts/global/governance-verify.js --json",
     "governance:worktrees": "node scripts/global/worktree-governance-audit.js --json",

@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { scanGitHubLabels } = require('./governance-github-scanner');
 
 const root = path.resolve(__dirname, '..', '..');
 const logsDir = path.join(root, 'logs');
@@ -57,21 +58,31 @@ function runVerify() {
   }
 }
 
-function buildReport(verifyData) {
+function buildReport(verifyData, gh = { violations: [], counts: { open: 0, terminal: 0, epic: 0 } }) {
   const classes = classify(verifyData.issues || []);
-  const total = verifyData.failedChecks || 0;
+  const total = (verifyData.failedChecks || 0) + gh.violations.length;
   return {
     generatedAt: new Date().toISOString(),
     checkedTickets: verifyData.checkedTickets || 0,
     totalDrift: total,
-    driftByClass: { open: classes.open.length, terminal: classes.terminal.length, epic: classes.epic.length },
+    driftByClass: {
+      open: classes.open.length + gh.counts.open,
+      terminal: classes.terminal.length + gh.counts.terminal,
+      epic: classes.epic.length + gh.counts.epic,
+    },
+    githubViolations: gh.violations,
     details: classes,
     status: total === 0 ? 'no-drift' : 'drift-detected',
   };
 }
 
-function run() {
-  const report = buildReport(JSON.parse(runVerify()));
+async function run() {
+  let ghData = { violations: [], counts: { open: 0, terminal: 0, epic: 0 } };
+  if (process.env.GITHUB_TOKEN) {
+    const [owner, repo] = (process.env.GITHUB_REPOSITORY || '/').split('/');
+    ghData = await scanGitHubLabels(process.env.GITHUB_TOKEN, owner, repo).catch(() => ghData);
+  }
+  const report = buildReport(JSON.parse(runVerify()), ghData);
   fs.mkdirSync(logsDir, { recursive: true });
   fs.writeFileSync(
     path.join(logsDir, 'governance-drift.json'),
@@ -87,4 +98,4 @@ function run() {
 }
 
 module.exports = { classify, classifyIssue };
-if (require.main === module) run();
+if (require.main === module) run().catch(e => { console.error(e); process.exit(1); });
