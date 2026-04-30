@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — GitHub-API Drift Scan + Epic Close Validator (#359)
+
+### Added — Live Governance Scanning
+- `scripts/global/governance-github-scanner.js`: paginates all GitHub issues via REST API, checks 5 ADR-010 rules (closed+role, done+role, missing active-status role, epic+ready, multi-status), returns classified violations
+- `scripts/global/epic-close-validator.js`: checks all open `type:epic` issues for close-readiness (status:review, open child count via timeline, CONSULTANT_CLOSEOUT comment)
+- `governance:epics` npm script
+
+### Changed — Governance Drift Pipeline
+- `scripts/global/governance-drift-classifier.js`: now async; calls `governance-github-scanner.js` when `GITHUB_TOKEN` set, merges `githubViolations` into drift report
+- `.github/workflows/drift-detection.yml`: passes `GITHUB_TOKEN`/`GITHUB_REPOSITORY` to drift step; adds epic close-readiness summarize step
+
 ## [Unreleased] — ADR-010 Lifecycle Enforcement + Daily Scan (#358)
 
 ### Added — Label Governance Enforcement
