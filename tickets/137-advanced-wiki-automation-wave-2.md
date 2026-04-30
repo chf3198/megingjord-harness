@@ -25,3 +25,9 @@ Constraints:
 
 - Status transition: `triage -> ready`
 - Ready for collaborator implementation.
+
+## BLOCKER_NOTE
+
+- owner: collaborator (wiki infra + AI synthesis)
+- unblock_condition: #120 epic (wiki health) closed; contradiction/staleness baseline established; synthesis prompt design approved
+- eta_or_review_time: manager review by 2026-05-07 governance queue

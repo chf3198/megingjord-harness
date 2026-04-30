@@ -25,3 +25,9 @@ Deliverable:
 
 - Status transition: `triage -> ready`
 - Ready for collaborator research synthesis and wiki updates.
+
+## BLOCKER_NOTE
+
+- owner: collaborator (fleet operations research)
+- unblock_condition: #132 epic architecture choices finalized; resource trade-off data available from current fleet runs
+- eta_or_review_time: manager review by 2026-05-07 governance queue

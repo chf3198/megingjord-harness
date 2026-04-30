@@ -27,3 +27,9 @@ Constraints:
 - Status transition: `triage -> ready`
 - Ready for collaborator implementation under branch:
   - `feat/130-openclaw-harness-reliability-hardening`
+
+## BLOCKER_NOTE
+
+- owner: collaborator (OpenClaw integration)
+- unblock_condition: #128 epic (OpenClaw infrastructure) reaches `status:ready` with preflight/dispatch stable
+- eta_or_review_time: manager review by 2026-05-07 governance queue
