@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Consultant SKILL.md Updates (#682)
+
+### Changed
+- `skills/role-consultant-critique/SKILL.md`: Added Comprehensive Check Registry section, Manager Feedback Protocol step, and extended output contract with `checks_run`, `checks_failed`, `remediation_issues` fields.
+- `skills/workflow-self-anneal/SKILL.md`: Added Consultant Integration section and two new trigger conditions for governance/cost-budget FAIL patterns.
+
 ## [Unreleased] — Consultant Feedback Bridge (#681)
 
 ### Added
