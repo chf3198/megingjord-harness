@@ -30,26 +30,30 @@
   <path d="M86 106C227 58 350 159 489 123C633 85 722 47 879 72C1028 95 1095 182 1241 171C1360 161 1442 110 1510 72" stroke="#5AB8FF" stroke-width="7" stroke-linecap="round"/>
   <path d="M98 274C244 232 348 312 495 282C646 250 768 167 923 204C1079 241 1139 322 1287 305C1388 293 1463 248 1524 206" stroke="#AD7DFF" stroke-width="5" stroke-linecap="round"/>
 </g>
-<path d="M1222 82L1166 179H1232L1193 282L1310 149H1254L1289 82H1222Z" fill="url(#bolt)"/>
-<rect x="90" y="86" width="928" height="100" rx="24" fill="#081225" fill-opacity="0.72" stroke="#9ED8FF" stroke-opacity="0.35"/>
-<text x="126" y="145" fill="#F8FBFF" font-family="Segoe UI, Arial, sans-serif" font-size="74" font-weight="800" letter-spacing="1.2">MEGINGJORD HARNESS</text>
-<rect x="120" y="206" width="770" height="44" rx="22" fill="#09182F" fill-opacity="0.84"/>
-<text x="150" y="235" fill="#DCEBFF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Governance-first AI agent orchestration • Thor-forged belt • Lightning-backed runtime control</text>
-<rect x="242" y="278" width="1118" height="60" rx="30" fill="url(#belt)" stroke="#FFD98A" stroke-opacity="0.35"/>
-<rect x="278" y="295" width="420" height="26" rx="13" fill="#5A340D" fill-opacity="0.34"/>
-<rect x="902" y="295" width="420" height="26" rx="13" fill="#5A340D" fill-opacity="0.34"/>
-<circle cx="340" cy="308" r="6" fill="#694314"/>
-<circle cx="384" cy="308" r="6" fill="#694314"/>
-<circle cx="428" cy="308" r="6" fill="#694314"/>
-<circle cx="472" cy="308" r="6" fill="#694314"/>
-<circle cx="516" cy="308" r="6" fill="#694314"/>
-<circle cx="1150" cy="308" r="6" fill="#694314"/>
-<circle cx="1194" cy="308" r="6" fill="#694314"/>
-<circle cx="1238" cy="308" r="6" fill="#694314"/>
-<circle cx="1282" cy="308" r="6" fill="#694314"/>
-<rect x="714" y="258" width="172" height="100" rx="18" fill="url(#buckle)" stroke="#FFF1B3" stroke-width="4"/>
-<rect x="754" y="281" width="92" height="54" rx="12" fill="#1E1710" fill-opacity="0.72" stroke="#FFF0B6" stroke-width="4"/>
-<rect x="798" y="281" width="24" height="54" rx="8" fill="#E4B85A"/>
+<path d="M1250 40L1180 160H1256L1200 280L1340 140H1270L1310 40H1250Z" fill="url(#bolt)"/>
+<rect x="78" y="80" width="952" height="114" rx="28" fill="#081225" fill-opacity="0.72" stroke="#9ED8FF" stroke-opacity="0.35" stroke-width="2"/>
+<text x="126" y="152" fill="#F8FBFF" font-family="Segoe UI, Arial, sans-serif" font-size="74" font-weight="800" letter-spacing="1.2">MEGINGJORD HARNESS</text>
+<rect x="108" y="205" width="794" height="56" rx="28" fill="#09182F" fill-opacity="0.84" stroke="#4A9EFF" stroke-opacity="0.25" stroke-width="1.5"/>
+<text x="150" y="240" fill="#DCEBFF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Governance-first AI agent orchestration • Thor-forged belt • Lightning-backed runtime control</text>
+<rect x="220" y="278" width="1160" height="68" rx="34" fill="url(#belt)" stroke="#FFD98A" stroke-opacity="0.35" stroke-width="2"/>
+<ellipse cx="320" cy="312" rx="28" ry="32" fill="#8B5A1C" opacity="0.5"/>
+<ellipse cx="485" cy="312" rx="28" ry="32" fill="#8B5A1C" opacity="0.5"/>
+<ellipse cx="1115" cy="312" rx="28" ry="32" fill="#8B5A1C" opacity="0.5"/>
+<ellipse cx="1280" cy="312" rx="28" ry="32" fill="#8B5A1C" opacity="0.5"/>
+<circle cx="320" cy="312" r="10" fill="#E6AA56" opacity="0.8"/>
+<circle cx="485" cy="312" r="10" fill="#E6AA56" opacity="0.8"/>
+<circle cx="1115" cy="312" r="10" fill="#E6AA56" opacity="0.8"/>
+<circle cx="1280" cy="312" r="10" fill="#E6AA56" opacity="0.8"/>
+<rect x="680" y="252" width="240" height="120" rx="24" fill="url(#buckle)" stroke="#FFF1B3" stroke-width="5"/>
+<rect x="710" y="272" width="180" height="80" rx="20" fill="#1E1710" fill-opacity="0.75" stroke="#FFE8A2" stroke-width="3"/>
+<polygon points="800,272 830,295 830,337 800,360 770,337 770,295" fill="#D4AF37" stroke="#FFF8DC" stroke-width="2"/>
+<circle cx="800" cy="316" r="8" fill="#E6C542"/>
+<rect x="720" y="290" width="12" height="52" rx="6" fill="#C9932E"/>
+<rect x="880" y="290" width="12" height="52" rx="6" fill="#C9932E"/>
+<circle cx="726" cy="280" r="4" fill="#FF1493"/>
+<circle cx="886" cy="280" r="4" fill="#FF1493"/>
+<circle cx="726" cy="352" r="4" fill="#FF1493"/>
+<circle cx="886" cy="352" r="4" fill="#FF1493"/>
 <rect x="550" y="346" width="500" height="42" rx="21" fill="#09182F" fill-opacity="0.86"/>
 <text x="586" y="374" fill="#FFE8A2" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="1.5">COPILOT • CLAUDE CODE • CODEX</text>
 </svg>
