@@ -14,6 +14,15 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Continuous Governance Drift Detection (#360)
+
+### Added — Governance Drift Classification
+- `scripts/global/governance-drift-classifier.js`: classifies governance issues into `open`, `terminal`, and `epic` drift classes; exits 1 on drift detected
+- `tests/governance-drift.spec.js`: 11 targeted unit tests for all drift classification paths
+- `.github/workflows/drift-detection.yml`: daily + manual CI workflow writing `logs/governance-drift.json`
+- npm script `governance:drift` for manual drift runs
+- Extended `scripts/global/governance-weekly-report.js` with `driftByClass` metrics and robust verifier error handling
+
 ## [Unreleased] — Sandbox Launcher Sync (#647)
 
 ### Added — Worktree Governance Automation
