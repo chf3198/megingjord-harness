@@ -30,6 +30,12 @@
 }
 .baton-agent { font-size: 0.75rem; color: var(--text); margin-left: auto; }
 
+.baton-comment {
+  font-size: 0.7rem; color: var(--text-muted); cursor: help;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 0.2rem; max-width: 100%;
+}
+
 .baton-pipeline {
   display: flex; align-items: center; gap: 0;
   flex-wrap: nowrap; overflow-x: auto;
