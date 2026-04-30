@@ -23,13 +23,15 @@ jobs:
 
       - name: Check doc update coverage
         id: check
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD")
           echo "Changed files:"
           echo "$CHANGED"
 
-          # Skip-gate escape hatches
-          PR_BODY="${{ github.event.pull_request.body }}"
+          # Skip-gate escape hatch
           if echo "$PR_BODY" | grep -qF '[skip-doc-gate]'; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
