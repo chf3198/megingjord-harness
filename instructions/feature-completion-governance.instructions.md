@@ -2,9 +2,7 @@
 applyTo: "**"
 ---
 
-When asked to "complete" a feature-add (or equivalent language), all four baton roles are required.
-Do not stop at "tests pass" — tests passing only closes Collaborator.
-See `role-baton-routing.instructions.md` for the full sequence.
+When asked to "complete" a feature-add, all four baton roles are required. Tests passing only closes Collaborator — do not stop there.
 
 ## Admin completion contract (required before claiming done)
 

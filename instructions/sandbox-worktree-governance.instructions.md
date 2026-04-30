@@ -6,10 +6,6 @@ applyTo: "**"
 
 # Sandbox Worktree Governance
 
-## Purpose
-
-Prevent cross-agent collisions and branch drift when using dedicated sandbox worktrees.
-
 ## Operating Model
 
 - `sandbox/copilot`, `sandbox/codex`, and `sandbox/claude-code` are launcher branches.
@@ -43,8 +39,4 @@ Preferred command:
 
 ## Escalation
 
-If any sandbox branch is behind or dirty:
-
-1. Stop implementation on that branch.
-2. Run session-start reset flow.
-3. Resume on a ticket-linked task branch only.
+If any sandbox branch is behind or dirty: stop, run session-start reset flow, then resume on a ticket-linked task branch only.

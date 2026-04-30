@@ -18,11 +18,7 @@ Run `workflow-self-anneal` skill when any of these conditions is true:
 - Ticket/epic local markdown state diverges from observable GitHub issue/PR evidence.
 - Any P0/P1 ticket remains `status:ready` for more than 24h without a blocker note.
 
-Ready-stall blocker note minimum fields:
-- `BLOCKER_NOTE`
-- `owner`
-- `unblock_condition`
-- `eta_or_review_time`
+Ready-stall blocker note required fields: `BLOCKER_NOTE`, `owner`, `unblock_condition`, `eta_or_review_time`.
 
 ## Self-annealing constraints
 
@@ -34,7 +30,7 @@ Ready-stall blocker note minimum fields:
 
 ## Self-annealing protocol
 
-1. Detect mismatch between expected behavior (from instructions) and observed behavior (from evidence).
+1. Detect mismatch between expected and observed behavior.
 2. Classify root cause: `ambiguity`, `missing guardrail`, `stale instruction`, `tool fragility`, or `human override`.
 3. Assess recurrence risk: `low`, `medium`, or `high`.
 4. Propose minimal docs/workflow delta that prevents recurrence.
@@ -47,12 +43,3 @@ Run `docs-drift-maintenance` skill after any change to:
 - Configuration files, defaults, or environment variables.
 - Workflows, CI/CD pipelines, or automation scripts.
 - UX-visible behavior, user-facing features, or settings.
-
-## Documentation drift rules
-
-- Docs updates must ship with behavior/config/workflow changes — not as follow-up.
-- Map each changed surface to impacted docs (README, CHANGELOG, operational docs, runbooks).
-- Identify stale, missing, or contradictory statements.
-- Keep wording precise, testable, and user-actionable.
-- Avoid speculative claims unsupported by current implementation.
-- Verify that docs match actual behavior and invocation paths after updates.

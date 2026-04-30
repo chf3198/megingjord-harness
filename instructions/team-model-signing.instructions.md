@@ -16,9 +16,8 @@ applyTo: "**"
 
 ## Source of truth
 
-- Structured `Team&Model` provenance is authoritative.
-- Human aliases are display-friendly and must remain deterministic from team + model + role.
-- `inventory/team-model-signatures.json` is the shared alias registry consumed by `scripts/global/agent-signature.js`.
+- `inventory/team-model-signatures.json` is the alias registry; `scripts/global/agent-signature.js` consumes it.
+- Human aliases are deterministic from team + model + role.
 - Repo-local governance may extend or tighten the format, but may not remove team/model provenance.
 
 ## Required surfaces
@@ -45,5 +44,4 @@ applyTo: "**"
 
 ## Override rule
 
-- Repo-local governance may narrow or extend the global scheme.
 - When local rules differ, use the local alias/trailer format and keep canonical `Team&Model` provenance present.

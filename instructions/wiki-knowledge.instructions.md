@@ -6,9 +6,7 @@ applyTo: "**"
 
 ## LLM Wiki Availability
 
-A compiled Karpathy LLM Wiki is deployed at `~/.copilot/wiki/`.
-This wiki contains cross-referenced knowledge about the fleet,
-skills, governance, architecture, and research.
+Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governance, architecture, and research.
 
 ## Access Model
 
@@ -22,10 +20,7 @@ skills, governance, architecture, and research.
 
 ## When to Use the Wiki
 
-- Before research tasks: check if the wiki already has compiled knowledge
-- When answering questions about fleet topology, governance, or architecture
-- When cross-referencing skills, instructions, or ADR decisions
-- After completing significant work: suggest wiki updates in Megingjord
+Check wiki before research tasks, when answering fleet/governance/architecture questions, when cross-referencing skills or ADRs, and after significant work (suggest updates).
 
 ## Wiki Structure
 
