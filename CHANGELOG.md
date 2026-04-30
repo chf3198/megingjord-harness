@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — Playwright Layout Regression Tests (#399)
+
+### Added — Layout Regression Coverage
+- `tests/layout-regression.spec.js`: 4 geometric assertions — baton+activity side-by-side at 725px viewport; context-flow panel bottom edge within viewport height; every `.cf-sub` label Y within its parent `.cf-node-g rect` bounds; every `.cf-node-g rect` left edge ≥ 5px from panel border
+
 ## [Unreleased] — GitHub-API Drift Scan + Epic Close Validator (#359)
 
 ### Added — Live Governance Scanning
