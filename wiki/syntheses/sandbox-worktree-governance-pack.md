@@ -1,7 +1,10 @@
 ---
 title: Sandbox Worktree Governance Pack
-type: syntheses
+type: synthesis
+created: 2026-04-29
+updated: 2026-04-30
 tags: [governance, worktrees, drift-prevention, wiki]
+status: active
 ---
 # Sandbox Worktree Governance Pack
 

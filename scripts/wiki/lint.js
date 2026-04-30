@@ -44,6 +44,12 @@ function lint() {
     }
   }
 
+  // index.md is the navigation root — read early so its references count as inbound links
+  const indexContent = fs.readFileSync(path.join(WIKI_DIR, 'index.md'), 'utf-8');
+  linkGraph['index'] = new Set(
+    [...indexContent.matchAll(/\[\[([^\]]+)\]\]/g)].map((m) => m[1])
+  );
+
   // Check for orphan pages (no inbound links)
   const inbound = new Set();
   for (const [, targets] of Object.entries(linkGraph)) {
@@ -54,7 +60,6 @@ function lint() {
   }
 
   // Check index.md sync
-  const indexContent = fs.readFileSync(path.join(WIKI_DIR, 'index.md'), 'utf-8');
   for (const page of pages) {
     if (!indexContent.includes(`[[${page.slug}]]`)) {
       issues.index.push(`${page.slug} missing from index.md`);

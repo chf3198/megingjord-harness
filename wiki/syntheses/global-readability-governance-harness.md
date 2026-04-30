@@ -1,7 +1,10 @@
 ---
 title: Global Readability Governance Harness
-type: syntheses
+type: synthesis
+created: 2026-04-29
+updated: 2026-04-30
 tags: [governance, linting, readability, wiki]
+status: active
 ---
 # Global Readability Governance for DevEnv Ops Harness
 
