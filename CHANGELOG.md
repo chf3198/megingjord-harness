@@ -19,6 +19,17 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Instruction Token Footprint Reduction (#667)
+
+### Changed — Instruction Optimization
+- 15 instruction files reduced by 877 words (15.0%) with no governance regression
+- `role-baton-routing`: dropped Sequence section (duplicated transition guards) and De-duplication boundary
+- `ticket-driven-work`: removed Linking Rules section and condensed work-type matrix to prose
+- `release-docs-hygiene`: removed intro bullets that duplicated post-merge checklist
+- `workflow-resilience`: removed Documentation drift rules section (covered by release-docs-hygiene)
+- `github-governance`: removed five "invoke skill" pointer lines, condensed capability-first section
+- All 363 files ≤100 lines; readability baseline maintained at 389 warnings
+
 ## [Unreleased] — CI Workflow Efficiency Improvements (#661)
 
 ### Changed — Scheduled Workflow Reliability
