@@ -1,7 +1,10 @@
 ---
-title: Nodejs Project Organization
-type: sources
-tags: []
+title: Node.js Project Organization
+type: source
+created: 2026-04-23
+updated: 2026-04-30
+tags: [nodejs, project-structure]
+status: active
 ---
 # Node.js Project Organization Patterns
 

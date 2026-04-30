@@ -1,7 +1,10 @@
 ---
-title: Nodejs Install Patterns
-type: sources
-tags: []
+title: Node.js Install Patterns
+type: source
+created: 2026-04-23
+updated: 2026-04-30
+tags: [nodejs, installation, toolchain]
+status: active
 ---
 # Node.js Ease-of-Install Patterns
 

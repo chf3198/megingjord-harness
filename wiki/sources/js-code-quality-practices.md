@@ -1,7 +1,10 @@
 ---
-title: Js Code Quality Practices
-type: sources
-tags: []
+title: JS Code Quality Practices
+type: source
+created: 2026-04-23
+updated: 2026-04-30
+tags: [javascript, code-quality, linting]
+status: active
 ---
 # JavaScript Code Quality Practices
 

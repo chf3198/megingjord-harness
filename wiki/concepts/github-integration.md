@@ -1,9 +1,11 @@
 ---
 title: GitHub Integration
-category: concepts
+type: concept
 created: 2026-04-14
+updated: 2026-04-30
 tags: [github, api, monitoring, dashboard]
-links: [[context-flow]], [[model-routing]]
+related: ["[[context-flow]]", "[[model-routing]]"]
+status: active
 ---
 
 # GitHub Integration

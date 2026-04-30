@@ -72,3 +72,5 @@ Response returned via Tailscale mesh
 - [[fleet-capability-tagging-patterns-2026-04-28]]
 
 See also: [[wiki-pattern]], [[dashboard-comparable-tools]], [[dashboard-world-class-research]]
+
+See also: [[fleet-architecture]], [[github-integration]]

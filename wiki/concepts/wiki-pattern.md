@@ -35,4 +35,4 @@ have the LLM curate a structured wiki as it learns.
 - **Query**: Index → relevant pages → synthesized answer
 - **Lint**: Structural health checks
 
-See: [[karpathy-llm-wiki-pattern]]
+See: [[karpathy-llm-wiki-pattern]], [[llm-wiki-state-2026]]
