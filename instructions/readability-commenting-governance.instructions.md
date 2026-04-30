@@ -48,4 +48,3 @@ applyTo: "dashboard/**/*.js,scripts/**/*.js,tests/**/*.js,hooks/scripts/**/*.sh"
 - **JavaScript**: exported functions/classes require JSDoc with params/returns when applicable.
 - **Shell**: include intent comments before destructive operations and retries.
 - **Markdown**: prefer concise sections, explicit action items, and no stale TODO lists.
-

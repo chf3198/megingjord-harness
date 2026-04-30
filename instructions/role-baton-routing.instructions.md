@@ -86,4 +86,3 @@ A repo may override the baton sequence via `.github/copilot-instructions.md`; lo
 - Admin: `role-admin-execution`
 - Consultant: `role-consultant-critique`
 - Orchestration: `role-baton-orchestrator`
-

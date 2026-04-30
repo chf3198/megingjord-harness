@@ -43,4 +43,3 @@ Run `docs-drift-maintenance` skill after any change to:
 - Configuration files, defaults, or environment variables.
 - Workflows, CI/CD pipelines, or automation scripts.
 - UX-visible behavior, user-facing features, or settings.
-
