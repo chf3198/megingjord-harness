@@ -1,4 +1,8 @@
 # #599 Task: Sandbox worktree governance pack
+Type: Task
+Priority: P1 (High)
+Status: in-progress
+Area: governance
 
 Type: Task
 Status: in-progress
