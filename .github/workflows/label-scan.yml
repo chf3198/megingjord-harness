@@ -1,0 +1,89 @@
+name: Label Scan (ADR-010 Daily Audit)
+# Scans ALL issues (open + closed) daily for ADR-010 label violations.
+# label-lint.yml only fires on issue events — this catches historical drift.
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  label-scan:
+    name: adr-010-label-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan issues for ADR-010 violations
+        uses: actions/github-script@f28e40c7f34bde8b3046d788e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const marker = '<!-- adr-010-label-scan -->';
+            const STATUS_ROLE_REQUIRED = {
+              'status:in-progress': 'role:collaborator',
+              'status:testing':     'role:admin',
+              'status:review':      'role:consultant',
+            };
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'all', per_page: 100,
+            });
+
+            let violations = 0;
+            for (const issue of issues) {
+              const labels = issue.labels.map(l => l.name);
+              const statusLabels = labels.filter(l => l.startsWith('status:'));
+              const roleLabels   = labels.filter(l => l.startsWith('role:'));
+              const v = [];
+
+              if (issue.state === 'closed' && roleLabels.length > 0) {
+                v.push(`Closed issue retains role labels: ${roleLabels.join(', ')}`);
+              }
+              if (statusLabels.includes('status:done') && roleLabels.length > 0) {
+                v.push(`status:done retains role labels: ${roleLabels.join(', ')}`);
+              }
+              for (const [status, required] of Object.entries(STATUS_ROLE_REQUIRED)) {
+                if (statusLabels.includes(status) && !roleLabels.includes(required)) {
+                  v.push(`${status} missing required ${required}`);
+                }
+              }
+              if (labels.includes('type:epic') && statusLabels.includes('status:ready')) {
+                v.push('epic at status:ready (invalid — child tickets only)');
+              }
+              if (statusLabels.length > 1) {
+                v.push(`multiple status labels: ${statusLabels.join(', ')}`);
+              }
+
+              if (v.length === 0) continue;
+              violations++;
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: issue.number, per_page: 100,
+              });
+              const existing = comments.find(c => c.body?.includes(marker));
+              const body = [
+                marker,
+                '',
+                '## ⚠️ ADR-010 Label Scan Violation',
+                '',
+                `Issue #${issue.number} has invalid label state:`,
+                '',
+                v.map(x => `- ${x}`).join('\n'),
+                '',
+                '**Current labels**: ' + labels.map(l => `\`${l}\``).join(', '),
+                '',
+                '_This comment was posted by the daily label-scan workflow. It will not re-post if unchanged._',
+              ].join('\n');
+
+              if (!existing) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body });
+              } else if (existing.body !== body) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              }
+            }
+            console.log(`Scan complete. ${issues.length} issues checked, ${violations} with violations.`);
+            if (violations > 0) core.setFailed(`${violations} ADR-010 violations found.`);

@@ -50,6 +50,23 @@ jobs:
             } else if (areaLabels.length > 1) {
               violations.push(`**Rule 6**: Multiple \`area:\` labels found: ${areaLabels.join(', ')}. Only one is allowed.`);
             }
+            if (issue.state === 'closed' && roleLabels.length > 0) {
+              violations.push(`**Rule 7**: Closed issue must not retain \`role:\` labels. Remove: ${roleLabels.join(', ')}.`);
+            }
+            const STATUS_ROLE_REQUIRED = {
+              'status:in-progress': 'role:collaborator',
+              'status:testing':     'role:admin',
+              'status:review':      'role:consultant',
+            };
+            for (const [status, required] of Object.entries(STATUS_ROLE_REQUIRED)) {
+              if (statusLabels.includes(status) && !roleLabels.includes(required)) {
+                violations.push(`**Rule 8**: \`${status}\` requires \`${required}\`. Add it.`);
+              }
+            }
+            const isEpic = labels.includes('type:epic');
+            if (isEpic && statusLabels.includes('status:ready')) {
+              violations.push('**Rule 9**: Epics cannot be at `status:ready` — that status is for child tickets only.');
+            }
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
             });
