@@ -20,6 +20,22 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - `scripts/global/governance-verify.js`: removed `Signed-by:` requirement from local ticket files; baton record lives in GitHub comments (enforced by baton-gate CI). Eliminated 53 false-positive drift findings covering 98% of all tickets
 - Bulk label cleanup: stripped lingering `role:*` labels from 9 closed issues and corrected `status:*` labels on 26 closed issues (no-status, wrong-status, backlog/review on closed state)
 
+## [Unreleased] — Wiki Critical Audit and Structural Repair (#651)
+
+### Fixed — LLM Wiki Health
+- `scripts/wiki/lint.js`: orphan detection now counts `index.md` references as inbound links (index was excluded from link graph, causing false orphan reports for all indexed pages)
+- Repaired frontmatter on 9 wiki pages (plural type fields corrected, missing `created`/`status` added)
+- Fixed `concepts/github-integration.md`: `category:` → `type:`, added `related` field
+- Removed 3 ghost index entries (`linting-governance-rationale/tooling/rollout` — files don't exist)
+- Fixed 2 broken wikilinks in code-block documentation examples
+
+### Added — LLM Wiki Improvements
+- `wiki/WIKI.md`: schema reference with `confidence`, `last_verified`, `sources_count`, `superseded_by` frontmatter fields; lint rule for >90-day staleness
+- `wiki/syntheses/llm-wiki-state-2026.md`: synthesis from 16 web sources; validates flat-markdown at 65-page scale; 5 actionable improvements
+- `wiki_router.py`: `infra-automation` routing branch injecting fleet routing order and governance enforcement layers for devenv-ops sessions; max snippets raised to 5
+- Index rebuilt: 65 pages, clean section structure, 8 missing source entries added
+- Log updated with 7 entries for #647, #360, #595, #651
+
 ## [Unreleased] — Continuous Governance Drift Detection (#360)
 
 ### Added — Governance Drift Classification
