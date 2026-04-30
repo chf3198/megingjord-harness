@@ -14,6 +14,12 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Governance Verifier Hygiene (#652)
+
+### Fixed — Governance Verifier False Positives
+- `scripts/global/governance-verify.js`: removed `Signed-by:` requirement from local ticket files; baton record lives in GitHub comments (enforced by baton-gate CI). Eliminated 53 false-positive drift findings covering 98% of all tickets
+- Bulk label cleanup: stripped lingering `role:*` labels from 9 closed issues and corrected `status:*` labels on 26 closed issues (no-status, wrong-status, backlog/review on closed state)
+
 ## [Unreleased] — Continuous Governance Drift Detection (#360)
 
 ### Added — Governance Drift Classification
