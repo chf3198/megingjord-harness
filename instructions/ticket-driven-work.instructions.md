@@ -21,8 +21,6 @@ applyTo: "**"
 
 ## Label taxonomy (v1.0 — agent-typed 8-status)
 
-Each status names the active agent type. One glance = who owns it now.
-
 | Status | Active Agent | Gate Condition |
 |---|---|---|
 | `status:backlog` | — | Queued; unassigned |
@@ -46,17 +44,7 @@ Each status names the active agent type. One glance = who owns it now.
 
 ## Valid owner × work-type matrix
 
-| Work type | Primary role | Valid active statuses |
-|---|---|---|
-| Research | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
-| Development | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
-| UX design | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
-| Styling/CSS | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
-| Graphic design | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
-| Documentation | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
-| Bug fix | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
-| Infra / ops | `role:collaborator` | `triage`, `ready`, `in-progress`, `testing`, `review`, `done` |
-| Marketing / comms | `role:collaborator` | `triage`, `ready`, `in-progress`, `review`, `done` |
+All work types use `role:collaborator`. Work types with CI gates (development, bug fix, infra/ops) include `testing`; all others skip it. Valid statuses: `triage` → `ready` → `in-progress` → [`testing`] → `review` → `done`.
 
 ## Forbidden combinations
 
@@ -76,13 +64,7 @@ Each status names the active agent type. One glance = who owns it now.
 4. **Link ticket to branch** — branch: `<type>/<issue#>-<slug>`.
 5. **Link ticket to PR** — PR body includes `Refs #N` (not `Closes #N`). Issue close is Consultant authority after CONSULTANT_CLOSEOUT.
 6. **Enforce ticket closure** — close only after merge + Consultant CLOSEOUT.
-7. **One symptom per ticket** — if a UAT failure surface has multiple distinct symptoms (e.g. panel clipping AND label overflow), each symptom gets its own ticket. Never group unrelated layout bugs under one issue.
-
-## Linking Rules
-
-- Branch: `feat/11-ticket-baton-system`
-- Commit: `feat(skills): implement ticket-as-baton governance #11`
-- PR: Body must include `Refs #11` + validation evidence (not `Closes #11`)
+7. **One symptom per ticket** — never group multiple distinct symptoms under one issue.
 
 ## GitHub evidence block (required for closeout)
 

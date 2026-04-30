@@ -25,7 +25,6 @@ applyTo: "**"
 - Issues must include: problem/objective, expected outcome, acceptance criteria.
 - Large work is decomposed with sub-issues and `blocked by` / `blocking` dependencies.
 - Templates required: at minimum bug, task, and epic forms. `blank_issues_enabled: false` in config.yml.
-- For detailed lifecycle execution, invoke `github-ticket-lifecycle-orchestrator` skill.
 
 ## Review and merge gates
 
@@ -34,7 +33,6 @@ applyTo: "**"
 - All review conversations resolved.
 - Rulesets/branch protection requirements satisfied.
 - Merge method follows repo policy.
-- For detailed review/merge administration, invoke `github-review-merge-admin` skill.
 
 ## Actions security baseline
 
@@ -46,7 +44,6 @@ applyTo: "**"
 - **Label-lint enforcement**: `.github/workflows/label-lint.yml` runs on all `issues`
   events and enforces ADR-010 label rules (single status, single role, no execution
   role on terminal closed/backlog items). Violations post a comment and fail the check.
-- For detailed Actions hardening, invoke `github-actions-security-hardening` skill.
 
 ## Release and incident flow
 
@@ -56,18 +53,14 @@ applyTo: "**"
 - Incident items include severity, impact, owner, and containment plan.
 - Hotfix branch/PR linked to incident issue with validation evidence.
 - Follow-up prevention tickets created before incident closure.
-- For detailed release/incident procedures, invoke `github-release-incident-flow` skill.
 
 ## Project linkage
 
 - Project items have status, priority, iteration, and owner fields populated.
 - Issue ↔ branch and issue ↔ PR linkage maintained in the Development panel.
 - Built-in workflows: auto-add, status sync, auto-archive configured where available.
-- For detailed Agile linkage setup, invoke `github-projects-agile-linkage` skill.
 
 ## Capability-first routing
 
-- Before recommending rulesets, merge queue, or plan-sensitive features, run `github-capability-resolver` to verify availability by plan/visibility/owner type.
-- Route all GitHub workflow governance requests through `github-ops-tree-router` to the correct specialist skill.
-- Use `github-ops-excellence` as the policy catalog overlay for calibrating strictness.
-- For ruleset design/migration, invoke `github-ruleset-architecture` skill.
+- Before recommending rulesets or plan-sensitive features, run `github-capability-resolver` to verify availability.
+- Route workflow governance requests through `github-ops-tree-router`; invoke `github-ruleset-architecture` for ruleset design.

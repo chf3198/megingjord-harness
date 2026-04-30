@@ -8,9 +8,7 @@ applyTo: "**"
 
 ## Epic vs. Child Ticket — Role Boundary
 
-- Epic always carries `role:manager`. This never changes during the epic's lifecycle.
-- The active agent role lives on the **child ticket**, not the epic.
-- Agent Baton: the child ticket at `status:in-progress` is the active work item; the epic is context only.
+- Epic always carries `role:manager` — never changes. Active agent role lives on the child ticket, not the epic.
 
 ## Epic Status Advancement Rules
 
@@ -38,11 +36,7 @@ When any child ticket is closed, the Manager posts a progress update to the epic
 - Remaining children: #X, #Y, #Z
 ```
 
-Evidence integrity requirements:
-- Progress updates must cover every closed linked child exactly once before epic closeout.
-- `CONSULTANT_CLOSEOUT` must reference the full linked-child set for the epic.
-- Any `PR #N` reference in epic closeout must resolve to a real pull request.
-- Stale automated governance comments should be removed once the epic is normalized.
+Evidence integrity: progress updates must cover every closed child exactly once; `CONSULTANT_CLOSEOUT` must reference the full linked-child set; any `PR #N` must resolve to a real PR.
 
 ## Epic Close Conditions
 
@@ -56,15 +50,12 @@ An epic may close **only when ALL of these are true**:
 
 ## Re-scope-before-close rule
 
-- If original epic acceptance criteria cannot be completed within current tranche,
-  Manager must publish an explicit re-scope artifact before review/close.
+- If original epic ACs cannot be completed, Manager must publish an explicit re-scope artifact (deferred scope + follow-on child tickets) before review/close.
 - Post-hoc scope normalization at Consultant closeout is forbidden.
-- Re-scope artifact must list deferred scope and linked follow-on child tickets.
 
 ## Branch Naming
 
-Branches are created for **child tickets**, never for epics directly.
-Format: `<type>/<child-issue-number>-<slug>`
+Branches are created for child tickets only: `<type>/<child-issue-number>-<slug>`
 
 ## Forbidden
 

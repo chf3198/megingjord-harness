@@ -10,8 +10,8 @@ applyTo: "**"
 - No code or config work without a linked GitHub issue (ticket-first gate).
 - Every commit message must reference `#N` (issue number).
 - Branch naming: `<type>/<issue#>-<slug>` (e.g., `feat/62-multi-ticket-baton`).
-- Research tickets skip branching — findings posted as ticket comments.
-- Pull latest `main` into feature branch before creating PR (pull-before-PR).
+- Research tickets skip branching; findings posted as ticket comments.
+- Pull latest `main` into feature branch before creating PR.
 
 ## Engineering standards
 
@@ -24,7 +24,6 @@ applyTo: "**"
 - Never expose secrets in repository files, packaged artifacts, logs, or generated examples.
 - Before packaging/publishing, verify exclude rules block secret-bearing files.
 - Use placeholders in docs and examples — never live tokens, keys, or credentials.
-- Prevention first, detection second: local guardrails before CI backstops.
 - For versioned artifacts, enforce version consistency (tag = manifest = changelog).
 - Use deterministic checks and objective pass/fail gates whenever possible.
 - If evidence is incomplete, state uncertainty and gather missing evidence.

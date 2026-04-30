@@ -39,20 +39,13 @@ Files live in repo root or `.github/`. Missing items are prioritized:
 - Classify repository by primary app type (`website-static`, `web-app`, `library-sdk`, `infra-automation`) before applying standards.
 - Apply core-baseline controls, then primary-type controls, then relevant overlays (`security`, `collaboration`, `release`, `observability`).
 - Prefer the smallest correct standards stack over over-engineered policy.
-- For detailed routing, invoke `repo-standards-router` skill.
-- For new/uninitialized repos, invoke `repo-onboarding-standards` skill.
 
 ## Governance audit triggers
 
-Run `repo-profile-governance` skill when:
-- Starting a new session in any repository (quick health check).
-- After a PR merge or deployment that changes user-facing behavior.
-- Before any public release.
-- When community health gaps are suspected.
+Run `repo-profile-governance` skill at session start, after behavior-changing merges/deploys, before releases, and when community health gaps are suspected.
 
 ## Repository structure conventions
 
-- On new repos or restructuring, invoke `repo-structure-conventions` skill.
 - Every repo follows a universal root layout: README, LICENSE, CHANGELOG, .gitignore, .github/, docs/, scripts/, test/.
 - CHANGELOG.md follows [Keep a Changelog](https://keepachangelog.com/) format: Added, Changed, Deprecated, Removed, Fixed, Security.
 - Build artifacts are isolated via .gitignore (and .vscodeignore / .npmignore where applicable).
@@ -68,6 +61,5 @@ Run `repo-profile-governance` skill when:
 
 ## Consistency across repos
 
-- Critical standards are consistent across all managed repositories.
-- Deviations are documented and intentional, not accidental drift.
+- Critical standards are consistent across all managed repositories; deviations are documented and intentional.
 - Weekly `profile-weekly-check` mode available for recurring hygiene regression detection.

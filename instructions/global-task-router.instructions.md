@@ -6,7 +6,6 @@ applyTo: "**"
 
 # Global Task Router
 
-Load the `global-task-router` skill for non-trivial work after `MANAGER_HANDOFF`.
 Policy source: `scripts/global/model-routing-policy.json` (capability_matrix field).
 
 ## Lane order (cost-ascending mandate)
@@ -38,12 +37,6 @@ If fleet signals `escalation_needed=true`: use the `suggested_tier` (haiku first
 
 ## Escalation rules
 
-- Start in the lowest adequate lane per capability matrix.
-- Never skip haiku to reach premium — haiku must fail or be inadequate first.
-- Premium escalation requires a short rationale in progress updates.
-- Record: selected lane, backend/model, rationale, escalation trigger.
-
-## Rollback policy
-
-If premium share exceeds 20% over 7 days, routing engine forces fleet lane.
-Run `npm run routing:report` to check current distribution.
+- Start in lowest adequate lane; never skip haiku to reach premium.
+- Premium escalation requires a short rationale. Record: lane, model, rationale, trigger.
+- If premium share exceeds 20% over 7 days, routing engine forces fleet lane (`npm run routing:report`).

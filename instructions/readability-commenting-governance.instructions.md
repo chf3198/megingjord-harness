@@ -4,9 +4,6 @@ applyTo: "dashboard/**/*.js,scripts/**/*.js,tests/**/*.js,hooks/scripts/**/*.sh"
 
 # Readability & Commenting Governance
 
-## Purpose
-Apply consistent readability and documentation quality across all harness-managed repos.
-
 ## Required Standards
 
 1. **Formatting**
@@ -52,8 +49,3 @@ Apply consistent readability and documentation quality across all harness-manage
 - **Shell**: include intent comments before destructive operations and retries.
 - **Markdown**: prefer concise sections, explicit action items, and no stale TODO lists.
 
-## Before/After Examples
-
-- Naming: `const d = getData();` → `const deviceData = getData();`
-- Magic number: `setTimeout(fn, 5000)` → `const HEALTHCHECK_TIMEOUT_MS = 5000; setTimeout(fn, HEALTHCHECK_TIMEOUT_MS)`
-- JSDoc: undocumented exported function → exported function with purpose/param/return contract.
