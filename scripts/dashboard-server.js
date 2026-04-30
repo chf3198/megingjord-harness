@@ -92,6 +92,7 @@ async function handleApi(req, res) {
   if (u === '/api/quota-probes') { const { probeAll } = require('./quota-probes'); return jsonRes(res, 200, await probeAll()); }
   if (u === '/api/copilot-usage') { const { getCopilotQuota } = require('./copilot-tracker'); return jsonRes(res, 200, getCopilotQuota()); }
   if (u === '/api/copilot-usage/sync' && req.method === 'POST') { let b=''; req.on('data',c=>b+=c); req.on('end',()=>{ try { const d=JSON.parse(b); const { setManualUsage } = require('./copilot-tracker'); return jsonRes(res,200,setManualUsage(d.cost,d.requests)); } catch(e){ return jsonRes(res,400,{error:e.message}); } }); return; }
+  if (u === '/api/logs/cost-telemetry') { const lf=path.join(ROOT,'logs','cost-telemetry.jsonl'); const txt=fs.existsSync(lf)?fs.readFileSync(lf,'utf8'):''; res.setHeader('Content-Type','text/plain'); return res.end(txt); }
   jsonRes(res, 404, { error: 'not found' });
 }
 
