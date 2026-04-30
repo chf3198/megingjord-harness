@@ -14,6 +14,12 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — CI Workflow Efficiency Improvements (#661)
+
+### Changed — Scheduled Workflow Reliability
+- `.github/workflows/post-merge-automation.yml`: added `concurrency` block (`cancel-in-progress: false`) to prevent duplicate triggers for the same PR merge
+- `.github/workflows/drift-detection.yml`: added npm dependency caching (matching pattern in `lint.yml` and `quality-gates.yml`); updated node version 20 → 22 for fleet consistency
+
 ## [Unreleased] — Governance Verifier Hygiene (#652)
 
 ### Fixed — Governance Verifier False Positives
