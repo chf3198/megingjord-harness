@@ -48,6 +48,9 @@ async function buildDecision(route, resolved) {
     if (!chat.ok) return { action: 'fleet-unavailable', reason: chat.error };
     return { action: 'dispatched-fleet', chat, targetUrl: primaryUrl };
   }
+  if (resolved.lane === 'haiku') {
+    return { action: 'recommend-haiku', reason: 'mid-complexity haiku lane (0.3–0.7)' };
+  }
   return { action: 'recommend-sonnet', reason: 'premium lane' };
 }
 
