@@ -26,3 +26,9 @@ Constraints:
 
 - Status transition: `triage -> ready`
 - Ready for collaborator implementation.
+
+## BLOCKER_NOTE
+
+- owner: collaborator (dashboard + scoring)
+- unblock_condition: #139 epic (self-anneal governance) and #143 (cost/quality scoring framework) reach implementation readiness; threshold rules defined
+- eta_or_review_time: manager review by 2026-05-07 governance queue

@@ -25,3 +25,9 @@ Acceptance Criteria:
 
 - Status transition: `triage -> ready`
 - Ready for collaborator research + documentation updates.
+
+## BLOCKER_NOTE
+
+- owner: collaborator (LLM reliability research)
+- unblock_condition: #128 epic infrastructure settled; OpenClaw gateway patterns documented; local-inference alternatives matured
+- eta_or_review_time: manager review by 2026-05-07 governance queue

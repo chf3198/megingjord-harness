@@ -28,3 +28,9 @@ Implementation Targets:
 
 - Status transition: `triage -> ready`
 - Ready for collaborator implementation.
+
+## BLOCKER_NOTE
+
+- owner: collaborator (dashboard-UX specialized)
+- unblock_condition: dashboard CSS baseline stable; narrow-viewport regression tests pass
+- eta_or_review_time: manager review by 2026-05-07 governance queue
