@@ -8,6 +8,12 @@ disable-model-invocation: false
 
 # Role: Consultant Critique
 
+## Comprehensive Check Registry
+
+Run `node scripts/global/consultant-checks.js --issue <N> --json > /tmp/checks.json` before CLOSEOUT.
+Checks span 3 domains: `governance` (baton artifacts, labels, events), `tools` (wiki growth, skill refs), `fleet` (device routing, cost budget).
+Include `checks_run: <N>/<total>` and `checks_failed: <N>` in CLOSEOUT output.
+
 ## Responsibilities
 
 - Perform independent quality/risk review of ALL prior roles.
@@ -42,17 +48,11 @@ disable-model-invocation: false
 4. Add 🎉 emoji reaction to the issue to celebrate closure.
 5. **Emit event**: `emit-event.js --type baton:consultant --issue N --role consultant --agent "Quinn Critic"`.
 6. Close issue: `gh issue close N --comment "Released in vX.Y.Z — summary"`.
+7. **Manager Feedback Protocol**: after confidence scoring, run `node scripts/global/consultant-feedback.js --issue <N> --results /tmp/checks.json`. Require `remediation_issues: [...]` in CLOSEOUT if any FAIL (or `remediation_issues: none`).
 
 ## Reject criteria (governance failures only)
 
-Consultant MAY reject (revert to Collaborator) **only** when:
-- A required handoff artifact (MANAGER_HANDOFF / COLLABORATOR_HANDOFF / ADMIN_HANDOFF) is absent.
-- ACs were not checked ✅ with evidence before handoff.
-- Admin merged before CI was green (verifiable via PR checks).
-
-**Consultant must NOT reject** for: solution quality disagreements, style preferences, or scope additions not in original ACs. Those become `recommended_follow_ups` items.
-
-**Before rejecting**: Post a comment enumerating exactly which governance rule was violated and which artifact/evidence is missing.
+Reject (revert to Collaborator) only when a required artifact is absent, ACs lack evidence, or Admin merged before CI was green. Disagreements on quality/style become `recommended_follow_ups`. Post exact violation before rejecting.
 
 ## Entry criteria
 
@@ -92,4 +92,7 @@ confidence: <low|medium|high>
 wiki_health: <pages_before>→<pages_after>
 fleet_utilization: <devices_used>/<devices_available>
 recommended_follow_ups:
+checks_run: <N>/<total>
+checks_failed: <N>
+remediation_issues: <list or none>
 ```
