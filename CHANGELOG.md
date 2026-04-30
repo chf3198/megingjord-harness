@@ -19,6 +19,14 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Real-Time Cost Monitor Dashboard (#672)
+
+### Added — Cost Dashboard
+- `dashboard/js/cost-monitor.js`: browser module with `fetchCostTelemetry()` and `renderCostMonitor(data)`; projected monthly cost, budget bar (80% alert), tier distribution table, last 5 requests
+- `dashboard/index.html`: added `💰 Cost` nav button and cost-monitor panel template
+- `dashboard/js/app.js`: wired `costData` into Alpine data object; populated in `refreshAll()`
+- `scripts/dashboard-server.js`: `/api/logs/cost-telemetry` endpoint serving `logs/cost-telemetry.jsonl`; 404 when absent
+
 ## [Unreleased] — Cost Telemetry + Routing Discipline (#668)
 
 ### Added — Cost Accounting per Dispatch
