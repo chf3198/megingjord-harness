@@ -1,5 +1,10 @@
 # #599 Task: Sandbox worktree governance pack
 
+Type: Task
+Status: in-progress
+Priority: P1
+Area: governance
+
 **Type**: task | **Status**: in-progress | **Priority**: P1 | **Lane**: code-change
 **Labels**: type:task, status:in-progress, area:governance, area:scripts, area:instructions
 
