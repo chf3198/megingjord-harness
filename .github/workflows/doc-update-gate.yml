@@ -39,7 +39,7 @@ jobs:
 
           # Trigger patterns (paths that require a doc update)
           TRIGGERS=$(echo "$CHANGED" | grep -E \
-            '^skills/|^instructions/|^scripts/global/|^hooks/|^\.github/workflows/|^inventory/|^package\.json')
+            '^skills/|^instructions/|^scripts/global/|^hooks/|^\.github/workflows/|^inventory/|^package\.json' || true)
 
           if [ -z "$TRIGGERS" ]; then
             echo "No trigger paths changed — gate passes."
@@ -51,7 +51,7 @@ jobs:
 
           # Doc surfaces that satisfy the gate
           DOC_CHANGED=$(echo "$CHANGED" | grep -E \
-            '^docs/|^CHANGELOG\.md$|^README\.md$|^\.github/.*\.md$')
+            '^docs/|^CHANGELOG\.md$|^README\.md$|^\.github/.*\.md$' || true)
 
           if [ -n "$DOC_CHANGED" ]; then
             echo "Doc update present:"
