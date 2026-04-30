@@ -12,7 +12,7 @@ function dashboardApp() {
     governanceState: {},
     wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
     githubData: null,
-    fleetHealthLog: [],
+    fleetHealthLog: [], costData: [],
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -66,7 +66,7 @@ function dashboardApp() {
         this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
-        this.lastRefresh = new Date().toLocaleTimeString();
+        this.costData = await fetchCostTelemetry(); this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
         this.loading = false;
       }
