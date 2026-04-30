@@ -14,6 +14,8 @@ const assets = [
   ['lint-configs/eslint.config.devenv.js', 'lint-configs/eslint.config.devenv.js'],
   ['lint-configs/ruff.devenv.toml', 'lint-configs/ruff.devenv.toml'],
   ['lint-configs/ci-lint.yml', '.github/workflows/ci-lint.yml'],
+  ['hooks/scripts/pre-push-readability.sh', 'hooks/scripts/pre-push-readability.sh'],
+  ['scripts/install-git-hooks.sh', 'scripts/install-git-hooks.sh'],
 ];
 
 const timestamp = new Date().toISOString();
