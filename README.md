@@ -1,6 +1,6 @@
 # Megingjord Harness
 
-![Megingjord Banner](.github/assets/megingjord-banner.svg)
+![Megingjord Banner](.github/assets/megingjord-banner.png)
 
 [![License: PolyForm NC](https://img.shields.io/badge/License-PolyForm%20NC%201.0-blue.svg)](LICENSE)
 [![Node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
