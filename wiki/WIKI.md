@@ -39,9 +39,7 @@ superseded_by: "[[newer-page]]"   # optional — when content is replaced
 ---
 ```
 
-**Lint rule**: pages where `last_verified` is >90 days old are flagged as stale.
-**Confidence guide**: `high` = 3+ corroborating sources; `medium` = 1-2 sources;
-`low` = single source or inferred.
+**Lint**: `last_verified` >90d → stale. **Confidence**: `high`=3+ sources; `medium`=1-2; `low`=1 or inferred.
 
 ## Naming Conventions
 
@@ -98,7 +96,5 @@ superseded_by: "[[newer-page]]"   # optional — when content is replaced
 
 ## Constraints
 
-- All wiki files ≤100 lines (split if needed)
-- Markdown only — no HTML, no binary files in wiki/
-- Git tracks everything — wiki/ is version-controlled
-- Raw sources are the source of truth; wiki is derived
+- Wiki files ≤100 lines (split if needed); Markdown only; no binary files
+- Git tracks wiki/; raw sources are the source of truth; wiki is derived
