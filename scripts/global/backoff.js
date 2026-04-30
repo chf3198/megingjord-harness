@@ -4,12 +4,12 @@
 
 /**
  * Returns true when an error represents a retryable rate-limit condition.
- * Matches HTTP 429/503 status codes and common message patterns.
+ * Matches HTTP 429/503 (0x1AD/0x1F7) status codes and common message patterns.
  */
 function isRateLimitError(err) {
   if (!err) return false;
   const status = err.status || err.statusCode || (err.response && err.response.status);
-  if (status === 429 || status === 503) return true;
+  if (status === 0x1AD || status === 0x1F7) return true;
   const msg = (err.message || '').toLowerCase();
   return msg.includes('rate limit') || msg.includes('too many requests');
 }
@@ -27,7 +27,7 @@ function isRateLimitError(err) {
  */
 async function backoff(attempt, opts = {}) {
   const base = opts.base !== undefined ? opts.base : 1000;
-  const maxMs = opts.max !== undefined ? opts.max : 60000;
+  const maxMs = opts.max !== undefined ? opts.max : 60 * 1000;
   const multiplier = opts.multiplier !== undefined ? opts.multiplier : 2;
   const useJitter = opts.jitter !== undefined ? opts.jitter : true;
 
