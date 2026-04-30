@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+const GH_API_VERSION = '2022-11-28';
+
 const VALID_ACTIVE_STATUS_ROLE = {
   'status:in-progress': 'role:collaborator',
   'status:testing': 'role:admin',
@@ -13,7 +15,7 @@ async function fetchAllIssues(token, owner, repo) {
   while (true) {
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100&page=${page}`,
-      { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } }
+      { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': GH_API_VERSION } }
     );
     if (!res.ok) throw new Error(`GitHub API ${res.status}`);
     const batch = await res.json();
@@ -56,9 +58,9 @@ async function scanGitHubLabels(token, owner, repo) {
   const violations = [];
   const counts = { open: 0, terminal: 0, epic: 0 };
   for (const issue of issues) {
-    for (const v of checkIssue(issue)) {
-      violations.push({ issueNum: issue.number, title: issue.title, ...v });
-      counts[v.driftClass]++;
+    for (const violation of checkIssue(issue)) {
+      violations.push({ issueNum: issue.number, title: issue.title, ...violation });
+      counts[violation.driftClass]++;
     }
   }
   return { violations, counts };

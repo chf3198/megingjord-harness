@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 
+const GH_API_VERSION = '2022-11-28';
+
 const GH_HEADERS = token => ({
   Authorization: `Bearer ${token}`,
   Accept: 'application/vnd.github+json',
-  'X-GitHub-Api-Version': '2022-11-28',
+  'X-GitHub-Api-Version': GH_API_VERSION,
 });
 
 async function get(url, token) {
