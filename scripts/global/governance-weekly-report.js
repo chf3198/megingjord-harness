@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { classify } = require('./governance-drift-classifier');
 
 const root = path.resolve(__dirname, '..', '..');
 const dir = path.join(root, 'tickets');
@@ -22,7 +23,12 @@ function tickets() {
 }
 
 function verify() {
-  const raw = execSync('node scripts/global/governance-verify.js --json', { cwd: root, encoding: 'utf8' });
+  let raw;
+  try {
+    raw = execSync('node scripts/global/governance-verify.js --json', { cwd: root, encoding: 'utf8' });
+  } catch (err) {
+    raw = err.stdout || '{}';
+  }
   return JSON.parse(raw);
 }
 
@@ -40,6 +46,8 @@ function run() {
   const terminal = s => /^done\s*\(`closed`\)/i.test(s) || /^cancelled/i.test(s);
   const staleReady = list.filter(t => /^ready\b/i.test(t.status) && /^P[01]$/.test(t.priority)
     && now - t.mtimeMs > cutoff && !t.blocker).length;
+  const dc = classify(v.issues || []);
+  const driftByClass = { open: dc.open.length, terminal: dc.terminal.length, epic: dc.epic.length };
   const out = {
     generatedAt: new Date().toISOString(),
     metrics: {
@@ -48,7 +56,7 @@ function run() {
       failedChecks: v.failedChecks,
       epicIntegrityFailures: v.issues.filter(i => i.includes('epic closed with open children')).length,
       evidenceFailures: v.issues.filter(i => i.includes('missing GitHub Evidence Block')).length,
-      staleReadyP0P1: staleReady
+      staleReadyP0P1: staleReady, driftByClass
     },
     recommendations: recommendations({ failedChecks: v.failedChecks, staleReadyP0P1: staleReady,
       evidenceFailures: v.issues.filter(i => i.includes('missing GitHub Evidence Block')).length })

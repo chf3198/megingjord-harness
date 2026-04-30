@@ -1,0 +1,40 @@
+name: Drift Detection
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  drift-detection:
+    name: governance-drift-detection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Run drift classifier
+        run: node scripts/global/governance-drift-classifier.js --json || true
+      - name: Summarize drift classes
+        run: |
+          if [ -f logs/governance-drift.json ]; then
+            node -e "
+              const r = require('./logs/governance-drift.json');
+              const { open, terminal, epic } = r.driftByClass;
+              console.log('Drift status: ' + r.status);
+              console.log('Open drift: ' + open);
+              console.log('Terminal drift: ' + terminal);
+              console.log('Epic drift: ' + epic);
+              if (r.totalDrift > 0) process.exit(0);
+            "
+          fi
+      - name: Commit drift report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add logs/governance-drift.json
+          git diff --cached --quiet || git commit -m "chore(governance): update drift detection report"
+          git push
