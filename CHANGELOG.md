@@ -14,6 +14,16 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — HELP Docs and Doc Governance (Epic #335)
+
+### Added — HELP Documentation Infrastructure (#522 #639 #640 #641 #644)
+- `docs/howto/help-inventory.md`: full audit of all 36 skills; zero HELP.md coverage; priority gap table
+- `docs/howto/doc-update-trigger-matrix.md`: maps code-area patterns to required doc surfaces; CI gate spec
+- `docs/howto/baton-workflow.md`: end-to-end developer HOWTO for the Agile baton ticket lifecycle
+- `docs/howto/fleet-routing.md`: developer HOWTO for fleet routing lanes, complexity scoring, and cost-report
+- `.github/workflows/doc-update-gate.yml`: CI gate — fails PRs that modify skills/instructions/scripts without a doc update
+- `scripts/lint.js`: added `docs/howto` to 100-line exclusion list (same pattern as `instructions/` and `research/`)
+
 ## [Unreleased] — Self-Anneal Governance Infrastructure (Epic #416)
 
 ### Added — Fleet Capability Tagging (Epic #561)

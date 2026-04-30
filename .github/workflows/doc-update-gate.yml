@@ -1,0 +1,68 @@
+name: doc-update-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: doc-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doc-update-gate:
+    name: Doc update required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Check doc update coverage
+        id: check
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          # Skip-gate escape hatch
+          if echo "$PR_BODY" | grep -qF '[skip-doc-gate]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Trigger patterns (paths that require a doc update)
+          TRIGGERS=$(echo "$CHANGED" | grep -E \
+            '^skills/|^instructions/|^scripts/global/|^hooks/|^\.github/workflows/|^inventory/|^package\.json')
+
+          if [ -z "$TRIGGERS" ]; then
+            echo "No trigger paths changed — gate passes."
+            exit 0
+          fi
+
+          echo "Trigger paths changed:"
+          echo "$TRIGGERS"
+
+          # Doc surfaces that satisfy the gate
+          DOC_CHANGED=$(echo "$CHANGED" | grep -E \
+            '^docs/|^CHANGELOG\.md$|^README\.md$|^\.github/.*\.md$')
+
+          if [ -n "$DOC_CHANGED" ]; then
+            echo "Doc update present:"
+            echo "$DOC_CHANGED"
+            exit 0
+          fi
+
+          echo ""
+          echo "❌ doc-update-gate: changes to skills/, instructions/, scripts/global/,"
+          echo "   hooks/, .github/workflows/, inventory/, or package.json require a"
+          echo "   corresponding update to docs/, CHANGELOG.md, or README.md."
+          echo ""
+          echo "   To bypass: add [skip-doc-gate] to the PR description body."
+          exit 1
