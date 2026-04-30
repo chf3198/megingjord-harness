@@ -40,14 +40,14 @@ function recordCostEvent(lane, model, opts = {}) {
 
 function readCostEvents(days = 30) {
   if (!fs.existsSync(FILE)) return [];
-  const cutoff = Date.now() - days * 86400000;
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
   return fs.readFileSync(FILE, 'utf8').split('\n').filter(Boolean)
     .map(l => { try { return JSON.parse(l); } catch { return null; } })
     .filter(r => r && new Date(r.ts).getTime() >= cutoff);
 }
 
 function summarizeCost(entries) {
-  const n = entries.length || 1;
+  const total = entries.length || 1;
   const byLane = {};
   let totalCost = 0;
   entries.forEach(e => {
@@ -65,18 +65,18 @@ function summarizeCost(entries) {
     budgetPct: +budgetPct,
     budgetAlert: projectedMonthly > MONTHLY_BUDGET_USD * 0.8,
     byLane: Object.fromEntries(
-      Object.entries(byLane).map(([k, v]) => [k, { count: v, pct: +((v / n) * 100).toFixed(1) }])
+      Object.entries(byLane).map(([k, v]) => [k, { count: v, pct: +((v / total) * 100).toFixed(1) }])
     ),
   };
 }
 
 if (require.main === module) {
   const events = readCostEvents(30);
-  const s = summarizeCost(events);
-  console.log(`Cost baseline (last 30d): $${s.totalCostUsd} actual`);
-  console.log(`Projected monthly: $${s.projectedMonthlyUsd} / $${MONTHLY_BUDGET_USD} budget`);
-  console.log(`Budget used: ${s.budgetPct}%${s.budgetAlert ? ' ⚠ ALERT' : ''}`);
-  Object.entries(s.byLane).forEach(([k, v]) =>
+  const summary = summarizeCost(events);
+  console.log(`Cost baseline (last 30d): $${summary.totalCostUsd} actual`);
+  console.log(`Projected monthly: $${summary.projectedMonthlyUsd} / $${MONTHLY_BUDGET_USD} budget`);
+  console.log(`Budget used: ${summary.budgetPct}%${summary.budgetAlert ? ' ⚠ ALERT' : ''}`);
+  Object.entries(summary.byLane).forEach(([k, v]) =>
     console.log(`  ${k.padEnd(8)} ${v.count} req (${v.pct}%)`));
 }
 
