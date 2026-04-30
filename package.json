@@ -12,6 +12,7 @@
     "format": "prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js",
     "format:check": "prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js",
     "cost-report": "node scripts/global/cost-report.js",
+    "cost:baseline": "node scripts/global/cost-baseline.js",
     "lint:readability": "node scripts/lint-readability.js",
     "lint:readability:ci": "node scripts/lint-readability.js --max-warnings=389",
     "readability:snapshot": "bash scripts/readability-snapshot.sh",
