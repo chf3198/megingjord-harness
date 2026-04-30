@@ -19,6 +19,12 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Verification Baseline + Cost Measurement (#671)
+
+### Added — Cost Baseline Tooling
+- `scripts/global/cost-baseline.js`: before/after comparison tool; reads `logs/cost-telemetry.jsonl`, shows current projected monthly cost vs pre-optimization baseline ($60.38/mo, ~1090 req, 100% premium); outputs savings delta
+- `npm run cost:baseline`: runs cost-baseline.js for 30-day window comparison
+
 ## [Unreleased] — Instruction Token Footprint Reduction (#667)
 
 ### Changed — Instruction Optimization
