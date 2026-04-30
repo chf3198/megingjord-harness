@@ -1,0 +1,47 @@
+name: Sandbox Launcher Sync
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sandbox-launcher-sync
+  cancel-in-progress: true
+
+jobs:
+  sync-sandbox-launchers:
+    name: sync-sandbox-launchers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const sha = context.sha;
+            const branches = [
+              'sandbox/copilot',
+              'sandbox/codex',
+              'sandbox/claude-code',
+            ];
+            const results = [];
+            for (const branch of branches) {
+              try {
+                await github.rest.git.updateRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch}`,
+                  sha,
+                  force: true,
+                });
+                results.push(`✓ ${branch} → ${sha.slice(0, 7)}`);
+              } catch (err) {
+                if (err.status === 422 || err.status === 404) {
+                  results.push(`– ${branch}: not found on origin, skipped`);
+                } else {
+                  throw err;
+                }
+              }
+            }
+            core.info(results.join('\n'));
