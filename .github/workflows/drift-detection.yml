@@ -23,6 +23,9 @@ jobs:
             npm-${{ runner.os }}-
       - run: npm ci
       - name: Run drift classifier
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: node scripts/global/governance-drift-classifier.js --json || true
       - name: Summarize drift classes
         run: |
@@ -34,9 +37,15 @@ jobs:
               console.log('Open drift: ' + open);
               console.log('Terminal drift: ' + terminal);
               console.log('Epic drift: ' + epic);
+              console.log('GitHub violations: ' + (r.githubViolations || []).length);
               if (r.totalDrift > 0) process.exit(0);
             "
           fi
+      - name: Summarize epic close-readiness
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/global/epic-close-validator.js || true
       - name: Commit drift report
         run: |
           git config user.name "github-actions[bot]"
