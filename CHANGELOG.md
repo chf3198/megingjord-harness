@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — ADR-010 Lifecycle Enforcement + Daily Scan (#358)
+
+### Added — Label Governance Enforcement
+- `.github/workflows/label-lint.yml`: Rule 7 (closed+role), Rule 8 (positive role per active status), Rule 9 (epic+status:ready guard)
+- `.github/workflows/label-scan.yml`: new scheduled daily ADR-010 scan of all issues with idempotent violation comments
+
 ## [Unreleased] — End-to-End Anneal Verification Reliability (#683)
 
 ### Changed
