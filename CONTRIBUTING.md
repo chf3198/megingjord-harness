@@ -90,11 +90,11 @@ Before submitting a pull request, verify:
 
 ## Baton Gate Chain
 
-Every PR runs `baton-gates.yml`: collaborator-gate → admin-gate → consultant-gate.
-PR body must include `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, and `CONSULTANT_CLOSEOUT`.
-All sections require `Signed-by:`, `Team&Model:`, and `Role:`; Admin must differ from Collaborator.
-PRs >10 files or >500 LOC require `BLOCKER_NOTE` plus evidence closeout.
+Every PR runs `baton-gates.yml`: collaborator-gate → admin-gate → consultant-gate. Each gate
+checks the PR body/comments for its artifact string — no human approval needed (#516). **PR
+body must include all three**: `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`.
+All sections require `Signed-by:` / `Team&Model:` / `Role:` (#485). Admin ≠ Collaborator
+(#494). PRs >10 files or >500 LOC: BLOCKER_NOTE (#492). Evidence Block + CLOSEOUT (#493).
 
-Admin merge checklist: `pr-title-required` ≤60 chars, all gates green, artifacts present.
-Lane model: `code-change` (full baton), `docs/research` (Manager+Consultant),
-`config-only` (Admin+Consultant). See role-baton-routing.instructions.md.
+**Admin before merging**: (1) `pr-title-required` ≤60 chars; (2) all gates green; (3) artifact strings in PR body (#511).
+**Lane**: `code-change` (full baton, default) · `docs/research` (Manager+Consultant) · `config-only` (Admin+Consultant). Skipped-role artifacts use `N/A` markers. See role-baton-routing.instructions.md §Multi-lane DoD.

@@ -6,8 +6,6 @@
 [![Node >=22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![Plugin](https://img.shields.io/badge/Agent%20Plugin-Megingjord%20Harness-0a66c2.svg)](plugin.json)
 [![Runtime](https://img.shields.io/badge/runtime-Copilot%20%2B%20Codex%20%2B%20Claude-7c3aed.svg)](AGENTS.md)
-[![Quality Gates](https://github.com/chf3198/megingjord-harness/actions/workflows/quality-gates.yml/badge.svg)](https://github.com/chf3198/megingjord-harness/actions/workflows/quality-gates.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/chf3198/megingjord-harness/badge)](https://scorecard.dev/viewer/?uri=github.com/chf3198/megingjord-harness)
 
 **Megingjord** is a governance-first AI agent harness with skills, hooks, agents, runtime scripts, and a Karpathy-style LLM wiki.
 
@@ -31,7 +29,6 @@ flowchart LR
 - Fleet-aware routing, telemetry, and policy enforcement
 - Static dashboard with operations + governance visibility
 - LLM wiki integration for reusable institutional knowledge
-- Accessibility + UX baseline checks aligned to WCAG 2.2 and Core Web Vitals
 
 ## Quick start
 

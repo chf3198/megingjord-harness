@@ -1,6 +1,6 @@
 name: Epic
 description: Large initiative spanning multiple issues
-labels: ["type:epic", "status:backlog", "priority:P2", "area:governance"]
+labels: ["type:epic", "status:backlog"]
 body:
   - type: input
     id: summary
@@ -42,19 +42,5 @@ body:
         - P1 — blocks release
         - P2 — important
         - P3 — nice to have
-    validations:
-      required: true
-  - type: dropdown
-    id: area
-    attributes:
-      label: Area
-      options:
-        - dashboard
-        - hooks
-        - skills
-        - instructions
-        - agents
-        - scripts
-        - infrastructure
     validations:
       required: true

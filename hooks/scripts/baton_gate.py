@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse: block git commit when no GitHub issue reference present.
-
-Extends commit_ticket_gate.py with Claude Code Bash tool support.
-"""
+Extends commit_ticket_gate.py with Claude Code Bash tool support."""
 import json
 import os
 import re
