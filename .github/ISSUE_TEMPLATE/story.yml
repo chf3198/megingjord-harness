@@ -1,6 +1,6 @@
 name: Story
 description: User-facing feature or capability
-labels: ["type:story", "status:backlog"]
+labels: ["type:story", "status:backlog", "priority:P2"]
 body:
   - type: input
     id: summary

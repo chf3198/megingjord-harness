@@ -1,7 +1,7 @@
 ---
 name: 🐛 Bug Report
 about: Something is broken or behaving unexpectedly
-labels: "type:bug,priority:p2,status:backlog"
+labels: "type:bug,priority:P2,status:backlog,area:dashboard"
 ---
 
 **🎯 Manager [role-manager-execution] — Manny Scope**
@@ -21,6 +21,9 @@ labels: "type:bug,priority:p2,status:backlog"
 - OS:
 - Branch:
 - Dashboard version:
+
+## Impact
+<!-- User/system impact and severity -->
 
 ## Acceptance criteria
 - [ ] Bug is not reproducible
