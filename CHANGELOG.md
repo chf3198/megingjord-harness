@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — End-to-End Anneal Verification Reliability (#683)
+
+### Changed
+- `scripts/global/consultant-checks.js`: `gov-003` now accepts baton evidence from either `logs/fleet-health.jsonl` or `.dashboard/events.jsonl` (`baton:handoff`) to avoid false FAILs when fleet-health logs are telemetry-only.
+- `scripts/global/consultant-checks.js`: `fleet-003` now recognizes local utilization from either explicit `provider:"ollama"` entries or `lane:"fleet"` telemetry rows.
+
 ## [Unreleased] — Consultant SKILL.md Updates (#682)
 
 ### Changed

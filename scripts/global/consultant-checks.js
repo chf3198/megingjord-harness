@@ -38,7 +38,13 @@ const checks = [
     const pass = /MANAGER_HANDOFF/.test(comments) && /COLLABORATOR_HANDOFF/.test(comments) && /ADMIN_HANDOFF/.test(comments) && /CONSULTANT_CLOSEOUT/.test(comments);
     return ok(id('gov', 2), 'governance', pass, pass ? 'all baton artifacts present' : 'missing baton artifact', pass ? 'artifact-complete' : 'artifact-gap', 'post missing baton artifacts');
   }],
-  [id('gov', 3), 'governance', () => exists('logs/fleet-health.jsonl') ? ok(id('gov', 3), 'governance', /baton:/.test(read('logs/fleet-health.jsonl')), 'logs/fleet-health.jsonl scanned', 'event-coverage-check', 'emit baton events') : skip(id('gov', 3), 'governance', 'missing fleet-health log')],
+  [id('gov', 3), 'governance', () => {
+    const fleetLog = read('logs/fleet-health.jsonl');
+    const eventLog = read('.dashboard/events.jsonl');
+    const pass = /baton:/.test(fleetLog) || /"type":"baton:handoff"/.test(eventLog);
+    const evidence = pass ? 'fleet-health or dashboard baton events present' : 'no baton markers in fleet-health/events log';
+    return ok(id('gov', 3), 'governance', pass, evidence, 'event-coverage-check', 'emit baton events');
+  }],
   [id('gov', 4), 'governance', () => { const gitLog = run("git log --oneline -99"); const matchCount = (gitLog.match(/#\d+/g) || []).length; const total = gitLog ? gitLog.split('\n').length : 0; return ok(id('gov', 4), 'governance', total > 0 && matchCount / total >= 0.8, `${matchCount}/${total} commit refs`, 'commit-issue-linkage', 'reference issue numbers in commits'); }],
   [id('gov', 5), 'governance', () => issue ? ok(id('gov', 5), 'governance', !/- \[ \]/.test(run(`gh issue view ${issue}`)), 'issue body checklist scanned', 'ac-evidence-completeness', 'complete unchecked ACs') : skip(id('gov', 5), 'governance', 'missing --issue')],
   [id('gov', 6), 'governance', () => { const branch = run('git branch --show-current'); return ok(id('gov', 6), 'governance', /^(feat|fix|skill|hook)\//.test(branch), branch || 'unknown-branch', 'branch-naming', 'use approved branch prefix'); }],
@@ -49,7 +55,12 @@ const checks = [
   [id('tool', 5), 'tools', () => ok(id('tool', 5), 'tools', !run("grep -Rn '\t|  $' dashboard scripts | head -1"), 'whitespace scan completed', 'prettification-compliance', 'normalize indentation and trailing spaces')],
   [id('fleet', 1), 'fleet', () => exists('logs/model-routing-telemetry.jsonl') ? ok(id('fleet', 1), 'fleet', !/\b[0-9]{3}\b/.test(read('logs/model-routing-telemetry.jsonl')), 'telemetry scanned for HTTP 3xx/4xx/5xx', 'rate-limit-event-frequency', 'enable backoff/circuit-breaker') : skip(id('fleet', 1), 'fleet', 'missing routing telemetry')],
   [id('fleet', 2), 'fleet', () => exists('logs/model-routing-weekly.json') ? ok(id('fleet', 2), 'fleet', true, 'weekly cost file present', 'cost-budget-adherence', 'enforce monthly budget threshold') : skip(id('fleet', 2), 'fleet', 'missing weekly cost report')],
-  [id('fleet', 3), 'fleet', () => exists('logs/model-routing-telemetry.jsonl') ? ok(id('fleet', 3), 'fleet', /provider":"ollama/.test(read('logs/model-routing-telemetry.jsonl')), 'provider mix scanned', 'local-llm-utilization', 'route free-tier work to local ollama') : skip(id('fleet', 3), 'fleet', 'missing routing telemetry')],
+  [id('fleet', 3), 'fleet', () => {
+    if (!exists('logs/model-routing-telemetry.jsonl')) return skip(id('fleet', 3), 'fleet', 'missing routing telemetry');
+    const telemetry = read('logs/model-routing-telemetry.jsonl');
+    const pass = /provider":"ollama/.test(telemetry) || /"lane":"fleet"/.test(telemetry);
+    return ok(id('fleet', 3), 'fleet', pass, 'provider/lane mix scanned', 'local-llm-utilization', 'route free-tier work to local ollama');
+  }],
   [id('fleet', 4), 'fleet', () => exists('logs/model-routing-telemetry.jsonl') ? ok(id('fleet', 4), 'fleet', Date.now() - fs.statSync(path.join(root, 'logs/model-routing-telemetry.jsonl')).mtimeMs < ONE_DAY_MS, 'telemetry freshness checked', 'telemetry-freshness', 'refresh telemetry daily') : skip(id('fleet', 4), 'fleet', 'missing routing telemetry')],
 ];
 
