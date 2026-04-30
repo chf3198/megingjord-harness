@@ -38,6 +38,8 @@ jobs:
         run: npm run lint:readability:ci
       - name: Router smoke
         run: npm run router:smoke
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
       - name: Deterministic unit tests
         run: >-
           npx playwright test
