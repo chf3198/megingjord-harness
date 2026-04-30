@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — Consultant Feedback Bridge (#681)
+
+### Added
+- `scripts/global/consultant-feedback.js`: Manager backlog feedback bridge. Converts failed `consultant-checks.js` results into GitHub create-or-augment backlog actions and posts a Remediation Brief on the originating issue. Closes Epic #610 child #614.
+
 ## [3.2.0] — Rebrand: DevEnv Ops → Megingjord (2026-04-29)
 
 ### Changed — Global Rebrand
