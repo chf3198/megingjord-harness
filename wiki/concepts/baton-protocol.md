@@ -50,3 +50,5 @@ Manager → Collaborator → Admin → Consultant
 - All roles are AI agents; human = design decisions + UAT only
 
 See: [[ticket-lifecycle-v1]], [[agile-roles-analysis]]
+
+See: [[sandbox-worktree-governance-pack]]

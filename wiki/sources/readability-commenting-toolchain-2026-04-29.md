@@ -1,7 +1,10 @@
 ---
-title: Readability Commenting Toolchain 2026-04-29
-type: sources
+title: Readability & Commenting Toolchain Research (2026-04-29)
+type: source
+created: 2026-04-29
+updated: 2026-04-30
 tags: [readability, jsdoc, linting, formatting, governance]
+status: active
 ---
 # Readability & Commenting Toolchain Research (2026-04-29)
 

@@ -1,7 +1,10 @@
 ---
 title: Linting Governance
-type: concepts
-tags: []
+type: concept
+created: 2026-04-14
+updated: 2026-04-30
+tags: [linting, governance, code-quality]
+status: active
 ---
 # Linting Governance
 
@@ -84,3 +87,5 @@ and waived for incremental adoption. Forward-fix in #111.
 - `lint-configs/lint-baseline.md` — waiver register
 
 See also: [[js-code-quality-practices]], [[nodejs-install-patterns]], [[nodejs-project-organization]]
+
+See also: [[global-readability-governance-harness]]

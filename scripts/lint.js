@@ -11,12 +11,17 @@ const LIMIT = 100;
 const IGNORE = [
   'node_modules', '.git', 'playwright-report',
   'test-results', 'package-lock.json', '.dashboard',
+  'logs',
   // Global resources have their own governance
   'skills', 'hooks'
 ];
 
 const IGNORE_PATHS = ['scripts/global', 'instructions', 'research', 'docs/howto'];
-const IGNORE_FILES = ['CHANGELOG.md', 'CHANGELOG-archive.md'];
+const IGNORE_FILES = [
+  'CHANGELOG.md', 'CHANGELOG-archive.md',
+  // Append-only / catalog files that grow by design
+  'log.md', 'index.md',
+];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
 

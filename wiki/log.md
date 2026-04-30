@@ -98,3 +98,35 @@ for Admin/Consultant closeout phases. Total wiki pages now: 57.
 ## [2026-04-29] ingest | Sandbox worktree governance pack
 Added source+synthesis pages for launcher-branch controls, reset workflow, and merge-group-safe CI governance checks.
 Last updated with supporting research and runbook alignment.
+
+## [2026-04-30] shipped | Sandbox launcher sync (#647)
+`.github/workflows/post-merge-sandbox-sync.yml` merged: fires on push to main, force-resets
+all sandbox/* branches via GitHub REST API. Closes the "guardian without a keeper" invariant
+hole in worktree-governance-required CI gate.
+
+## [2026-04-30] shipped | Governance drift detection (#360)
+`scripts/global/governance-drift-classifier.js` + 11-test spec + daily CI workflow merged.
+Classifies governance issues into open/terminal/epic drift classes; writes JSON report to
+`logs/governance-drift.json`. `npm run governance:drift` for manual runs.
+
+## [2026-04-30] shipped | Fleet remediation runner evidence pack (#595)
+`scripts/global/fleet-benchmark-runner.js` + `fleet-rollout-runner.js` confirmed in main
+(merged earlier via PR #596 by Copilot team). Issue closed after Claude Code Team verified
+2/2 tests pass.
+
+## [2026-04-30] anneal | Wiki critical audit and structural repair (#651)
+34 lint violations resolved: frontmatter fixed on 9 pages, ghost index entries removed
+(linting-governance-rationale/tooling/rollout), 2 missing pages added to index,
+type field pluralisation corrected on 7 pages. Model routing page updated
+(Opus 4.6 → 4.7). Index rebuilt with correct page counts (62→65 with new synthesis).
+
+## [2026-04-30] ingest | LLM Wiki state synthesis (2026)
+New synthesis page `llm-wiki-state-2026.md` created from web research (16 sources).
+Key findings: flat-markdown architecture validated at this scale; 5 improvements
+recommended (confidence frontmatter, infra-automation routing, qmd search MCP,
+typed wikilinks, frontmatter-only session map). Total wiki pages now: 65.
+
+## [2026-04-30] update | wiki_router.py — infra-automation routing
+Added `infra-automation` routing branch: devenv-ops sessions now inject fleet routing
+order (from model-routing concept) and governance enforcement layers (from governance-
+enforcement concept). Max snippets raised from 4 to 5. Synced to both runtimes.

@@ -1,7 +1,10 @@
 ---
 title: Dashboard Comparable Tools
-type: sources
-tags: []
+type: source
+created: 2026-04-23
+updated: 2026-04-30
+tags: [dashboard, research]
+status: active
 ---
 # Dashboard Comparable Tools: Marketability Patterns
 

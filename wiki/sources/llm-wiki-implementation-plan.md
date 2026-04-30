@@ -31,7 +31,7 @@ Anthropic: CLAUDE.md must be short; wiki pages + skills carry domain knowledge.
 - `wiki_wisdom.py` is wired: reads wiki pages, injects 3 into every session
 - `index.md` is the manual BM25 retrieval catalog — correct pattern
 - `log.md` is append-only — correct pattern (Mem0 ADD-only algorithm)
-- `[[wikilinks]]` = manual entity linking — correct pattern
+- wikilinks (double-bracket syntax) = manual entity linking — correct pattern
 
 ### Five Gaps
 1. Only 3 of 50 wiki pages wired into session_context.py
