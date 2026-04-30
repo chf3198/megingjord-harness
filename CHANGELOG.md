@@ -19,6 +19,13 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Fleet Quantization Strategy + Device Inventory (#669)
+
+### Changed — Fleet Device Inventory
+- `inventory/devices.json`: added `recommendedModels[]` with `quantization`, `paramSize`, `sizeGB`, `use` per model for all 3 Ollama fleet nodes (penguin-1, windows-laptop, 36gbwinresource)
+- `inventory/devices.json`: added `benchmarks` object per device with `platform`, `warmTokPerSec`, `model`, `quantization`, `notes`; 36gbwinresource at 32.3 tok/s GPU, windows-laptop at 7.3 tok/s CPU
+- All 3 nodes confirmed reachable via Tailscale; live quantization: Q8_0 (sub-2b), Q4_K_M (7b)
+
 ## [Unreleased] — Real-Time Cost Monitor Dashboard (#672)
 
 ### Added — Cost Dashboard
