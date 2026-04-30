@@ -14,7 +14,6 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
-## [Unreleased] — Continuous Governance Drift Detection (#360)
 ## [Unreleased] — Governance Verifier Hygiene (#652)
 
 ### Fixed — Governance Verifier False Positives
