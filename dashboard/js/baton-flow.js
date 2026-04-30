@@ -46,6 +46,7 @@ function renderBatonRow(t) {
     ? `<span class="baton-gap">⚠️ Skipped: ${gaps.join(', ')}</span>` : '';
   const staleWarn = t.stale ? '<span class="baton-gap">⏳ stale &gt;30m</span>' : '';
   const tl = renderTimeline(t.issue);
+  const comment = buildCommentSnippet(t.lastComment);
   return `<div class="baton-row">
     <div class="baton-meta">
       ${epic}
@@ -54,6 +55,7 @@ function renderBatonRow(t) {
       <span class="badge ${badge}">${t.status || 'idle'}</span>
       ${agent} ${model} ${gapWarn} ${staleWarn}
     </div>
+    ${comment}
     <div class="baton-pipeline">${steps}</div>
     ${tl}
   </div>`;
@@ -65,21 +67,16 @@ function statusBadge(s) {
 
 function normalizeBaton(state) {
   if (!state) return [];
-  if (Array.isArray(state)) return state.filter(t => t.issue);
-  if (state.issue) return [state];
-  return [];
+  return Array.isArray(state) ? state.filter(t => t.issue) : (state.issue ? [state] : []);
 }
 
 function renderTimeline(issue) {
   const tl = typeof getTicketTimeline === 'function'
     ? getTicketTimeline(issue) : [];
   if (!tl.length) return '';
-  const roleDesc = {
-    manager: 'Manager: scope defined, ACs written',
+  const roleDesc = { manager: 'Manager: scope defined, ACs written',
     collaborator: 'Collaborator: implementation + validation',
-    admin: 'Admin: CI gates run, PR merged',
-    consultant: 'Consultant: critique + CLOSEOUT'
-  };
+    admin: 'Admin: CI gates run, PR merged', consultant: 'Consultant: critique + CLOSEOUT' };
   const items = tl.map((h, i) => {
     const r = BATON_ROLES.find(x => x.id === h.role);
     const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
@@ -89,10 +86,15 @@ function renderTimeline(issue) {
   return `<div class="baton-timeline" title="Baton handoff history">${items}</div>`;
 }
 
+function buildCommentSnippet(lc) {
+  if (!lc) return '';
+  const full = esc(lc), snippet = lc.length > 80 ? esc(lc.slice(0, 80)) + '…' : full;
+  return `<div class="baton-comment" title="${full}" aria-label="Last comment: ${full}">💬 ${snippet}</div>`;
+}
+
 function buildBatonState(routerLog) {
   if (!routerLog || !routerLog.length) return [];
   const last = routerLog[0];
   const roleMap = { router: 'manager', implementer: 'collaborator', quick: 'admin' };
-  return [{ activeRole: roleMap[last.agent] || 'manager',
-    issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress' }];
+  return [{ activeRole: roleMap[last.agent] || 'manager', issue: last.task?.match(/#(\d+)/)?.[1] || null, status: 'in-progress' }];
 }

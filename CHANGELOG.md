@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — Agent Baton Last Comment Snippet (#326)
+
+### Added — Baton UI Enhancement
+- `dashboard/js/baton-flow.js`: `buildCommentSnippet()` displays last comment inline per baton row — truncated to 80 chars with ellipsis, full text in `title`/`aria-label` for tooltip/accessibility
+- `dashboard/css/baton.css`: `.baton-comment` rule — compact single-line display, `text-overflow: ellipsis`, `cursor: help`
+- `tests/baton-comment-snippet.spec.js`: 5 Playwright tests covering snippet render, truncation, tooltip, aria-label, and null-comment no-render
+
 ## [Unreleased] — Playwright Layout Regression Tests (#399)
 
 ### Added — Layout Regression Coverage
