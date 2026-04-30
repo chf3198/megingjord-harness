@@ -31,6 +31,13 @@ This skill optimizes _process reliability_, not model internals.
 - Repeated carryover/blocked items across iterations.
 - PR/merge latency breaches targets or reopened issues trend up.
 - **Commits exist without linked GitHub issues** (process drift).
+- **Consultant check registry returns ≥1 FAIL on domain:governance**.
+- **Fleet check `fleet-002` (cost-budget) FAIL for ≥2 consecutive cycles**.
+
+## Consultant Integration
+
+Self-anneal may be invoked automatically from `consultant-feedback.js` when `gov-002` (baton-artifact-presence) or `gov-003` (event-emission) FAIL — these are workflow process failures, not implementation bugs.
+Check IDs are managed in `scripts/global/consultant-checks.js` (3 domains: governance/tools/fleet).
 
 ## Input collection
 
