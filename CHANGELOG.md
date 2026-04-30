@@ -17,8 +17,15 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 ## [Unreleased] — CI Workflow Efficiency Improvements (#661)
 
 ### Changed — Scheduled Workflow Reliability
-- `.github/workflows/post-merge-automation.yml`: added `concurrency` block (`cancel-in-progress: false`) to prevent duplicate triggers for the same PR merge
-- `.github/workflows/drift-detection.yml`: added npm dependency caching (matching pattern in `lint.yml` and `quality-gates.yml`); updated node version 20 → 22 for fleet consistency
+
+## [Unreleased] — Consultant Check Registry Bootstrap (#664)
+
+### Added — Initial Registry CLI
+- `scripts/global/consultant-checks.js`: new lightweight CLI emitting governance/tools/fleet check records with `id`, `domain`, `status`, `evidence`, `finding`, and `suggestedFix`
+- Supports `--issue`, `--json`, and `--dry-run` for machine-parseable baton usage and low-cost local validation
+
+### Fixed — Governance Baseline Metadata
+- `tickets/599-task-sandbox-worktree-governance-pack.md`: normalized plain metadata headers (`Type`, `Status`, `Priority`, `Area`) to satisfy verifier parsing on current mainline baseline
 
 ## [Unreleased] — Governance Verifier Hygiene (#652)
 
