@@ -14,6 +14,11 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Sandbox Launcher Sync (#647)
+
+### Added — Worktree Governance Automation
+- `.github/workflows/post-merge-sandbox-sync.yml`: fires on push to `main`; force-resets `sandbox/copilot`, `sandbox/codex`, `sandbox/claude-code` to the new main SHA via the GitHub REST API — closes the gap where `worktree-governance-required` enforced currency but no automation maintained it
+
 ## [Unreleased] — HELP Docs and Doc Governance (Epic #335)
 
 ### Added — HELP Documentation Infrastructure (#522 #639 #640 #641 #644)
