@@ -2,7 +2,13 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-HOOKS_DIR="$ROOT/.git/hooks"
+GIT_COMMON_DIR="$(git -C "$ROOT" rev-parse --git-common-dir 2>/dev/null || true)"
+if [[ -z "$GIT_COMMON_DIR" ]]; then
+  echo "⚠️  Unable to resolve git common dir for hooks"
+  exit 0
+fi
+[[ "$GIT_COMMON_DIR" = /* ]] || GIT_COMMON_DIR="$ROOT/$GIT_COMMON_DIR"
+HOOKS_DIR="$GIT_COMMON_DIR/hooks"
 
 if [[ ! -d "$HOOKS_DIR" ]]; then
   echo "⚠️  Git hooks directory not found: $HOOKS_DIR"
