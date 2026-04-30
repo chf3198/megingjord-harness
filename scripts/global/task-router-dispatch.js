@@ -6,6 +6,7 @@ const { chatComplete: ollamaChat } = require('./ollama-direct');
 const { getProfile } = require('./fleet-config');
 const { resolveRouting } = require('./model-routing-engine');
 const { recordTelemetry } = require('./model-routing-telemetry');
+const { recordCostEvent } = require('./cost-telemetry');
 const policy = require('./model-routing-policy.json');
 
 const args = process.argv.slice(2);
@@ -63,6 +64,7 @@ async function main() {
   recordTelemetry({ lane: resolved.lane, model: resolved.modelId, multiplier: resolved.multiplier,
     taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
     rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
+  recordCostEvent(resolved.lane, resolved.modelId, { outcome });
   const result = { route: effectiveRoute, routing: resolved, decision };
   if (json) {
     console.log(JSON.stringify(result, null, 2));

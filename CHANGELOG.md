@@ -14,6 +14,14 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - **Governance-aligned semantics** (protection, guardrails, policy)
 - **Lower naming-conflict risk** after rejecting "Codex" due OpenAI brand collision and "Aegis" due broad prior use
 
+## [Unreleased] — Cost Telemetry + Routing Discipline (#667)
+
+### Added — Cost Accounting per Dispatch
+- `scripts/global/cost-telemetry.js`: per-dispatch cost logger writing `logs/cost-telemetry.jsonl`; computes `cost_usd` per tier at 2026 blended pricing; budget alert at 80% of $10/mo
+- `scripts/global/task-router-dispatch.js`: now calls `recordCostEvent()` on every fleet dispatch
+- `npm run cost:baseline`: runs cost-telemetry summarizer for 30-day window
+- `scripts/lint.js`: added `.claude` to IGNORE list (excludes agent worktrees from 100-line scan)
+
 ## [Unreleased] — CI Workflow Efficiency Improvements (#661)
 
 ### Changed — Scheduled Workflow Reliability
