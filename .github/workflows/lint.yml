@@ -32,11 +32,11 @@ jobs:
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.npm
           key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'npm-shrinkwrap.json') }}
@@ -52,7 +52,7 @@ jobs:
       - name: Markdown lint
         run: npm run lint:md
       - name: Vale prose lint
-        uses: errata-ai/vale-action@v2
+        uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2
         with:
           files: '.'
           reporter: github-pr-check

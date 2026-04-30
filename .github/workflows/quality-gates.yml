@@ -1,0 +1,50 @@
+name: Quality Gates
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality_required:
+    name: quality-required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json', 'npm-shrinkwrap.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: Install deps
+        run: npm install --no-audit --no-fund
+      - name: Formatting check
+        run: npm run format:check
+      - name: 100-line lint
+        run: npm run lint
+      - name: Readability gate
+        run: npm run lint:readability:ci
+      - name: Router smoke
+        run: npm run router:smoke
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Deterministic unit tests
+        run: >-
+          npx playwright test
+          tests/unit-modules.spec.js
+          tests/routing-policy.spec.js
+          tests/accessibility-baseline.spec.js
+          tests/google-quality.spec.js
+          --reporter=line

@@ -1,2 +1,14 @@
 # Default owner for everything
 * @chf3198
+
+# Governance + security controls
+/.github/ @chf3198
+/.github/CODEOWNERS @chf3198
+/.github/workflows/ @chf3198
+/.github/SECURITY.md @chf3198
+
+# Runtime and release-critical surfaces
+/hooks/ @chf3198
+/instructions/ @chf3198
+/scripts/global/ @chf3198
+/package.json @chf3198
