@@ -60,6 +60,7 @@
     "help:topic": "node scripts/help-topic.js",
     "docs:lint": "node scripts/docs-lint.js",
     "agent:coord:status": "node scripts/global/agent-coord-local.js status",
+    "agent:worktree": "bash scripts/agent-worktree.sh",
     "validate:triage": "node scripts/validate-plugin-triage.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "test": "npx playwright test",
