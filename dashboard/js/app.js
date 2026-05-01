@@ -36,6 +36,7 @@ function dashboardApp() {
       await this.refreshAll();
       this.scheduleRefresh();
       if (typeof connectSSE === 'function') connectSSE(this);
+      if (typeof initContextFlowEvents === 'function') initContextFlowEvents();
       this.lastRefresh = new Date().toLocaleTimeString();
       addActivity(this.activityLog, 'system', 'Dashboard initialized',
         `${this.devices.length} devices loaded`);
