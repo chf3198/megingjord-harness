@@ -7,7 +7,7 @@
 
 ### Dynamic Tracking Table
 
-> **Column Key:** All models scored on the same 0–10 rubric. `Arch` = Architectural Soundness, `Sec` = Security Posturing, `UX/UI` = UX Practicality, `Read.` = Execution Readiness, `Empirical` = live harness composite (April 2026 controlled eval). Copilot Pro rows are analytically scored (no API access for harness). `est.` = tier-level estimate. `—` = not evaluated via that method. `⚠ rate-limited` = daily free-tier cap reached.
+> **Column Key:** All models scored on the same 0–10 rubric. `Arch` = Architectural Soundness, `Sec` = Security Posturing, `UX/UI` = UX Practicality, `Read.` = Execution Readiness, `Empirical` = live harness composite (April 2026 controlled eval). Copilot Pro rows are analytically scored (no API access for harness). `est.` = tier-level estimate. `—` = not evaluated via that method. `⚠ rate-limited` = daily free-tier cap reached. `⚠ not installed` = model removed from fleet host.
 
 | Model | Tier / Cost | Arch | Sec | UX/UI | Read. | Empirical | Best Use Case |
 |---|---|---|---|---|---|---|---|
@@ -34,8 +34,9 @@
 | **OpenRouter — google/gemma-3-4b-it:free** | Free-cloud / 0x | est 6.5 | est 6.0 | est 7.0 | est 6.5 | **10.0** | Small Google model; punches well above its weight class. |
 | **OpenRouter — nvidia/nemotron-nano-9b:free** | Free-cloud / 0x | est 6.5 | est 6.5 | est 6.5 | est 6.5 | **10.0** | Compact NVIDIA; best value at 9B params empirically. |
 | **OpenClaw — qwen2.5:7b-instruct** *(fleet)* | Local-fleet / 0x | est 7.0 | est 6.5 | est 7.0 | est 6.5 | **8.0** | Best fleet model empirically; strong clarity + UX. |
-| **OpenClaw — phi3:mini** *(fleet)* | Local-fleet / 0x | est 6.5 | est 6.0 | est 6.5 | est 6.5 | **6.8** | Fastest fleet model (33s/300 tok); good accuracy. |
-| **OpenClaw — mistral:latest** *(fleet)* | Local-fleet / 0x | est 7.5 | est 7.0 | est 7.5 | est 7.0 | **5.8** | Slow CPU gen (~1 tok/s); accuracy strong but limited throughput. |
+| **OpenClaw — qwen2.5-coder:7b** *(fleet)* | Local-fleet / 0x | est 7.5 | est 7.0 | est 7.5 | est 7.5 | **7.0** | Coding-tuned 7B; 1.3 tok/s CPU-only; use when GPU nodes unavailable. |
+| **OpenClaw — phi3:mini** *(fleet)* | Local-fleet / 0x | est 6.5 | est 6.0 | est 6.5 | est 6.5 | ⚠ not installed | Removed from OpenClaw fleet (2026-05-01). |
+| **OpenClaw — mistral:latest** *(fleet)* | Local-fleet / 0x | est 7.5 | est 7.0 | est 7.5 | est 7.0 | ⚠ not installed | Removed from OpenClaw fleet (2026-05-01). |
 
 ### Evaluation Methodology Insights
 *Researched methodology for LLM evaluation:*
