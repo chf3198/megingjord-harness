@@ -2,7 +2,7 @@
 title: "OpenClaw Gateway"
 type: entity
 created: 2026-04-14
-updated: 2026-04-23
+updated: 2026-05-01
 tags: [fleet, service, inference]
 sources: ["[[openclaw-windows-optimization-2026]]"]
 related: ["[[windows-laptop]]", "[[penguin-1]]", "[[model-routing]]", "[[tiered-agent-architecture]]"]
@@ -25,14 +25,21 @@ Self-hosted fleet routing gateway on [[windows-laptop]].
 - Uniform request/response surface for tooling scripts
 - Operational choke-point for reliability telemetry
 
-## Models Available
-- mistral (7B) — primary coding model
-- qwen2.5:7b — secondary coding model
-- llama3.2 — general purpose
+## Models Available (live as of 2026-05-01)
+- qwen2.5:7b-instruct — general instruction following; ~1–2 tok/s CPU
+- qwen2.5-coder:7b — coding-tuned; ~1.3 tok/s CPU cold-start
+
+**Removed**: mistral:latest, phi3:mini, llama3.2 (no longer installed)
+
+## Performance Constraints
+- Host: CPU-only (Intel i3-N305, 8 cores, ~6.3 GiB RAM, no GPU)
+- Inference speed: 1–2 tok/s for 7B quantized models
+- Use GPU nodes (36gbwinresource: 9+ tok/s) for latency-sensitive tasks
+- OpenClaw is preferred for privacy-critical or offline-required workloads
 
 ## Current Operational Risk
+- CPU-only inference limits throughput for interactive tasks
 - Gateway health endpoint instability can make fleet lane unavailable
-- Reliability depends on aligned health checks and fallback behavior
 - See [[openclaw-windows-optimization-2026]] for hardening plan
 
 ## Failover Chain
