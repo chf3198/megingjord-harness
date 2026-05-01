@@ -35,6 +35,20 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - dashboard
+        - hooks
+        - skills
+        - instructions
+        - agents
+        - scripts
+        - infrastructure
+    validations:
+      required: true
+  - type: dropdown
     id: priority
     attributes:
       label: Priority
