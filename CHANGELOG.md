@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Baton Step Fleet Resource Tooltips (#329)
+
+### Added — Fleet Resource Visibility
+- `dashboard/js/baton-flow.js`: each baton step `title` tooltip now shows resource type (fleet/cloud), agent name, and model for the active role; done steps show "✓ done"; pending steps show "pending" — uses `/^(qwen|llama|mistral|phi|gemma)/` regex to classify fleet vs cloud models
+- `tests/baton-step-resource.spec.js`: 5 Playwright tests covering fleet-type detection, cloud-type detection, agent name in tooltip, model name in tooltip, and done-step label
+
 ## [Unreleased] — Agent Baton Last Comment Snippet (#326)
 
 ### Added — Baton UI Enhancement

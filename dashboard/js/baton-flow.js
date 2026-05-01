@@ -23,14 +23,16 @@ function renderBatonFlow(batonState) {
 }
 
 function renderBatonRow(t) {
+  const ai = BATON_ROLES.findIndex(x => x.id === t.activeRole);
+  const resType = m => /^(qwen|llama|mistral|phi|gemma)/.test(m || '') ? 'fleet' : 'cloud';
   const steps = BATON_ROLES.map((r, i) => {
     let cls = 'baton-step';
-    const ai = BATON_ROLES.findIndex(x => x.id === t.activeRole);
     if (r.id === t.activeRole) cls += ' active';
     else if (ai > i) cls += ' done';
-    const arrow = i < BATON_ROLES.length - 1
-      ? '<span class="baton-arrow">→</span>' : '';
-    return `<span class="${cls}" title="${r.id}">
+    const arrow = i < BATON_ROLES.length - 1 ? '<span class="baton-arrow">→</span>' : '';
+    const isAct = r.id === t.activeRole, isDone = ai > i;
+    const tip = isAct ? `${r.label} · ${resType(t.model)} · ${t.agent || '?'} · ${t.model || '?'}` : isDone ? `${r.label}: ✓ done` : `${r.label}: pending`;
+    return `<span class="${cls}" title="${tip}">
       ${r.icon}<span class="baton-lbl">${r.label}</span>
     </span>${arrow}`;
   }).join('');
@@ -64,12 +66,10 @@ function renderBatonRow(t) {
 function statusBadge(s) {
   return ({ 'in-progress': 'active', ready: 'degraded', done: 'healthy', idle: 'unknown', review: 'degraded' })[s] || 'unknown';
 }
-
 function normalizeBaton(state) {
   if (!state) return [];
   return Array.isArray(state) ? state.filter(t => t.issue) : (state.issue ? [state] : []);
 }
-
 function renderTimeline(issue) {
   const tl = typeof getTicketTimeline === 'function'
     ? getTicketTimeline(issue) : [];
