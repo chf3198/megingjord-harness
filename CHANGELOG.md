@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — Docs Drift Detector and CI Gate (#722)
+
+### Added
+- `scripts/docs-lint.js`: deterministic docs-drift checker. Validates that every `npm run X` token in `dashboard/js/help-*.js` resolves to a real `package.json` script, every `[[wikilink]]` resolves to a real wiki page in `~/.copilot/wiki/concepts/` or `~/.copilot/wiki/entities/`, and warns on `instructions/*.md` files older than 90 days.
+- `.github/workflows/docs-lint.yml`: NEW workflow that runs `npm run docs:lint` on PRs touching HELP, instructions, scripts, or package.json. Syncs `wiki/` to `~/.copilot/wiki/` before the check.
+- `package.json`: added `docs:lint` script.
+
 ## [Unreleased] — HELP Wikilinks and help:topic CLI (#718)
 
 ### Added
