@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Wiki Section Popularity Auto-Record (#328)
+
+### Fixed — Wiki Health Metrics
+- `dashboard/js/wiki-reader.js`: `renderWikiReader` now auto-calls `trackWikiAccess` for each loaded section at most once per hour (debounced via `_lastAutoRecord` + `AUTO_RECORD_INTERVAL_MS`), so section popularity updates without requiring manual user clicks
+- `tests/wiki-popularity.spec.js`: 4 Playwright tests covering section bar render, empty-state display, section click request tracking, and auto-record trigger
+
 ## [Unreleased] — Baton Step Fleet Resource Tooltips (#329)
 
 ### Added — Fleet Resource Visibility
