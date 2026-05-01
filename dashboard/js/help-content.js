@@ -1,6 +1,11 @@
 // Help Content — comprehensive help center with search
 // Uses HELP_USER_SECTIONS and HELP_DEV_SECTIONS from split files
 
+function renderWikiLinks(body) {
+  return body.replace(/\[\[([\w-]+)\]\]/g, (_m, name) =>
+    `<a href="#" class="wiki-link" title="Open wiki: ${name}" onclick="Alpine.$data(document.querySelector('[x-data]')).setView('wiki');return false;">${name}</a>`);
+}
+
 function getHelpSections(devMode) {
   const user = typeof HELP_USER_SECTIONS !== 'undefined'
     ? HELP_USER_SECTIONS : [];
@@ -50,7 +55,7 @@ function renderHelpPanel(devMode) {
         const s = byId[id];
         return `<details id="help-${s.id}" class="help-section" data-help-id="${s.id}">
           <summary>${s.title}</summary>
-          <div class="help-body">${s.body}</div></details>`;
+          <div class="help-body">${renderWikiLinks(s.body)}</div></details>`;
       }).join('');
     return `<div class="help-category">
       <h3 class="help-cat-title">${cat.title}</h3>${items}</div>`;
