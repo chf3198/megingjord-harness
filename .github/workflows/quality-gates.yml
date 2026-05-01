@@ -47,4 +47,6 @@ jobs:
           tests/routing-policy.spec.js
           tests/accessibility-baseline.spec.js
           tests/google-quality.spec.js
+          tests/no-network-errors.spec.js
+          tests/api-smoke.spec.js
           --reporter=line
