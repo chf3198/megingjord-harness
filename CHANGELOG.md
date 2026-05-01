@@ -7,6 +7,13 @@
 - `scripts/global/agent-assignee-guard.js`: GitHub-issue-assignee = ticket-ownership truth check; exits 0 if vendor matches assignee, 2 if mismatch.
 - `package.json`: `agent:assignee-guard` script.
 
+## [Unreleased] — Layer 2 Multi-Agent Worktree Convention (#738)
+
+### Added
+- `scripts/agent-worktree.sh`: idempotently creates `<repo>/.harness/worktrees/<vendor>/` for codex/copilot/continue/cursor.
+- `research/adr/012-multi-agent-worktree-governance.md`: ADR documenting per-vendor worktree path discipline (composes with Anthropic's `.claude/worktrees/` rather than overriding).
+- `package.json`: `agent:worktree` script.
+
 ## [Unreleased] — Drift Monitoring Strategy Research (#726)
 
 ### Added
