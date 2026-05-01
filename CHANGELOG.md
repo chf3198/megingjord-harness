@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Release Smoke Governance Wiring (#719)
+
+### Changed
+- `.github/workflows/quality-gates.yml`: now executes `tests/no-network-errors.spec.js` and `tests/api-smoke.spec.js` in required quality checks.
+- `.github/workflows/release-please.yml`: added `release-verification` job to run the same two Playwright smoke specs on `main` push.
+
 ## [Unreleased] — Epic Close-Readiness Gate (#452)
 
 ### Added
