@@ -2,6 +2,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { normalizeTokenRecord } = require('./token-ledger-schema');
 
 const FILE = path.join(__dirname, '..', '..', 'logs', 'model-routing-telemetry.jsonl');
 
@@ -11,7 +12,7 @@ const MAX_ENTRIES = 100;
 
 function recordTelemetry(entry) {
   ensureDir();
-  const row = {
+  const legacy = {
     ts: new Date().toISOString(),
     lane: entry.lane || 'free',
     model: entry.model || 'unknown',
@@ -23,6 +24,15 @@ function recordTelemetry(entry) {
     rollbackApplied: entry.rollbackApplied || false,
     execute: entry.execute || false,
   };
+  const canonical = normalizeTokenRecord({
+    ...entry,
+    lane: legacy.lane,
+    model: legacy.model,
+    timestamp: legacy.ts,
+    provider: entry.provider || legacy.lane,
+    source_kind: entry.source_kind || 'routing_telemetry',
+  });
+  const row = { ...legacy, ...canonical };
   const existing = fs.existsSync(FILE)
     ? fs.readFileSync(FILE, 'utf8').split('\n').filter(Boolean) : [];
   const lines = [...existing.slice(-(MAX_ENTRIES - 1)), JSON.stringify(row)];
