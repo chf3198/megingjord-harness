@@ -132,3 +132,13 @@ order (from model-routing concept) and governance enforcement layers (from gover
 enforcement concept). Max snippets raised from 4 to 5. Synced to both runtimes.
 
 ## [2026-05-01] ingest | Drift Monitoring Strategy 2026-05-01
+
+## 2026-05-01 — Fleet Hardware Optimization #734 ingested
+Manual ingest: research/fleet-hardware-optimization-2026-05-01.md → wiki/sources/fleet-hardware-optimization-2026-05-01.md
+Cross-linked: 36gbwinresource, openclaw, penguin-1, fleet-architecture, cascade-dispatch, model-routing
+
+## [2026-05-01] ingest | Token Telemetry Capability Matrix (Epic #768 research gate)
+Evidence-backed provider capability matrix and unified design synthesis created.
+Covers: Anthropic, OpenRouter, LiteLLM, Gemini, Ollama (exact), Copilot (estimated).
+Canonical schema and confidence policy defined. Implementation children #769-#774 created.
+Total wiki pages now: 66.

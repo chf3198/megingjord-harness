@@ -5,11 +5,8 @@ function dashboardApp() {
     devices: [], services: [], quotas: [], liveQuotas: [],
     fleetStats: {}, routerStats: {},
     config: { refreshSec: 5, highContrast: false },
-    currentView: 'live', helpDevMode: false,
-    batonState: [],
-    ticketLog: [],
-    activityLog: [],
-    governanceState: {},
+    currentView: 'live', helpDevMode: false, agentSessions: [],
+    batonState: [], ticketLog: [], activityLog: [], governanceState: {},
     wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
     githubData: null,
     fleetHealthLog: [], costData: [],
@@ -67,7 +64,9 @@ function dashboardApp() {
         this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
-        this.costData = await fetchCostTelemetry(); this.lastRefresh = new Date().toLocaleTimeString();
+        if (typeof fetchCostTelemetry === 'function') this.costData = await fetchCostTelemetry();
+        if (typeof fetchAgentSessions === 'function') this.agentSessions = await fetchAgentSessions();
+        this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
         this.loading = false;
       }

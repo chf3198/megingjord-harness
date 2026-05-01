@@ -76,8 +76,8 @@ The LLM updates this on every ingest operation.
 - [[nodejs-install-patterns]] — Node.js Install Patterns
 - [[nodejs-project-organization]] — Node.js Project Organization
 - [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization & Alternatives (2026)
-
 - [[drift-monitoring-strategy-2026-05-01]] — Drift Monitoring Strategy 2026-05-01
+- [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
 
 ## Syntheses
 
@@ -86,15 +86,16 @@ The LLM updates this on every ingest operation.
 - [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack
 - [[global-readability-governance-harness]] — Global Readability Governance Harness
 - [[llm-wiki-state-2026]] — LLM Wiki Critical Analysis & 2026 Best Practices
+- [[token-telemetry-unified-design-2026]] — Unified Token Telemetry Design (2026)
 
 ## Recent Additions
 
-- [[llm-wiki-state-2026]] — LLM Wiki Critical Analysis & 2026 Best Practices (2026-04-30)
-- [[global-readability-governance-harness]] — Global Readability Governance Harness (2026-04-29)
+- [[token-telemetry-unified-design-2026]] — Unified Token Telemetry Design (2026-05-01)
+- [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
 - [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack (2026-04-29)
 - [[readability-commenting-toolchain-2026-04-29]] — Readability & Commenting Toolchain Research (2026-04-29)
 - [[sandbox-worktree-governance-2026-04-29]] — Sandbox Worktree Governance Pack Source (2026-04-29)
 
 ---
 
-**Pages**: 64 | **Last updated**: 2026-05-01
+**Pages**: 66 | **Last updated**: 2026-05-01
