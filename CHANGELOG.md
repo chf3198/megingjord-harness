@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — HTTP Handler Sync-Call Guard (#723)
+
+### Added
+- `scripts/global/no-sync-http-handlers.js`: fails when `execSync` or `spawnSync` appears in dashboard HTTP handler files.
+- `package.json`: added `governance:no-sync-http` script.
+
+### Changed
+- `.github/workflows/quality-gates.yml`: now runs `npm run governance:no-sync-http` as a required quality gate.
+
 ## [Unreleased] — Docs Drift Detector and CI Gate (#722)
 
 ### Added

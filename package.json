@@ -45,6 +45,7 @@
     "governance:drift": "node scripts/global/governance-drift-classifier.js --json",
     "governance:epics": "node scripts/global/epic-close-validator.js",
     "governance:epic": "node scripts/global/epic-evidence.js",
+    "governance:no-sync-http": "node scripts/global/no-sync-http-handlers.js",
     "governance:reconcile": "node scripts/global/ticket-reconcile.js --json",
     "governance:verify": "node scripts/global/governance-verify.js --json",
     "governance:worktrees": "node scripts/global/worktree-governance-audit.js --json",
