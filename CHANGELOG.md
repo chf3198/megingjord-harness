@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — Architecture Documentation Library (#727)
+
+### Added
+- `docs/ARCHITECTURE.md`: system data-flow map and subsystem index (routing, governance, wiki, dashboard, fleet) with file pointers to canonical sources.
+- `docs/HELP-GUIDELINES.md`: HELP panel UX patterns — section-id taxonomy (`start-*`, `use-*`, `trouble-*`, `dev-*`), body HTML conventions, file-size discipline, wikilink rules.
+- `docs/DECISIONS.md`: index for the 11 ADRs in `research/adr/` (canonical store) with how-to-add-a-new-ADR guidance.
+
 ## [Unreleased] — HTTP Handler Sync-Call Guard (#723)
 
 ### Added
