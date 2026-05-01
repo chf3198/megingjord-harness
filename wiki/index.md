@@ -94,8 +94,9 @@ The LLM updates this on every ingest operation.
 - [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
 - [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack (2026-04-29)
 - [[readability-commenting-toolchain-2026-04-29]] — Readability & Commenting Toolchain Research (2026-04-29)
+- [[multi-agent-dashboard-design-2026-05-01]] — Multi-Agent Dashboard Design Decisions (Epic #742, 2026-05-01)
 - [[sandbox-worktree-governance-2026-04-29]] — Sandbox Worktree Governance Pack Source (2026-04-29)
 
 ---
 
-**Pages**: 66 | **Last updated**: 2026-05-01
+**Pages**: 67 | **Last updated**: 2026-05-01
