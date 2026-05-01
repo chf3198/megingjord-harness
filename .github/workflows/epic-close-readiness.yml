@@ -1,0 +1,78 @@
+name: Epic Close-Readiness Gate
+# Warns and re-opens an epic if closed while children are still open.
+# Implements #452 AC1-AC3: detect, warn, re-open.
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  epic-close-readiness:
+    name: epic-close-readiness
+    runs-on: ubuntu-latest
+    # Only run for type:epic issues
+    if: >
+      contains(
+        toJson(github.event.issue.labels.*.name),
+        'type:epic'
+      )
+    steps:
+      - name: Check for open children and warn
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const epicNum = context.issue.number;
+            const { owner, repo } = context.repo;
+
+            // Search for open issues/PRs referencing this epic
+            const query =
+              `repo:${owner}/${repo} is:issue is:open ` +
+              `"#${epicNum}" in:body`;
+            const result = await github.rest.search.issuesAndPullRequests({
+              q: query, per_page: 50
+            });
+
+            // Filter to only those that reference this epic
+            const patterns = [
+              new RegExp(`[Cc]loses\\s+#${epicNum}\\b`),
+              new RegExp(`[Rr]efs\\s+#${epicNum}\\b`),
+              new RegExp(`[Pp]arent:\\s*#${epicNum}\\b`),
+              new RegExp(`[Ee]pic\\s+#${epicNum}\\b`),
+            ];
+            const openChildren = result.data.items.filter(i =>
+              i.number !== epicNum &&
+              patterns.some(p => p.test(i.body || ''))
+            );
+
+            if (openChildren.length === 0) {
+              console.log('No open children detected. Epic close is clean.');
+              return;
+            }
+
+            // Build warning comment
+            const list = openChildren
+              .map(i => `- #${i.number}: ${i.title}`)
+              .join('\n');
+            const body =
+              `## Epic Close-Readiness Violation\n\n` +
+              `This epic was closed while the following child issues are still open:\n\n` +
+              `${list}\n\n` +
+              `Resolve or explicitly close all children before closing the epic.\n\n` +
+              `_Auto-reopened by Epic Close-Readiness Gate._`;
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: epicNum, body
+            });
+
+            await github.rest.issues.update({
+              owner, repo, issue_number: epicNum, state: 'open'
+            });
+
+            core.setFailed(
+              `Epic #${epicNum} re-opened: ${openChildren.length} child(ren) still open.`
+            );
