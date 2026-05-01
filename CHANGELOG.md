@@ -1,12 +1,11 @@
 # Changelog
 
-## [Unreleased] — Layer 4 Local SQLite WAL Coordination (#739)
+## [Unreleased] — Layer 1+5 VS Code Profiles + Assignee Guard (#737)
 
 ### Added
-- `scripts/global/agent-coord-local.js`: always-on default coordination primitive at `<repo>/.dashboard/agent-state.sqlite`. TTL-bounded leases (acquireLease / releaseLease) and per-agent heartbeats (heartbeat / listActiveAgents) using `better-sqlite3` in WAL mode. API surface mirrors what Layer 3 (#740 Cloudflare Worker) will implement.
-- `tests/agent-coord-local.spec.js`: 5 Playwright tests covering lease acquisition blocking, TTL expiry, release, heartbeat tracking, and stale-agent exclusion.
-- `package.json`: `better-sqlite3` dependency; `agent:coord:status` script.
-- `.gitignore`: `.dashboard/agent-state.sqlite*`, `.harness/worktrees/`, `.claude/worktrees/`.
+- `templates/vscode-profiles/{claude,codex,copilot,continue}.code-profile.json`: per-vendor VS Code profile templates pinning extension set + `megingjord.agent.vendor` + worktree path.
+- `scripts/global/agent-assignee-guard.js`: GitHub-issue-assignee = ticket-ownership truth check; exits 0 if vendor matches assignee, 2 if mismatch.
+- `package.json`: `agent:assignee-guard` script.
 
 ## [Unreleased] — Drift Monitoring Strategy Research (#726)
 

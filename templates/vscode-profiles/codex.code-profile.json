@@ -1,0 +1,30 @@
+{
+  "$schema": "vscode://schemas/profile-template",
+  "name": "Megingjord — Codex",
+  "id": "megingjord-codex",
+  "extensions": [
+    {
+      "identifier": { "id": "openai.codex" },
+      "displayName": "OpenAI Codex"
+    },
+    {
+      "identifier": { "id": "github.vscode-pull-request-github" },
+      "displayName": "GitHub Pull Requests"
+    }
+  ],
+  "settings": {
+    "telemetry.telemetryLevel": "off",
+    "files.autoSave": "off",
+    "git.confirmSync": true,
+    "megingjord.agent.vendor": "codex",
+    "megingjord.agent.worktree": ".harness/worktrees/codex"
+  },
+  "_meta": {
+    "purpose": "VS Code Profile for the OpenAI Codex session in a Megingjord multi-agent command center setup. Layer 1 of #736; Tier-B priority extension.",
+    "vendor": "codex",
+    "worktree_convention": ".harness/worktrees/codex/ — harness-managed via 'npm run agent:worktree -- codex' (#738)",
+    "codex_profile": "Bind cwd to the worktree; use sandbox_mode=workspace-write + approval_policy=on-request",
+    "tier": "B",
+    "ref_adr": "research/adr/012-multi-agent-worktree-governance.md"
+  }
+}
