@@ -6,6 +6,7 @@
 - `scripts/global/tier-c-guard.js`: detects Aider auto-commit signatures (last 5 commits) and Cline/Roo workspace markers (`.clinerules/`, `.roo/`); blocks Aider auto-commit on `main`, `master`, `release/*`, `hotfix/*` branches; warning-only on feature branches; `MEGINGJORD_ALLOW_TIER_C=1` override available.
 - `package.json`: `agent:tier-c` script.
 
+## [Unreleased] — Drift Monitoring Strategy Research
 
 ### Added
 - `research/drift-monitoring-strategy-2026-05-01.md`: decision matrix and recommendation for install-agnostic stale-instruction drift monitoring.
