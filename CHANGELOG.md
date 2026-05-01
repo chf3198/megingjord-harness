@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — HELP Wikilinks and help:topic CLI (#718)
+
+### Added
+- `dashboard/js/help-content.js`: `renderWikiLinks(body)` transforms `[[page-name]]` patterns in help section bodies into Alpine-wired anchor tags that switch the dashboard to Wiki view.
+- `scripts/help-topic.js`: CLI script; `npm run help:topic -- <term>` searches the local LLM wiki and prints results to stdout.
+- `package.json`: added `help:topic` script.
+
+### Changed
+- `dashboard/js/help-user.js`: five help sections (baton, context-flow, governance, ticket-log, devices) now include a "Learn more: [[wiki-page]]" wikilink.
+- `dashboard/js/help-dev.js`: three developer sections (architecture, contributing, skills) now include wikilinks.
+
 ## [Unreleased] — Release Smoke Governance Wiring (#719)
 
 ### Changed
