@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — Layer 1+5 VS Code Profiles + Assignee Guard (#737)
+
+### Added
+- `templates/vscode-profiles/{claude,codex,copilot,continue}.code-profile.json`: per-vendor VS Code profile templates pinning extension set + `megingjord.agent.vendor` + worktree path.
+- `scripts/global/agent-assignee-guard.js`: GitHub-issue-assignee = ticket-ownership truth check; exits 0 if vendor matches assignee, 2 if mismatch.
+- `package.json`: `agent:assignee-guard` script.
+
 ## [Unreleased] — Layer 2 Multi-Agent Worktree Convention (#738)
 
 ### Added

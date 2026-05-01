@@ -1,0 +1,34 @@
+{
+  "$schema": "vscode://schemas/profile-template",
+  "name": "Megingjord — Copilot",
+  "id": "megingjord-copilot",
+  "extensions": [
+    {
+      "identifier": { "id": "github.copilot" },
+      "displayName": "GitHub Copilot"
+    },
+    {
+      "identifier": { "id": "github.copilot-chat" },
+      "displayName": "GitHub Copilot Chat"
+    },
+    {
+      "identifier": { "id": "github.vscode-pull-request-github" },
+      "displayName": "GitHub Pull Requests"
+    }
+  ],
+  "settings": {
+    "telemetry.telemetryLevel": "off",
+    "files.autoSave": "off",
+    "git.confirmSync": true,
+    "megingjord.agent.vendor": "copilot",
+    "megingjord.agent.worktree": ".harness/worktrees/copilot"
+  },
+  "_meta": {
+    "purpose": "VS Code Profile for the GitHub Copilot Chat agent-mode session in a Megingjord multi-agent command center setup. Layer 1 of #736.",
+    "vendor": "copilot",
+    "worktree_convention": ".harness/worktrees/copilot/ — harness-managed via 'npm run agent:worktree -- copilot' (#738)",
+    "limitation": "Copilot Chat has no documented sub-directory pin; worktree isolation is achieved by opening a separate VS Code window rooted at the worktree path.",
+    "tier": "A",
+    "ref_adr": "research/adr/012-multi-agent-worktree-governance.md"
+  }
+}

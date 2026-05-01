@@ -51,4 +51,5 @@ jobs:
           tests/google-quality.spec.js
           tests/no-network-errors.spec.js
           tests/api-smoke.spec.js
+          tests/api-smoke-load.spec.js
           --reporter=line
