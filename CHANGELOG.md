@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Drift Monitoring Strategy Research (#726)
+
+### Added
+- `research/drift-monitoring-strategy-2026-05-01.md`: decision matrix and recommendation for install-agnostic stale-instruction drift monitoring.
+- `raw/articles/drift-monitoring-strategy-2026-05-01.md`: ingest source artifact for wiki capture.
+- `wiki/sources/drift-monitoring-strategy-2026-05-01.md`: generated wiki source summary from ingest pipeline.
+
+### Changed
+- `wiki/index.md`: indexed the new drift-monitoring strategy source page.
+- `wiki/log.md`: recorded ingest event for drift-monitoring strategy research.
+
 ## [Unreleased] — Architecture Documentation Library (#727)
 
 ### Added

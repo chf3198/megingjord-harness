@@ -77,6 +77,8 @@ The LLM updates this on every ingest operation.
 - [[nodejs-project-organization]] — Node.js Project Organization
 - [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization & Alternatives (2026)
 
+- [[drift-monitoring-strategy-2026-05-01]] — Drift Monitoring Strategy 2026-05-01
+
 ## Syntheses
 
 - [[devenv-ops-enforcement-architecture]] — DevEnv Ops Enforcement Architecture
@@ -95,4 +97,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 65 | **Last updated**: 2026-04-30
+**Pages**: 64 | **Last updated**: 2026-05-01

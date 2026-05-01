@@ -130,3 +130,5 @@ typed wikilinks, frontmatter-only session map). Total wiki pages now: 65.
 Added `infra-automation` routing branch: devenv-ops sessions now inject fleet routing
 order (from model-routing concept) and governance enforcement layers (from governance-
 enforcement concept). Max snippets raised from 4 to 5. Synced to both runtimes.
+
+## [2026-05-01] ingest | Drift Monitoring Strategy 2026-05-01
