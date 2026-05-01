@@ -29,3 +29,8 @@ raw/**/*.epub
 Thumbs.db
 logs/
 logs/copilot-usage.json
+
+# Multi-agent coordination (#739) and worktree governance (#738)
+.dashboard/agent-state.sqlite*
+.harness/worktrees/
+.claude/worktrees/

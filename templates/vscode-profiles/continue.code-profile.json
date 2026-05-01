@@ -1,0 +1,30 @@
+{
+  "$schema": "vscode://schemas/profile-template",
+  "name": "Megingjord — Continue",
+  "id": "megingjord-continue",
+  "extensions": [
+    {
+      "identifier": { "id": "continue.continue" },
+      "displayName": "Continue.dev"
+    },
+    {
+      "identifier": { "id": "github.vscode-pull-request-github" },
+      "displayName": "GitHub Pull Requests"
+    }
+  ],
+  "settings": {
+    "telemetry.telemetryLevel": "off",
+    "files.autoSave": "off",
+    "git.confirmSync": true,
+    "megingjord.agent.vendor": "continue",
+    "megingjord.agent.worktree": ".harness/worktrees/continue"
+  },
+  "_meta": {
+    "purpose": "VS Code Profile for the Continue.dev agent-mode session in a Megingjord multi-agent command center setup. Layer 1 of #736.",
+    "vendor": "continue",
+    "worktree_convention": ".harness/worktrees/continue/ — harness-managed via 'npm run agent:worktree -- continue' (#738)",
+    "limitation": "Continue follows the IDE workspace root; isolation requires opening VS Code rooted at the worktree path. Pin to v1.0.20+ to avoid LanceDB index races.",
+    "tier": "A",
+    "ref_adr": "research/adr/012-multi-agent-worktree-governance.md"
+  }
+}

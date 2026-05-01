@@ -1,0 +1,29 @@
+{
+  "$schema": "vscode://schemas/profile-template",
+  "name": "Megingjord — Claude",
+  "id": "megingjord-claude",
+  "extensions": [
+    {
+      "identifier": { "id": "anthropic.claude-code" },
+      "displayName": "Claude Code"
+    },
+    {
+      "identifier": { "id": "github.vscode-pull-request-github" },
+      "displayName": "GitHub Pull Requests"
+    }
+  ],
+  "settings": {
+    "telemetry.telemetryLevel": "off",
+    "files.autoSave": "off",
+    "git.confirmSync": true,
+    "megingjord.agent.vendor": "claude",
+    "megingjord.agent.worktree": ".claude/worktrees"
+  },
+  "_meta": {
+    "purpose": "VS Code Profile for the Claude Code session in a Megingjord multi-agent command center setup. Layer 1 of #736.",
+    "vendor": "claude",
+    "worktree_convention": ".claude/worktrees/<session-id>/ (managed by Anthropic — auto-created, no opt-out per issue #50109)",
+    "tier": "A",
+    "ref_adr": "research/adr/012-multi-agent-worktree-governance.md"
+  }
+}
