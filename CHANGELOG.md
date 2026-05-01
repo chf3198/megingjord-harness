@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — Epic Close-Readiness Gate (#452)
+
+### Added
+- `.github/workflows/epic-close-readiness.yml`: detects when a `type:epic` issue is closed while child issues referencing it remain open; posts a violation comment listing open children and re-opens the epic automatically.
+
 ## [Unreleased] — Governance Integrity Automation Hardening (#657)
 
 ### Added
