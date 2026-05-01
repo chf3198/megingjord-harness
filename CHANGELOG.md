@@ -1,18 +1,16 @@
 # Changelog
 
-## [Unreleased] — Layer 1+5 VS Code Profiles + Assignee Guard (#737)
+## [Unreleased] — Tier-C Protection Detector (#741)
 
 ### Added
-- `templates/vscode-profiles/{claude,codex,copilot,continue}.code-profile.json`: per-vendor VS Code profile templates pinning extension set + `megingjord.agent.vendor` + worktree path.
-- `scripts/global/agent-assignee-guard.js`: GitHub-issue-assignee = ticket-ownership truth check; exits 0 if vendor matches assignee, 2 if mismatch.
-- `package.json`: `agent:assignee-guard` script.
+- `scripts/global/tier-c-guard.js`: detects Aider auto-commit signatures (last 5 commits) and Cline/Roo workspace markers (`.clinerules/`, `.roo/`); blocks Aider auto-commit on `main`, `master`, `release/*`, `hotfix/*` branches; warning-only on feature branches; `MEGINGJORD_ALLOW_TIER_C=1` override available.
+- `package.json`: `agent:tier-c` script.
 
-## [Unreleased] — Layer 2 Multi-Agent Worktree Convention (#738)
+## [Unreleased] — Tier-C Protection Detector (#741)
 
 ### Added
-- `scripts/agent-worktree.sh`: idempotently creates `<repo>/.harness/worktrees/<vendor>/` for codex/copilot/continue/cursor.
-- `research/adr/012-multi-agent-worktree-governance.md`: ADR documenting per-vendor worktree path discipline (composes with Anthropic's `.claude/worktrees/` rather than overriding).
-- `package.json`: `agent:worktree` script.
+- `scripts/global/tier-c-guard.js`: detects Aider auto-commit signatures (last 5 commits) and Cline/Roo workspace markers (`.clinerules/`, `.roo/`); blocks Aider auto-commit on `main`, `master`, `release/*`, `hotfix/*` branches; warning-only on feature branches; `MEGINGJORD_ALLOW_TIER_C=1` override available.
+- `package.json`: `agent:tier-c` script.
 
 ## [Unreleased] — Drift Monitoring Strategy Research (#726)
 
