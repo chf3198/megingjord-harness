@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — Governance Integrity Automation Hardening (#657)
+
+### Added
+- `.github/workflows/lint.yml`: added `Ticket reconciliation` step and `issues:read` permission for PR/merge-group governance validation.
+- `scripts/global/ticket-reconcile.js`: detects local `tickets/*.md` files without matching GitHub issues and fails when drift exists.
+- `package.json`: added `governance:reconcile` script.
+
+### Changed
+- `.github/workflows/label-lint.yml`: auto-reopens issues closed without terminal status labels, strips `role:*` labels on close, and enforces exactly one `lane:*` label at `status:ready`.
+- `.github/workflows/baton-gates.yml`: lightweight lanes (`lane:docs-research`, `lane:docs-only`, `lane:trivial`) skip collaborator/admin artifact requirements.
+- `.github/workflows/evidence-completeness.yml`: lightweight lanes skip collaborator timing enforcement.
+- `.github/workflows/label-scan.yml`: corrected pinned `actions/github-script` digest.
+
 ## [Unreleased] — Wiki Section Popularity Auto-Record (#328)
 
 ### Fixed — Wiki Health Metrics
