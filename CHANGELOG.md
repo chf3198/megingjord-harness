@@ -5,6 +5,7 @@
 ### Added
 - `.github/workflows/lint.yml`: added `Ticket reconciliation` step and `issues:read` permission for PR/merge-group governance validation.
 - `scripts/global/ticket-reconcile.js`: detects local `tickets/*.md` files without matching GitHub issues and fails when drift exists.
+- `scripts/global/ticket-reconcile-baseline.json`: baseline allowlist for known historical ticket-ID gaps so only net-new drift fails CI.
 - `package.json`: added `governance:reconcile` script.
 
 ### Changed

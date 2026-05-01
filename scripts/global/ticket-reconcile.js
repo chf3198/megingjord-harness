@@ -6,6 +6,7 @@ const path = require('path');
 const asJson = process.argv.includes('--json');
 const root = path.resolve(__dirname, '..', '..');
 const ticketsDir = path.join(root, 'tickets');
+const baselineFile = path.join(__dirname, 'ticket-reconcile-baseline.json');
 
 function readLocalTicketIds() {
   return fs.readdirSync(ticketsDir)
@@ -44,7 +45,13 @@ async function readRemoteIssueIds() {
 async function main() {
   const localIds = readLocalTicketIds();
   const remoteIds = await readRemoteIssueIds();
-  const missing = remoteIds.size ? localIds.filter(id => !remoteIds.has(id)) : [];
+  const baseline = fs.existsSync(baselineFile)
+    ? JSON.parse(fs.readFileSync(baselineFile, 'utf8')).missingTickets || []
+    : [];
+  const baselineSet = new Set(baseline);
+  const missing = remoteIds.size
+    ? localIds.filter(id => !remoteIds.has(id) && !baselineSet.has(id))
+    : [];
   const result = {
     checked: localIds.length,
     missingCount: missing.length,
