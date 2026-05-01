@@ -59,6 +59,7 @@
     "wiki:search": "node scripts/wiki/search.js",
     "help:topic": "node scripts/help-topic.js",
     "docs:lint": "node scripts/docs-lint.js",
+    "agent:coord:status": "node scripts/global/agent-coord-local.js status",
     "validate:triage": "node scripts/validate-plugin-triage.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "test": "npx playwright test",
@@ -88,6 +89,7 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
+    "better-sqlite3": "^12.9.0",
     "dotenv": "^17.4.1"
   }
 }

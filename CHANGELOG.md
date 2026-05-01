@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — Layer 4 Local SQLite WAL Coordination (#739)
+
+### Added
+- `scripts/global/agent-coord-local.js`: always-on default coordination primitive at `<repo>/.dashboard/agent-state.sqlite`. TTL-bounded leases (acquireLease / releaseLease) and per-agent heartbeats (heartbeat / listActiveAgents) using `better-sqlite3` in WAL mode. API surface mirrors what Layer 3 (#740 Cloudflare Worker) will implement.
+- `tests/agent-coord-local.spec.js`: 5 Playwright tests covering lease acquisition blocking, TTL expiry, release, heartbeat tracking, and stale-agent exclusion.
+- `package.json`: `better-sqlite3` dependency; `agent:coord:status` script.
+- `.gitignore`: `.dashboard/agent-state.sqlite*`, `.harness/worktrees/`, `.claude/worktrees/`.
+
 ## [Unreleased] — Drift Monitoring Strategy Research (#726)
 
 ### Added
