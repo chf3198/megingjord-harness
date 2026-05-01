@@ -1,0 +1,42 @@
+name: Docs Lint
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'dashboard/js/help-*.js'
+      - 'instructions/**'
+      - 'scripts/**'
+      - 'package.json'
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/js/help-*.js'
+      - 'instructions/**'
+      - 'scripts/**'
+      - 'package.json'
+
+concurrency:
+  group: docs-lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  docs_lint:
+    name: docs-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Sync wiki cache
+        run: |
+          mkdir -p "$HOME/.copilot/wiki/concepts" "$HOME/.copilot/wiki/entities"
+          if [ -d wiki/concepts ]; then cp -r wiki/concepts/* "$HOME/.copilot/wiki/concepts/" 2>/dev/null || true; fi
+          if [ -d wiki/entities ]; then cp -r wiki/entities/* "$HOME/.copilot/wiki/entities/" 2>/dev/null || true; fi
+      - name: Run docs:lint
+        run: node scripts/docs-lint.js

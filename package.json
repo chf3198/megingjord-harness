@@ -57,6 +57,7 @@
     "wiki:anneal": "node scripts/wiki/anneal.js",
     "wiki:search": "node scripts/wiki/search.js",
     "help:topic": "node scripts/help-topic.js",
+    "docs:lint": "node scripts/docs-lint.js",
     "validate:triage": "node scripts/validate-plugin-triage.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "test": "npx playwright test",
