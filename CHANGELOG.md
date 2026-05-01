@@ -14,6 +14,17 @@
 - `.github/workflows/evidence-completeness.yml`: lightweight lanes skip collaborator timing enforcement.
 - `.github/workflows/label-scan.yml`: corrected pinned `actions/github-script` digest.
 
+## [Unreleased] — Context Flow Event-Animation CSS Classes (#706)
+
+### Added — Context Flow Animations Foundation
+- `dashboard/css/context.css`: `@keyframes cf-pulse` (3s ease-out drop-shadow pulse), `.cf-active` (event-triggered animation class), and `.cf-idle` (dim to opacity 0.35); prerequisite for SSE-driven event-wiring module (#707)
+
+## [Unreleased] — Fleet Benchmarks + OpenClaw Model Inventory (#338)
+
+### Added — Fleet Resource Documentation
+- `model-compare/design-analysis/LLM-EVALUATION-MATRIX.md`: new `qwen2.5-coder:7b` row with live benchmark data (1.3 TPS CPU, empirical score 7.0); `phi3:mini` and `mistral:latest` marked `⚠ not installed`
+- `wiki/entities/openclaw.md`: updated models-available section with live benchmarks; added CPU-only performance constraints; documented `qwen2.5-coder:7b` cold-start behavior
+
 ## [Unreleased] — Wiki Section Popularity Auto-Record (#328)
 
 ### Fixed — Wiki Health Metrics
