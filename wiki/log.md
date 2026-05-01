@@ -137,6 +137,11 @@ enforcement concept). Max snippets raised from 4 to 5. Synced to both runtimes.
 Manual ingest: research/fleet-hardware-optimization-2026-05-01.md → wiki/sources/fleet-hardware-optimization-2026-05-01.md
 Cross-linked: 36gbwinresource, openclaw, penguin-1, fleet-architecture, cascade-dispatch, model-routing
 
+## [2026-05-01] ingest | Multi-Agent Dashboard Design (Epic #742)
+Cerebras llama3.1-8b design Q&A: CSS Grid auto-fill layout, N>3 overflow badge, browser-tab-only heartbeat, JSON schema {vendor,agentId,branch,ticket,activity,ts,tier}.
+Canonical files: research/multi-agent-dashboard-design-2026-05-01.md → wiki/sources/multi-agent-dashboard-design-2026-05-01.md
+Epic #742 closed. PR #777 merged. Version v3.3.0 tagged.
+
 ## [2026-05-01] ingest | Token Telemetry Capability Matrix (Epic #768 research gate)
 Evidence-backed provider capability matrix and unified design synthesis created.
 Covers: Anthropic, OpenRouter, LiteLLM, Gemini, Ollama (exact), Copilot (estimated).

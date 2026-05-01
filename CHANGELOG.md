@@ -1,3 +1,18 @@
+## [3.3.0] — 2026-05-01 — Multi-Agent Dashboard Overhaul (Epic #742)
+
+### Added
+- `dashboard/js/multi-agent-sessions.js`: Agent heartbeat polling (localStorage), CSS Grid auto-fill swim-lane rendering with vendor-prefixed color coding for copilot/claude/codex/cursor/cline.
+- `dashboard/js/tier-c-banner.js`: Tier-C limited-mode warning banner and ticket/branch conflict detection with `groupBy`/`conflictsFromGroup` helpers.
+- `dashboard/css/multi-agent.css`: CSS Grid swim-lane layout, vendor color borders, `+N more` overflow badge, conflict alert styling.
+- `🤖 Agents` nav tab and panel in `dashboard/index.html`.
+- `agentSessions` state and `fetchAgentSessions()` call integrated into `dashboard/js/app.js` `refreshAll()` cycle.
+- `research/multi-agent-dashboard-design-2026-05-01.md`: Design decisions Q1–Q4 sourced from Cerebras fleet AI.
+- Child ticket #776 created as implementation ticket under Epic #742.
+- PR #777 merged; all 14 CI gates passed.
+
+### Changed
+- `wiki/log.md`: Fixed MD012 double-blank-line at entry #140.
+
 # Changelog
 
 ## [Unreleased] — Layer 3 Cloudflare Worker Coordination (Optional, #740)
