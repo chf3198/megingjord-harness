@@ -1,6 +1,8 @@
 // Wiki Reader — browse real wiki pages from /api/wiki-pages
 
 let _wikiPagesCache = [];
+let _lastAutoRecord = 0;
+const AUTO_RECORD_INTERVAL_MS = 3600000;
 
 async function loadWikiPages() {
   try {
@@ -22,6 +24,11 @@ function renderWikiReader(pages) {
     const cat = p.type || 'unknown';
     if (!cats[cat]) cats[cat] = [];
     cats[cat].push(p);
+  }
+  const now = Date.now();
+  if (now - _lastAutoRecord > AUTO_RECORD_INTERVAL_MS) {
+    Object.keys(cats).forEach(c => typeof trackWikiAccess === 'function' && trackWikiAccess(c, ''));
+    _lastAutoRecord = now;
   }
   const typeLabel = {
     entities: '📦 Entities', concepts: '💡 Concepts',
