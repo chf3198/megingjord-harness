@@ -16,7 +16,7 @@ codebase, git history, packaged artifacts, and CI workflows.
 
 ### 1. Live File Scan
 Search for files containing potential secrets:
-- API keys: patterns like `sk-`, `ghp_`, `gho_`, `Bearer`, `token`, `secret`, `password`
+- API keys: patterns like `sk-`, `ghp_`, `gho_`, `Bearer `, `token`, `secret`, `password`
 - `.env` files with real values (not placeholders)
 - Private keys: `-----BEGIN`, `.pem`, `.key`, `id_rsa`, `id_ed25519`
 - Hard-coded credentials in source files
