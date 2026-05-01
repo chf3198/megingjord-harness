@@ -375,3 +375,4 @@ Megingjord better positions the harness as a **governance-first** AI agent orche
 - Agent names and activity tracking in baton panel
 
 **See [CHANGELOG-archive.md](CHANGELOG-archive.md) for versions 2.3.0 and earlier.**
+
