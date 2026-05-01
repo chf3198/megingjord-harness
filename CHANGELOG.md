@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Layer 3 Cloudflare Worker Coordination (Optional, #740)
+
+### Added
+- `cloudflare/worker.ts`: Worker entry routing requests to a per-fleet Durable Object instance.
+- `cloudflare/durable-object.ts`: `CoordinatorDurableObject` class implementing lease + heartbeat APIs that mirror the Layer 4 SQLite surface.
+- `cloudflare/wrangler.toml`: deploy config; no secrets committed.
+- `cloudflare/README.md`: deploy instructions; documented free-tier headroom.
+- `scripts/global/agent-coord-remote.js`: client wrapper that uses Cloudflare Worker if `CLOUDFLARE_WORKER_URL` is set, else falls back to Layer 4 with a "limited mode" banner.
+- `package.json`: `agent:coord:remote` script.
+
 ## [Unreleased] — Tier-C Protection Detector (#741)
 
 ### Added
