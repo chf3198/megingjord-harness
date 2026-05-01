@@ -1,0 +1,14 @@
+name = "megingjord-coord"
+main = "worker.ts"
+compatibility_date = "2026-04-01"
+
+[[durable_objects.bindings]]
+name = "COORDINATOR"
+class_name = "CoordinatorDurableObject"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["CoordinatorDurableObject"]
+
+[observability]
+enabled = true
