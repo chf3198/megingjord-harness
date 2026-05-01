@@ -46,6 +46,8 @@ jobs:
             if (labels.includes('type:epic')) {
               violations.push(`Issue #${linkedNum} is type:epic — PRs must link to child tickets, not epics`);
             }
+            const lightweight = ['lane:docs-research', 'lane:docs-only', 'lane:trivial'];
+            const requiresCollaborator = !labels.some(l => lightweight.includes(l));
 
             // 3. Branch-to-issue binding: N in branch name must equal N in Refs #N
             const branch = pr.head.ref;
@@ -60,7 +62,9 @@ jobs:
               issue_number: linkedNum, per_page: 100,
             });
             const handoff = comments.find(c => c.body.includes('COLLABORATOR_HANDOFF'));
-            if (!handoff) {
+            if (!requiresCollaborator) {
+              console.log(`Issue #${linkedNum}: lightweight lane; collaborator timing check skipped.`);
+            } else if (!handoff) {
               violations.push(`COLLABORATOR_HANDOFF not found on issue #${linkedNum}`);
             } else {
               const lagMs = prCreatedAt - new Date(handoff.created_at);

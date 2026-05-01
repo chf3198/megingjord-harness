@@ -24,8 +24,27 @@ jobs:
             const marker = '<!-- adr-010-label-lint -->';
             const issue = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
             const labels = issue.labels.map(label => label.name);
-            const statusLabels = labels.filter(l => l.startsWith('status:'));
-            const roleLabels   = labels.filter(l => l.startsWith('role:'));
+            const closeRoles = labels.filter(label => label.startsWith('role:'));
+            const hasTerminal = labels.includes('status:done') || labels.includes('status:cancelled');
+
+            if (issue.state === 'closed' && !hasTerminal) {
+              await github.rest.issues.update({ owner, repo, issue_number: issueNum, state: 'open' });
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issueNum,
+                body: '❌ Close blocked: add `status:done` or `status:cancelled` before closing this issue.',
+              });
+            }
+            if (issue.state === 'closed' && closeRoles.length > 0) {
+              for (const role of closeRoles) {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name: role }).catch(() => {});
+              }
+            }
+
+            const refreshed = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
+            const currentLabels = refreshed.labels.map(label => label.name);
+            const statusLabels = currentLabels.filter(l => l.startsWith('status:'));
+            const roleLabels   = currentLabels.filter(l => l.startsWith('role:'));
+            const laneLabels   = currentLabels.filter(l => l.startsWith('lane:'));
             const violations   = [];
             if (statusLabels.length === 0) {
               violations.push('**Rule 1**: No `status:` label found. Every issue must have exactly one.');
@@ -44,14 +63,17 @@ jobs:
             if (statusLabels.includes('status:triage') && !roleLabels.includes('role:manager')) {
               violations.push('**Rule 5**: `status:triage` issues must have `role:manager`. Epics always carry this label.');
             }
-            const areaLabels = labels.filter(l => l.startsWith('area:'));
+            const areaLabels = currentLabels.filter(l => l.startsWith('area:'));
             if (areaLabels.length === 0) {
               violations.push('**Rule 6**: No `area:` label found. Every issue must have exactly one `area:*` label (auto-label-area.yml applies it on open).');
             } else if (areaLabels.length > 1) {
               violations.push(`**Rule 6**: Multiple \`area:\` labels found: ${areaLabels.join(', ')}. Only one is allowed.`);
             }
-            if (issue.state === 'closed' && roleLabels.length > 0) {
+            if (refreshed.state === 'closed' && roleLabels.length > 0) {
               violations.push(`**Rule 7**: Closed issue must not retain \`role:\` labels. Remove: ${roleLabels.join(', ')}.`);
+            }
+            if (refreshed.state === 'closed' && !statusLabels.some(s => s === 'status:done' || s === 'status:cancelled')) {
+              violations.push('**Rule 7b**: Closed issue must include `status:done` or `status:cancelled`.');
             }
             const STATUS_ROLE_REQUIRED = {
               'status:in-progress': 'role:collaborator',
@@ -63,9 +85,12 @@ jobs:
                 violations.push(`**Rule 8**: \`${status}\` requires \`${required}\`. Add it.`);
               }
             }
-            const isEpic = labels.includes('type:epic');
+            const isEpic = currentLabels.includes('type:epic');
             if (isEpic && statusLabels.includes('status:ready')) {
               violations.push('**Rule 9**: Epics cannot be at `status:ready` — that status is for child tickets only.');
+            }
+            if (statusLabels.includes('status:ready') && laneLabels.length !== 1) {
+              violations.push('**Rule 10**: `status:ready` requires exactly one `lane:*` label.');
             }
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
@@ -87,7 +112,7 @@ jobs:
               '',
               violations.map(v => `- ${v}`).join('\n'),
               '',
-              '**Current labels**: ' + (labels.length ? labels.map(l => `\`${l}\``).join(', ') : '_none_'),
+              '**Current labels**: ' + (currentLabels.length ? currentLabels.map(l => `\`${l}\``).join(', ') : '_none_'),
               '',
               'See [ADR-010](../blob/main/research/adr/010-ticket-status-role-model.md) for the full status–role binding model.',
               '',
