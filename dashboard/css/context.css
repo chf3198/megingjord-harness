@@ -93,3 +93,8 @@
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 3px; padding: 0 0.2rem;
 }
+
+/* Context Flow event-driven animation classes (#706) */
+@keyframes cf-pulse { 0% { opacity:1; filter:drop-shadow(0 0 4px #60a5fa); } 100% { opacity:.5; filter:none; } }
+.cf-active { animation: cf-pulse 3s ease-out forwards; }
+.cf-idle   { opacity: 0.35; }
