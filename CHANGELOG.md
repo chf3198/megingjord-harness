@@ -100,6 +100,20 @@
 - `npm run capability:probe` and `npm run capability:show` scripts.
 - `.env.example`: optional Tier 0/2/3 env-var template.
 
+## [3.3.6] — 2026-05-02 — Copilot Estimated-Lane Telemetry + Caveat Reporting (#772)
+
+### Added
+- `research/token-copilot-estimated-lane-implementation-2026-05-02.md`: implementation note and validation evidence for estimated Copilot telemetry handling.
+
+### Changed
+- `scripts/global/token-provider-adapters.js`: added `copilot` adapter with `estimated` confidence and explicit caveat metadata.
+- `scripts/global/token-ledger-schema.js`: canonical records now include `caveat_code` and `caveat_detail` fields.
+- `scripts/global/model-routing-telemetry.js`: summary includes confidence distribution (`exact`, `estimated`, `other`).
+- `scripts/global/model-routing-weekly-report.js`: weekly output includes confidence split delta.
+- `scripts/global/cost-report.js`: report now prints exact-vs-estimated split and caveat note.
+- `scripts/copilot-tracker.js`: added `getCopilotEstimatedRecord()` for canonical estimated-lane projection.
+- `tests/token-provider-adapters.spec.js`, `tests/telemetry-schema.spec.js`, `tests/unit-modules.spec.js`: coverage for Copilot adapter and confidence/caveat semantics.
+
 ## [3.3.5] — 2026-05-02 — Paid-Token Floor Validation Evidence (#782)
 
 ### Added

@@ -38,6 +38,14 @@ function report() {
   console.log(`Premium share: ${(stats.premiumShare * 100).toFixed(1)}%`);
   console.log(`Avg multiplier: ${stats.avgMultiplier}`);
   console.log(`Success rate: ${(stats.successRate * 100).toFixed(1)}%`);
+  const conf = stats.confidenceDistribution || { exact: 0, estimated: 0, other: 0 };
+  console.log('\nConfidence split (exact vs estimated):');
+  console.log(`  exact: ${(conf.exact * 100).toFixed(1)}%`);
+  console.log(`  estimated: ${(conf.estimated * 100).toFixed(1)}%`);
+  console.log(`  other: ${(conf.other * 100).toFixed(1)}%`);
+  if (conf.estimated > 0) {
+    console.log('  caveat: estimated entries are non-exact and may include manual Copilot sync data.');
+  }
 
   if (stats.premiumShare > 0.2) {
     console.log(`\n⚠  Premium share ${(stats.premiumShare * 100).toFixed(0)}% exceeds 20% target.`);
