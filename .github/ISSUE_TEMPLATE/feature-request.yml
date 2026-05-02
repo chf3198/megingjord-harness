@@ -1,0 +1,53 @@
+name: Feature Request
+description: New capability or improvement
+labels: ["type:story", "status:backlog", "priority:P2"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Feature summary
+      description: One-line imperative description (≤72 chars).
+      placeholder: "Add fleet-utilization metric to dashboard health panel"
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: One sentence — what should this enable?
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What gap or pain does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: non_objectives
+    attributes:
+      label: Non-objectives
+      description: What is explicitly out of scope.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable statements that prove the feature works.
+      value: |
+        - [ ] AC1:
+        - [ ] AC2:
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Expected impact on users, maintainers, or operations.
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      value: |
+        - Files must remain ≤100 lines.
+        - No build step for dashboard changes.
