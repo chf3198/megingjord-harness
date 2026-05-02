@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Codebase Organization: Relocate Legacy Artifacts (#820)
+
+### Changed
+- `model-compare/` → `research/model-compare/` via `git mv`.
+- `NAMING_RESEARCH_2026.md` → `research/naming-2026.md` via `git mv`.
+- `scripts/ai-matrix-build-final.js`: MATRIX_PATH updated to new location.
+- `package.json` lint:md: dropped `!model-compare/**`, added `!tickets/**`.
+
+### Removed
+- `tickets/` (70 files): removed from index; GitHub Issues `#N` is canonical baton. Historical content remains in git log; `tickets/` added to `.gitignore`.
+
 ## [Unreleased] — Phase 6 Markdown Exec Block-Lint (#801)
 
 ### Added

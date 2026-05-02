@@ -85,7 +85,7 @@ npm run deploy:both:apply
 | `lint` | `node scripts/lint.js` |
 | `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md` |
 | `lint:js` | `eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki` |
-| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!model-compare/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md'` |
+| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
 | `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=400` |
