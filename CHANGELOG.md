@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Phase 6 Markdown Exec Block-Lint (#801)
+
+### Added
+- `scripts/global/docs-exec.js`: opt-in fenced-block runner for docs. Scans markdown for `<!-- exec: [timeout=Ns] -->` markers immediately preceded by ```sh/```bash blocks and executes them. Default behavior is **safe** — blocks without the marker are not executed (inverted from the original skip-tag design for safety).
+- `tests/docs-exec.spec.js`: 6 Playwright tests (no markers, marked-success, marked-failure, no-marker-no-run, per-block timeout, multi-file).
+- `.github/workflows/docs-exec.yml`: CI gate; runs in clean Ubuntu container.
+- `package.json`: `docs:exec` script.
+
+### Notes
+- Token-free, deterministic, exit-code-driven.
+- Default 30s timeout per block; override with `<!-- exec: timeout=Ns -->`.
+
 ## [Unreleased] — Phase 7 Diátaxis + Zensical Research (#802)
 
 ### Added
