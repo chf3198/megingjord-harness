@@ -16,7 +16,7 @@ const IGNORE = [
   'skills', 'hooks'
 ];
 
-const IGNORE_PATHS = ['scripts/global', 'instructions', 'research', 'docs/howto'];
+const IGNORE_PATHS = ['scripts/global', 'instructions', 'research', 'docs/howto', 'raw'];
 const IGNORE_FILES = [
   'CHANGELOG.md', 'CHANGELOG-archive.md',
   // Append-only / catalog files that grow by design
