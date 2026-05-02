@@ -1,3 +1,10 @@
+## [3.3.2] — 2026-05-01 — Provider Token Adapters (#771)
+
+### Added
+- `scripts/global/token-provider-adapters.js`: adapter layer for Anthropic, OpenRouter, LiteLLM, Gemini, and Ollama usage payloads into canonical token-ledger records.
+- `tests/token-provider-adapters.spec.js`: adapter unit tests covering each provider plus partial payload handling.
+- `research/provider-adapters-implementation-2026-05-01.md`: implementation note with mapping summary and downstream handoff.
+
 ## [3.3.1] — 2026-05-01 — Canonical Token Ledger Schema (#770)
 
 ### Added
