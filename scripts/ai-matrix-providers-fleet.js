@@ -15,22 +15,22 @@ const chat = (url, apiKey, model) => ({
 });
 
 // OpenClaw: Ollama on windows-laptop (Tailscale: 100.78.22.13:11434, bound 0.0.0.0)
-// No auth required. Models: mistral:latest, phi3:mini, qwen2.5:7b-instruct
+// No auth required. Models: qwen2.5-coder:1.5b, starcoder2:3b, qwen2.5-coder:7b
 const fleetProviders = {
-  openclaw_mistral: chat(
+  openclaw_small: chat(
     'http://100.78.22.13:11434/v1/chat/completions',
     'ollama',
-    'mistral:latest'
+    'qwen2.5-coder:1.5b'
   ),
-  openclaw_phi3: chat(
+  openclaw_fast: chat(
     'http://100.78.22.13:11434/v1/chat/completions',
     'ollama',
-    'phi3:mini'
+    'starcoder2:3b'
   ),
   openclaw_qwen: chat(
     'http://100.78.22.13:11434/v1/chat/completions',
     'ollama',
-    'qwen2.5:7b-instruct'
+    'qwen2.5-coder:7b'
   ),
 };
 

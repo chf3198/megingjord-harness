@@ -89,9 +89,9 @@
       "port": 4000,
       "runtime": "Python 3.12.10 + LiteLLM 1.83.4",
       "models": [
-        "ollama/mistral",
-        "ollama/phi3:mini",
-        "ollama/qwen2.5:7b-instruct"
+        "qwen2.5-coder-1.5b",
+        "starcoder2-3b",
+        "qwen2.5-coder-7b"
       ],
       "persistence": "LiteLLMServe scheduled task (SYSTEM, ONSTART)",
       "status": "active"

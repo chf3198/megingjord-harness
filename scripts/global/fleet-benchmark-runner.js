@@ -37,7 +37,11 @@ async function run(opts = {}) {
     const row = { id: d.id, host: d.host }; out.devices.push(row);
     try {
       const tags = await j('GET', `http://${d.host}:11434/api/tags`, null, 20000);
-      const model = tags.data.models?.[0]?.name; row.model = model || null;
+      const cfg = inv.devices.find((x) => x.id === d.id) || {};
+      const preferred = cfg.benchmarks?.model || cfg.recommendedModels?.[0]?.model;
+      const names = (tags.data.models || []).map((m) => m.name);
+      const model = names.includes(preferred) ? preferred : names[0];
+      row.model = model || null;
       if (!model) { row.error = { reason: 'no_model', message: 'no installed models' }; continue; }
       row.cold = await benchOnce(d.host, model, out.prompt, out.timeout_ms);
       row.warm = await benchOnce(d.host, model, out.prompt, out.timeout_ms);
