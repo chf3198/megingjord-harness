@@ -76,4 +76,12 @@ test.describe('Judge gate wiring — #512', () => {
     expect(src).toContain('judgeModel: jcfg.model');
     expect(src).toContain('judge_latency_ms: j.latency_ms');
   });
+
+  test('copilot-tracker exports estimated record with caveat', () => {
+    const { getCopilotEstimatedRecord } = require('../scripts/copilot-tracker.js');
+    const rec = getCopilotEstimatedRecord();
+    expect(rec.provider).toBe('copilot');
+    expect(rec.confidence_level).toBe('estimated');
+    expect(rec.caveat_code).toBe('copilot_estimated_lane');
+  });
 });

@@ -5,10 +5,17 @@ const path = require('path');
 const { normalizeTokenRecord } = require('./token-ledger-schema');
 
 const FILE = path.join(__dirname, '..', '..', 'logs', 'model-routing-telemetry.jsonl');
+const DAY_MS = 86400000;
 
 function ensureDir() { fs.mkdirSync(path.dirname(FILE), { recursive: true }); }
 
 const MAX_ENTRIES = 100;
+
+function pctMap(counts, sampleCount) {
+  return Object.fromEntries(
+    Object.entries(counts).map(([key, value]) => [key, +(value / sampleCount).toFixed(3)])
+  );
+}
 
 function recordTelemetry(entry) {
   ensureDir();
@@ -42,19 +49,26 @@ function recordTelemetry(entry) {
 
 function readTelemetry(days = 30) {
   if (!fs.existsSync(FILE)) return [];
-  const cutoff = Date.now() - days * 86400000;
+  const cutoff = Date.now() - days * DAY_MS;
   return fs.readFileSync(FILE, 'utf8').split('\n').filter(Boolean)
     .map(l => { try { return JSON.parse(l); } catch { return null; } })
     .filter(r => r && new Date(r.ts).getTime() >= cutoff);
 }
 
 function summarize(entries) {
-  const n = entries.length || 1;
+  const sampleCount = entries.length || 1;
   const byLane = { free: 0, fleet: 0, haiku: 0, premium: 0 };
+  const byConfidence = { exact: 0, estimated: 0, other: 0 };
   const escalations = { haiku: 0, premium: 0 };
-  entries.forEach(e => {
-    byLane[e.lane] = (byLane[e.lane] || 0) + 1;
-    if (e.escalation) escalations[e.escalation] = (escalations[e.escalation] || 0) + 1;
+  entries.forEach(entry => {
+    byLane[entry.lane] = (byLane[entry.lane] || 0) + 1;
+    const confidenceLevel = entry.confidence_level;
+    if (confidenceLevel && String(confidenceLevel).startsWith('exact')) byConfidence.exact += 1;
+    else if (confidenceLevel === 'estimated') byConfidence.estimated += 1;
+    else byConfidence.other += 1;
+    if (entry.escalation) {
+      escalations[entry.escalation] = (escalations[entry.escalation] || 0) + 1;
+    }
   });
   const premium = entries.filter(e => e.lane === 'premium').length;
   const ok = entries.filter(e => e.outcome === 'ok').length;
@@ -62,15 +76,14 @@ function summarize(entries) {
   const mult = entries.reduce((s, e) => s + (Number(e.multiplier) || 0), 0);
   return {
     samples: entries.length,
-    laneDistribution: Object.fromEntries(
-      Object.entries(byLane).map(([k, v]) => [k, +(v / n).toFixed(3)])
-    ),
+    laneDistribution: pctMap(byLane, sampleCount),
+    confidenceDistribution: pctMap(byConfidence, sampleCount),
     escalationCounts: escalations,
-    premiumShare: +(premium / n).toFixed(3),
-    successRate: +(ok / n).toFixed(3),
-    failRate: +((n - ok) / n).toFixed(3),
-    rollbackRate: +(rollback / n).toFixed(3),
-    avgMultiplier: +(mult / n).toFixed(3),
+    premiumShare: +(premium / sampleCount).toFixed(3),
+    successRate: +(ok / sampleCount).toFixed(3),
+    failRate: +((sampleCount - ok) / sampleCount).toFixed(3),
+    rollbackRate: +(rollback / sampleCount).toFixed(3),
+    avgMultiplier: +(mult / sampleCount).toFixed(3),
   };
 }
 
