@@ -50,7 +50,6 @@
 ### Changed
 - `wiki/log.md`: Fixed MD012 double-blank-line at entry #140.
 
-
 ## [Unreleased] — Layer 3 Cloudflare Worker Coordination (Optional, #740)
 
 ### Added
