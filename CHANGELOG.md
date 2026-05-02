@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Lockfile flip: commit package-lock.json (#830, ADR-017 Accepted)
+
+### Added
+- `package-lock.json` committed to the index (clean Node 22 / npm 11 regeneration). Restores reproducible installs and unblocks Dependabot npm-ecosystem PRs.
+- `.github/workflows/npm-lockfile-sync.yml`: CI runs `npm ci` on every PR / merge_group / main push touching `package.json` or `package-lock.json`. Fails when the lockfile diverges.
+
+### Changed
+- `.gitignore`: removed `package-lock.json` from Node section; added comment pointer to ADR-017.
+- `research/adr/017-package-lock-decision.md`: status Proposed → Accepted.
+- `docs/DECISIONS.md`: ADR-017 row dropped the "(Proposed)" suffix.
+- `scripts/lint.js`: `.worktrees` added to IGNORE for cross-team worktree compatibility.
+
 ## [Unreleased] — Codebase Organization: post-#820 broken-ref cleanup (#818)
 
 ### Changed

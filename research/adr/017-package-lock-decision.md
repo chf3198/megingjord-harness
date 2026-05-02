@@ -1,8 +1,11 @@
 # ADR-017: package-lock.json — Commit vs. Gitignore Decision
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-05-02
-**Ticket**: #822 (implementation child of Epic #818, scoped from #819 research)
+**Ticket**: #822 (ADR write); #830 (implementing PR — flip executed)
+**Implementing PR**: see PR linked from #830
+
+The status was flipped from Proposed → Accepted on 2026-05-02 when #830 executed the lockfile flip: `package-lock.json` is now committed, the `.gitignore` entry removed, and a new `npm-lockfile-sync.yml` CI workflow runs `npm ci` on every PR to keep the lockfile in sync.
 
 ## Context
 
