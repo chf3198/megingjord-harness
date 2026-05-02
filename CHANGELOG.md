@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] — Phase 5 Issue Forms Cleanup (#800)
+
+### Added
+- `.github/ISSUE_TEMPLATE/feature-request.yml`: YAML form replacing the legacy markdown template; preserves label pre-fill (`type:story`, `status:backlog`, `priority:P2`).
+
+### Removed
+- `.github/ISSUE_TEMPLATE/bug_report.md` (duplicate of existing `bug-report.yml`).
+- `.github/ISSUE_TEMPLATE/epic.md` (duplicate of existing `epic.yml`).
+- `.github/ISSUE_TEMPLATE/feature_request.md` (replaced by `feature-request.yml`).
+
+### Notes
+- `config.yml` retains `blank_issues_enabled: false` ✅ — verified.
+- Repo metadata sync workflow (originally part of #800 scope) intentionally **not** included: the live repo About + topics carry richer values than `package.json` keywords, and a push-triggered sync would regress that. A manual-dispatch sync can be added in a follow-up once `package.json` keywords reach parity with the curated repo topics.
+
 ## [Unreleased] — Phase 3 log4brains ADR Pipeline (#798)
 
 ### Added
