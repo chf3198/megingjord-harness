@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — Codebase Organization: post-#820 broken-ref cleanup (#818)
+
+### Changed
+- `.markdownlintignore`: `model-compare/` → `research/model-compare/` (path moved in #820).
+- `docs/howto/doc-update-trigger-matrix.md`: `model-compare/**` → `research/model-compare/**` (same).
+
+### Notes
+- Final-validation pass for Epic #818 caught two configuration files still referencing the old `model-compare/` path. Historical references in `CHANGELOG-archive.md` and earlier research/triage docs are intentionally preserved for historical accuracy.
+
 ## [Unreleased] — ADR-017: package-lock.json Commit vs. Gitignore (#822)
 
 ### Added
