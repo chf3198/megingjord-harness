@@ -1,12 +1,11 @@
 # Changelog
 
-## [Unreleased] — Phase 3 State Offload Client + Worker Tools (#785)
+## [Unreleased] — Phase 4 Free-Model Orchestrator (#786)
 
 ### Added
-- `scripts/global/state-offload-client.js`: client for cache-not-source-of-truth state offload. Reads `.dashboard/capabilities.json` to gate activation; falls back to `gh` CLI / git / events.jsonl on cache miss.
-- `cloudflare/state-tools.ts`: Worker endpoints for `/baton/:n`, `/assignee/:n`, `/branch/:repo`, `/activity/:since` with TTL staleness annotation.
-- `tests/state-offload-client.spec.js`: 5 Playwright tests.
-- `package.json`: `state:offload` script.
+- `scripts/global/free-router.js`: classifier+signal stack tier-routing logic; calls Groq llama-3.3-70b on uncertain cases; falls back to deterministic classifier when no free LLM available.
+- `tests/free-router.spec.js`: 7 Playwright tests covering classifier signals, capability gating, LLM fallback paths.
+- `package.json`: `router:free` script.
 
 ## [Unreleased] — Phase 0 Capability Probe + Manifest (#788)
 
