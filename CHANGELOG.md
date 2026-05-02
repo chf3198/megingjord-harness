@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Phase 7 Diátaxis + Zensical Research (#802)
+
+### Added
+- `research/diataxis-ia-audit-2026-05-02.md`: Diátaxis classification matrix.
+- `research/zensical-migration-plan-2026-05-02.md`: migration plan honoring verified runway facts.
+
 ## [Unreleased] — Phase 5 Issue Forms Cleanup (#800)
 
 ### Added
