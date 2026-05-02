@@ -147,3 +147,14 @@ Evidence-backed provider capability matrix and unified design synthesis created.
 Covers: Anthropic, OpenRouter, LiteLLM, Gemini, Ollama (exact), Copilot (estimated).
 Canonical schema and confidence policy defined. Implementation children #769-#774 created.
 Total wiki pages now: 66.
+
+## 2026-05-01 — Paid Token Floor Reduction #782 ingested
+Manual ingest: research/paid-token-floor-reduction-2026-05-01.md → wiki/sources/paid-token-floor-reduction-2026-05-01.md
+
+## [2026-05-01] ingest | Fleet Resource Audit + Hardware Optimization
+Live fleet audit + hardware optimization findings (post-IT pass 2026-05-01).
+Source files: raw/articles/fleet-resource-audit-2026-05-01.md, research/fleet-hardware-optimization-2026-05-01.md, research/multi-agent-command-center-round-2-2026-05-01.md.
+Wiki pages: wiki/sources/fleet-resource-audit-2026-05-01.md, wiki/sources/fleet-hardware-optimization-2026-05-01.md, wiki/sources/multi-agent-command-center-round-2-2026-05-01.md.
+
+## [2026-05-02] update | Fleet entities refreshed (#803)
+Updated wiki/entities/{36gbwinresource,openclaw,penguin-1}.md to reflect SYSTEM-service Ollama operating mode, current model lineups, and per-request keep_alive: "24h" pattern. Architecture map (docs/ARCHITECTURE.md) and DECISIONS index updated; WIKI.md and wiki-knowledge instruction now document the wiki:ingest pipeline; new docs/howto/contribute-to-wiki.md walks contributors through it.

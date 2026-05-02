@@ -50,28 +50,35 @@ status: stub | draft | mature
 
 ## Operations
 
-### Ingest
-1. Human places source in `raw/` with frontmatter
+| Operation | Command | Script |
+|---|---|---|
+| Ingest | `npm run wiki:ingest -- raw/articles/<file>.md` | `scripts/wiki/ingest.js` |
+| Lint | `npm run wiki:lint` | `scripts/wiki/lint.js` |
+| Anneal | `npm run wiki:anneal` | `scripts/wiki/anneal.js` |
+| Search | `npm run wiki:search -- "query"` | `scripts/wiki/search.js` |
+
+`wiki:search` is exposed globally as `node ~/.copilot/scripts/wiki-search.js` after deploy.
+
+### Ingest pipeline (raw/articles → wiki/sources → entities/concepts)
+
+`wiki:ingest` implements steps 3–6; 1–2 and 7 are judgment calls.
+
+1. Human places source in `raw/articles/<slug>.md` with `status: pending`
 2. LLM reads source, discusses key takeaways
 3. LLM writes `wiki/sources/<slug>.md` summary
-4. LLM updates entity/concept pages (create or revise)
-5. LLM updates `wiki/index.md` with new/changed pages
+4. LLM updates entity/concept pages
+5. LLM updates `wiki/index.md`
 6. LLM appends entry to `wiki/log.md`
-7. Mark raw source frontmatter `status: ingested`
+7. Mark raw source `status: ingested` and commit
 
-### Query
-1. LLM reads `wiki/index.md` to find relevant pages
-2. LLM reads those pages, synthesizes answer with `[[citations]]`
-3. Valuable answers get filed as `wiki/syntheses/<slug>.md`
+Walkthrough: `docs/howto/contribute-to-wiki.md`.
 
-### Lint
-1. Check for broken `[[wikilinks]]` (target page must exist)
-2. Check for orphan pages (no inbound links)
-3. Check frontmatter completeness (all required fields present)
-4. Check `wiki/index.md` is in sync with actual wiki/ contents
-5. Flag contradictions between pages
-6. Flag stale claims superseded by newer sources
-7. Output: health report with actionable items
+### Query and lint
+
+Query: LLM reads `wiki/index.md`, then drills into pages, synthesizes
+with `[[citations]]`; valuable answers get filed as syntheses. Lint
+checks broken wikilinks, orphans, frontmatter completeness, index
+drift, contradictions, and stale claims.
 
 ## Cross-Reference Rules
 
@@ -80,17 +87,14 @@ status: stub | draft | mature
 - Syntheses must cite ≥2 source/concept pages
 - Bidirectional: if A links to B, B should link back to A
 
-## Fleet Routing (for inference operations)
+## Fleet Routing (inference operations)
 
 | Operation | Primary | Failover |
 |---|---|---|
-| Ingest (summarize + cross-ref) | OpenClaw (7B) | Groq, Cerebras |
-| Query (synthesis) | OpenClaw (7B) | Copilot Pro |
-| Lint (structural checks) | Local scripts | Groq (fast) |
+| Ingest | OpenClaw (deepseek-coder-v2:lite) | Groq, Cerebras |
+| Query | OpenClaw | Copilot Pro |
+| Lint | Local scripts | Groq |
 
 ## Constraints
 
-- All wiki files ≤100 lines (split if needed)
-- Markdown only — no HTML, no binary files in wiki/
-- Git tracks everything — wiki/ is version-controlled
-- Raw sources are the source of truth; wiki is derived
+- Wiki files ≤100 lines; markdown only; git-tracked; raw sources are the source of truth, wiki is derived.

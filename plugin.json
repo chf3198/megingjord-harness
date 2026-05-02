@@ -1,7 +1,7 @@
 {
   "name": "megingjord-harness",
   "description": "Megingjord: Governance-first AI agent harness — skills, agents, hooks for structured development workflows",
-  "version": "3.2.0",
+  "version": "3.3.3",
   "author": "chf3198",
   "skills": [
     "skills/docs-drift-maintenance",

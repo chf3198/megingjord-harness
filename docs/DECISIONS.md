@@ -35,6 +35,8 @@ admin-tracked.
 | 009 | GitHub Feature Adoption | [`009-github-feature-adoption.md`](../research/adr/009-github-feature-adoption.md) |
 | 010 | Ticket Status–Role Ownership Binding Model | [`010-ticket-status-role-model.md`](../research/adr/010-ticket-status-role-model.md) |
 | 011 | Fleet Auto-Discovery Architecture | [`011-fleet-auto-discovery.md`](../research/adr/011-fleet-auto-discovery.md) |
+| 012 | Multi-Agent Worktree Path Governance | [`012-multi-agent-worktree-governance.md`](../research/adr/012-multi-agent-worktree-governance.md) |
+| 013 | Capability Detection Substrate for Optional Cost-Reduction Features | [`013-capability-detection-substrate.md`](../research/adr/013-capability-detection-substrate.md) |
 
 ## Known issues
 

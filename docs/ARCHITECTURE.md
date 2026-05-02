@@ -28,7 +28,15 @@ Codex                          policy.json          OR Cloud (Claude /        + 
 - `scripts/global/cascade-dispatch.js` — fleet-first cascade (Free → Fleet → Haiku → Premium)
 - `scripts/global/model-routing-policy.json` — capability matrix, lane order
 - `scripts/global/task-router-dispatch.js` — direct dispatch to a tier
+- `scripts/global/free-router.js` — free-model orchestrator MVP (#786): classifier + signal stack picks a tier, calls a free LLM (Groq) when available, falls back to deterministic cascade-dispatch
 - `agents/router.agent.md` — Routing role definition
+
+### Capability detection / cost-reduction (ADR-013)
+
+- `scripts/global/capability-probe.js` + `capability-show.js` — probe providers, fleet hosts, toolchain; write/read `.dashboard/capabilities.json`
+- `scripts/global/rag-search.js` (#784) — repo-context search; MCP-first with ripgrep fallback
+- `scripts/global/state-offload-client.js` (#792) — per-turn state offload to a Worker
+- Optional features gate on the capability manifest, so a missing provider or offline fleet host degrades gracefully
 
 ### Governance
 
@@ -54,9 +62,13 @@ Codex                          policy.json          OR Cloud (Claude /        + 
 
 ### Fleet
 
-- `inventory/devices.json` — Tailscale IPs, Ollama models, GPU/CPU class
+- `inventory/devices.json` — Tailscale IPs, Ollama models, GPU/CPU class (reconciliation tracked in #765)
 - `scripts/health-check.js` — fleet connectivity probe
-- Runtime targets: `36gbwinresource` (GPU 32 TPS), `OpenClaw` (CPU 7 TPS), `penguin-1` (micro)
+- `wiki/entities/{36gbwinresource,openclaw,penguin-1}.md` — per-device authoritative state
+- Runtime targets (post-2026-05-01 IT pass, SYSTEM-service Ollama):
+  - `36gbwinresource` — Win11 Pro, Quadro T2000 4 GB VRAM; starcoder2:3b at 95 TPS (full GPU), qwen2.5-coder:32b at 1.6 TPS (max-quality)
+  - `openclaw` — CPU-only Win10, 16 GB RAM; deepseek-coder-v2:lite at 8.4 TPS (16B MoE primary)
+  - `penguin-1` — ChromeOS LXC, ~880 MB free RAM; SLM utility role (qwen3:0.6b, gemma3:270m, nomic-embed-text, snowflake-arctic-embed:m)
 
 ## Data flows
 

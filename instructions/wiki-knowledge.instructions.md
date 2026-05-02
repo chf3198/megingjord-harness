@@ -12,11 +12,16 @@ Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governan
 
 | Operation | Where | Command |
 |---|---|---|
-| **Search** | Any repo | `node ~/.copilot/scripts/wiki-search.js "query"` |
+| **Search (compiled)** | Any repo | `node ~/.copilot/scripts/wiki-search.js "query"` |
 | **Read** | Any repo | Read `~/.copilot/wiki/index.md` then drill into pages |
+| **Search (source)** | Megingjord only | `npm run wiki:search -- "query"` |
 | **Ingest** | Megingjord only | `npm run wiki:ingest -- raw/articles/<file>.md` |
 | **Lint** | Megingjord only | `npm run wiki:lint` |
 | **Anneal** | Megingjord only | `npm run wiki:anneal` |
+
+End-to-end ingest pipeline (raw/articles → wiki/sources → entity/concept
+pages → index.md → log.md) is documented in `WIKI.md`; the
+contributor walkthrough is `docs/howto/contribute-to-wiki.md`.
 
 ## When to Use the Wiki
 
