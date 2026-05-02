@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — Phase 2 RAG Search MVP (#784)
+
+### Added
+- `scripts/global/rag-search.js`: repo-context search with MCP-first when capability manifest reports rag_server reachable, ripgrep-fallback otherwise. Returns top-k snippets with file path + line numbers.
+- `tests/rag-search.spec.js`: 6 Playwright tests covering capability gating, env-override priority, empty-query handling, ripgrep fallback.
+- `package.json`: `rag:search` script.
+- Full embeddings-backed MCP server deployment tracked as follow-up child.
+
 ## [Unreleased] — Phase 0 Capability Probe + Manifest (#788)
 
 ### Added
