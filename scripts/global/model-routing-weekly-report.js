@@ -4,10 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { readTelemetry, summarize } = require('./model-routing-telemetry');
 const { loadUsage } = require('../copilot-tracker');
+const DAY_MS = 86400000;
 
 function report() {
   const week = readTelemetry(7);
-  const prev = readTelemetry(14).filter(e => new Date(e.ts).getTime() < Date.now() - 7 * 86400000);
+  const prev = readTelemetry(14).filter(e => new Date(e.ts).getTime() < Date.now() - 7 * DAY_MS);
   const now = summarize(week);
   const old = summarize(prev);
   const usage = loadUsage();
