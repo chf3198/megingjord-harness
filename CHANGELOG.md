@@ -1,3 +1,12 @@
+## [3.3.1] — 2026-05-01 — Canonical Token Ledger Schema (#770)
+
+### Added
+- `scripts/global/token-ledger-schema.js`: canonical token-ledger normalizer with confidence enum (`exact_request`, `exact_aggregate`, `derived`, `estimated`, `unknown`) and lane-aware defaults.
+- `research/token-ledger-schema-implementation-2026-05-01.md`: implementation note documenting canonical fields, confidence policy, and compatibility guarantees.
+
+### Changed
+- `scripts/global/model-routing-telemetry.js`: now appends canonical token-ledger fields on every write while preserving historical telemetry keys (`ts`, `lane`, `model`, etc.) for existing consumers.
+
 ## [3.3.0] — 2026-05-01 — Multi-Agent Dashboard Overhaul (Epic #742)
 
 ### Added
