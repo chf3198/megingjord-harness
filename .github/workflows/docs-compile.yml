@@ -1,0 +1,41 @@
+name: Docs Compile
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'README.md'
+      - 'scripts/docs-compile.js'
+      - 'scripts/global/docs-transforms.js'
+      - '.github/workflows/docs-compile.yml'
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'README.md'
+      - 'scripts/docs-compile.js'
+      - 'scripts/global/docs-transforms.js'
+
+concurrency:
+  group: docs-compile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    name: docs-compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Verify README in sync with package.json
+        run: node scripts/docs-compile.js --check

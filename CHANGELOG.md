@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Phase 1 README Compile Pipeline (#796)
+
+### Added
+- `scripts/docs-compile.js`: README compile entrypoint; `--check` mode used by CI.
+- `scripts/global/docs-transforms.js`: custom `packageScripts` transform for markdown-magic v4.x.
+- `.github/workflows/docs-compile.yml`: CI gate that fails when README is out of sync with `package.json`.
+- `package.json`: `docs:compile` script; `markdown-magic@4.8.0` devDependency.
+- `README.md`: auto-rebuilt scripts table inside `<!-- docs packageScripts -->` fence.
+
+### Changed
+- `scripts/lint.js`: README and package.json added to IGNORE_FILES (manifests grow by design).
+
 ## [Unreleased] — Phase 2 RAG Search MVP (#784)
 
 ### Added
