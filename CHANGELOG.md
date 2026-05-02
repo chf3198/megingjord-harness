@@ -19,6 +19,13 @@
 - `tests/rag-search.spec.js`: 6 Playwright tests.
 - `package.json`: `rag:search` script.
 
+## [Unreleased] — Phase 4 Free-Model Orchestrator (#786)
+
+### Added
+- `scripts/global/free-router.js`: classifier+signal stack tier-routing logic; calls Groq llama-3.3-70b on uncertain cases; falls back to deterministic classifier when no free LLM available.
+- `tests/free-router.spec.js`: 7 Playwright tests covering classifier signals, capability gating, LLM fallback paths.
+- `package.json`: `router:free` script.
+
 ## [Unreleased] — Phase 0 Capability Probe + Manifest (#788)
 
 ### Added
@@ -28,6 +35,19 @@
 - `research/adr/013-capability-detection-substrate.md`: ADR documenting the substrate model.
 - `npm run capability:probe` and `npm run capability:show` scripts.
 - `.env.example`: optional Tier 0/2/3 env-var template.
+
+## [3.3.4] — 2026-05-01 — Fleet Model Upgrades (#765)
+
+### Added
+- `scripts/fleet/36gbwinresource/install-models.ps1` and `scripts/fleet/windows-laptop/install-models.ps1`: replicable Ollama model/bootstrap scripts for the two Windows fleet hosts.
+- `research/fleet-model-upgrades-implementation-2026-05-01.md`: measured rollout note with benchmark table, provider probe results, and rejected Qwen3-coder availability check.
+- `research/adr/014-fleet-model-placement-on-windows-hosts.md`: ADR documenting the shift to `starcoder2:3b` on 36gbwinresource and `qwen2.5-coder:1.5b` on OpenClaw.
+
+### Changed
+- `inventory/devices.json`: reconciled both Windows hosts to live `/api/tags`, updated benchmark winners, and marked LiteLLM as running on OpenClaw.
+- `config/litellm-config.yaml`, `scripts/global/litellm-client.js`, `scripts/global/openclaw-chat.js`, `scripts/wiki/wiki-llm.js`, and `scripts/ai-matrix-providers-fleet.js`: aligned OpenClaw aliases to the current primary/fast/quality fleet models.
+- `scripts/global/fleet-benchmark-runner.js`: now benchmarks the inventory-selected model instead of whichever tag happens to sort first.
+- `wiki/entities/36gbwinresource.md`, `wiki/entities/openclaw.md`, and `wiki/entities/windows-laptop.md`: refreshed live model inventories, benchmark figures, and routing roles.
 
 ## [3.3.3] — 2026-05-01 — Cloudflare AI Gateway Phase 1 (#783)
 

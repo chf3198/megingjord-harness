@@ -7,8 +7,8 @@ const ENDPOINTS = (() => {
   const oc = ocURL ? `${ocURL}/v1/chat/completions` : null;
   const list = [];
   if (oc) {
-    list.push({ name: 'OpenClaw', url: oc, model: 'ollama/mistral', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
-    list.push({ name: 'OpenClaw-7B', url: oc, model: 'ollama/qwen2.5:7b-instruct', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
+    list.push({ name: 'OpenClaw', url: oc, model: 'qwen2.5-coder-1.5b', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
+    list.push({ name: 'OpenClaw-Quality', url: oc, model: 'qwen2.5-coder-7b', key: process.env.OPENCLAW_API_KEY || 'sk-1234' });
   }
   list.push({ name: 'Groq', url: 'https://api.groq.com/openai/v1/chat/completions',
     model: 'llama-3.3-70b-versatile', key: process.env.GROQ_API_KEY || '' });
