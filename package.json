@@ -64,6 +64,8 @@
     "capability:probe": "node scripts/global/capability-probe.js",
     "capability:show": "node scripts/global/capability-show.js",
     "rag:search": "node scripts/global/rag-search.js",
+    "router:free": "node scripts/global/free-router.js",
+    "state:offload": "node scripts/global/state-offload-client.js",
     "validate:triage": "node scripts/validate-plugin-triage.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "test": "npx playwright test",
