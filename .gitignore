@@ -10,7 +10,7 @@ hooks/state/
 
 # Node
 node_modules/
-package-lock.json
+# package-lock.json is committed (ADR-017, #830) for reproducible installs and Dependabot npm support.
 
 # Playwright
 playwright-report/
