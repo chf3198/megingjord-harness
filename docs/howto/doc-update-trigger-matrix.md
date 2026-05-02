@@ -26,7 +26,7 @@ Generated: 2026-04-30 | Refs #522 #335
 | `logs/**` | Generated/ephemeral data |
 | `research/**` | Research is self-documenting |
 | `wiki/**` | Wiki content is its own doc surface |
-| `model-compare/**` | Benchmark data; not user-facing |
+| `research/model-compare/**` | Benchmark data; not user-facing |
 | `.github/ISSUE_TEMPLATE/**` | Templates are docs themselves |
 | `lint-configs/**` | Config only; behavior unchanged unless `npm run lint` output changes |
 
