@@ -158,3 +158,7 @@ Wiki pages: wiki/sources/fleet-resource-audit-2026-05-01.md, wiki/sources/fleet-
 
 ## [2026-05-02] update | Fleet entities refreshed (#803)
 Updated wiki/entities/{36gbwinresource,openclaw,penguin-1}.md to reflect SYSTEM-service Ollama operating mode, current model lineups, and per-request keep_alive: "24h" pattern. Architecture map (docs/ARCHITECTURE.md) and DECISIONS index updated; WIKI.md and wiki-knowledge instruction now document the wiki:ingest pipeline; new docs/howto/contribute-to-wiki.md walks contributors through it.
+
+## [2026-05-02] ingest | Codebase organization 2026-Q2 research (#819)
+Source: research/codebase-organization-2026-05-02.md / raw/articles/codebase-organization-2026-05-02.md / wiki/sources/codebase-organization-2026-05-02.md.
+Manual ingest (fleet LLM endpoints returning HTTP 400 at ingest time). Spawned implementation children #820, #821, #822 under Epic #818.
