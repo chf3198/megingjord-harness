@@ -48,6 +48,9 @@ npm run deploy:both:apply
 <!-- docs packageScripts -->
 | Script | Command |
 |---|---|
+| `adr:build` | `log4brains build` |
+| `adr:new` | `log4brains adr new` |
+| `adr:preview` | `log4brains preview` |
 | `agent:coord:remote` | `node scripts/global/agent-coord-remote.js` |
 | `agent:tier-c` | `node scripts/global/tier-c-guard.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |

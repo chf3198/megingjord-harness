@@ -1,7 +1,8 @@
-# ADR-004: Model Routing via Custom Agents
+# ADR-015: Model Routing via Custom Agents
 
 **Status**: Accepted
 **Date**: 2025-07-13
+**Renumbered**: 2026-05-02 — was ADR-004 (duplicate of `004-global-task-router.md`); renumbered to 015 in Phase 3 of #795 to resolve the duplicate while preserving git history via `git mv`.
 
 ## Context
 

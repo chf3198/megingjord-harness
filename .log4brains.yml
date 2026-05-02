@@ -1,0 +1,4 @@
+project:
+  name: Megingjord ADRs
+  tz: America/New_York
+  adrFolder: ./research/adr

@@ -1,23 +1,23 @@
 # Architecture Decision Records — Index
 
 ADRs document significant architecture and process decisions for Megingjord.
-The canonical store is [`research/adr/`](../research/adr/) — this file is an
-index, not a duplicate. To prevent split source-of-truth, **never** add
-decision records under `docs/DECISIONS/`; always add them to `research/adr/`.
+Canonical store: [`research/adr/`](../research/adr/).
+
+This index is **auto-renderable** — run `npm run adr:preview` for the
+hot-reload web UI or `npm run adr:build` for a static site.
+The hand-edited table below remains as a quick navigation reference.
 
 ## How to add a new ADR
 
-1. Pick the next sequential number (current highest: 011).
-2. Copy `research/adr/README.md` template structure into `research/adr/NNN-slug.md`.
-3. Fill in: Status (Proposed / Accepted / Deprecated / Superseded), Date,
-   Context, Decision, Consequences, Alternatives Considered.
-4. Reference any superseded ADR with a "Supersedes ADR-XXX" line.
-5. Update this index in the same PR.
-6. Link the ADR from related skills, instructions, or design docs.
+```bash
+npm run adr:new -- "decision title"
+```
 
-The `manager-ticket-lifecycle` baton workflow applies: ADRs that change
-governance must go through Manager → Consultant; technical-only ADRs may be
-admin-tracked.
+This scaffolds a MADR-templated file under `research/adr/`. Fill in
+Status, Context, Decision, Consequences, Alternatives. The
+log4brains pipeline auto-numbers and indexes the new ADR.
+
+ADRs that change governance must follow Manager → Consultant baton.
 
 ## Existing ADRs
 
@@ -27,7 +27,6 @@ admin-tracked.
 | 002 | Dashboard Stack — Alpine.js + Static | [`002-dashboard-stack.md`](../research/adr/002-dashboard-stack.md) |
 | 003 | Free-Tier Failover Routing | [`003-failover-routing.md`](../research/adr/003-failover-routing.md) |
 | 004 | Global Task Router | [`004-global-task-router.md`](../research/adr/004-global-task-router.md) |
-| 004 | Model Routing via Custom Agents | [`004-model-routing-agents.md`](../research/adr/004-model-routing-agents.md) |
 | 005 | Ticket-Driven Work Management | [`005-ticket-driven-work.md`](../research/adr/005-ticket-driven-work.md) |
 | 006 | Visual QA Gate for Web Releases | [`006-visual-qa-gate.md`](../research/adr/006-visual-qa-gate.md) |
 | 007 | LLM Wiki Knowledge System Adoption | [`007-llm-wiki-adoption.md`](../research/adr/007-llm-wiki-adoption.md) |
@@ -36,16 +35,14 @@ admin-tracked.
 | 010 | Ticket Status–Role Ownership Binding Model | [`010-ticket-status-role-model.md`](../research/adr/010-ticket-status-role-model.md) |
 | 011 | Fleet Auto-Discovery Architecture | [`011-fleet-auto-discovery.md`](../research/adr/011-fleet-auto-discovery.md) |
 | 012 | Multi-Agent Worktree Path Governance | [`012-multi-agent-worktree-governance.md`](../research/adr/012-multi-agent-worktree-governance.md) |
-| 013 | Capability Detection Substrate for Optional Cost-Reduction Features | [`013-capability-detection-substrate.md`](../research/adr/013-capability-detection-substrate.md) |
+| 013 | Capability Detection Substrate | [`013-capability-detection-substrate.md`](../research/adr/013-capability-detection-substrate.md) |
+| 014 | Fleet Model Placement on Windows Hosts | [`014-fleet-model-placement-on-windows-hosts.md`](../research/adr/014-fleet-model-placement-on-windows-hosts.md) |
+| 015 | Model Routing via Custom Agents (renumbered from ADR-004) | [`015-model-routing-agents.md`](../research/adr/015-model-routing-agents.md) |
+| 016 | log4brains as the ADR Pipeline | [`016-log4brains-adr-pipeline.md`](../research/adr/016-log4brains-adr-pipeline.md) |
 
-## Known issues
+## Resolved issues
 
-- ADR-004 has a duplicate number (Global Task Router and Model Routing via
-  Custom Agents). One should be renumbered when a related change next touches
-  the routing subsystem; both are referenced from active instructions today,
-  so renumbering blindly would create dangling links.
-- README.md under `research/adr/` is the long-form contributor guide; this
-  file is the navigation index for the broader documentation set.
+- The historical ADR-004 duplicate (Global Task Router vs. Model Routing via Custom Agents) was resolved in Phase 3 of #795: the routing-agents file was renumbered to ADR-015 via `git mv`. See ADR-016 for the log4brains adoption that prevents future drift.
 
 ## Related
 

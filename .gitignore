@@ -34,3 +34,6 @@ logs/copilot-usage.json
 .dashboard/agent-state.sqlite*
 .harness/worktrees/
 .claude/worktrees/
+
+# log4brains build output (#798)
+.log4brains/
