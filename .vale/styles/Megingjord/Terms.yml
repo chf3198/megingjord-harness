@@ -1,0 +1,9 @@
+extends: substitution
+message: "Use canonical term — replace '%s' with '%s' (docs/STYLE-GUIDE.md)."
+level: warning
+ignorecase: true
+swap:
+  '\bbaton handoff\b': 'handoff artifact'
+  '\bsequential roles?\b': 'baton'
+  '\bcopilot agent\b': 'agent'
+  '\blocal LLM\b': 'fleet'

@@ -1,0 +1,34 @@
+name: Docs Anchors
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'scripts/global/docs-anchors.js'
+      - '.github/workflows/docs-anchors.yml'
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'scripts/global/docs-anchors.js'
+
+concurrency:
+  group: docs-anchors-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  anchors:
+    name: docs-anchors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Verify doc anchors in sync with code
+        run: node scripts/global/docs-anchors.js

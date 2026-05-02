@@ -1,0 +1,8 @@
+extends: substitution
+message: "Use canonical brand spelling — replace '%s' with '%s' (#797)."
+level: error
+ignorecase: false
+swap:
+  '\bDevEnv Ops\b': 'Megingjord'
+  '\bdevenv-ops\b': 'megingjord-harness'
+  '(?<![\w-])megingjord(?![\w-])': 'Megingjord'

@@ -1,0 +1,11 @@
+extends: existence
+message: "Banned operator-identity phrase '%s'. The agent owns automation; do not push manual steps onto the user. See instructions/operator-identity-context.instructions.md."
+level: warning
+ignorecase: true
+tokens:
+  - "you will need to manually"
+  - "you'll need to manually"
+  - "the user must manually"
+  - "please manually"
+  - "please run the following manually"
+  - "you will have to do this by hand"

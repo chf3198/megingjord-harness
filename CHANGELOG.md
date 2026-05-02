@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — Phase 2 Vale + Drift-equivalent Anchors (#797)
+
+### Added
+- `.vale/styles/Megingjord/Brand.yml`, `BannedPhrases.yml`, `Terms.yml`: opt-in Megingjord style pack covering canonical brand spelling, operator-identity banned phrases, and canonical terminology. Available for activation per-scope in `.vale.ini`.
+- `scripts/global/docs-anchors.js`: Drift-equivalent doc-code anchor checker. Scans `.md` for `<!-- anchor: path/to/file.ext[#L10-L20] [hash:...] -->` markers and verifies the anchored region still hashes to the declared value. `--fix` mode rewrites hashes to the current state.
+- `tests/docs-anchors.spec.js`: 8 Playwright tests (no anchors, missing hash, --fix, in-sync, code drift, missing target, line-range slice, line-range drift).
+- `.github/workflows/docs-anchors.yml`: CI gate that fails when anchored code changes without a doc update.
+- `package.json`: `docs:anchors` script.
+
+### Notes
+- Vale Megingjord pack is provided but not activated in `.vale.ini` by default (would false-positive on instructions/operator-identity-context.instructions.md, which legitimately quotes the banned phrases as part of its own ban list). Future tickets can opt the pack into specific scopes.
+- Verification-round corrections honored: dropped Mozilla pack (unverifiable); kept verified packs (Microsoft, Google, Elastic, Grafana, Canonical) as future activation targets.
+
 ## [Unreleased] — Phase 1 README Compile Pipeline (#796)
 
 ### Added
