@@ -1,3 +1,24 @@
+# Changelog
+
+## [Unreleased] — Phase 0 Capability Probe + Manifest (#788)
+
+### Added
+- `scripts/global/capability-probe.js`: read-only substrate probe; detects Tailscale, fleet hosts, Cloudflare account, six provider API keys, MCP RAG server. Writes `.dashboard/capabilities.json` (gitignored, per-install). Never charges tokens; all metadata-only endpoints.
+- `scripts/global/capability-show.js`: human-readable manifest summary; reports per-tier feature availability for Epic #782 children.
+- `tests/capability-probe.spec.js`: 6 Playwright tests covering schema, read-only invariant, missing-binary fallback, missing-key fallback, show CLI, tier-availability mapping.
+- `research/adr/013-capability-detection-substrate.md`: ADR documenting the substrate model.
+- `npm run capability:probe` and `npm run capability:show` scripts.
+- `.env.example`: optional Tier 0/2/3 env-var template.
+
+## [3.3.3] — 2026-05-01 — Cloudflare AI Gateway Phase 1 (#783)
+
+### Added
+- `scripts/global/ai-gateway-setup.md`: runbook for creating and validating `megingjord-anthropic-cache` with opt-in `ANTHROPIC_BASE_URL`.
+- `scripts/global/anthropic-gateway-smoke.js`: smoke validator for direct-vs-gateway Anthropic endpoint routing.
+
+### Changed
+- `.env.example`: documents optional `ANTHROPIC_BASE_URL` gateway override while preserving direct Anthropic fallback behavior by default.
+
 ## [3.3.2] — 2026-05-01 — Provider Token Adapters (#771)
 
 ### Added
@@ -29,7 +50,6 @@
 ### Changed
 - `wiki/log.md`: Fixed MD012 double-blank-line at entry #140.
 
-# Changelog
 
 ## [Unreleased] — Layer 3 Cloudflare Worker Coordination (Optional, #740)
 

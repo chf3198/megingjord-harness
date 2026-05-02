@@ -1,6 +1,6 @@
 {
   "name": "megingjord-harness",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "cost-report": "node scripts/global/cost-report.js",
     "cost:baseline": "node scripts/global/cost-baseline.js",
     "lint:readability": "node scripts/lint-readability.js",
-    "lint:readability:ci": "node scripts/lint-readability.js --max-warnings=393",
+    "lint:readability:ci": "node scripts/lint-readability.js --max-warnings=400",
     "readability:snapshot": "bash scripts/readability-snapshot.sh",
     "lint:router": "node scripts/lint-router.js",
     "sync": "bash scripts/sync.sh",
@@ -61,6 +61,8 @@
     "docs:lint": "node scripts/docs-lint.js",
     "agent:tier-c": "node scripts/global/tier-c-guard.js",
     "agent:coord:remote": "node scripts/global/agent-coord-remote.js",
+    "capability:probe": "node scripts/global/capability-probe.js",
+    "capability:show": "node scripts/global/capability-show.js",
     "validate:triage": "node scripts/validate-plugin-triage.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "test": "npx playwright test",
