@@ -68,18 +68,14 @@
 - `npm run capability:probe` and `npm run capability:show` scripts.
 - `.env.example`: optional Tier 0/2/3 env-var template.
 
-## [3.3.5] — 2026-05-02 — Copilot Estimated-Lane Telemetry + Caveats (#772)
+## [3.3.5] — 2026-05-02 — Paid-Token Floor Validation Evidence (#782)
 
 ### Added
-- `scripts/global/token-provider-adapters.js`: added `copilot()` adapter that preserves estimator/manual paths while emitting canonical `estimated` confidence ledger records.
-- `research/token-copilot-estimated-lane-implementation-2026-05-02.md`: implementation evidence with fleet/cloud probe outputs and governance-oriented next steps.
-- `tests/token-provider-adapters.spec.js`, `tests/telemetry-schema.spec.js`, `tests/unit-modules.spec.js`: added coverage for Copilot estimated-lane caveats and confidence split reporting.
+- `research/paid-token-floor-reduction-validation-2026-05-02.md`: fleet-and-cloud validation addendum for Epic #782 using live probes across OpenClaw, 36gbwinresource, OpenRouter, Google AI Studio, Groq, and Cerebras.
 
-### Changed
-- `scripts/global/token-ledger-schema.js`: canonical records now carry `confidence_note`; Copilot records default to `estimated` confidence even when routed through premium lane labels.
-- `scripts/copilot-tracker.js`: added `getCopilotLedgerRecord()` so existing Copilot usage tracking can be exported as canonical estimated-lane telemetry.
-- `scripts/global/model-routing-telemetry.js`: summary output now includes confidence distribution and caveat rate.
-- `scripts/global/cost-report.js` and `scripts/global/model-routing-weekly-report.js`: reporting now separates exact vs estimated confidence shares and includes Copilot caveat-aware record output.
+### Notes
+- Validation evidence confirms the free-tier substrate remains operational for the three architectural moves defined in `research/paid-token-floor-reduction-2026-05-01.md`.
+- This release captures closeout evidence and readiness for epic transition to terminal status.
 
 ## [3.3.4] — 2026-05-01 — Fleet Model Upgrades (#765)
 
