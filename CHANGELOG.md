@@ -1,11 +1,11 @@
 # Changelog
 
-## [Unreleased] — Phase 4 Free-Model Orchestrator (#786)
+## [Unreleased] — Phase 2 RAG Search MVP (#784)
 
 ### Added
-- `scripts/global/free-router.js`: classifier+signal stack tier-routing logic; calls Groq llama-3.3-70b on uncertain cases; falls back to deterministic classifier when no free LLM available.
-- `tests/free-router.spec.js`: 7 Playwright tests covering classifier signals, capability gating, LLM fallback paths.
-- `package.json`: `router:free` script.
+- `scripts/global/rag-search.js`: repo-context search with MCP-first when capability manifest reports rag_server reachable, ripgrep-fallback otherwise.
+- `tests/rag-search.spec.js`: 6 Playwright tests.
+- `package.json`: `rag:search` script.
 
 ## [Unreleased] — Phase 0 Capability Probe + Manifest (#788)
 
