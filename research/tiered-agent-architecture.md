@@ -90,4 +90,4 @@ Sub-1B models cannot code reliably. They serve as:
 - [ ] Test OpenClaw BYOK integration in VS Code
 - [ ] Benchmark Tailscale→OpenClaw tool-call latency
 - [ ] Prototype SML classifier with lfm2.5-thinking
-- [ ] Create ADR-004 for this architecture decision
+- [x] ADR-015 documents this architecture decision (originally ADR-004; renumbered 2026-05-02 in Phase 3 of #795)

@@ -11,7 +11,7 @@ const LIMIT = 100;
 const IGNORE = [
   'node_modules', '.git', 'playwright-report',
   'test-results', 'package-lock.json', '.dashboard',
-  'logs', '.claude',
+  'logs', '.claude', '.log4brains',
   // Global resources have their own governance
   'skills', 'hooks'
 ];

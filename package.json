@@ -70,6 +70,9 @@
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "docs:compile": "node scripts/docs-compile.js",
     "docs:anchors": "node scripts/global/docs-anchors.js",
+    "adr:new": "log4brains adr new",
+    "adr:preview": "log4brains preview",
+    "adr:build": "log4brains build",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:quality": "npx playwright test tests/google-quality.spec.js",
@@ -93,6 +96,7 @@
     "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^17.5.0",
+    "log4brains": "^1.1.0",
     "markdown-magic": "^4.8.0",
     "markdownlint-cli2": "^0.17.2",
     "prettier": "^3.6.2"

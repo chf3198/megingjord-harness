@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] — Phase 3 log4brains ADR Pipeline (#798)
+
+### Added
+- `log4brains@1.1.0` devDependency: ADR pipeline with MADR templates, hot-reload preview, static-publish.
+- `.log4brains.yml`: project config pointing at `research/adr/`.
+- `package.json`: `adr:new`, `adr:preview`, `adr:build` scripts.
+- `research/adr/016-log4brains-adr-pipeline.md`: ADR documenting log4brains adoption and the slow-cadence trade-off.
+
+### Changed
+- `research/adr/004-model-routing-agents.md` → `research/adr/015-model-routing-agents.md` (renumbered via `git mv` to resolve the long-standing ADR-004 duplicate; first line updated to `ADR-015`).
+- `docs/DECISIONS.md`: rewritten as a quick-nav pointer to the auto-rendered log4brains site; lists all 16 ADRs.
+- `research/adr/README.md`: index row for the renumbered ADR-015.
+- `research/tiered-agent-architecture.md` and `raw/articles/tiered-agent-architecture.md`: TODO references updated from ADR-004 to ADR-015.
+- `.gitignore`: ignore `.log4brains/` build output.
+
+### Notes
+- Verification-round correction honored: ADR-016 documents the slow-cadence risk (log4brains v1.1.0 released 2024-12-17). Mitigation: vendor or fork upstream package if it goes dark.
+- GitHub Pages publish workflow deferred to a follow-up ticket; `npm run adr:build` produces the static site locally today.
+
 ## [Unreleased] — Phase 2 Vale + Drift-equivalent Anchors (#797)
 
 ### Added
@@ -48,6 +67,19 @@
 - `research/adr/013-capability-detection-substrate.md`: ADR documenting the substrate model.
 - `npm run capability:probe` and `npm run capability:show` scripts.
 - `.env.example`: optional Tier 0/2/3 env-var template.
+
+## [3.3.5] — 2026-05-02 — Copilot Estimated-Lane Telemetry + Caveats (#772)
+
+### Added
+- `scripts/global/token-provider-adapters.js`: added `copilot()` adapter that preserves estimator/manual paths while emitting canonical `estimated` confidence ledger records.
+- `research/token-copilot-estimated-lane-implementation-2026-05-02.md`: implementation evidence with fleet/cloud probe outputs and governance-oriented next steps.
+- `tests/token-provider-adapters.spec.js`, `tests/telemetry-schema.spec.js`, `tests/unit-modules.spec.js`: added coverage for Copilot estimated-lane caveats and confidence split reporting.
+
+### Changed
+- `scripts/global/token-ledger-schema.js`: canonical records now carry `confidence_note`; Copilot records default to `estimated` confidence even when routed through premium lane labels.
+- `scripts/copilot-tracker.js`: added `getCopilotLedgerRecord()` so existing Copilot usage tracking can be exported as canonical estimated-lane telemetry.
+- `scripts/global/model-routing-telemetry.js`: summary output now includes confidence distribution and caveat rate.
+- `scripts/global/cost-report.js` and `scripts/global/model-routing-weekly-report.js`: reporting now separates exact vs estimated confidence shares and includes Copilot caveat-aware record output.
 
 ## [3.3.4] — 2026-05-01 — Fleet Model Upgrades (#765)
 
