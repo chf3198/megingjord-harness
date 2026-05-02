@@ -70,6 +70,7 @@
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "docs:compile": "node scripts/docs-compile.js",
     "docs:anchors": "node scripts/global/docs-anchors.js",
+    "docs:exec": "node scripts/global/docs-exec.js",
     "adr:new": "log4brains adr new",
     "adr:preview": "log4brains preview",
     "adr:build": "log4brains build",

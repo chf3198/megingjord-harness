@@ -1,0 +1,35 @@
+name: Docs Exec
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'scripts/global/docs-exec.js'
+      - '.github/workflows/docs-exec.yml'
+  merge_group:
+    types: [checks_requested]
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'scripts/global/docs-exec.js'
+
+concurrency:
+  group: docs-exec-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  exec:
+    name: docs-exec
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Run opt-in markdown exec blocks
+        run: node scripts/global/docs-exec.js
