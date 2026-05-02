@@ -29,6 +29,7 @@ flowchart LR
 - Multi-runtime deployment model with dry-run/apply scripts
 - Governance baton model: Manager → Collaborator → Admin → Consultant
 - Fleet-aware routing, telemetry, and policy enforcement
+- Confidence-aware telemetry separates exact vs estimated Copilot usage with report caveats
 - Static dashboard with operations + governance visibility
 - LLM wiki integration for reusable institutional knowledge
 - Accessibility + UX baseline checks aligned to WCAG 2.2 and Core Web Vitals
