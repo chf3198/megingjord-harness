@@ -7,13 +7,16 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 async function fetchCostTelemetry() {
   try {
-    const resp = await fetch('/api/logs/cost-telemetry');
-    if (!resp.ok) return [];
-    const text = await resp.text();
-    return text.trim().split('\n').filter(Boolean).map(l => {
+    const [costResp, tokenResp] = await Promise.all([
+      fetch('/api/logs/cost-telemetry'), fetch('/api/logs/token-telemetry-summary')
+    ]);
+    const text = costResp.ok ? await costResp.text() : '';
+    const entries = text.trim().split('\n').filter(Boolean).map(l => {
       try { return JSON.parse(l); } catch { return null; }
     }).filter(Boolean);
-  } catch { return []; }
+    const summary = tokenResp.ok ? await tokenResp.json() : null;
+    return { entries, summary };
+  } catch { return { entries: [], summary: null }; }
 }
 
 function calcMonthlyCost(entries) {
@@ -48,22 +51,31 @@ function renderRecentRows(data) {
 }
 
 function renderCostMonitor(data) {
-  if (!data || !data.length) {
+  const payload = Array.isArray(data) ? { entries: data, summary: null } : (data || { entries: [], summary: null });
+  const entries = payload.entries || [];
+  const summary = payload.summary;
+  if (!entries.length && !summary?.samples) {
     return `<div class="cost-empty">
       <p>No cost telemetry recorded yet.</p>
       <p class="config-note">Entries appear when routing decisions
         are logged via model-routing-telemetry.js.</p>
     </div>`;
   }
-  const monthly = calcMonthlyCost(data);
+  const monthly = calcMonthlyCost(entries);
   const pct = Math.min(100, Math.round((monthly / BUDGET) * 100));
   const alert = monthly > BUDGET * 0.8;
   const barCls = alert ? 'cost-bar warn' : 'cost-bar ok';
   const badge = alert ? `<span class="cost-badge alert">⚠ >80% budget</span>` : '';
-  const distRows = tierDistribution(data).map(row =>
+  const distRows = tierDistribution(entries).map(row =>
     `<tr><td>${row.lane}</td><td>${row.count}</td><td>${row.pct}%</td></tr>`
   ).join('');
+  const conf = summary?.confidence || { exact: 0, estimated: 0, other: 0 };
+  const cov = summary?.nonFreeCoverage || { samples: 0, share: 0 };
+  const providers = (summary?.providers || []).slice(0, 4).map(row =>
+    `<tr><td>${esc(row.provider)}</td><td>${row.samples}</td><td>${row.total_tokens}</td></tr>`).join('');
+  const telemetry = summary?.samples ? `<div class="cost-metric"><span class="cost-label">Token Telemetry</span><span class="cost-value">${summary.totals.total_tokens}</span><span class="cost-budget">tokens / ${summary.samples} samples</span></div><table class="cost-table"><thead><tr><th>Signal</th><th>Value</th><th>Share</th></tr></thead><tbody><tr><td>Exact</td><td>${Math.round(conf.exact * summary.samples)}</td><td>${Math.round(conf.exact * 100)}%</td></tr><tr><td>Estimated</td><td>${Math.round(conf.estimated * summary.samples)}</td><td>${Math.round(conf.estimated * 100)}%</td></tr><tr><td>Non-free lanes</td><td>${cov.samples}</td><td>${Math.round(cov.share * 100)}%</td></tr></tbody></table><table class="cost-table"><thead><tr><th>Provider</th><th>Samples</th><th>Tokens</th></tr></thead><tbody>${providers}</tbody></table></div>` : '';
   return `<div class="cost-summary">
+    ${telemetry}
     <div class="cost-metric">
       <span class="cost-label">Est. Monthly Cost</span>
       <span class="cost-value">$${monthly}</span>
@@ -74,6 +86,8 @@ function renderCostMonitor(data) {
     <table class="cost-table"><thead>
       <tr><th>Lane</th><th>Reqs</th><th>%</th></tr></thead>
       <tbody>${distRows}</tbody></table>
-    <div class="cost-recent"><h4>Last 5 Requests</h4>${renderRecentRows(data)}</div>
+    <div class="cost-recent"><h4>Last 5 Requests</h4>${renderRecentRows(entries)}</div>
   </div>`;
 }
+
+if(typeof module!=="undefined")module.exports={fetchCostTelemetry,calcMonthlyCost,tierDistribution,renderCostMonitor};else Object.assign(window,{fetchCostTelemetry,calcMonthlyCost,tierDistribution,renderCostMonitor});

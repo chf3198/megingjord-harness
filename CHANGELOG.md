@@ -153,6 +153,15 @@
 - `npm run capability:probe` and `npm run capability:show` scripts.
 - `.env.example`: optional Tier 0/2/3 env-var template.
 
+## [3.3.7] — 2026-05-02 — Token Telemetry Reporting Surfaces (#773)
+
+### Added
+- `routing:telemetry` summary generator writing `logs/token-telemetry-summary.json` for governance-facing token telemetry rollups.
+- Dashboard token telemetry surface for confidence split, lane/model summaries, and non-free coverage visibility.
+
+### Changed
+- Cost view now combines cost and token telemetry reporting using the same routed telemetry feed.
+
 ## [3.3.6] — 2026-05-02 — Copilot Estimated-Lane Telemetry + Caveat Reporting (#772)
 
 ### Added

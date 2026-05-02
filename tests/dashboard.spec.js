@@ -49,4 +49,12 @@ test.describe('Megingjord Dashboard', () => {
     await page.goto('/');
     await expect(page.locator('#btn-test')).toBeVisible();
   });
+
+  test('cost view shows token telemetry content', async ({ page }) => {
+    await page.goto('/');
+    await page.click('button[title="Cost"]');
+    await page.waitForTimeout(300);
+    await expect(page.locator('#panel-cost h2')).toContainText('Cost + Token Telemetry');
+    await expect(page.locator('#panel-cost')).toContainText('Token Telemetry');
+  });
 });

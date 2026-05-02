@@ -104,6 +104,7 @@ npm run deploy:both:apply
 | `routing:baseline` | `node scripts/global/routing-baseline-report.js` |
 | `routing:calibrate` | `node scripts/global/cascade-calibrate.js` |
 | `routing:report` | `node scripts/global/routing-baseline-report.js --days 7` |
+| `routing:telemetry` | `node scripts/global/token-telemetry-report.js --json` |
 | `setup` | `npm install && echo '✅ megingjord ready — run: npm start'` |
 | `start` | `node scripts/dashboard-server.js` |
 | `state:offload` | `node scripts/global/state-offload-client.js` |
