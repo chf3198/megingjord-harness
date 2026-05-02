@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — Codebase Organization: .editorconfig (#821)
+
+### Added
+- `.editorconfig` at repo root with universal indent/whitespace rules. Per-extension overrides for Python/TOML (4-space), Markdown (preserve trailing whitespace for line breaks), and Makefile (tabs).
+
+### Notes
+- `.secrets.baseline` (detect-secrets) deferred to a follow-up: requires Python tooling (`pipx install detect-secrets`) that isn't available in this checkout. Can be added with `detect-secrets scan > .secrets.baseline` in any environment that has it.
+
 ## [Unreleased] — Codebase Organization: Relocate Legacy Artifacts (#820)
 
 ### Changed
