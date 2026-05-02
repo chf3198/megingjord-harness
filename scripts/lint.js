@@ -21,6 +21,10 @@ const IGNORE_FILES = [
   'CHANGELOG.md', 'CHANGELOG-archive.md',
   // Append-only / catalog files that grow by design
   'log.md', 'index.md',
+  // Compiled README — generated section grows with package.json (#796)
+  'README.md',
+  // Project manifests that grow with deps/scripts — managed by npm tooling
+  'package.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
