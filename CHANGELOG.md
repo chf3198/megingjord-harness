@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — ADR-017: package-lock.json Commit vs. Gitignore (#822)
+
+### Added
+- `research/adr/017-package-lock-decision.md`: ADR (Proposed) documenting the decision to commit `package-lock.json` (currently gitignored) and defer the actual flip to an isolated follow-up PR with CI verification. Surfaces evidence that Dependabot npm ecosystem is silently broken because PRs cannot be opened without a committed lockfile.
+- `docs/DECISIONS.md`: ADR-017 row added.
+
+### Notes
+- This ticket lands the ADR only. The actual lockfile flip is deferred to a follow-up child that includes:
+  - Removing `package-lock.json` from `.gitignore`
+  - Committing the current Node-22-produced lockfile
+  - Adding CI step `npm install --frozen-lockfile` (or equivalent)
+  - Confirming Dependabot npm PRs start opening
+
 ## [Unreleased] — Codebase Organization: .editorconfig (#821)
 
 ### Added
