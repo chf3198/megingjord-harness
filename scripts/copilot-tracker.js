@@ -78,6 +78,20 @@ function getCopilotQuota() {
   };
 }
 
+function getCopilotEstimatedRecord() {
+  const data = loadUsage();
+  const reqs = data.manualOverride?.requests ?? data.requests;
+  const cost = data.manualOverride?.cost ?? data.estimatedCost;
+  return {
+    provider: 'copilot', model: 'copilot-pro', input_tokens: 0, output_tokens: 0,
+    total_tokens: 0, cost_usd: Number(cost || 0), confidence_level: 'estimated',
+    caveat_code: 'copilot_estimated_lane',
+    caveat_detail: 'Copilot token counts are estimated/manual; no exact per-request API available.',
+    source_kind: data.manualOverride ? 'copilot_manual_sync' : 'copilot_estimator',
+    request_id: `${data.period}:${reqs}`
+  };
+}
+
 module.exports = {
-  loadUsage, addRequests, setManualUsage, getCopilotQuota
+  loadUsage, addRequests, setManualUsage, getCopilotQuota, getCopilotEstimatedRecord
 };
