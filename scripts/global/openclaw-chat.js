@@ -4,7 +4,7 @@
 // Direct Tailscale HTTP, no SSH tunnel required
 
 const OPENCLAW_BASE = process.env.OPENCLAW_URL || 'http://localhost:4000';
-const DEFAULT_MODEL = 'qwen2.5-7b';
+const DEFAULT_MODEL = 'qwen2.5-coder-1.5b';
 const CHAT_TIMEOUT_MS = 120000;
 const HEALTH_TIMEOUT_MS = 5000;
 const DEFAULT_MAX_TOKENS = 256;

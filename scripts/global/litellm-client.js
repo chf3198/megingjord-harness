@@ -8,7 +8,12 @@ const { chatComplete: ollamaChat, healthCheck: ollamaHealth } = require('./ollam
 const { getOpenClawURL } = require('./fleet-config');
 
 // Map Ollama model IDs to LiteLLM named groups (triggers fallback chain).
-const NAMED_GROUPS = { 'qwen2.5:7b-instruct': 'fleet-primary', 'mistral:latest': 'fleet-fallback' };
+const NAMED_GROUPS = {
+  'qwen2.5-coder:1.5b': 'fleet-primary',
+  'starcoder2:3b': 'fleet-fast',
+  'qwen2.5-coder:7b': 'fleet-quality',
+  'qwen2.5:7b-instruct': 'fleet-fallback'
+};
 
 function getLiteLLMUrl() {
   return process.env.LITELLM_URL || getOpenClawURL();
