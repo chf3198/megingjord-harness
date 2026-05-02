@@ -162,3 +162,6 @@ Updated wiki/entities/{36gbwinresource,openclaw,penguin-1}.md to reflect SYSTEM-
 ## [2026-05-02] ingest | Codebase organization 2026-Q2 research (#819)
 Source: research/codebase-organization-2026-05-02.md / raw/articles/codebase-organization-2026-05-02.md / wiki/sources/codebase-organization-2026-05-02.md.
 Manual ingest (fleet LLM endpoints returning HTTP 400 at ingest time). Spawned implementation children #820, #821, #822 under Epic #818.
+
+## [2026-05-02] audit | Manager-side ticket audit pass (#836, #837 spawned)
+Manager-authority audit across 18 open tickets. Deterministic governance scripts reported zero drift. LLM-grounded review (Groq llama-3.3-70b + Cerebras qwen-3-235b, free fleet) surfaced one real doc-drift (epic-governance vs ticket-driven-work contradiction → #836), one ticket-cluster boundary (#732/#766/#833), and one AC-tightening signal (#829). New wiki concept: ticket-audit-pattern. New tickets: #836, #837. Manager comments posted on #732, #766, #829, #833. Token cost: ~8 KB Claude / ~80 KB free fleet.
