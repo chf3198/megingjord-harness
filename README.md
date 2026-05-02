@@ -62,6 +62,7 @@ npm run deploy:both:apply
 | `deploy:claude:apply` | `bash scripts/deploy.sh --apply --target claude` |
 | `deploy:codex` | `bash scripts/deploy.sh --target codex` |
 | `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex` |
+| `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
