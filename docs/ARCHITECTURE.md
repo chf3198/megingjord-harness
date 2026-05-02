@@ -31,20 +31,12 @@ Codex                          policy.json          OR Cloud (Claude /        + 
 - `scripts/global/free-router.js` — free-model orchestrator MVP (#786): classifier + signal stack picks a tier, calls a free LLM (Groq) when available, falls back to deterministic cascade-dispatch
 - `agents/router.agent.md` — Routing role definition
 
-### Capability detection (ADR-013)
+### Capability detection / cost-reduction (ADR-013)
 
-- `scripts/global/capability-probe.js` — probes providers, fleet hosts, and toolchain; writes manifest
-- `scripts/global/capability-show.js` — reads `.dashboard/capabilities.json`
-- `.dashboard/capabilities.json` — capability manifest consumed by routing, RAG, state-offload, and other optional features
-- Optional cost-reduction features gate on this manifest, so a missing provider or offline fleet host degrades gracefully
-
-### RAG / repo-context search (#784)
-
-- `scripts/global/rag-search.js` — repo-context search MVP; uses MCP server when available, falls back to ripgrep
-
-### State offload (#792)
-
-- `scripts/global/state-offload-client.js` — per-turn state offload client; pushes long state to a Worker so the active context stays small
+- `scripts/global/capability-probe.js` + `capability-show.js` — probe providers, fleet hosts, toolchain; write/read `.dashboard/capabilities.json`
+- `scripts/global/rag-search.js` (#784) — repo-context search; MCP-first with ripgrep fallback
+- `scripts/global/state-offload-client.js` (#792) — per-turn state offload to a Worker
+- Optional features gate on the capability manifest, so a missing provider or offline fleet host degrades gracefully
 
 ### Governance
 
