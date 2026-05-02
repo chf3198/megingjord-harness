@@ -5,11 +5,31 @@
 model_list:
   - model_name: fleet-primary
     litellm_params:
-      model: ollama/qwen2.5:7b-instruct
+      model: ollama/qwen2.5-coder:1.5b
+      api_base: http://localhost:11434
+  - model_name: fleet-fast
+    litellm_params:
+      model: ollama/starcoder2:3b
+      api_base: http://localhost:11434
+  - model_name: fleet-quality
+    litellm_params:
+      model: ollama/qwen2.5-coder:7b
       api_base: http://localhost:11434
   - model_name: fleet-fallback
     litellm_params:
-      model: ollama/mistral:latest
+      model: ollama/qwen2.5:7b-instruct
+      api_base: http://localhost:11434
+  - model_name: qwen2.5-coder-1.5b
+    litellm_params:
+      model: ollama/qwen2.5-coder:1.5b
+      api_base: http://localhost:11434
+  - model_name: starcoder2-3b
+    litellm_params:
+      model: ollama/starcoder2:3b
+      api_base: http://localhost:11434
+  - model_name: qwen2.5-coder-7b
+    litellm_params:
+      model: ollama/qwen2.5-coder:7b
       api_base: http://localhost:11434
   - model_name: haiku
     litellm_params:
@@ -24,6 +44,13 @@ router_settings:
   routing_strategy: least-busy
   fallbacks:
     - fleet-primary:
+      - fleet-fast
+      - fleet-quality
+      - fleet-fallback
+      - haiku
+      - sonnet
+    - fleet-fast:
+      - fleet-quality
         - fleet-fallback
         - haiku
         - sonnet

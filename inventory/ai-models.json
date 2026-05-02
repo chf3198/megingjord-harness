@@ -56,7 +56,7 @@
   },
   "openclaw": {
     "cost": "free (self-hosted)",
-    "models": ["ollama/mistral", "ollama/phi3:mini", "ollama/qwen2.5:7b-instruct"],
+    "models": ["qwen2.5-coder-1.5b", "starcoder2-3b", "qwen2.5-coder-7b"],
     "note": "Windows laptop — available when online"
   },
   "cloudflareAI": {
