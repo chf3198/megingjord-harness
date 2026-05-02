@@ -37,3 +37,7 @@ logs/copilot-usage.json
 
 # log4brains build output (#798)
 .log4brains/
+
+# Local pre-GitHub-canonical baton history (#820)
+# Authoritative ticket data lives in GitHub Issues; tickets/*.md is local-only legacy.
+tickets/

@@ -80,7 +80,7 @@
     "lint:js": "eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki",
     "lint:py": "ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/",
     "lint:sh": "find scripts -name '*.sh' -exec shellcheck {} +",
-    "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!model-compare/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md'",
+    "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**'",
     "lint:all": "npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md"
   },
   "keywords": [

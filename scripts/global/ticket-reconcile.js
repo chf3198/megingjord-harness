@@ -9,6 +9,7 @@ const ticketsDir = path.join(root, 'tickets');
 const baselineFile = path.join(__dirname, 'ticket-reconcile-baseline.json');
 
 function readLocalTicketIds() {
+  if (!fs.existsSync(ticketsDir)) return [];
   return fs.readdirSync(ticketsDir)
     .map(name => name.match(/^(\d+)-.*\.md$/)?.[1])
     .filter(Boolean)

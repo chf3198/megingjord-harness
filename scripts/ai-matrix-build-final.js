@@ -6,7 +6,7 @@ const path = require('path');
 const glob = require('node:fs');
 
 const TEST_RESULTS_DIR = path.join(process.cwd(), 'test-results');
-const MATRIX_PATH = path.join(process.cwd(), 'model-compare', 'design-analysis', 'LLM-EVALUATION-MATRIX.md');
+const MATRIX_PATH = path.join(process.cwd(), 'research', 'model-compare', 'design-analysis', 'LLM-EVALUATION-MATRIX.md');
 
 // Load all run files and aggregate best score per provider
 function loadBestResults() {
