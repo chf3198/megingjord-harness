@@ -2,49 +2,74 @@
 title: "OpenClaw Gateway"
 type: entity
 created: 2026-04-14
-updated: 2026-05-01
-tags: [fleet, service, inference]
-sources: ["[[openclaw-windows-optimization-2026]]"]
-related: ["[[windows-laptop]]", "[[penguin-1]]", "[[model-routing]]", "[[tiered-agent-architecture]]"]
-status: draft
+updated: 2026-05-02
+tags: [fleet, service, inference, system-service-ollama, deepseek-coder-v2]
+sources: ["[[openclaw-windows-optimization-2026]]", "[[fleet-resource-audit-2026-05-01]]", "[[fleet-hardware-optimization-2026-05-01]]"]
+related: ["[[windows-laptop]]", "[[36gbwinresource]]", "[[penguin-1]]", "[[model-routing]]", "[[tiered-agent-architecture]]", "[[cascade-dispatch]]"]
+status: current
 ---
 
 # OpenClaw Gateway
 
-Self-hosted fleet routing gateway on [[windows-laptop]].
+CPU-only inference host. Now operates under SYSTEM-service Ollama with
+deepseek-coder-v2:lite as primary model — 16B MoE delivering ~140% better
+TPS than the prior dense 7B baseline.
 
 ## Architecture
-- LiteLLM/OpenClaw proxy: single OpenAI-compatible endpoint
-- Ollama backends: local model serving across fleet devices
-- Fleet integration: target for `fleet` lane dispatch in task-router
-- Network scope: exposed to [[tailscale-mesh]] only
 
-## What It Provides to DevEnv Ops
-- Fleet-lane execution endpoint abstraction
-- Centralized model selection and fallback policy
-- Uniform request/response surface for tooling scripts
-- Operational choke-point for reliability telemetry
+- Ollama on port 11434 (SYSTEM-service `ollserv` scheduled task)
+- Fleet integration: target for `fleet-coder` lane dispatch
+- Network scope: Tailscale mesh only
+- New admin account `desktop-909a7km\admin` (replaces prior shared account)
 
-## Models Available (live as of 2026-05-01)
-- qwen2.5:7b-instruct — general instruction following; ~1–2 tok/s CPU
-- qwen2.5-coder:7b — coding-tuned; ~1.3 tok/s CPU cold-start
+## Operating mode (post-2026-05-02 IT pass)
 
-**Removed**: mistral:latest, phi3:mini, llama3.2 (no longer installed)
+- Tray app retired; SYSTEM-service `ollserv` runs `ollama serve` at boot
+- Pagefile increased to 24-32 GB
+- Defender exclusions for `~\.ollama\` + ollama executables
+- Machine-scope env vars: `OLLAMA_KEEP_ALIVE=24h`, `NUM_PARALLEL=4`, `MAX_LOADED_MODELS=3`, `FLASH_ATTENTION=1`, `HOST=0.0.0.0:11434`, `MODELS=C:\Users\Admin\.ollama\models`
 
-## Performance Constraints
-- Host: CPU-only (Intel i3-N305, 8 cores, ~6.3 GiB RAM, no GPU)
-- Inference speed: 1–2 tok/s for 7B quantized models
-- Use GPU nodes (36gbwinresource: 9+ tok/s) for latency-sensitive tasks
-- OpenClaw is preferred for privacy-critical or offline-required workloads
+## Specs
 
-## Current Operational Risk
-- CPU-only inference limits throughput for interactive tasks
-- Gateway health endpoint instability can make fleet lane unavailable
-- See [[openclaw-windows-optimization-2026]] for hardening plan
+- CPU-only (no GPU)
+- 16 GB RAM, 15.8 GB visible
+- Windows 10
+- Tailscale IP: 100.78.22.13
 
-## Failover Chain
-1. OpenClaw (local fleet) — free, low latency
-2. Groq (cloud free tier) — fast, rate limited
-3. Cerebras (cloud free tier) — fast, limited models
+## Models installed (as of 2026-05-02)
 
-See: [[free-tier-inventory]], [[tiered-agent-architecture]]
+| Model | Size | Tier | Warm TPS |
+|---|---|---|---|
+| **deepseek-coder-v2:lite** | 8.91 GB | **primary** (16B MoE, ~2.4B active per token) | **8.4** |
+| granite-code:20b | 11.55 GB | max-quality dense alternative | ~1-2 |
+| qwen2.5-coder:7b | 4.68 GB | legacy fallback | 3.5 |
+| qwen2.5:7b-instruct | 4.68 GB | legacy fallback | 3.5 |
+
+**Saturation behavior**: cannot hold both deepseek (9.9 GB) and granite-20b (12 GB) simultaneously on the 16 GB host; operates as **single-model warm cache** with 24h keep-alive, switching only when an explicit different model is requested.
+
+## Routing role
+
+- `tier`: standard
+- `inferenceClass`: coding
+- `priority`: 60
+- Preferred for: integration, tests, migration, workflow
+- Default model: **deepseek-coder-v2:lite** (best CPU TPS in MoE class)
+- Heavy reasoning: granite-code:20b (slower, higher quality)
+
+## Failover chain (when OpenClaw unavailable)
+
+1. OpenClaw (local fleet) — free, low latency, this entity
+2. 36gbwinresource (GPU fleet) — preferred for FIM/short completions
+3. Groq cloud (llama-3.3-70b-versatile) — fast, rate-limited
+4. Cerebras (qwen-3-235b) — fast, limited capacity
+5. Anthropic Haiku — paid fallback
+
+## Maintenance notes
+
+- KEEP_ALIVE env var was historically unreliable when Ollama ran as a tray
+  app under a now-retired user. SYSTEM-service migration (2026-05-02) fixed
+  the env-var inheritance issue.
+- See `.dashboard/it-notes/fleet-upgrade-2026-05-01.md` (gitignored, IT-local) for the
+  authoritative operational runbook.
+
+See: [[36gbwinresource]], [[penguin-1]], [[fleet-architecture]], [[cascade-dispatch]]

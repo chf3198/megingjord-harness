@@ -50,14 +50,29 @@ status: stub | draft | mature
 
 ## Operations
 
-### Ingest
-1. Human places source in `raw/` with frontmatter
+### Toolchain (run from Megingjord repo root)
+
+| Operation | Command | Script |
+|---|---|---|
+| Ingest one raw source | `npm run wiki:ingest -- raw/articles/<file>.md` | `scripts/wiki/ingest.js` |
+| Lint structure | `npm run wiki:lint` | `scripts/wiki/lint.js` |
+| Anneal (rewrite for consistency) | `npm run wiki:anneal` | `scripts/wiki/anneal.js` |
+| Search wiki | `npm run wiki:search -- "query"` | `scripts/wiki/search.js` |
+
+`wiki:search` is also exposed globally as `node ~/.copilot/scripts/wiki-search.js` after deploy, so non-Megingjord repos can read the compiled wiki.
+
+### Ingest pipeline (raw/articles → wiki/sources → wiki/{entities,concepts})
+
+The `wiki:ingest` script implements steps 3–6 below; steps 1–2 and 7 are the
+human-or-LLM judgment calls around it.
+
+1. Human places source in `raw/articles/<slug>.md` with frontmatter (set `status: pending`)
 2. LLM reads source, discusses key takeaways
-3. LLM writes `wiki/sources/<slug>.md` summary
+3. LLM writes `wiki/sources/<slug>.md` summary (one source page per raw file)
 4. LLM updates entity/concept pages (create or revise)
 5. LLM updates `wiki/index.md` with new/changed pages
 6. LLM appends entry to `wiki/log.md`
-7. Mark raw source frontmatter `status: ingested`
+7. Mark raw source frontmatter `status: ingested` and commit
 
 ### Query
 1. LLM reads `wiki/index.md` to find relevant pages
