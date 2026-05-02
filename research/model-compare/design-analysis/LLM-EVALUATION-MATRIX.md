@@ -1,5 +1,15 @@
 # LLM Response Comparison & Evaluation Matrix
 
+> ⚠️ **STALE — last refreshed 2026-04-20.** Refresh + automation tracked in **#833**.
+> Known missing-or-outdated entries (post-2026-04-20):
+> - `starcoder2:3b`, `granite-code:3b`, `qwen2.5-coder:32b` (added on 36gbwinresource via #765)
+> - `deepseek-coder-v2:lite` (added on windows-laptop via #765)
+> - penguin-1 SLM/embedder lineup (qwen3:0.6b, gemma3:270m, nomic-embed-text, snowflake-arctic-embed:m via #734)
+> - `gemini-2.0-flash` deprecated → `gemini-2.5-flash` (#804)
+> - Cerebras qwen-3-235b rate-limit posture
+> - OpenRouter free pool roster shift
+> Do not rely on numbers below until #833 ships. Use the routing tier definitions in `instructions/global-task-router.instructions.md` as the source of truth meanwhile.
+
 **Date:** 2026-04-20
 **Task:** Design consultation and analysis for Fleet Resource Table autoupdate and user-editing pipeline.
 **Methodology:** Based on industry best practices for evaluating LLMs on complex architectural tasks, we employ a multi-rubric scoring framework (0-10 scale) focusing on Architectural Soundness, Security Posturing, UX/UI Practicality, and Execution Readiness. 
