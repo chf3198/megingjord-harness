@@ -34,8 +34,6 @@ function normalizeTokenRecord(entry = {}) {
     total_tokens: total,
     cost_usd: entry.cost_usd == null ? null : n(entry.cost_usd),
     confidence_level: level,
-    caveat_code: entry.caveat_code || null,
-    caveat_detail: entry.caveat_detail || null,
     request_id: entry.request_id || null,
     source_kind: entry.source_kind || 'routing_telemetry',
   };

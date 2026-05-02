@@ -51,14 +51,9 @@ function readTelemetry(days = 30) {
 function summarize(entries) {
   const n = entries.length || 1;
   const byLane = { free: 0, fleet: 0, haiku: 0, premium: 0 };
-  const byConfidence = { exact: 0, estimated: 0, other: 0 };
   const escalations = { haiku: 0, premium: 0 };
   entries.forEach(e => {
     byLane[e.lane] = (byLane[e.lane] || 0) + 1;
-    const c = e.confidence_level;
-    if (c && String(c).startsWith('exact')) byConfidence.exact += 1;
-    else if (c === 'estimated') byConfidence.estimated += 1;
-    else byConfidence.other += 1;
     if (e.escalation) escalations[e.escalation] = (escalations[e.escalation] || 0) + 1;
   });
   const premium = entries.filter(e => e.lane === 'premium').length;
@@ -69,9 +64,6 @@ function summarize(entries) {
     samples: entries.length,
     laneDistribution: Object.fromEntries(
       Object.entries(byLane).map(([k, v]) => [k, +(v / n).toFixed(3)])
-    ),
-    confidenceDistribution: Object.fromEntries(
-      Object.entries(byConfidence).map(([k, v]) => [k, +(v / n).toFixed(3)])
     ),
     escalationCounts: escalations,
     premiumShare: +(premium / n).toFixed(3),

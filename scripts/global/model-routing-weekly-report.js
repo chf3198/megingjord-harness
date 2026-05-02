@@ -15,12 +15,6 @@ function report() {
     generatedAt: new Date().toISOString(),
     period: usage.period,
     premiumShare: { current: now.premiumShare, previous: old.premiumShare, delta: now.premiumShare - old.premiumShare },
-    confidenceSplit: {
-      current: now.confidenceDistribution,
-      previous: old.confidenceDistribution,
-      estimatedDelta:
-        (now.confidenceDistribution?.estimated || 0) - (old.confidenceDistribution?.estimated || 0)
-    },
     quality: { successRate: now.successRate, failRate: now.failRate, rollbackRate: now.rollbackRate },
     efficiency: { avgMultiplier: now.avgMultiplier, requests: usage.manualOverride?.requests ?? usage.requests }
   };

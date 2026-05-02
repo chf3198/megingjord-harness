@@ -15,7 +15,6 @@ test('recordTelemetry writes entry with required schema fields', () => {
   expect(entry.taskClass).toBe('coding');
   expect(entry.complexityScore).toBe(0.35);
   expect(['local', 'cheap', 'fleet', 'free', 'haiku', 'premium']).toContain(entry.lane);
-  expect(['exact_request', 'exact_aggregate', 'derived', 'estimated', 'unknown']).toContain(entry.confidence_level);
 });
 
 // AC5: lane is one of known tiers
@@ -41,16 +40,6 @@ test('telemetry rolling window trims to max 100 entries', () => {
   }
   const entries = readTelemetry(30);
   expect(entries.length).toBeLessThanOrEqual(100);
-});
-
-test('telemetry summarize includes confidence split', () => {
-  const { summarize } = require(path.join(__dirname, '../scripts/global/model-routing-telemetry'));
-  const out = summarize([
-    { lane: 'fleet', confidence_level: 'exact_request', outcome: 'ok' },
-    { lane: 'premium', confidence_level: 'estimated', outcome: 'ok' }
-  ]);
-  expect(out.confidenceDistribution.exact).toBe(0.5);
-  expect(out.confidenceDistribution.estimated).toBe(0.5);
 });
 
 // AC4: npm run cost-report resolves to cost-report.js

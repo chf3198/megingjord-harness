@@ -48,11 +48,3 @@ test('ollama adapter maps eval counters', () => {
   expect(r.output_tokens).toBe(6);
   expect(r.confidence_level).toBe('exact_request');
 });
-
-test('copilot adapter is estimated and includes caveat', () => {
-  const r = adapters.copilot({ estimated_cost_usd: 0.52, request_id: '2026-05:13' }, { lane: 'premium' });
-  expect(r.provider).toBe('copilot');
-  expect(r.confidence_level).toBe('estimated');
-  expect(r.caveat_code).toBe('copilot_estimated_lane');
-  expect(r.caveat_detail).toContain('No exact Copilot');
-});

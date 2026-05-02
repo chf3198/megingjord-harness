@@ -62,17 +62,4 @@ function ollama(payload = {}, base = {}) {
   });
 }
 
-function copilot(payload = {}, base = {}) {
-  return mk(base, {
-    provider: 'copilot', model: payload.model || base.model || 'copilot-pro',
-    input_tokens: n(payload.input_tokens), output_tokens: n(payload.output_tokens),
-    total_tokens: payload.total_tokens ?? (n(payload.input_tokens) + n(payload.output_tokens)),
-    cost_usd: payload.cost_usd ?? payload.estimated_cost_usd,
-    confidence_level: 'estimated', request_id: payload.request_id || base.request_id,
-    source_kind: 'copilot_estimator', caveat_code: 'copilot_estimated_lane',
-    caveat_detail: payload.caveat_detail ||
-      'No exact Copilot per-request token API; values are estimated or manually synced.'
-  });
-}
-
-module.exports = { anthropic, openrouter, litellm, gemini, ollama, copilot };
+module.exports = { anthropic, openrouter, litellm, gemini, ollama };
