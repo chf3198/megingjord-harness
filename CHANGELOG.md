@@ -34,9 +34,9 @@
 ## [3.3.8] — 2026-05-03 — Token Telemetry Reconciliation + Drift Alerting (#774)
 
 ### Added
-- `scripts/global/token-telemetry-reconcile.js`: reconciliation harness that compares request-level adapter totals against provider aggregate APIs (OpenRouter, Groq). Generates pass/fail verdict table with configurable drift thresholds (warn ≥15%, fail ≥35%).
-- `dashboard/js/token-reconcile.js`: dashboard panel renderer for drift reconciliation report; verdict badges, alert list, threshold display.
-- `tests/token-telemetry-reconcile.spec.js`: 3 tests covering report structure, configurable thresholds, and panel HTML rendering.
+- `scripts/global/token-telemetry-reconcile.js`: reconciliation harness that compares request-level adapter totals against provider aggregate APIs (OpenRouter native + Anthropic/LiteLLM when usage endpoints are configured). Generates pass/fail verdicts with configurable drift thresholds (warn ≥15%, fail ≥35%).
+- `dashboard/js/token-reconcile.js`: dashboard panel renderer for drift reconciliation report; verdict badges, alert list, threshold display, lane and confidence-impact columns.
+- `tests/token-telemetry-reconcile.spec.js`: 4 tests covering report structure, configurable thresholds, provider lane/confidence fields, and panel rendering.
 - `npm run routing:reconcile` script: CLI entry-point for reconciliation report generation.
 
 ### Changed
