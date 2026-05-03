@@ -103,7 +103,7 @@
     "globals": "^17.5.0",
     "log4brains": "^1.1.0",
     "markdown-magic": "^4.8.0",
-    "markdownlint-cli2": "^0.17.2",
+    "markdownlint-cli2": "^0.22.1",
     "prettier": "^3.6.2"
   },
   "dependencies": {
