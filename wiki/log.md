@@ -12,6 +12,12 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-03] update | Token telemetry drift reconciliation (#774)
+Implemented and validated reconciliation + alerting harness for request-vs-aggregate token drift.
+Added provider lane and confidence-impact fields, dashboard reconcile panel, and test coverage.
+Validation evidence captured from capability probe, cloud provider probes, and fleet benchmark
+(including 36gbwinresource performance and OpenClaw preflight result).
+
 ## [2026-04-13] init | Wiki system scaffolded
 Phase 1 foundation created. Directories: raw/, wiki/, scripts/wiki/.
 Schema: WIKI.md. No sources ingested yet.
