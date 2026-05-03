@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — Reconcile release-please manifest (#843, follow-up from #840)
+
+### Fixed
+- `.release-please-manifest.json`: `3.1.0` → `3.3.8`. The stale 3.1.0 baseline caused the first post-#840 release-please PR (#842, closed) to propose v3.2.0 — lower than the latest tag v3.3.7. With the manifest reconciled, the next release-please run will propose a version monotonically greater than v3.3.7.
+
 ## [Unreleased] — Enable Actions to create+approve PRs; unblock release-please (#840, ADR-018 Accepted)
 
 ### Added
