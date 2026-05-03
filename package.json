@@ -1,6 +1,6 @@
 {
   "name": "megingjord-harness",
-  "version": "3.3.8",
+  "version": "3.2.0",
   "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
