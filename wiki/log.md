@@ -168,3 +168,6 @@ Manager-authority audit across 18 open tickets. Deterministic governance scripts
 
 ## [2026-05-03] shipped | Fleet matrix refresh automation + freshness gate (#833)
 `scripts/global/routing-refresh.js` probes Groq/Cerebras/OpenRouter/Google + 3 Tailscale Ollama hosts; writes `.dashboard/routing-snapshot.json` + stamps matrix header. `scripts/global/matrix-freshness.js` fails CI on >60d staleness. `.github/workflows/model-matrix-refresh.yml` monthly cron + on-demand. 6 Playwright tests. 36gbwinresource qwen2.5-coder:32b drafted the change-summary section; zero paid LLM tokens.
+
+## [2026-05-03] research | Parallel fleet access — global queue design (#781)
+Manager-authority research deliverable for cross-team Tailscale fleet sharing. Decision: SQLite-WAL default substrate (#739) with optional Worker DO (#740/#788). Per-vendor skill/tool surfaces designed for Claude Code, Copilot, Codex, Continue.dev, Cursor, Aider. Heavy fleet usage: Cerebras 235B (Q5-Q10), 36gbwinresource qwen2.5-coder:32b (Q4), Groq llama-3.3-70b (Q1-Q3). Implementation children deferred to client review.
