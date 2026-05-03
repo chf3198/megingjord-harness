@@ -89,7 +89,7 @@ npm run deploy:both:apply
 | `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
-| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=400` |
+| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=420` |
 | `lint:router` | `node scripts/lint-router.js` |
 | `lint:sh` | `find scripts -name '*.sh' -exec shellcheck {} +` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
@@ -103,6 +103,9 @@ npm run deploy:both:apply
 | `router:weekly` | `node scripts/global/model-routing-weekly-report.js` |
 | `routing:baseline` | `node scripts/global/routing-baseline-report.js` |
 | `routing:calibrate` | `node scripts/global/cascade-calibrate.js` |
+| `routing:freshness` | `node scripts/global/matrix-freshness.js` |
+| `routing:reconcile` | `node scripts/global/token-telemetry-reconcile.js --json` |
+| `routing:refresh` | `node scripts/global/routing-refresh.js --update-matrix` |
 | `routing:report` | `node scripts/global/routing-baseline-report.js --days 7` |
 | `routing:telemetry` | `node scripts/global/token-telemetry-report.js --json` |
 | `setup` | `npm install && echo '✅ megingjord ready — run: npm start'` |

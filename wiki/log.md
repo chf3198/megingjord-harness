@@ -165,3 +165,6 @@ Manual ingest (fleet LLM endpoints returning HTTP 400 at ingest time). Spawned i
 
 ## [2026-05-02] audit | Manager-side ticket audit pass (#836, #837 spawned)
 Manager-authority audit across 18 open tickets. Deterministic governance scripts reported zero drift. LLM-grounded review (Groq llama-3.3-70b + Cerebras qwen-3-235b, free fleet) surfaced one real doc-drift (epic-governance vs ticket-driven-work contradiction → #836), one ticket-cluster boundary (#732/#766/#833), and one AC-tightening signal (#829). New wiki concept: ticket-audit-pattern. New tickets: #836, #837. Manager comments posted on #732, #766, #829, #833. Token cost: ~8 KB Claude / ~80 KB free fleet.
+
+## [2026-05-03] shipped | Fleet matrix refresh automation + freshness gate (#833)
+`scripts/global/routing-refresh.js` probes Groq/Cerebras/OpenRouter/Google + 3 Tailscale Ollama hosts; writes `.dashboard/routing-snapshot.json` + stamps matrix header. `scripts/global/matrix-freshness.js` fails CI on >60d staleness. `.github/workflows/model-matrix-refresh.yml` monthly cron + on-demand. 6 Playwright tests. 36gbwinresource qwen2.5-coder:32b drafted the change-summary section; zero paid LLM tokens.

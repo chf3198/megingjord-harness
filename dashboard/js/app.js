@@ -9,7 +9,7 @@ function dashboardApp() {
     batonState: [], ticketLog: [], activityLog: [], governanceState: {},
     wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
     githubData: null,
-    fleetHealthLog: [], costData: [], tokenTelemetry: null,
+    fleetHealthLog: [], costData: [], tokenTelemetry: null, reconcileData: null,
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -64,7 +64,7 @@ function dashboardApp() {
         this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
-        if (typeof fetchCostTelemetry === 'function') this.costData = await fetchCostTelemetry(); if (typeof fetchTokenTelemetrySummary === 'function') this.tokenTelemetry = await fetchTokenTelemetrySummary();
+        if (typeof fetchCostTelemetry === 'function') this.costData = await fetchCostTelemetry(); if (typeof fetchTokenTelemetrySummary === 'function') this.tokenTelemetry = await fetchTokenTelemetrySummary(); if (typeof fetchTokenReconcileSummary === 'function') this.reconcileData = await fetchTokenReconcileSummary().catch(() => null);
         if (typeof fetchAgentSessions === 'function') this.agentSessions = await fetchAgentSessions();
         this.lastRefresh = new Date().toLocaleTimeString();
       } finally {
