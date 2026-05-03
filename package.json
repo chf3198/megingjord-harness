@@ -98,7 +98,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "devDependencies": {
     "@playwright/test": "^1.52.0",
-    "eslint": "^9.39.4",
+    "eslint": "^10.3.0",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^17.5.0",
     "log4brains": "^1.1.0",
