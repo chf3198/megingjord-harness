@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Research: parallel fleet access — global queue design (#781)
+
+### Added
+- `research/parallel-fleet-queue-design-2026-05-03.md`: 10-question research deliverable + queue-substrate decision matrix + per-vendor skill/tool surface + wait/escalate policy + observability + fairness + pre-emption + cross-runtime auth.
+- `raw/articles/parallel-fleet-queue-design-2026-05-03.md`, `wiki/sources/parallel-fleet-queue-design-2026-05-03.md`, `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- Implementation children NOT spawned per Manager scope — research awaiting client review.
+- Heavy free-fleet usage: Cerebras qwen-3-235b (Q5–Q10), 36gbwinresource qwen2.5-coder:32b (Q4), Groq llama-3.3-70b (Q1–Q3). Zero paid LLM tokens.
+
 ## [Unreleased] — Reconcile release-please manifest (#843, follow-up from #840)
 
 ### Fixed
