@@ -99,7 +99,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "eslint": "^9.39.4",
-    "eslint-plugin-jsdoc": "^50.8.0",
+    "eslint-plugin-jsdoc": "^62.9.0",
     "globals": "^17.5.0",
     "log4brains": "^1.1.0",
     "markdown-magic": "^4.8.0",
