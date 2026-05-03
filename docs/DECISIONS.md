@@ -40,6 +40,7 @@ ADRs that change governance must follow Manager → Consultant baton.
 | 015 | Model Routing via Custom Agents (renumbered from ADR-004) | [`015-model-routing-agents.md`](../research/adr/015-model-routing-agents.md) |
 | 016 | log4brains as the ADR Pipeline | [`016-log4brains-adr-pipeline.md`](../research/adr/016-log4brains-adr-pipeline.md) |
 | 017 | package-lock.json — Commit vs. Gitignore Decision | [`017-package-lock-decision.md`](../research/adr/017-package-lock-decision.md) |
+| 018 | Enable GitHub Actions to create and approve pull requests | [`018-actions-pr-permission.md`](../research/adr/018-actions-pr-permission.md) |
 
 ## Resolved issues
 

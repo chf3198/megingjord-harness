@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — Enable Actions to create+approve PRs; unblock release-please (#840, ADR-018 Accepted)
+
+### Added
+- `research/adr/018-actions-pr-permission.md` (Accepted): documents enabling `can_approve_pull_request_reviews=true` while retaining `default_workflow_permissions=read`. Fleet-drafted risk register (Groq llama-3.3-70b).
+- `docs/DECISIONS.md`: ADR-018 row.
+
+### Changed
+- Repo-level Actions permission flipped via `gh api PUT /repos/.../actions/permissions/workflow` to `can_approve_pull_request_reviews=true`. `default_workflow_permissions` retained at `read`.
+- `.github/workflows/release-please.yml`: added `workflow_dispatch:` trigger for manual verification.
+
+### Notes
+- Unblocks the auto-tag flow silently failing since release-please was introduced. Latest tags stuck at v3.3.7 with the [Unreleased] block accumulating.
+
 ## [Unreleased] — Fleet matrix refresh automation + freshness gate (#833)
 
 ### Added
