@@ -135,6 +135,13 @@ npm run deploy:both:apply
 
 This table is auto-generated from `package.json` by `npm run docs:compile` (#796). Do not edit by hand inside the fenced region — CI fails when README diverges from sources.
 
+## Token telemetry reconciliation configuration
+
+- Run `npm run routing:reconcile` to generate `logs/token-telemetry-reconcile.json`.
+- Default thresholds: `drift_pct=0.15`, `drift_pct_fail=0.35`, `min_samples=3`.
+- OpenRouter aggregate usage is auto-probed when `OPENROUTER_API_KEY` is set.
+- Anthropic/LiteLLM aggregate usage can be enabled with `ANTHROPIC_USAGE_URL` and `LITELLM_USAGE_URL` (plus keys).
+
 ## Public trust surfaces
 
 - [Code of Conduct](CODE_OF_CONDUCT.md)
