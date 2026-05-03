@@ -1,6 +1,6 @@
 {
   "name": "megingjord-harness",
-  "version": "3.3.7",
+  "version": "3.3.8",
   "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
@@ -42,6 +42,9 @@
     "routing:baseline": "node scripts/global/routing-baseline-report.js",
     "routing:report": "node scripts/global/routing-baseline-report.js --days 7",
     "routing:telemetry": "node scripts/global/token-telemetry-report.js --json",
+    "routing:reconcile": "node scripts/global/token-telemetry-reconcile.js --json",
+    "routing:refresh": "node scripts/global/routing-refresh.js --update-matrix",
+    "routing:freshness": "node scripts/global/matrix-freshness.js",
     "routing:calibrate": "node scripts/global/cascade-calibrate.js",
     "governance:drift": "node scripts/global/governance-drift-classifier.js --json",
     "governance:epics": "node scripts/global/epic-close-validator.js",

@@ -103,6 +103,9 @@ npm run deploy:both:apply
 | `router:weekly` | `node scripts/global/model-routing-weekly-report.js` |
 | `routing:baseline` | `node scripts/global/routing-baseline-report.js` |
 | `routing:calibrate` | `node scripts/global/cascade-calibrate.js` |
+| `routing:freshness` | `node scripts/global/matrix-freshness.js` |
+| `routing:reconcile` | `node scripts/global/token-telemetry-reconcile.js --json` |
+| `routing:refresh` | `node scripts/global/routing-refresh.js --update-matrix` |
 | `routing:report` | `node scripts/global/routing-baseline-report.js --days 7` |
 | `routing:telemetry` | `node scripts/global/token-telemetry-report.js --json` |
 | `setup` | `npm install && echo '✅ megingjord ready — run: npm start'` |

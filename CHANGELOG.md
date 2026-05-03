@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.3.8] — 2026-05-03 — Token Telemetry Reconciliation + Drift Alerting (#774)
+
+### Added
+- `scripts/global/token-telemetry-reconcile.js`: reconciliation harness that compares request-level adapter totals against provider aggregate APIs (OpenRouter, Groq). Generates pass/fail verdict table with configurable drift thresholds (warn ≥15%, fail ≥35%).
+- `dashboard/js/token-reconcile.js`: dashboard panel renderer for drift reconciliation report; verdict badges, alert list, threshold display.
+- `tests/token-telemetry-reconcile.spec.js`: 3 tests covering report structure, configurable thresholds, and panel HTML rendering.
+- `npm run routing:reconcile` script: CLI entry-point for reconciliation report generation.
+
+### Changed
+- `scripts/dashboard-server.js`: added `/api/logs/token-telemetry-reconcile` route.
+- `dashboard/index.html`: loads `token-reconcile.js`; cost view now renders reconcile panel between token telemetry and cost monitor.
+- `dashboard/js/app.js`: added `reconcileData` state; fetches reconciliation summary on cost view refresh.
+
 ## [Unreleased] — Lockfile flip: commit package-lock.json (#830, ADR-017 Accepted)
 
 ### Added
