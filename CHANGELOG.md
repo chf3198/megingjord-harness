@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Research v3 (HAMR): 5-axis optimization (#873, EPIC #860)
+
+### Added
+- `research/hamr-v3-2026-05-04.md` (2226 words): 5-axis optimization (security, UX, token-min, paid-token + rate-limit, maintenance). Acronym formalized as **HAMR — Harness-Aware Mesh Routing**.
+- `raw/articles/hamr-v3-2026-05-04.md` + `wiki/sources/hamr-v3-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- v1+v2 substrate preserved. v3 adds SLSA-L3 + OIDC publishing + Cosign Bundle 1.0 + MCP OAuth+DPoP + capability manifests (security); npx init + magic-link + hamr:status/doctor/quota (UX); per-tier sub-bundles + JSON Patch + distilled constitution + structured outputs (~80% session-token reduction); Anthropic/OpenAI/Gemini Batch (50% off) + sticky cache + context-editing + spillover (paid-token min); Wrangler 4.x + Tail Workers + R2 lifecycle + schema versioning (maintenance).
+- 13 MVP children (vs v2's 9); 4 new. NOT spawned per Manager scope.
+- Heavy fleet usage via sub-agent + websearch. Zero paid LLM tokens.
+
 ## [Unreleased] — Research v2: fleet harness-awareness — agnostic, multi-repo, redundancy, caching, A2A (#863, EPIC #860)
 
 ### Added
