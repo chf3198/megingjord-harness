@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Research: dashboard layout density heuristics + panel sizing (#854, child of EPIC #850)
+
+### Added
+- `research/dashboard-layout-density-2026-05-04.md`: 2026-Q2 layout-density research with per-panel sizing matrix, removal/consolidation criteria, and cross-viewport strategy for 1920×1080 / 1440×900 / mobile-touch.
+- `raw/articles/dashboard-layout-density-2026-05-04.md` + `wiki/sources/dashboard-layout-density-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- Visual mockups included as desktop/laptop/mobile panel wireframes.
+- Heavy free-fleet utilization: capability probe + routing refresh (Groq/Cerebras/OpenRouter/Google + Tailscale hosts) + fleet benchmark evidence with strong 36gbwinresource throughput.
+
 ## [Unreleased] — Research: dashboard closed-state hygiene (#852, child of EPIC #848)
 
 ### Added

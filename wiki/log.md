@@ -180,3 +180,6 @@ Manager-authority research deliverable for cross-team Tailscale fleet sharing. D
 
 ## [2026-05-04] research | Dashboard closed-state hygiene (#852)
 Research-only deliverable for child of EPIC #848. Decision: Linear-style default-hide + toggle with Height-style condensed historical attribution. Single Groq llama-3.3-70b dispatch (zero paid LLM tokens). Implementation children NOT spawned — awaiting client review.
+
+## [2026-05-04] research | Dashboard layout density heuristics (#854)
+Research-only deliverable for child of EPIC #850. Produced per-panel sizing matrix and desktop/laptop/mobile wireframe baselines with panel consolidation rationale. Heavy fleet usage evidence captured from capability probe + routing refresh + fleet benchmark (36gbwinresource strongest throughput). Implementation children NOT spawned — awaiting client review.
