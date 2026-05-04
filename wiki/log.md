@@ -177,3 +177,6 @@ Manager-authority audit across 18 open tickets. Deterministic governance scripts
 
 ## [2026-05-03] research | Parallel fleet access — global queue design (#781)
 Manager-authority research deliverable for cross-team Tailscale fleet sharing. Decision: SQLite-WAL default substrate (#739) with optional Worker DO (#740/#788). Per-vendor skill/tool surfaces designed for Claude Code, Copilot, Codex, Continue.dev, Cursor, Aider. Heavy fleet usage: Cerebras 235B (Q5-Q10), 36gbwinresource qwen2.5-coder:32b (Q4), Groq llama-3.3-70b (Q1-Q3). Implementation children deferred to client review.
+
+## [2026-05-04] research | Dashboard closed-state hygiene (#852)
+Research-only deliverable for child of EPIC #848. Decision: Linear-style default-hide + toggle with Height-style condensed historical attribution. Single Groq llama-3.3-70b dispatch (zero paid LLM tokens). Implementation children NOT spawned — awaiting client review.

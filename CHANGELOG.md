@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Research: dashboard closed-state hygiene (#852, child of EPIC #848)
+
+### Added
+- `research/dashboard-closed-state-hygiene-2026-05-04.md`: 2026-Q2 patterns survey (Linear / Height / GitHub Projects v2 / Anthropic Console) for terminal-state filtering + post-close role attribution + dashboard-side lint vs upstream gate. Decision: Linear-style default-hide + toggle, Height-style condensed historical attribution, hybrid lint posture.
+- `raw/articles/dashboard-closed-state-hygiene-2026-05-04.md` + `wiki/sources/dashboard-closed-state-hygiene-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- Implementation children NOT spawned — awaiting client review.
+- Single Groq llama-3.3-70b dispatch; zero paid LLM tokens.
+
 ## [Unreleased] — Fix governance scripts that ENOENT'd on missing tickets/ dir (#856)
 
 ### Fixed
