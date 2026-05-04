@@ -6,7 +6,9 @@ const args = process.argv.slice(2);
 const asJson = args.includes('--json');
 const root = path.resolve(__dirname, '..', '..');
 const dir = path.join(root, 'tickets');
-const files = fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort();
+const files = fs.existsSync(dir)
+  ? fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort()
+  : [];
 const workflowsDir = path.join(root, '.github', 'workflows');
 const readyCutoffMs = 24 * 60 * 60 * 1000;
 const nowMs = Date.now();

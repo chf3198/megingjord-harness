@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Fix governance scripts that ENOENT'd on missing tickets/ dir (#856)
+
+### Fixed
+- `scripts/global/governance-verify.js`: guards `tickets/` dir read with `fs.existsSync()` — returns empty file list cleanly when dir is absent.
+- `scripts/global/governance-weekly-report.js`: same guard inside `tickets()` reader.
+
+Both scripts have been silently broken since #820 removed the local `tickets/` directory (GitHub `#N` is canonical baton). `ticket-reconcile.js` was fixed at the time; these two were missed.
+
+Verified: `npm run governance:verify` and `npm run governance:weekly` now exit 0 with sensible empty/passing output.
+
 ## [Unreleased] — Research: parallel fleet access — global queue design (#781)
 
 ### Added

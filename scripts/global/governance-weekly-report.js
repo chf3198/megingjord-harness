@@ -11,6 +11,7 @@ const logsDir = path.join(root, 'logs');
 
 function tickets() {
   const out = [];
+  if (!fs.existsSync(dir)) return out;
   for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.md'))) {
     const p = path.join(dir, f), txt = fs.readFileSync(p, 'utf8');
     const n = +(txt.match(/^# Ticket\s+(\d+)\s+—/m)?.[1] || 0);
