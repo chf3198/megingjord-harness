@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Research: fleet harness-awareness — centralized governance/wiki/tools server (#861, EPIC #860)
+
+### Added
+- `research/fleet-harness-awareness-2026-05-04.md`: 2026-Q2 substrate survey (Cloudflare Workers/KV/R2; GitHub raw/Pages/Gist; Anthropic Files API + prompt caching; hosted MCP; Hugging Face; Vercel/Netlify Blob; Google Drive; Litestream→R2). Decision: **Cloudflare Worker + R2 + KV fronted by MCP `prompts`/`resources`**. R2 free-egress moat + Anthropic prompt-caching 90% savings + content-addressed bundle hash as single cache key.
+- `raw/articles/fleet-harness-awareness-2026-05-04.md`, `wiki/sources/fleet-harness-awareness-2026-05-04.md`, `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- Implementation children NOT spawned per Manager scope — research awaiting client review.
+- 5 MVP implementation children identified (Worker+R2+KV substrate, bundler, cache-key strategy, vendor wiring, fallback chain).
+- Free-fleet usage: sub-agent + websearch (primary-source citations) + cross-references with shipped primitives #739 / #740 / #784 / #788. Zero paid LLM tokens for content.
+
 ## [Unreleased] — Research: dashboard layout density heuristics + panel sizing (#854, child of EPIC #850)
 
 ### Added
