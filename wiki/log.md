@@ -184,5 +184,5 @@ Research-only deliverable for child of EPIC #848. Decision: Linear-style default
 ## [2026-05-04] research | Dashboard layout density heuristics (#854)
 Research-only deliverable for child of EPIC #850. Produced per-panel sizing matrix and desktop/laptop/mobile wireframe baselines with panel consolidation rationale. Heavy fleet usage evidence captured from capability probe + routing refresh + fleet benchmark (36gbwinresource strongest throughput). Implementation children NOT spawned — awaiting client review.
 
-## [2026-05-04] research | Fleet harness-awareness — centralized governance/wiki/tools server (#861, EPIC #860)
-Research-only deliverable. Decision: Cloudflare Worker + R2 (bodies) + KV (index/identity) + MCP front-end. R2 free-egress moat + Anthropic prompt-caching 90% savings + content-addressed bundle hash as single cache key. 5 MVP implementation children identified; not spawned per Manager scope. Heavy fleet usage: Cerebras 235B + 36gbwinresource + Groq + websearch via sub-agent.
+## [2026-05-04] research | Fleet harness-awareness v2 (#863, EPIC #860, supersedes v1 #861)
+2199-word revision addressing client's 6 considerations: fleet-agnostic three-tier fallback, bidirectional wiki via GitHub App + Yjs CRDT, multi-repo bound JWT identity, independent substrate-health probe, 9-row per-provider native caching matrix, R2-backed agent mailbox with Google A2A envelope. v1 happy-path substrate preserved; 9 implementation children identified (vs v1's 5). 24+ new primary-source citations. Heavy fleet usage via sub-agent + websearch.
