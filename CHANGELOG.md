@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — Research: HAMR v3.2.2 patch — R9.2 cwd-vs-branch hook enforcement (#923, EPIC #860)
+
+### Added
+- `research/hamr-v3-2-2-2026-05-05.md`: pre-Wave-4 alignment patch extending v3.2.1 §R9.2 with three sub-patterns (R9.2.1 Bash-hook contract; R9.2.2 `gh pr create --head` mandate; R9.2.3 branch-ops audit log). Triggered by 3 empirical hazard occurrences during HAMR Waves 1–3.
+- `raw/articles/hamr-v3-2-2-2026-05-05.md` + `wiki/sources/hamr-v3-2-2-2026-05-05.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- v3.2 (#890) + v3.2.1 (#907) stay unmodified; v3.2 + v3.2.1 + v3.2.2 are the combined input contract for Wave 4.
+- Implementation deferred to a separate development child ticket spawned post-merge so the patch can ship without code drift.
+- Disjoint from Copilot Team active surface.
+
 ## [Unreleased] — HAMR Wave 3 child 5: R2 JSONL mailbox + signed A2A envelopes (#918, EPIC #860)
 
 ### Added

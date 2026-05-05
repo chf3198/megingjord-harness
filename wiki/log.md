@@ -12,6 +12,17 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-05] research | HAMR v3.2.2 patch — R9.2 cwd-vs-branch hook enforcement (#923, EPIC #860)
+Pre-Wave-4 alignment patch extending v3.2.1 §R9.2 with three sub-patterns:
+R9.2.1 Bash-hook contract (pre-tool guard asserts HEAD non-detached + no
+in-progress rebase + branch matches EXPECTED_BRANCH); R9.2.2 `gh pr create`
+MUST pass explicit `--head <ref>` flag (cwd-resolved head BANNED); R9.2.3
+branch-ops audit log at ~/.megingjord/branch-ops.log. Triggered by 3
+empirical hazard occurrences during HAMR Waves 1–3 (PR cwd-resolution
+landing commits on wrong/Copilot branches). Implementation deferred to a
+separate development child ticket spawned post-merge. Source:
+research/hamr-v3-2-2-2026-05-05.md.
+
 ## [2026-05-05] research | HAMR v3.2.1 patch — R9 + §R6 update + Copilot coordination (#907, EPIC #860)
 Pre-Wave-2 alignment patch amending v3.2 (#890). Bundles three deltas:
 (1) R9 NEW cross-level resource-failure recovery — four Wave-1-validated
