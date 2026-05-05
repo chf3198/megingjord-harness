@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 4 child 3: provider caching adapters + sticky-route + cache-hit gate (#926, EPIC #860)
+
+### Added
+- `scripts/global/cache-hit-gate.js` (≤100 lines, CommonJS): rolling 7-day cache-hit-rate gate. Reads `~/.megingjord/cache-stats.jsonl`; computes `cache_read_tokens / input_tokens`; alerts when below 80% per v3.2 §R5. Exits non-zero when failing for CI gating.
+- `scripts/global/sticky-route.js` (≤100 lines): tier → preferred-provider sticky router. Returns `previousProvider` when in-tier and healthy (cache-hit win); falls back via `~/.megingjord/substrate-health.json` (#911) when previous unhealthy. Tiers: `free`, `fleet`, `haiku`, `premium`.
+- `scripts/global/token-provider-adapters.js`: 3 new OAI-shape adapters (`openai`, `groq`, `cerebras`) extracting `cache_read_tokens` from `prompt_tokens_details.cached_tokens` or `prompt_cache_hit_tokens`. Now covers all 9 supported providers (anthropic, openai, gemini, groq, cerebras, openrouter, ollama, litellm, copilot). Shared `oaiShape` helper keeps file ≤100 lines.
+- `scripts/global/litellm-client.js`: new `cacheHeaders(provider, opts)` export emitting native cache hints per v3.2 §R5 9-row matrix (Anthropic prompt-caching + extended-cache-ttl betas; Gemini `cachedContent`; Groq/Cerebras/OpenAI `x-cache-control` headers).
+- `tests/cache-adapters.spec.js`: 9 deterministic tests; 17 underlying assertions covering all 9 adapters, cache-header matrix, hit-rate computation across windowed/empty/normal records, gate pass/fail, sticky vs fallback vs null. 9/9 pass.
+- `wiki/concepts/cache-adapters.md`.
+- `package.json` scripts: `hamr:cache-gate`, `hamr:sticky-route`.
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- Disjoint from Copilot Team active surface — touches only `litellm-client.js`, `token-provider-adapters.js`, and 2 new global scripts. **Did NOT modify** `dashboard/js/token-reconcile.js`, `cost-report.js`, or `model-routing-engine.js` per #926 ticket constraint.
+- Strict-superset preserved: only additive surface (3 new adapters + 1 new export + 2 new files); zero deletions.
+- All new + modified files ≤ 100 lines (lint cap).
+- Operator-cost: $0 (no live provider calls in tests).
+- Wave 4 closeout: child 3 (#926) was final development child. Closeout summary on Epic #860 follows.
+
 ## [Unreleased] — HAMR Wave 4 child 9: header-spillover + Anthropic Batch + /mcp SLSA gate + /quota real data (#927, EPIC #860)
 
 ### Added

@@ -75,4 +75,20 @@ function copilot(payload = {}, base = {}) {
   });
 }
 
-module.exports = { anthropic, openrouter, litellm, gemini, ollama, copilot };
+function oaiShape(payload, base, provider, sourceKind) {
+  const usage = payload.usage || {};
+  const details = usage.prompt_tokens_details || {};
+  return mk(base, {
+    provider, model: payload.model || base.model,
+    input_tokens: n(usage.prompt_tokens), output_tokens: n(usage.completion_tokens),
+    cache_read_tokens: n(details.cached_tokens || usage.prompt_cache_hit_tokens),
+    reasoning_tokens: n((usage.completion_tokens_details || {}).reasoning_tokens),
+    total_tokens: n(usage.total_tokens), confidence_level: 'exact_request',
+    request_id: payload.id || base.request_id, source_kind: sourceKind
+  });
+}
+function openai(p = {}, b = {}) { return oaiShape(p, b, 'openai', 'openai_chat_completions'); }
+function groq(p = {}, b = {}) { return oaiShape(p, b, 'groq', 'groq_chat_completions'); }
+function cerebras(p = {}, b = {}) { return oaiShape(p, b, 'cerebras', 'cerebras_chat_completions'); }
+
+module.exports = { anthropic, openrouter, litellm, gemini, ollama, copilot, openai, groq, cerebras };

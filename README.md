@@ -81,12 +81,14 @@ npm run deploy:both:apply
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
 | `governance:worktrees` | `node scripts/global/worktree-governance-audit.js --json` |
 | `hamr:batch-router` | `node scripts/global/anthropic-batch-router.js` |
+| `hamr:cache-gate` | `node scripts/global/cache-hit-gate.js` |
 | `hamr:compress` | `node scripts/global/constitution-compressor.js` |
 | `hamr:deploy` | `bash scripts/global/hamr-deploy.sh` |
 | `hamr:doctor` | `node scripts/global/hamr-doctor.js` |
 | `hamr:health` | `node scripts/global/substrate-health.js` |
 | `hamr:rule-gate` | `node scripts/global/rule-coverage-gate.js` |
 | `hamr:spillover` | `node scripts/global/header-spillover.js` |
+| `hamr:sticky-route` | `node scripts/global/sticky-route.js` |
 | `hamr:teardown` | `bash scripts/global/hamr-teardown.sh` |
 | `health` | `node scripts/health-check.js` |
 | `help:topic` | `node scripts/help-topic.js` |

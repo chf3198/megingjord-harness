@@ -66,4 +66,28 @@ async function healthCheck() {
   return { ...h, backend: 'ollama' };
 }
 
-module.exports = { chatComplete, healthCheck, getLiteLLMUrl };
+/** Provider-native cache-control hints per v3.2 §R5 9-row matrix.
+ * Returns headers + body fragments to opt into native caching.
+ * Caller merges into provider request. Used by HAMR Wave 4 child 3 (#926).
+ * @param {string} provider - Provider name (anthropic, gemini, groq, etc.).
+ * @param {object} [opts] - { ttlSeconds, cacheKey }.
+ * @returns {{headers: object, bodyExtras: object}} Cache hint payload.
+ */
+const DEFAULT_CACHE_TTL_SECONDS = 3600;
+const ANTHROPIC_CACHE_BETAS = 'prompt-caching-2024-07-31,extended-cache-ttl-2025-04-11';
+
+function cacheHeaders(provider, opts = {}) {
+  const ttl = opts.ttlSeconds ?? DEFAULT_CACHE_TTL_SECONDS;
+  switch (provider) {
+    case 'anthropic':
+      return { headers: { 'anthropic-beta': ANTHROPIC_CACHE_BETAS },
+        bodyExtras: { extra_headers: { 'cache-control': `max-age=${ttl}` } } };
+    case 'gemini':
+      return { headers: {}, bodyExtras: { cachedContent: opts.cacheKey || null, ttl: `${ttl}s` } };
+    case 'groq': case 'cerebras': case 'openai':
+      return { headers: { 'x-cache-control': `max-age=${ttl}` }, bodyExtras: {} };
+    default: return { headers: {}, bodyExtras: {} };
+  }
+}
+
+module.exports = { chatComplete, healthCheck, getLiteLLMUrl, cacheHeaders };
