@@ -91,14 +91,9 @@ test('runGate aggregates stages correctly', async () => {
   const r = await GATE.runGate(tier, []);
   expect(r.tier).toBe('routing-12kb');
   expect(r.sha256).toMatch(/^[a-f0-9]{64}$/);
-  expect(r.stages.stage1).toBeDefined();
-  expect(r.stages.stage2a).toBeDefined();
-  expect(r.stages.stage2b).toBeDefined();
+  expect(r.stages).toMatchObject({ stage1: expect.any(Object), stage2a: expect.any(Object), stage2b: expect.any(Object) });
 });
 
-test('STAGE thresholds match v3.2.1 §R6 update', () => {
-  expect(GATE.STAGE_1_THRESHOLD).toBe(0.99);
-  expect(GATE.STAGE_2A_THRESHOLD).toBe(0.80);
-  expect(GATE.STAGE_2B_THRESHOLD).toBe(0.95);
-  expect(GATE.STAGE_3_FLOOR).toBe(0.50);
+test('STAGE thresholds match v3.2.1 §R6', () => {
+  expect([GATE.STAGE_1_THRESHOLD, GATE.STAGE_2A_THRESHOLD, GATE.STAGE_2B_THRESHOLD, GATE.STAGE_3_FLOOR]).toEqual([0.99, 0.80, 0.95, 0.50]);
 });
