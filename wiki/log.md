@@ -24,6 +24,16 @@ baton handoff artifacts + non-fleet judge gate). Sources:
 research/hamr-spike-s6-build-vs-adopt-2026-05-04.md and
 research/hamr-spike-s6-threat-model-2026-05-04.md.
 
+## [2026-05-04] research | HAMR Spike S5 — Distillation rule-coverage (#880, EPIC #860)
+Empirical compression-vs-rule-coverage curve for our 22,480-char governance
+text. Two methods tested in parallel: deterministic top-k extractive (47-
+keyword vocabulary) and Cerebras llama3.1-8b LLM rewrite. Both saturate at
+~32% of source size (≈68% tokens saved) before hitting an irreducible-rule
+floor. 20-question quiz graded by Cerebras llama3.1-8b scored 20/20 at every
+level on both methods. Decision: REVISE v3's ≥97% target upward to ≥99%
+keyword-coverage; introduce two-stage gate (cheap keyword + periodic
+reasoning-grounded). Source: research/hamr-spike-s5-distillation-2026-05-04.md.
+
 ## [2026-05-04] research | HAMR Spike S1 — Existing Code Audit (#876, EPIC #860)
 Audit of 20 modules against HAMR v3 13-child MVP plan. Decision counts:
 REUSE 3, REFACTOR 11, REPLACE 3, MERGE 3. Revised HAMR child count: 9

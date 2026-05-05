@@ -16,6 +16,19 @@
   - **DC-4**: Ed25519-signed baton handoff artifacts; label-lint CI verifies signature; non-fleet cloud judge for governance-critical verification (cross-cutting: children 8, 9, `agent-signature.js`).
 - Heavy fleet usage via Implementer subagent + websearch. Zero paid LLM tokens.
 
+## [Unreleased] — Research: HAMR Spike S5 — Distillation rule-coverage (#880, EPIC #860)
+
+### Added
+- `research/hamr-spike-s5-distillation-2026-05-04.md` (~330 lines): empirical compression-vs-rule-coverage measurement for 22,480-char `instructions/` corpus. Two compression methods (deterministic top-k extractive + Cerebras llama3.1-8b rewrite) tested at 5 levels (60% / 50% / 40% / 30% / 20% of source). 20-question governance quiz graded by Cerebras llama3.1-8b; both methods scored 20/20 at every level (100% rule-coverage). Both methods saturate at ~32% of source size (≈68% tokens saved) before hitting an irreducible-rule floor.
+- `raw/articles/hamr-spike-s5-distillation-2026-05-04.md` + `wiki/sources/hamr-spike-s5-distillation-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- Decision: REVISE v3 target — keyword-coverage raised from ≥97% to ≥99%; two-stage gate proposed (Stage-1 keyword every build, Stage-2 reasoning-grounded weekly with stronger judge).
+- Threats to validity carried forward: lenient grading (key-term presence), small-model judge (llama3.1-8b), quiz selection bias, compression preserves keywords by construction, no stochasticity measured.
+- Heavy free-fleet usage (Cerebras llama3.1-8b for compression + grading; deterministic Python pipeline). Zero paid LLM tokens.
+- Stage-2 reasoning-grounded validation deferred to HAMR MVP execution.
+
 ## [Unreleased] — HAMR S2 spike: capability-probe HAMR substrate checks (#877, EPIC #860)
 
 ### Added
