@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 7 child A: cross-team instruction integration (#951, EPIC #860)
+
+### Added
+- `instructions/hamr-routing.instructions.md` (≤100 lines): canonical HAMR governance contract used by all 3 teams (Claude Code, Copilot, Codex). Documents producer chains, provider-call wrapper contract, /mcp dispatch, cost levers, and boundaries vs Copilot Team active surface.
+
+### Changed
+- `CLAUDE.md`: imports new HAMR routing instructions.
+- `AGENTS.md`: adds "HAMR cross-team routing" section pointing to canonical file.
+- `.github/copilot-instructions.md`: adds "HAMR Cross-Team Routing" section with explicit non-duplication note.
+- `instructions/global-task-router.instructions.md`: adds boundary clarification (lane vs cost-mechanics) and "do not duplicate HAMR mechanics" rule.
+
+### Notes
+- Lane: code-change.
+- Dedup audit performed — no existing instruction had HAMR-adjacent canonical content; only `global-task-router` overlapped (lane policy), resolved via cross-reference.
+- Strict-superset preserved across all 4 governance files.
+
 ## [Unreleased] — HAMR Wave 6 child 4: Anthropic Batch live validator (#944, EPIC #860)
 
 ### Added
