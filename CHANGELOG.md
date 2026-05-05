@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 6 child 2: /mcp mailbox:read envelope-content fetch (#942, EPIC #860)
+
+### Changed
+- `cloudflare/hamr/routes/mcp-dispatch.ts`: `mailbox:read` accepts `params.fetch_contents`. When truthy, fetches each R2 object body and parses as JSON; caps at 50 envelopes (existing constant); skips malformed (`{key, envelope: null, error: 'invalid_json' | 'object_missing'}`). Default behavior (keys-only) unchanged.
+
+### Added
+- `tests/mailbox-fetch-contents.spec.js`: 3 live route tests covering auth-before-dispatch ordering with and without `fetch_contents`.
+
+### Notes
+- Lane: code-change.
+- Worker redeployed (`829e843c-dd8d-41e9-a18f-b3baa685b7eb`).
+- Strict-superset preserved: `fetch_contents` opt-in; pre-existing consumers unaffected.
+
 ## [Unreleased] — HAMR Wave 6 child 1: log rotation + scheduled freshness signal (#941, EPIC #860)
 
 ### Added

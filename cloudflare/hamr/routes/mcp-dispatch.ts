@@ -28,7 +28,19 @@ async function mailboxRead(env: Env, params: Record<string, unknown>): Promise<R
   const limitNum = Number(params.limit ?? 10);
   const limit = Math.min(MAX_MAILBOX_RESULTS, Math.max(1, limitNum));
   const list = await env.HAMR_BUNDLES.list({ prefix: MAILBOX_PREFIX, limit });
-  return jsonResponse(200, { count: list.objects.length, keys: list.objects.map((o) => o.key) });
+  if (!params.fetch_contents) {
+    return jsonResponse(200, { count: list.objects.length, keys: list.objects.map((o) => o.key) });
+  }
+  const envelopes: Array<{ key: string; envelope: unknown; error?: string }> = [];
+  for (const entry of list.objects) {
+    const obj = await env.HAMR_BUNDLES.get(entry.key);
+    if (!obj) { envelopes.push({ key: entry.key, envelope: null, error: 'object_missing' }); continue; }
+    try {
+      const text = await obj.text();
+      envelopes.push({ key: entry.key, envelope: JSON.parse(text) });
+    } catch { envelopes.push({ key: entry.key, envelope: null, error: 'invalid_json' }); }
+  }
+  return jsonResponse(200, { count: envelopes.length, envelopes });
 }
 
 export async function dispatch(request: Request, env: Env, keyId: string, slsaState: string): Promise<Response> {
