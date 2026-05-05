@@ -12,6 +12,18 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-04] research | HAMR Spike S6 — Build-vs-adopt + STRIDE threat model (#881, EPIC #860)
+Two-part deliverable: (a) per-child build-vs-adopt matrix for the 9 surviving
+HAMR MVP children — counts ADOPT 2 / BUILD 4 / HYBRID 3 / REUSE 0; one
+license-incompatible library flagged (TruffleHog AGPL-3.0, rejected as direct
+dep); (b) formal STRIDE threat model across 5 adversary classes × 6 STRIDE
+categories — 9 of 30 cells residual MEDIUM or HIGH after existing mitigations.
+Four required HAMR design changes (DC-1: signed A2A mailbox envelopes; DC-2:
+slsa-verifier pre-MCP-connect; DC-3: hardware-bound DPoP key; DC-4: signed
+baton handoff artifacts + non-fleet judge gate). Sources:
+research/hamr-spike-s6-build-vs-adopt-2026-05-04.md and
+research/hamr-spike-s6-threat-model-2026-05-04.md.
+
 ## [2026-05-04] research | HAMR Spike S1 — Existing Code Audit (#876, EPIC #860)
 Audit of 20 modules against HAMR v3 13-child MVP plan. Decision counts:
 REUSE 3, REFACTOR 11, REPLACE 3, MERGE 3. Revised HAMR child count: 9

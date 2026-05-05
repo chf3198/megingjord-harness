@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased] — Research: HAMR Spike S6 — Build-vs-adopt + STRIDE threat model (#881, EPIC #860)
+
+### Added
+- `research/hamr-spike-s6-build-vs-adopt-2026-05-04.md` (~390 lines): per-child build-vs-adopt matrix for the 9 surviving HAMR MVP children. Counts: **ADOPT 2 / BUILD 4 / HYBRID 3 / REUSE 0**. One license-incompatible library flagged and rejected as direct dependency: **TruffleHog (AGPL-3.0)** — mitigated by subprocess-only invocation boundary.
+- `research/hamr-spike-s6-threat-model-2026-05-04.md` (~350 lines): formal STRIDE threat model across 5 adversary classes (compromised CF account, leaked operator JWT, malicious fleet model, supply-chain attack, MCP OAuth replay) × 6 STRIDE categories. **9 of 30 cells residual MEDIUM or HIGH** after existing mitigations.
+- `raw/articles/hamr-spike-s6-build-vs-adopt-2026-05-04.md` + `raw/articles/hamr-spike-s6-threat-model-2026-05-04.md` + `wiki/sources/hamr-spike-s6-build-vs-adopt-2026-05-04.md` + `wiki/sources/hamr-spike-s6-threat-model-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- **Four HAMR design changes forced by S6 findings:**
+  - **DC-1**: HMAC/Ed25519-signed A2A envelopes; Worker `/mailbox/read` verifies before processing (child 5: mailbox).
+  - **DC-2**: `hamr:doctor` runs `slsa-verifier verify-artifact` before reporting `hamr ok`; MCP clients block connect on unverified bundle (children 1, 8).
+  - **DC-3**: DPoP private key in Secure Enclave / TPM2; fallback to 4 h JWT TTL with documented risk (child 2 identity).
+  - **DC-4**: Ed25519-signed baton handoff artifacts; label-lint CI verifies signature; non-fleet cloud judge for governance-critical verification (cross-cutting: children 8, 9, `agent-signature.js`).
+- Heavy fleet usage via Implementer subagent + websearch. Zero paid LLM tokens.
+
 ## [Unreleased] — HAMR S2 spike: capability-probe HAMR substrate checks (#877, EPIC #860)
 
 ### Added
