@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] — Convergence Design v1: harness-wide feature integration (#922, EPIC #922)
+
+### Added
+- `research/harness-convergence-design-2026-05-05.md`: approved cross-team architecture for the 4 harness axes (governance / tooling / fleet / HAMR) + Dashboard as observation/control plane.
+- `raw/articles/harness-convergence-design-2026-05-05.md`: raw ingest source.
+- `wiki/sources/harness-convergence-design-2026-05-05.md`: wiki source page.
+- `wiki/log.md`: convergence entry.
+
+### Notes
+- Lane: docs-research.
+- 9-round 3-team SIGN_OFF on Epic #922 (Codex / Copilot / Claude Code).
+- Authored as operator-deputy fast-track per operator authorization (single-LLM voicing all 3 teams; convergence quality conditional on operator review).
+- Downstream child Epic to be filed for development implementation per design.
+
 ## [Unreleased] — HAMR Wave 7 follow-up: per-team opt-in configuration (#963, EPIC #860)
 
 ### Added
