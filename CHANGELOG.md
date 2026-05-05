@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 7 child C: periodic-push cron installer (#953, EPIC #860)
+
+### Added
+- `scripts/global/hamr-periodic-push.sh` (≤100 lines): runs `hamr:cache-push` + `hamr:health-push`; logs to `~/.megingjord/push-log.jsonl`; gracefully exits 0.
+- `scripts/global/install-cron.sh` (≤100 lines): idempotent crontab installer at 6h cadence with marker-based dedup.
+- `tests/periodic-push-cron.spec.js`: 4 tests.
+
 ## [Unreleased] — HAMR Wave 7 child B: hamr-provider-wrapper opt-in shim (#952, EPIC #860)
 
 ### Added
