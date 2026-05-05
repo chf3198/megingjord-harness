@@ -42,3 +42,6 @@ logs/copilot-usage.json
 # Authoritative ticket data lives in GitHub Issues; tickets/*.md is local-only legacy.
 tickets/
 .worktrees/
+
+# Operator-local spike outputs (Wave 1 #891/#892/#893) — never committed
+tmp/

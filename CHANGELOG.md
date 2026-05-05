@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 1 validation: S4 live Anthropic prompt-cache measurement (#892, EPIC #860)
+
+### Added
+- `research/hamr-wave1-s4-live-cache-2026-05-05.md`: live measurement deliverable for v3.2 §R5 cache-strategy validation. 20 calls to `claude-sonnet-4-5` with a 14,073-token HAMR governance bundle (instructions/* + 4 wiki concept pages). Total spend **$0.18 (under $0.50 cap)**.
+- `raw/articles/hamr-wave1-s4-live-cache-2026-05-05.md` + `wiki/sources/hamr-wave1-s4-live-cache-2026-05-05.md` + `wiki/log.md` entry.
+
+### Changed
+- `package.json`: added `@anthropic-ai/sdk@^0.93.0` as devDependency for spike scripts.
+- `.gitignore`: added `tmp/` (operator-local spike outputs never committed).
+
+### Measured
+- **5m ephemeral**: 83.82% reduction (1 write + 9 reads, 90% hit rate). **Exceeds v3's 72% claim by +11.8 pp.**
+- **1h extended**: 90.59% reduction (10 reads, 100% hit on still-warm cache). **Exceeds v3 by +18.6 pp.**
+
+### Decisions
+- **CONFIRM v3 §R5**: 1-h extended cache as default for HAMR's 15–60 min baton sessions.
+- **CONFIRM 80% hit-rate floor**: measured 90% (5m) / 100% (1h) bracket the floor on the high side.
+- Bundle-rebuild rate-limit ≥5 min at Worker layer remains required (unchanged).
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- Operator authorized live API spend; .env-loaded `ANTHROPIC_API_KEY` consumed via `dotenv` at session start; key never logged or committed.
+- Spike script (`tmp/wave1/s4-cache-spike.js`) and output (`tmp/wave1/s4-output.json`) are gitignored — only sanitized usage counts and computed costs reproduced in research file.
+- Disjoint from Copilot Team active surface.
+
 ## [Unreleased] — HAMR Wave 1: hamr:doctor skeleton — capability + tier + remediation CLI (#896, EPIC #860)
 
 ### Added
