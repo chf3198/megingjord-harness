@@ -12,6 +12,18 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-05] validation | HAMR Wave 1 S3 — Live CF Worker + KV latency (#891, EPIC #860)
+Live throwaway Worker + KV deploy at hamr-spike.chf3198.workers.dev. R2 substituted
+with KV (R2 needs one-time operator dashboard ToS; KV is same Workers-Paid plan,
+same bound-storage round-trip). 60 samples (30 cold + 29 warm after dropping
+prime call). Measured cold p50 114.6 / p95 153.3 ms (within v3.2 §R4 ≤180 ms p95);
+warm p50 37.4 / p95 45.4 ms (BEATS v3.2 §R4 ≤80/120 ms by ~2×). Decisions: CONFIRM
+v3.2 §R4 thresholds; revise `npx megingjord init` sample to 40 ms p50 / 50 ms p95;
+HTTP/2 keepalive + KV edge-cache mandates ratified; R2 enablement deferred to
+operator dashboard step (add to hamr:doctor remediation list). Tear-down verified
+HTTP 404. Net subscription cost $0. Source:
+research/hamr-wave1-s3-live-deploy-2026-05-05.md.
+
 ## [2026-05-04] research | HAMR v3.2 — post-spike redesign baseline (#890, EPIC #860)
 Design baseline after the 6-spike validation gate. Substrate (CF Worker + R2
 + KV + MCP + Tailscale fleet) survives; trust model, latency contract, cache

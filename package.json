@@ -105,7 +105,8 @@
     "log4brains": "^1.1.0",
     "markdown-magic": "^4.8.0",
     "markdownlint-cli2": "^0.17.2",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "wrangler": "^4.87.0"
   },
   "dependencies": {
     "dotenv": "^17.4.1"

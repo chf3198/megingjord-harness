@@ -1,5 +1,31 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 1 validation: S3 live CF Worker + KV latency measurement (#891, EPIC #860)
+
+### Added
+- `research/hamr-wave1-s3-live-deploy-2026-05-05.md`: live measurement deliverable for v3.2 §R4 latency-contract validation. Throwaway Worker + KV deployed at `hamr-spike.chf3198.workers.dev`; 60 samples (30 cold + 29 warm after dropping prime call); infrastructure torn down (verified HTTP 404).
+- `raw/articles/hamr-wave1-s3-live-deploy-2026-05-05.md` + `wiki/sources/hamr-wave1-s3-live-deploy-2026-05-05.md` + `wiki/log.md` entry.
+
+### Changed
+- `package.json`: added `wrangler@^4.87.0` as devDependency for spike scripts.
+
+### Measured
+- **Cold path** (n=30, new TLS per call): p50 **114.6 ms** / p95 **153.3 ms**. Within v3.2 §R4 ≤180 ms cold-p95 budget.
+- **Warm path** (n=29, HTTP keep-alive): p50 **37.4 ms** / p95 **45.4 ms**. **Beats v3.2 §R4 ≤80 ms p50 / ≤120 ms p95 by ~2×.**
+- 3.1× cold-vs-warm ratio ratifies HTTP/2 keepalive + KV edge-cache mandates.
+
+### Decisions
+- **CONFIRM v3.2 §R4 latency budget** — no thresholds revised.
+- **Revise `npx megingjord init` sample to 40 ms p50 / 50 ms p95** (vs S3 #878's derived 54/80 ms).
+- **R2 enablement deferred to operator dashboard step** (CF requires manual ToS acceptance per error 10042). KV substituted for live measurement; R2 latency expected +5–15 ms vs KV (still within budget). Add to `hamr:doctor` (#896) remediation list as a manual dashboard link.
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- Operator authorized live deploy; `.env`-loaded `CLOUDFLARE_API_TOKEN` consumed via shell export at session start; never logged or committed.
+- Net subscription cost $0 — Workers-Paid plan was already active; KV usage was within included quota.
+- Spike artifacts (`tmp/wave1/cf-spike/`) gitignored.
+- Disjoint from Copilot Team active surface.
+
 ## [Unreleased] — HAMR Wave 1: hamr:doctor skeleton — capability + tier + remediation CLI (#896, EPIC #860)
 
 ### Added
