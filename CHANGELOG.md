@@ -12,6 +12,19 @@
 - Threats to validity carried forward: pricing volatility, unmeasured hit rate, bundle-content drift, tool-definition placement, cross-operator cache collisions.
 - Heavy free-fleet usage (websearch + analytical math; no LLM call). Zero paid LLM tokens for this deliverable.
 
+## [Unreleased] — Research: HAMR Spike S3 — Substrate latency analysis (#878, EPIC #860)
+
+### Added
+- `research/hamr-spike-s3-latency-analysis-2026-05-04.md` (~770 lines): per-segment substrate-latency budget for HAMR. Local measurements (curl × 30, dig × 5, tailscale ping × 30 per host) combined with cited Cloudflare / Tailscale / vendor numbers. **Verdict: REVISE v3's ≤80 ms claim** — cold paths measure 108–116 ms p50 (exceed by 28–36 ms); warm cache-hit paths satisfy claim at 54 ms p50 / 80 ms p95. Required HAMR revisions: scope claim to warm-connection only, mandate HTTP/2 keepalive, mandate KV edge-cache via Cache-Control headers, revise `npx megingjord init` 60 ms sample.
+- `raw/articles/hamr-spike-s3-latency-analysis-2026-05-04.md` + `wiki/sources/hamr-spike-s3-latency-analysis-2026-05-04.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only). Lane converted from original code-change after S2 #877 capability probe revealed no Wrangler/R2 in operator environment; live deploy deferred to a 1-day operator-authorized follow-up (deploy plan in §9 of the research file).
+- Tailscale fleet RTT measured: windows-laptop 5 ms p50 (LAN direct), 36gbwinresource 11 ms p50 (LAN indirect), penguin-1 64 ms p50 / 170 ms p95 (WAN DERP relay).
+- 8 vendor sources cited (Cloudflare Workers limits, R2 data-location, Workers blog, Groq rate limits, Cerebras inference docs, OpenRouter API docs, Google Gemini docs, Tailscale KB).
+- Threats to validity carried forward: single operator geography, warm-path RTT derived not measured, R2 latency no formal SLA, vendor LLM latency no published p50/p95.
+- Heavy fleet usage via Implementer subagent + websearch + free local probes. Zero paid LLM tokens. Zero CF subscription / R2 spend.
+
 ## [Unreleased] — Research: HAMR Spike S6 — Build-vs-adopt + STRIDE threat model (#881, EPIC #860)
 
 ### Added

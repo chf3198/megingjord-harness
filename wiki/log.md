@@ -25,6 +25,17 @@ Spike script + operator-run instructions documented in §5 (gitignored). Spend
 expected ~$0.07 (under $0.50 cap). Source:
 research/hamr-spike-s4-prompt-cache-2026-05-04.md.
 
+## [2026-05-04] research | HAMR Spike S3 — Substrate latency analysis (#878, EPIC #860)
+Lane converted from code-change to docs-research after S2 #877 capability probe
+showed operator environment has no Wrangler/R2; live deploy deferred. Measured
++ cited per-segment latency budget. Verdict: **REVISE** v3's ≤80 ms claim —
+cold paths measure 108–116 ms p50 (exceed by 28–36 ms); warm cache-hit paths
+hit 54 ms p50 / 80 ms p95 (satisfy claim). Required revisions: scope claim to
+warm-connection only, mandate HTTP/2 keepalive, mandate KV edge-cache via
+Cache-Control headers, revise `npx megingjord init` 60 ms sample. Tailscale
+fleet RTT: windows-laptop 5 ms, 36gbwinresource 11 ms, penguin-1 64 ms p50.
+Source: research/hamr-spike-s3-latency-analysis-2026-05-04.md.
+
 ## [2026-05-04] research | HAMR Spike S6 — Build-vs-adopt + STRIDE threat model (#881, EPIC #860)
 Two-part deliverable: (a) per-child build-vs-adopt matrix for the 9 surviving
 HAMR MVP children — counts ADOPT 2 / BUILD 4 / HYBRID 3 / REUSE 0; one
