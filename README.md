@@ -80,6 +80,7 @@ npm run deploy:both:apply
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
 | `governance:worktrees` | `node scripts/global/worktree-governance-audit.js --json` |
+| `hamr:activate` | `bash scripts/global/hamr-activate.sh` |
 | `hamr:batch-router` | `node scripts/global/anthropic-batch-router.js` |
 | `hamr:batch-validate` | `node scripts/global/batch-validator.js` |
 | `hamr:cache-emit` | `node scripts/global/cache-stats-emit.js` |
@@ -90,6 +91,7 @@ npm run deploy:both:apply
 | `hamr:doctor` | `node scripts/global/hamr-doctor.js` |
 | `hamr:health` | `node scripts/global/substrate-health.js` |
 | `hamr:health-push` | `node scripts/global/substrate-health-push.js` |
+| `hamr:install-cron` | `bash scripts/global/install-cron.sh` |
 | `hamr:log-rotate` | `node scripts/global/log-rotate.js` |
 | `hamr:rule-gate` | `node scripts/global/rule-coverage-gate.js` |
 | `hamr:spillover` | `node scripts/global/header-spillover.js` |

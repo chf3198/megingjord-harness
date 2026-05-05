@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 7 child D: hamr:activate one-shot installer (#954, EPIC #860)
+
+### Added
+- `scripts/global/hamr-activate.sh` (≤100 lines): runs install-hooks (#934) → install-cron (#953) → env check → Worker reachability. Each team runs once per checkout.
+- `package.json` scripts: `hamr:activate`, `hamr:install-cron`.
+- `tests/hamr-activate.spec.js`: 3 tests.
+
 ## [Unreleased] — HAMR Wave 7 child C: periodic-push cron installer (#953, EPIC #860)
 
 ### Added
