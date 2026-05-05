@@ -42,8 +42,8 @@ export default {
       if (url.pathname === '/healthz' && m === 'GET') res = await healthz(env);
       else if (url.pathname.startsWith('/bundle/') && m === 'GET') res = await bundle(url, env);
       else if (url.pathname === '/mcp' && m === 'POST') res = await mcp(request, env);
-      else if (url.pathname === '/mailbox/read' && m === 'GET') res = await mailboxRead(env);
-      else if (url.pathname === '/mailbox/write' && m === 'POST') res = await mailboxWrite(env);
+      else if (url.pathname === '/mailbox/read' && m === 'GET') res = await mailboxRead(request, env);
+      else if (url.pathname === '/mailbox/write' && m === 'POST') res = await mailboxWrite(request, env);
       else if (url.pathname === '/quota' && m === 'GET') res = await quota(env);
       else res = notFound();
     } catch (err) {

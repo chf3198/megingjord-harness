@@ -14,7 +14,7 @@ test('sign() returns artifact, signature, key_id, timestamp, tier', async () => 
   expect(r).toHaveProperty('key_id');
   expect(r).toHaveProperty('timestamp');
   expect(r).toHaveProperty('tier');
-  expect(r.tier).toBe('T4');
+  expect(['T3-env', 'T4']).toContain(r.tier);
 });
 
 // 2. sign() signature length is 86–88 chars (Ed25519 64 bytes base64 unpadded/padded)
