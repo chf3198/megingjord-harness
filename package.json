@@ -36,6 +36,7 @@
     "governance:weekly": "node scripts/global/governance-weekly-report.js",
     "governance:worktrees": "node scripts/global/worktree-governance-audit.js --json",
     "hamr:batch-router": "node scripts/global/anthropic-batch-router.js",
+    "hamr:cache-emit": "node scripts/global/cache-stats-emit.js",
     "hamr:cache-gate": "node scripts/global/cache-hit-gate.js",
     "hamr:compress": "node scripts/global/constitution-compressor.js",
     "hamr:deploy": "bash scripts/global/hamr-deploy.sh",

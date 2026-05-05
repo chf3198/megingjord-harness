@@ -6,6 +6,18 @@
 
 const { chatComplete: ollamaChat, healthCheck: ollamaHealth } = require('./ollama-direct');
 const { getOpenClawURL } = require('./fleet-config');
+const { appendCacheStat } = require('./cache-stats-emit');
+
+function emitCacheStatSafe(provider, model, usage) {
+  try {
+    if (!usage) return;
+    const d = usage.prompt_tokens_details || {};
+    appendCacheStat({ provider, model,
+      cache_read_tokens: Number(d.cached_tokens || usage.prompt_cache_hit_tokens || 0),
+      input_tokens: Number(usage.prompt_tokens || 0),
+      output_tokens: Number(usage.completion_tokens || 0) });
+  } catch { /* never let stats emission break the call */ }
+}
 
 // Map Ollama model IDs to LiteLLM named groups (triggers fallback chain).
 const NAMED_GROUPS = {
@@ -39,6 +51,7 @@ async function litellmChat(prompt, opts = {}) {
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || '';
     if (!content) return { ok: false, error: 'empty_response' };
+    emitCacheStatSafe('litellm', data.model || model, data.usage);
     return { ok: true, content, model: data.model || model, backend: 'litellm' };
   } catch (e) {
     return { ok: false, error: e.message || 'litellm_error' };
@@ -66,13 +79,7 @@ async function healthCheck() {
   return { ...h, backend: 'ollama' };
 }
 
-/** Provider-native cache-control hints per v3.2 §R5 9-row matrix.
- * Returns headers + body fragments to opt into native caching.
- * Caller merges into provider request. Used by HAMR Wave 4 child 3 (#926).
- * @param {string} provider - Provider name (anthropic, gemini, groq, etc.).
- * @param {object} [opts] - { ttlSeconds, cacheKey }.
- * @returns {{headers: object, bodyExtras: object}} Cache hint payload.
- */
+// cacheHeaders: native cache-control hints per v3.2 §R5 9-row matrix (#926).
 const DEFAULT_CACHE_TTL_SECONDS = 3600;
 const ANTHROPIC_CACHE_BETAS = 'prompt-caching-2024-07-31,extended-cache-ttl-2025-04-11';
 

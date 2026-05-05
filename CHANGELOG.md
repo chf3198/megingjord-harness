@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 5 child 1: cache-stats.jsonl emit-site wiring (#932, EPIC #860)
+
+### Added
+- `scripts/global/cache-stats-emit.js` (≤100 lines, CommonJS): atomic appender for `~/.megingjord/cache-stats.jsonl`. Exports `appendCacheStat({provider, cache_read_tokens, input_tokens, ...})`, `fromTokenRecord(adapterOutput)`, `STATS_FILE`. Closes the consumer/producer gap left by Wave 4 child 3 (#926).
+- `scripts/global/litellm-client.js`: `chatComplete` now emits one cache-stat record per successful call via internal `emitCacheStatSafe` helper (try/catch isolated — never breaks the chat call).
+- `tests/cache-stats-emit.spec.js`: 7 tests; verifies normalized schema, throw-on-missing-provider, multi-append, fromTokenRecord conversion, end-to-end emit→gate flow above and below floor.
+- `package.json` script: `hamr:cache-emit`.
+
+### Notes
+- Lane: code-change.
+- Disjoint from Copilot Team active surface — only `litellm-client.js` (already disjoint) + new emitter file.
+- All files ≤ 100 lines; `litellm-client.js` exactly at 100.
+- Strict-superset preserved: emitter is purely additive; `chatComplete` API unchanged.
+
 ## [Unreleased] — HAMR Wave 4 child 3: provider caching adapters + sticky-route + cache-hit gate (#926, EPIC #860)
 
 ### Added
