@@ -12,6 +12,15 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-05] validation | HAMR Wave 1 S4 — Live Anthropic cache measurement (#892, EPIC #860)
+20 live calls to claude-sonnet-4-5 with 14,073-token HAMR governance bundle
+(instructions/* + 4 wiki concept pages). Total spend $0.18 (under $0.50 cap).
+Measured reductions: 5m ephemeral 83.82% (1 write + 9 reads, 90% hit), 1h
+extended 90.59% (10 reads, 100% hit on warm cache). Both EXCEED v3's 72%
+claim (+11.8 pp / +18.6 pp). CONFIRM v3 §R5: 1-h extended cache as default;
+80% hit-rate floor preserved; ≥5 min bundle-rebuild rate-limit unchanged.
+Source: research/hamr-wave1-s4-live-cache-2026-05-05.md.
+
 ## [2026-05-04] research | HAMR v3.2 — post-spike redesign baseline (#890, EPIC #860)
 Design baseline after the 6-spike validation gate. Substrate (CF Worker + R2
 + KV + MCP + Tailscale fleet) survives; trust model, latency contract, cache
