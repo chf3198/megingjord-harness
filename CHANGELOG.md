@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 1: judge-quorum.js — 2-of-N independence-based judge gate (#895)
+
+### Added
+- `scripts/global/judge-quorum.js` (89 lines, ESM): 2-of-N family-independent judge quorum gate. Hardcoded Wave 1 family registry (qwen, llama, claude, gemini, mistral) with provenance tags (vendor-attested / unverified). Gate types: `routine` (1 judge), `stage2` (2 different families), `closeout` (2 different families, ≥1 vendor-attested). Agreement threshold 0.10; mean score on agreement; `escalate()` selects a 3rd family on disagreement. `dispatcher` parameter is required injection in Wave 1 — throws on missing dispatcher; Wave 4 wires real cascade-dispatch adapter. No new third-party dependencies; uses only `node:crypto` (none needed beyond ESM built-ins).
+- `tests/judge-quorum.spec.js` (89 lines, Playwright-test): 8 deterministic stub-based tests covering: family registry shape, routine/stage2/closeout gate selection, agreement/disagreement detection, escalation family selection, and missing-dispatcher error. Zero live LLM calls.
+- `wiki/concepts/judge-quorum.md` (61 lines): concept page with frontmatter, three-orthogonal-axes table (cost / locality / provenance), gate-type map from v3.2 §3.2, Wave 1 dispatcher-injection limitation, and cross-references to #890 and #881.
+
+### Notes
+- Lane: code-change (new executable scripts + tests).
+- Independence principle from HAMR v3.2 §3.2 (#890): judge gate cares about provenance axis only, not cloud-vs-local locality. A Tailscale-hosted Ollama model with vendor-attested manifest satisfies the gate at zero token cost.
+- Wave 4 (#TBD) will inject the real cascade-dispatch wrapper as the default dispatcher; Wave 1 ships the quorum logic and registry only.
+- Refs #895, Refs #860.
 ## [Unreleased] — HAMR Wave 1: baton-signing.js — Ed25519 sign/verify + 4-tier key probe (#894, EPIC #860)
 
 ### Added
