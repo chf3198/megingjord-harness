@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 7 child F: cross-team integration test suite (#956, EPIC #860)
+
+### Added
+- `tests/hamr-team-integration.spec.js` (≤100 lines): 9 smoke tests covering Worker reachability + auth gates, signing key resolution, canonicalize determinism, provider-wrapper instrumentation, sync-verify, JSONL operator-locality, and `MEGINGJORD_HAMR_DISABLED` bypass.
+
+### Notes
+- **Full Wave 1-7 HAMR suite: 164/164 pass** (10.7s wall time, $0 operator cost).
+
 ## [Unreleased] — HAMR Wave 7 child E: sync verification (#955, EPIC #860)
 
 ### Added
