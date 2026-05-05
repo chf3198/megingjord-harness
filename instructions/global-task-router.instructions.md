@@ -40,3 +40,7 @@ If fleet signals `escalation_needed=true`: use the `suggested_tier` (haiku first
 - Start in lowest adequate lane; never skip haiku to reach premium.
 - Premium escalation requires a short rationale. Record: lane, model, rationale, trigger.
 - If premium share exceeds 20% over 7 days, routing engine forces fleet lane (`npm run routing:report`).
+
+## Cost/observability mechanics within each lane
+
+This file selects the **lane**. Cost levers (caching, spillover, sticky-route, batching) and observability (cache-hit gate, /quota, /mcp doctor:probe) live in HAMR, not here. See `instructions/hamr-routing.instructions.md`. Do not duplicate HAMR mechanics in this file.
