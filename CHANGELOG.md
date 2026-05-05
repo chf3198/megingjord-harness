@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 4 child 9: header-spillover + Anthropic Batch + /mcp SLSA gate + /quota real data (#927, EPIC #860)
+
+### Added
+- `scripts/global/header-spillover.js` (≤100 lines, CommonJS): provider-agnostic rate-limit header parser (`readRateLimitHeaders`) + substrate-health-aware next-provider picker (`pickSpilloverTarget`) + combined decision (`maybeSpillover`). Priority order: anthropic → openai → cerebras → groq → gemini → openrouter. Reads `~/.megingjord/substrate-health.json` (#911).
+- `scripts/global/anthropic-batch-router.js` (≤100 lines): Anthropic Batch API client (`submitBatch`, `pollBatch`) + eligibility decider (`isBatchEligible`). Eligible kinds: wiki-anneal, research-summary, rule-coverage-stage2b, bundle-rebuild — only when deadline ≥ 6h. 50% off + bypasses online quotas per v3.2 §R5.
+- `tests/header-spillover.spec.js`: 13 unit tests (rate-limit detection, spillover decision, batch eligibility, priority ordering) + 2 live route smoke tests (post-deploy `/quota` schema v2 + `/mcp` 401 missing_dpop). 15/15 pass.
+- `wiki/concepts/header-spillover.md`.
+
+### Changed
+- `cloudflare/hamr/routes/quota.ts`: replaced Wave 2 placeholder with KV-backed real data. `schema_version: 2`, reads `cache-stats:hit-rate-7d` + iterates `provider-spillover:*` keys. `placeholder: false`.
+- `cloudflare/hamr/routes/mcp.ts`: replaced Wave 2 #910 503 placeholder with Ed25519 DPoP verify + bundle-SHA SLSA gate. When `x-hamr-bundle-sha` advertised, looks up `slsa-attest:<sha>` in KV (writer = SLSA pipeline #912); missing or `verified !== true` ⇒ 503 `slsa_gate_failed`. Otherwise 200 acceptance receipt with `slsa_gate: 'verified' | 'skipped_no_bundle_advertised'`.
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- Worker redeployed (version 1de7eca0); live-verified `/quota` returns `schema_version: 2 placeholder: false` and `/mcp` correctly returns 503 `no_slsa_attestation_for_bundle` when bundle-SHA is advertised but no marker is in KV.
+- Disjoint from Copilot Team active surface — touches HAMR `/mcp`, `/quota`, and global scripts only.
+- Unblocks Wave 4 child 3 #926 (caching adapters populate `cache-stats:hit-rate-7d`) and Wave 4 child 6 #912 (SLSA pipeline populates `slsa-attest:<sha>`).
+- Operator-cost: $0 (no live Batch submission in tests).
+
 ## [Unreleased] — HAMR Wave 4 child 7: constitution compressor + 3-stage rule-coverage gate (#925, EPIC #860)
 
 ### Added
