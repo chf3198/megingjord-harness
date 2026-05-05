@@ -1,5 +1,27 @@
 # Changelog
 
+## [Unreleased] — Research: HAMR v3.2.1 patch (R9 + §R6 update + Copilot coordination) (#907, EPIC #860)
+
+### Added
+- `research/hamr-v3-2-1-2026-05-05.md`: pre-Wave-2 alignment patch amending v3.2 (#890). Bundles **R9 (NEW cross-level resource-failure recovery — 4 Wave-1-validated patterns)**, **§R6 binary→3-stage gate update (per #893 finding)**, and **Copilot Team v2.0 baton-routing coordination note** (Wave-5 sync required; not earlier-wave blocking).
+- `raw/articles/hamr-v3-2-1-2026-05-05.md` + `wiki/sources/hamr-v3-2-1-2026-05-05.md` + `wiki/log.md` entry.
+
+### Notes
+- Lane: docs-research (Manager + Consultant only).
+- v3.2 stays unmodified for history preservation; v3.2 + v3.2.1 are the combined input contract for Wave 2.
+- **R9 patterns (empirically validated during Wave 1):**
+  - **R9.1** Worktree-isolation as crash-survivable execution surface (#895 recovery from VS Code crash).
+  - **R9.2** Cwd-vs-branch pre-flight for `gh pr create` (#899 mis-target → #900 reopen on #895).
+  - **R9.3** Sequential dispatch with backoff + family-fallback (#893 quiz, 14/14 Cerebras→Gemini covers).
+  - **R9.4** Idempotent infrastructure tear-down (#891 wrangler-delete + HTTP-404 verification).
+- **§R6 update (replaces v3.2 binary gate):**
+  - **Stage-1** every build, ≥99% deterministic keyword (unchanged).
+  - **Stage-2a** weekly, free-fleet 2-of-N quorum, ≥80% on direct + counter-factual.
+  - **Stage-2b** monthly OR rule-change PR, paid-tier OR fine-tuned, ≥95% including boundary.
+  - **Stage-3** on-demand operator review for any rule scoring <0.50 in Stage-2b.
+- **Wave 2 prerequisites confirmed**: R2 active (10 GB free tier, ToS accepted 2026-05-05); #894/#895/#896 modules in main; R9.1–R9.4 patterns recorded; §R6 calibrated; Copilot v2.0 sync deferred to Wave 5. Wave 2 unblocked.
+- Disjoint from Copilot Team active surface (no overlap with `dashboard/js/token-reconcile.js`, `scripts/global/token-*.js`, `cost-report.js`, `model-routing-engine.js`, or in-flight `instructions/role-baton-routing.instructions.md` v2.0 WIP).
+
 ## [Unreleased] — HAMR Wave 1 validation: S5 Stage-2 reasoning quiz (#893, EPIC #860)
 
 ### Added

@@ -12,6 +12,19 @@ Brief description of what happened.
 
 ---
 
+## [2026-05-05] research | HAMR v3.2.1 patch — R9 + §R6 update + Copilot coordination (#907, EPIC #860)
+Pre-Wave-2 alignment patch amending v3.2 (#890). Bundles three deltas:
+(1) R9 NEW cross-level resource-failure recovery — four Wave-1-validated
+patterns (worktree-isolation, cwd-vs-branch pre-flight, sequential dispatch
+with backoff + family-fallback, idempotent infrastructure tear-down);
+(2) §R6 binary→3-stage gate (Stage-1 deterministic ≥99% keyword unchanged;
+Stage-2a free-fleet ≥80% direct+counter-factual; Stage-2b paid-tier ≥95%
+with boundary; Stage-3 operator review for <0.50). v3.2 §R6 ≥97% threshold
+unachievable per #893 finding;
+(3) Copilot Team v2.0 baton-routing coordination note (Wave-5 sync required;
+not Wave 2/3/4 blocking). v3.2 stays unmodified; v3.2 + v3.2.1 are combined
+input contract for Wave 2. Source: research/hamr-v3-2-1-2026-05-05.md.
+
 ## [2026-05-05] validation | HAMR Wave 1 S5 Stage-2 reasoning quiz (#893, EPIC #860)
 60-Q quiz authored across direct (30) / counter-factual (20) / boundary (10);
 20-Q balanced subset run via judge-quorum.js #895 with Cerebras qwen-3-235b
