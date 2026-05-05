@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — baton-routing v2.0 governance: GitHub Projects, typed collabs, zero null-role (#909, Epic #905)
+### Changed
+- `instructions/role-baton-routing.instructions.md`: v1.0 → v2.0. Seven-state FSM (`backlog→todo→in-progress→testing→review→done|cancelled`). `role:*` never-null invariant. Typed collaborators (`role:collab-analyst/coder/architect/ops`). `role:archived` after 30d close. `ready`/`triage` states dropped.
+### Added
+- Labels: `role:collab-analyst`, `role:collab-coder`, `role:collab-architect`, `role:collab-ops`, `role:archived`.
+- GitHub Project #3 "DevEnv Ops Board" — Status (7 states), Collab Type, Lane, Role custom fields.
+- `research/baton-routing-v2-design-2026-05-05.md`: design log (10 decisions, research trail, state mapping).
+### Migrated
+- Tickets #868–#872: MANAGER_HANDOFF posted, transitioned to `status:todo + role:collab-analyst`.
+
 ## [Unreleased] — HAMR Wave 1 validation: S5 Stage-2 reasoning quiz (#893, EPIC #860)
 
 ### Added
