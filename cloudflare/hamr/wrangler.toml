@@ -20,3 +20,6 @@ id = "a01abe088f454a59973e72736978b5e5"
 
 # PUBLISHER_KEYRING is set via `wrangler secret put PUBLISHER_KEYRING`
 # (NOT committed to wrangler.toml; format is JSON {key_id: base64-spki-public-key})
+
+[triggers]
+crons = ["0 */6 * * *"]  # cache-stats freshness check every 6h (#941)

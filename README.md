@@ -88,6 +88,7 @@ npm run deploy:both:apply
 | `hamr:deploy` | `bash scripts/global/hamr-deploy.sh` |
 | `hamr:doctor` | `node scripts/global/hamr-doctor.js` |
 | `hamr:health` | `node scripts/global/substrate-health.js` |
+| `hamr:log-rotate` | `node scripts/global/log-rotate.js` |
 | `hamr:rule-gate` | `node scripts/global/rule-coverage-gate.js` |
 | `hamr:spillover` | `node scripts/global/header-spillover.js` |
 | `hamr:sticky-route` | `node scripts/global/sticky-route.js` |

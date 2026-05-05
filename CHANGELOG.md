@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 6 child 1: log rotation + scheduled freshness signal (#941, EPIC #860)
+
+### Added
+- `scripts/global/log-rotate.js` (≤100 lines): generic JSONL rotator. Caps at N lines (default 10k); on overflow, gzip-archives `<file>.<iso-ts>.gz` then truncates. CLI: `npm run hamr:log-rotate -- <file> [--max-lines=<N>]`.
+- `cloudflare/hamr/scheduled.ts` (≤100 lines): Cloudflare scheduled handler. Reads `cache-stats:hit-rate-7d:meta`; if `ts > 24h ago` (or missing), sets `cache-stats:hit-rate-7d:stale=true`.
+- `cloudflare/hamr/wrangler.toml`: `crons = ["0 */6 * * *"]` cron trigger every 6h.
+- `tests/log-rotate.spec.js`: 4 tests (countLines, missing-file, no-rotate, rotate-archives-truncates with gzip roundtrip).
+- `package.json`: `hamr:log-rotate` script.
+
+### Changed
+- `cloudflare/hamr/worker.ts`: exports `scheduled(event, env)` invoking `scheduledHandler`.
+- `cloudflare/hamr/routes/quota.ts`: response now includes additive `stale: boolean` field; reads `cache-stats:hit-rate-7d:stale` KV key.
+
+### Notes
+- Lane: code-change.
+- Worker redeployed (`d5f69c67-1430-4485-9a90-bbacf85b726d`); cron schedule live (every 6h).
+- Live-verified `/quota` returns `stale: false` correctly; additive — existing consumers unaffected.
+
 ## [Unreleased] — HAMR Wave 5 child 4: real /mcp serving (capability dispatch) (#935, EPIC #860)
 
 ### Changed

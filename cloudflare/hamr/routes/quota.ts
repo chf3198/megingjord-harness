@@ -3,6 +3,7 @@
 import type { Env } from '../worker';
 
 const HIT_RATE_KEY = 'cache-stats:hit-rate-7d';
+const STALE_KEY = 'cache-stats:hit-rate-7d:stale';
 const PROVIDER_PREFIX = 'provider-spillover:';
 
 interface ProviderState {
@@ -32,13 +33,21 @@ async function readProviderStates(env: Env): Promise<Record<string, ProviderStat
   return out;
 }
 
+async function readStale(env: Env): Promise<boolean> {
+  const raw = await env.HAMR_KV.get(STALE_KEY);
+  return raw === 'true';
+}
+
 export async function quota(env: Env): Promise<Response> {
-  const [hit_rate_7d, providers] = await Promise.all([readHitRate(env), readProviderStates(env)]);
+  const [hit_rate_7d, providers, stale] = await Promise.all([
+    readHitRate(env), readProviderStates(env), readStale(env),
+  ]);
   return new Response(JSON.stringify({
     schema_version: 2,
     ts: Date.now(),
     hit_rate_7d,
     providers,
+    stale,
     placeholder: false,
   }), {
     status: 200,

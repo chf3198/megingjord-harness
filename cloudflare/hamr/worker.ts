@@ -7,6 +7,7 @@ import { mcp } from './routes/mcp';
 import { mailboxRead, mailboxWrite } from './routes/mailbox';
 import { quota } from './routes/quota';
 import { cacheStats } from './routes/cache-stats';
+import { scheduled as scheduledHandler } from './scheduled';
 
 export interface Env {
   HAMR_KV: KVNamespace;
@@ -57,5 +58,8 @@ export default {
     const out = withSecurity(res);
     out.headers.set('x-hamr-elapsed-ms', String(Date.now() - t0));
     return out;
+  },
+  async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+    await scheduledHandler(env);
   },
 } satisfies ExportedHandler<Env>;
