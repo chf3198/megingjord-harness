@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 7 child B: hamr-provider-wrapper opt-in shim (#952, EPIC #860)
+
+### Added
+- `scripts/global/hamr-provider-wrapper.js` (≤100 lines): `wrapProviderCall(provider, callFn, opts)` — opt-in shim that injects HAMR cost levers (`cacheHeaders` #926, `appendCacheStat` #932, `maybeSpillover` #927, `pickStickyProvider` #926) around any provider call. Pure library; zero modification to existing call sites. Honors `MEGINGJORD_HAMR_DISABLED=1` for opt-out.
+- `tests/hamr-provider-wrapper.spec.js`: 7 tests (cacheHeaders pass-through, spillover on 429, no-spillover on 200, sticky decision, disabled env no-op, exception isolation, JSONL emission).
+
+### Notes
+- Lane: code-change. Disjoint from Copilot Team active surface.
+
 ## [Unreleased] — HAMR Wave 7 child A: cross-team instruction integration (#951, EPIC #860)
 
 ### Added
