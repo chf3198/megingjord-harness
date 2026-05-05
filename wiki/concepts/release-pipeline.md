@@ -37,63 +37,24 @@ Per S6 #881 build-vs-adopt; pinned to specific commit SHAs per
 
 ## Pipeline DAG
 
-```
-tag-push v*
-    │
-    ▼
-┌───────────┐
-│ build     │  scripts/global/hamr-bundle-build.js produces:
-│           │   dist/bundles/<tier>-<sha-prefix>.tar.zst (+ .json manifest)
-└────┬──────┘
-     │ artifact: hamr-bundle
-     ▼
-┌────────────┐    ┌──────────────┐
-│ slsa-attest│    │ cosign-sign  │
-│ (reusable) │    │ (sign-blob)  │
-└────────────┘    └──────────────┘
-     │                  │
-     │ artifact: SLSA   │ artifact: hamr-cosign
-     │  attestation     │  (.cosign.bundle)
-     └────────┬─────────┘
-              ▼
-   ┌────────────────────────────┐
-   │ publish-r2-deploy-worker   │
-   │   wrangler-action OIDC →   │
-   │     deploy hamr Worker     │
-   │   wrangler r2 object put → │
-   │     hamr-bundles/...       │
-   │   slsa-verifier post-check │
-   └────────────────────────────┘
-```
+`tag-push v*` → `build` (hamr-bundle-build.js produces
+`dist/bundles/<tier>-<sha-prefix>.tar.zst`) → `slsa-attest` (reusable
+SLSA-L3 workflow) + `cosign-sign` (keyless Fulcio sign-blob) →
+`publish-r2-deploy-worker` (R2 upload + wrangler-action OIDC deploy +
+slsa-verifier post-check).
 
 ## Modules
 
-### `scripts/global/hamr-bundle-build.js`
-
-Generates content-addressed HAMR bundle. Wave 2 ships
-`governance-30kb` tier (binding `instructions/*.md` + 4 wiki
-concept pages). Full tier set (`fim-5kb` / `routing-12kb` /
-`architect-90kb`) ships in Wave 4 child 7.
-
-Canonical concat: NUL-separated `<rel>\0<content>` pairs, sorted
-by path, SHA-256 hash. Filename includes first 16 hex chars of
-SHA so a lookup by content addresses cleanly.
-
-### `scripts/global/slsa-verify.js`
-
-Wraps `slsa-verifier verify-artifact` and `cosign verify-blob`
-for runtime use:
-
-- `hamr:doctor` (#896) calls `slsa-verify.js slsa <bundle>
-  <attest>` to surface a tier-3 degraded mode if the active
-  bundle has no valid SLSA attestation.
-- The HAMR core Worker `/mcp` route (#910) will call
-  `slsa-verify.js` from a future R2-fetch path before serving
-  bundles to MCP clients (currently returns 503 placeholder).
-
-Both verifiers fail closed (`ok:false reason:...`) if the
-corresponding CLI binary is not installed — operator runs
-`npm i -g @slsa-framework/slsa-verifier` and `cosign` once.
+- **`scripts/global/hamr-bundle-build.js`** — content-addressed bundle
+  generator. Wave 2 ships `governance-30kb` (instructions + 4 wiki
+  concept pages); Wave 4 child 7 ships full tier set (`fim-5kb`,
+  `routing-12kb`, `architect-90kb`). Canonical concat: NUL-separated
+  `<rel>\0<content>` pairs sorted by path → SHA-256 → first 16 hex
+  chars in filename.
+- **`scripts/global/slsa-verify.js`** — wraps `slsa-verifier
+  verify-artifact` + `cosign verify-blob`. Used by `hamr:doctor`
+  (#896) tier-classification + Worker `/mcp` (#910) bundle-serve
+  gate. Both verifiers fail closed if CLI binary missing.
 
 ## v3.2.1 R9.4 idempotent tear-down
 
