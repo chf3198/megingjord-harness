@@ -19,17 +19,31 @@ function canonicalize(s) {
 }
 
 let _sessionKey = null;
+const { createPrivateKey } = require('node:crypto');
 
-/** Return (creating once) the per-process T4 in-memory Ed25519 keypair.
- * @returns {{ privateKey: object, pubKeyDer: Buffer, key_id: string }} Session key.
+/** Return (creating once) the Ed25519 keypair. Reads OPERATOR_KEY_SEED_B64 (T3-like
+ * persisted key) if set, else generates T4 ephemeral.
+ * @returns {{ privateKey: object, pubKeyDer: Buffer, key_id: string, tier: string }} Session key.
  */
 function getSessionKey() {
-  if (!_sessionKey) {
-    const { privateKey, publicKey } = generateKeyPairSync('ed25519');
-    const pubKeyDer = publicKey.export({ type: 'spki', format: 'der' });
-    const hex = createHash('sha256').update(pubKeyDer).digest('hex');
-    _sessionKey = { privateKey, pubKeyDer, key_id: `op-${hex.slice(0, 16)}` };
+  if (_sessionKey) return _sessionKey;
+  let privateKey, tier;
+  const seed = process.env.OPERATOR_KEY_SEED_B64;
+  if (seed) {
+    // PKCS8 base64 (32-byte raw Ed25519 seed wrapped). Use raw seed via PKCS8 prefix.
+    const rawSeed = Buffer.from(seed, 'base64');
+    if (rawSeed.length !== 32) throw new Error('OPERATOR_KEY_SEED_B64 must decode to 32 bytes');
+    const pkcs8 = Buffer.concat([Buffer.from('302e020100300506032b657004220420', 'hex'), rawSeed]);
+    privateKey = createPrivateKey({ key: pkcs8, format: 'der', type: 'pkcs8' });
+    tier = 'T3-env';
+  } else {
+    privateKey = generateKeyPairSync('ed25519').privateKey;
+    tier = 'T4';
   }
+  const publicKey = require('node:crypto').createPublicKey(privateKey);
+  const pubKeyDer = publicKey.export({ type: 'spki', format: 'der' });
+  const hex = createHash('sha256').update(pubKeyDer).digest('hex');
+  _sessionKey = { privateKey, pubKeyDer, key_id: `op-${hex.slice(0, 16)}`, tier };
   return _sessionKey;
 }
 
@@ -64,14 +78,14 @@ async function probeKeyTier() {
  */
 async function sign(artifact, options = {}) {
   void options;
-  const { privateKey, pubKeyDer, key_id } = getSessionKey();
+  const { privateKey, pubKeyDer, key_id, tier } = getSessionKey();
   const sig = cSign(null, Buffer.from(canonicalize(artifact), 'utf8'), privateKey);
   return {
     artifact,
     signature: sig.toString('base64').replace(/=+$/, ''),
     key_id,
     timestamp: new Date().toISOString(),
-    tier: 'T4',
+    tier: tier ?? 'T4',
     publicKey: pubKeyDer.toString('base64').replace(/=+$/, ''),
   };
 }

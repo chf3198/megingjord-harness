@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 3 child 5: R2 JSONL mailbox + signed A2A envelopes (#918, EPIC #860)
+
+### Added
+- `cloudflare/hamr/routes/mailbox.ts` (≤100 lines): **REPLACES** Wave 2 #910 501 placeholders. POST `/mailbox/write` validates A2A envelope schema, verifies Ed25519 sig via `PUBLISHER_KEYRING`, checks KV nonce for replay, appends JSONL to R2 at `mailboxes/<recipient>/<yyyy-mm-dd>.jsonl`. GET `/mailbox/read?recipient=...&since=...` returns chronologically-sorted envelopes.
+- `scripts/global/mailbox-client.js` (≤100 lines): operator `sendMessage()` + `pollMessages()` API. UUIDv7 nonce (RFC 9562). Reuses `baton-signing.js` (#894).
+- `scripts/global/mailbox-outbox.js` (≤100 lines): local JSONL outbox at `~/.megingjord/mailbox-outbox.jsonl` for offline-mode queueing per v3.2 §4 failover map.
+- `scripts/global/baton-signing.js` extended: `OPERATOR_KEY_SEED_B64` env override → stable **T3-env tier** for mailbox routing.
+- `tests/mailbox.spec.js`: 9 tests (UUIDv7 + envelope + outbox + live send/poll/replay + reject). Live tests skip when seed unset.
+- `wiki/concepts/mailbox.md`: route reference + schema + bootstrap flow + R9 patterns.
+- `package.json` scripts: `mailbox:send`, `mailbox:poll`, `mailbox:flush`.
+
+### Live verification
+
+- Worker redeployed; `PUBLISHER_KEYRING` Worker secret set.
+- End-to-end roundtrip verified live: send 200 → poll 200 returns envelope → replay returns 409 `replay_detected`.
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- Operator-cost: $0 (R2 + KV reused from #910).
+- Strict-superset preserved: existing `agent-coord-remote.js` (megingjord-coord) unchanged.
+- R9 applied: R9.3 (≤3 s ops), R9.4 (idempotent on `(publisher_key_id, nonce)`; replay deterministic 409), R9 failover (mailbox-outbox queues + flush on recovery).
+- Disjoint from Copilot Team active surface.
+
 ## [Unreleased] — HAMR Wave 2 child 2: substrate-health probe (#911, EPIC #860)
 
 ### Added
