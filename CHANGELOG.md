@@ -1,5 +1,33 @@
 # Changelog
 
+## [Unreleased] — HAMR Wave 2 child 6: SLSA-L3 + OIDC + Cosign release pipeline (#912, EPIC #860)
+
+### Added
+- `.github/workflows/release.yml`: HAMR release pipeline triggered on tag push or workflow_dispatch. DAG: build → SLSA-L3 attest → Cosign sign-blob keyless → R2 upload + GH Release artifacts → wrangler-action OIDC deploy → slsa-verifier post-condition.
+- `scripts/global/hamr-bundle-build.js` (≤100 lines, CommonJS): content-addressed bundle generator. Wave 2 ships `governance-30kb` tier (binding `instructions/*.md` + 4 wiki concept pages); full tier set ships in Wave 4 child 7. Canonical concat: NUL-separated `<rel>\0<content>` pairs sorted by path → SHA-256 → filename `<tier>-<sha-prefix>.tar.zst`.
+- `scripts/global/slsa-verify.js` (≤100 lines, CommonJS): wraps `slsa-verifier verify-artifact` and `cosign verify-blob` for runtime use by `hamr:doctor` (#896) and the Worker `/mcp` route (#910). Both verifiers fail closed if CLI binary not installed.
+- `tests/release-pipeline.spec.js`: 8 deterministic Playwright tests covering bundle-build determinism + SHA-256 format + dotfile exclusion + slsa-verify wrapper API + workflow YAML structure (verifies all third-party Actions pinned to 40-char SHAs).
+- `wiki/concepts/release-pipeline.md`: pipeline DAG + adopted-libraries pin table + module reference + R9.4 rollback path + Wave-2 vs MVP scope.
+
+### Notes
+- Lane: code-change (Manager + Collaborator + Admin + Consultant).
+- ADOPT per S6 #881 build-vs-adopt: `slsa-framework/slsa-github-generator@v2.0.0` (reusable workflow); `sigstore/cosign-installer` v3.7.0 pinned to SHA `d7d6e113…`; `cloudflare/wrangler-action` v3.14.1 pinned to SHA `392082e8…`. All transitive Actions (`actions/checkout`, `actions/setup-node`, `actions/upload-artifact`, `actions/download-artifact`) pinned to 40-char SHAs per .github security baseline.
+- OIDC trust: `id-token: write` permission on the workflow enables Cosign keyless via Fulcio + `cloudflare/wrangler-action` OIDC-authenticated Worker deploy. No long-lived CF API tokens required for deploy step.
+- Operator-cost: $0 (GH Actions included minutes + sigstore free + R2 included quota + Workers-Paid included).
+- R9.4 rollback path: Worker version is incremented on every deploy; `wrangler rollback --version-id <prev>` reverts. Cosign signatures are revocable via sigstore Fulcio rekor transparency log.
+- 8/8 tests pass.
+- Disjoint from Copilot Team active surface (no overlap with `dashboard/js/token-reconcile.js`, `scripts/global/token-*.js`, `cost-report.js`, `model-routing-engine.js`, or `instructions/role-baton-routing.instructions.md` v2.0 — which itself merged via #909 during Wave 2).
+
+## [Unreleased] — baton-routing v2.0 governance: GitHub Projects, typed collabs, zero null-role (#909, Epic #905)
+### Changed
+- `instructions/role-baton-routing.instructions.md`: v1.0 → v2.0. Seven-state FSM (`backlog→todo→in-progress→testing→review→done|cancelled`). `role:*` never-null invariant. Typed collaborators (`role:collab-analyst/coder/architect/ops`). `role:archived` after 30d close. `ready`/`triage` states dropped.
+### Added
+- Labels: `role:collab-analyst`, `role:collab-coder`, `role:collab-architect`, `role:collab-ops`, `role:archived`.
+- GitHub Project #3 "DevEnv Ops Board" — Status (7 states), Collab Type, Lane, Role custom fields.
+- `research/baton-routing-v2-design-2026-05-05.md`: design log (10 decisions, research trail, state mapping).
+### Migrated
+- Tickets #868–#872: MANAGER_HANDOFF posted, transitioned to `status:todo + role:collab-analyst`.
+
 ## [Unreleased] — HAMR Wave 2 child 1: HAMR core CF Worker (#910, EPIC #860)
 
 ### Added
@@ -43,6 +71,7 @@
   - **Stage-3** on-demand operator review for any rule scoring <0.50 in Stage-2b.
 - **Wave 2 prerequisites confirmed**: R2 active (10 GB free tier, ToS accepted 2026-05-05); #894/#895/#896 modules in main; R9.1–R9.4 patterns recorded; §R6 calibrated; Copilot v2.0 sync deferred to Wave 5. Wave 2 unblocked.
 - Disjoint from Copilot Team active surface (no overlap with `dashboard/js/token-reconcile.js`, `scripts/global/token-*.js`, `cost-report.js`, `model-routing-engine.js`, or in-flight `instructions/role-baton-routing.instructions.md` v2.0 WIP).
+(docs(changelog): baton-routing v2.0 governance entry (#909))
 
 ## [Unreleased] — HAMR Wave 1 validation: S5 Stage-2 reasoning quiz (#893, EPIC #860)
 
