@@ -27,6 +27,16 @@ test('admin gate passes when collaborator and admin use different teams', () => 
   expect(result.reason).toBe('independent');
 });
 
+test('signer alias takes precedence over shared Team&Model provenance', () => {
+  const result = gate.checkAdminIndependence([
+    { body: 'COLLABORATOR_HANDOFF\nAI-Signature: Cora\nAI-Team-Model: codex:gpt-5@openai' },
+    { body: 'ADMIN_HANDOFF\nAI-Signature: Nia\nAI-Team-Model: codex:gpt-5@openai' },
+  ]);
+  expect(result.ok).toBe(true);
+  expect(result.collaboratorId).toBe('Cora');
+  expect(result.adminId).toBe('Nia');
+});
+
 test('role identity accepts legacy Team&Model and Signed-by fields', () => {
   expect(gate.roleIdentity({ body: 'Team&Model: copilot:gpt-5.1@github' }))
     .toBe('copilot:gpt-5.1@github');

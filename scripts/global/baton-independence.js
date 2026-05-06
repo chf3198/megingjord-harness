@@ -11,10 +11,10 @@ const fs = require('fs');
 function roleIdentity(comment) {
   const body = comment.body || '';
   const patterns = [
-    /AI-Team-Model:\s*([^\n]+)/i,
-    /Team&Model:\s*([^\n]+)/i,
     /AI-Signature:\s*([^\n]+)/i,
     /Signed-by:\s*([^\n]+)/i,
+    /AI-Team-Model:\s*([^\n]+)/i,
+    /Team&Model:\s*([^\n]+)/i,
   ];
   for (const pattern of patterns) {
     const match = body.match(pattern);
