@@ -8,6 +8,13 @@ Each entry uses a parseable prefix for CLI filtering.
 Brief description of what happened.
 ```
 
+## [2026-05-06] governance | Harness Goal Constitution wiki concept (#1060, EPIC #1024)
+Added `wiki/concepts/harness-goals.md` and indexed the canonical 9-goal
+constitution: Governance, Quality, Zero Cost, Privacy, Portability, Resilience,
+Throughput, Observability, Interoperability. This completes the wiki concept
+artifact required by Epic #1024 after always-loaded instruction surfaces shipped
+in #1030.
+
 ## [2026-05-06] research | IDE Proxy Shim R&D (#1021, EPIC #1020)
 Research for Claude Code IDE proxy shim. Recommends LiteLLM proxy adoption as IDE backend (already supports Anthropic-compatible `/v1/messages`); 6-child sketch ~5d total. Latency budget ≤50ms p95 achievable. Fleet pass-rate ≥85% on complexity bands 1-2 is activation gate. Anthropic key never reaches fleet. Acceptance: ≥30% turn count routed non-Anthropic, ≥25% session cost reduction, zero quality regression on Premium-tier turns.
 

@@ -35,6 +35,7 @@ The LLM updates this on every ingest operation.
 - [[linting-governance]] — Global Linting Governance
 - [[fleet-architecture]] — Fleet Architecture Overview
 - [[workspace-write-boundary-discipline]] — Workspace Write-Boundary Discipline
+- [[harness-goals]] — Harness Goal Constitution
 
 ## Source Summaries
 
@@ -93,6 +94,7 @@ The LLM updates this on every ingest operation.
 
 ## Recent Additions
 
+- [[harness-goals]] — Harness Goal Constitution (2026-05-06)
 - [[dashboard-live-data-methodology-2026-05-05]] — Dashboard Live-Data Methodology (2026-05-05)
 - [[workspace-write-boundary-discipline]] — Workspace Write-Boundary Discipline (2026-05-05)
 - [[vscode-copilot-allow-prompts-2026-05-05]] — VS Code Copilot Allow Prompts (2026-05-05)
@@ -105,4 +107,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 70 | **Last updated**: 2026-05-05
+**Pages**: 71 | **Last updated**: 2026-05-06
