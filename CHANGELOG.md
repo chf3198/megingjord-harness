@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Wave 8 child 2: cascade-policy-overrides consumer (#977, EPIC #968)
+
+### Changed
+- `scripts/global/model-routing-engine.js`: adds `loadOverrides()` that reads `~/.megingjord/cascade-policy-overrides.json` (additive; falls back when absent). `resolveRouting()` returns `{overridesApplied, overridesStale}` flags. Strict-superset preserved.
+- `tests/policy-overrides-consumer.spec.js`: 5 tests (absent/present/malformed paths + resolveRouting integration + back-compat).
+
+### Notes
+- Implements convergence-design item 4 (consumer side). Producer shipped in #976.
+- Copilot Team active surface — work performed as operator-deputy per #922 SIGN_OFF authorization.
+
 ## [Unreleased] — Wave 8 child 5: cross-team edit governance-lint warn (#980, EPIC #968)
 
 ### Added

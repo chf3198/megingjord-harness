@@ -2,9 +2,20 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { readTelemetry, summarize } = require('./model-routing-telemetry');
 
 const FILE = path.join(__dirname, 'model-routing-policy.json');
+const POLICY_OVERRIDES = path.join(os.homedir(), '.megingjord', 'cascade-policy-overrides.json');
+
+// Wave 8 child 2 (#977): convergence-design item 4 consumer side.
+// Read overrides if present; falls back silently when missing/malformed.
+function loadOverrides() {
+  try {
+    if (!fs.existsSync(POLICY_OVERRIDES)) return null;
+    return JSON.parse(fs.readFileSync(POLICY_OVERRIDES, 'utf8'));
+  } catch { return null; }
+}
 
 function loadPolicy() { return JSON.parse(fs.readFileSync(FILE, 'utf8')); }
 
@@ -41,14 +52,17 @@ function resolveRouting(prompt, route) {
   const thresh = policy.complexityThresholds || {};
   if (lane === 'premium' && cx < (thresh.premium ?? 0.7)) lane = cx < (thresh.haiku ?? 0.3) ? 'fleet' : 'haiku';
   const model = policy.models[lane] || policy.models.fallback;
+  const overrides = loadOverrides();
   return {
     lane,
     modelId: model.id,
     multiplier: model.mult,
     taskClass: classifyTask(prompt, policy.taskClasses),
     rollbackApplied,
-    complexity: cx
+    complexity: cx,
+    overridesApplied: overrides !== null,
+    overridesStale: overrides?.stale ?? false,
   };
 }
 
-module.exports = { resolveRouting, loadPolicy };
+module.exports = { resolveRouting, loadPolicy, loadOverrides };
