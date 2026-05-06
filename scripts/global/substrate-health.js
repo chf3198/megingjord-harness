@@ -75,7 +75,7 @@ async function probeSubstrateHealth(opts = {}) {
     ts: Date.now(),
     hamr_worker: await probeHamrWorker(opts.workerUrl),
     cloudflare_ai: await probeCloudflareAI(
-      opts.cfToken ?? process.env.CLOUDFLARE_API_TOKEN,
+      opts.cfToken ?? process.env.CLOUDFLARE_WORKERS_AI_TOKEN ?? process.env.CLOUDFLARE_API_TOKEN,
       opts.cfAccountId ?? process.env.CLOUDFLARE_ACCOUNT_ID,
     ),
     fleet: caps?.fleet ?? {},
