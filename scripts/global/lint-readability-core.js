@@ -36,7 +36,9 @@ function checkFile(filePath) {
     }
     if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
     if (/const\s+[A-Z_]+/.test(line)) return;
-    const magic = line.match(magicRe);
+    // A6 fix (#991): strip GitHub issue refs (#NNN inside string literals) before scan.
+    const strippedLine = line.replace(/['"`][^'"`]*#\d{2,4}[^'"`]*['"`]/g, '""');
+    const magic = strippedLine.match(magicRe);
     if (magic && !allowedNumbers.has(magic[1])) {
       warnings.push({
         line: idx + 1,
@@ -100,4 +102,4 @@ function run(args = process.argv.slice(2)) {
   }
 }
 
-module.exports = { run };
+module.exports = { run, checkFile };

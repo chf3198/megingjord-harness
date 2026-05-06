@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Tooling A6: magic-number lint whitelist for #NNN literals (#991, EPIC #987)
+
+### Fixed
+- `scripts/global/lint-readability-core.js`: strip GitHub issue refs (`#NNN`) from inside string literals (single/double/backtick quotes) before applying magic-number rule. Real numeric literals in code paths still flagged.
+- `tests/lint-magic-number-whitelist.spec.js`: 4 tests covering whitelist hits, real catches, mixed lines, and all 3 quote variants.
+
+### Notes
+- `checkFile` added to `module.exports` of lint-readability-core for testability.
+- Strict-superset preserved: existing rule behavior unchanged on real magic numbers.
+
 ## [Unreleased] — Tooling A3: evidence-completeness Refs Epic pairing fix (#990, EPIC #987)
 
 ### Fixed
