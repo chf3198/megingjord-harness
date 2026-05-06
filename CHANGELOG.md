@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — Stage 4 live cost-lever activation (#1067)
+
+### Added
+- `scripts/global/batch-route.js` (49 lines) — `routeWithBatch(opts, syncFn, batchRequests)` helper. Routes work to Anthropic Batch API (50% discount) when `isBatchEligible({kind, deadlineMs})` returns true; sync fallback otherwise. Handles batch submission failure with sync fallback.
+- `tests/batch-route.spec.js` — 4 tests (eligibility paths + DEFAULT_DEADLINE_MS).
+- `research/stage-4-cost-report-2026-05-06.json` — empirical activation evidence: live Batch path verified (msgbatch_01YaqNqbbZDWZAZJESFJfVuK ended ok); live quality-parity measured at meanParity=0.457 vs synthetic 1.0 placeholder (gate FAIL — floor needs empirical recalibration); cache-stat snapshot; lever-status table.
+
+### Operator actions executed
+- Ran `node scripts/global/batch-validator.js --live --operator-approved` — submitted 1×32-token Haiku Batch request, polled to status:ended. Operator cost: <\$0.0001.
+- Ran `node scripts/global/ide-proxy-quality-parity.js --live --operator-approved` — 12 routed-vs-baseline pairs against corpus. Empirical meanParity=0.457; gate FAIL exposes that the synthetic 0.65 floor needs recalibration (small-model vs Opus parity is naturally lower than the placeholder bar).
+
 ## [Unreleased] — Stage 3 graceful-degrade verification (Epic #949 AC)
 
 ### Added

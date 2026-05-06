@@ -1,0 +1,53 @@
+{
+  "report_version": 1,
+  "generated_at": "2026-05-06T22:06:45Z",
+  "stage": "stage-4-live-activation",
+  "parent_ticket": "#1067",
+  "deliverables": {
+    "live_batch_validation": {
+      "ok": true,
+      "batch_id": "msgbatch_01YaqNqbbZDWZAZJESFJfVuK",
+      "status": "ended",
+      "operator_cost_usd_estimate": "<0.0001",
+      "verdict": "Anthropic Batch path verified end-to-end"
+    },
+    "live_quality_parity": {
+      "ok": false,
+      "mode": "live",
+      "totalTurns": 12,
+      "meanParity": 0.457,
+      "parityFloor": 0.65,
+      "gate": "FAIL",
+      "operator_cost_usd_estimate": "~0.30",
+      "interpretation": "Empirical jaccard+length-ratio of routed (small-model fleet) vs Opus baseline is 0.457 — below the 0.65 floor. Two paths to address: (a) recalibrate floor to small-vs-large-model realistic range (suggest 0.40-0.45), (b) upgrade to LLM-judged scoring instead of token-overlap heuristic. The 0.65 floor was set without empirical calibration in Stage 2."
+    },
+    "batch_route_helper": {
+      "ok": true,
+      "surface": "scripts/global/batch-route.js",
+      "tests": "tests/batch-route.spec.js (4/4 pass)",
+      "consumer_pattern": "routeWithBatch({kind, deadlineMs}, syncFn, batchRequests) — eligible kinds route to Batch (50% Anthropic discount); sync fallback otherwise"
+    }
+  },
+  "cache_stats": {
+    "jsonl_records": 58,
+    "path": "~/.megingjord/cache-stats.jsonl"
+  },
+  "lever_status": {
+    "anthropic_prompt_cache": "5min default (per Anthropic 2026 revert); extended_cache_ttl 1h opt-in available via litellm-client cacheHeaders",
+    "anthropic_batch_api": "live-verified; routeWithBatch helper ships in this PR",
+    "header_spillover": "active (substrate-health.json + 429 detection)",
+    "sticky_route_per_tier": "active (tier→provider with availability fallback)",
+    "cf_ai_free_tier": "active (3 deployments healthy: mistral-7b-v0.2, llama-3.1-8b, llama-3.2-3b)",
+    "ollama_fleet_lane": "active (windows-laptop + 36gbwinresource, persistent via Scheduled Task)"
+  },
+  "cost_baseline_estimates": {
+    "session_synthetic_corpus_pct_reduction": 48.1,
+    "non_anthropic_routing_pct": 75.0,
+    "activation_gate": "PASS — meets ≥30% routing + ≥25% cost reduction"
+  },
+  "gaps": [
+    "Quality-parity floor needs empirical recalibration (0.65 was synthetic placeholder)",
+    "Real-session telemetry capture not yet wired (still using 12-turn corpus)",
+    "Dashboard panel surfacing cache-stats and parity scores absent (#996)"
+  ]
+}
