@@ -165,6 +165,11 @@ This table is auto-generated from `package.json` by `npm run docs:compile` (#796
 - Default thresholds: `drift_pct=0.15`, `drift_pct_fail=0.35`, `min_samples=3`.
 - OpenRouter aggregate usage is auto-probed when `OPENROUTER_API_KEY` is set.
 - Anthropic/LiteLLM aggregate usage can be enabled with `ANTHROPIC_USAGE_URL` and `LITELLM_USAGE_URL` (plus keys).
+- OpenAI-compatible providers should be logged generically unless a narrower adapter
+  is known.
+- Codex VS Code sessions are first-class routing consumers, but do not assume they
+  expose per-request token totals; reconcile route metadata with aggregate OpenAI
+  usage or configured Codex OpenTelemetry exports.
 
 ## Public trust surfaces
 

@@ -19,11 +19,15 @@ The routing pipeline has three stages:
 2. **resolve** (`model-routing-engine.js`) — applies complexity thresholds and rollback policy
 3. **dispatch** (`task-router-dispatch.js`) — executes against the resolved backend
 
+The policy is runtime-neutral. Codex, Copilot, and Claude Code sessions use the
+same lanes; HAMR and the model policy resolve provider details after the lane is
+chosen.
+
 ## Lanes
 
 | Lane | Backend | Cost | Use when |
 | --- | --- | --- | --- |
-| `free` | Claude auto-tier | $0 | Lookups, Q&A, docs, boilerplate |
+| `free` | Agent auto-tier | $0 | Lookups, Q&A, docs, boilerplate |
 | `fleet` | Ollama (qwen2.5:7b-instruct) | $0 | Medium implementation, config gen, log analysis |
 | `haiku` | claude-haiku-4-5-20251001 | ~$0.08x | Single-file refactors, test gen, code review |
 | `premium` | claude-sonnet-4-6 | 1.0x | Multi-file architecture, security, ambiguous debugging |
@@ -66,6 +70,11 @@ Output fields:
 - `routing.lane` — lane after threshold and rollback enforcement
 - `routing.complexity` — 0.0–1.0 score
 - `decision.action` — what actually happened (`route-fleet`, `recommend-haiku`, `fleet-unavailable`, etc.)
+
+Token telemetry should report exact provider usage when available. For
+OpenAI-compatible calls without a narrower adapter, record the provider as
+`openai-compatible`; for Codex sessions without per-request token totals, record
+route metadata and reconcile with aggregate usage or configured OpenTelemetry.
 
 ## Reading the Cost Report
 

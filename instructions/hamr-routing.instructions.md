@@ -7,7 +7,8 @@ type: instructions
 # HAMR Routing (Wave 1-6 production)
 
 HAMR (`https://hamr.chf3198.workers.dev`) is the cross-team cost+observability layer.
-Each team — Claude Code, Copilot, Codex — is expected to route through it.
+Each team — Claude Code, Copilot, Codex — is a first-class consumer and is
+expected to route governed provider calls through it.
 Activate with `npm run hamr:activate` once per checkout.
 
 ## Producer chain (must run periodically)
@@ -33,6 +34,17 @@ const result = await wrapProviderCall('anthropic', () => sdk.messages.create(req
 
 The wrapper auto-applies `cacheHeaders(provider)` (#926), records `appendCacheStat`
 on response (#932), and returns spillover hint via `maybeSpillover` (#927) on rate-limit.
+Treat runtime and provider as separate fields: Codex is a runtime, while
+OpenAI-compatible, Anthropic, Ollama, LiteLLM, or OpenRouter are provider paths.
+
+## Token telemetry policy
+
+- Prefer exact provider usage from HAMR-wrapped responses or aggregate usage APIs.
+- Record generic OpenAI-compatible traffic as `provider=openai-compatible` unless a
+  narrower adapter is known.
+- Do not invent Codex per-request token totals. If a Codex session does not expose
+  per-request usage, record route metadata and reconcile against aggregate OpenAI
+  usage or Codex OpenTelemetry exports when configured.
 
 ## /mcp capability dispatch
 

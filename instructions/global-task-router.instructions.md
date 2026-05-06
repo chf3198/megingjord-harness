@@ -16,6 +16,10 @@ Policy source: `scripts/global/model-routing-policy.json` (capability_matrix fie
 3. **Haiku** — claude-haiku-4-5-20251001. Single-file refactors, test gen, code review.
 4. **Premium** — claude-sonnet-4-6. Multi-file architecture, security, ambiguous debugging.
 
+Codex, Copilot, and Claude Code sessions all use the same lane policy. A lane
+selects required capability and cost tier; provider IDs and telemetry adapters
+are implementation details owned by HAMR and `model-routing-policy.json`.
+
 ## Capability matrix (use for ticket assignment and lane selection)
 
 | Dimension | Fleet (local) | Haiku | Premium |
@@ -43,4 +47,4 @@ If fleet signals `escalation_needed=true`: use the `suggested_tier` (haiku first
 
 ## Cost/observability mechanics within each lane
 
-This file selects the **lane**. Cost levers (caching, spillover, sticky-route, batching) and observability (cache-hit gate, /quota, /mcp doctor:probe) live in HAMR, not here. See `instructions/hamr-routing.instructions.md`. Do not duplicate HAMR mechanics in this file.
+This file selects the **lane**. Cost levers (caching, spillover, sticky-route, batching) and observability (cache-hit gate, /quota, /mcp doctor:probe) live in HAMR, not here. See `instructions/hamr-routing.instructions.md`. Do not duplicate HAMR mechanics in this file or make lane policy runtime-specific.
