@@ -30,6 +30,14 @@ test('pre-push hook exits 1 when local branch ≠ HEAD', () => {
   expect(result.stdout.toString()).toContain('R9.2.1 violation');
 });
 
+// A1 fix (#989): branch-delete refspec uses all-zeros local_sha.
+test('pre-push hook exits 0 on branch-delete refspec (all-zero local_sha)', () => {
+  const stdin = 'refs/heads/some-other-branch 0000000000000000000000000000000000000000 refs/heads/some-other-branch deadbeef\n';
+  const result = spawnSync(PRE_PUSH, [], { input: stdin, cwd: REPO_ROOT });
+  expect(result.status).toBe(0);
+  expect(result.stdout.toString()).not.toContain('R9.2.1 violation');
+});
+
 test('audit script writes JSON-line on post-checkout branch op', () => {
   const auditLog = path.join(process.env.HOME, '.megingjord', 'branch-ops-audit.log');
   const beforeLines = fs.existsSync(auditLog) ? fs.readFileSync(auditLog, 'utf8').split('\n').length : 0;

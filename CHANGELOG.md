@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Tooling A1: R9.2 hook --delete refspec fix (#989, EPIC #987)
+
+### Fixed
+- `scripts/hooks/pre-push-branch-check.sh`: skips branch-mismatch check when local_sha is the all-zeros delete sentinel. Branch deletions (`git push origin --delete <branch>`) no longer trip the R9.2 hook.
+- `tests/r92-hooks.spec.js`: 1 new test for delete refspec; 7/7 total pass.
+
+### Notes
+- Strict-superset preserved: real-push mismatch detection unchanged.
+- Audit log records `is_delete: true|false` for transparency.
+
 ## [Unreleased] — Wave 8 child 2: cascade-policy-overrides consumer (#977, EPIC #968)
 
 ### Changed
