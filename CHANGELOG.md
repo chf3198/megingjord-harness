@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Tooling C13: GitHub Artifact Attestations on release workflow (#999, EPIC #987)
+
+### Added
+- `.github/workflows/release.yml`: new `github-attest` job using `actions/attest-build-provenance@v2.1.0` (pinned by SHA). Runs in parallel with existing `slsa-attest` + `cosign-sign` jobs.
+- `instructions/release-docs-hygiene.instructions.md`: step 7 — artifact attestation evidence requirement.
+
+### Notes
+- Strict-superset preserved: existing cosign path unchanged. New attestation is a parallel signal.
+- Codex Team active surface (release workflow + governance instructions) — work performed as operator-deputy per #922 SIGN_OFF authorization.
+
 ## [Unreleased] — Tooling C8: Cloudflare Workers Observability v2 adoption (#998, EPIC #987)
 
 ### Changed

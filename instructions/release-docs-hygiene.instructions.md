@@ -15,5 +15,6 @@ After every PR merge or deployment that changes user-facing behavior, run these 
 4. **Docs drift**: Run the `docs-drift-maintenance` skill to detect stale documentation that contradicts the new behavior.
 5. **Learnings**: If the change revealed a significant discovery, add an entry to `docs/workflow/learnings.md`.
 6. **Release integrity**: If the merge changes extension or package behavior, run `release-version-integrity` to validate tag/manifest/changelog alignment, then publish the new version.
+7. **Artifact attestation**: Tag-triggered releases MUST produce both cosign-bundle signature AND GitHub Artifact Attestation (Sigstore-backed; via `actions/attest-build-provenance`). C13 (#999) enables the parallel attestation signal alongside the existing cosign path.
 
-Do not consider a PR merge or deployment task complete until steps 1-6 are explicitly addressed (either completed or confirmed not applicable).
+Do not consider a PR merge or deployment task complete until steps 1-7 are explicitly addressed (either completed or confirmed not applicable).
