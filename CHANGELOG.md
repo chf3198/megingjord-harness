@@ -6,6 +6,20 @@
 - `baton-gates.yml` admin-gate now blocks identical `COLLABORATOR_HANDOFF` and `ADMIN_HANDOFF` signer identities, with compatibility for AI-Signature, Signed-by, AI-Team-Model, and Team&Model baton fields.
 - `scripts/global/baton-independence.js` and `tests/baton-independence.spec.js` cover same-signer failure, independent-signer pass, and legacy signing fields.
 
+## [Unreleased] — Baton marker matching
+
+### Fixed (#1057)
+- `baton-independence.js` now matches `COLLABORATOR_HANDOFF` and `ADMIN_HANDOFF` only as standalone role marker lines, preventing prose references in later comments from corrupting signer checks.
+
+## [Unreleased] — Ollama fleet activation (#1051)
+
+### Operator actions executed
+- Started Ollama daemons on `windows-laptop` (100.78.22.13) and `36gbwinresource` (100.91.113.16) bound to `0.0.0.0:11434`. Mechanism: SSH + Scheduled Task running a launcher batch (`%TEMP%\ollama-tailnet.bat`) that sets `OLLAMA_HOST=0.0.0.0:11434` before `ollama serve`. Survives logoff via `SC ONLOGON`.
+- Verified Tailscale reach + model inventory on both hosts; LiteLLM proxy now reports 13/15 endpoints healthy (was 8/15).
+
+### Fixed
+- `config/litellm-config.yaml` — Ollama `starcoder2:3b` and `qwen2.5-coder:7b` deployments repointed from `36gbwinresource` to `windows-laptop` after empirical latency probe (3b: 5s vs 60s+ timeout; 7b: 51s cold vs 60s+ timeout). 36gbwinresource appears GPU-contended on cold-start; windows-laptop responds reliably.
+
 ## [Unreleased] — Cost-reduction Phase 2 activation corrections
 
 ### Fixed (#1050, resolves #1048)

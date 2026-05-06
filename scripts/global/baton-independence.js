@@ -24,8 +24,9 @@ function roleIdentity(comment) {
 }
 
 function findRoleComment(comments, marker) {
+  const roleLine = new RegExp(`(^|\\n)\\s*${marker}\\s*(\\n|$)`);
   return [...comments].reverse().find(comment =>
-    (comment.body || '').includes(marker)
+    roleLine.test(comment.body || '')
   );
 }
 
