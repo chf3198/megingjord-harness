@@ -10,11 +10,11 @@ model_list:
   - model_name: fleet-fast
     litellm_params:
       model: ollama/starcoder2:3b
-      api_base: http://100.91.113.16:11434
+      api_base: http://100.78.22.13:11434
   - model_name: fleet-quality
     litellm_params:
       model: ollama/qwen2.5-coder:7b
-      api_base: http://100.91.113.16:11434
+      api_base: http://100.78.22.13:11434
   - model_name: fleet-fallback
     litellm_params:
       model: ollama/qwen2.5:7b-instruct
@@ -26,11 +26,11 @@ model_list:
   - model_name: starcoder2-3b
     litellm_params:
       model: ollama/starcoder2:3b
-      api_base: http://100.91.113.16:11434
+      api_base: http://100.78.22.13:11434
   - model_name: qwen2.5-coder-7b
     litellm_params:
       model: ollama/qwen2.5-coder:7b
-      api_base: http://100.91.113.16:11434
+      api_base: http://100.78.22.13:11434
   - model_name: haiku
     litellm_params:
       model: claude-haiku-4-5-20251001
