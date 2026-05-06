@@ -1,0 +1,57 @@
+# Wave 8 child 5 (#980) — cross-team edit governance-lint warn.
+# Convergence-design item 7: when a PR edits both shared-surface (instructions/, inventory/, wiki/)
+# AND owned-surface (scripts/global/, dashboard/, cloudflare/hamr/), warn if PR body lacks a
+# coordinating-ticket citation. WARN-ONLY — does not block merge.
+name: cross-team-edit-warn
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  cross-team-edit-warn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Detect cross-cut edits
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: number, per_page: 100
+            });
+            const sharedRe = /^(instructions\/|inventory\/|wiki\/)/;
+            const ownedRe = /^(scripts\/global\/|dashboard\/|cloudflare\/hamr\/)/;
+            let touchesShared = false, touchesOwned = false;
+            for (const f of files) {
+              if (sharedRe.test(f.filename)) touchesShared = true;
+              if (ownedRe.test(f.filename)) touchesOwned = true;
+            }
+            if (!(touchesShared && touchesOwned)) {
+              core.info('no cross-cut edits detected — no warn needed');
+              return;
+            }
+            const body = context.payload.pull_request.body || '';
+            const hasCoord = /(?:Coordinates|Coord-with|Refs Epic) #\d+/i.test(body);
+            if (hasCoord) {
+              core.info('cross-cut edits detected and coordinating ticket cited — OK');
+              return;
+            }
+            const marker = '<!-- cross-team-edit-warn -->';
+            const existing = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: number, per_page: 100
+            });
+            if (existing.some(c => c.body && c.body.includes(marker))) {
+              core.info('warn comment already posted; skipping');
+              return;
+            }
+            const comment = `${marker}\n## Cross-team edit warn\n\nThis PR touches both **shared-surface** (instructions/, inventory/, wiki/) AND **owned-surface** (scripts/global/, dashboard/, cloudflare/hamr/) without citing a coordinating ticket.\n\nPer convergence-design item 7 (Epic #922), cross-cut edits should cite a coordinating ticket using \`Coordinates #N\`, \`Coord-with #N\`, or \`Refs Epic #N\` in the PR body.\n\n_Warn only — does not block merge._`;
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: number, body: comment
+            });
+            core.info('warn comment posted');

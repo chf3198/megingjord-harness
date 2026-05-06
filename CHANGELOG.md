@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — Wave 8 child 5: cross-team edit governance-lint warn (#980, EPIC #968)
+
+### Added
+- `.github/workflows/cross-team-edit-warn.yml` (≤100 lines): runs on `pull_request`. When a PR touches both shared-surface (`instructions/`, `inventory/`, `wiki/`) AND owned-surface (`scripts/global/`, `dashboard/`, `cloudflare/hamr/`) without citing a coordinating ticket (`Coordinates #N`, `Coord-with #N`, or `Refs Epic #N`), posts a warn comment. Idempotent (single comment via marker dedup). **Warn only — does not block merge.**
+
+### Notes
+- Implements convergence-design item 7.
+- Codex Team surface (governance lint adjacent) — work performed as operator-deputy.
+
 ## [Unreleased] — Wave 8 child 4: SKILL.md → per-team views derive script (#979, EPIC #968)
 
 ### Added
