@@ -21,25 +21,44 @@ jobs:
             const prCreatedAt = new Date(pr.created_at);
             const violations = [];
 
-            // 1. Linked issue — require Refs #N
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
-            if (!refsMatch) {
+            // 1. Linked issue — require Refs #N. A3 fix (#990): scan ALL Refs;
+            // pick the first non-epic. `Refs Epic #N` is treated as secondary
+            // (allowed alongside `Refs #child`); `Refs #N` alone where N is an
+            // Epic still fails per the original rule.
+            const refsAll = [...body.matchAll(/Refs(?:\s+Epic)?\s+#(\d+)/gi)];
+            if (!refsAll.length) {
               core.setFailed('No linked issue (Refs #N missing). Add Refs #N to PR body.');
               return;
             }
-            const linkedNum = parseInt(refsMatch[1]);
+            // Resolve each candidate; pick the first that is NOT type:epic.
+            let linkedNum = null;
+            let issue = null;
+            for (const m of refsAll) {
+              const candidate = parseInt(m[1]);
+              try {
+                const r = await github.rest.issues.get({
+                  owner: context.repo.owner, repo: context.repo.repo, issue_number: candidate,
+                });
+                const isEpic = r.data.labels.map(l => l.name).includes('type:epic');
+                if (!isEpic) { linkedNum = candidate; issue = r.data; break; }
+              } catch { /* fall through */ }
+            }
+            if (linkedNum === null) {
+              // No non-epic Refs found; fall back to original behavior with first Refs.
+              linkedNum = parseInt(refsAll[0][1]);
+            }
 
             // 2. Issue must be OPEN and not type:epic
-            let issue;
-            try {
-              const r = await github.rest.issues.get({
-                owner: context.repo.owner, repo: context.repo.repo,
-                issue_number: linkedNum,
-              });
-              issue = r.data;
-            } catch (e) {
-              core.setFailed(`Issue #${linkedNum} not found: ${e.message}`);
-              return;
+            if (!issue) {
+              try {
+                const r = await github.rest.issues.get({
+                  owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+                });
+                issue = r.data;
+              } catch (e) {
+                core.setFailed(`Issue #${linkedNum} not found: ${e.message}`);
+                return;
+              }
             }
             if (issue.state !== 'open') violations.push(`Issue #${linkedNum} is ${issue.state} — must be OPEN`);
             const labels = issue.labels.map(l => l.name);
