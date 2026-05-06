@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — Admin signer independence gate
+
+### Added (#1022)
+- `baton-gates.yml` admin-gate now blocks identical `COLLABORATOR_HANDOFF` and `ADMIN_HANDOFF` signer identities, with compatibility for AI-Signature, Signed-by, AI-Team-Model, and Team&Model baton fields.
+- `scripts/global/baton-independence.js` and `tests/baton-independence.spec.js` cover same-signer failure, independent-signer pass, and legacy signing fields.
+
 ## [Unreleased] — Cost-reduction Phase 2 activation corrections
 
 ### Fixed (#1050, resolves #1048)

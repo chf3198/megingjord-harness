@@ -52,9 +52,12 @@ jobs:
     needs: [collaborator-gate]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
+            const { checkAdminIndependence } =
+              require('./scripts/global/baton-independence.js');
             const body = context.payload.pull_request.body || '';
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
@@ -80,6 +83,11 @@ jobs:
                 'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
             }
+            const independence = checkAdminIndependence(comments.map(c => ({
+              body: c.body,
+              author: c.user && c.user.login,
+            })));
+            if (!independence.ok) core.setFailed(independence.message);
 
   consultant-gate:
     name: consultant-gate
