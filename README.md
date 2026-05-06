@@ -17,7 +17,7 @@
 flowchart LR
 	A[Repo Source] --> B[skills/ instructions/ hooks/ scripts]
 	B --> C[~/.copilot runtime]
-	B --> D[~/.codex/megingjord-harness runtime]
+	B --> D[~/.codex/devenv-ops runtime]
 	B --> E[~/.agents/skills runtime]
 	C --> F[Governed agent execution]
 	D --> F
@@ -180,10 +180,10 @@ This table is auto-generated from `package.json` by `npm run docs:compile` (#796
 |---|---|
 | skills/ | ~/.copilot/skills + ~/.agents/skills |
 | instructions/ | ~/.copilot/instructions |
-| hooks/ | ~/.copilot/hooks + ~/.codex/megingjord-harness/hooks |
-| scripts/global/ | ~/.copilot/scripts + ~/.codex/megingjord-harness/scripts |
+| hooks/ | ~/.copilot/hooks + ~/.codex/devenv-ops/hooks |
+| scripts/global/ | ~/.copilot/scripts + ~/.codex/devenv-ops/scripts |
 | .codex/ | ~/.codex/AGENTS.md + config.toml + hooks.json + rules/ |
-| wiki/ | ~/.copilot/wiki + ~/.codex/megingjord-harness/wiki |
+| wiki/ | ~/.copilot/wiki + ~/.codex/devenv-ops/wiki |
 
 ## Issue flows
 
