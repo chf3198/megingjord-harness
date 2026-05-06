@@ -55,6 +55,21 @@ jobs:
       base64-subjects: ${{ needs.build.outputs.sha256 }}
       upload-assets: true
 
+  github-attest:
+    # C13 (#999): GitHub Artifact Attestations as parallel signal alongside cosign.
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with: { name: hamr-bundle, path: dist/bundles/ }
+      - uses: actions/attest-build-provenance@7668a9555bb8260244698ac4f7866b8b13d0ce20 # v2.1.0
+        with:
+          subject-path: 'dist/bundles/*'
+
   cosign-sign:
     needs: [build, slsa-attest]
     runs-on: ubuntu-latest
