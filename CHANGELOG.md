@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — Stage 3 graceful-degrade verification (Epic #949 AC)
+
+### Added
+- `tests/fleet-graceful-degrade.spec.js` (6 tests) — exercises `getProfile()` solo/degraded/full transitions and asserts the LiteLLM fallback chain terminates in cloud (haiku → sonnet) when the local fleet is exhausted. Verifies Epic #949 AC: "Fleet profile degrades gracefully to CPU → cloud when GPU offline."
+
 ## [Unreleased] — Stage 2 cost-reduction: empirical observability
 
 ### Added
