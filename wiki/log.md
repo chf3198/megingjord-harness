@@ -8,6 +8,12 @@ Each entry uses a parseable prefix for CLI filtering.
 Brief description of what happened.
 ```
 
+## [2026-05-06] research | IDE Proxy Shim R&D (#1021, EPIC #1020)
+Research for Claude Code IDE proxy shim. Recommends LiteLLM proxy adoption as IDE backend (already supports Anthropic-compatible `/v1/messages`); 6-child sketch ~5d total. Latency budget ≤50ms p95 achievable. Fleet pass-rate ≥85% on complexity bands 1-2 is activation gate. Anthropic key never reaches fleet. Acceptance: ≥30% turn count routed non-Anthropic, ≥25% session cost reduction, zero quality regression on Premium-tier turns.
+
+## [2026-05-06] research | Fleet & Cloud Resource Optimization R&D (#950, EPIC #949 re-scoped)
+Re-scoped R&D dropping obsolete §1/§2 (delivered by #573/#765/#768). Active scope: §3 Tailscale Aperture, §4 CF AI 2026 catalog, §5 fleet-portability. Decision: keep LiteLLM as primary routing engine; Aperture deferred until beta exits. CF AI free tier (10K Neurons/day) registered as new named LiteLLM groups. 8-child sketch ~5.5d total.
+
 ## [2026-05-05] convergence | Megingjord Harness Convergence Design v1 (#922, 9-round 3-team SIGN_OFF)
 Approved cross-team architecture: 4 axes (governance / tooling / fleet / HAMR) plus Dashboard as observation/control plane. HAMR is shared substrate maintained by Claude Code Team. substrate-health gates model-routing-engine UPSTREAM of cascade-dispatch via cascade-policy-overrides.json. Per-team config markers extended with axis_consumers. SKILL.md frontmatter is canonical tool-discovery format with auto-derived per-team views. Cross-team edits on shared files via baton + governance-lint warn. megingjord-coord deprecation and Dashboard HAMR opt-in (#966) deferred to downstream Epics. 3 consecutive SIGN_OFFs (Codex/Copilot/Claude Code) at rounds 7/8/9. Authored as fast-track operator-deputy passes per operator authorization.
 

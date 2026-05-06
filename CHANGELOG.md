@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased] — Cost-reduction Phase 1 R&D (Epics #1020 + #949)
+
+### Added
+- `research/ide-proxy-shim-2026-05-06.md` (R&D #1021 for Epic #1020): wire-format compat + latency budget + quality regression methodology + 4 architecture options + 6-child implementation sketch (~5d total). Recommendation: adopt LiteLLM proxy as IDE backend.
+- `research/fleet-cloud-optimization-2026-05-06.md` (R&D #950 for Epic #949 re-scoped): Aperture vs LiteLLM analysis (keep LiteLLM, defer Aperture), CF AI 2026 catalog registration design, fleet-portability via fleet-discover. 8-child implementation sketch (~5.5d total).
+- `wiki/sources/{ide-proxy-shim,fleet-cloud-optimization}-2026-05-06.md` ingests.
+- `wiki/log.md` 2 new research entries.
+
+### Notes
+- Lane: docs-research. Operator-cost: $0 (websearch + analysis only).
+- Both R&Ds gate Phase 2 implementation children for #1020 + #949.
+- Cost-reduction Epics retain scheduling precedence per operator policy.
+
 ## [Unreleased] — Tooling C13: GitHub Artifact Attestations on release workflow (#999, EPIC #987)
 
 ### Added
