@@ -34,6 +34,7 @@ The LLM updates this on every ingest operation.
 - [[github-integration]] — GitHub API Integration & Dashboard Monitoring
 - [[linting-governance]] — Global Linting Governance
 - [[fleet-architecture]] — Fleet Architecture Overview
+- [[workspace-write-boundary-discipline]] — Workspace Write-Boundary Discipline
 
 ## Source Summaries
 
@@ -78,6 +79,8 @@ The LLM updates this on every ingest operation.
 - [[openclaw-windows-optimization-2026]] — OpenClaw on Windows: Optimization & Alternatives (2026)
 - [[drift-monitoring-strategy-2026-05-01]] — Drift Monitoring Strategy 2026-05-01
 - [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
+- [[vscode-copilot-allow-prompts-2026-05-05]] — VS Code Copilot Allow Prompts (2026-05-05)
+- [[dashboard-live-data-methodology-2026-05-05]] — Dashboard Live-Data Methodology (2026-05-05)
 
 ## Syntheses
 
@@ -90,6 +93,9 @@ The LLM updates this on every ingest operation.
 
 ## Recent Additions
 
+- [[dashboard-live-data-methodology-2026-05-05]] — Dashboard Live-Data Methodology (2026-05-05)
+- [[workspace-write-boundary-discipline]] — Workspace Write-Boundary Discipline (2026-05-05)
+- [[vscode-copilot-allow-prompts-2026-05-05]] — VS Code Copilot Allow Prompts (2026-05-05)
 - [[token-telemetry-unified-design-2026]] — Unified Token Telemetry Design (2026-05-01)
 - [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
 - [[sandbox-worktree-governance-pack]] — Sandbox Worktree Governance Pack (2026-04-29)
@@ -99,4 +105,4 @@ The LLM updates this on every ingest operation.
 
 ---
 
-**Pages**: 67 | **Last updated**: 2026-05-01
+**Pages**: 70 | **Last updated**: 2026-05-05

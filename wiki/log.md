@@ -15,6 +15,21 @@ Approved cross-team architecture: 4 axes (governance / tooling / fleet / HAMR) p
 
 ---
 
+## [2026-05-05] ingest | VS Code Copilot allow-prompt avoidance (Epic #849)
+Added workspace-trust + approvals research to the Karpathy wiki so sessions can
+avoid repeated "Allow" interruptions. New pages:
+`wiki/sources/vscode-copilot-allow-prompts-2026-05-05.md` and
+`wiki/concepts/workspace-write-boundary-discipline.md`. Core policy: keep writes
+inside repo workspace root and never edit runtime homes directly from this repo
+session; use repo-mediated deploy flow instead. Source:
+research/dashboard-liveness-workspace-trust-2026-05-05.md.
+
+## [2026-05-05] ingest | Dashboard live-data methodology (Epic #849)
+Added dashboard liveness contract source page documenting SSE vs polling split,
+panel refresh cadence, staleness signaling, and forced refresh on delayed-mount
+views. New page: `wiki/sources/dashboard-live-data-methodology-2026-05-05.md`.
+Source: research/dashboard-live-data-patterns-2026-05-05.md.
+
 ## [2026-05-05] research | HAMR v3.2.2 patch — R9.2 cwd-vs-branch hook enforcement (#923, EPIC #860)
 Pre-Wave-4 alignment patch extending v3.2.1 §R9.2 with three sub-patterns:
 R9.2.1 Bash-hook contract (pre-tool guard asserts HEAD non-detached + no
