@@ -6,31 +6,31 @@ model_list:
   - model_name: fleet-primary
     litellm_params:
       model: ollama/qwen2.5-coder:1.5b
-      api_base: http://localhost:11434
+      api_base: http://100.78.22.13:11434
   - model_name: fleet-fast
     litellm_params:
       model: ollama/starcoder2:3b
-      api_base: http://localhost:11434
+      api_base: http://100.91.113.16:11434
   - model_name: fleet-quality
     litellm_params:
       model: ollama/qwen2.5-coder:7b
-      api_base: http://localhost:11434
+      api_base: http://100.91.113.16:11434
   - model_name: fleet-fallback
     litellm_params:
       model: ollama/qwen2.5:7b-instruct
-      api_base: http://localhost:11434
+      api_base: http://100.78.22.13:11434
   - model_name: qwen2.5-coder-1.5b
     litellm_params:
       model: ollama/qwen2.5-coder:1.5b
-      api_base: http://localhost:11434
+      api_base: http://100.78.22.13:11434
   - model_name: starcoder2-3b
     litellm_params:
       model: ollama/starcoder2:3b
-      api_base: http://localhost:11434
+      api_base: http://100.91.113.16:11434
   - model_name: qwen2.5-coder-7b
     litellm_params:
       model: ollama/qwen2.5-coder:7b
-      api_base: http://localhost:11434
+      api_base: http://100.91.113.16:11434
   - model_name: haiku
     litellm_params:
       model: claude-haiku-4-5-20251001
@@ -39,14 +39,10 @@ model_list:
     litellm_params:
       model: claude-sonnet-4-6
       api_key: os.environ/ANTHROPIC_API_KEY
-  # D1 (#1031): IDE proxy backend — Anthropic Opus 4.7 passthrough.
-  # Claude Code IDE points api_endpoint at this proxy's /v1/messages.
   - model_name: opus
     litellm_params:
       model: claude-opus-4-7
       api_key: os.environ/ANTHROPIC_API_KEY
-  # D1 (#1031): aliases that expose Anthropic-compat /v1/messages route.
-  # LiteLLM auto-translates any alias when called via /v1/messages endpoint.
   - model_name: claude-opus-4-7
     litellm_params:
       model: claude-opus-4-7
@@ -55,30 +51,29 @@ model_list:
     litellm_params:
       model: claude-haiku-4-5-20251001
       api_key: os.environ/ANTHROPIC_API_KEY
-  # F3 (#1039): Cloudflare AI 2026 free-tier named groups (depends on F2 catalog).
+  # CF AI text-gen (verified active via direct ai/run probe 2026-05-06; #1048).
+  # NOTE: ai/models/search returns deprecated models too; always probe before configuring.
   - model_name: cloud-fleet-primary
     litellm_params:
-      model: cloudflare/@cf/qwen/qwen3-30b-a3b-fp8
-      api_key: os.environ/CLOUDFLARE_API_TOKEN
+      model: cloudflare/@hf/mistral/mistral-7b-instruct-v0.2
+      api_key: os.environ/CLOUDFLARE_WORKERS_AI_TOKEN
       cloudflare_account_id: os.environ/CLOUDFLARE_ACCOUNT_ID
   - model_name: cloud-fleet-quality
     litellm_params:
-      model: cloudflare/@cf/openai/gpt-oss-120b
-      api_key: os.environ/CLOUDFLARE_API_TOKEN
+      model: cloudflare/@cf/meta/llama-3.1-8b-instruct
+      api_key: os.environ/CLOUDFLARE_WORKERS_AI_TOKEN
       cloudflare_account_id: os.environ/CLOUDFLARE_ACCOUNT_ID
   - model_name: cloud-fleet-fast
     litellm_params:
-      model: cloudflare/@cf/google/gemma-4-26b-a4b-it
-      api_key: os.environ/CLOUDFLARE_API_TOKEN
+      model: cloudflare/@cf/meta/llama-3.2-3b-instruct
+      api_key: os.environ/CLOUDFLARE_WORKERS_AI_TOKEN
       cloudflare_account_id: os.environ/CLOUDFLARE_ACCOUNT_ID
 
 router_settings:
-  # F1 (#1037): adopt latency-based routing with cooldowns + retry budget.
-  # Replaces simple-shuffle with deployment ordering by p50 latency.
   routing_strategy: latency-based-routing
   routing_strategy_args:
-    ttl: 1800   # 30 min cache window for latency observations
-  cooldown_time: 60   # seconds before retrying a failed deployment
+    ttl: 1800
+  cooldown_time: 60
   allowed_fails: 2
   fallbacks:
     - fleet-primary:
@@ -106,10 +101,6 @@ budget_manager:
   budget_alerts:
     - threshold: 0.80
       email: chf3198@yahoo.com
-
-# Environment variables required on deployment host:
-# ANTHROPIC_API_KEY=sk-ant-... (never commit the real key)
-# Optional: LITELLM_MASTER_KEY=sk-... (gateway auth token)
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY

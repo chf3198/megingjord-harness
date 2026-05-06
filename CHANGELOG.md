@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Cost-reduction Phase 2 activation corrections
+
+### Fixed (#1050, resolves #1048)
+- `scripts/global/substrate-health.js` — `probeCloudflareAI()` prefers new `CLOUDFLARE_WORKERS_AI_TOKEN` env var with fallback to broad `CLOUDFLARE_API_TOKEN`. Preserves least-privilege isolation between AI inference and HAMR Worker/R2 scopes.
+- `config/litellm-config.yaml` — 3 CF AI deployments now use `CLOUDFLARE_WORKERS_AI_TOKEN`. Swapped paid/deprecated models to verified-active free-tier text-gen (`@hf/mistral/mistral-7b-instruct-v0.2`, `@cf/meta/llama-3.1-8b-instruct`, `@cf/meta/llama-3.2-3b-instruct`) — Phase 2 R&D bet on 30b/120b/26b free models that were actually paid; CF `models/search` returns deprecated models without filtering.
+- `config/litellm-config.yaml` — Ollama deployments repointed from `localhost:11434` to fleet Tailscale IPs (`100.78.22.13` windows-laptop, `100.91.113.16` 36gbwinresource). Will activate once Ollama daemon starts on those hosts (#1051).
+
+### Verification
+- LiteLLM `/health`: 8/15 endpoints healthy (5 Anthropic + 3 CF AI). End-to-end inference confirmed through proxy.
+
 ## [Unreleased] — Cost-reduction Phase 2 runtime + portability (9 of 14 remaining)
 
 ### Added (runtime — IDE proxy)
