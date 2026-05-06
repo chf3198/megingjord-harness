@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] — Tooling A3: evidence-completeness Refs Epic pairing fix (#990, EPIC #987)
+
+### Fixed
+- `.github/workflows/evidence-completeness.yml`: gate now scans all `Refs #N` AND `Refs Epic #N` matches in PR body; picks first non-epic candidate as the primary linked issue. PRs that cite both a child ticket AND an Epic now pass.
+
+### Notes
+- Strict-superset preserved: PRs with only `Refs #child-N` continue to work unchanged. PRs with only `Refs Epic #N` still fail (must have a child Refs).
+- Workflow file (Codex-team-adjacent surface) — work performed as operator-deputy per #922 SIGN_OFF authorization.
+
 ## [Unreleased] — Tooling A1: R9.2 hook --delete refspec fix (#989, EPIC #987)
 
 ### Fixed
