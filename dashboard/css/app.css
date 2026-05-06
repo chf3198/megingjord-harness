@@ -82,3 +82,4 @@ body.high-contrast {
   --text: #fff; --text-muted: #e5e7eb; --blue: #86d3ff;
   --green: #4ade80; --yellow: #facc15;
 }
+.panel-ts { font-size: .7rem; color: var(--text-muted); margin-left: .5rem; font-weight: normal; }

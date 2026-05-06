@@ -52,7 +52,7 @@
         <template x-if="isView('live')"><section id="panel-activity" class="panel">
             <h2>📡 Live Activity <button class="shb" data-tip="activity" aria-label="Help: Activity">?</button></h2><div x-html="renderActivityFeed(activityLog)"></div></section></template>
         <template x-if="isView('live')"><section id="panel-context-flow" class="panel full-width">
-            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button></h2><div x-html="renderContextFlow()"></div></section></template>
+            <h2>🧠 Context Flow <button class="shb" data-tip="context-flow" aria-label="Help: Context Flow">?</button><span class="panel-ts" x-text="panelTs.flow ? '⟳ '+panelTs.flow : ''"></span></h2><div x-html="renderContextFlow()"></div></section></template>
         <!-- LOGS: 2 panels (streaming chronological) -->
         <template x-if="isView('logs')"><section id="panel-router-log" class="panel">
             <h2>📋 Router Log <button class="shb" data-tip="router-log" aria-label="Help: Router Log">?</button></h2><div class="log-scroll" x-html="renderRouterLog()"></div></section></template>
@@ -62,9 +62,9 @@
             <h2>📋 Ticket Log <button class="shb" data-tip="ticket-log" aria-label="Help: Tickets">?</button></h2><div class="log-scroll" x-html="renderTicketLog(ticketLog)"></div></section></template>
         <!-- OPS: 6 panels (monitoring + analytics) -->
         <section id="panel-github" class="panel" x-show="isView('ops')">
-            <h2>🐙 GitHub <button class="shb" data-tip="github" aria-label="Help: GitHub">?</button></h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
+            <h2>🐙 GitHub <button class="shb" data-tip="github" aria-label="Help: GitHub">?</button><span class="panel-ts" x-text="panelTs.github ? '⟳ '+panelTs.github : ''"></span></h2><div x-html="renderGitHubMonitor(githubData)"></div></section>
         <section id="panel-quotas" class="panel" x-show="isView('ops')">
-            <h2>📊 Quotas <button class="shb" data-tip="quotas" aria-label="Help: Quotas">?</button></h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
+            <h2>📊 Quotas <button class="shb" data-tip="quotas" aria-label="Help: Quotas">?</button><span class="panel-ts" x-text="panelTs.quotas ? '⟳ '+panelTs.quotas : ''"></span></h2><div x-html="renderQuotaPanel(liveQuotas, quotas)"></div></section>
 
         <section id="panel-governance" class="panel" x-show="isView('ops')">
             <h2>🛡️ Governance <button class="shb" data-tip="governance" aria-label="Help: Governance">?</button></h2><div x-html="renderGovernancePanel(governanceState)"></div></section>
@@ -86,11 +86,11 @@
             <h2>🧪 Stress Test <button class="shb" data-tip="test-panel" aria-label="Help: Test">?</button></h2><div x-html="renderStressPanel(testRun)"></div></section></template>
         <!-- WIKI: 2 panels -->
         <template x-if="isView('wiki')"><section id="panel-wiki-metrics" class="panel">
-            <h2>📊 Metrics <button class="shb" data-tip="wiki-metrics" aria-label="Help: Metrics">?</button></h2><div x-html="renderWikiMetrics(wikiMetrics, wikiHealth)"></div></section></template>
+            <h2>📊 Metrics <button class="shb" data-tip="wiki-metrics" aria-label="Help: Metrics">?</button><span class="panel-ts" x-text="panelTs.wiki ? '⟳ '+panelTs.wiki : ''"></span></h2><div x-html="renderWikiMetrics(wikiMetrics, wikiHealth)"></div></section></template>
         <template x-if="isView('wiki')"><section id="panel-wiki-reader" class="panel wiki-main">
             <h2>📚 Research Wiki <button class="shb" data-tip="wiki-reader" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiReader(wikiPages)"></div></section></template>
-        <!-- COST: 1 panel --><template x-if="isView('cost')"><section id="panel-cost" class="panel full-width"><h2>💰 Cost + Token Telemetry <button class="shb" data-tip="cost" aria-label="Help: Cost">?</button></h2><div x-html="renderTokenTelemetryPanel(tokenTelemetry)"></div><div x-html="renderTokenReconcilePanel(reconcileData)"></div><div x-html="renderCostMonitor(costData)"></div></section></template>
-        <!-- AGENTS --><template x-if="isView('agents')"><section id="panel-agents" class="panel full-width"><h2>🤖 Agents <button class="shb" data-tip="agents" aria-label="Help: Agents">?</button></h2><div x-html="renderAgentInventory()"></div><hr class="panel-divider"><h3 class="panel-subheading">🔴 Live Sessions</h3><div x-html="renderTierCBanner(agentSessions)"></div><div x-html="renderConflictAlerts(agentSessions)"></div><div x-html="renderAgentSessions(agentSessions)"></div></section></template>
+        <!-- COST: 1 panel --><template x-if="isView('cost')"><section id="panel-cost" class="panel full-width"><h2>💰 Cost + Token Telemetry <button class="shb" data-tip="cost" aria-label="Help: Cost">?</button><span class="panel-ts" x-text="panelTs.cost ? '⟳ '+panelTs.cost : ''"></span></h2><div x-html="renderTokenTelemetryPanel(tokenTelemetry)"></div><div x-html="renderTokenReconcilePanel(reconcileData)"></div><div x-html="renderCostMonitor(costData)"></div></section></template>
+        <!-- AGENTS --><template x-if="isView('agents')"><section id="panel-agents" class="panel full-width"><h2>🤖 Agents <button class="shb" data-tip="agents" aria-label="Help: Agents">?</button><span class="panel-ts" x-text="panelTs.agents ? '⟳ '+panelTs.agents : ''"></span></h2><div x-html="renderAgentInventory()"></div><hr class="panel-divider"><h3 class="panel-subheading">🔴 Live Sessions</h3><div x-html="renderTierCBanner(agentSessions)"></div><div x-html="renderConflictAlerts(agentSessions)"></div><div x-html="renderAgentSessions(agentSessions)"></div></section></template>
         <!-- HELP: 1 panel full-width -->
         <template x-if="isView('help')"><section id="panel-help" class="panel full-width">
             <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>

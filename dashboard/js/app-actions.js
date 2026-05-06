@@ -1,8 +1,6 @@
 // Dashboard actions split out to keep app.js compact
 
-function setDashboardView(app, view) {
-  app.currentView = view;
-}
+function setDashboardView(app, view) { app.currentView = view; if (['cost','wiki','agents'].includes(view)) app.refreshAll(); }
 
 function isDashboardView(app, view) {
   return app.currentView === view;

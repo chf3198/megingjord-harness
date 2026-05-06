@@ -9,7 +9,7 @@ function dashboardApp() {
     batonState: [], ticketLog: [], activityLog: [], governanceState: {},
     wikiHealth: { loaded: false }, wikiMetrics: null, wikiPages: [],
     githubData: null,
-    fleetHealthLog: [], costData: [], tokenTelemetry: null, reconcileData: null,
+    fleetHealthLog: [], costData: [], tokenTelemetry: null, reconcileData: null, panelTs: {},
     tooltipsEnabled: false, autoRefreshEnabled: true,
     refreshTimer: null, testTimer: null,
     testRun: { running: false, rounds: 0, ok: 0, fail: 0, last: 'idle' },
@@ -66,7 +66,8 @@ function dashboardApp() {
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
         if (typeof fetchCostTelemetry === 'function') this.costData = await fetchCostTelemetry(); if (typeof fetchTokenTelemetrySummary === 'function') this.tokenTelemetry = await fetchTokenTelemetrySummary(); if (typeof fetchTokenReconcileSummary === 'function') this.reconcileData = await fetchTokenReconcileSummary().catch(() => null);
         if (typeof fetchAgentSessions === 'function') this.agentSessions = await fetchAgentSessions();
-        this.lastRefresh = new Date().toLocaleTimeString();
+        const _ts = new Date().toLocaleTimeString();
+        this.panelTs = { github: _ts, quotas: _ts, wiki: _ts, cost: _ts, agents: _ts, flow: _ts }; this.lastRefresh = _ts;
       } finally {
         this.loading = false;
       }
