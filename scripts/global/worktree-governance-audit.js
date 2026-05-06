@@ -1,22 +1,35 @@
 #!/usr/bin/env node
+/* eslint-disable jsdoc/require-jsdoc */
 const { execSync } = require('child_process');
 
-const asJson = process.argv.includes('--json');
 const maxBehind = Number(process.env.SANDBOX_MAX_BEHIND || 0);
+const validTargets = ['copilot', 'codex', 'claude-code'];
 const sandboxRx = /^sandbox\/(copilot|codex|claude-code)$/;
+
+function parseTarget(args = process.argv.slice(2), env = process.env) {
+  const inline = args.find((arg) => arg.startsWith('--target='));
+  const splitAt = args.findIndex((arg) => arg === '--target');
+  const value = inline ? inline.split('=')[1] : splitAt >= 0 ? args[splitAt + 1] : env.SANDBOX_TARGET;
+  if (!value) return null;
+  if (!validTargets.includes(value)) throw new Error(`Invalid target: ${value}. Use ${validTargets.join(', ')}.`);
+  return value;
+}
+function helpText() {
+  return 'Usage: worktree-governance-audit.js [--json] [--target=<copilot|codex|claude-code>]\n'
+    + 'Default audits every sandbox launcher. Target mode audits only one launcher.';
+}
 
 function run(cmd) {
   return execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
 }
 
-function readLocalSandboxBranches() {
-  const out = run('git for-each-ref --format="%(refname:short)" refs/heads/sandbox/');
+function refs(scope) {
+  const out = run(`git for-each-ref --format="%(refname:short)" ${scope}`);
   return out ? out.split('\n').filter(Boolean) : [];
 }
-
-function readRemoteSandboxBranches() {
-  const out = run('git for-each-ref --format="%(refname:short)" refs/remotes/origin/sandbox/');
-  return out ? out.split('\n').filter(Boolean) : [];
+function logicalBranchName(branch) { return branch.replace(/^origin\//, ''); }
+function filterBranches(branches, target) {
+  return target ? branches.filter((branch) => logicalBranchName(branch) === `sandbox/${target}`) : branches;
 }
 
 function aheadBehind(branch) {
@@ -24,21 +37,15 @@ function aheadBehind(branch) {
   const [ahead, behind] = out.split(/\s+/).map(Number);
   return { ahead, behind };
 }
-
 function dirtyInBranch(branch) {
-  const out = run(`git -c core.quotepath=false status --porcelain --untracked-files=all --branch`);
+  const out = run('git -c core.quotepath=false status --porcelain --untracked-files=all --branch');
   const lines = out.split('\n').filter(Boolean);
-  const head = lines[0] || '';
-  const changed = Math.max(lines.length - 1, 0);
-  return head.includes(`## ${branch}`) ? changed : 0;
+  return (lines[0] || '').includes(`## ${branch}`) ? Math.max(lines.length - 1, 0) : 0;
 }
 
 function inspectBranch(branch, usingRemote, issues) {
-  const logicalBranch = branch.replace(/^origin\//, '');
-  if (!sandboxRx.test(logicalBranch)) {
-    issues.push(`${logicalBranch}: invalid sandbox naming.`);
-    return;
-  }
+  const logicalBranch = logicalBranchName(branch);
+  if (!sandboxRx.test(logicalBranch)) return issues.push(`${logicalBranch}: invalid sandbox naming.`);
   const { ahead, behind } = aheadBehind(branch);
   if (ahead > 0) issues.push(`${logicalBranch}: ahead of origin/main by ${ahead} commits.`);
   if (behind > maxBehind) issues.push(`${logicalBranch}: behind origin/main by ${behind} commits (max ${maxBehind}).`);
@@ -47,16 +54,18 @@ function inspectBranch(branch, usingRemote, issues) {
   if (dirtyCount > 0) issues.push(`${logicalBranch}: has ${dirtyCount} local changes while on sandbox launcher.`);
 }
 
-function check() {
+function check(options = {}) {
+  const target = Object.hasOwn(options, 'target') ? options.target : parseTarget(options.args);
   run('git fetch origin --prune');
-  const issues = [];
-  const localBranches = readLocalSandboxBranches();
+  const localBranches = refs('refs/heads/sandbox/');
   const usingRemote = !localBranches.length;
-  const branches = usingRemote ? readRemoteSandboxBranches() : localBranches;
-  if (!branches.length) issues.push('No sandbox/* branches found locally or on origin.');
+  const foundBranches = usingRemote ? refs('refs/remotes/origin/sandbox/') : localBranches;
+  const branches = filterBranches(foundBranches, target);
+  const issues = [];
+  if (!branches.length) issues.push(`No ${target ? `sandbox/${target}` : 'sandbox/*'} branches found locally or on origin.`);
   for (const branch of branches) inspectBranch(branch, usingRemote, issues);
-
   return {
+    target: target || 'all',
     checkedBranches: branches.length,
     maxBehind,
     status: issues.length ? 'fail' : 'pass',
@@ -65,20 +74,27 @@ function check() {
   };
 }
 
-try {
-  const result = check();
-  if (asJson) console.log(JSON.stringify(result, null, 2));
-  else {
-    console.log(`worktree-governance: ${result.status.toUpperCase()} (${result.checkedBranches} branches)`);
-    result.issues.forEach(i => console.log(`- ${i}`));
-  }
-  process.exit(result.status === 'pass' ? 0 : 1);
-} catch (error) {
-  const message = error?.stderr?.toString().trim() || error.message;
-  if (asJson) {
-    console.log(JSON.stringify({ status: 'fail', issues: [message], runAt: new Date().toISOString() }, null, 2));
-  } else {
-    console.error(`worktree-governance: FAIL\n- ${message}`);
-  }
-  process.exit(1);
+function printResult(result, asJson) {
+  if (asJson) return console.log(JSON.stringify(result, null, 2));
+  console.log(`worktree-governance: ${result.status.toUpperCase()} (${result.checkedBranches} branches)`);
+  result.issues.forEach((i) => console.log(`- ${i}`));
 }
+
+if (require.main === module) {
+  const asJson = process.argv.includes('--json');
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    console.log(helpText());
+    process.exit(0);
+  }
+  try {
+    const result = check();
+    printResult(result, asJson);
+    process.exit(result.status === 'pass' ? 0 : 1);
+  } catch (error) {
+    const message = error?.stderr?.toString().trim() || error.message;
+    printResult({ status: 'fail', issues: [message], runAt: new Date().toISOString() }, asJson);
+    process.exit(1);
+  }
+}
+
+module.exports = { check, filterBranches, helpText, parseTarget, validTargets };

@@ -36,6 +36,8 @@ Preferred command:
 - Local: pre-commit branch guard blocks commits on `sandbox/*`.
 - CI: `worktree-governance-required` must pass.
 - Audit command: `npm run governance:worktrees`.
+- Targeted audit: `node scripts/global/worktree-governance-audit.js --target=codex --json`.
+- Default audits must still check all Copilot, Claude Code, and Codex launchers.
 
 ## Escalation
 
