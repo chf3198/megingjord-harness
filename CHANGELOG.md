@@ -7,7 +7,6 @@
 - `scripts/global/visual-qa-classify.js` (67 lines) — diff-aware visual QA classifier. UI patterns: `dashboard/*.html`, `dashboard/css/*.css`, `dashboard/js/*-{panel,view}.js`. Auto-records N/A for safe non-UI diffs to eliminate false positives in stop hook.
 - `tests/broker.spec.js` — 11 Playwright tests covering full acquire/heartbeat/release/reconcile lifecycle + visual-QA classification.
 
-
 ## [Unreleased] — Epic #866 PR-C: write-safety + Karpathy v2 + known-defects (#871 #1017 #1018)
 
 ### Added
