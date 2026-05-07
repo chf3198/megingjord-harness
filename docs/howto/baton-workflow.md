@@ -196,7 +196,8 @@ COLLABORATOR_HANDOFF: N/A — config-only lane
 
 - `status:done` on an open issue — done must coincide with `gh issue close`
 - Any `role:*` label on a closed issue
-- `status:backlog` or `status:done` with any `role:*` label
+- `status:backlog` or `status:done` with any `role:*` label — **except Epics**, which carry `role:manager` throughout their lifecycle (label-lint Rule E2; per Epic #1074)
+- `status:dormant` or `status:deferred` on non-Epic tickets (Rule E5)
 - Skipping a role without posting an explicit N/A marker
 
 ## Quick Reference

@@ -1,10 +1,11 @@
 # ADR-010: Ticket Status–Role Ownership Binding Model
 
-**Status**: Accepted
+**Status**: Accepted (amended 2026-05-07 by Epic #1074)
 **Date**: 2026-04-16
 **Author**: Manny Scope (Manager), Cody Builder (Collaborator)
 **Tickets**: #118, #133, #134
 **Supersedes**: Informal model in `manager-ticket-lifecycle` skill
+**Amended by**: Epic #1074 (Epic-vs-child governance differentiation) — adds `status:dormant` + `status:deferred` Epic-only states; carves out Epic exceptions to Rule 4 (backlog) and Rule 8 (in-progress) per label-lint Rules E2/E3/E5. Original 8-status child-ticket model unchanged for non-Epic tickets.
 
 ## Context
 

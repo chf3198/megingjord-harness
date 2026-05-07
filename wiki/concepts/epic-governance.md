@@ -21,11 +21,14 @@ and close conditions. Epics are parent containers; all active work happens in ch
 
 | Epic Status     | Condition to Advance             |
 |-----------------|----------------------------------|
+| `backlog`       | Created; carries `role:manager` (Rule E2) |
 | `triage`        | Scope defined, children created  |
-| `ready`         | All children triaged              |
-| `in-progress`   | ≥1 child `in-progress`           |
+| `in-progress`   | ≥1 child `in-progress`; carries `role:manager` (Rule E3) |
+| `dormant`       | Active goal, no current work; 90d EPIC_REVIEW (Rule E5; #1074) |
+| `deferred`      | Active goal, externally blocked; no ETA (Rule E5; #1074) |
 | `review`        | All children `done` or terminal  |
 | `done`/closed   | See close conditions below       |
+| `cancelled`     | Goal invalidated (NOT for stalled work) |
 
 ## Progress Comment Protocol
 
