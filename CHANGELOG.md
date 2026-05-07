@@ -1,14 +1,12 @@
 # Changelog
 
-## [Unreleased] — Epic #866 PR-A: hybrid retrieval foundation (#868 #869 #1082)
+## [Unreleased] — Epic #866 PR-B: hygiene scanners + eval harness (#870 #872)
 
 ### Added
-- `scripts/wiki/retrieval.js` (96 lines) — hybrid retrieval: BM25 lexical + cosine-style dense + reciprocal rank fusion (#868). Sentence-boundary chunker with parent-context expansion (#869). Local-only computation; no LLM/embedding dependency.
-- `tests/wiki-retrieval.spec.js` — 9 tests (tokenize, chunkPage, bm25Score, denseScore, rrf, constants).
-
-### Changed
-- `scripts/wiki/wiki-llm.js` — wraps `callLLM` with `hamr-provider-wrapper.wrapProviderCall` (#1082). Per-provider tier mapping (OpenClaw → fleet-fast/quality; Groq/Cerebras → cloud-fleet-quality). Honors `MEGINGJORD_HAMR_DISABLED=1` and falls back to direct fetch when wrapper unavailable.
-- `scripts/wiki/search.js` — uses `hybridSearch` by default; legacy keyword fallback gated behind `WIKI_HYBRID=0` for backward-compat.
+- `scripts/wiki/hygiene.js` (85 lines) — wiki content hygiene scanners (#870): stale (180d threshold), duplicate (0.85 jaccard), orphan (no inbound wikilinks), weak-link (<2 outbound). Local-only computation.
+- `scripts/wiki/eval-harness.js` (70 lines) — wiki retrieval eval harness with quality gate (#872). PRECISION_AT=5; QUALITY_FLOOR=0.40. Writes `logs/wiki-eval-report.json`.
+- `scripts/wiki/eval-ground-truth.json` — 5 seed queries with expected slugs.
+- `tests/wiki-hygiene-eval.spec.js` — 9 tests covering hygiene scanners + eval precision/recall.
 
 ## [Unreleased] — Epic #1074: Epic-vs-child governance differentiation
 
