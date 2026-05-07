@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — Epic #949 closeout (GPU-node priority-1 routing)
+
+### Added
+- `config/litellm-config.yaml` — new `fleet-large` deployment routed to 36gbwinresource (100.91.113.16) for `ollama/qwen2.5-coder:32b`. Closes Epic #949 AC1 (GPU node priority-1 routing) for the unique 32b model capability that no other fleet host has. Inline comment documents empirical cold-start tradeoff.
+
+### Closed
+- Epic #949 (Intelligent Fleet & Cloud Resource Optimization) — all 7 success criteria met. Documentation, R&D, and code shipped across multiple PRs (Stage 1-4 of cost-reduction); this PR closes the AC1 routing gap.
+
 ## [Unreleased] — Epic #1020 closeout (parity-floor recalibration)
 
 ### Changed

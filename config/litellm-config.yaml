@@ -19,6 +19,14 @@ model_list:
     litellm_params:
       model: ollama/qwen2.5:7b-instruct
       api_base: http://100.78.22.13:11434
+  # AC1 closeout (Epic #949): GPU node priority-1 routing for unique 32b capability.
+  # 36gbwinresource is the only fleet host with qwen2.5-coder:32b. Cold-start is slow
+  # (~120s+ empirically); warm inference is fast. Use for tasks where 32b quality matters.
+  - model_name: fleet-large
+    litellm_params:
+      model: ollama/qwen2.5-coder:32b
+      api_base: http://100.91.113.16:11434
+      timeout: 240
   - model_name: qwen2.5-coder-1.5b
     litellm_params:
       model: ollama/qwen2.5-coder:1.5b
