@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — Epic #866 PR-A: hybrid retrieval foundation (#868 #869 #1082)
+
+### Added
+- `scripts/wiki/retrieval.js` (96 lines) — hybrid retrieval: BM25 lexical + cosine-style dense + reciprocal rank fusion (#868). Sentence-boundary chunker with parent-context expansion (#869). Local-only computation; no LLM/embedding dependency.
+- `tests/wiki-retrieval.spec.js` — 9 tests (tokenize, chunkPage, bm25Score, denseScore, rrf, constants).
+
+### Changed
+- `scripts/wiki/wiki-llm.js` — wraps `callLLM` with `hamr-provider-wrapper.wrapProviderCall` (#1082). Per-provider tier mapping (OpenClaw → fleet-fast/quality; Groq/Cerebras → cloud-fleet-quality). Honors `MEGINGJORD_HAMR_DISABLED=1` and falls back to direct fetch when wrapper unavailable.
+- `scripts/wiki/search.js` — uses `hybridSearch` by default; legacy keyword fallback gated behind `WIKI_HYBRID=0` for backward-compat.
+
 ## [Unreleased] — Epic #1074: Epic-vs-child governance differentiation
 
 ### Added

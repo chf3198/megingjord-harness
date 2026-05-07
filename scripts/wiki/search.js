@@ -6,7 +6,9 @@
 const fs = require('fs');
 const { callLLM, SEARCH_PROMPT } = require('./wiki-llm');
 const { listPages, WIKI_DIR } = require('./wiki-io');
+const { hybridSearch } = require('./retrieval');
 const path = require('path');
+const USE_HYBRID = process.env.WIKI_HYBRID !== '0';
 
 async function search(question) {
   console.log(`🔍 Query: ${question}\n`);
@@ -21,15 +23,18 @@ async function search(question) {
     process.exit(0);
   }
 
-  // Step 2: Simple keyword matching against index + page contents
-  const qWords = question.toLowerCase().split(/\s+/);
-  const scored = pages.map((p) => {
-    const content = fs.readFileSync(p.path, 'utf-8').toLowerCase();
-    const hits = qWords.filter((w) => content.includes(w)).length;
-    return { ...p, score: hits };
-  });
-  scored.sort((a, b) => b.score - a.score);
-  const relevant = scored.filter((p) => p.score > 0).slice(0, 5);
+  // Step 2: Hybrid retrieval (#868) — BM25 + dense + RRF fusion. Fallback: keyword match.
+  let relevant;
+  if (USE_HYBRID) {
+    relevant = hybridSearch(question, pages);
+  } else {
+    const qWords = question.toLowerCase().split(/\s+/);
+    relevant = pages.map((p) => {
+      const content = fs.readFileSync(p.path, 'utf-8').toLowerCase();
+      const hits = qWords.filter((w) => content.includes(w)).length;
+      return { ...p, score: hits };
+    }).sort((a, b) => b.score - a.score).filter((p) => p.score > 0).slice(0, 5);
+  }
 
   if (relevant.length === 0) {
     console.log('No relevant wiki pages found for this query.');
