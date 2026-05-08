@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased] — #1116: reword global-task-router fleet phrasing
+
+### Changed
+- `instructions/global-task-router.instructions.md:3` — replace "Local fleet is second-highest priority goal" with "Fleet is the highest zero-cost execution lane after Free/Auto, subject to Governance (G1) and Quality (G2)." Per #1105 D-004 (CX-RD C3 HIGH-severity finding). Disambiguates cost-lane from goal-priority.
+
 ## [Unreleased] — #1117: normalize ZeroCost spelling in session_context.py
 
 ### Fixed

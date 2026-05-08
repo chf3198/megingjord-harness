@@ -1,6 +1,6 @@
 ---
 name: Global Task Router
-description: Route work through local-first cascade lanes with capability matrix. Local fleet is second-highest priority goal.
+description: Route work through local-first cascade lanes with capability matrix. Fleet is the highest zero-cost execution lane after Free/Auto, subject to Governance (G1) and Quality (G2).
 applyTo: "**"
 ---
 
