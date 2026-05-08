@@ -1,0 +1,35 @@
+name: Goal Drift Lint (advisory)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'instructions/harness-goals.instructions.md'
+      - 'instructions/global-standards.instructions.md'
+      - 'hooks/scripts/goal_lens.py'
+      - '.codex/AGENTS.md'
+      - '.github/copilot-instructions.md'
+      - 'wiki/concepts/harness-goals.md'
+      - 'generated/goals-contract.json'
+  schedule:
+    - cron: '17 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  goal-drift-lint:
+    name: Goal-priority drift detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run goal-drift lint (advisory)
+        run: node scripts/global/lint-goal-drift.js
+        continue-on-error: true
+      - name: Note
+        run: |
+          echo "Per #1122 / #1105 D-011: this lint is advisory-first."
+          echo "After 2 weeks stable, promote to required by setting GOAL_DRIFT_GATE=1."
