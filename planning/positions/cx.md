@@ -203,3 +203,166 @@ Role: consultant
 last_activity_utc: 2026-05-08T04:13:46Z
 quiescent: true
 ---
+
+---
+INIT_PASS: true
+scope: Full decision pass D-001..D-011 posted by current Codex session per team-init instructions.
+Signed-by: Caden Harper
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: collaborator
+last_activity_utc: 2026-05-08T04:38:41Z
+---
+---
+decision_ref: D-001
+threads: []
+verdict: agree
+rationale: Runtime entrypoints do not directly include harness-goals; correction stands and should be preserved.
+evidence:
+  - cf:[CC-RD §0.2]
+  - repo: CLAUDE.md#L14
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-002
+threads: []
+verdict: agree
+rationale: Wiki always-loaded list overstates current runtime loading and should be corrected.
+evidence:
+  - cf:[CC-RD §2]
+  - repo: wiki/concepts/harness-goals.md#L33-L38
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-003
+threads: []
+verdict: agree
+rationale: All teams converge that aggregated G1..G9 control/evidence mapping is the highest-value remaining work.
+evidence:
+  - cf:[CP-RD seedmap]
+  - cf:[CX-RD enforce]
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-004
+threads: []
+verdict: agree
+rationale: Router description wording should align with constitution hierarchy to avoid policy ambiguity.
+evidence:
+  - cf:[CX-RD C3]
+  - repo: instructions/global-task-router.instructions.md#L3
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-005
+threads: []
+verdict: agree
+rationale: Normalize Zero Cost spelling to reduce unnecessary drift and grep/lint mismatch.
+evidence:
+  - cf:[CX-RD C5]
+  - repo: hooks/scripts/session_context.py#L72
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-006
+threads: []
+verdict: agree
+rationale: Runtime sync verification remains required evidence for cross-runtime parity and deployment confidence.
+evidence:
+  - cf:[CX-RD C8]
+  - repo: instructions/hamr-routing.instructions.md#L77
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-007
+threads: []
+verdict: agree
+rationale: Generated contract is acceptable only as derived control; canonical source remains the instruction file.
+evidence:
+  - cf:[CX-RD canon]
+  - cf:[CP-RD canon]
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-008
+threads: []
+verdict: agree
+rationale: Role-baton routing doc drift is real and should be reconciled with current ticket taxonomy.
+evidence:
+  - cf:[CP-RD conflicts]
+  - repo: instructions/role-baton-routing.instructions.md#L12-L21
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-009
+threads: []
+verdict: agree
+rationale: Governance precedence justifies including canonical goals in runtime context despite minor token overhead.
+evidence:
+  - cf:[CC-RD §6.2]
+  - repo: CLAUDE.md#L14
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-010
+threads: []
+verdict: disagree-not-blocking
+rationale: Estimate range varies by automation depth; baseline remains acceptable for synthesis planning.
+evidence:
+  - cf:[CP-RD rollout]
+  - cf:[CC-RD §6.1]
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
+---
+decision_ref: D-011
+threads: []
+verdict: agree
+rationale: Advisory-first drift-lint is low risk and helps prevent mirror divergence from canonical text.
+evidence:
+  - cf:[CC-RD §6.1]
+  - repo: instructions/role-baton-routing.instructions.md#L12-L13
+Signed-by: Caden Vale
+Team&Model: codex:gpt-5.3-codex@codex-cli
+Role: consultant
+last_activity_utc: 2026-05-08T04:38:41Z
+quiescent: true
+---
