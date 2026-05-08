@@ -8,8 +8,9 @@ Three roles, three prompts (in `planning/prompts/`):
 
 | Role | Prompt(s) | Phase |
 | --- | --- | --- |
-| Admin (Claude Code Team) | `admin-init.md` | one-shot at session start |
-| Participant (Copilot, Codex) | `team-prep.md` then `team-init.md` | two-phase: prep then execute |
+| All teams (CC, CP, CX) | `team-rd.md` | Phase-R: independent first-pass R&D (only for brand-new R&D tickets without pre-existing research) |
+| Admin (Claude Code Team) | `admin-init.md` | Phase-S: one-shot at synthesis-session start |
+| Participant (Copilot, Codex) | `team-prep.md` then `team-init.md` | Phase-P + Phase-S: prep then init |
 
 The operator dispatches each session by sending a short directive that points at the appropriate prompt file. See `planning/prompts/` for the full text.
 

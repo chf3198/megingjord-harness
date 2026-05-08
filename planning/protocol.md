@@ -195,6 +195,22 @@ Termination + stability mechanics derive from:
 
 Per-team verdict + admin tie-break is novel to this protocol; it is a small extension of judge-based adaptive termination where the judge is structurally constrained (admin tie-break only, not content arbitration).
 
+## §9.5 Phase-R (independent R&D) — for brand-new R&D tickets
+
+When a synthesis run begins from a brand-new R&D ticket with NO pre-existing research artifacts (vs. the #1105 case where each team had authored their R&D over prior days), Phase-R precedes Phase-P (prep).
+
+**Phase-R rules**:
+
+- Each team independently produces `planning/artifacts/<team-code>-rd.md`
+- During Phase-R, teams do NOT read each other's R&D artifacts (preserves independence)
+- Each team signals completion with `RD-COMPLETE: <team-code> as <alias>, ...`
+- After all three teams report `RD-COMPLETE`, operator advances to Phase-P (prep)
+- Admin (Claude Code Team) does NOT participate in Phase-R independence except as their own first-pass; admin role activates at Phase-S (synthesis init)
+
+**Why Phase-R exists**: the prep+init phases assume `artifacts/<team-code>-rd.md` files exist. Without Phase-R for new R&D tickets, prep would fail with "no artifacts to read." Phase-R fills the gap.
+
+**Prompt**: `planning/prompts/team-rd.md`
+
 ## §10 Operating discipline
 
 - **No edits to another team's file. Ever.** This is the parallel-safety invariant.
