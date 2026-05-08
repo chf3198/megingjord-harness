@@ -160,13 +160,21 @@ title: Auto-load harness-goals.instructions.md (or byte-identical equivalent) in
 threads: []
 opened_utc: 2026-05-07T22:00Z
 resolved_utc: 2026-05-08T04:30Z
+operator_decision_utc: 2026-05-08T (operator chose hybrid B / B+ tier)
 positions:
   cc: {verdict: agree, note: "G1>G3; implementation may choose @-include OR goal_lens.py-only with byte-identity CI lint as cheaper equivalent"}
   cx: {verdict: agree, ref: "[CX-RD C2]"}
   cp: {verdict: agree}
 final: PASS
 signature_variance: cp
-implementation_note: Two viable implementations — (A) @-include in CLAUDE.md and AGENTS.md (~30 lines/session token cost); (B) goal_lens.py-only injection + CI lint enforcing byte-identity between goal_lens.py priority sentence and harness-goals.instructions.md#L8-L9 (cheaper). Operator chooses A vs B at child-ticket scoping.
+implementation_choice: HYBRID (operator-directed)
+implementation_note: |
+  Operator chose tiered hybrid:
+  - Tier B (default, most session types): goal_lens.py-only injection of the priority sentence + CI lint enforcing byte-identity between goal_lens.py and harness-goals.instructions.md#L8-L9. Cheap; ~0 token cost per session.
+  - Tier B+ (for final-reviewer roles, e.g. Consultant): expanded goal definitions ALSO injected. Implementation options:
+      * goal_lens.py reads the active role from session context and injects expanded definitions when role == 'consultant' (preferred — single injection point).
+      * OR @-include harness-goals.instructions.md only in consultant-role session entry points if role-specific entry points exist.
+  Rationale: G1 (Governance) governance-clarity is highest where review rigor is highest (Consultant role); G3 (Zero Cost) protected for the high-volume general work (Manager/Collaborator/Admin). Best of both options.
 ```
 
 ## D-010 — Effort estimate baseline
@@ -212,7 +220,7 @@ The synthesis decisions imply the following child-ticket plan. Per protocol §10
 | Suggested ticket | Maps to | Effort | Dependencies |
 | --- | --- | --- | --- |
 | Fix wiki "Always-Loaded Surfaces" claim | D-002 | 0.1d | — |
-| Add @harness-goals to CLAUDE.md + AGENTS.md (option A) OR add byte-identity CI lint (option B) | D-009 | 0.2d (A) or 0.3d (B) | operator chooses A or B |
+| Implement D-009 hybrid: byte-identity CI lint + role-aware expanded-definition injection in goal_lens.py for consultant role | D-009 | 0.4d (B + B+ tier) | operator chose hybrid |
 | Reword global-task-router phrasing | D-004 | 0.1d | — |
 | Normalize "ZeroCost" -> "Zero Cost" in session_context.py | D-005 | 0.05d | — |
 | Reconcile role-baton-routing with v1.1 taxonomy | D-008 | 0.3d | — |
