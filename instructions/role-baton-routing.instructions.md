@@ -9,45 +9,42 @@ applyTo: "**"
 The GitHub issue **is** the baton. One active role at a time. Every state carries exactly one
 `role:*` label — no exceptions, including closed tickets.
 
-Authoritative board: **DevEnv Ops Board** (GitHub Projects #3).
-Baton view filter: `status:todo,in-progress,testing,review` (backlog/done/cancelled hidden).
+Authoritative board: **Megingjord Harness Board** (GitHub Projects).
+Baton view filter: `status:triage,ready,in-progress,testing,review` (backlog/done/cancelled/dormant/deferred hidden from active baton view).
 
-## Status Workflow
+## Status Workflow (10-state taxonomy v1.1, aligned with `instructions/ticket-driven-work.instructions.md`)
 
 ```
-Status        Role Label          Gate / Trigger
+Status         Role Label          Gate / Trigger
 ──────────────────────────────────────────────────────────────────────
-backlog       role:manager        Manager creates + scopes; not yet pulled
-todo          role:collab-{type}  MANAGER_HANDOFF emitted; collab assigned
-in-progress   role:collab-{type}  Branch created OR first commit (Actions auto-detect)
-testing       role:admin          COLLABORATOR_HANDOFF emitted; CI gates running
-review        role:consultant     ADMIN_HANDOFF emitted; critique + closeout active
-done          role:manager        CONSULTANT_CLOSEOUT emitted; closed; Manager re-applied
-cancelled     role:manager        Manager closes as "not planned"; reason comment required
+backlog        — (Epic: manager)   Created; not yet scoped
+triage         role:manager        Manager actively scoping AC + gates
+ready          —                   MANAGER_HANDOFF emitted; awaiting Collaborator pickup
+in-progress    role:collaborator   Implementation active (Epic: role:manager per Rule E3)
+testing        role:admin          COLLABORATOR_HANDOFF emitted; CI gates running
+review         role:consultant     ADMIN_HANDOFF emitted; critique + closeout active
+done           — (terminal)        CONSULTANT_CLOSEOUT emitted; issue closed
+cancelled      — (terminal)        Goal invalidated; Manager authority
+dormant        role:manager        Epic-only: paused; 90d EPIC_REVIEW (Rule E5)
+deferred       role:manager        Epic-only: blocked, no ETA (Rule E5)
 ```
 
 ## Transition Guards
 
-- `backlog → todo`: MANAGER_HANDOFF posted; swap `role:manager` → `role:collab-{type}`.
-- `todo → in-progress`: Branch created; retain `role:collab-{type}`; GitHub Actions updates Status.
+- `backlog → triage`: Manager picks up; applies `role:manager`.
+- `triage → ready`: MANAGER_HANDOFF posted; remove `role:manager` (no role on `ready`).
+- `ready → in-progress`: Collaborator picks up; applies `role:collaborator`.
 - `in-progress → testing`: COLLABORATOR_HANDOFF; all ACs ✅; swap to `role:admin`.
 - `testing → review`: ADMIN_HANDOFF; all gates pass; swap to `role:consultant`.
-- `review → done`: CONSULTANT_CLOSEOUT; swap `role:consultant` → `role:manager`; close issue.
-- `any → cancelled`: Manager only — remove current `role:*`; apply `role:manager`; post
-  `CANCELLATION: <reason>`; close as "not planned".
+- `review → done`: CONSULTANT_CLOSEOUT; remove `role:consultant`; close issue (atomic).
+- `any → cancelled`: Manager authority — remove current `role:*`; post `CANCELLATION: <reason>`; close as "not planned".
+- `in-progress ↔ dormant` (Epic-only): Manager pauses; carries `role:manager` per Rule E2.
+- `in-progress ↔ deferred` (Epic-only): Manager flags external blocker; carries `role:manager`.
 - Manager ticket-health checks, AC edits, and label fixes are out-of-band; no handoff required.
 
-## Typed Collaborators
+## Collaborator role
 
-Type is selected at `backlog → todo`. Each type may queue N `todo` tickets but
-**at most 1 `in-progress`** at a time (enforced by baton-gate Action).
-
-| Label                  | Capability profile                        |
-|------------------------|-------------------------------------------|
-| role:collab-analyst    | Research, wiki surgery, doc analysis      |
-| role:collab-coder      | Implementation, tests, refactoring        |
-| role:collab-architect  | Design docs, ADRs, interface specs        |
-| role:collab-ops        | Config, deploy, infra, CI changes         |
+Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:collab-{type}` form). Capability profile is reflected in ticket area labels (`area:scripts`, `area:hooks`, `area:dashboard`, etc.) rather than role-suffix typing. Each Collaborator may have only **1 `in-progress` ticket at a time** (enforced by baton-gates Action).
 
 ## Multi-Lane Definition of Done
 

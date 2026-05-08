@@ -50,8 +50,10 @@ jobs:
           echo "$TRIGGERS"
 
           # Doc surfaces that satisfy the gate
+          # .changes/unreleased/*.md added per #1132 fragment pattern (eliminates
+          # CHANGELOG merge conflicts). Aggregated into CHANGELOG.md at release time.
           DOC_CHANGED=$(echo "$CHANGED" | grep -E \
-            '^docs/|^CHANGELOG\.md$|^README\.md$|^\.github/.*\.md$' || true)
+            '^docs/|^CHANGELOG\.md$|^README\.md$|^\.github/.*\.md$|^\.changes/unreleased/.*\.md$' || true)
 
           if [ -n "$DOC_CHANGED" ]; then
             echo "Doc update present:"
