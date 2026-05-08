@@ -32,11 +32,16 @@ evidence.
 
 ## Always-Loaded Surfaces
 
-- `.github/copilot-instructions.md`
-- `.codex/AGENTS.md`
-- `instructions/global-standards.instructions.md`
-- `instructions/harness-goals.instructions.md`
-- `hooks/scripts/goal_lens.py`
+These surfaces inject the priority sentence into every governed session at startup or via the goal-keyword hook:
+
+- `.github/copilot-instructions.md` (Copilot runtime)
+- `.codex/AGENTS.md` (Codex runtime)
+- `instructions/global-standards.instructions.md` (Claude Code via `CLAUDE.md` @-include)
+- `hooks/scripts/goal_lens.py` (UserPromptSubmit hook on goal-decision keywords; all runtimes)
+
+## Reachable on Demand (NOT auto-included)
+
+- `instructions/harness-goals.instructions.md` — canonical goal constitution with expanded G1..G9 definitions. Contains the full priority sentence + per-goal definitions, but is NOT @-included by any runtime entry point. Read on demand or via `goal_lens.py` keyword trigger. (Per #1105 D-001 cross-team verification: CC + CX both confirmed.)
 
 ## Goal Definitions
 
