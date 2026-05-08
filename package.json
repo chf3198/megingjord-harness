@@ -110,7 +110,8 @@
     "wiki:lint": "node scripts/wiki/lint.js",
     "wiki:search": "node scripts/wiki/search.js",
     "worktree:start": "bash scripts/worktree-session-start.sh",
-    "governance:audit": "node scripts/global/governance-audit.js"
+    "governance:audit": "node scripts/global/governance-audit.js",
+    "goals:regen": "node scripts/global/goals-contract-generate.js"
   },
   "keywords": [
     "devops",

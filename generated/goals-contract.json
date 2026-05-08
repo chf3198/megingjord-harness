@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-05-08T19:08:47.284Z",
+  "source_path": "instructions/harness-goals.instructions.md",
+  "source_sha256_prefix": "788d2fbb9edf4e69",
+  "priority_order": [
+    {
+      "id": "G1",
+      "name": "Governance"
+    },
+    {
+      "id": "G2",
+      "name": "Quality"
+    },
+    {
+      "id": "G3",
+      "name": "Zero Cost"
+    },
+    {
+      "id": "G4",
+      "name": "Privacy"
+    },
+    {
+      "id": "G5",
+      "name": "Portability"
+    },
+    {
+      "id": "G6",
+      "name": "Resilience"
+    },
+    {
+      "id": "G7",
+      "name": "Throughput"
+    },
+    {
+      "id": "G8",
+      "name": "Observability"
+    },
+    {
+      "id": "G9",
+      "name": "Interoperability"
+    }
+  ],
+  "definitions": {
+    "G1": {
+      "name": "Governance",
+      "text": "policy, role, provenance, and ticket controls are non-negotiable"
+    },
+    "G2": {
+      "name": "Quality",
+      "text": "maximize correctness and engineering value of outcomes"
+    },
+    "G3": {
+      "name": "Zero Cost",
+      "text": "prefer local/fleet/free lanes before paid providers"
+    },
+    "G4": {
+      "name": "Privacy",
+      "text": "keep sensitive context local unless explicit override exists"
+    },
+    "G5": {
+      "name": "Portability",
+      "text": "avoid user-specific coupling; settings-driven behavior preferred"
+    },
+    "G6": {
+      "name": "Resilience",
+      "text": "graceful degradation and fallback paths for partial outages"
+    },
+    "G7": {
+      "name": "Throughput",
+      "text": "acceptable speed after higher-priority goals are satisfied"
+    },
+    "G8": {
+      "name": "Observability",
+      "text": "decisions and outcomes are visible, auditable, and attributable"
+    },
+    "G9": {
+      "name": "Interoperability",
+      "text": "preserve compatibility across agent surfaces and runtimes"
+    }
+  },
+  "notes": [
+    "GENERATED — do not edit. Regenerate via `npm run goals:regen`.",
+    "Markdown source is canonical; JSON is a derived view for linting/automation.",
+    "Direct edits to this file are blocked by CI (verify-goals-contract gate)."
+  ]
+}
