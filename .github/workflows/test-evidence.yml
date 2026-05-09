@@ -1,0 +1,56 @@
+name: test-evidence
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+jobs:
+  test-evidence:
+    name: test-evidence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Validate test_strategy evidence
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { validate } = require('./scripts/global/test-evidence-validator.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) {
+              core.setFailed('No Refs #N in PR body — cannot resolve linked issue.');
+              return;
+            }
+            const issueNumber = parseInt(refsMatch[1], 10);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: issueNumber,
+            });
+            const labels = issue.labels.map(l => l.name);
+            const lane = labels.find(l => l.startsWith('lane:')) || 'lane:code-change';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: issueNumber, per_page: 100,
+            });
+            const trail = comments.map(c => c.body || '').join('\n');
+            const stratMatch = trail.match(/test_strategy:\s*([a-z-]+)/i);
+            const test_strategy = stratMatch ? stratMatch[1].toLowerCase() : 'none';
+            const { data: prFilesData } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner, repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number, per_page: 100,
+            });
+            const pr_files = prFilesData.map(f => f.filename);
+            const result = validate({ test_strategy, lane, comments, pr_files });
+            const summary = `test-evidence: strategy=${test_strategy} lane=${lane} → ${result.ok ? 'PASS' : 'FAIL'} (${result.reason})`;
+            console.log(summary);
+            if (!result.ok) {
+              const detail = result.violations.map(v => `  • ${v.rule}: ${v.detail}`).join('\n');
+              core.setFailed(`${summary}\n${detail}\nSee instructions/test-methodology-matrix.instructions.md`);
+            }

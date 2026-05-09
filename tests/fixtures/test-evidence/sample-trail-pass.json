@@ -1,0 +1,6 @@
+[
+  {"body": "MANAGER_HANDOFF\ntest_strategy: tdd-pyramid\nlane: lane:code-change"},
+  {"body": "COLLABORATOR_HANDOFF\nfiles_changed: tests/foo.spec.js + scripts/foo.js"},
+  {"body": "ADMIN_HANDOFF"},
+  {"body": "CONSULTANT_CLOSEOUT\nrubric_rating: 8/10"}
+]

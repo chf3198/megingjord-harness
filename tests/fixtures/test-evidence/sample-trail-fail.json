@@ -1,0 +1,4 @@
+[
+  {"body": "MANAGER_HANDOFF\ntest_strategy: tdd-pyramid\nlane: lane:code-change"},
+  {"body": "COLLABORATOR_HANDOFF\nfiles_changed: scripts/foo.js (impl only, no spec)"}
+]

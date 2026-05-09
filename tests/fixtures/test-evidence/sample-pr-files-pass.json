@@ -1,0 +1,5 @@
+[
+  "tests/foo.spec.js",
+  "scripts/global/foo.js",
+  ".changes/unreleased/9999.md"
+]

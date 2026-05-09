@@ -49,5 +49,18 @@ test('audit() returns schema_version 1 result with required fields', async () =>
   expect(r).toHaveProperty('started_at');
   expect(r).toHaveProperty('checks');
   expect(r).toHaveProperty('violations');
+  expect(r).toHaveProperty('dependency_health');
   expect(['PASS', 'FAIL']).toContain(r.overall);
+});
+
+
+test('dependency cycles become governance audit violations', async () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-dep-'));
+  const graph = path.join(tmp, 'graph.json');
+  fs.writeFileSync(graph, JSON.stringify({ nodes: [{ id: 1 }, { id: 2 }],
+    edges: [{ from: 1, to: 2 }, { from: 2, to: 1 }] }));
+  const r = await A.audit({ dependencyHealth: { graph, proposals: graph, decisions: graph } });
+  expect(r.violations.some(v => v.rule === 'dependency-cycle')).toBe(true);
 });

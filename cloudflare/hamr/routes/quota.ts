@@ -7,6 +7,7 @@ const STALE_KEY = 'cache-stats:hit-rate-7d:stale';
 const PROVIDER_PREFIX = 'provider-spillover:';
 const LAST_UPDATE_KEY = 'cache-stats:last-update-ms';
 const PUSH_FAILURE_KEY = 'cache-stats:push-failure-count-24h';
+const GOAL_HEALTH_KEY = 'goal-health-score:7d';
 const FRESHNESS_SLO_MS = 12 * 60 * 60 * 1000;
 
 interface ProviderState {
@@ -55,28 +56,31 @@ async function readPushFailureCount(env: Env): Promise<number> {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+async function readGoalHealth(env: Env): Promise<{ score: number | null; stale: boolean }> {
+  const raw = await env.HAMR_KV.get(GOAL_HEALTH_KEY);
+  if (!raw) return { score: null, stale: true };
+  try {
+    const parsed = JSON.parse(raw);
+    const score = Number.isFinite(parsed.score) ? parsed.score : null;
+    return { score, stale: parsed.stale === true || score === null };
+  } catch { return { score: null, stale: true }; }
+}
+
 export async function quota(env: Env): Promise<Response> {
   const now = Date.now();
-  const [hit_rate_7d, providers, stale, last_update_ms, push_failure_count_24h] = await Promise.all([
-    readHitRate(env), readProviderStates(env), readStale(env),
-    readLastUpdateMs(env), readPushFailureCount(env),
-  ]);
+  const [hit_rate_7d, providers, stale, last_update_ms, push_failure_count_24h, goal_health] =
+    await Promise.all([
+      readHitRate(env), readProviderStates(env), readStale(env),
+      readLastUpdateMs(env), readPushFailureCount(env), readGoalHealth(env),
+    ]);
   const stale_age_ms = last_update_ms ? now - last_update_ms : null;
   const slo_breach = stale_age_ms !== null && stale_age_ms > FRESHNESS_SLO_MS;
   return new Response(JSON.stringify({
-    schema_version: 3,
-    ts: now,
-    hit_rate_7d,
-    providers,
-    stale,
-    last_update_ms,
-    freshness_slo_ms: FRESHNESS_SLO_MS,
-    stale_age_ms,
-    slo_breach,
+    schema_version: 4, ts: now, hit_rate_7d, providers, stale,
+    last_update_ms, freshness_slo_ms: FRESHNESS_SLO_MS, stale_age_ms, slo_breach,
     push_failure_count_24h,
+    goal_health_score_7d: goal_health.score,
+    goal_health_stale: goal_health.stale,
     placeholder: false,
-  }), {
-    status: 200,
-    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
-  });
+  }), { status: 200, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 }

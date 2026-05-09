@@ -21,12 +21,21 @@ Refs #<!-- issue number -->
 - **Admin**: <!-- link to ADMIN_HANDOFF comment on linked issue -->
 - **Consultant**: <!-- link to CONSULTANT_CLOSEOUT comment on linked issue -->
 
+## Test strategy
+
+<!-- Per instructions/test-methodology-matrix.instructions.md.
+     Must match MANAGER_HANDOFF.test_strategy on linked issue. -->
+
+- Strategy: <!-- tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|none -->
+- Evidence artifact: <!-- spec file path / fixture path / VISUAL_QA_EVIDENCE link / "see linked issue MANAGER_HANDOFF" -->
+
 ## Validation
 
 - [ ] `npm run lint` — clean
-- [ ] `npm test` — all pass
+- [ ] `npm test` — all pass (or N/A per matrix)
 - [ ] CHANGELOG updated
 - [ ] Docs synced to behavioral changes
+- [ ] `test-evidence` gate passes (consumes test_strategy from linked issue MANAGER_HANDOFF)
 
 ## Risk
 
