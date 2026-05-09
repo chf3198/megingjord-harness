@@ -14,6 +14,7 @@
     "cost-report": "node scripts/global/cost-report.js",
     "cost:baseline": "node scripts/global/cost-baseline.js",
     "deps:aggregate": "node scripts/global/dep-graph-aggregate.js",
+    "deps:augment": "node scripts/global/dep-graph-augment.js",
     "deploy": "bash scripts/deploy.sh",
     "deploy:apply": "bash scripts/deploy.sh --apply",
     "deploy:both": "bash scripts/deploy.sh --target both",
