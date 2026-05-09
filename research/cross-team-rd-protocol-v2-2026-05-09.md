@@ -45,11 +45,7 @@ Protocol v1 (used in synthesis-1105 and synthesis-1131) was modeled on parallel-
                        No admin/consultant authority.
 ```
 
-**Lead-team selection**: operator picks per ticket. Should rotate over time so no team has structural advantage. Consider:
-
-- Topic affinity (lead team has most domain knowledge)
-- Workload balance (rotate across recent leads)
-- Independence (lead team should have no conflict-of-interest on the topic)
+**Lead-team selection** (operator-resolved 2026-05-09): the lead team is determined by **which session the operator initiates the R&D from**. If the operator requests team-collaborative R&D in the Claude Code session, Claude Code Team is the owner. If from Copilot Chat, Copilot Team is the owner. From Codex extension, Codex Team. The substrate of the initiating session = the lead team. Elegant, deterministic, and observable.
 
 ## §2 Phase order
 
@@ -98,7 +94,7 @@ Each session, before posting anything, MUST verify substrate:
 
 - **No peer reads**: do NOT open `<other-team>-rd.md`. Independence is the entire point.
 - **No seeded R&D**: only the goal/task/issue text is the input. No prior consensus map, no admin-pre-staged decisions.
-- **WebSearch MANDATORY**: opening plan must cite at least N=5 web sources (industry/academic/blog) addressing the topic. Format: `websearch: <URL> (accessed <ISO-8601-UTC>) — <one-line gist>`.
+- **WebSearch MANDATORY**: opening plan must cite at least N=5 web sources (industry/academic/blog) addressing the topic. Format: `websearch: <URL> (accessed <ISO-8601-UTC>) — <one-line gist>`. The entire system relies on internet — no offline fallback exists or is needed (operator-resolved 2026-05-09).
 - **Repo evidence MANDATORY**: at least N=10 file:line anchors grounding claims in the actual codebase. Format: `repo: path/file.ext#L<start>-L<end>`.
 - **Contamination declaration MANDATORY**: every artifact starts with explicit declaration of what the author has read related to the topic before authoring (issue text counted, anything else flagged).
 
@@ -121,7 +117,7 @@ N=<websearch-count> websearch citations, N=<repo-evidence-count> repo anchors.
 
 ### Wave mechanics
 
-Each wave is bounded — operator dispatches a wave; teams have a defined window (default 2-4 hours) to respond.
+Each wave is bounded — operator dispatches a wave; teams have **up to 1 hour to respond** (operator-resolved 2026-05-09: 1 hour MAX per wave). Teams that finish faster signal completion immediately; admin proceeds when all three teams report wave-complete or 1h elapses.
 
 ```
    WAVE 1 (Initial peer review)
@@ -171,11 +167,13 @@ Each summary includes:
 
 This is real work. The admin is a guiding judge, not a passive snapshot collector.
 
-### Termination triggers
+### Termination triggers (operator-resolved 2026-05-09)
 
-- **Convergence**: admin certifies in WAVE_SUMMARY that all disputed points have >=2-team agree with cited evidence. Move to Phase-C.
-- **Hard cap**: 5 waves OR 72h wall-clock from Phase-D kickoff. Force admin tie-break on residual disputes; move to Phase-C.
+- **Early termination — perfect agreement**: if admin verifies in WAVE_SUMMARY that ALL teams agree on EVERY disputed point with cited evidence, debate ends immediately. No need to iterate further. Move to Phase-C.
+- **Convergence with residual stable disagreement**: if admin verifies that disputed points have either (a) full team agreement, OR (b) stable, evidence-grounded disagreement that is unlikely to resolve through more debate, **admin posts CLIENT_ESCALATION_NEEDED**. The operator joins the design discussion as a 4th voice and decides the residual points. Move to Phase-C only after operator weighs in.
 - **EMERGENCY_HALT**: any team escalates to operator via dedicated comment block. Admin pauses; operator decides.
+
+The protocol does NOT enforce a hard wave-count cap — perfect agreement triggers early termination, and stable residual disagreement triggers operator escalation. Both mechanisms prevent indefinite debate.
 
 ## §6 File-system shape (collision-resistant)
 
@@ -360,16 +358,22 @@ This document was authored by Claude Code Team alone (single-team R&D), not via 
 
 Future cross-team R&D Epics adopt v2 from kickoff.
 
-## §12 Open design questions
+## §12 Design questions — RESOLVED 2026-05-09
 
-Items the operator should review before adoption:
+Operator (chf3198) reviewed the open questions on 2026-05-09 and provided the following answers, which have been folded into the protocol body above. Documenting here for traceability.
 
-1. **Wave window**: 2-4 hours per wave is a guess. Could be shorter (1h) for fast topics or longer (8h) for complex ones. Per-ticket override?
-2. **Hard cap**: 5 waves / 72h is a guess. Should this be tunable per topic complexity?
-3. **WebSearch fallback**: if a team genuinely can't WebSearch (offline), is there an alternative evidence source? Or hard requirement?
-4. **Lead-team rotation**: who picks? Should there be a fairness algorithm?
-5. **Participant veto**: under §6 consensus rules, can a participant team veto a decision lead-team admin wants to promote? (Currently: any blocking-disagree forces admin tie-break; admin can override.)
-6. **Migration**: do we re-run #1131 under v2 to recover the architectural consensus, or extract directly from the existing artifacts (per the SYNTHESIS_ABANDONED comment)?
+| Q | Decision |
+| --- | --- |
+| Wave length | **1 hour MAX** per wave. Teams that finish faster signal completion; admin proceeds when all 3 report wave-complete or 1h elapses. |
+| Stopping criteria | **Early termination on perfect agreement.** If all teams agree on every disputed point in any wave, debate ends. No mandatory iteration count. |
+| WebSearch fallback | **Not needed.** Entire system relies on internet; offline scenarios are out of scope. |
+| Lead-team selection | **Substrate of initiating session.** Operator's session that requests the R&D becomes the lead team. (Operator initiating from Claude Code session → CC owns; from Copilot Chat → CP owns; from Codex extension → CX owns.) |
+| Residual disagreement | **Operator escalation.** If debate reaches stable disagreement (no more movement), admin posts `CLIENT_ESCALATION_NEEDED`. Operator joins as a 4th voice in the design discussion and resolves residual points. |
+| Migration of #1131 | **Re-run under v2** for the next applicable Epic. The synthesis-1131 architectural consensus is preserved as case-study evidence in the SYNTHESIS_ABANDONED comment but does not feed #1130 directly. New R&D ticket for Epic #1130 to be filed under v2. |
+
+## §13 Validation plan
+
+Per operator decision Q6, the first v2 validation run is a fresh R&D for Epic #1130 (universal HAMR coverage) under v2 from kickoff. This will be filed as a new R&D ticket replacing the cancelled #1131. Lead-team selection per Q4: determined by which session the operator initiates from.
 
 ---
 
