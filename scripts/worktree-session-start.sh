@@ -27,6 +27,16 @@ root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 [[ -n "$root" ]] || die "not inside a git repository"
 
 cd "$root"
+preflight="$root/scripts/global/parallel-git-preflight.sh"
+if [[ -x "$preflight" ]]; then
+  set +e
+  "$preflight" --mode pre-work
+  preflight_rc=$?
+  set -e
+  [[ "$preflight_rc" -eq 1 ]] && die "parallel git preflight failed"
+  [[ "$preflight_rc" -eq 2 ]] && log "pre-work preflight warnings present"
+fi
+
 log "syncing sandbox launcher branch: $sandbox"
 
 git fetch origin --prune

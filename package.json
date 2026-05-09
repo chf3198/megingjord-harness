@@ -35,6 +35,7 @@
     "governance:epic": "node scripts/global/epic-evidence.js",
     "governance:epics": "node scripts/global/epic-close-validator.js",
     "governance:no-sync-http": "node scripts/global/no-sync-http-handlers.js",
+    "git:preflight": "bash scripts/global/parallel-git-preflight.sh",
     "governance:reconcile": "node scripts/global/ticket-reconcile.js --json",
     "governance:verify": "node scripts/global/governance-verify.js --json",
     "governance:weekly": "node scripts/global/governance-weekly-report.js",
