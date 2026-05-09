@@ -61,8 +61,20 @@ async function litellmChat(prompt, opts = {}) {
 async function chatComplete(prompt, opts = {}) {
   const url = getLiteLLMUrl();
   if (url) {
-    const r = await litellmChat(prompt, { ...opts, url });
-    if (r.ok) return r;
+    if (opts.skipHamrWrap) {
+      const direct = await litellmChat(prompt, { ...opts, url });
+      if (direct.ok) return direct;
+    } else {
+      try {
+        const { wrapProviderCall } = require('./hamr-provider-wrapper');
+        const wrapped = await wrapProviderCall('litellm', async () => {
+          const inner = await litellmChat(prompt, { ...opts, url });
+          if (!inner.ok) throw new Error(inner.error || 'litellm_failed');
+          return inner;
+        }, { tier: opts.tier });
+        if (wrapped.ok) return wrapped.value;
+      } catch { /* fall through to ollama */ }
+    }
   }
   return ollamaChat(prompt, opts);
 }
