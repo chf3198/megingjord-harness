@@ -60,6 +60,16 @@ async function audit(opts = {}) {
   const checks = CHECKS.map(runCheck);
   const tickets = listOpenTickets();
   const violations = detectViolations(tickets);
+  let hamrSensor = null;
+  try { hamrSensor = require('./hamr-utilization-sensor').compute(); } catch { /* sensor optional */ }
+  if (hamrSensor && hamrSensor.status === 'violation') {
+    violations.push({ ticket: 'HAMR', rule: 'utilization-floor',
+      detail: `production_hamr_utilization_rate_7d=${hamrSensor.rate?.toFixed(2)} below floor ${hamrSensor.thresholds.violation}` });
+  }
+  if (hamrSensor && hamrSensor.status === 'escalation') {
+    violations.push({ ticket: 'HAMR', rule: 'utilization-escalation',
+      detail: `production_hamr_utilization_rate_7d=${hamrSensor.rate?.toFixed(2)} below escalation ${hamrSensor.thresholds.escalation}` });
+  }
   const summary = {
     schema_version: 1,
     started_at: startedAt,
@@ -67,6 +77,7 @@ async function audit(opts = {}) {
     checks: checks.map(c => ({ name: c.name, ok: c.ok, error: c.error || null })),
     open_tickets: tickets.length,
     violations,
+    hamr_utilization: hamrSensor,
     overall: violations.length === 0 && checks.every(c => c.ok) ? 'PASS' : 'FAIL',
   };
   fs.writeFileSync(REPORT_FILE, JSON.stringify(summary, null, 2));
