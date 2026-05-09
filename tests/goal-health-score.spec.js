@@ -52,7 +52,8 @@ test.describe('goal-health-score (#1253 / Epic #1113 AC2)', () => {
   });
 
   test('weights_used reflects renormalization', () => {
-    const sensorValues = { ga: 0, ll: 0, cf: null, pr: null, rp: null, oo: null };
+    // ga(0.25) + cf(0.20) + rp(0.20) = 0.65 ≥ 0.5 floor → not stale
+    const sensorValues = { ga: 0, ll: null, cf: 0, pr: null, rp: 0, oo: null };
     const r = computeGHS({ sensorValues });
     const sum = Object.values(r.weights_used).reduce((s, v) => s + v, 0);
     expect(sum).toBeCloseTo(1.0, 5);
