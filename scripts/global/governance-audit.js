@@ -65,6 +65,13 @@ function readOperatorOverrides() {
   try { return require('./goal-tier-override').activeOverrides(); } catch { return []; }
 }
 
+function runActuatorEngine(goalHealth) {
+  try {
+    const ghs = goalHealth && Number.isFinite(goalHealth.score) ? goalHealth.score : null;
+    return require('./actuator-engine').runEngine({ ghs }).actuators;
+  } catch { return null; }
+}
+
 function loadHamrSensor(violations) {
   let hamrSensor = null;
   try { hamrSensor = require('./hamr-utilization-sensor').compute(); } catch { /* optional */ }
@@ -88,12 +95,14 @@ async function audit(opts = {}) {
     violations.push({ ticket: 'DEP-GRAPH', rule: 'dependency-cycle', detail: cycle }));
   const goalHealth = computeGoalHealth(violations.length);
   const operatorOverridesActive = readOperatorOverrides();
+  const actuatorState = runActuatorEngine(goalHealth);
   const summary = {
-    schema_version: 3, started_at: startedAt, completed_at: new Date().toISOString(),
+    schema_version: 4, started_at: startedAt, completed_at: new Date().toISOString(),
     checks: checks.map(c => ({ name: c.name, ok: c.ok, error: c.error || null })),
     open_tickets: tickets.length, violations, hamr_utilization: hamrSensor,
     dependency_health: dependencyHealth, goal_health: goalHealth,
     operator_overrides_active: operatorOverridesActive,
+    actuator_state: actuatorState,
     overall: violations.length === 0 && checks.every(c => c.ok) ? 'PASS' : 'FAIL',
   };
   fs.writeFileSync(REPORT_FILE, JSON.stringify(summary, null, 2));
