@@ -37,6 +37,7 @@ The LLM updates this on every ingest operation.
 - [[workspace-write-boundary-discipline]] — Workspace Write-Boundary Discipline
 - [[harness-goals]] — Harness Goal Constitution
 - [[harness-goal-controls]] — G1..G9 enforcement primitives + evidence signals (aggregated map)
+- [[epic-ac-reconciliation]] — Epic AC Reconciliation pattern (auto-reconcile checkboxes vs evidence)
 
 ## Source Summaries
 
@@ -83,6 +84,7 @@ The LLM updates this on every ingest operation.
 - [[token-telemetry-capability-matrix-2026-05-01]] — Token Telemetry Capability Matrix (2026-05-01)
 - [[vscode-copilot-allow-prompts-2026-05-05]] — VS Code Copilot Allow Prompts (2026-05-05)
 - [[dashboard-live-data-methodology-2026-05-05]] — Dashboard Live-Data Methodology (2026-05-05)
+- [[epic-state-truthfulness-rd-2026-05-09]] — Epic-state truthfulness R&D (CC team plan, 2026-05-09)
 
 ## Syntheses
 
