@@ -54,8 +54,9 @@ function detectViolations(tickets) {
 function computeGoalHealth(violationCount) {
   try {
     const { computeGHS } = require('./goal-health-score');
-    const sensorValues = { ga: Math.min(1, violationCount / 14), ll: null, cf: null, pr: null,
-      rp: null, oo: null };
+    const { aggregate } = require('./sensors');
+    const { fetchAll } = require('./sensors/fetch-data');
+    const sensorValues = aggregate(fetchAll(violationCount));
     return computeGHS({ sensorValues });
   } catch { return null; }
 }
