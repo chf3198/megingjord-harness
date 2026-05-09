@@ -68,6 +68,7 @@ npm run deploy:both:apply
 | `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex` |
 | `deps:aggregate` | `node scripts/global/dep-graph-aggregate.js` |
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
+| `deps:review` | `node scripts/global/dep-proposals-review.js` |
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
@@ -185,14 +186,14 @@ This table is auto-generated from `package.json` by `npm run docs:compile` (#796
 
 ## Runtime mapping
 
-| Source | Runtime target |
-|---|---|
-| skills/ | ~/.copilot/skills + ~/.agents/skills |
-| instructions/ | ~/.copilot/instructions |
-| hooks/ | ~/.copilot/hooks + ~/.codex/devenv-ops/hooks |
-| scripts/global/ | ~/.copilot/scripts + ~/.codex/devenv-ops/scripts |
-| .codex/ | ~/.codex/AGENTS.md + config.toml + hooks.json + rules/ |
-| wiki/ | ~/.copilot/wiki + ~/.codex/devenv-ops/wiki |
+| Source          | Runtime target                                         |
+| --------------- | ------------------------------------------------------ |
+| skills/         | ~/.copilot/skills + ~/.agents/skills                   |
+| instructions/   | ~/.copilot/instructions                                |
+| hooks/          | ~/.copilot/hooks + ~/.codex/devenv-ops/hooks           |
+| scripts/global/ | ~/.copilot/scripts + ~/.codex/devenv-ops/scripts       |
+| .codex/         | ~/.codex/AGENTS.md + config.toml + hooks.json + rules/ |
+| wiki/           | ~/.copilot/wiki + ~/.codex/devenv-ops/wiki             |
 
 ## Issue flows
 

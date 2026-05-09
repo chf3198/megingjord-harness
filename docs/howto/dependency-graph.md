@@ -40,6 +40,17 @@ npm run deps:augment -- --graph planning/dep-graph.json
 The augmentor writes `planning/dep-proposals.json`, records confidence and
 cache metadata, and never mutates issues.
 
+Review generated proposals without mutating GitHub:
+
+```bash
+npm run deps:review -- --proposals planning/dep-proposals.json
+```
+
+The review command records accepted, rejected, and suppressed decisions in
+`planning/dep-decisions.json`. Accepted records keep proposal and issue-title
+metadata for later approved mutation tooling. Rejected and suppressed proposals
+are tombstoned by cache key until source issue inputs change.
+
 Signed-by: Nova Harper
 Team&Model: codex:gpt-5@codex-cli
 Role: collaborator
