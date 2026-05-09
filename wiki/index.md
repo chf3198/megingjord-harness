@@ -21,6 +21,7 @@ The LLM updates this on every ingest operation.
 
 ## Concepts
 
+- [[epic-state-truthfulness]] — Epic-state truthfulness and AC reconciliation controls
 - [[baton-protocol]] — Baton Protocol (Role Handoff) [v1.0]
 - [[ticket-lifecycle-v1]] — Ticket Lifecycle v1.0 — Agent-Typed Model
 - [[epic-governance]] — Epic Lifecycle Governance Rules
@@ -40,6 +41,7 @@ The LLM updates this on every ingest operation.
 
 ## Source Summaries
 
+- [[epic-1271-cx-rd-plan-2026-05-09]] — Epic #1271 Codex R&D plan for state truthfulness
 - [[karpathy-llm-wiki-pattern]] — Karpathy LLM Wiki Pattern
 - [[devenv-fleet-topology]] — DevEnv Fleet Topology
 - [[copilot-skills-system]] — Copilot Skills System
