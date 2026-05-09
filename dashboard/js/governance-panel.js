@@ -4,6 +4,7 @@ function renderGovernancePanel(state = {}) {
   const pre = hooks.PreToolUse || [];
   const user = hooks.UserPromptSubmit || [];
   const stop = hooks.Stop || [];
+  const anneal = state.anneal_queue || null;
   return `
     <div class="governance-grid">
       <div class="gov-card gov-status">
@@ -22,6 +23,7 @@ function renderGovernancePanel(state = {}) {
         <h3>Stop hooks (${stop.length})</h3>
         <ul>${stop.map(item => `<li>${escapeHtml(item.command)}</li>`).join('')}</ul>
       </div>
+      ${anneal?`<div class="gov-card">${renderAnnealPanel(anneal)}</div>`:''}
     </div>
   `;
 }

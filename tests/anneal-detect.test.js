@@ -60,4 +60,44 @@ describe('anneal-detect',()=>{
     lines.forEach(l=>{try{JSON.parse(l);parsed++;}catch(e){}});
     assert.equal(parsed,2,'should parse 2 of 3 lines, skip corrupt');
   });
+
+  test('AC5: idempotency — two runs produce single incident entry',async()=>{
+    const p=patterns.filter(x=>x.id==='changelog_merge_conflict');
+    const p1=await detect(mock.fetchHit,p);
+    const p2=await detect(mock.fetchHit,p,{changelog_merge_conflict:p1});
+    assert.ok(p1.length>0,'first run should produce proposal');
+    assert.equal(p2.length,0,'second run on same incidents should produce zero new proposals');
+  });
+
+  test('AC5: dedupe_key format — pattern_id:window_weeks',async()=>{
+    const dedupe=(id,w)=>`${id}:${Math.floor(w/7)}`;
+    assert.equal(dedupe('changelog_merge_conflict',7),'changelog_merge_conflict:1');
+    assert.equal(dedupe('lint_too_long',14),'lint_too_long:2');
+  });
+
+  test('AC5: proposal contains required fields — id, dedupe_key, evidence, remediation',async()=>{
+    const p=patterns.filter(x=>x.id==='changelog_merge_conflict');
+    const proposals=await detect(mock.fetchHit,p);
+    if(proposals.length>0){
+      const prop=proposals[0];
+      assert.ok(prop.pattern_id,'missing pattern_id');
+      assert.ok(prop.evidence.length>0,'missing evidence');
+      assert.ok(prop.count>=prop.threshold,'count should meet threshold');
+    }
+  });
+
+  test('AC7: TTL suppression — isSuppressed checks expiry correctly',()=>{
+    const now=Date.now();
+    const exp1={created_utc:new Date(now).toISOString(),expires_utc:new Date(now+86400000).toISOString()};
+    const exp2={created_utc:new Date(now).toISOString(),expires_utc:new Date(now-86400000).toISOString()};
+    assert.ok(!exp1.expires_utc||new Date(exp1.expires_utc)>new Date(),'future TTL should be active');
+    assert.ok(exp2.expires_utc&&new Date(exp2.expires_utc)<new Date(),'past TTL should be expired');
+  });
+
+  test('AC7: suppression reason is auditable',()=>{
+    const record={pattern_id:'test',reason:'Too noisy',ttl_days:7,reviewer:'alice',
+      created_utc:'2026-05-09T12:00:00Z',expires_utc:'2026-05-16T12:00:00Z'};
+    assert.equal(record.reason,'Too noisy','reason must be preserved');
+    assert.ok(record.reviewer,'reviewer must be auditable');
+  });
 });

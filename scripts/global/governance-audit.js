@@ -61,7 +61,9 @@ async function audit(opts = {}) {
   const tickets = listOpenTickets();
   const violations = detectViolations(tickets);
   let hamrSensor = null;
+  let annealSensor = null;
   try { hamrSensor = require('./hamr-utilization-sensor').compute(); } catch { /* sensor optional */ }
+  try { annealSensor = require('./anneal-governance-sensor').computeMetrics(); } catch { /* sensor optional */ }
   if (hamrSensor && hamrSensor.status === 'violation') {
     violations.push({ ticket: 'HAMR', rule: 'utilization-floor',
       detail: `production_hamr_utilization_rate_7d=${hamrSensor.rate?.toFixed(2)} below floor ${hamrSensor.thresholds.violation}` });
@@ -78,6 +80,7 @@ async function audit(opts = {}) {
     open_tickets: tickets.length,
     violations,
     hamr_utilization: hamrSensor,
+    anneal_queue: annealSensor,
     overall: violations.length === 0 && checks.every(c => c.ok) ? 'PASS' : 'FAIL',
   };
   fs.writeFileSync(REPORT_FILE, JSON.stringify(summary, null, 2));

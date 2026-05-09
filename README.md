@@ -54,6 +54,7 @@ npm run deploy:both:apply
 | `adr:preview` | `log4brains preview` |
 | `agent:coord:remote` | `node scripts/global/agent-coord-remote.js` |
 | `agent:tier-c` | `node scripts/global/tier-c-guard.js` |
+| `anneal:review` | `node scripts/global/anneal-review.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |
 | `capability:show` | `node scripts/global/capability-show.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
