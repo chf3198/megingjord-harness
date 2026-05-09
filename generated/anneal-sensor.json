@@ -1,0 +1,11 @@
+{
+  "sensor": "recurring_failure_rate",
+  "goal": "G2",
+  "score": 1,
+  "window_days": 7,
+  "total_incidents": 0,
+  "resolved_incidents": 0,
+  "open_incidents": 0,
+  "generated_utc": "2026-05-09T18:07:33.528Z",
+  "source": "logs/anneal-incidents.jsonl"
+}
