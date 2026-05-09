@@ -24,6 +24,13 @@ Re-scoped R&D dropping obsolete §1/§2 (delivered by #573/#765/#768). Active sc
 ## [2026-05-05] convergence | Megingjord Harness Convergence Design v1 (#922, 9-round 3-team SIGN_OFF)
 Approved cross-team architecture: 4 axes (governance / tooling / fleet / HAMR) plus Dashboard as observation/control plane. HAMR is shared substrate maintained by Claude Code Team. substrate-health gates model-routing-engine UPSTREAM of cascade-dispatch via cascade-policy-overrides.json. Per-team config markers extended with axis_consumers. SKILL.md frontmatter is canonical tool-discovery format with auto-derived per-team views. Cross-team edits on shared files via baton + governance-lint warn. megingjord-coord deprecation and Dashboard HAMR opt-in (#966) deferred to downstream Epics. 3 consecutive SIGN_OFFs (Codex/Copilot/Claude Code) at rounds 7/8/9. Authored as fast-track operator-deputy passes per operator authorization.
 
+## [2026-05-09] ingest | Epic #1271 Codex R&D plan (#1274)
+Added raw/source/concept wiki coverage for Epic-state truthfulness. The normal
+`npm run wiki:ingest` path was attempted, but OpenClaw ingest was unreachable;
+Codex completed the source summary and concept page manually using the same
+Karpathy wiki structure. New pages: `wiki/sources/epic-1271-cx-rd-plan-2026-05-09.md`
+and `wiki/concepts/epic-state-truthfulness.md`.
+
 **Tip**: `grep "^## \[" log.md | tail -5` shows last 5 entries.
 
 ---
