@@ -31,6 +31,15 @@ The graph includes:
 The command is read-only against GitHub. It does not mutate issues, labels, or
 native dependency relationships.
 
+Generate AI-assisted proposals after the graph exists:
+
+```bash
+npm run deps:augment -- --graph planning/dep-graph.json
+```
+
+The augmentor writes `planning/dep-proposals.json`, records confidence and
+cache metadata, and never mutates issues.
+
 Signed-by: Nova Harper
 Team&Model: codex:gpt-5@codex-cli
 Role: collaborator
