@@ -63,6 +63,36 @@ An epic may close **only when ALL of these are true**:
 - If original epic ACs cannot be completed, Manager must publish an explicit re-scope artifact (deferred scope + follow-on child tickets) before review/close.
 - Post-hoc scope normalization at Consultant closeout is forbidden.
 
+## EPIC_RESCOPE artifact schema (per Epic #1271 AC7)
+
+When ACs cannot be completed, the Manager publishes one or more `EPIC_RESCOPE` blocks as comments on the Epic before close. Each block declares deferred ACs + reasons + follow-on tickets. `closeout-lint` blocks Epic close if (a) any AC is unchecked AND (b) no `EPIC_RESCOPE` block covers it.
+
+```
+EPIC_RESCOPE
+deferred_acs: [AC4, AC5]
+deferred_reason_per_ac:
+  AC4: structural-measurement-window
+  AC5: dependent-on-producer
+re_evaluate_by: 2026-05-24
+follow_on_tickets: [#1234, #1235]
+ruleset_bypass_actor: <github-username-or-N/A>
+ruleset_bypass_reason: <text-or-N/A>
+signed_by: <consultant-alias>
+Team&Model: <team:model@substrate>
+Role: consultant
+```
+
+Schema rules:
+
+- `deferred_acs` — JSON-style array; each AC must reference an unchecked AC in the Epic body
+- `deferred_reason_per_ac` — keys must match `deferred_acs`; values from category enum: `structural-measurement-window | dependent-on-producer | scope-cut-to-followon | external-blocker | other`
+- `re_evaluate_by` — ISO date for time-windowed deferrals; required when reason is `structural-measurement-window`
+- `follow_on_tickets` — JSON-style array of `#N` references; each must resolve to a real issue
+- `ruleset_bypass_actor` / `ruleset_bypass_reason` — required when Epic close uses repository ruleset bypass; otherwise `N/A`
+- `signed_by` — Consultant alias (Manager-signed RESCOPE artifacts are rejected by `closeout-lint`)
+
+Multiple RESCOPE blocks are allowed (one per deferred AC), or a single block listing several. Validator counts unique `deferred_acs` entries and matches against unchecked-AC set.
+
 ## Branch Naming
 
 Branches are created for child tickets only: `<type>/<child-issue-number>-<slug>`
