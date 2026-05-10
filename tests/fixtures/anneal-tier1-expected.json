@@ -1,0 +1,7 @@
+{
+  "events": [
+    { "pattern_id": "tier1-governance-drift", "severity": "high" },
+    { "pattern_id": "tier1-git-state-drift", "severity": "medium" },
+    { "pattern_id": "tier1-hamr-utilization", "severity": "medium" }
+  ]
+}

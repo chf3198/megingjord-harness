@@ -1,0 +1,7 @@
+{
+  "sensors": {
+    "governance": { "totalDrift": 2 },
+    "git_state": { "status": "FAIL", "violation_count": 1 },
+    "hamr": { "rate": 0.5 }
+  }
+}
