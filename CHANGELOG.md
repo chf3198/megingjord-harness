@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased] — #1309: codify three-tier anneal protocol (Epic #1308 Workstream A)
+
+### Added
+- `wiki/concepts/distributed-self-anneal.md` — three-tier model overview (Observation / Mid-flight pivot / Consultant goal-failure escalation). Builds on Epic #1133 pattern-detection layer. Relates `[[self-annealing]]`, `[[agent-drift]]`, `[[governance-enforcement]]`, `[[ticket-audit-pattern]]`.
+- `wiki/concepts/andon-pull-protocol.md` — any-role pull mechanics, trigger phrases (`pull anneal`, `andon`, `drift anneal #N`, `report drift`), event schema v2 contract, severity classification, pivot semantics (snapshot/restore), anti-patterns.
+
+### Changed
+- `instructions/workflow-resilience.instructions.md` — added "Three-tier escalation model" section with tier definitions, authority matrix, and bounded-loop kill-switch rules (single-flight per session, 3 pivots/24h, 5 tickets/7d/pattern, 50-step counter). References new wiki concept pages.
+- `wiki/concepts/self-annealing.md` — added "Three-tier extension (Epic #1308)" section; added `[[distributed-self-anneal]]` and `[[andon-pull-protocol]]` to related-page wikilinks; updated event-bus integration reference to mention incidents.jsonl schema v2.
+- `wiki/index.md` — registered both new concept pages in Concepts section and Recent Additions; bumped page count 73→75.
+
 ## [Unreleased] — #1115: fix wiki Always-Loaded Surfaces claim
 
 ### Changed
