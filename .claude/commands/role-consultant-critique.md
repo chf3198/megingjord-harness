@@ -54,12 +54,10 @@ Consultant MAY reject (revert to Collaborator) **only** when:
 ## Tier-3 goal-failure escalation (Epic #1308)
 
 If rubric scores below threshold against any G1–G9 goal, Consultant may invoke Manager for Tier-3 actions via `anneal-trigger-router` (`action:request-consultant-escalation`):
-
-- Reopen failed AC: return ticket to Manager; remove `status:done` if posted in error
-- Reopen failed ticket: invoke Manager baton on original or follow-up issue
+- Reopen failed AC or ticket: return to Manager baton; remove `status:done` if posted in error
 - File new self-anneal Epic: pattern is systemic across multiple tickets
 
-Each emits `event:goal-failure-escalation` with rubric evidence per Epic #1308 schema v2 (`{tier:3, trigger_role:consultant, trigger_type:goal-failure, severity, evidence, ticket_ref, epic_ref}`). Authority: Consultant only; other roles rejected with `kill_switch_trip:authority`.
+Each emits `event:goal-failure-escalation` per Epic #1308 schema v2 (`{tier:3, trigger_role:consultant, trigger_type:goal-failure, severity, evidence, ticket_ref, epic_ref}`). Authority: Consultant only; other roles rejected with `kill_switch_trip:authority`.
 
 ## Entry criteria
 
