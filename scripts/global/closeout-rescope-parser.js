@@ -35,9 +35,9 @@ function parseRescopeBlocks(text) {
   while ((m = blockRe.exec(text)) !== null) {
     const body = m[1];
     const block = { errors: [] };
-    const get = (k) => {
-      const r = new RegExp('^\\s*' + k + ':\\s*(.+?)\\s*$', 'm');
-      const mm = body.match(r);
+    const get = (key) => {
+      const fieldRe = new RegExp('^\\s*' + key + ':\\s*(.+?)\\s*$', 'm');
+      const mm = body.match(fieldRe);
       return mm ? mm[1] : null;
     };
     block.deferred_acs = parseListField(get('deferred_acs'));

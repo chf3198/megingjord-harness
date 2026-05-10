@@ -25,19 +25,23 @@ function consensus(provenance) {
 
 function statusFromConsensus(con, hasMeasuringLabel) {
   if (hasMeasuringLabel) return 'MEASURING';
-  if (con.vote === 'satisfied' && con.score >= 0.6) return 'READY_TO_CLOSE';
+  if (con.vote === 'satisfied' && con.score >= READY_THRESHOLD) return 'READY_TO_CLOSE';
   if (con.vote === 'unmet') return 'UNMET';
   return 'UNKNOWN';
 }
 
+const HEURISTIC_FALLBACK_WEIGHT = 0.1;
+const MANUAL_ASSERTION_WEIGHT = 0.6;
+const READY_THRESHOLD = 0.6;
+
 function reconcileOne(ac, evidence, opts) {
-  const provenance = (evidence || []).map(e => ({
-    vote: e.vote,
-    weight: e.weight ?? EVIDENCE_RANK[e.source] ?? 0.1,
-    source: e.source,
+  const provenance = (evidence || []).map(item => ({
+    vote: item.vote,
+    weight: item.weight ?? EVIDENCE_RANK[item.source] ?? HEURISTIC_FALLBACK_WEIGHT,
+    source: item.source,
   }));
   if (ac.checked && !provenance.length) {
-    provenance.push({ vote: 'satisfied', weight: 0.6, source: 'manual_assertion' });
+    provenance.push({ vote: 'satisfied', weight: MANUAL_ASSERTION_WEIGHT, source: 'manual_assertion' });
   }
   const con = consensus(provenance);
   const truth_status = statusFromConsensus(con, opts.hasMeasuringLabel);

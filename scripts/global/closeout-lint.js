@@ -48,9 +48,9 @@ async function run({ github, context, core }) {
     if (unmet.length) {
       violations.push(`Epic close blocked: ${unmet.length} unmet AC(s) without EPIC_RESCOPE: ${unmet.map(a => a.id).join(', ')}`);
     }
-    for (const r of rescopes) {
-      if (r.errors && r.errors.length) {
-        violations.push(`EPIC_RESCOPE schema errors: ${r.errors.join('; ')}`);
+    for (const rescope of rescopes) {
+      if (rescope.errors && rescope.errors.length) {
+        violations.push(`EPIC_RESCOPE schema errors: ${rescope.errors.join('; ')}`);
       }
     }
   }

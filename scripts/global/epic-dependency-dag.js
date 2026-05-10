@@ -18,16 +18,19 @@ function parseTextDeps(body) {
   return edges;
 }
 
+const STATUS_NOT_FOUND = 404;
+const STATUS_FORBIDDEN = 403;
+
 async function fetchNativeDeps(github, owner, repo, issueNumber, guard) {
   try {
-    const path = `/repos/${owner}/${repo}/issues/${issueNumber}/dependencies`;
-    const fn = () => github.request(`GET ${path}`);
+    const apiPath = `/repos/${owner}/${repo}/issues/${issueNumber}/dependencies`;
+    const fn = () => github.request(`GET ${apiPath}`);
     const result = guard ? await guard.withGuard(`deps:${issueNumber}`, fn) : await fn();
     const data = result.value?.data || result.data || [];
-    return data.map(d => ({ kind: d.relationship || 'blocked-by', target: d.number, source: 'native' }));
-  } catch (e) {
-    if (e.status === 404 || e.status === 403) return null;
-    throw e;
+    return data.map(dep => ({ kind: dep.relationship || 'blocked-by', target: dep.number, source: 'native' }));
+  } catch (err) {
+    if (err.status === STATUS_NOT_FOUND || err.status === STATUS_FORBIDDEN) return null;
+    throw err;
   }
 }
 

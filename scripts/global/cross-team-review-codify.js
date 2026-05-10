@@ -23,12 +23,15 @@ function within(date, since) {
 
 function detectCrossTeamComments({ issueBody, comments, now = new Date() }) {
   const ownerTeam = teamPart(teamModelOf(issueBody));
-  const since = new Date(now.getTime() - WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const HOURS_PER_DAY = 24;
+  const SECONDS_PER_HOUR = 3600;
+  const MS_PER_SECOND = 1000;
+  const since = new Date(now.getTime() - WINDOW_DAYS * HOURS_PER_DAY * SECONDS_PER_HOUR * MS_PER_SECOND);
   const cross = [];
-  for (const c of comments) {
-    if (!within(c.created_at, since)) continue;
-    const t = teamPart(teamModelOf(c.body));
-    if (t && ownerTeam && t !== ownerTeam) cross.push({ id: c.id, team: t, url: c.html_url });
+  for (const comment of comments) {
+    if (!within(comment.created_at, since)) continue;
+    const team = teamPart(teamModelOf(comment.body));
+    if (team && ownerTeam && team !== ownerTeam) cross.push({ id: comment.id, team, url: comment.html_url });
   }
   return { ownerTeam, count: cross.length, cross };
 }

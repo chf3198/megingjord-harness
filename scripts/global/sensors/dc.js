@@ -14,15 +14,15 @@ function matchesNarrative(text) {
 
 function compute({ epicComments = [], reconciledByEpic = {}, since = SINCE_DEFAULT } = {}) {
   let drift = 0; const evidence = [];
-  for (const c of epicComments) {
-    if (!c || !c.epic) continue;
-    if (c.created_at && c.created_at < since) continue;
-    if (!matchesNarrative(c.body)) continue;
-    const reconciled = reconciledByEpic[c.epic] || [];
-    const unmet = reconciled.filter(r => r.truth_status === 'UNMET' && !r.rescope_ref);
+  for (const comment of epicComments) {
+    if (!comment || !comment.epic) continue;
+    if (comment.created_at && comment.created_at < since) continue;
+    if (!matchesNarrative(comment.body)) continue;
+    const reconciled = reconciledByEpic[comment.epic] || [];
+    const unmet = reconciled.filter(row => row.truth_status === 'UNMET' && !row.rescope_ref);
     if (unmet.length) {
       drift += 1;
-      evidence.push(`epic=${c.epic} unmet_acs=${unmet.map(u => u.ac_id).join(',')}`);
+      evidence.push(`epic=${comment.epic} unmet_acs=${unmet.map(row => row.ac_id).join(',')}`);
     }
   }
   return { value: drift, evidence };
