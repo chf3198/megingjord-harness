@@ -27,7 +27,12 @@ done           — (terminal)        CONSULTANT_CLOSEOUT emitted; issue closed
 cancelled      — (terminal)        Goal invalidated; Manager authority
 dormant        role:manager        Epic-only: paused; 90d EPIC_REVIEW (Rule E5)
 deferred       role:manager        Epic-only: blocked, no ETA (Rule E5)
+measuring      (sub-state of in-progress) Epic-only: time-windowed AC awaiting elapse (Rule E6, #1271 AC4)
 ```
+
+### Rule E6 — `status:measuring` carve-out
+
+Per Epic #1271 AC4, `status:measuring` is a **sub-state of `status:in-progress`** for Epics blocked only by an elapsed-time AC. Existence of `status:measuring` implies `status:in-progress` is also present. Body schema: `Recheck-after: <ISO-date>`, `Measure-window: <duration>`, `Sensor: <owner>`. Daily cron (`measuring-recheck.yml`) auto-comments when `Recheck-after` elapses. Label-lint MUST allow the pair (`status:in-progress` + `status:measuring`); single-status-only invariant is relaxed for this pair only.
 
 ## Transition Guards
 

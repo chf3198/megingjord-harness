@@ -1,0 +1,21 @@
+name: status:measuring Recheck Cron
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: measuring-recheck
+  cancel-in-progress: false
+
+jobs:
+  recheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const path = require('path');
+            const recheck = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/measuring-recheck.js'));
+            await recheck.recheckRun({ github, context, core });

@@ -1,16 +1,15 @@
-name: Closeout Lint
+name: Manager Narrative Lint
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created, edited]
 
 concurrency:
-  group: closeout-lint-${{ github.ref }}
+  group: narrative-lint-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
-  closeout-schema:
-    name: closeout-schema
+  lint:
+    if: contains(github.event.issue.labels.*.name, 'type:epic')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -18,5 +17,5 @@ jobs:
         with:
           script: |
             const path = require('path');
-            const lint = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/closeout-lint.js'));
+            const lint = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/manager-narrative-lint.js'));
             await lint.run({ github, context, core });
