@@ -1,6 +1,7 @@
 name: Label Lint (ADR-010)
-# Enforces ticket status/role binding rules defined in ADR-010
-# Rules: single status, single role, no role on closed/done, backlog=no role, triage=manager
+# Enforces ticket status/role binding rules from ADR-010.
+# Uses shared rules from scripts/global/label-rules.js (parity with label-scan.yml).
+# Also enforces close-protection actions (auto-reopen, role-cleanup-on-close).
 
 on:
   issues:
@@ -14,21 +15,29 @@ jobs:
   label-lint:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Validate ADR-010 label rules
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
+            const { evaluate } = require('./scripts/global/label-rules.js');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issueNum = context.payload.issue.number;
             const marker = '<!-- adr-010-label-lint -->';
-            const issue = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
-            const labels = issue.labels.map(label => label.name);
-            const closeRoles = labels.filter(label => label.startsWith('role:'));
+
+            // Phase 1: close-protection actions (auto-reopen, role-cleanup)
+            const issue = (await github.rest.issues.get({
+              owner, repo, issue_number: issueNum,
+            })).data;
+            const labels = issue.labels.map(l => l.name);
+            const closeRoles = labels.filter(l => l.startsWith('role:'));
             const hasTerminal = labels.includes('status:done') || labels.includes('status:cancelled');
 
             if (issue.state === 'closed' && !hasTerminal) {
-              await github.rest.issues.update({ owner, repo, issue_number: issueNum, state: 'open' });
+              await github.rest.issues.update({
+                owner, repo, issue_number: issueNum, state: 'open',
+              });
               await github.rest.issues.createComment({
                 owner, repo, issue_number: issueNum,
                 body: '❌ Close blocked: add `status:done` or `status:cancelled` before closing this issue.',
@@ -36,108 +45,56 @@ jobs:
             }
             if (issue.state === 'closed' && closeRoles.length > 0) {
               for (const role of closeRoles) {
-                await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name: role }).catch(() => {});
+                if (role === 'role:archived') continue;
+                await github.rest.issues.removeLabel({
+                  owner, repo, issue_number: issueNum, name: role,
+                }).catch(() => {});
               }
             }
 
-            const refreshed = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
-            const currentLabels = refreshed.labels.map(label => label.name);
-            const statusLabels = currentLabels.filter(l => l.startsWith('status:'));
-            const roleLabels   = currentLabels.filter(l => l.startsWith('role:'));
-            const laneLabels   = currentLabels.filter(l => l.startsWith('lane:'));
-            const isEpic       = currentLabels.includes('type:epic');
-            const EPIC_ONLY_STATES = ['status:dormant', 'status:deferred'];
-            const violations   = [];
-            if (statusLabels.length === 0) {
-              violations.push('**Rule 1**: No `status:` label found. Every issue must have exactly one.');
-            } else if (statusLabels.length > 1) {
-              violations.push(`**Rule 1**: Multiple \`status:\` labels found: ${statusLabels.join(', ')}. Only one is allowed.`);
-            }
-            if (roleLabels.length > 1) {
-              violations.push(`**Rule 2**: Multiple \`role:\` labels found: ${roleLabels.join(', ')}. Only one is allowed.`);
-            }
-            if (statusLabels.includes('status:done') && roleLabels.length > 0) {
-              violations.push(`**Rule 3**: \`status:done\` issues must not have a \`role:\` label. Remove: ${roleLabels.join(', ')}.`);
-            }
-            if (statusLabels.includes('status:backlog') && roleLabels.length > 0 && !isEpic) {
-              violations.push(`**Rule 4**: \`status:backlog\` child issues must not have a \`role:\` label. Remove: ${roleLabels.join(', ')}.`);
-            }
-            if (isEpic && statusLabels.includes('status:backlog') && !roleLabels.includes('role:manager')) {
-              violations.push('**Rule E2**: Epic at `status:backlog` requires `role:manager` (Epic invariant).');
-            }
-            if (statusLabels.includes('status:triage') && !roleLabels.includes('role:manager')) {
-              violations.push('**Rule 5**: `status:triage` issues must have `role:manager`. Epics always carry this label.');
-            }
-            const areaLabels = currentLabels.filter(l => l.startsWith('area:'));
-            if (areaLabels.length === 0) {
-              violations.push('**Rule 6**: No `area:` label found. Every issue must have exactly one `area:*` label (auto-label-area.yml applies it on open).');
-            } else if (areaLabels.length > 1) {
-              violations.push(`**Rule 6**: Multiple \`area:\` labels found: ${areaLabels.join(', ')}. Only one is allowed.`);
-            }
-            if (refreshed.state === 'closed' && roleLabels.length > 0) {
-              violations.push(`**Rule 7**: Closed issue must not retain \`role:\` labels. Remove: ${roleLabels.join(', ')}.`);
-            }
-            if (refreshed.state === 'closed' && !statusLabels.some(s => s === 'status:done' || s === 'status:cancelled')) {
-              violations.push('**Rule 7b**: Closed issue must include `status:done` or `status:cancelled`.');
-            }
-            const STATUS_ROLE_REQUIRED = {
-              'status:in-progress': 'role:collaborator',
-              'status:testing':     'role:admin',
-              'status:review':      'role:consultant',
-            };
-            for (const [status, required] of Object.entries(STATUS_ROLE_REQUIRED)) {
-              if (statusLabels.includes(status) && !roleLabels.includes(required) && !isEpic) {
-                violations.push(`**Rule 8**: \`${status}\` requires \`${required}\`. Add it.`);
-              }
-            }
-            if (isEpic && statusLabels.includes('status:in-progress') && !roleLabels.includes('role:manager')) {
-              violations.push('**Rule E3**: Epic at `status:in-progress` requires `role:manager` (Epic carries manager throughout lifecycle).');
-            }
-            for (const epicState of EPIC_ONLY_STATES) {
-              if (statusLabels.includes(epicState) && !isEpic) {
-                violations.push(`**Rule E5**: \`${epicState}\` is Epic-only. Non-Epic tickets cannot use it.`);
-              }
-              if (statusLabels.includes(epicState) && isEpic && !roleLabels.includes('role:manager')) {
-                violations.push(`**Rule E5**: Epic at \`${epicState}\` requires \`role:manager\`.`);
-              }
-            }
-            if (isEpic && statusLabels.includes('status:ready')) {
-              violations.push('**Rule 9**: Epics cannot be at `status:ready` — that status is for child tickets only.');
-            }
-            if (statusLabels.includes('status:ready') && laneLabels.length !== 1) {
-              violations.push('**Rule 10**: `status:ready` requires exactly one `lane:*` label.');
-            }
+            // Phase 2: evaluate via shared rules and post comment
+            const refreshed = (await github.rest.issues.get({
+              owner, repo, issue_number: issueNum,
+            })).data;
+            const violations = evaluate(refreshed);
+
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
             });
-            const lintComment = comments.find(comment => comment.body?.includes(marker));
+            const lintComment = comments.find(c => c.body?.includes(marker));
+
             if (violations.length === 0) {
               if (lintComment) {
-                await github.rest.issues.deleteComment({ owner, repo, comment_id: lintComment.id });
+                await github.rest.issues.deleteComment({
+                  owner, repo, comment_id: lintComment.id,
+                });
               }
               console.log(`Issue #${issueNum}: label rules OK`);
               return;
             }
+
+            const currentLabels = refreshed.labels.map(l => l.name);
             const body = [
-              marker,
-              '',
-              '## ⚠️ ADR-010 Label Lint Violation',
-              '',
-              `Issue #${issueNum} has invalid label combinations:`,
-              '',
-              violations.map(v => `- ${v}`).join('\n'),
-              '',
+              marker, '',
+              '## ⚠️ ADR-010 Label Lint Violation', '',
+              `Issue #${issueNum} has invalid label combinations:`, '',
+              violations.map(v => `- ${v}`).join('\n'), '',
               '**Current labels**: ' + (currentLabels.length ? currentLabels.map(l => `\`${l}\``).join(', ') : '_none_'),
               '',
-              'See [ADR-010](../blob/main/research/adr/010-ticket-status-role-model.md) for the full status–role binding model.',
+              'See [ADR-010](../blob/main/research/adr/010-ticket-status-role-model.md) for the binding model.',
               '',
-              '_This comment was posted by the label-lint workflow._',
+              '_Posted by label-lint workflow._',
             ].join('\n');
+
             if (lintComment?.body !== body) {
               if (lintComment) {
-                await github.rest.issues.updateComment({ owner, repo, comment_id: lintComment.id, body });
+                await github.rest.issues.updateComment({
+                  owner, repo, comment_id: lintComment.id, body,
+                });
               } else {
-                await github.rest.issues.createComment({ owner, repo, issue_number: issueNum, body });
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: issueNum, body,
+                });
               }
             }
             core.setFailed(`Label violations on #${issueNum}: ${violations.length} rule(s) broken.`);

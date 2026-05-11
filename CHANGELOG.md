@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — #1307: fix ADR-010 label-scan Epic exception via shared rule set
+
+### Added
+- `scripts/global/label-rules.js` — single source of truth for ADR-010 label evaluation. Used by both `label-lint.yml` (per-event) and `label-scan.yml` (daily audit). Prevents the two gates from disagreeing about what constitutes a violation.
+- `tests/label-rules.spec.js` — 14 Playwright tests covering Epic exception (Rule E3 must NOT flag Epics with role:manager), non-Epic Rule 8 enforcement, closed-issue role-cleanup, Epic-only states (E5), missing area (Rule 6), missing lane on ready (Rule 10), multiple status labels (Rule 1), and Rule 7/7b close-protection.
+
+### Changed
+- `.github/workflows/label-scan.yml` — now uses shared `scripts/global/label-rules.js` via `require()` (after `actions/checkout`). Adds AC3 comment-cleanup: when an issue no longer violates, the existing `<!-- adr-010-label-scan -->` comment is deleted. Removes the inline rules block that lacked the Epic exception (was the root cause of the daily false-positive comments on in-progress Epics #1245/#1133/#1130/#1113).
+- `.github/workflows/label-lint.yml` — parallel refactor: uses the shared rule set. Close-protection actions (auto-reopen on close-without-`status:done`, role-label cleanup on close, `role:archived` preservation) remain in the workflow as inline action logic.
+
 ## [Unreleased] — #1312: anneal_tier field in MANAGER_HANDOFF schema (Epic #1308 Workstream A)
 
 ### Changed
