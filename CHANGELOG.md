@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased] — #1357: retention + rotation policy for *.jsonl logging surfaces (Epic #1339 C6)
+
+### Added
+- `scripts/global/log-rotation.js` — per-surface retention + rotation. Default policy: incidents.jsonl 90d hot + gzip archive; cache-stats.jsonl 30d hot, no archive. Trigger: size cap (50MB) OR daily boundary. Archive structure: `~/.megingjord/archive/<surface>/<name>.jsonl.YYYY-MM-DD.gz`. Per R&D Thread 5.
+- `tests/log-rotation.spec.js` — 9 golden-file tests covering shouldRotate (size, date, nonexistent), rotate (rename + recreate empty, archive gzip), prune, and SURFACES policy exports.
+- `.github/workflows/log-rotation.yml` — daily cron at 07:15 UTC + workflow_dispatch.
+
 ## [Unreleased] — #1353: unified event schema v3 + backward-compat shim (Epic #1339 C2)
 
 ### Added

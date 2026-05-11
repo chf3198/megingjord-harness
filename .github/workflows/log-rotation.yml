@@ -1,0 +1,25 @@
+name: Log Rotation (daily)
+# Per-surface retention + rotation per Epic #1339 / #1357 / R&D Thread 5.
+
+on:
+  schedule:
+    - cron: '15 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: log-rotation
+  cancel-in-progress: false
+
+jobs:
+  rotate:
+    name: rotate-and-prune
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Run rotation
+        run: node scripts/global/log-rotation.js
