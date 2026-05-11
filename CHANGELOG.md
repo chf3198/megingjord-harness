@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — #1359: goal-coverage dashboard panel (Epic #1339 C8)
+
+### Added
+- `dashboard/api/goal-coverage-handlers.js` — `/api/goal-coverage` endpoint. Maps G1..G9 to evidence signals from `incidents.jsonl` (trigger_type filters per C1 inventory). Returns per-goal `count_24h`, `count_7d`, `coverage_status` (`ok` ≥3/7d, `low` 1-2, `gap` 0). Closes G8 self-reference (observability of observability).
+- `dashboard/js/goal-coverage-panel.js` — self-registering panel renderer (`registerGoalCoveragePanel`). Live SSE updates on `incident` events. WCAG-compliant color coding via CSS classes.
+- `dashboard/css/goal-coverage.css` — table styles with WCAG 4.5:1 contrast minimums; `prefers-reduced-motion` respected.
+- `tests/goal-coverage-panel.spec.js` — 8 visual-regression + unit tests covering GOAL_MAP, threshold classification, time-window filtering, ts/timestamp aliasing, route export.
+
+### Changed
+- `scripts/dashboard-server.js` — registered `/api/goal-coverage` route (inline, no line-count increase).
+- `dashboard/index.html` — added `<link>`, `<script>`, and `<section>` for the new panel (inline, no line-count increase).
+
 ## [Unreleased] — #1354: SSE live-streaming pipeline (Epic #1339 C3)
 
 ### Added
