@@ -79,3 +79,18 @@ test('Multiple status labels: Rule 1 violation', () => {
   const v = R.evaluate(mk(['type:task', 'status:in-progress', 'status:testing', 'role:collaborator', 'area:governance']));
   expect(v.some(x => x.includes('Rule 1') && x.includes('multiple'))).toBe(true);
 });
+
+test('Rule 11 (#1305 AC7): cross-team consult :needed AND :in-progress is mutually exclusive', () => {
+  const v = R.evaluate(mk([
+    'type:epic', 'status:in-progress', 'role:manager', 'area:governance',
+    'consultant:cross-team-needed', 'consultant:cross-team-in-progress',
+  ]));
+  expect(v.some(x => x.includes('Rule 11') && x.includes('mutually exclusive'))).toBe(true);
+});
+
+test('Rule 11: either label alone is OK', () => {
+  const v1 = R.evaluate(mk(['type:epic', 'status:in-progress', 'role:manager', 'area:governance', 'consultant:cross-team-needed']));
+  const v2 = R.evaluate(mk(['type:epic', 'status:in-progress', 'role:manager', 'area:governance', 'consultant:cross-team-in-progress']));
+  expect(v1.filter(x => x.includes('Rule 11'))).toEqual([]);
+  expect(v2.filter(x => x.includes('Rule 11'))).toEqual([]);
+});

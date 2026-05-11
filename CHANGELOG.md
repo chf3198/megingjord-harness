@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased] — #1305: cross-team Consultant pickup protocol (core delivery)
+
+### Added
+- `instructions/cross-team-consultant.instructions.md` — single canonical protocol document for cross-team Consultant closeouts (replaces the operator's prior 3 KB paste-into-Copilot-Chat flow).
+- `.claude/commands/cross-team-consult-pickup.md` — new skill with trigger phrases `cross-team consult #N`, `find cross-team work`, `pull cross-team`. Auto-discovered via skill `description:` field; deploys to all substrates via `npm run deploy:apply`.
+- `scripts/global/cross-team-queue.js` — substrate-aware queue resolver. Reads `inventory/team-model-signatures.json` to derive caller team (Cross-Team R&D Protocol v2 §3 pattern); first-claim-wins protocol with 5-second race-check window; `CROSS_TEAM_CLAIM` / `CROSS_TEAM_CLAIM_YIELD` / `CROSS_TEAM_CLAIM_EXPIRED` audit comments; 24-hour claim TTL.
+- `tests/cross-team-queue.spec.js` — 12 Playwright tests covering substrate→team resolution, claim/yield/expiry comment shapes, race protocol.
+- Labels: `consultant:cross-team-needed`, `consultant:cross-team-in-progress` (generic — no team-specific suffixes, satisfies G5 Portability).
+
+### Changed
+- `scripts/global/label-rules.js` — added Rule 11: cross-team consult labels are mutually exclusive (`:needed` XOR `:in-progress`). Both label-lint and label-scan inherit via shared module.
+- `tests/label-rules.spec.js` — added Rule 11 coverage (2 new tests).
+
+### Deferred to follow-up Manager ticket
+- AC6: signer-substrate gate in `baton-gates.yml` (verify CONSULTANT_EPIC_CLOSEOUT signer's `Team&Model` substrate matches active CLAIM substrate)
+- AC8: stale-claim reaper cron (daily check of `expires:` timestamps; revert `:in-progress → :needed` with `CROSS_TEAM_CLAIM_EXPIRED` audit)
+- AC9: Manager-side automation to auto-apply `consultant:cross-team-needed` when lead-team Manager posts the closeout-request comment
+
+These are enforcement/automation additions that strengthen the core protocol; the core flow above is operable without them. Follow-up filed separately.
+
 ## [Unreleased] — #1306: tighten Epic close-readiness matcher (task-list-only)
 
 ### Changed

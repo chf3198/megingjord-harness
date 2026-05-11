@@ -76,6 +76,11 @@ function evaluate(issue) {
     violations.push('Rule 10: status:ready requires exactly one lane label');
   }
 
+  // Rule 11 (#1305 AC7): cross-team consult labels are mutually exclusive.
+  if (labels.includes('consultant:cross-team-needed') && labels.includes('consultant:cross-team-in-progress')) {
+    violations.push('Rule 11: consultant:cross-team-needed and consultant:cross-team-in-progress are mutually exclusive');
+  }
+
   return violations;
 }
 
