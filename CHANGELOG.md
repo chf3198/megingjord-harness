@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] — #1361: token-cost benchmark — variants A/B/C compared (Epic #1339 C10)
+
+### Added
+- `scripts/global/token-cost-benchmark.js` — synthetic benchmark for schema variants A (v1 mixed) / B (v3 unified) / C (v3 + `_summary`). 1000-event samples, char-count proxy (~4 chars/token), runnable via `node`. Exports `runBenchmark(sampleSize)` for parametric sweeps.
+- `research/logging-token-cost-benchmark-2026-05-11.md` — empirical findings + honest negative result. R&D's hypothesis ("B reduces tokens ≥15% vs A") was directionally wrong: B is +63% vs A (consolidation framing wrong; A was minimal, B adds structure). C is +101% vs A. Recommendations: ship B unconditionally for G1/G5/G6/G8/G9 wins; **defer C** until usage data shows >5× LLM-read ratio per event.
+
 ## [Unreleased] — #1358: PII/secret redaction for harness logs (Epic #1339 C7)
 
 ### Added
