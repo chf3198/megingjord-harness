@@ -46,7 +46,13 @@ async function refreshAnnealQueue(targetElement) {
 function registerAnnealQueuePanel(targetElement) {
   if (!targetElement) return;
   refreshAnnealQueue(targetElement);
-  window.addEventListener('megingjord:event', () => refreshAnnealQueue(targetElement));
+  window.addEventListener('megingjord:event', async () => {
+    await refreshAnnealQueue(targetElement);
+    // C5: transient animation on update (honors reduced-motion)
+    if (typeof window.animatePanelUpdate === 'function') {
+      window.animatePanelUpdate(targetElement, 'aq-row-new');
+    }
+  });
 }
 
 if (typeof module !== 'undefined') module.exports = { fetchAnnealQueueData, summarizeAnneal, renderAnnealQueuePanel, registerAnnealQueuePanel };

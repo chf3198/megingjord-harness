@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased] — #1356: anneal queue + baton flow panel animation upgrades (Epic #1339 C5)
+
+### Added
+- `dashboard/js/panel-anim.js` — shared `animatePanelUpdate(element, className, opts)` + `prefersReducedMotion()` + `subscribePanelSSE(eventType, onEvent)`. Reusable transient-highlight pattern for SSE-driven panels. Single shared EventSource via `window.__panelSSE` (one connection for all panels).
+- `dashboard/js/baton-flow-anim.js` — sidecar that subscribes to `baton:*` SSE events and animates the matching `.baton-step.active` element. Keeps `baton-flow.js` at exact 100-line cap untouched. Auto-init on DOMContentLoaded.
+- `dashboard/css/panel-anim.css` — `aq-pulse` + `bf-transition` keyframes; GPU-accelerated (opacity/transform/filter); `prefers-reduced-motion: reduce` fallback snaps to state.
+- `tests/anneal-queue-animation.spec.js` — 8 tests covering shared helpers, role-index mapping, null-input safety, document-absent fallback.
+
+### Changed
+- `dashboard/js/anneal-queue-panel.js` — `registerAnnealQueuePanel` now also triggers `animatePanelUpdate(target, 'aq-row-new')` after refresh on `megingjord:event`.
+- `dashboard/index.html` — linked `panel-anim.css`; added script tags for `panel-anim.js` and `baton-flow-anim.js` (inline, no line growth).
+
 ## [Unreleased] — #1355: Context Flow animation layer (Epic #1339 C4)
 
 ### Added
