@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased] — #1360: codify observability standard (Epic #1339 C9 capstone)
+
+### Added
+- `instructions/observability.instructions.md` (96 lines) — canonical reference codifying decisions from C1–C8: logging surfaces, schema v3 (with OTel GenAI namespace), retention/rotation defaults, PII/secret redaction policy, SSE live-streaming pipeline, dashboard animation pattern, goal-lens mapping, authority assignment per `trigger_role`. Links to inventory wiki page and R&D research artifacts as drill-down references.
+
+### Changed
+- `CLAUDE.md` — added `@instructions/observability.instructions.md` to the Instructions @-include list.
+
 ## [Unreleased] — #1356: anneal queue + baton flow panel animation upgrades (Epic #1339 C5)
 
 ### Added
