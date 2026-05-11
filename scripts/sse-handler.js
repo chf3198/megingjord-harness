@@ -1,11 +1,18 @@
-// scripts/sse-handler.js — Server-Sent Events for dashboard live push
-// Watches .dashboard/events.jsonl and streams new events to connected clients
+// scripts/sse-handler.js — Server-Sent Events for dashboard live push.
+// Multi-surface (events.jsonl, incidents.jsonl, cache-stats.jsonl) via the
+// shared scripts/global/jsonl-tail.js (Epic #1339 / #1354).
 
 const fs = require('fs');
 const path = require('path');
+const { tail } = require('./global/jsonl-tail.js');
 
+const HOME = process.env.HOME || '/tmp';
 const EVENTS_FILE = path.resolve(__dirname, '..', '.dashboard', 'events.jsonl');
+const INCIDENTS_FILE = path.join(HOME, '.megingjord', 'incidents.jsonl');
+const CACHE_STATS_FILE = path.join(HOME, '.megingjord', 'cache-stats.jsonl');
+
 const clients = new Set();
+const activeTails = [];
 
 /** SSE endpoint handler for /api/events/stream */
 function stream(req, res) {
@@ -28,7 +35,7 @@ function broadcast(eventType, data) {
   }
 }
 
-/** Parse last N lines from events.jsonl */
+/** Parse last N lines from a jsonl file (utility for snapshot endpoints) */
 function tailLines(content, n) {
   const lines = content.trim().split('\n').slice(-n);
   const events = [];
@@ -38,31 +45,38 @@ function tailLines(content, n) {
   return events;
 }
 
-// Watch events.jsonl for new entries
-let lastSize = 0;
-function initWatcher() {
-  if (!fs.existsSync(EVENTS_FILE)) return;
-  lastSize = fs.statSync(EVENTS_FILE).size;
-  fs.watch(EVENTS_FILE, { persistent: false }, () => {
-    try {
-      const stat = fs.statSync(EVENTS_FILE);
-      if (stat.size <= lastSize) { lastSize = stat.size; return; }
-      const buf = Buffer.alloc(stat.size - lastSize);
-      const fd = fs.openSync(EVENTS_FILE, 'r');
-      fs.readSync(fd, buf, 0, buf.length, lastSize);
-      fs.closeSync(fd);
-      lastSize = stat.size;
-      const newLines = buf.toString('utf-8').trim().split('\n');
-      for (const line of newLines) {
-        try {
-          const ev = JSON.parse(line);
-          broadcast(ev.type || 'activity', ev);
-        } catch { /* skip malformed */ }
-      }
-    } catch { /* file race */ }
-  });
+/**
+ * Subscribe a jsonl surface to live SSE broadcast.
+ * Returns a tail handle so callers can close() on shutdown.
+ */
+function subscribeSurface(file, defaultEventType, opts = {}) {
+  if (!fs.existsSync(file)) {
+    // File may not exist yet; jsonl-tail handles eventual create via chokidar
+  }
+  const handle = tail(file, (event) => {
+    const eventType = event.event || event.type || defaultEventType;
+    broadcast(eventType, event);
+  }, { onDrop: (n) => broadcast('dropped', { count: n, file }), ...opts });
+  activeTails.push(handle);
+  return handle;
 }
 
-try { initWatcher(); } catch { /* no events file yet */ }
+/** Initialize default subscriptions: events.jsonl, incidents.jsonl, cache-stats.jsonl */
+function initWatchers() {
+  try { subscribeSurface(EVENTS_FILE, 'activity'); } catch { /* skip */ }
+  try { subscribeSurface(INCIDENTS_FILE, 'incident'); } catch { /* skip */ }
+  try { subscribeSurface(CACHE_STATS_FILE, 'cache-stat'); } catch { /* skip */ }
+}
 
-module.exports = { stream, broadcast, clients };
+/** Close all active tails (for tests + shutdown) */
+function closeAllSubscriptions() {
+  while (activeTails.length > 0) activeTails.pop().close();
+}
+
+try { initWatchers(); } catch { /* no surfaces yet — chokidar will pick up when created */ }
+
+module.exports = {
+  stream, broadcast, clients, tailLines,
+  subscribeSurface, closeAllSubscriptions,
+  EVENTS_FILE, INCIDENTS_FILE, CACHE_STATS_FILE,
+};

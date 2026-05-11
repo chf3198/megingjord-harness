@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — #1354: SSE live-streaming pipeline (Epic #1339 C3)
+
+### Added
+- `scripts/global/jsonl-tail.js` — chokidar-based JSONL tail with offset tracking, rotation awareness (shrunken-file reset; add-event reset), and backpressure (sliding-window drop with `dropped:N` callback). Exports `tail()`, `readFromOffset()`, `parseLines()` for testability.
+- `tests/jsonl-tail.spec.js` — 6 tdd-pyramid tests: append emission, offset tracking, shrunken-file reset, malformed-JSON onError, close() teardown, state-exposing accessors.
+- `tests/sse-stream.spec.js` — 5 integration tests: surface subscription → broadcast, fallback event type, multi-client fanout, failing-client removal, tailLines parser.
+
+### Changed
+- `scripts/sse-handler.js` — replaced inline `fs.watch` + offset bookkeeping with the shared `jsonl-tail` module. **Multi-surface support**: now subscribes to `events.jsonl` + `incidents.jsonl` + `cache-stats.jsonl` automatically. Added `subscribeSurface(file, defaultEventType)` API for additional surfaces. Backpressure surfaces via `dropped` SSE event.
+
 ## [Unreleased] — #1361: token-cost benchmark — variants A/B/C compared (Epic #1339 C10)
 
 ### Added
