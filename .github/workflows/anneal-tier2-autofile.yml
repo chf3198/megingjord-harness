@@ -1,4 +1,6 @@
 name: Anneal Tier2 Autofile
+# Recovery note: if schedule is auto-disabled by GitHub inactivity,
+# re-enable this workflow in Actions UI and run one workflow_dispatch.
 on:
   schedule:
     - cron: '37 3 * * *'
@@ -57,8 +59,14 @@ jobs:
           name: anneal-tier1-fixture
       - name: Tier2 classifier fixture tests
         run: node scripts/global/anneal-tier2-autofile.spec.js
+      - name: Schedule actor health tests
+        run: node scripts/global/anneal-schedule-health.spec.js
       - name: Review suppression contract tests
         run: node scripts/global/anneal-review.spec.js
+      - name: Schedule actor health check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run --silent anneal:schedule-health
       - name: Tier2 autofile run
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
