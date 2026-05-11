@@ -1,18 +1,33 @@
 'use strict';
+// Epic Close-Readiness Gate logic (#452 / #750 / #1306).
+const ERROR_MSG_MAX = 1500;
+// Matcher uses task-list edges + explicit Parent: refs + GitHub native parentIssue.
+// Replaces #1306-flagged prose/`Refs`/`Epic #N` matching that produced false positives.
 
-function issueRefs(text) {
-  const nums = []; const r = /#(\d+)\b/g;
-  for (let m = r.exec(text || ''); m; m = r.exec(text || '')) nums.push(Number(m[1]));
-  return nums;
+function parseTaskListChildren(epicBody) {
+  const refs = new Set();
+  const lines = (epicBody || '').split('\n');
+  for (const line of lines) {
+    const m = line.match(/^\s*-\s*\[[ xX]\]\s+.*?#(\d+)\b/);
+    if (m) refs.add(Number(m[1]));
+  }
+  return refs;
+}
+
+function parseParentRef(issue, epicNum, owner, repo) {
+  const txt = `${issue.title || ''}\n${issue.body || ''}`;
+  if (new RegExp(`\\bParent:\\s*#${epicNum}\\b`).test(txt)) return 'parent-text';
+  const urlRe = new RegExp(`\\bParent:\\s*https://github\\.com/${owner}/${repo}/issues/${epicNum}\\b`);
+  if (urlRe.test(txt)) return 'parent-url';
+  return null;
 }
 
 async function listOpenIssues(github, owner, repo) {
   let after = null; let parentSupported = true; const nodes = [];
-  const vars = () => ({ owner, repo, after });
-  const q = withParent => `query($owner:String!,$repo:String!,$after:String){repository(owner:$owner,name:$repo){issues(first:100,states:OPEN,after:$after){nodes{number title body labels(first:20){nodes{name}}${withParent ? ' parentIssue{number}' : ''}} pageInfo{hasNextPage endCursor}}}}`;
-  while (true) {
+  const query = (wp) => `query($owner:String!,$repo:String!,$after:String){repository(owner:$owner,name:$repo){issues(first:100,states:OPEN,after:$after){nodes{number title body labels(first:20){nodes{name}}${wp ? ' parentIssue{number}' : ''}} pageInfo{hasNextPage endCursor}}}}`;
+  for (;;) {
     let data;
-    try { data = await github.graphql(q(parentSupported), vars()); }
+    try { data = await github.graphql(query(parentSupported), { owner, repo, after }); }
     catch (e) {
       if (parentSupported && /parentIssue/i.test(String(e.message))) { parentSupported = false; continue; }
       throw e;
@@ -24,56 +39,64 @@ async function listOpenIssues(github, owner, repo) {
   }
 }
 
-function directMatch(issue, epicNum, owner, repo) {
-  const txt = `${issue.title || ''}\n${issue.body || ''}`;
-  const rgx = [
-    new RegExp(`[Cc]loses\\s+#${epicNum}\\b`),
-    new RegExp(`[Rr]efs\\s+#${epicNum}\\b`),
-    new RegExp(`[Pp]arent:\\s*#${epicNum}\\b`),
-    new RegExp(`[Pp]arent:\\s*https://github.com/${owner}/${repo}/issues/${epicNum}\\b`),
-    new RegExp(`[Ee]pic\\s+#${epicNum}\\b`),
-  ];
-  const byText = rgx.some(r => r.test(txt));
-  const byLabel = (issue.labels?.nodes || []).some(l => l.name.toLowerCase() === `epic-${epicNum}`);
-  const byParent = issue.parentIssue?.number === epicNum;
-  return { byText, byLabel, byParent, matched: byText || byLabel || byParent };
+async function restoreEpicLabels(github, owner, repo, epicNum, epic) {
+  const labels = epic.labels.map(label => label.name);
+  const toRemove = [];
+  if (labels.includes('status:done')) toRemove.push('status:done');
+  for (const resolutionLabel of ['resolution:released', 'resolution:completed']) {
+    if (labels.includes(resolutionLabel)) toRemove.push(resolutionLabel);
+  }
+  for (const labelToRemove of toRemove) {
+    await github.rest.issues.removeLabel({ owner, repo, issue_number: epicNum, name: labelToRemove }).catch(() => {});
+  }
+  if (labels.includes('status:done')) {
+    await github.rest.issues.addLabels({ owner, repo, issue_number: epicNum, labels: ['status:review'] }).catch(() => {});
+  }
 }
 
 async function run({ github, context, core }) {
-  const epicNum = context.issue.number; const { owner, repo } = context.repo;
+  const dryRun = process.env.DRY_RUN === 'true';
+  const epicNum = (dryRun && context.payload.inputs?.epic_number)
+    ? Number(context.payload.inputs.epic_number)
+    : context.issue?.number;
+  if (!epicNum) { core.setFailed('No epic number provided.'); return; }
+  const { owner, repo } = context.repo;
   try {
+    const { data: epic } = await github.rest.issues.get({ owner, repo, issue_number: epicNum });
+    const taskList = parseTaskListChildren(epic.body);
     const { nodes, parentSupported } = await listOpenIssues(github, owner, repo);
-    const issues = nodes.filter(i => i.number !== epicNum);
-    const reasons = new Map(); const direct = new Set();
-    for (const i of issues) {
-      const hit = directMatch(i, epicNum, owner, repo); if (!hit.matched) continue;
-      const why = [];
-      if (hit.byText) why.push('text');
-      if (hit.byLabel) why.push('label');
-      if (hit.byParent && parentSupported) why.push('parentIssue');
-      reasons.set(i.number, why.join('+')); direct.add(i.number);
+    const open = [];
+    for (const i of nodes) {
+      if (i.number === epicNum) continue;
+      const inTL = taskList.has(i.number);
+      const isParent = parentSupported && i.parentIssue?.number === epicNum;
+      const pText = parseParentRef(i, epicNum, owner, repo);
+      if (inTL || isParent || pText) {
+        open.push({ number: i.number, title: i.title, why: inTL ? 'task-list' : (isParent ? 'parentIssue' : pText) });
+      }
     }
-    for (const i of issues) {
-      if (direct.has(i.number)) continue;
-      const ref = issueRefs(`${i.title || ''}\n${i.body || ''}`).find(n => direct.has(n));
-      if (!ref) continue;
-      direct.add(i.number); reasons.set(i.number, `indirect-via-#${ref}`);
+    if (!open.length) {
+      if (dryRun) console.log(`Epic #${epicNum}: zero open children. Close is valid.`);
+      return;
     }
-    const openChildren = issues.filter(i => direct.has(i.number));
-    if (!openChildren.length) return;
-    const lines = openChildren.map(i => `- #${i.number}: ${i.title} _(match: ${reasons.get(i.number)})_`).join('\n');
-    const body = `## Epic Close-Readiness Violation\n\nOpen child issues detected for epic #${epicNum}:\n\n${lines}\n\nParent field support: ${parentSupported ? 'enabled' : 'not available in this API context'}\n\n_Auto-reopened by Epic Close-Readiness Gate._`;
+    const lines = open.map(c => `- #${c.number}: ${c.title} _(match: ${c.why})_`).join('\n');
+    const body = `## Epic Close-Readiness Violation\n\nOpen child issues detected for epic #${epicNum}:\n\n${lines}\n\nParent field support: ${parentSupported ? 'enabled' : 'not available in this API context'}\n\n_Auto-reopened by Epic Close-Readiness Gate (task-list-only matcher, ${open.length} child${open.length === 1 ? '' : 'ren'})._\n\n**Status restoration**: \`status:done\` and \`resolution:*\` labels removed; \`status:review\` re-applied.`;
+    if (dryRun) {
+      console.log(`DRY RUN — would reopen #${epicNum} with ${open.length} children:\n${body}`);
+      return;
+    }
     await github.rest.issues.createComment({ owner, repo, issue_number: epicNum, body });
     await github.rest.issues.update({ owner, repo, issue_number: epicNum, state: 'open' });
-    core.setFailed(`Epic #${epicNum} re-opened: ${openChildren.length} open child(ren).`);
+    await restoreEpicLabels(github, owner, repo, epicNum, epic);
+    core.setFailed(`Epic #${epicNum} re-opened: ${open.length} open child(ren).`);
   } catch (error) {
-    const msg = String(error.message || error).slice(0, 1500);
+    const msg = String(error.message || error).slice(0, ERROR_MSG_MAX);
     await github.rest.issues.createComment({
       owner, repo, issue_number: epicNum,
-      body: `## Epic Close-Readiness Diagnostic Failure\n\nValidation failed due to API/runtime error:\n\n\`${msg}\`\n\nPlease re-run workflow after resolving token/permission/rate-limit issues.`
+      body: `## Epic Close-Readiness Diagnostic Failure\n\nValidation failed: \`${msg}\``
     }).catch(() => {});
     core.setFailed(`Close-readiness diagnostic failed: ${msg}`);
   }
 }
 
-module.exports = { run };
+module.exports = { run, parseTaskListChildren, parseParentRef, restoreEpicLabels };

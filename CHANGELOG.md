@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — #1306: tighten Epic close-readiness matcher (task-list-only)
+
+### Changed
+- `scripts/global/epic-close-readiness-check.js` — rewrote matcher to use task-list edges only (`- [ ] #N` / `- [x] #N` in epic body) plus explicit `Parent: #N` / `Parent: URL` refs plus GitHub native `parentIssue` field. Removed prose-matching for `Refs #N`, `Closes #N`, `Epic #N`, and `Parent` mentions in PR-style text. Removed `indirect-via-#N` recursive traversal (was the second-order false-positive amplifier). Live evidence: #1103 was stuck `status:done` + OPEN for 2 days because the old matcher treated sibling Epics #1112/#1113/#1125/#1130/etc. as children via prose/indirect matching.
+- `.github/workflows/epic-close-readiness.yml` — added `workflow_dispatch` trigger with `dry_run` and `epic_number` inputs for preview mode (AC4). DRY_RUN env var propagated to script.
+
+### Added
+- `restoreEpicLabels()` in matcher — AC3: on auto-reopen, removes `status:done` and `resolution:released|completed`; re-applies `status:review`. Was previously a second-order bug (auto-reopen left issue in forbidden `status:done` + open state).
+- `tests/epic-close-readiness.spec.js` — 7 Playwright tests: task-list extraction with mixed checkbox styles, indented/nested lists, prose-mention rejection (#1306 root-cause regression test), `Parent:` text/URL detection, prose-Parent rejection, real #1103-shape body produces zero children, real #1308 body produces all 8 children.
+
 ## [Unreleased] — #1307: fix ADR-010 label-scan Epic exception via shared rule set
 
 ### Added
