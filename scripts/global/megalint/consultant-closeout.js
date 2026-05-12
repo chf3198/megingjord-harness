@@ -44,6 +44,31 @@ function checkTier3Emission(body, input) {
   return result.violations;
 }
 
+function hasChildRef(body) {
+  // Match `#NNN` outside of common false-positives (URLs, hex colors).
+  const matches = (body || '').match(/(?:^|[\s(\[,;])#(\d{2,5})\b/g) || [];
+  return matches.length > 0;
+}
+
+function hasPrRef(body) {
+  return /\b(?:PR|pull[\/\\]|pull\s+request)\s*#?\d+|pull\/\d+/i.test(body || '');
+}
+
+function hasResearchRef(body) {
+  return /research\/[\w-]+\.md/i.test(body || '');
+}
+
+function checkSubstantiveContent(body, isEpic) {
+  if (!isEpic) return [];
+  if (hasChildRef(body) || hasPrRef(body) || hasResearchRef(body)) return [];
+  return [{
+    rule: 'epic-closeout-no-substantive-evidence',
+    detail: 'CONSULTANT_CLOSEOUT on an Epic must reference substantive evidence: at least one of '
+      + '(a) #N child issue ref, (b) PR ref (PR #N or pull/N), (c) research/*.md path. '
+      + 'Schema-fields-only closeouts (rubric + verdict + timestamp + signer) are insufficient — see #1453.',
+  }];
+}
+
 function validate(input) {
   const closeout = findConsultantCloseout(input.comments || []);
   if (!closeout) {
@@ -55,6 +80,7 @@ function validate(input) {
     ...checkEvidenceFields(body),
     ...checkCrypto(body),
     ...checkTier3Emission(body, input),
+    ...checkSubstantiveContent(body, input.isEpic === true),
   ];
   return { ok: violations.length === 0, violations, found: true };
 }
