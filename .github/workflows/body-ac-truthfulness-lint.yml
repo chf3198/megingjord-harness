@@ -1,0 +1,80 @@
+name: Body AC Truthfulness Lint
+# Verifies all body AC checkboxes are ticked on issues.closed with status:done.
+# Epic #1407 AC5. Uses scripts/global/megalint/body-ac-truthfulness.js.
+# Advisory mode (core.warning) — mirrors signer-lint soak pattern.
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  body-ac-truthfulness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { validate } = require('./scripts/global/megalint/body-ac-truthfulness.js');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNum = context.payload.issue.number;
+            const marker = '<!-- megalint-body-ac-truthfulness -->';
+
+            const issue = (await github.rest.issues.get({
+              owner, repo, issue_number: issueNum,
+            })).data;
+
+            const labels = issue.labels.map(l => l.name);
+            const isDone = labels.includes('status:done');
+            if (!isDone) {
+              console.log(`Issue #${issueNum}: not status:done, skipping`);
+              return;
+            }
+
+            const result = validate({ body: issue.body || '', labels, state: issue.state });
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issueNum, per_page: 100,
+            });
+            const lintComment = comments.find(c => (c.body || '').includes(marker));
+
+            if (result.ok) {
+              if (lintComment) {
+                await github.rest.issues.deleteComment({
+                  owner, repo, comment_id: lintComment.id,
+                });
+              }
+              console.log(`Issue #${issueNum}: body-AC truthfulness OK`);
+              return;
+            }
+
+            const body = [
+              marker, '',
+              '## ⚠️ Body AC Truthfulness Violation', '',
+              `Issue #${issueNum} was closed with \`status:done\` but has unchecked AC checkboxes.`,
+              '',
+              '**Violations**:', '',
+              result.violations.map(v => `- \`${v.rule}\` — ${v.detail}`).join('\n'),
+              '',
+              '**Fix**: tick all `- [x] AC` checkboxes that are complete, or move unmet ACs to follow-up tickets.',
+              '',
+              '_Posted by body-ac-truthfulness-lint (advisory — promotes to required after soak). Epic #1407 AC5._',
+            ].join('\n');
+
+            if (lintComment) {
+              if (lintComment.body !== body) {
+                await github.rest.issues.updateComment({
+                  owner, repo, comment_id: lintComment.id, body,
+                });
+              }
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issueNum, body,
+              });
+            }
+            core.warning(`Body-AC truthfulness violation on #${issueNum}: ${result.violations.length} rule(s)`);

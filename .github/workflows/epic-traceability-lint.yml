@@ -1,0 +1,94 @@
+name: Epic Traceability Lint
+# Verifies Epic body contains child-ticket references when children exist.
+# Epic #1407 AC6. Uses scripts/global/megalint/epic-ac-traceability.js.
+# Advisory mode (core.warning) — promotes to required after soak.
+
+on:
+  issues:
+    types: [opened, edited, closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  epic-traceability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { validate } = require('./scripts/global/megalint/epic-ac-traceability.js');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNum = context.payload.issue.number;
+            const marker = '<!-- megalint-epic-traceability -->';
+
+            const issue = (await github.rest.issues.get({
+              owner, repo, issue_number: issueNum,
+            })).data;
+
+            const labels = issue.labels.map(l => l.name);
+            if (!labels.includes('type:epic')) {
+              console.log(`Issue #${issueNum}: not an Epic, skipping`);
+              return;
+            }
+
+            // Fetch linked children via timeline API
+            const timeline = await github.paginate(
+              'GET /repos/{owner}/{repo}/issues/{issue_number}/timeline',
+              { owner, repo, issue_number: issueNum, per_page: 100 },
+            ).catch(() => []);
+            const linkedChildren = timeline
+              .filter(e => e.event === 'cross-referenced' && e.source?.issue)
+              .map(e => e.source.issue.number)
+              .filter((n, i, arr) => arr.indexOf(n) === i);
+
+            const result = validate({
+              body: issue.body || '',
+              labels,
+              issueNumber: issueNum,
+              linkedChildren,
+            });
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issueNum, per_page: 100,
+            });
+            const lintComment = comments.find(c => (c.body || '').includes(marker));
+
+            if (result.ok) {
+              if (lintComment) {
+                await github.rest.issues.deleteComment({
+                  owner, repo, comment_id: lintComment.id,
+                });
+              }
+              console.log(`Epic #${issueNum}: traceability OK`);
+              return;
+            }
+
+            const body = [
+              marker, '',
+              '## ⚠️ Epic Traceability Violation', '',
+              `Epic #${issueNum} is missing child-ticket references in its body.`,
+              '',
+              '**Violations**:', '',
+              result.violations.map(v => `- \`${v.rule}\` — ${v.detail}`).join('\n'),
+              '',
+              '**Fix**: add a "Child tickets" section listing `#N` references for each AC, or document explicit deferral.',
+              '',
+              '_Posted by epic-traceability-lint (advisory — promotes to required after soak). Epic #1407 AC6._',
+            ].join('\n');
+
+            if (lintComment) {
+              if (lintComment.body !== body) {
+                await github.rest.issues.updateComment({
+                  owner, repo, comment_id: lintComment.id, body,
+                });
+              }
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issueNum, body,
+              });
+            }
+            core.warning(`Epic traceability violation on #${issueNum}: ${result.violations.length} rule(s)`);
