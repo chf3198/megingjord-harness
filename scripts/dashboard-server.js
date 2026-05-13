@@ -63,7 +63,7 @@ async function handleApi(req, res) {
     return jsonRes(res, usageResponse.status, usageResponse.body);
   }
   if (requestUrl === '/api/router/metrics') { try { const { getRouterMetrics } = require('./global/router-metrics'); return jsonRes(res,200,getRouterMetrics()); } catch(e){ return jsonRes(res,200,{timestamp:new Date().toISOString(),lanes:{free:0,fleet:0,premium:0}}); } }
-  if (requestUrl === '/api/anneal/queue') return require('../dashboard/api/anneal-queue-handlers').handleAnnealQueue(req, res); if (requestUrl === '/api/goal-coverage') return require('../dashboard/api/goal-coverage-handlers').handleGoalCoverage(req, res); if (requestUrl === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
+  if (requestUrl === '/api/anneal/queue') return require('../dashboard/api/anneal-queue-handlers').handleAnnealQueue(req, res); if (requestUrl === '/api/goal-coverage') return require('../dashboard/api/goal-coverage-handlers').handleGoalCoverage(req, res); if (requestUrl === '/api/merge-evidence-stats') return require('../dashboard/api/merge-evidence-handlers').handleMergeEvidenceStats(req, res); if (requestUrl === '/api/wiki-health') { return jsonRes(res, 200, getWikiHealth()); }
   if (requestUrl === '/api/wiki-pages') { return jsonRes(res, 200, getWikiPages()); }
   if (requestUrl === '/api/wiki-metrics') { const wikiHealth = getWikiHealth(); return jsonRes(res, 200, getWikiMetrics(wikiHealth)); }
   if (requestUrl.startsWith('/api/wiki-access')) {

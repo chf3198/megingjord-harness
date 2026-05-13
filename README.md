@@ -127,6 +127,7 @@ npm run deploy:both:apply
 | `mailbox:flush` | `node scripts/global/mailbox-outbox.js flush` |
 | `mailbox:poll` | `node scripts/global/mailbox-client.js poll` |
 | `mailbox:send` | `node scripts/global/mailbox-client.js send` |
+| `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
 | `rag:search` | `node scripts/global/rag-search.js` |
