@@ -16,6 +16,7 @@
     "capability:probe": "node scripts/global/capability-probe.js",
     "capability:show": "node scripts/global/capability-show.js",
     "cost-report": "node scripts/global/cost-report.js",
+    "cost:token-report": "node scripts/global/token-spend-report.js",
     "cost:baseline": "node scripts/global/cost-baseline.js",
     "deps:aggregate": "node scripts/global/dep-graph-aggregate.js",
     "deps:augment": "node scripts/global/dep-graph-augment.js",
