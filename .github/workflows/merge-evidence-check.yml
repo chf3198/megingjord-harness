@@ -1,0 +1,59 @@
+# Epic #1486 Phase-1b — live merge-evidence advisory on issue close.
+# Fires on issues.closed; queries merged PRs referencing the issue; runs the
+# megalint merge-evidence rule; posts an advisory comment + applies the
+# governance:close-without-merge label on violation. WARN-ONLY.
+name: merge-evidence-check
+on:
+  issues:
+    types: [closed]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  merge-evidence-check:
+    runs-on: ubuntu-latest
+    if: contains(toJson(github.event.issue.labels.*.name), 'status:done')
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const rule = require('./scripts/global/megalint/merge-evidence.js');
+            const reconciler = require('./scripts/global/merge-evidence-reconciler.js');
+            const { owner, repo } = context.repo;
+            const issue = context.payload.issue;
+            const labels = (issue.labels || []).map(l => l.name);
+            // Quick skip via rule (returns skipped reason without GH search)
+            const dryResult = rule.validate({ state: 'closed', labels, mergedPRRefs: [] });
+            if (dryResult.skipped) {
+              core.info(`skip: ${dryResult.skipped}`);
+              return;
+            }
+            // Query merged PRs referencing this issue (PR body or commit messages)
+            const results = await github.paginate(
+              github.rest.search.issuesAndPullRequests,
+              { q: `repo:${owner}/${repo} is:pr is:merged #${issue.number}`, per_page: 30 }
+            );
+            const mergedPRRefs = results.map(r => ({ number: r.number, title: r.title }));
+            const result = rule.validate({ state: 'closed', labels, mergedPRRefs });
+            if (result.ok) {
+              core.info(`pass: ${mergedPRRefs.length} merged PR(s) found`);
+              return;
+            }
+            // Check for existing advisory (idempotency)
+            const existing = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issue.number, per_page: 100,
+            });
+            if (existing.some(c => c.body && c.body.includes(reconciler.COMMENT_MARKER))) {
+              core.info('advisory already posted; skipping');
+              return;
+            }
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: issue.number,
+              body: reconciler.buildComment({ number: issue.number }),
+            });
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: issue.number,
+              labels: [reconciler.VIOLATION_LABEL],
+            }).catch(e => core.warning(`label apply failed: ${e.message}`));
+            core.info('advisory posted + label applied');
