@@ -39,7 +39,7 @@ async function buildDecision(route, resolved) {
       return { action: 'fleet-solo-fallback', reason: 'No fleet nodes reachable' };
     }
     if (!prompt) return { action: 'route-fleet', reason: 'no prompt to dispatch' };
-    const selectedModel = model || resolved.modelId || route.recommendedModel;
+    const selectedModel = model || resolved.providerModelId || route.recommendedModel;
     const primaryUrl = resolveFleetUrl(route);
     let chat = await tryOllama(primaryUrl, selectedModel);
     // Graceful fallback on 502/504 or network error
@@ -58,13 +58,15 @@ async function buildDecision(route, resolved) {
 async function main() {
   const route = classifyPrompt(prompt);
   const resolved = resolveRouting(prompt, route);
-  const effectiveRoute = { ...route, lane: resolved.lane, recommendedModel: resolved.modelId };
+  const effectiveRoute = { ...route, lane: resolved.lane,
+    recommendedModel: resolved.modelId, providerModel: resolved.providerModelId };
   const decision = await buildDecision(effectiveRoute, resolved);
   const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
-  recordTelemetry({ lane: resolved.lane, model: resolved.modelId, multiplier: resolved.multiplier,
+  recordTelemetry({ lane: resolved.lane, model: resolved.providerModelId,
+    multiplier: resolved.multiplier,
     taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
     rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
-  recordCostEvent(resolved.lane, resolved.modelId, { outcome });
+  recordCostEvent(resolved.lane, resolved.providerModelId, { outcome });
   const result = { route: effectiveRoute, routing: resolved, decision };
   if (json) {
     console.log(JSON.stringify(result, null, 2));

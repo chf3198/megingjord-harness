@@ -11,14 +11,23 @@ Policy source: `scripts/global/model-routing-policy.json` (capability_matrix fie
 ## Lane order (cost-ascending mandate)
 
 1. **Free** — Auto tier. Lookup, analysis, docs, Q&A, boilerplate. Zero tokens.
-2. **Fleet** — Ollama local (qwen2.5:7b-instruct). Medium implementation, known-pattern
+2. **Fleet** — `fleet-coding-local`. Medium implementation, known-pattern
    coding, config gen, log analysis. Zero tokens. **Execute via cascade-dispatch.**
-3. **Haiku** — claude-haiku-4-5-20251001. Single-file refactors, test gen, code review.
-4. **Premium** — claude-sonnet-4-6. Multi-file architecture, security, ambiguous debugging.
+3. **Haiku** — `balanced-cloud`. Single-file refactors, test gen, code review.
+4. **Premium** — `frontier-reasoning`. Multi-file architecture, security,
+   ambiguous debugging.
 
 Codex, Copilot, and Claude Code sessions all use the same lane policy. A lane
-selects required capability and cost tier; provider IDs and telemetry adapters
-are implementation details owned by HAMR and `model-routing-policy.json`.
+selects required capability and cost tier. Runtime, provider, model family, and
+lane are separate concepts:
+
+- **Runtime**: Codex, Copilot, Claude Code, or another agent surface.
+- **Provider**: Anthropic, OpenAI-compatible, Ollama, OpenRouter, LiteLLM, or fleet.
+- **Model family**: vendor/model lineage selected by an adapter.
+- **Lane**: free, fleet, haiku, or premium capability/cost tier.
+
+Provider IDs and telemetry adapters are implementation details owned by HAMR,
+`model-routing-policy.json`, and `routing-provider-adapters.json`.
 
 ## Capability matrix (use for ticket assignment and lane selection)
 
@@ -47,4 +56,7 @@ If fleet signals `escalation_needed=true`: use the `suggested_tier` (haiku first
 
 ## Cost/observability mechanics within each lane
 
-This file selects the **lane**. Cost levers (caching, spillover, sticky-route, batching) and observability (cache-hit gate, /quota, /mcp doctor:probe) live in HAMR, not here. See `instructions/hamr-routing.instructions.md`. Do not duplicate HAMR mechanics in this file or make lane policy runtime-specific.
+This file selects the **lane**. Cost levers (caching, spillover, sticky-route,
+batching) and observability (cache-hit gate, /quota, /mcp doctor:probe) live in
+HAMR, not here. See `instructions/hamr-routing.instructions.md`. Do not
+duplicate HAMR mechanics in this file or make lane policy runtime-specific.

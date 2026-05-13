@@ -50,6 +50,18 @@ test('task-router-policy defaultLane is fleet', () => {
   expect(policy.defaultLane).toBe('fleet');
 });
 
+test('provider adapters keep premium lane provider-neutral', () => {
+  const { resolveRouting, loadAdapters } = require('../scripts/global/model-routing-engine.js');
+  const resolved = resolveRouting('security audit architecture risk', {
+    lane: 'premium', complexity: 0.9, disableRollback: true
+  });
+  const adapters = loadAdapters();
+  expect(resolved.modelId).toBe('frontier-reasoning');
+  expect(resolved.providerPath).toBe('anthropic');
+  expect(adapters.lanes.premium.adapters).toContain('openai-compatible:frontier');
+  expect(adapters.lanes.premium.adapters).toContain('litellm:frontier');
+});
+
 // AC4: fleet keywords include action verbs that agents use
 test('task-router classifies "implement a function" as fleet', () => {
   const { classifyPrompt } = require('../scripts/global/task-router.js');

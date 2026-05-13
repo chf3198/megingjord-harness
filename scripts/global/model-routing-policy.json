@@ -1,6 +1,7 @@
 {
   "version": "2.2.0",
   "defaultLane": "fleet",
+  "adapterPolicy": "routing-provider-adapters.json",
   "complexityThresholds": {
     "_doc": "Numeric complexity score gates. fleet=[0,0.3), haiku=[0.3,0.7), premium=[0.7,1.0]",
     "haiku": 0.3,
@@ -16,11 +17,11 @@
     "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
   },
   "models": {
-    "free":    { "id": "auto",                       "mult": 0,    "costPer1kTokens": 0 },
-    "fleet":   { "id": "qwen2.5:7b-instruct",        "mult": 0,    "costPer1kTokens": 0,      "endpoint": "ollama" },
-    "haiku":   { "id": "claude-haiku-4-5-20251001",  "mult": 0.08, "costPer1kTokens": 0.00088 },
-    "premium": { "id": "claude-sonnet-4-6",           "mult": 1,    "costPer1kTokens": 0.009   },
-    "fallback":{ "id": "claude-haiku-4-5-20251001",  "mult": 0.08, "costPer1kTokens": 0.00088 }
+    "free":    { "id": "free-auto",             "mult": 0,    "costPer1kTokens": 0 },
+    "fleet":   { "id": "fleet-coding-local",    "mult": 0,    "costPer1kTokens": 0,      "endpoint": "ollama" },
+    "haiku":   { "id": "balanced-cloud",        "mult": 0.08, "costPer1kTokens": 0.00088 },
+    "premium": { "id": "frontier-reasoning",    "mult": 1,    "costPer1kTokens": 0.009   },
+    "fallback":{ "id": "balanced-cloud",        "mult": 0.08, "costPer1kTokens": 0.00088 }
   },
   "capability_matrix": {
     "_doc": "Per-dimension tier thresholds. Manager uses this for ticket assignment.",

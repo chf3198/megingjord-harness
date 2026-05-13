@@ -15,9 +15,9 @@ const SIGNAL_DOCS = /\b(docs?|readme|comment|describe|explain)\b/i;
 const TIERS = {
   FIM: { tier: 'fleet-fim', model: 'starcoder2:3b', host: '36gbwinresource' },
   REFACTOR: { tier: 'fleet-coder', model: 'qwen2.5-coder:7b', host: '36gbwinresource' },
-  REASONING: { tier: 'premium', model: 'claude-sonnet', host: 'cloud' },
+  REASONING: { tier: 'premium', model: 'frontier-reasoning', host: 'provider-adapter' },
   DOCS: { tier: 'free-cloud', model: 'groq-llama-3.3-70b', host: 'cloud' },
-  DEFAULT: { tier: 'haiku', model: 'claude-haiku', host: 'cloud' },
+  DEFAULT: { tier: 'haiku', model: 'balanced-cloud', host: 'provider-adapter' },
 };
 
 function _capability() {

@@ -5,7 +5,7 @@
   "lanes": {
     "free": {
       "backend": "auto",
-      "recommendedModel": "gpt-5-mini",
+      "recommendedModel": "free-auto",
       "keywords": [
         "search", "grep", "find", "explain", "read", "docs",
         "rename", "boilerplate", "simple", "small", "single-file"
@@ -13,7 +13,7 @@
     },
     "fleet": {
       "backend": "ollama",
-      "recommendedModel": "qwen2.5:7b-instruct",
+      "recommendedModel": "fleet-coding-local",
       "selection": "capability-tags",
       "keywords": [
         "multi-file", "tests", "refactor", "implement", "migration",
@@ -22,8 +22,8 @@
       ]
     },
     "premium": {
-      "backend": "anthropic",
-      "recommendedModel": "claude-sonnet-4-6",
+      "backend": "provider-adapter",
+      "recommendedModel": "frontier-reasoning",
       "keywords": [
         "architecture", "ambiguous", "complex", "hard", "risk",
         "security", "performance", "concurrency", "incident", "design"

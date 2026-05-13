@@ -28,7 +28,10 @@ test('classifier picks fleet-fim on completion-style task', () => {
 
 test('classifier picks reasoning tier on architecture task', () => {
   const { classify, TIERS } = require(ROUTER);
-  expect(classify('design the authentication architecture').tier).toBe('premium');
+  const route = classify('design the authentication architecture');
+  expect(route.tier).toBe('premium');
+  expect(route.model).toBe('frontier-reasoning');
+  expect(route.host).toBe('provider-adapter');
 });
 
 test('classifier picks fleet-coder on refactor task', () => {
