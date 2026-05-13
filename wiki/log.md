@@ -44,6 +44,13 @@ Claude Code and Copilot. New source page:
 governance-first Wave 1 controls with a portable AC schema as canonical truth,
 and GitHub 2026 platform features as adapters.
 
+## [2026-05-13] research | Codex compatibility audit (#1476)
+Added the Codex Team compatibility audit covering harness goals, routing,
+HAMR activation, runtime deployment, Codex config, AGENTS.md review behavior,
+and OpenAI/Codex telemetry. New source page:
+`wiki/sources/codex-compatibility-audit-2026-05-13.md`. Source:
+`research/codex-compatibility-audit-2026-05-13.md`.
+
 **Tip**: `grep "^## \[" log.md | tail -5` shows last 5 entries.
 
 ---
