@@ -1,0 +1,69 @@
+# Epic #1486 Phase-1b — daily reconciler. Scans recently-closed status:done
+# tickets, batches them through the merge-evidence rule, posts advisory +
+# applies governance:close-without-merge label on offenders. WARN-ONLY.
+# Manual trigger via workflow_dispatch with optional since-days input.
+name: merge-evidence-cron
+on:
+  schedule:
+    - cron: '15 3 * * *'
+  workflow_dispatch:
+    inputs:
+      since_days:
+        description: 'Lookback window in days (default 7)'
+        type: string
+        default: '7'
+      batch_size:
+        description: 'Max issues processed per run (default 20)'
+        type: string
+        default: '20'
+permissions:
+  contents: read
+  issues: write
+jobs:
+  merge-evidence-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const reconciler = require('./scripts/global/merge-evidence-reconciler.js');
+            const { owner, repo } = context.repo;
+            const sinceDays = parseInt(process.env.SINCE_DAYS || '7', 10);
+            const batchSize = parseInt(process.env.BATCH_SIZE || '20', 10);
+            const since = new Date(Date.now() - sinceDays * 86400e3).toISOString().slice(0, 10);
+            core.info(`scanning closed status:done issues since ${since}, batch=${batchSize}`);
+            const closed = await github.paginate(github.rest.search.issuesAndPullRequests, {
+              q: `repo:${owner}/${repo} is:issue is:closed label:status:done closed:>=${since}`,
+              per_page: 50,
+            });
+            core.info(`candidates: ${closed.length}`);
+            const items = [];
+            for (const issue of closed.slice(0, batchSize * 2)) {
+              const prs = await github.paginate(github.rest.search.issuesAndPullRequests, {
+                q: `repo:${owner}/${repo} is:pr is:merged #${issue.number}`, per_page: 5,
+              });
+              items.push({
+                issue: { ...issue, state: 'closed' },
+                mergedPRRefs: prs.map(p => ({ number: p.number })),
+              });
+            }
+            const plan = reconciler.reconcile(items, { batchSize });
+            core.info(`plan: violations=${plan.violations.length} skipped=${plan.skipped.length} passed=${plan.passed.length} remaining=${plan.remaining}`);
+            for (const v of plan.violations) {
+              const existing = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: v.number, per_page: 100,
+              });
+              if (existing.some(c => c.body && c.body.includes(plan.marker))) continue;
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: v.number,
+                body: reconciler.buildComment({ number: v.number }),
+              });
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number: v.number, labels: [plan.label],
+              }).catch(e => core.warning(`label apply failed on #${v.number}: ${e.message}`));
+            }
+            core.info(`cron complete; processed=${plan.processed}`);
+        env:
+          SINCE_DAYS: ${{ github.event.inputs.since_days || '7' }}
+          BATCH_SIZE: ${{ github.event.inputs.batch_size || '20' }}
