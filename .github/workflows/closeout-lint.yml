@@ -42,6 +42,7 @@ jobs:
             const input = {
               comments, lane, labels,
               body: issue.body || '',
+              prBody: body,
               state: issue.state,
               isEpic: labels.includes('type:epic'),
               issueNumber: linkedIssue,
@@ -50,6 +51,7 @@ jobs:
 
             const mh = megalint.run('manager-handoff', input);
             const cl = megalint.run('consultant-closeout', input);
+            const pg = megalint.run('merge-evidence-pr-gate', input);
 
             const violations = [];
             if (mh.found && !mh.ok) {
@@ -62,9 +64,15 @@ jobs:
                 violations.push(`CONSULTANT_CLOSEOUT: ${v.rule} — ${v.detail}`);
               }
             }
+            if (!pg.ok) {
+              for (const v of pg.violations) {
+                violations.push(`MERGE_EVIDENCE_PR_GATE: ${v.rule} — ${v.detail}`);
+              }
+            }
 
             const summary = `closeout-schema: manager-handoff=${mh.found ? (mh.ok ? 'PASS' : 'FAIL') : 'absent'} `
-              + `consultant-closeout=${cl.found ? (cl.ok ? 'PASS' : 'FAIL') : 'absent'}`;
+              + `consultant-closeout=${cl.found ? (cl.ok ? 'PASS' : 'FAIL') : 'absent'} `
+              + `merge-evidence-pr-gate=${pg.skipped ? `SKIP:${pg.skipped}` : (pg.ok ? 'PASS' : 'FAIL')}`;
             console.log(summary);
 
             if (violations.length) {

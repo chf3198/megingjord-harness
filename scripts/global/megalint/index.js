@@ -12,6 +12,7 @@ const signer = require('./signer-fidelity.js');
 const truthfulness = require('./body-ac-truthfulness.js');
 const traceability = require('./epic-ac-traceability.js');
 const mergeEvidence = require('./merge-evidence.js');
+const mergeEvidencePrGate = require('./merge-evidence-pr-gate.js');
 
 const VALIDATORS = {
   'manager-handoff': manager,
@@ -22,6 +23,7 @@ const VALIDATORS = {
   'body-ac-truthfulness': truthfulness,
   'epic-ac-traceability': traceability,
   'merge-evidence': mergeEvidence,
+  'merge-evidence-pr-gate': mergeEvidencePrGate,
 };
 
 function runAll(input) {
