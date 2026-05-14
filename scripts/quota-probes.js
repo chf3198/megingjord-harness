@@ -94,4 +94,4 @@ async function probeAll() {
   return { groq, google, cerebras, timestamp: new Date().toISOString() };
 }
 
-module.exports = { probeGroq, probeGoogle, probeCerebras, probeAll };
+module.exports = { probeGroq, probeGoogle, probeCerebras, probeAll, parseGroqHeaders };
