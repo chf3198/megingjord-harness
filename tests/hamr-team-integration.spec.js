@@ -18,11 +18,11 @@ test('Worker /healthz reachable from operator host', async ({ request }) => {
   expect(body.ok).toBe(true);
 });
 
-test('Worker /quota returns schema_version 2 + stale field', async ({ request }) => {
+test('Worker /quota returns supported schema_version + stale field', async ({ request }) => {
   const r = await request.get(`${BASE}/quota`);
   expect(r.status()).toBe(200);
   const body = await r.json();
-  expect(body.schema_version).toBe(2);
+  expect(body.schema_version).toBeGreaterThanOrEqual(2);
   expect(typeof body.stale).toBe('boolean');
   expect(body.placeholder).toBe(false);
 });

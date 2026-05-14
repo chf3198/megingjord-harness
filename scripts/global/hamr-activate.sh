@@ -19,10 +19,24 @@ else
   echo "⏭ crontab not available — skipping (run hamr-periodic-push.sh manually)"
 fi
 
-step "3/5 check operator key + Anthropic API key"
+step "3/5 check operator key + provider key"
 missing=()
 [ -z "${OPERATOR_KEY_SEED_B64:-}" ] && [ ! -f "${HOME}/.megingjord/keys/operator-ed25519.pem" ] && missing+=(OPERATOR_KEY_SEED_B64)
-[ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=(ANTHROPIC_API_KEY)
+provider="${HAMR_PROVIDER:-}"
+if [ -z "$provider" ]; then
+  case "${HAMR_TEAM:-codex}" in
+    claude-code) provider="anthropic" ;;
+    codex) provider="openai-compatible" ;;
+    *) provider="provider-neutral" ;;
+  esac
+fi
+case "$provider" in
+  anthropic) [ -z "${ANTHROPIC_API_KEY:-}" ] && missing+=(ANTHROPIC_API_KEY) ;;
+  openai|openai-compatible) [ -z "${OPENAI_API_KEY:-}" ] && missing+=(OPENAI_API_KEY) ;;
+  openrouter) [ -z "${OPENROUTER_API_KEY:-}" ] && missing+=(OPENROUTER_API_KEY) ;;
+  ollama|fleet|provider-neutral) ;;
+  *) echo "⚠ unknown HAMR_PROVIDER=$provider; provider key check skipped" ;;
+esac
 if [ "${#missing[@]}" -eq 0 ]; then
   echo "✅ all required env present"
 else
@@ -39,7 +53,7 @@ else
 fi
 
 step "5/5 write per-team opt-in marker"
-team="${HAMR_TEAM:-claude-code}"
+team="${HAMR_TEAM:-codex}"
 case "$team" in
   claude-code) cfg_dir="$HOME/.claude" ;;
   copilot)     cfg_dir="$HOME/.copilot" ;;
@@ -52,7 +66,7 @@ if [ -n "$cfg_dir" ]; then
   axes_off="${HAMR_AXES_OFF:-}"
   axis_val() { case ",$axes_off," in *,$1,*) echo false ;; *) echo true ;; esac }
   printf '{"enabled":true,"activated_at":"%s","activated_by":"%s","team_runtime":"%s","axis_consumers":{"governance":%s,"tooling":%s,"fleet":%s,"hamr":%s}}\n' \
-    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$team" "$cfg_dir" \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$team" "$team" \
     "$(axis_val governance)" "$(axis_val tooling)" "$(axis_val fleet)" "$(axis_val hamr)" \
     > "$cfg_dir/hamr-config.json"
   echo "✅ wrote $cfg_dir/hamr-config.json (axis_consumers default-on)"

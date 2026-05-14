@@ -6,7 +6,11 @@ set -euo pipefail
 
 repo_root=$(git rev-parse --show-toplevel)
 hooks_src="$repo_root/scripts/hooks"
-hooks_dst="$repo_root/.git/hooks"
+git_hooks_path=$(git -C "$repo_root" rev-parse --git-path hooks)
+case "$git_hooks_path" in
+  /*) hooks_dst="$git_hooks_path" ;;
+  *) hooks_dst="$repo_root/$git_hooks_path" ;;
+esac
 mkdir -p "$hooks_dst"
 
 install_hook() {
@@ -25,9 +29,11 @@ install_hook() {
       echo "✅ $name already chains $target"
       return 0
     fi
-    echo "" >> "$dst"
-    echo "# Appended by install-hooks.sh (#934) — R9.2 enforcement" >> "$dst"
-    echo "\"$src\" \"\$@\"" >> "$dst"
+    {
+      echo ""
+      echo "# Appended by install-hooks.sh (#934) — R9.2 enforcement"
+      echo "\"$src\" \"\$@\""
+    } >> "$dst"
     echo "✅ $name extended with $target"
     return 0
   fi

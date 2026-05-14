@@ -9,7 +9,9 @@ type: instructions
 HAMR (`https://hamr.chf3198.workers.dev`) is the cross-team cost+observability layer.
 Each team — Claude Code, Copilot, Codex — is a first-class consumer and is
 expected to route governed provider calls through it.
-Activate with `npm run hamr:activate` once per checkout.
+Activate with `npm run hamr:activate` once per checkout. The activation script
+supports normal clones and linked Git worktrees; it installs hooks through
+Git's resolved hooks path rather than assuming `.git/` is a directory.
 SessionStart runs `hamr_activation_check.py` as an advisory gate. Missing,
 disabled, malformed, or >24h stale activation emits context before governed
 provider calls; offline work remains unblocked.
@@ -77,6 +79,12 @@ npm run hamr:activate         # installs git hooks + cron
 npm run hamr:sync-verify      # confirms scripts present in ~/.copilot/, ~/.codex/
 npx playwright test tests/hamr-team-integration.spec.js   # smoke test
 ```
+
+Provider key checks are runtime-aware. `HAMR_TEAM=claude-code` defaults to the
+Anthropic provider path and checks `ANTHROPIC_API_KEY`; `HAMR_TEAM=codex`
+defaults to OpenAI-compatible activation and checks `OPENAI_API_KEY`.
+Provider-neutral, fleet, and Ollama activation modes do not require a cloud
+provider key at activation time. Set `HAMR_PROVIDER` to override the default.
 
 ## Override
 
