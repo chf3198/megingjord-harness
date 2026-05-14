@@ -51,6 +51,12 @@ and OpenAI/Codex telemetry. New source page:
 `wiki/sources/codex-compatibility-audit-2026-05-13.md`. Source:
 `research/codex-compatibility-audit-2026-05-13.md`.
 
+## [2026-05-14] research | Provider adapter matrix (#1485, EPIC #1480)
+Added runtime-vs-provider matrix for Codex, Claude Code, Copilot, OpenClaw,
+fleet, HAMR, OpenAI-compatible, Anthropic, Ollama, OpenRouter, and LiteLLM.
+New source page: `wiki/sources/provider-adapter-matrix-2026-05-14.md`.
+Source: `research/provider-adapter-matrix-2026-05-14.md`.
+
 **Tip**: `grep "^## \[" log.md | tail -5` shows last 5 entries.
 
 ---

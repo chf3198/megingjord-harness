@@ -49,6 +49,7 @@ The LLM updates this on every ingest operation.
 ## Source Summaries
 
 - [[codex-compatibility-audit-2026-05-13]] — Codex compatibility audit for harness goals/features/functionality
+- [[provider-adapter-matrix-2026-05-14]] — Provider adapter matrix for Codex, Copilot, Claude Code, HAMR, and provider paths
 - [[epic-1271-codex-fdpr-2026-05-10]] — Codex final development plan recommendation for Epic #1271
 - [[epic-1271-cx-rd-plan-2026-05-09]] — Epic #1271 Codex R&D plan for state truthfulness
 - [[epic-1271-cp-rd-plan-2026-05-09]] — Epic #1271 Copilot R&D plan for state truthfulness
@@ -109,6 +110,7 @@ The LLM updates this on every ingest operation.
 ## Recent Additions
 
 - [[codex-compatibility-audit-2026-05-13]] — Codex compatibility audit (2026-05-13)
+- [[provider-adapter-matrix-2026-05-14]] — Provider adapter matrix (2026-05-14)
 - [[distributed-self-anneal]] — Three-tier distributed self-anneal (2026-05-10)
 - [[andon-pull-protocol]] — Any-role pull protocol (2026-05-10)
 - [[epic-1271-codex-fdpr-2026-05-10]] — Codex FDPR for Epic #1271 (2026-05-10)
