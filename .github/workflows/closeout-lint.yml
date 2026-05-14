@@ -53,6 +53,7 @@ jobs:
             const mh = megalint.run('manager-handoff', input);
             const cl = megalint.run('consultant-closeout', input);
             const pg = megalint.run('merge-evidence-pr-gate', input);
+            const fe = megalint.run('flaw-emission', input);
 
             const violations = [];
             const aliasViolations = [];
@@ -85,8 +86,29 @@ jobs:
 
             const summary = `closeout-schema: manager-handoff=${mh.found ? (mh.ok ? 'PASS' : 'FAIL') : 'absent'} `
               + `consultant-closeout=${cl.found ? (cl.ok ? 'PASS' : 'FAIL') : 'absent'} `
-              + `merge-evidence-pr-gate=${pg.skipped ? `SKIP:${pg.skipped}` : (pg.ok ? 'PASS' : 'FAIL')}`;
+              + `merge-evidence-pr-gate=${pg.skipped ? `SKIP:${pg.skipped}` : (pg.ok ? 'PASS' : 'FAIL')} `
+              + `flaw-emission=${fe.skipped ? `SKIP:${fe.skipped}` : (fe.ok ? 'PASS' : 'ADVISORY')}`;
             console.log(summary);
+
+            const advisoryMarker = '<!-- flaw-emission-advisory -->';
+            if (!fe.ok) {
+              const advisory = `${advisoryMarker}\n## ⚠️ Mid-flight flaw accounting advisory\n\n`
+                + `Detected ${fe.mentions} flaw mention(s) in baton artifacts with missing artifact citation nearby.\n`
+                + `For each flaw mention, include one of: issue ref (#N), incidents.jsonl pattern_id, memory note path, or anneal_tickets_filed entry.\n\n`
+                + fe.violations.map(v => `- ${v.detail}`).join('\n');
+              const existing = comments.find(c => (c.body || '').includes(advisoryMarker));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  comment_id: existing.id, body: advisory,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: linkedIssue, body: advisory,
+                });
+              }
+            }
 
             if (violations.length) {
               core.setFailed(

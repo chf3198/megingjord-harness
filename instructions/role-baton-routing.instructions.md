@@ -36,7 +36,7 @@ deferred       role:manager        Epic-only: blocked, no ETA (Rule E5)
 - `ready → in-progress`: Collaborator picks up; applies `role:collaborator`.
 - `in-progress → testing`: COLLABORATOR_HANDOFF; all ACs ✅; swap to `role:admin`.
 - `testing → review`: ADMIN_HANDOFF; all gates pass; swap to `role:consultant`.
-- `review → done`: CONSULTANT_CLOSEOUT; remove `role:consultant`; close issue (atomic). Must declare `anneal_tickets_filed: [#N,...] | none`.
+- `review → done`: CONSULTANT_CLOSEOUT; remove `role:consultant`; close issue (atomic). Must declare `anneal_tickets_filed: [#N,...] | none` and `mid_flight_flaws:` accounting.
 - `any → cancelled`: Manager authority — remove current `role:*`; post `CANCELLATION: <reason>`; close as "not planned".
 - `in-progress ↔ dormant` (Epic-only): Manager pauses; carries `role:manager` per Rule E2.
 - `in-progress ↔ deferred` (Epic-only): Manager flags external blocker; carries `role:manager`.
@@ -69,6 +69,17 @@ on issues closed >30 days. Archived tickets are excluded from all dashboard and 
 - `ADMIN_HANDOFF` signer identity must differ from `COLLABORATOR_HANDOFF`.
 - All governed work requires a GitHub issue and `Refs #N` in the PR body; workflow identity resolution follows `instructions/team-model-in-workflows.instructions.md`.
 - Skip baton only for: single Q&A, read-only lookup, no file edits, no state-changing tool calls.
+
+## Flaw-recognition anneal decision (required)
+
+When any active role recognizes a flaw/error during execution, it must record one explicit decision:
+- `file-ticket` — structural/repeatable gap; include `#N`
+- `log-incident-only` — one-off operational event; include `incidents.jsonl`/`pattern_id`
+- `memory-note-only` — judgment/process note with no immediate code/process delta; include memory path
+- `no-action-justified` — include a short rationale
+
+This decision must be cited in baton artifacts and summarized in `CONSULTANT_CLOSEOUT` under:
+- `mid_flight_flaws: [<flaw>, decision=<...>, artifact=<...>]`
 
 ## Enforcement Points
 
