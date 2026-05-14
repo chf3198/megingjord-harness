@@ -9,10 +9,10 @@ const APPLY = process.argv.includes('--apply');
 const fixes = { broken: [], orphans: [], frontmatter: [] };
 
 function fuzzyMatch(target, slugs) {
-  const norm = (s) => s.replace(/[-_]/g, '').toLowerCase();
-  const t = norm(target);
-  for (const s of slugs) {
-    if (norm(s).includes(t) || t.includes(norm(s))) return s;
+  const norm = (input) => input.replace(/[-_]/g, '').toLowerCase();
+  const normTarget = norm(target);
+  for (const slug of slugs) {
+    if (norm(slug).includes(normTarget) || normTarget.includes(norm(slug))) return slug;
   }
   return null;
 }
@@ -35,9 +35,9 @@ function fixBrokenLinks(pages, allSlugs) {
 
 function fixOrphans(pages, allSlugs) {
   const inbound = new Set();
-  for (const p of pages) {
-    const content = fs.readFileSync(p.path, 'utf-8');
-    for (const [, l] of content.matchAll(/\[\[([^\]]+)\]\]/g)) inbound.add(l);
+  for (const page of pages) {
+    const content = fs.readFileSync(page.path, 'utf-8');
+    for (const [, link] of content.matchAll(/\[\[([^\]]+)\]\]/g)) inbound.add(link);
   }
   const indexPath = path.join(WIKI_DIR, 'index.md');
   let idx = fs.readFileSync(indexPath, 'utf-8');

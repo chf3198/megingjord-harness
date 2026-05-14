@@ -40,6 +40,14 @@ jobs:
               issue_number: linkedIssue, per_page: 100,
             });
 
+            // #1554: fetch PR files to detect cross-checkout-destructive
+            // symlink deletions. Advisory-first per Epic #1486 Path D.
+            const { data: prFiles } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner, repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number, per_page: 100,
+            });
+            const prLabels = (context.payload.pull_request.labels || []).map(l => l.name);
+
             const input = {
               comments, lane, labels,
               body: issue.body || '',
@@ -48,12 +56,18 @@ jobs:
               isEpic: labels.includes('type:epic'),
               issueNumber: linkedIssue,
               ticketRef: `#${linkedIssue}`,
+              prFiles,
+              labelsOnPR: prLabels,
             };
 
             const mh = megalint.run('manager-handoff', input);
             const cl = megalint.run('consultant-closeout', input);
             const pg = megalint.run('merge-evidence-pr-gate', input);
             const fe = megalint.run('flaw-emission', input);
+            // cross-checkout-destructive uses prFiles + prBody + labelsOnPR
+            const xcd = megalint.run('cross-checkout-destructive', {
+              prFiles, prBody: body, labels: prLabels,
+            });
 
             const violations = [];
             const aliasViolations = [];
@@ -83,11 +97,15 @@ jobs:
                 violations.push(`MERGE_EVIDENCE_PR_GATE: ${v.rule} — ${v.detail}`);
               }
             }
+            // #1554: cross-checkout-destructive is advisory-first; reported via
+            // PR comment marker rather than blocking the closeout-schema gate.
+            // Promotion to required is deferred per Epic #1486 Path D pattern.
 
             const summary = `closeout-schema: manager-handoff=${mh.found ? (mh.ok ? 'PASS' : 'FAIL') : 'absent'} `
               + `consultant-closeout=${cl.found ? (cl.ok ? 'PASS' : 'FAIL') : 'absent'} `
               + `merge-evidence-pr-gate=${pg.skipped ? `SKIP:${pg.skipped}` : (pg.ok ? 'PASS' : 'FAIL')} `
-              + `flaw-emission=${fe.skipped ? `SKIP:${fe.skipped}` : (fe.ok ? 'PASS' : 'FAIL')}`;
+              + `flaw-emission=${fe.skipped ? `SKIP:${fe.skipped}` : (fe.ok ? 'PASS' : 'FAIL')} `
+              + `cross-checkout-destructive=${xcd.skipped ? `SKIP:${xcd.skipped}` : (xcd.ok ? 'PASS' : 'ADVISORY')}`;
             console.log(summary);
 
             const advisoryMarker = '<!-- flaw-emission-required -->';
@@ -116,6 +134,34 @@ jobs:
                 owner: context.repo.owner, repo: context.repo.repo,
                 comment_id: existing.id,
               });
+            }
+
+            // #1554: post cross-checkout-destructive advisory as PR comment (not blocking)
+            const xcdMarker = '<!-- cross-checkout-destructive-advisory -->';
+            if (!xcd.ok) {
+              const advisory = `${xcdMarker}\n## ⚠️ Cross-checkout destructive change advisory\n\n`
+                + `This PR deletes ${xcd.deletedSymlinks.length} tracked symlink(s). When collaborators pull this commit, git will force-remove the working-tree entry — including any real directory a collaborator has placed there (e.g., \`npm install\` output, operator-applied repair).\n\n`
+                + `Affected paths:\n` + xcd.deletedSymlinks.map(p => `- \`${p}\``).join('\n') + `\n\n`
+                + `**To acknowledge** (advisory-only this phase; promotes to required after soak):\n`
+                + `- Add to PR body: \`<!-- cross-checkout-destructive: <reason> -->\`\n`
+                + `- OR apply label: \`cross-checkout-destructive:approved\`\n\n`
+                + `See #1554 and #1539 (the incident this rule guards against).`;
+              const prComments = (await github.rest.issues.listComments({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number, per_page: 50,
+              })).data;
+              const existing = prComments.find(c => (c.body || '').includes(xcdMarker));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  comment_id: existing.id, body: advisory,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number, body: advisory,
+                });
+              }
             }
 
             if (violations.length) {
