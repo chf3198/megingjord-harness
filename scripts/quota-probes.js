@@ -3,11 +3,8 @@
 
 const https = require('https');
 
-const HTTP_OK = 200;
-const HTTP_BAD_GATEWAY = 502;
-const HTTP_GATEWAY_TIMEOUT = 504;
-const DEFAULT_TIMEOUT_MS = 5000;
-const GROQ_TIMEOUT_MS = 8000;
+const HTTP_OK = 200, HTTP_BAD_GATEWAY = 502, HTTP_GATEWAY_TIMEOUT = 504;
+const DEFAULT_TIMEOUT_MS = 5000, GROQ_TIMEOUT_MS = 8000;
 
 function probeWithHeaders(url, headers, timeout = DEFAULT_TIMEOUT_MS) {
   return new Promise(resolve => {
@@ -19,10 +16,7 @@ function probeWithHeaders(url, headers, timeout = DEFAULT_TIMEOUT_MS) {
       }));
     });
     req.on('error', () => resolve({ status: HTTP_BAD_GATEWAY, body: '{}', headers: {} }));
-    req.on('timeout', () => {
-      req.destroy();
-      resolve({ status: HTTP_GATEWAY_TIMEOUT, body: '{}', headers: {} });
-    });
+    req.on('timeout', () => { req.destroy(); resolve({ status: HTTP_GATEWAY_TIMEOUT, body: '{}', headers: {} }); });
   });
 }
 
@@ -42,11 +36,7 @@ function parseGroqHeaders(headers) {
 async function probeGroq() {
   const key = process.env.GROQ_API_KEY;
   if (!key) return { id: 'groq', error: 'no key' };
-  const payload = JSON.stringify({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{ role: 'user', content: 'ping' }],
-    max_tokens: 1
-  });
+  const payload = JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'ping' }], max_tokens: 1 });
   const opts = {
     hostname: 'api.groq.com', path: '/openai/v1/chat/completions',
     method: 'POST', timeout: GROQ_TIMEOUT_MS,
