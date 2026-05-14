@@ -13,6 +13,9 @@ const truthfulness = require('./body-ac-truthfulness.js');
 const traceability = require('./epic-ac-traceability.js');
 const mergeEvidence = require('./merge-evidence.js');
 const mergeEvidencePrGate = require('./merge-evidence-pr-gate.js');
+const lintAsAc = require('./lint-as-ac.js');
+const workflowShaPin = require('./workflow-sha-pin.js');
+const testDiscoverability = require('./test-discoverability.js');
 
 const VALIDATORS = {
   'manager-handoff': manager,
@@ -24,6 +27,9 @@ const VALIDATORS = {
   'epic-ac-traceability': traceability,
   'merge-evidence': mergeEvidence,
   'merge-evidence-pr-gate': mergeEvidencePrGate,
+  'lint-as-ac': lintAsAc,
+  'workflow-sha-pin': workflowShaPin,
+  'test-discoverability': testDiscoverability,
 };
 
 function runAll(input) {
