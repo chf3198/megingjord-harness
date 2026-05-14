@@ -28,6 +28,17 @@ Anthropic, OpenAI-compatible, Ollama, OpenRouter, LiteLLM, and fleet paths.
 Anthropic remains available as a default cloud adapter, but it is no longer the
 visible definition of a paid lane.
 
+## Capability Registry
+
+Provider and runtime capability claims live in
+`scripts/global/provider-capability-registry.json`. The generated operator view
+is `docs/provider-capability-registry.md` and can be refreshed with
+`node scripts/global/provider-capability-registry.js --write-doc`.
+
+Runtime records describe agent surfaces. Provider records describe serving
+paths. Keep those ownership boundaries separate when comparing Codex, Copilot,
+Claude Code, HAMR, OpenClaw, OpenRouter, Ollama, LiteLLM, or vendor APIs.
+
 ## Validation
 
 Routing changes should include:
