@@ -1,22 +1,23 @@
-// Event Bus Client — polls /api/events for live dashboard updates
-// _batonTickets: active baton only (backlog→consultant, never closed)
-// _ticketLog: full audit trail of all tickets, all statuses
-
 let _lastEventTs = null;
-const _batonTickets = {};   // issue → ticket (active baton only)
-const _batonHistory = {};   // issue → [{role, ts}] for timeline
-const _ticketLog = {};      // issue → ticket (all, including closed)
+const _batonTickets = {};
+const _batonHistory = {};
+const _ticketLog = {};
 const CLOSED_STATUSES = new Set(['done', 'cancelled']);
+const ACTIVE_STATUSES = new Set(['in-progress', 'review', 'testing', 'ready-for-testing']);
 const STATUS_ROLE_MAP = {
-  backlog: null, todo: 'manager', 'in-progress': 'collaborator',
+  backlog: null, todo: 'manager', ready: 'manager', 'in-progress': 'collaborator',
   'ready-for-testing': 'admin', testing: 'admin',
-  'passed-testing': 'admin', done: 'consultant', cancelled: null,
+  'passed-testing': 'admin', review: 'consultant', done: 'consultant', cancelled: null,
 };
+function normalizeStatus(e, prev) {
+  return e.status || (e.type === 'ticket:created' ? 'backlog' : null) || prev?.status || 'backlog';
+}
+function normalizeRole(e, status, prev) {
+  return e.role || STATUS_ROLE_MAP[status] || prev?.activeRole || null;
+}
 
 async function fetchEvents(since) {
-  const url = since
-    ? '/api/events?since=' + encodeURIComponent(since)
-    : '/api/events';
+  const url = since ? '/api/events?since=' + encodeURIComponent(since) : '/api/events';
   try { const r = await fetch(url); return r.ok ? await r.json() : []; }
   catch { return []; }
 }
@@ -37,30 +38,29 @@ function eventToActivity(e) {
   return { type, message: msg, detail: e.issue ? `#${e.issue}` : '' };
 }
 
-/** Merge events into persistent baton ticket map and ticket log */
 function mergeBatonEvents(events) {
   const now = Date.now();
   for (const e of events) {
     if (!e.issue) continue;
-    const prev = _batonTickets[e.issue] || _ticketLog[e.issue];
+    const prev = _ticketLog[e.issue] || _batonTickets[e.issue];
+    const status = normalizeStatus(e, prev);
+    const role = normalizeRole(e, status, prev);
     const base = { issue: e.issue, _updated: now,
       title: e.title || prev?.title || '',
       epic: e.epic || prev?.epic || null,
       agent: e.agent || prev?.agent || '',
       model: e.model || prev?.model || '' };
-    // Always update ticket log (full audit trail)
-    const logStatus = e.status || (e.type === 'ticket:created' ? 'backlog' : null)
-      || _ticketLog[e.issue]?.status || 'backlog';
-    _ticketLog[e.issue] = { ...base, status: logStatus,
-      activeRole: e.role || _ticketLog[e.issue]?.activeRole || null };
-    // Baton map: evict on close; skip if no role
-    if (e.status && CLOSED_STATUSES.has(e.status)) { delete _batonTickets[e.issue]; continue; }
-    if (!e.role) continue;
-    _batonTickets[e.issue] = { ...base, activeRole: e.role, status: e.status || 'in-progress' };
+    _ticketLog[e.issue] = { ...base, status, activeRole: role };
+    if (CLOSED_STATUSES.has(status) || !ACTIVE_STATUSES.has(status) || !role) {
+      delete _batonTickets[e.issue];
+      continue;
+    }
+    _batonTickets[e.issue] = { ...base, activeRole: role, status };
     if (!_batonHistory[e.issue]) _batonHistory[e.issue] = [];
-    _batonHistory[e.issue].push({ role: e.role, ts: e.ts || new Date(now).toISOString() });
+    if (role && (!_batonHistory[e.issue].length || _batonHistory[e.issue][_batonHistory[e.issue].length - 1].role !== role)) {
+      _batonHistory[e.issue].push({ role, ts: e.ts || new Date(now).toISOString() });
+    }
   }
-  // Sort baton: by issue# desc (all active, no done tier)
   return Object.values(_batonTickets).sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 
@@ -70,14 +70,15 @@ function pruneClosedFromGitHub(issues) {
 }
 function getBatonState() {
   const now = Date.now();
-  return Object.values(_batonTickets).map(t=>({...t,stale:now-t._updated>_STALE_MS}));
+  return Object.values(_batonTickets)
+    .filter(t => ACTIVE_STATUSES.has(t.status) && !CLOSED_STATUSES.has(t.status))
+    .map(t => ({ ...t, stale: now - t._updated > _STALE_MS }));
 }
 function getTicketLog() {
   return Object.values(_ticketLog).sort((a, b) => (b.issue || 0) - (a.issue || 0));
 }
 function getTicketTimeline(issue) { return _batonHistory[issue] || []; }
 
-/** Detect governance gaps: skipped baton roles */
 function detectMissingEvents(issue) {
   const exp = ['manager','collaborator','admin','consultant'];
   const roles = (_batonHistory[issue]||[]).map(h=>h.role);

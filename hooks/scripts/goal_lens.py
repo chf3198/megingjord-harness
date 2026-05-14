@@ -20,6 +20,11 @@ GOALS = (
     "G8 Observability > G9 Interoperability"
 )
 
+ANNEAL_RE = re.compile(
+    r"\b(anneal|self-anneal|recurr|mid-flight|tier-2|repeat failure|pattern)\b",
+    re.IGNORECASE,
+)
+
 DEFINITIONS_TIER_B_PLUS = (
     "Goal definitions: "
     "G1 Governance: policy, role, provenance, ticket controls non-negotiable. "
@@ -79,6 +84,11 @@ def main() -> int:
     base = f"Goal lens: {GOALS}."
     if DECISION_RE.search(prompt):
         base += " Decision check: justify any lower-priority override with explicit evidence."
+    if ANNEAL_RE.search(prompt):
+        base += (
+            " Anneal awareness: if a recurrence pattern is observed mid-flight, "
+            "surface or file the Tier-2 signal now instead of waiting for the nightly cron."
+        )
 
     if RECURRENCE_RE.search(prompt):
         base += " " + RECURRENCE_GUIDANCE

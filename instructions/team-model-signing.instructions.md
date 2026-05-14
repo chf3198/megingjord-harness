@@ -45,7 +45,7 @@ applyTo: "**"
 - Match the first registry entry whose team/model pattern and optional device pattern fit.
 - Surname derives from active Agile role.
 - Current role surnames: Manager=`Mason`, Collaborator=`Harper`, Admin=`Reyes`, Consultant=`Vale`.
-- Use `node scripts/global/agent-signature.js` when you need deterministic output.
+- Use `node scripts/global/agent-signature.js` for raw signatures or `node scripts/global/baton-comment-build.js` for full baton comment templates.
 
 ## Override rule
 

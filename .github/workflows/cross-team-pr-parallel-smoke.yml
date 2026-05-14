@@ -1,0 +1,42 @@
+name: cross-team-pr-parallel-smoke
+on:
+  workflow_dispatch:
+    inputs:
+      target_pr:
+        description: "PR number that should contain cross-team marker comment"
+        required: true
+      shared_issue:
+        description: "Issue number expected to have coordinator label"
+        required: true
+      expected_parallel_pr:
+        description: "Optional parallel PR number expected in advisory table"
+        required: false
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate parallel-PR smoke outcome
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const smoke = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/cross-team-pr-parallel-smoke`);
+            const targetPr = Number('${{ inputs.target_pr }}');
+            const sharedIssue = Number('${{ inputs.shared_issue }}');
+            const expected = '${{ inputs.expected_parallel_pr }}';
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: targetPr, per_page: 100
+            });
+            const issue = await github.rest.issues.get({ owner, repo, issue_number: sharedIssue });
+            const result = smoke.verifySmokeResult({
+              comments: comments.map(c => c.body || ''),
+              labels: (issue.data.labels || []).map(l => l.name),
+              expectedParallelPr: expected,
+            });
+            core.info(JSON.stringify(result));
+            if (!result.ok) core.setFailed(`parallel smoke failed: ${JSON.stringify(result)}`);

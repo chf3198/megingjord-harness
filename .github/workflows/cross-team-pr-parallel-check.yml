@@ -1,0 +1,82 @@
+# D-1435-01 (#1473) — parallel-PR duplicate-work detection.
+# When a PR opens/syncs, extract referenced issue numbers from the body
+# and compare Team&Model identity first, falling back to GitHub login only
+# when no Team&Model is present. WARN-ONLY — does not block merge.
+name: cross-team-pr-parallel-check
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+jobs:
+  parallel-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Detect parallel-PR duplicate work
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { resolveParallelIdentity } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/cross-team-pr-parallel-check`);
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            // Extract all issue refs (#N) from this PR body
+            const refs = [...body.matchAll(/#(\d+)/g)].map(m => m[1]);
+            if (!refs.length) return core.info('no issue refs in PR body — skipping');
+            const currentCommits = await github.paginate(github.rest.pulls.listCommits, {
+              owner, repo, pull_number: pr.number, per_page: 100
+            });
+            const currentIdentity = resolveParallelIdentity({ body, user: pr.user, commits: currentCommits });
+            core.info(`current identity: ${currentIdentity.source}:${currentIdentity.value}`);
+            // Search for other open PRs referencing same issues
+            const parallel = [];
+            for (const ref of refs) {
+              const results = await github.paginate(
+                github.rest.search.issuesAndPullRequests,
+                { q: `repo:${owner}/${repo} is:pr is:open #${ref}`, per_page: 30 }
+              );
+              for (const hit of results) {
+                if (hit.number === pr.number) continue;
+                const full = await github.rest.pulls.get({ owner, repo, pull_number: hit.number });
+                const commits = await github.paginate(github.rest.pulls.listCommits, {
+                  owner, repo, pull_number: hit.number, per_page: 100
+                });
+                const hitIdentity = resolveParallelIdentity({
+                  body: full.data.body || '',
+                  user: full.data.user || hit.user,
+                  commits,
+                });
+                if (currentIdentity.value !== hitIdentity.value) {
+                  parallel.push({ ref, prNum: hit.number, user: hit.user.login, identity: hitIdentity.value });
+                }
+              }
+            }
+            if (!parallel.length) return core.info('no parallel PRs detected — OK');
+            core.warning(`parallel PRs detected: ${JSON.stringify(parallel)}`);
+            const marker = '<!-- cross-team-pr-parallel-check -->';
+            const existing = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: pr.number, per_page: 100
+            });
+            if (!existing.some(c => c.body && c.body.includes(marker))) {
+              const rows = parallel.map(
+                p => `| #${p.ref} | #${p.prNum} | ${p.identity} |`
+              ).join('\n');
+              const msg = `${marker}\n## Cross-team parallel-PR warn\n\n` +
+                `A different Team&Model identity references the same issue(s) as this PR.\n` +
+                `This may indicate duplicate work across teams.\n\n` +
+                `| Shared issue | Parallel PR | Team&Model identity |\n|---|---|---|\n${rows}\n\n` +
+                `Per coordination protocol (#1305), cite \`Coordinates #N\` in the PR body if work is intentionally divided.\n\n` +
+                `_Warn only — does not block merge._`;
+              await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: msg });
+            }
+            for (const ref of [...new Set(parallel.map(p => p.ref))]) {
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number: Number(ref),
+                labels: ['coordinator:cross-team-needs-hand-off']
+              }).catch(() => {});
+            }
+            core.info('parallel-PR warn posted and coordinator label applied');

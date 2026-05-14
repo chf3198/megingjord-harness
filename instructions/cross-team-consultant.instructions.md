@@ -58,9 +58,31 @@ The label vocabulary is team-agnostic by design:
 
 Adding a 4th team requires zero changes to labels, skills, scripts, or workflows — only a `inventory/team-model-signatures.json` registry entry.
 
+## Parallel-PR duplicate-work scenario (#1473)
+
+When two PRs reference the same child ticket, the workflow compares Team&Model identity first and falls back to GitHub login only when no Team&Model field is present:
+
+1. Workflow `cross-team-pr-parallel-check.yml` fires on `pull_request` opened/synchronize.
+2. Extracts issue refs from PR body and resolves Team&Model from PR body or commit trailers (`Team&Model:` / `AI-Team-Model:`).
+3. If a same-human but different-Team&Model PR is found, it posts an advisory comment on the PR and applies `coordinator:cross-team-needs-hand-off` to the shared issue(s).
+4. Operator should add `Coordinates #N` to PR bodies if work is intentionally divided, or close the duplicate and consolidate.
+
+This is advisory only — neither PR is blocked from merging.
+
+## Sibling-child role-label conflict scenario (#1474)
+
+When an Epic child issue receives `role:collaborator`, `role:admin`, or
+`role:consultant`, workflow `cross-team-edit-warn.yml` also evaluates open
+sibling children under the same parent Epic (`- Epic: #N` body marker).
+
+If a sibling has the same role label with a different team/owner, the workflow
+posts an advisory comment and applies `coordinator:cross-team-needs-hand-off`.
+Manager should coordinate ownership or split scope with `Coordinates #N`.
+
 ## See also
 
 - `.claude/commands/cross-team-consult-pickup.md` — pickup skill
 - `scripts/global/cross-team-queue.js` — queue resolver
 - `inventory/team-model-signatures.json` — substrate-to-team registry
 - `research/cross-team-rd-protocol-v2-2026-05-09.md` §3 — substrate-first identity pattern
+- `.github/workflows/cross-team-pr-parallel-check.yml` — PR-parallel detection (#1473)

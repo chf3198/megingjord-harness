@@ -14,26 +14,26 @@ git pull --ff-only
 
 ## Step 2 — Determine your team code and alias (READ THIS CAREFULLY)
 
-Your team code is one of:
+**Your team code is determined by which extension panel you are running in — NOT
+by which model is active.** Model routing (e.g. Copilot Auto) never changes your team.
 
-- `cp` = Copilot Team (substrate `github-copilot`)
-- `cx` = Codex Team (substrate `codex-cli`)
+| Panel / substrate | Team code | substrate value |
+|---|---|---|
+| GitHub Copilot Chat | `cp` | `github-copilot` |
+| Codex CLI or VS Code Codex panel | `cx` | `codex-cli` / `codex-vscode-ide` |
+| Claude Code CLI | `cc` | `claude-code-cli` |
 
 Your **registry-derived alias** is computed from `inventory/team-model-signatures.json`:
 
-1. Open `inventory/team-model-signatures.json`.
-2. Find the registry entry whose `team` matches your team and whose `modelPattern` matches your active model.
-3. The `aliasSeed` field is your **given name**.
-4. Your **surname** rotates by role (also in the JSON):
-   - `manager` → Mason
-   - `collaborator` → Harper
-   - `admin` → Reyes
-   - `consultant` → Vale
-5. Combine: `<aliasSeed> <role-surname>` is your `Signed-by` value.
+1. Confirm your substrate from the table above — this is your canonical team.
+2. Find the registry entry matching your team + active model for the `aliasSeed`.
+3. Your **surname** rotates by role: `manager` → Mason, `collaborator` → Harper,
+   `admin` → Reyes, `consultant` → Vale.
+4. Combine: `<aliasSeed> <role-surname>` is your `Signed-by` value.
 
-**Critical**: Do NOT sign as `chf3198` (the operator's GitHub handle). Sign with your **team's** derived alias. The operator is the client; you are the AI agent.
-
-**Critical model check** (Copilot Team only): the registry note says `gpt-5.*codex` models belong to team `codex`, NOT `copilot`. If your active model in Copilot Chat is `gpt-5.3-codex` or similar, switch to a Copilot-native model first (e.g., Claude Sonnet → alias seed "Soren"; Claude Opus → "Orion"; gpt-5-mini → "Milo"). Confirm your active model before continuing.
+**Critical**: Do NOT sign as `chf3198`. Sign with your AI agent alias.
+**Critical**: Copilot Auto may route to `gpt-5.3-codex` — you remain team `cp`.
+Sign as `copilot:gpt-5.3-codex@github-copilot`. Do NOT switch models to work around this.
 
 ## Step 3 — Read scaffolding
 

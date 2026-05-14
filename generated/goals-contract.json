@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "generated_utc": "2026-05-08T19:08:47.284Z",
+  "generated_utc": "2026-05-14T06:42:12.083Z",
   "source_path": "instructions/harness-goals.instructions.md",
-  "source_sha256_prefix": "788d2fbb9edf4e69",
+  "source_sha256_prefix": "cec4cc6d6a8b50d6",
   "priority_order": [
     {
       "id": "G1",
@@ -18,7 +18,7 @@
     },
     {
       "id": "G4",
-      "name": "Privacy"
+      "name": "Privacy & Security"
     },
     {
       "id": "G5",
@@ -39,6 +39,10 @@
     {
       "id": "G9",
       "name": "Interoperability"
+    },
+    {
+      "id": "G10",
+      "name": "Maintainability"
     }
   ],
   "definitions": {
@@ -48,15 +52,15 @@
     },
     "G2": {
       "name": "Quality",
-      "text": "maximize correctness and engineering value of outcomes"
+      "text": "correctness, testability, and engineering value are governance-enforced Requires: TDD/EDD coverage floor (>=80%), functional-first design, measurable acceptance criteria, and passing lint/type checks before merge"
     },
     "G3": {
       "name": "Zero Cost",
       "text": "prefer local/fleet/free lanes before paid providers"
     },
     "G4": {
-      "name": "Privacy",
-      "text": "keep sensitive context local unless explicit override exists"
+      "name": "Privacy & Security",
+      "text": "sensitive context stays local unless explicit override exists; secrets never in git, env vars, or logs; least-privilege tokens enforced; supply-chain dependencies pinned; agent-consumed inputs sanitised against injection"
     },
     "G5": {
       "name": "Portability",
@@ -77,6 +81,10 @@
     "G9": {
       "name": "Interoperability",
       "text": "preserve compatibility across agent surfaces and runtimes"
+    },
+    "G10": {
+      "name": "Maintainability",
+      "text": "files <=100 lines; cyclomatic complexity <=10 per function; no dead code at merge; changes documented via GOV-009 EDD before implementation"
     }
   },
   "notes": [

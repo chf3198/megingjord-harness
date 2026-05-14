@@ -18,6 +18,7 @@ jobs:
         with:
           script: |
             const megalint = require('./scripts/global/megalint/index.js');
+            const alias = require('./scripts/global/signer-alias.js');
 
             const body = context.payload.pull_request.body || '';
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
@@ -54,6 +55,18 @@ jobs:
             const pg = megalint.run('merge-evidence-pr-gate', input);
 
             const violations = [];
+            const aliasViolations = [];
+            for (const c of comments) {
+              const b = c.body || '';
+              const signedBy = (b.match(/Signed-by:\s*([^\n]+)/i) || [])[1];
+              const teamModel = (b.match(/Team&Model:\s*([^\n]+)/i) || [])[1];
+              const role = (b.match(/Role:\s*([^\n]+)/i) || [])[1];
+              if (!signedBy || !teamModel || !role) continue;
+              const [team, rest] = teamModel.trim().split(':');
+              const model = (rest || '').split('@')[0] || '';
+              const check = alias.enforceSignerAlias(team, role.trim().toLowerCase(), signedBy.trim(), { model });
+              if (!check.ok) aliasViolations.push(`${role.trim()}: expected ${check.canonical}, got ${signedBy.trim()}`);
+            }
             if (mh.found && !mh.ok) {
               for (const v of mh.violations) {
                 violations.push(`MANAGER_HANDOFF: ${v.rule} — ${v.detail}`);
@@ -81,4 +94,7 @@ jobs:
                 + violations.map(v => `  • ${v}`).join('\n')
                 + `\nSee scripts/global/megalint/ + instructions/role-baton-routing.instructions.md`
               );
+            }
+            if (aliasViolations.length) {
+              core.setFailed(`closeout-schema: signer-alias-fidelity=FAIL\n` + aliasViolations.map(v => `  • ${v}`).join('\n'));
             }

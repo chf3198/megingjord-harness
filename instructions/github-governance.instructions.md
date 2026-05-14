@@ -64,3 +64,4 @@ applyTo: "**"
 
 - Before recommending rulesets or plan-sensitive features, run `github-capability-resolver` to verify availability.
 - Route workflow governance requests through `github-ops-tree-router`; invoke `github-ruleset-architecture` for ruleset design.
+- For workflow automation that compares actors, apply Team&Model-first identity resolution per `instructions/team-model-in-workflows.instructions.md`.

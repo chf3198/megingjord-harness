@@ -3,33 +3,44 @@
 /* Generate JSON contract from instructions/harness-goals.instructions.md
  * Per #1121 / #1105 D-007. Markdown is canonical source; JSON is derived
  * view for programmatic linting (#1122) and machine-readable tools.
+ * Updated: support G10+, & in names, multi-line definitions (#1529-#1531).
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const SOURCE = path.resolve(__dirname, '../../instructions/harness-goals.instructions.md');
+const SOURCE = path.resolve(
+  __dirname, '../../instructions/harness-goals.instructions.md'
+);
 const OUT = path.resolve(__dirname, '../../generated/goals-contract.json');
+
+// Name token: one or more Title-cased words optionally joined with &/and
+const NAME_PAT = '[A-Z][A-Za-z]+(?:[\\s&]+[A-Z][A-Za-z]+)*';
 
 function parse(md) {
   const priority = [];
   const definitions = {};
-  // Priority order: extract from the canonical sentence (which may span lines).
-  // Strategy: collapse whitespace, take all G<n> Name tokens in document order;
-  // dedupe keeping first occurrence, take the first 9.
   const flat = md.replace(/\s+/g, ' ');
-  const tokens = [...flat.matchAll(/(G[1-9])\s+([A-Z][A-Za-z]+(?:\s[A-Z][A-Za-z]+)?)\s*(?=[>.])/g)];
-  for (const t of tokens) {
-    if (priority.length === 9) break;
+  // Extract G<n> Name from priority line (supports G10+)
+  const prioRe = new RegExp(`(G\\d+)\\s+(${NAME_PAT})\\s*(?=[>.]?)`, 'g');
+  for (const t of flat.matchAll(prioRe)) {
     if (!priority.find((p) => p.id === t[1])) {
       priority.push({ id: t[1], name: t[2].trim() });
     }
   }
-  // Definitions from `- G<n> Name: text` bullets
-  for (const line of md.split('\n')) {
-    const dm = line.match(/^- (G[1-9])\s+([A-Z][A-Za-z]+(?:\s[A-Z][A-Za-z]+)?):\s+(.+?)\.?\s*$/);
-    if (dm) definitions[dm[1]] = { name: dm[2].trim(), text: dm[3].trim() };
+  // Definitions from `- G<n> Name: text` bullets; join continuation lines
+  const lines = md.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const dm = lines[i].match(
+      new RegExp(`^- (G\\d+)\\s+(${NAME_PAT}):\\s+(.+?)(?:\\.)?\\s*$`)
+    );
+    if (!dm) continue;
+    let text = dm[3].trim();
+    while (lines[i + 1] && lines[i + 1].startsWith('  ')) {
+      text += ' ' + lines[++i].trim().replace(/\.$/, '');
+    }
+    definitions[dm[1]] = { name: dm[2].trim(), text };
   }
   return { priority, definitions };
 }

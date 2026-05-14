@@ -6,6 +6,8 @@ name: cross-team-edit-warn
 on:
   pull_request:
     types: [opened, synchronize, edited]
+  issues:
+    types: [labeled]
 permissions:
   contents: read
   issues: write
@@ -21,37 +23,57 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner, repo, pull_number: number, per_page: 100
+            if (context.eventName === 'pull_request') {
+              const number = context.payload.pull_request.number;
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                owner, repo, pull_number: number, per_page: 100
+              });
+              const sharedRe = /^(instructions\/|inventory\/|wiki\/)/;
+              const ownedRe = /^(scripts\/global\/|dashboard\/|cloudflare\/hamr\/)/;
+              let touchesShared = false, touchesOwned = false;
+              for (const f of files) {
+                if (sharedRe.test(f.filename)) touchesShared = true;
+                if (ownedRe.test(f.filename)) touchesOwned = true;
+              }
+              if (!(touchesShared && touchesOwned)) return core.info('no cross-cut edits detected');
+              const body = context.payload.pull_request.body || '';
+              if (/(?:Coordinates|Coord-with|Refs Epic) #\d+/i.test(body)) return core.info('coord ticket cited');
+              const marker = '<!-- cross-team-edit-warn -->';
+              const existing = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number: number, per_page: 100
+              });
+              if (existing.some(c => c.body && c.body.includes(marker))) return core.info('warn already posted');
+              const comment = `${marker}\n## Cross-team edit warn\n\nThis PR touches both **shared-surface** (instructions/, inventory/, wiki/) AND **owned-surface** (scripts/global/, dashboard/, cloudflare/hamr/) without citing a coordinating ticket.\n\nPer convergence-design item 7 (Epic #922), cite \`Coordinates #N\`, \`Coord-with #N\`, or \`Refs Epic #N\` in the PR body.\n\n_Warn only — does not block merge._`;
+              await github.rest.issues.createComment({ owner, repo, issue_number: number, body: comment });
+              return core.info('pull_request warn posted');
+            }
+            if (context.eventName !== 'issues' || context.payload.action !== 'labeled') return;
+            const issue = context.payload.issue;
+            const role = context.payload.label?.name || '';
+            if (!['role:collaborator', 'role:admin', 'role:consultant'].includes(role)) {
+              return core.info('non-role label event');
+            }
+            const match = (issue.body || '').match(/-\s*Epic:\s*#(\d+)/i);
+            if (!match) return core.info('no parent epic in issue body');
+            const epic = match[1];
+            const teamOf = (i) => (i.labels || []).find(l => l.name?.startsWith('team:'))?.name || `user:${i.user?.login || 'unknown'}`;
+            const siblings = await github.paginate(github.rest.search.issuesAndPullRequests, {
+              q: `repo:${owner}/${repo} is:issue is:open in:body "Epic: #${epic}"`, per_page: 100
             });
-            const sharedRe = /^(instructions\/|inventory\/|wiki\/)/;
-            const ownedRe = /^(scripts\/global\/|dashboard\/|cloudflare\/hamr\/)/;
-            let touchesShared = false, touchesOwned = false;
-            for (const f of files) {
-              if (sharedRe.test(f.filename)) touchesShared = true;
-              if (ownedRe.test(f.filename)) touchesOwned = true;
-            }
-            if (!(touchesShared && touchesOwned)) {
-              core.info('no cross-cut edits detected — no warn needed');
-              return;
-            }
-            const body = context.payload.pull_request.body || '';
-            const hasCoord = /(?:Coordinates|Coord-with|Refs Epic) #\d+/i.test(body);
-            if (hasCoord) {
-              core.info('cross-cut edits detected and coordinating ticket cited — OK');
-              return;
-            }
-            const marker = '<!-- cross-team-edit-warn -->';
+            const thisTeam = teamOf(issue);
+            const conflicts = siblings.filter(s =>
+              s.number !== issue.number && (s.labels || []).some(l => l.name === role) && teamOf(s) !== thisTeam
+            );
+            if (!conflicts.length) return core.info('no sibling role conflicts');
+            const marker = '<!-- cross-team-role-sibling-warn -->';
             const existing = await github.paginate(github.rest.issues.listComments, {
-              owner, repo, issue_number: number, per_page: 100
+              owner, repo, issue_number: issue.number, per_page: 100
             });
-            if (existing.some(c => c.body && c.body.includes(marker))) {
-              core.info('warn comment already posted; skipping');
-              return;
-            }
-            const comment = `${marker}\n## Cross-team edit warn\n\nThis PR touches both **shared-surface** (instructions/, inventory/, wiki/) AND **owned-surface** (scripts/global/, dashboard/, cloudflare/hamr/) without citing a coordinating ticket.\n\nPer convergence-design item 7 (Epic #922), cross-cut edits should cite a coordinating ticket using \`Coordinates #N\`, \`Coord-with #N\`, or \`Refs Epic #N\` in the PR body.\n\n_Warn only — does not block merge._`;
-            await github.rest.issues.createComment({
-              owner, repo, issue_number: number, body: comment
-            });
-            core.info('warn comment posted');
+            if (existing.some(c => c.body && c.body.includes(marker))) return core.info('sibling warn already posted');
+            const rows = conflicts.map(s => `| #${s.number} | ${teamOf(s)} | ${role} |`).join('\n');
+            const msg = `${marker}\n## Cross-team sibling-role warn\n\nIssue #${issue.number} and sibling child ticket(s) of Epic #${epic} share label **${role}** across different teams/owners.\n\n| Sibling issue | Team/owner | Role |\n|---|---|---|\n${rows}\n\nReview manager-level coordination guidance in instructions/cross-team-consultant.instructions.md (Parallel-PR duplicate-work scenario).\n\n_Warn only — does not block merge or closeout._`;
+            await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: msg });
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: issue.number, labels: ['coordinator:cross-team-needs-hand-off']
+            }).catch(() => {});
+            core.info('issues.labeled sibling-role warn posted');
