@@ -164,6 +164,7 @@ npm run deploy:both:apply
 | `test` | `npx playwright test` |
 | `test:headed` | `npx playwright test --headed` |
 | `test:quality` | `npx playwright test tests/google-quality.spec.js` |
+| `test:sse-load` | `node scripts/tools/sse-load-test.js` |
 | `ticket:create` | `node scripts/global/ticket-create.js` |
 | `toolchain:readability:install` | `node scripts/global/install-readability-toolchain.js` |
 | `validate:compat` | `node scripts/validate-plugin-compat.js` |

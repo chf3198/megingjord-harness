@@ -1,0 +1,18 @@
+{
+  "rate": 1000,
+  "duration_seconds": 5,
+  "target_total": 5000,
+  "sent": 5000,
+  "received": 4989,
+  "dropped": 0,
+  "final_buffer_depth": 0,
+  "latency_ms": {
+    "p50": 26,
+    "p95": 50,
+    "p99": 52,
+    "max": 56,
+    "mean": 26.151332932451393
+  },
+  "target_p95_ms": 500,
+  "target_met": true
+}

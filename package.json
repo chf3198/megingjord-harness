@@ -80,6 +80,7 @@
     "mailbox:poll": "node scripts/global/mailbox-client.js poll",
     "mailbox:send": "node scripts/global/mailbox-client.js send",
     "lint:coverage-metric": "node scripts/global/lint-coverage-metric.js",
+    "test:sse-load": "node scripts/tools/sse-load-test.js",
     "merge-evidence:snapshot": "node scripts/global/merge-evidence-snapshot.js",
     "prepare": "bash scripts/install-git-hooks.sh",
     "rag:search": "node scripts/global/rag-search.js",
