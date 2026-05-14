@@ -19,9 +19,11 @@ jobs:
     permissions:
       issues: write
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
+            const decision = require('./scripts/global/consultant-activation-decision.js');
             const body = context.payload.pull_request.body || '';
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) return;
@@ -31,9 +33,18 @@ jobs:
               owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
             });
             const labels = issue.labels.map(l => l.name);
-            if (!labels.includes('status:testing')) return; // not at testing → skip
+            // #1541: fetch comments + apply pure decision to avoid racing
+            // label-lint's auto-transition. Skip when issue is already
+            // terminal OR CONSULTANT_CLOSEOUT exists in trail.
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedNum, per_page: 100,
+            });
+            const result = decision.decide({ state: issue.state, labels, comments });
+            console.log(`#${linkedNum}: consultant-activation decision=${result.action} reason=${result.reason}`);
+            if (result.action !== 'activate') return;
 
-            const remove = labels.filter(l => /^(status:|role:admin)/.test(l));
+            const remove = labels.filter(l => result.removeLabelsMatching.test(l));
             for (const l of remove) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner, repo: context.repo.repo,
@@ -42,7 +53,7 @@ jobs:
             }
             await github.rest.issues.addLabels({
               owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: linkedNum, labels: ['status:review', 'role:consultant'],
+              issue_number: linkedNum, labels: result.addLabels,
             });
             const sha = context.payload.pull_request.merge_commit_sha?.slice(0, 7);
             const prUrl = context.payload.pull_request.html_url;
