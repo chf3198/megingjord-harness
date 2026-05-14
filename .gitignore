@@ -8,7 +8,9 @@ hooks/state/
 # Event bus runtime log
 .dashboard/
 
-# Node
+# Node — both directory and symlink forms (#1548: bare form catches
+# accidental `git add node_modules` when node_modules is a symlink).
+node_modules
 node_modules/
 # package-lock.json is committed (ADR-017, #830) for reproducible installs and Dependabot npm support.
 

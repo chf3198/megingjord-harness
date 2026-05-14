@@ -9,11 +9,19 @@ warn() { log "WARN: $*"; exit 2; }
 # fresh worktrees. Idempotent — skips if already linked.
 bootstrap_node_modules() {
   local worktree_root="$1"
-  local main_root
+  local main_root resolved
   main_root="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')"
   if [[ -z "$main_root" || ! -d "$main_root/node_modules" ]]; then
     log "node_modules bootstrap: no main checkout node_modules found at $main_root; skipping"
     return 0
+  fi
+  # #1540: refuse to chain a broken self-referential symlink at main.
+  if [[ -L "$main_root/node_modules" ]]; then
+    resolved="$(readlink -f "$main_root/node_modules" 2>/dev/null || echo BROKEN)"
+    if [[ "$resolved" == "BROKEN" || "$resolved" == "$main_root/node_modules" ]]; then
+      log "node_modules bootstrap: main's node_modules is a broken/self-symlink at $main_root; skipping (see #1539 / #1548)"
+      return 0
+    fi
   fi
   if [[ "$worktree_root" == "$main_root" ]]; then
     log "node_modules bootstrap: this IS the main checkout; nothing to link"

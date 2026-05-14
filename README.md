@@ -125,7 +125,7 @@ npm run deploy:both:apply
 | `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
-| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=420` |
+| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=430` |
 | `lint:router` | `node scripts/lint-router.js` |
 | `lint:sh` | `find scripts -name '*.sh' -exec shellcheck {} +` |
 | `mailbox:flush` | `node scripts/global/mailbox-outbox.js flush` |

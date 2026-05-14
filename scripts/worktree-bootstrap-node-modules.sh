@@ -12,6 +12,20 @@ if [[ -z "$main_root" || ! -d "$main_root/node_modules" ]]; then
   exit 1
 fi
 
+# #1540: self-symlink guard. If main's node_modules is a symlink that
+# resolves to itself (or doesn't resolve), the -d test above can still
+# pass (depending on kernel/fs) yet every downstream link will be
+# broken. Catch this explicitly so we never chain a broken link.
+if [[ -L "$main_root/node_modules" ]]; then
+  resolved="$(readlink -f "$main_root/node_modules" 2>/dev/null || echo BROKEN)"
+  if [[ "$resolved" == "BROKEN" || "$resolved" == "$main_root/node_modules" ]]; then
+    log "ERROR: main checkout node_modules is a broken/self-referential symlink at $main_root"
+    log "       remove the broken link and run 'npm install' in $main_root first"
+    log "       (see #1539 incident-1539-node-modules-cascade research doc + #1548)"
+    exit 1
+  fi
+fi
+
 linked=0
 skipped=0
 errored=0
