@@ -22,6 +22,7 @@
     { "team": "copilot", "modelPattern": "sonnet", "aliasSeed": "Soren" },
     { "team": "copilot", "modelPattern": "opus", "aliasSeed": "Orion" },
     { "team": "copilot", "modelPattern": "gpt-5.*mini", "aliasSeed": "Milo" },
+    { "team": "copilot", "modelPattern": "gpt-5.*codex", "aliasSeed": "Coda" },
     { "team": "claude-code", "modelPattern": "sonnet", "aliasSeed": "Clio" },
     { "team": "claude-code", "modelPattern": "opus", "aliasSeed": "Orla" },
     { "team": "openclaw", "modelPattern": "qwen", "aliasSeed": "Quinn", "devicePattern": "^windows-laptop$" },
