@@ -1,0 +1,56 @@
+name: consultant-second-opinion-advisory
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  advisory:
+    name: consultant-second-opinion-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const SO = require('./scripts/global/consultant-second-opinion.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const prLabels = context.payload.pull_request.labels.map(l => l.name);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedIssue,
+            });
+            const issueLabels = issue.labels.map(l => l.name);
+            if (SO.shouldSkip(prLabels) || SO.shouldSkip(issueLabels)) {
+              console.log('consultant-second-opinion: SKIPPED (waiver label)');
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const closeout = comments.map(c => c.body || '').find(b => b.includes('CONSULTANT_CLOSEOUT'));
+            if (!closeout) { console.log('No CONSULTANT_CLOSEOUT yet; nothing to compare.'); return; }
+            const hasSecondOpinion = /SECOND_OPINION/.test(closeout);
+            const status = hasSecondOpinion ? 'PASS' : 'ADVISORY-MISSING';
+            console.log(`consultant-second-opinion: ${status}`);
+            await core.summary.addRaw(`### Consultant second-opinion advisory\n\n${status}\n`).write();
+            if (!hasSecondOpinion) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: '<!-- consultant-second-opinion-advisory -->\n' +
+                      '## Consultant second-opinion advisory (Epic #1568 AC-4, #1573)\n\n' +
+                      'CONSULTANT_CLOSEOUT does not include a `SECOND_OPINION` block from a cross-provider rater. ' +
+                      'Run a cross-family rater against the rubric and append the result via ' +
+                      '`scripts/global/consultant-second-opinion.js` `appendSecondOpinionBlock(...)`. ' +
+                      'Waive with label `second-opinion:waived` if intentional. Does not block merge during soak.',
+              });
+            }
