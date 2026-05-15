@@ -8,6 +8,7 @@ const REPORT_FILE = '/tmp/governance-audit.json';
 const DEP_HEALTH = require('./dep-graph-health');
 const ANNEAL_SENSOR = require('./anneal-audit-sensor');
 const GIT_STATE_DRIFT = require('./git-state-drift-sensor');
+const WORKER_SIGNATURE = require('./worker-signature-governance');
 const CHECKS = ['governance:drift', 'governance:verify', 'governance:reconcile', 'governance:worktrees'];
 const TIMEOUT_MS = 60_000;
 const RAW_PREVIEW_MAX = 500;
@@ -27,7 +28,7 @@ function runCheck(name) {
 
 function listOpenTickets() {
   try {
-    const cmd = `gh issue list --state open --limit ${TICKET_FETCH_LIMIT} --json number,title,labels --jq ".[] | {number, title, labels: [.labels[].name]}"`;
+    const cmd = `gh issue list --state open --limit ${TICKET_FETCH_LIMIT} --json number,title,labels,body --jq ".[] | {number, title, body, labels: [.labels[].name]}"`;
     const out = execSync(cmd, { encoding: 'utf8', timeout: TIMEOUT_MS });
     return out.trim().split('\n').filter(Boolean).map(line => JSON.parse(line));
   } catch (err) { return []; }
@@ -92,6 +93,14 @@ async function audit(opts = {}) {
   const gitStateDrift = GIT_STATE_DRIFT.compute();
   const tickets = listOpenTickets();
   const violations = detectViolations(tickets);
+  const workerSignatureCompliance = WORKER_SIGNATURE.summarizeTickets(tickets);
+  for (const signatureViolation of workerSignatureCompliance.violations) {
+    violations.push({
+      ticket: signatureViolation.ticket,
+      rule: signatureViolation.rule,
+      detail: signatureViolation.detail,
+    });
+  }
   for (const driftViolation of gitStateDrift.violations || []) {
     violations.push({
       ticket: 'GIT-STATE',
@@ -114,6 +123,7 @@ async function audit(opts = {}) {
     open_tickets: tickets.length, violations, hamr_utilization: hamrSensor,
     git_state_drift: gitStateDrift,
     dependency_health: dependencyHealth, goal_health: goalHealth,
+    worker_signature_compliance: workerSignatureCompliance,
     operator_overrides_active: operatorOverridesActive,
     actuator_state: actuatorState,
     anneal_signals: annealSignals,

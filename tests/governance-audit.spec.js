@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 const A = require(path.resolve(__dirname, '..', 'scripts', 'global', 'governance-audit.js'));
+const WorkerSignature = require(path.resolve(__dirname, '..', 'scripts', 'global', 'worker-signature-governance.js'));
 
 test('CHECKS list includes the 4 deterministic governance scripts', () => {
   expect(A.CHECKS).toContain('governance:drift');
@@ -52,6 +53,7 @@ test('audit() returns schema_version 4 result with required fields', async () =>
   expect(r).toHaveProperty('git_state_drift');
   expect(r).toHaveProperty('dependency_health');
   expect(r).toHaveProperty('goal_health');
+  expect(r).toHaveProperty('worker_signature_compliance');
   expect(r).toHaveProperty('actuator_state');
   expect(['PASS', 'FAIL']).toContain(r.overall);
 });
@@ -75,4 +77,19 @@ test('dependency cycles become governance audit violations', async () => {
     edges: [{ from: 1, to: 2 }, { from: 2, to: 1 }] }));
   const r = await A.audit({ dependencyHealth: { graph, proposals: graph, decisions: graph } });
   expect(r.violations.some(v => v.rule === 'dependency-cycle')).toBe(true);
+});
+
+test('worker signature governance flags invalid grammar and client identity misuse', () => {
+  const badBody = `Manager: curtisfranks | GitHub Copilot (Claude Sonnet 4.6 @ github-copilot) | 2026-05-14\n\nSigned-by: Curtis Franks\nTeam&Model: copilot:claude-sonnet-4-6@github-copilot\nRole: manager`;
+  const result = WorkerSignature.inspectBody(badBody);
+  expect(result.ok).toBe(false);
+  expect(result.violations.some(v => v.rule === 'role-prefix-as-provenance')).toBe(true);
+  expect(result.violations.some(v => v.rule === 'client-identity-as-signer')).toBe(true);
+});
+
+test('worker signature governance accepts canonical worker blocks', () => {
+  const goodBody = `Signed-by: Quill Mason\nTeam&Model: codex:gpt-5.4@codex-cli\nRole: manager`;
+  const result = WorkerSignature.inspectBody(goodBody);
+  expect(result.ok).toBe(true);
+  expect(result.violations).toHaveLength(0);
 });
