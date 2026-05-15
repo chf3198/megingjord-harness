@@ -117,12 +117,13 @@ npm run deploy:both:apply
 | `health` | `node scripts/health-check.js` |
 | `help:topic` | `node scripts/help-topic.js` |
 | `hooks:install` | `bash scripts/global/install-hooks.sh` |
+| `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
 | `lint` | `node scripts/lint.js` |
 | `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md` |
 | `lint:coverage-metric` | `node scripts/global/lint-coverage-metric.js` |
 | `lint:js` | `eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki` |
-| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**'` |
+| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!.claude/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
 | `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=420` |
