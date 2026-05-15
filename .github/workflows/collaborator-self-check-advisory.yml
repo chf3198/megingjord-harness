@@ -1,0 +1,56 @@
+name: collaborator-self-check-advisory
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  advisory:
+    name: collaborator-self-check-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { OVERRIDE_LABEL } =
+              require('./scripts/global/collaborator-self-check.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue,
+            });
+            const labels = issue.labels.map(l => l.name);
+            const prLabels = context.payload.pull_request.labels.map(l => l.name);
+            if (labels.includes(OVERRIDE_LABEL) || prLabels.includes(OVERRIDE_LABEL)) {
+              console.log('collaborator-self-check: SKIPPED (waiver label)');
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const collab = comments.map(c => c.body || '').find(b => b.includes('COLLABORATOR_HANDOFF'));
+            const hasSection = collab && /Pre-handoff verification/i.test(collab);
+            const status = hasSection ? 'PASS' : 'ADVISORY-MISSING';
+            console.log(`collaborator-self-check: ${status}`);
+            await core.summary.addRaw(`### Collaborator self-check advisory\n\n${status}\n`).write();
+            if (!hasSection) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: '<!-- collaborator-self-check-advisory -->\n' +
+                      '## Collaborator self-check advisory (Epic #1568 AC-2, #1571)\n\n' +
+                      'COLLABORATOR_HANDOFF on the linked issue does not include a `Pre-handoff verification` section. ' +
+                      'Run `scripts/global/collaborator-self-check.js` `runChecks(...)` and paste the `formatChecks(...)` output into the handoff. ' +
+                      'Waive with label `collaborator-self-check:waived` if intentional. Does not block merge during soak.',
+              });
+            }

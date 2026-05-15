@@ -3,10 +3,15 @@
 ## [Unreleased]
 
 ### Added
-- `scripts/global/closeout-preflight.js` — local pre-push preflight that runs megalint closeout validators (manager-handoff, consultant-closeout, merge-evidence-pr-gate when PR exists) against the issue linked in the branch name; blocks push on FAIL; skippable via `SKIP_CLOSEOUT_PREFLIGHT=1`. Closes #1566.
-- `tests/closeout-preflight.spec.js` — 4 unit tests covering pass, fail (missing closeout), skip (no ticket branch), and skip-flag cases.
+- `scripts/global/collaborator-self-check.js` + `collaborator-self-check-rules.js` — 10-check deterministic pre-handoff helper for the Collaborator role (Epic #1568 AC-2). Closes #1571.
+- `tests/collaborator-self-check.spec.js` — 15 unit tests covering all 10 checks plus dispatcher, waiver, and format.
+- `.github/workflows/collaborator-self-check-advisory.yml` — advisory gate: posts PR comment when COLLABORATOR_HANDOFF lacks Pre-handoff verification section; non-blocking; waiver label `collaborator-self-check:waived` silences.
+- `docs/howto/collaborator-pre-handoff-checks.md` — operator guide explaining each check and how to interpret failures.
 
 ### Changed
+- `skills/role-collaborator-execution/SKILL.md` — added Pre-handoff verification section referencing the new helper.
+- `scripts/global/closeout-preflight.js` — local pre-push preflight that runs megalint closeout validators (manager-handoff, consultant-closeout, merge-evidence-pr-gate when PR exists) against the issue linked in the branch name; blocks push on FAIL; skippable via `SKIP_CLOSEOUT_PREFLIGHT=1`. Closes #1566.
+- `tests/closeout-preflight.spec.js` — 4 unit tests covering pass, fail (missing closeout), skip (no ticket branch), and skip-flag cases.
 - `hooks/scripts/pre-push-readability.sh` — wired closeout-preflight step after readability check.
 
 ## [Unreleased] — #1207: wiki-orphan-check fix — resolve 80 broken wikilinks (tool-002 PASS)
