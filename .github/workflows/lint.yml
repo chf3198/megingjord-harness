@@ -44,6 +44,8 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
       - run: npm install --no-audit --no-fund
+      - name: Pre-push parity smoke
+        run: npm run hooks:pre-push
       - name: Formatting check
         run: npm run format:check
       - name: 100-line file limit

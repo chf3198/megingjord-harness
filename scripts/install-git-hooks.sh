@@ -25,3 +25,8 @@ install_hook() {
 
 install_hook "$ROOT/hooks/scripts/validate-branch-name.sh" "pre-commit"
 install_hook "$ROOT/hooks/scripts/pre-push-readability.sh" "pre-push"
+
+if command -v npx >/dev/null 2>&1; then
+  npx lefthook install >/dev/null 2>&1 || true
+  echo "✅ Lefthook install attempted (pre-push uses lefthook.yml)"
+fi
