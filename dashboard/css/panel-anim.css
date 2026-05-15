@@ -38,4 +38,5 @@
   }
   .aq-row-new { filter: drop-shadow(0 0 4px #3b82f6); }
   .bf-active-transition { filter: drop-shadow(0 0 4px #10b981); }
+  *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
 }
