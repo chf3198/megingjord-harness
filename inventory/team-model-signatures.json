@@ -1,7 +1,7 @@
 {
   "lastUpdated": "2026-05-12",
   "defaultAliasSeed": "Nova",
-  "roleSurnames": { "manager": "Mason", "collaborator": "Harper", "admin": "Reyes", "consultant": "Vale" },
+  "roleSurnames": { "manager": "Mason", "collaborator": "Harper", "admin": "Reyes", "consultant": "Vale", "claude-code-team-manager-noting-overlap": "Mason" },
   "teamModelSpec": {
     "format": "team:model@substrate",
     "teamValues": ["copilot", "codex", "claude-code", "openclaw"],
