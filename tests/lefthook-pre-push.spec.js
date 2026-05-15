@@ -5,22 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const FILE = path.resolve(__dirname, '..', 'lefthook.yml');
+const FIXTURE = path.resolve(__dirname, 'fixtures', 'lefthook-pre-push.required.txt');
 
 test('lefthook pre-push includes required parity gates', () => {
   const content = fs.readFileSync(FILE, 'utf8');
-  const required = [
-    'pre-push:',
-    'parallel: true',
-    'hooks/scripts/validate-branch-name.sh',
-    'npm run lint',
-    'npm run lint:readability:ci',
-    'npm run lint:js',
-    'npm run lint:md',
-    'npm run lint:py',
-    'npm run lint:sh',
-    'node scripts/global/megalint/index.js',
-    'node scripts/global/closeout-preflight.js',
-    'node scripts/global/test-evidence-validator.js --diff-only',
-  ];
+  const required = fs.readFileSync(FIXTURE, 'utf8').trim().split('\n').filter(Boolean);
   for (const marker of required) expect(content).toContain(marker);
 });
