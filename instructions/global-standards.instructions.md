@@ -42,3 +42,13 @@ applyTo: "**"
 	or when `MEGINGJORD_MCP_DISABLED=1` is set.
 - See `instructions/github-governance.instructions.md` for the full contract
 	and `docs/howto/mcp-server-adoption.md` for the operator guide.
+
+## Decisional vs. actionable (Discussions vs. Issues)
+
+- **Issues**: actionable work with concrete deliverable + acceptance criteria.
+- **Discussions**: decisional questions, open design exploration, cross-team
+	protocol debates, tooling research — anything without a concrete AC yet.
+- When a Discussion crystallizes into a deliverable, convert it to an Issue
+	via `gh discussion view N --json` + `gh issue create`. Keep the Discussion
+	link in the Issue body so decisional rationale is preserved.
+- See `docs/howto/discussions-vs-issues.md` for category catalog and examples.
