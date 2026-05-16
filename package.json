@@ -44,6 +44,8 @@
     "governance:epics": "node scripts/global/epic-close-validator.js",
     "governance:manifest:validate": "node scripts/global/governance-manifest-validate.js",
     "governance:manifest:test": "node scripts/global/governance-manifest-validate.spec.js",
+    "governance:adapters:emit": "node scripts/global/governance-adapter-emit.js",
+    "governance:adapters:test": "node scripts/global/governance-adapter-emit.spec.js",
     "governance:no-sync-http": "node scripts/global/no-sync-http-handlers.js",
     "governance:tokens": "node scripts/global/governance-token-lint.js",
     "governance:reconcile": "node scripts/global/ticket-reconcile.js --json",
