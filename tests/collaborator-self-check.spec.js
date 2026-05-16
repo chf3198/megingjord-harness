@@ -129,3 +129,35 @@ test('formatChecks renders the skip reason when override label is present', () =
   expect(C.formatChecks({ ok: true, checks: [], skipped: 'override-waived' }))
     .toBe('Pre-handoff verification: SKIPPED (override-waived)');
 });
+
+test('mcpLoadCheck passes when MCP marker present in handoff body', () => {
+  const { mcpLoadCheck } = require('../scripts/global/collaborator-self-check-rules.js');
+  const result = mcpLoadCheck('Used mcp__github__create_issue for the ship', {});
+  expect(result.ok).toBe(true);
+});
+
+test('mcpLoadCheck passes when opt-out env set and cited in body', () => {
+  const { mcpLoadCheck } = require('../scripts/global/collaborator-self-check-rules.js');
+  const result = mcpLoadCheck('Skipped MCP because MEGINGJORD_MCP_DISABLED=1; air-gapped operator', { MEGINGJORD_MCP_DISABLED: '1' });
+  expect(result.ok).toBe(true);
+});
+
+test('mcpLoadCheck fails when opt-out env set but rationale missing', () => {
+  const { mcpLoadCheck } = require('../scripts/global/collaborator-self-check-rules.js');
+  const result = mcpLoadCheck('Plain body without any opt-out citation here', { MEGINGJORD_MCP_DISABLED: '1' });
+  expect(result.ok).toBe(false);
+});
+
+test('mcpLoadCheck advisory-passes when no MCP marker and no opt-out set', () => {
+  const { mcpLoadCheck } = require('../scripts/global/collaborator-self-check-rules.js');
+  const result = mcpLoadCheck('Plain body no markers', {});
+  expect(result.ok).toBe(true);
+  expect(result.evidence).toContain('advisory');
+});
+
+test('mcpLoadCheck detects MCP via plain MCP marker', () => {
+  const { mcpLoadCheck } = require('../scripts/global/collaborator-self-check-rules.js');
+  const result = mcpLoadCheck('Used MCP server tools', {});
+  expect(result.ok).toBe(true);
+});
+

@@ -91,9 +91,20 @@ const modelDiversityProspectiveAdmin = (own, admin) => {
     : fail('model-diversity-prospective-admin', `both on ${own}`);
 };
 
+const mcpLoadCheck = (handoffBody, env) => {
+  if ((env || process.env).MEGINGJORD_MCP_DISABLED === '1') {
+    return /MEGINGJORD_MCP_DISABLED=1/.test(handoffBody || '')
+      ? ok('mcp-load-check', 'opt-out cited')
+      : fail('mcp-load-check', 'opt-out env set but rationale missing in handoff');
+  }
+  return /mcp__github__|MCP/i.test(handoffBody || '')
+    ? ok('mcp-load-check', 'mcp usage detected')
+    : ok('mcp-load-check', 'no mcp marker (advisory; gh CLI fallback assumed)');
+};
+
 module.exports = {
   branchNamePrefix, refsThisTicketFirst, closesAndRefsBothPresent,
   tddSpecInDiffWhenRequired, noProseColonCollision, noMarkdownBoldOnTestStrategy,
   flawMarkerCitations, readabilityNoNewWarnings, allAcceptanceCriteriaTicked,
-  modelDiversityProspectiveAdmin,
+  modelDiversityProspectiveAdmin, mcpLoadCheck,
 };
