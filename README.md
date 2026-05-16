@@ -120,8 +120,9 @@ npm run deploy:both:apply
 | `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
 | `lint` | `node scripts/lint.js` |
-| `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md` |
+| `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md && npm run lint:decisions` |
 | `lint:coverage-metric` | `node scripts/global/lint-coverage-metric.js` |
+| `lint:decisions` | `node scripts/global/decisions-md-validator.js` |
 | `lint:js` | `eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki` |
 | `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!.claude/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
