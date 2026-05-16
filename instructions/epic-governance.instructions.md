@@ -77,6 +77,22 @@ An epic may close **only when ALL of these are true**:
 - If original epic ACs cannot be completed, Manager must publish an explicit re-scope artifact (deferred scope + follow-on child tickets) before review/close.
 - Post-hoc scope normalization at Consultant closeout is forbidden.
 
+## Epic-child linkage (Sub-issues primitive)
+
+New Epics SHOULD use GitHub's native **Sub-issues** primitive to link children
+to the parent Epic. The legacy `Refs Epic #N` prose convention remains valid
+for backward compatibility but is deprecated for new Epics. Sub-issues
+provides:
+
+- Native parent/child API (REST + GraphQL) and progress rollup.
+- Eliminates prose-collision trap class at the relationship layer (see #1614
+  for the legacy-regex hardening path and #1631 for the migration plan).
+- Up to 100 children per parent, 8 levels of nesting.
+
+Migration guide: `docs/howto/sub-issues-migration.md`. Validator behavior
+follows #1631 AC5 follow-on (closeout-schema prefers Sub-issue link over
+prose-scan; prose-scan fallback retained).
+
 ## Branch Naming
 
 Branches are created for child tickets only: `<type>/<child-issue-number>-<slug>`

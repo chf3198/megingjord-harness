@@ -100,6 +100,15 @@ Required fields on every `MANAGER_HANDOFF` comment:
 
 `test_strategy` selected per `instructions/test-methodology-matrix.instructions.md`; missing on legacy tickets defaults to `none` (advisory). New tickets with `none` on non-permitted lane fail `test-evidence`.
 
+## Parent/child relationships (Sub-issues primitive)
+
+The canonical parent/child relationship uses GitHub's native **Sub-issues**
+primitive (up to 100 children per parent, 8 levels deep). The legacy prose
+`Refs Epic #N` convention remains supported for backward compatibility but
+is deprecated for new tickets. See `docs/howto/sub-issues-migration.md` for
+the migration plan and #1631 follow-on children for the helper, validator,
+and test-suite implementation.
+
 ## Local Override
 
 A repo may override via `.github/copilot-instructions.md`; local wins on conflict.
