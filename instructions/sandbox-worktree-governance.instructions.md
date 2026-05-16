@@ -30,6 +30,10 @@ Lease command:
 
 - `node scripts/global/cross-team-lease.js create --ticket <N> --team <team> --role collaborator --branch <branch> --paths <paths> --runtime-surfaces <surfaces> --post-comment 1`
 
+Conflict check:
+
+- `node scripts/global/cross-team-conflict-gate.js --ticket <N> --branch <branch> --paths <paths> --post-comment 1`
+
 ## Forbidden Actions
 
 - Do not commit directly on `sandbox/*` branches.
@@ -62,3 +66,6 @@ If any sandbox branch is behind or dirty: stop, run session-start reset flow, th
 - `close` releases ownership after merge, cancellation, or handoff.
 - Creation and closeout should be mirrored to the GitHub issue with the stable
   `CROSS_TEAM_LEASE_*` marker block.
+- Before edits, run the conflict gate for intended paths. Exact branch and
+  same-ticket path collisions block unless Manager override is present; adjacent
+  governance surfaces warn and should be coordinated in the issue thread.
