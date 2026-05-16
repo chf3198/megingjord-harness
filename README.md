@@ -176,6 +176,7 @@ npm run deploy:both:apply
 | `wiki:anneal` | `node scripts/wiki/anneal.js` |
 | `wiki:ingest` | `node scripts/wiki/ingest.js` |
 | `wiki:lint` | `node scripts/wiki/lint.js` |
+| `wiki:reindex` | `node scripts/wiki/reindex.js` |
 | `wiki:search` | `node scripts/wiki/search.js` |
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
