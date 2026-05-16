@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "units": [
+    {
+      "id": "operator-identity-context",
+      "title": "Operator Identity Context",
+      "priority": "P1",
+      "appliesTo": ["**"],
+      "targets": ["copilot", "cline", "claude-code", "continue"],
+      "tags": ["governance", "baton", "operator"],
+      "bodyRef": "instructions/operator-identity-context.instructions.md"
+    },
+    {
+      "id": "team-model-signing",
+      "title": "Team Model Signing",
+      "priority": "P1",
+      "appliesTo": ["instructions/**", "scripts/global/**"],
+      "targets": ["copilot", "claude-code", "continue"],
+      "tags": ["governance", "signing", "traceability"],
+      "bodyRef": "instructions/team-model-signing.instructions.md"
+    }
+  ]
+}
