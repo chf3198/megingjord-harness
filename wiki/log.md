@@ -57,6 +57,11 @@ fleet, HAMR, OpenAI-compatible, Anthropic, Ollama, OpenRouter, and LiteLLM.
 New source page: `wiki/sources/provider-adapter-matrix-2026-05-14.md`.
 Source: `research/provider-adapter-matrix-2026-05-14.md`.
 
+## [2026-05-16] governance | Provider-neutral governance contract (#1623, EPIC #1604)
+Added shared governance contract with Codex, Copilot, and Claude Code adapter
+sections. Source: `research/issue-1623-provider-neutral-governance-2026-05-16.md`.
+Wiki page: `wiki/sources/provider-neutral-governance-2026-05-16.md`.
+
 **Tip**: `grep "^## \[" log.md | tail -5` shows last 5 entries.
 
 ---
