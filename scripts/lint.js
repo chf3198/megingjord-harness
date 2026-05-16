@@ -25,6 +25,8 @@ const IGNORE_FILES = [
   'README.md',
   // Project manifests that grow with deps/scripts — managed by npm tooling
   'package.json',
+  // Signer registry grows with teams × roles × key rotations (#1716 Phase 3.3)
+  'team-model-signatures.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];

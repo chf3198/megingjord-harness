@@ -1,11 +1,29 @@
 {
-  "lastUpdated": "2026-05-12",
+  "lastUpdated": "2026-05-16",
   "defaultAliasSeed": "Nova",
-  "roleSurnames": { "manager": "Mason", "collaborator": "Harper", "admin": "Reyes", "consultant": "Vale", "claude-code-team-manager-noting-overlap": "Mason" },
+  "roleSurnames": {
+    "manager": "Mason",
+    "collaborator": "Harper",
+    "admin": "Reyes",
+    "consultant": "Vale",
+    "claude-code-team-manager-noting-overlap": "Mason"
+  },
   "teamModelSpec": {
     "format": "team:model@substrate",
-    "teamValues": ["copilot", "codex", "claude-code", "openclaw"],
-    "substrates": ["github-copilot", "claude-code-cli", "codex-cli", "codex-vscode-ide", "openclaw-gateway", "local"],
+    "teamValues": [
+      "copilot",
+      "codex",
+      "claude-code",
+      "openclaw"
+    ],
+    "substrates": [
+      "github-copilot",
+      "claude-code-cli",
+      "codex-cli",
+      "codex-vscode-ide",
+      "openclaw-gateway",
+      "local"
+    ],
     "note": "Human-readable Signed-by/Team&Model/Role remains canonical for readers; Crypto-* fields add non-repudiation."
   },
   "substrateTeamMap": {
@@ -16,35 +34,186 @@
     "openclaw-gateway": "openclaw"
   },
   "registry": [
-    { "team": "codex", "modelPattern": "^gpt-5\\.4$", "aliasSeed": "Quill" },
-    { "team": "codex", "modelPattern": "gpt-5.*codex", "aliasSeed": "Caden" },
-    { "team": "copilot", "modelPattern": "^claude-[34]", "aliasSeed": "Soren" },
-    { "team": "copilot", "modelPattern": "sonnet", "aliasSeed": "Soren" },
-    { "team": "copilot", "modelPattern": "opus", "aliasSeed": "Orion" },
-    { "team": "copilot", "modelPattern": "gpt-5.*mini", "aliasSeed": "Milo" },
-    { "team": "copilot", "modelPattern": "gpt-5.*codex", "aliasSeed": "Coda" },
-    { "team": "claude-code", "modelPattern": "sonnet", "aliasSeed": "Clio" },
-    { "team": "claude-code", "modelPattern": "opus", "aliasSeed": "Orla" },
-    { "team": "openclaw", "modelPattern": "qwen", "aliasSeed": "Quinn", "devicePattern": "^windows-laptop$" },
-    { "team": "openclaw", "modelPattern": "mistral", "aliasSeed": "Mira", "devicePattern": "^windows-laptop$" },
-    { "team": "openclaw", "modelPattern": "phi", "aliasSeed": "Fia", "devicePattern": "^windows-laptop$" },
-    { "team": "*", "modelPattern": "qwen", "aliasSeed": "Quinn" },
-    { "team": "*", "modelPattern": "mistral", "aliasSeed": "Mira" },
-    { "team": "*", "modelPattern": "phi", "aliasSeed": "Fia" },
-    { "team": "*", "modelPattern": "gemma", "aliasSeed": "Gemma" }
+    {
+      "team": "codex",
+      "modelPattern": "^gpt-5\\.4$",
+      "aliasSeed": "Quill"
+    },
+    {
+      "team": "codex",
+      "modelPattern": "gpt-5.*codex",
+      "aliasSeed": "Caden"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "^claude-[34]",
+      "aliasSeed": "Soren"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "sonnet",
+      "aliasSeed": "Soren"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "opus",
+      "aliasSeed": "Orion"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gpt-5.*mini",
+      "aliasSeed": "Milo"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gpt-5.*codex",
+      "aliasSeed": "Coda"
+    },
+    {
+      "team": "claude-code",
+      "modelPattern": "sonnet",
+      "aliasSeed": "Clio"
+    },
+    {
+      "team": "claude-code",
+      "modelPattern": "opus",
+      "aliasSeed": "Orla"
+    },
+    {
+      "team": "openclaw",
+      "modelPattern": "qwen",
+      "aliasSeed": "Quinn",
+      "devicePattern": "^windows-laptop$"
+    },
+    {
+      "team": "openclaw",
+      "modelPattern": "mistral",
+      "aliasSeed": "Mira",
+      "devicePattern": "^windows-laptop$"
+    },
+    {
+      "team": "openclaw",
+      "modelPattern": "phi",
+      "aliasSeed": "Fia",
+      "devicePattern": "^windows-laptop$"
+    },
+    {
+      "team": "*",
+      "modelPattern": "qwen",
+      "aliasSeed": "Quinn"
+    },
+    {
+      "team": "*",
+      "modelPattern": "mistral",
+      "aliasSeed": "Mira"
+    },
+    {
+      "team": "*",
+      "modelPattern": "phi",
+      "aliasSeed": "Fia"
+    },
+    {
+      "team": "*",
+      "modelPattern": "gemma",
+      "aliasSeed": "Gemma"
+    }
   ],
   "cryptoKeys": [
-    { "team": "copilot", "role": "manager", "keyId": "copilot-manager-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAdHSEibo2ckbfnBsl0GyW/PlfEB7L8UDLbPSni9qwyVk=\\n-----END PUBLIC KEY-----" },
-    { "team": "copilot", "role": "collaborator", "keyId": "copilot-collaborator-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAUABiZi7zN6RuQkjbFLdkGgQrVg0pHqxga7RMh3P9CMg=\\n-----END PUBLIC KEY-----" },
-    { "team": "copilot", "role": "admin", "keyId": "copilot-admin-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAV26zaPlfvkiiOCpryX9GbKCPZZuobx11YCtGtHyqUtU=\\n-----END PUBLIC KEY-----" },
-    { "team": "copilot", "role": "consultant", "keyId": "copilot-consultant-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA4/MkydqOZED4D5zlarJrOOvkmhqDZmmROYxgsLOo4rE=\\n-----END PUBLIC KEY-----" },
-    { "team": "codex", "role": "manager", "keyId": "codex-manager-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAkQModrCGL/5Nc+oZlNAicymkJkT9sffWnAzZVl1wtQI=\\n-----END PUBLIC KEY-----" },
-    { "team": "codex", "role": "collaborator", "keyId": "codex-collaborator-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEADhpGEwbXS+j8NIX9bdoRE5MtnbIYLGUKeZ7d6wqXzfo=\\n-----END PUBLIC KEY-----" },
-    { "team": "codex", "role": "admin", "keyId": "codex-admin-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA7uTOTfGVv3Hov9dXKcabnXfJei8TagyiRt3iO2tkJU8=\\n-----END PUBLIC KEY-----" },
-    { "team": "codex", "role": "consultant", "keyId": "codex-consultant-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA+Uk+Suxmfdoj9XP2pMvxL04axDRlsKsLgH5bgYlxPq0=\\n-----END PUBLIC KEY-----" },
-    { "team": "claude-code", "role": "manager", "keyId": "claude-code-manager-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEALT4vAVD0dck0ZjbACxS2I2mV88gg91MWHriFB1WVEdk=\\n-----END PUBLIC KEY-----" },
-    { "team": "claude-code", "role": "collaborator", "keyId": "claude-code-collaborator-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAjY/rVkV4ljRTLCUJ5XhxnLFNQ1RQH94Ck+rPAeCSXcE=\\n-----END PUBLIC KEY-----" },
-    { "team": "claude-code", "role": "admin", "keyId": "claude-code-admin-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA/EBjpTLJeACajMUsIDFYgQa7tmp2czgsWKWsb8FGunQ=\\n-----END PUBLIC KEY-----" },
-    { "team": "claude-code", "role": "consultant", "keyId": "claude-code-consultant-v1", "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN8Xp3BzFDi7Y2iR1BOX/z/54fAIpW3XxtWIrsa3LHVY=\\n-----END PUBLIC KEY-----" }
+    {
+      "team": "copilot",
+      "role": "manager",
+      "keyId": "copilot-manager-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAdHSEibo2ckbfnBsl0GyW/PlfEB7L8UDLbPSni9qwyVk=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "copilot",
+      "role": "collaborator",
+      "keyId": "copilot-collaborator-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAUABiZi7zN6RuQkjbFLdkGgQrVg0pHqxga7RMh3P9CMg=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "copilot",
+      "role": "admin",
+      "keyId": "copilot-admin-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAV26zaPlfvkiiOCpryX9GbKCPZZuobx11YCtGtHyqUtU=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "copilot",
+      "role": "consultant",
+      "keyId": "copilot-consultant-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA4/MkydqOZED4D5zlarJrOOvkmhqDZmmROYxgsLOo4rE=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "codex",
+      "role": "manager",
+      "keyId": "codex-manager-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAkQModrCGL/5Nc+oZlNAicymkJkT9sffWnAzZVl1wtQI=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "codex",
+      "role": "collaborator",
+      "keyId": "codex-collaborator-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEADhpGEwbXS+j8NIX9bdoRE5MtnbIYLGUKeZ7d6wqXzfo=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "codex",
+      "role": "admin",
+      "keyId": "codex-admin-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA7uTOTfGVv3Hov9dXKcabnXfJei8TagyiRt3iO2tkJU8=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "codex",
+      "role": "consultant",
+      "keyId": "codex-consultant-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA+Uk+Suxmfdoj9XP2pMvxL04axDRlsKsLgH5bgYlxPq0=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "claude-code",
+      "role": "manager",
+      "keyId": "claude-code-manager-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEALT4vAVD0dck0ZjbACxS2I2mV88gg91MWHriFB1WVEdk=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "claude-code",
+      "role": "collaborator",
+      "keyId": "claude-code-collaborator-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAjY/rVkV4ljRTLCUJ5XhxnLFNQ1RQH94Ck+rPAeCSXcE=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "claude-code",
+      "role": "admin",
+      "keyId": "claude-code-admin-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEA/EBjpTLJeACajMUsIDFYgQa7tmp2czgsWKWsb8FGunQ=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "claude-code",
+      "role": "consultant",
+      "keyId": "claude-code-consultant-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAN8Xp3BzFDi7Y2iR1BOX/z/54fAIpW3XxtWIrsa3LHVY=\\n-----END PUBLIC KEY-----"
+    },
+    {
+      "team": "openclaw",
+      "role": "manager",
+      "keyId": "openclaw-manager-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAERn1EQAN4tx+6oy8waSLf5YbdwY2+OdegFrITXja5ak=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "openclaw",
+      "role": "collaborator",
+      "keyId": "openclaw-collaborator-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAD1Sj2jJplGLs2EbYVk9V+uPFbLHU9d46GfNP48+QkI0=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "openclaw",
+      "role": "admin",
+      "keyId": "openclaw-admin-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAYBBu5KU2OA+hbO15bffQhAfjFWwZXo5tI8pyxT5BYXs=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "openclaw",
+      "role": "consultant",
+      "keyId": "openclaw-consultant-v1",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEACCF0/o48aS8deiRJsyFPOAQqXoiyFfhQajo4AnaGaBY=\\n-----END PUBLIC KEY-----\\n"
+    }
   ]
 }
