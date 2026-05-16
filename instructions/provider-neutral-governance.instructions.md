@@ -58,6 +58,18 @@ must say "agent runtime" or "orchestrating team" unless it is naming an adapter.
   targets, not direct edit targets.
 - Tests must fail if Codex is omitted from shared coordination coverage.
 
+## Cross-Team Comment Artifacts
+
+Use these machine-readable GitHub comment blocks for coordination:
+`CLAIM_LEASE`, `CONFLICT_PULL`, `TEAM_QUESTION`, `TEAM_RESPONSE`, and
+`LEASE_CLOSE`.
+
+- Validate artifacts with `scripts/global/cross-team-comment-artifacts.js`.
+- Manager adjudicates `CONFLICT_PULL` when the owning team does not respond
+  before the requested deadline.
+- Manager escalates unanswered `TEAM_QUESTION` comments after `reply_by`.
+- `CLAIM_LEASE` duplicates by ticket or branch are invalid.
+
 Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
