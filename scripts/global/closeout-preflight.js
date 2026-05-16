@@ -25,13 +25,19 @@ function normalizeLabels(labels) {
   return (labels || []).map(label => (typeof label === 'string' ? label : label.name)).filter(Boolean);
 }
 
+function deriveLaneFromLabels(labels) {
+  const laneLabel = (labels || []).find(l => typeof l === 'string' && l.startsWith('lane:'));
+  return laneLabel || 'lane:code-change';
+}
+
 function toValidatorInput(issue, issueNum, branch) {
   const body = issue.body || '';
+  const labels = normalizeLabels(issue.labels);
   return {
     body,
     comments: normalizeComments(issue.comments),
-    labels: normalizeLabels(issue.labels),
-    lane: 'lane:code-change',
+    labels,
+    lane: deriveLaneFromLabels(labels),
     prBody: '',
     state: issue.state || 'open',
     ticketRef: issueNum,

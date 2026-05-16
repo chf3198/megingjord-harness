@@ -50,6 +50,21 @@ test('closeout-preflight skips branches without ticket numbers', () => {
   expect(result.stdout).toContain('skip');
 });
 
+test('closeout-preflight derives lane from labels when handoff is docs-only', () => {
+  const result = runWith({
+    title: 'D Test',
+    body: '',
+    comments: [
+      { body: 'MANAGER_HANDOFF\nscope: docs\nlane: lane:docs-only\ntest_strategy: peer-review\nacceptance: ok\ngates: peer\nSigned-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager' },
+      { body: '## CONSULTANT_CLOSEOUT\nG1=9\nverification-timestamp: 2026-05-15T00:00:00Z\nverdict: approved\nSigned-by: Orla Vale\nTeam&Model: claude-code:opus@anthropic\nRole: consultant\nrubric_rating: 9/10' },
+    ],
+    labels: ['lane:docs-only', 'type:doc'],
+    state: 'open',
+  }, 'fix/1639-derives-lane');
+  expect(result.status).toBe(0);
+  expect(result.stdout).toContain('PASS #1639');
+});
+
 test('closeout-preflight skips when SKIP_CLOSEOUT_PREFLIGHT=1', () => {
   const result = spawnSync(process.execPath, [SCRIPT], {
     env: {
