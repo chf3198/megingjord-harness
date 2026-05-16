@@ -2,6 +2,7 @@
 // Reads the request body's `capability` field and routes to the right handler.
 import type { Env } from '../worker';
 import { rotationCheck } from './rotation-check';
+import { reviewRun } from './review-run';
 
 const SUBSTRATE_HEALTH_KV_KEY = 'substrate-health:latest';
 const MAILBOX_PREFIX = 'mailbox/';
@@ -64,7 +65,13 @@ export async function dispatch(request: Request, env: Env, keyId: string, slsaSt
       r.headers.set('x-hamr-meta', JSON.stringify(meta));
       return r;
     }
+    case 'review:run': {
+      const result = reviewRun(params as Parameters<typeof reviewRun>[0]);
+      const r = jsonResponse(200, result);
+      r.headers.set('x-hamr-meta', JSON.stringify(meta));
+      return r;
+    }
     case '': return jsonResponse(200, { accepted: true, ...meta, hint: 'POST capability + params to invoke' });
-    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read', 'rotation:check'] });
+    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read', 'rotation:check', 'review:run'] });
   }
 }

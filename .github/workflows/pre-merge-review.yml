@@ -1,0 +1,30 @@
+name: pre-merge-review
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  review:
+    name: pre-merge-review
+    runs-on: ubuntu-latest
+    if: ${{ vars.MEGINGJORD_MODEL_REVIEW_DISABLED != '1' }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const orch = require('./scripts/global/pre-merge-review-orchestrator.js');
+            if (orch.disabled()) { console.log('pre-merge-review: opt-out'); return; }
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping'); return; }
+            const plan = orch.planSubAgents({});
+            const summary = `pre-merge-review: scaffolded (sub-agents: ${plan.sub_agents.join(', ')}); findings=0 (actual sub-agent invocation operationalizes via HAMR review:run capability)`;
+            console.log(summary);
+            await core.summary.addRaw(`### Pre-Merge Review (Epic #1736)\n\n${summary}\n\nMode: advisory-only (soak active per Phase 4 #1756)\n`).write();
