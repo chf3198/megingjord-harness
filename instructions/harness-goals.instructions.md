@@ -20,6 +20,14 @@ G10 Maintainability.
   secrets never in git, env vars, or logs; least-privilege tokens enforced; supply-chain
   dependencies pinned; agent-consumed inputs sanitised against injection.
 - G5 Portability: avoid user-specific coupling; settings-driven behavior preferred.
+  Each operator has a unique baseline of local, fleet, and remote resources;
+  features that require resources beyond the GitHub-access baseline (keys, secrets,
+  remote services, paid plans, specific fleet hardware, preview-tier features) must
+  either be classified as opt-in via env-var or label gate (parity with the existing
+  MEGINGJORD_HAMR_DISABLED and IDE proxy opt-in patterns) OR ship with a documented
+  minimal-resource fallback. Operator-environment variance is a first-class
+  portability dimension distinct from G6: G6 covers temporary outages of normally-
+  available resources, G5 covers baseline-absent resources for a given operator.
 - G6 Resilience: graceful degradation and fallback paths for partial outages.
 - G7 Throughput: acceptable speed after higher-priority goals are satisfied.
 - G8 Observability: decisions and outcomes are visible, auditable, and attributable.
@@ -32,5 +40,6 @@ G10 Maintainability.
 For any design/routing/tooling decision, briefly verify in this order:
 1) Is it governance-compliant? 2) Does it improve or preserve quality?
 3) Can it run at zero cost first? 4) Is privacy and security preserved by default?
-5) Is it portable? 6) Is degradation safe? 7) Is it fast enough?
+5) Is it portable across operator baselines (will it work for an operator without
+   resource X)? 6) Is degradation safe? 7) Is it fast enough?
 8) Is it observable? 9) Does it remain interoperable? 10) Is it maintainable?
