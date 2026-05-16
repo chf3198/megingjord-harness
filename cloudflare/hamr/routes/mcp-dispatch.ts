@@ -1,6 +1,7 @@
 // HAMR /mcp capability dispatch — Wave 5 child 4 (#935).
 // Reads the request body's `capability` field and routes to the right handler.
 import type { Env } from '../worker';
+import { rotationCheck } from './rotation-check';
 
 const SUBSTRATE_HEALTH_KV_KEY = 'substrate-health:latest';
 const MAILBOX_PREFIX = 'mailbox/';
@@ -57,7 +58,13 @@ export async function dispatch(request: Request, env: Env, keyId: string, slsaSt
     }
     case 'doctor:probe': return doctorProbe(env).then((r) => { r.headers.set('x-hamr-meta', JSON.stringify(meta)); return r; });
     case 'mailbox:read': return mailboxRead(env, params).then((r) => { r.headers.set('x-hamr-meta', JSON.stringify(meta)); return r; });
+    case 'rotation:check': {
+      const result = rotationCheck(params as Parameters<typeof rotationCheck>[0]);
+      const r = jsonResponse(200, result);
+      r.headers.set('x-hamr-meta', JSON.stringify(meta));
+      return r;
+    }
     case '': return jsonResponse(200, { accepted: true, ...meta, hint: 'POST capability + params to invoke' });
-    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read'] });
+    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read', 'rotation:check'] });
   }
 }

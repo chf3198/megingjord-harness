@@ -1,0 +1,59 @@
+name: rotation-advisory
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  advisory:
+    name: rotation-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const v2 = require('./scripts/global/baton-team-model-v2.js');
+            const adapter = require('./scripts/global/hamr-rotation-check.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N in PR body; rotation-advisory skipped.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedIssue,
+            });
+            const labels = issue.labels.map(l => l.name);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const records = v2.extractRecordsFromComments(comments);
+            const result = adapter.rotationCheck({
+              operator_mode: labels.includes('rotation-single-model-fleet') ? 'single-model-fleet' : 'advisory-only',
+              labels,
+              roles_observed: records,
+            });
+            const summary = result.decision === 'pass'
+              ? `rotation-advisory: PASS (mode=${result.operator_mode})`
+              : `rotation-advisory: ${result.decision.toUpperCase()} (${result.rule_evaluated || 'unknown'})`;
+            console.log(summary);
+            await core.summary.addRaw(`### Rotation advisory (Epic #1716)\n\n${summary}\n`).write();
+            if (result.decision !== 'pass') {
+              const detail = (result.violations || [])
+                .map(v => `- \`${v.rule}\`: ${v.detail}`).join('\n');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: '<!-- rotation-advisory -->\n## Rotation advisory (Epic #1716)\n\n' +
+                      detail + '\n\n' +
+                      'Operator mode: ' + result.operator_mode + '. ' +
+                      'Waive with label `rotation-required-waived` + rationale comment, or rotate the relevant role to a different `team`. ' +
+                      'Cross-family rotation required for strict-rotation mode; advisory-only mode does not block. ' +
+                      'See `docs/howto/rotation-contract-v2.md`.',
+              });
+            }
