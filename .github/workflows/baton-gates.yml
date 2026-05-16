@@ -58,6 +58,8 @@ jobs:
           script: |
             const { checkAdminIndependence } =
               require('./scripts/global/baton-independence.js');
+            const { analyzeComments } =
+              require('./scripts/global/baton-artifact-governance.js');
             const body = context.payload.pull_request.body || '';
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
@@ -88,6 +90,17 @@ jobs:
               author: c.user && c.user.login,
             })));
             if (!independence.ok) core.setFailed(independence.message);
+            const signerGov = analyzeComments(comments);
+            if (!signerGov.ok) {
+              const detail = signerGov.violations
+                .map(v => `${v.artifact || 'artifact'}:${v.rule}`)
+                .slice(0, 3)
+                .join(', ');
+              core.setFailed(
+                `Signer/role governance violations in issue #${linkedIssue}: ${detail}. ` +
+                'Rebuild baton artifacts with scripts/global/baton-comment-build.js.'
+              );
+            }
 
   consultant-gate:
     name: consultant-gate

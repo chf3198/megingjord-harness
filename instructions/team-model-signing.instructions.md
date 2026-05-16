@@ -47,6 +47,16 @@ applyTo: "**"
 - Current role surnames: Manager=`Mason`, Collaborator=`Harper`, Admin=`Reyes`, Consultant=`Vale`.
 - Use `node scripts/global/agent-signature.js` for raw signatures or `node scripts/global/baton-comment-build.js` for full baton comment templates.
 
+## Enforcement and recovery
+
+- CI enforcement: `.github/workflows/baton-gates.yml` validates baton artifact signer aliases and role consistency against registry rules.
+- Local enforcement: `node scripts/global/consultant-checks.js --issue <N>` includes signer/role consistency checks.
+- Recovery when blocked:
+  1. Rebuild the affected artifact text with `node scripts/global/baton-comment-build.js --artifact ... --role ... --team-model ... --ticket ...`.
+  2. Repost corrected baton artifact comment on the linked issue.
+  3. Re-run consultant checks and re-push.
+- Manual `Signed-by` edits are not allowed for governed baton artifacts.
+
 ## Override rule
 
 - When local rules differ, use the local alias/trailer format and keep canonical `Team&Model` provenance present.

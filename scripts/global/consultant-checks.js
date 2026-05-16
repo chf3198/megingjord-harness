@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
 const lib = require('./consultant-checks-lib');
+const batonGov = require('./baton-artifact-governance');
 
 const args = process.argv.slice(2);
 const asJson = args.includes('--json');
@@ -49,6 +50,20 @@ const checks = [
   [id('gov', 4), 'governance', () => { const gitLog = run("git log --oneline -99"); const matchCount = (gitLog.match(/#\d+/g) || []).length; const total = gitLog ? gitLog.split('\n').length : 0; return ok(id('gov', 4), 'governance', total > 0 && matchCount / total >= 0.8, `${matchCount}/${total} commit refs`, 'commit-issue-linkage', 'reference issue numbers in commits'); }],
   [id('gov', 5), 'governance', () => issue ? ok(id('gov', 5), 'governance', lib.decideGov005(run(`gh issue view ${issue}`)), 'issue body checklist scanned', 'ac-evidence-completeness', 'complete unchecked ACs') : skip(id('gov', 5), 'governance', 'missing --issue')],
   [id('gov', 6), 'governance', () => { const branch = run('git branch --show-current'); return ok(id('gov', 6), 'governance', /^(feat|fix|skill|hook)\//.test(branch), branch || 'unknown-branch', 'branch-naming', 'use approved branch prefix'); }],
+  [id('gov', 7), 'governance', () => {
+    if (!issue) return skip(id('gov', 7), 'governance', 'missing --issue');
+    let comments = [];
+    try { comments = JSON.parse(run(`gh issue view ${issue} --json comments`)).comments || []; }
+    catch {}
+    const result = batonGov.analyzeComments(comments);
+    const first = result.violations[0];
+    return ok(
+      id('gov', 7), 'governance', result.ok,
+      result.ok ? `${result.count} baton artifact comments validated` : `${first?.artifact || 'artifact'} ${first?.rule || 'unknown'}`,
+      'signer-role-consistency',
+      'rebuild artifact via baton-comment-build.js or agent-signature.js and correct role fields'
+    );
+  }],
   [id('tool', 1), 'tools', () => ok(id('tool', 1), 'tools', exists('wiki/index.md') && exists('wiki/log.md'), 'wiki index/log presence', 'wiki-growth-ready', 'maintain wiki index/log updates')],
   [id('tool', 2), 'tools', () => ok(id('tool', 2), 'tools', !/\[\[[^\]]+\]\].*\(not found\)/.test(run('npm run wiki:lint 2>&1 | cat')), 'wiki lint output scanned', 'wiki-orphan-check', 'add backlinks/cross-links')],
   [id('tool', 3), 'tools', () => ok(id('tool', 3), 'tools', /All files within 100-line/.test(run('npm run lint 2>&1 | cat')), 'lint output scanned', 'lint-clean', 'reduce file length or split files')],
