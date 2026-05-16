@@ -54,6 +54,8 @@ jobs:
         run: npm run governance:tokens
       - name: Governance sync check
         run: npm run governance:sync-check
+      - name: Governance compatibility matrix
+        run: npm run governance:compatibility:matrix
       - name: Readability gate
         run: npm run lint:readability:ci
       - name: Ticket reconciliation

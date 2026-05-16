@@ -48,6 +48,8 @@
     "governance:adapters:test": "node scripts/global/governance-adapter-emit.spec.js",
     "governance:generate": "node scripts/global/governance-generate.js",
     "governance:sync-check": "node scripts/global/governance-sync-check.js",
+    "governance:parity:test": "node scripts/global/governance-parity.spec.js",
+    "governance:compatibility:matrix": "node scripts/global/governance-compatibility-matrix.js",
     "governance:no-sync-http": "node scripts/global/no-sync-http-handlers.js",
     "governance:tokens": "node scripts/global/governance-token-lint.js",
     "governance:reconcile": "node scripts/global/ticket-reconcile.js --json",

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "units": [
+    {
+      "id": "global-governance",
+      "title": "Global Governance",
+      "priority": "P1",
+      "appliesTo": ["**"],
+      "targets": ["copilot", "cline", "claude-code", "continue"],
+      "tags": ["governance", "global"],
+      "bodyRef": "instructions/operator-identity-context.instructions.md"
+    },
+    {
+      "id": "path-scoped-governance",
+      "title": "Path Scoped Governance",
+      "priority": "P1",
+      "appliesTo": ["scripts/**", "hooks/**"],
+      "targets": ["copilot", "continue"],
+      "tags": ["governance", "path-scoped"],
+      "bodyRef": "instructions/team-model-signing.instructions.md"
+    },
+    {
+      "id": "priority-p2-governance",
+      "title": "Priority P2 Governance",
+      "priority": "P2",
+      "appliesTo": ["docs/**"],
+      "targets": ["copilot", "cline", "continue"],
+      "tags": ["governance", "docs"],
+      "bodyRef": "instructions/readability-commenting-governance.instructions.md"
+    }
+  ]
+}
