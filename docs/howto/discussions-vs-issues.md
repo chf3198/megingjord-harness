@@ -25,7 +25,17 @@ Once a deliverable + AC crystallizes, convert to an Issue.
 | Cross-team protocol | Inter-team coordination | "How should claim conflicts be resolved?" |
 | Tooling research | Tool evaluation | "Compare gh-aw vs Claude-Code agent-teams" |
 | Operations notes | Runbook deltas, op insights | "Pre-push gate hang recovery recipe" |
-| Q&A | Quick questions | "How do I run the lint locally?" |
+| Q&A (default) | Quick questions | "How do I run the lint locally?" |
+
+**API constraint** (per #1668 verification): GitHub's GraphQL API does **not**
+expose a `createDiscussionCategory` mutation. The 6 default categories
+(Announcements, General, Ideas, Polls, Q&A, Show and tell) ship with every
+Discussions-enabled repo. The 4 governance-specific categories above
+(Architecture, Cross-team protocol, Tooling research, Operations notes) must
+be created via the repo **Settings → Discussions** UI by an operator with
+admin access. Until then, governance discussions can be filed under
+**General** with the category-tag pattern in the title (e.g.,
+`[architecture] should we split HAMR...`).
 
 ## Conversion path (Discussion → Issue)
 
