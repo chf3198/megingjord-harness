@@ -1,0 +1,35 @@
+name: cross-team-event-receiver
+on:
+  repository_dispatch:
+    types: [cross-team-claim, cross-team-release, cross-team-stage-change]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  receive:
+    name: receive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: normalize-and-route
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { normalize, isInteresting } =
+              require('./scripts/global/cross-team-event-listener.js');
+            const event = normalize({
+              event_type: context.payload.action,
+              client_payload: context.payload.client_payload || {},
+              delivery: context.runId,
+            });
+            if (!isInteresting(event)) {
+              console.log(`Ignoring event ${event?.eventName}`);
+              return;
+            }
+            console.log(`Received cross-team event: ${event.eventName}`);
+            await core.summary.addRaw(
+              `### Cross-team event\n\n- name: ${event.eventName}\n` +
+              `- source: ${event.source}\n- actor: ${event.actor}\n`,
+            ).write();
