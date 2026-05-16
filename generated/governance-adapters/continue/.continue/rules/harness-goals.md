@@ -1,5 +1,5 @@
 ---
-target: claude-code
+target: continue
 id: harness-goals
 title: Harness Goal Constitution
 priority: P1
@@ -13,8 +13,9 @@ targets:
   - "continue"
 ---
 ---
-description: Governance unit harness-goals
 applyTo: "**"
+paths:
+  - "**"
 priority: P1
 targets: "copilot,cline,claude-code,continue"
 ---
@@ -23,4 +24,4 @@ targets: "copilot,cline,claude-code,continue"
 Source: instructions/harness-goals.instructions.md
 Targets: copilot, cline, claude-code, continue
 
-This is a generated adapter preview for claude-code.
+This is a generated adapter preview for continue.
