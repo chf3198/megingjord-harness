@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: '20' }
       - name: Validate test_strategy evidence
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
