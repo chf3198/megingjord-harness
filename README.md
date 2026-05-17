@@ -93,6 +93,8 @@ npm run deploy:both:apply
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
 | `governance:drift` | `node scripts/global/governance-drift-classifier.js --json` |
+| `governance:duplicate-check` | `node scripts/global/ticket-duplicate-guard.js --scan` |
+| `governance:duplicate-check:test` | `node --test tests/ticket-duplicate-guard.spec.js` |
 | `governance:epic` | `node scripts/global/epic-evidence.js` |
 | `governance:epics` | `node scripts/global/epic-close-validator.js` |
 | `governance:generate` | `node scripts/global/governance-generate.js` |
