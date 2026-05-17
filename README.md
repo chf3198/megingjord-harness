@@ -105,6 +105,8 @@ npm run deploy:both:apply
 | `governance:manifest:validate` | `node scripts/global/governance-manifest-validate.js` |
 | `governance:no-sync-http` | `node scripts/global/no-sync-http-handlers.js` |
 | `governance:parity:test` | `node scripts/global/governance-parity.spec.js` |
+| `governance:price-cap` | `node scripts/global/provider-price-cap-gate.js` |
+| `governance:price-cap:test` | `node --test tests/provider-price-cap-gate.spec.js` |
 | `governance:reconcile` | `node scripts/global/ticket-reconcile.js --json` |
 | `governance:review-score` | `node scripts/global/review-score-classifier.js` |
 | `governance:review-score:test` | `node --test tests/review-score-classifier.spec.js` |

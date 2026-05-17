@@ -158,6 +158,8 @@
     "governance:soak-language:test": "node --test tests/soak-language-guard.spec.js",
     "governance:review-score": "node scripts/global/review-score-classifier.js",
     "governance:review-score:test": "node --test tests/review-score-classifier.spec.js",
+    "governance:price-cap": "node scripts/global/provider-price-cap-gate.js",
+    "governance:price-cap:test": "node --test tests/provider-price-cap-gate.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",
     "goals:regen": "node scripts/global/goals-contract-generate.js"
   },
