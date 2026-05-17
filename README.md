@@ -106,6 +106,8 @@ npm run deploy:both:apply
 | `governance:no-sync-http` | `node scripts/global/no-sync-http-handlers.js` |
 | `governance:parity:test` | `node scripts/global/governance-parity.spec.js` |
 | `governance:reconcile` | `node scripts/global/ticket-reconcile.js --json` |
+| `governance:review-score` | `node scripts/global/review-score-classifier.js` |
+| `governance:review-score:test` | `node --test tests/review-score-classifier.spec.js` |
 | `governance:soak-language` | `node scripts/global/megalint/soak-language-guard.js` |
 | `governance:soak-language:test` | `node --test tests/soak-language-guard.spec.js` |
 | `governance:sync-check` | `node scripts/global/governance-sync-check.js` |

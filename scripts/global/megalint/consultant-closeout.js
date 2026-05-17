@@ -24,8 +24,15 @@ function checkEvidenceFields(body) {
   const legacyRubric = /G[1-9]\s*[=:]/i.test(body);
   const structuredRubric = /rubric_version["']?\s*[:=]\s*["']?g1-g9-v2/i.test(body)
     && /boxes_checked/i.test(body) && /boxes_total/i.test(body);
-  if (!legacyRubric && !structuredRubric) {
-    violations.push({ rule: 'missing-rubric', detail: 'CONSULTANT_CLOSEOUT missing legacy G1-9 rubric or v2 deterministic rubric JSON' });
+  // #1811 + #1750: accept rubric_provisional flag while Epic #1745 calibration corpus is built.
+  // The flag must coexist with SOME rubric form (legacy or structured) — it cannot replace rubric entirely.
+  const provisional = /rubric_provisional["']?\s*[:=]\s*["']?true/i.test(body)
+    || /provisional["']?\s*[:=]\s*["']?true/i.test(body);
+  if (!legacyRubric && !structuredRubric && !provisional) {
+    violations.push({ rule: 'missing-rubric', detail: 'CONSULTANT_CLOSEOUT missing legacy G1-9 rubric or v2 deterministic rubric JSON or rubric_provisional:true marker (Epic #1745).' });
+  }
+  if (provisional && !legacyRubric && !structuredRubric) {
+    violations.push({ rule: 'rubric-provisional-advisory', severity: 'advisory', detail: 'rubric_provisional:true accepted in advisory mode pending Epic #1745 calibration corpus. Include legacy or structured rubric alongside the flag.' });
   }
   if (!/verification[ _-]?timestamp/i.test(body)) violations.push({ rule: 'missing-verification-timestamp', detail: 'CONSULTANT_CLOSEOUT missing verification-timestamp field' });
   if (!/(verdict|approve|approved)/i.test(body)) violations.push({ rule: 'missing-verdict', detail: 'CONSULTANT_CLOSEOUT missing explicit verdict / approve statement' });
