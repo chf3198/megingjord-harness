@@ -97,6 +97,8 @@ npm run deploy:both:apply
 | `governance:duplicate-check:test` | `node --test tests/ticket-duplicate-guard.spec.js` |
 | `governance:epic` | `node scripts/global/epic-evidence.js` |
 | `governance:epics` | `node scripts/global/epic-close-validator.js` |
+| `governance:escalation-coverage` | `node scripts/global/escalation-coverage-gate.js` |
+| `governance:escalation-coverage:test` | `node --test tests/escalation-coverage-gate.spec.js` |
 | `governance:generate` | `node scripts/global/governance-generate.js` |
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
 | `governance:manifest:test` | `node scripts/global/governance-manifest-validate.spec.js` |

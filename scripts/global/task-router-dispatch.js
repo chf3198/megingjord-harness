@@ -62,11 +62,13 @@ async function main() {
     recommendedModel: resolved.modelId, providerModel: resolved.providerModelId };
   const decision = await buildDecision(effectiveRoute, resolved);
   const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
+  // #1797: escalation events MUST carry a structured reason for coverage gate compliance.
+  const escalation_reason = outcome === 'fail' ? (decision.action || 'unknown-escalation') : null;
   recordTelemetry({ lane: resolved.lane, model: resolved.providerModelId,
     multiplier: resolved.multiplier,
     taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
     rollbackApplied: resolved.rollbackApplied, outcome, execute: true });
-  recordCostEvent(resolved.lane, resolved.providerModelId, { outcome });
+  recordCostEvent(resolved.lane, resolved.providerModelId, { outcome, escalation_reason });
   const result = { route: effectiveRoute, routing: resolved, decision };
   if (json) {
     console.log(JSON.stringify(result, null, 2));

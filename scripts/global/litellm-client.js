@@ -51,8 +51,17 @@ async function litellmChat(prompt, opts = {}) {
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || '';
     if (!content) return { ok: false, error: 'empty_response' };
-    emitCacheStatSafe('litellm', data.model || model, data.usage);
-    return { ok: true, content, model: data.model || model, backend: 'litellm' };
+    if (!opts.disableCacheEmit) emitCacheStatSafe('litellm', data.model || model, data.usage);
+    return {
+      ok: true,
+      content,
+      model: data.model || model,
+      backend: 'litellm',
+      usage: data.usage || null,
+      prompt_tokens: Number(data.usage?.prompt_tokens || 0),
+      completion_tokens: Number(data.usage?.completion_tokens || 0),
+      total_tokens: Number(data.usage?.total_tokens || 0),
+    };
   } catch (e) {
     return { ok: false, error: e.message || 'litellm_error' };
   }
@@ -68,7 +77,7 @@ async function chatComplete(prompt, opts = {}) {
       try {
         const { wrapProviderCall } = require('./hamr-provider-wrapper');
         const wrapped = await wrapProviderCall('litellm', async () => {
-          const inner = await litellmChat(prompt, { ...opts, url });
+          const inner = await litellmChat(prompt, { ...opts, url, disableCacheEmit: true });
           if (!inner.ok) throw new Error(inner.error || 'litellm_failed');
           return inner;
         }, { tier: opts.tier });

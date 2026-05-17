@@ -34,6 +34,14 @@ test('appendCacheStat appends multiple records', () => {
   fs.unlinkSync(file);
 });
 
+test('appendCacheStat skips non-informative zero-token records', () => {
+  const file = tmpFile();
+  const r = EMIT.appendCacheStat({ provider: 'litellm', cache_read_tokens: 0, input_tokens: 0, output_tokens: 0 }, { file });
+  expect(r.ok).toBe(false);
+  expect(r.skipped).toBe(true);
+  expect(fs.existsSync(file)).toBe(false);
+});
+
 test('fromTokenRecord converts adapter output to cache-stat shape', () => {
   const tokenRecord = { provider: 'openai', model: 'gpt-5', cache_read_tokens: 400, input_tokens: 800, output_tokens: 100 };
   const stat = EMIT.fromTokenRecord(tokenRecord);

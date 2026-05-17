@@ -24,6 +24,22 @@ test('openai/groq/cerebras adapters extract cache-read-tokens', () => {
   expect(cer.cache_read_tokens).toBe(600);
 });
 
+test('litellm adapter extracts tokens from nested usage payload', () => {
+  const rec = ADAPTERS.litellm({
+    model: 'fleet-primary',
+    usage: {
+      prompt_tokens: 1200,
+      completion_tokens: 300,
+      total_tokens: 1500,
+      prompt_tokens_details: { cached_tokens: 900 },
+    },
+  });
+  expect(rec.input_tokens).toBe(1200);
+  expect(rec.output_tokens).toBe(300);
+  expect(rec.total_tokens).toBe(1500);
+  expect(rec.cache_read_tokens).toBe(900);
+});
+
 test('cacheHeaders covers anthropic + gemini + OAI-shape providers', () => {
   expect(LLM.cacheHeaders('anthropic').headers['anthropic-beta']).toContain('prompt-caching-2024-07-31');
   const gem = LLM.cacheHeaders('gemini', { ttlSeconds: 600, cacheKey: 'cache-abc' });

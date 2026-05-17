@@ -35,10 +35,15 @@ function openrouter(payload = {}, base = {}) {
 }
 
 function litellm(payload = {}, base = {}) {
+  const usage = payload.usage || {};
+  const details = usage.prompt_tokens_details || {};
   return mk(base, {
     provider: 'litellm', model: payload.model || base.model,
-    input_tokens: n(payload.prompt_tokens), output_tokens: n(payload.completion_tokens),
-    total_tokens: n(payload.total_tokens), cost_usd: payload.spend ?? payload.cost,
+    input_tokens: n(payload.prompt_tokens || usage.prompt_tokens),
+    output_tokens: n(payload.completion_tokens || usage.completion_tokens),
+    cache_read_tokens: n(details.cached_tokens || usage.prompt_cache_hit_tokens),
+    total_tokens: n(payload.total_tokens || usage.total_tokens),
+    cost_usd: payload.spend ?? payload.cost,
     confidence_level: payload.pricing_fresh === false ? 'estimated' : 'derived',
     request_id: payload.request_id || payload.id || base.request_id, source_kind: 'litellm_spend_log'
   });

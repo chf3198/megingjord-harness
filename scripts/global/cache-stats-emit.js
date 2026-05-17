@@ -13,6 +13,14 @@ function ensureDir() {
   if (!fs.existsSync(STATS_DIR)) fs.mkdirSync(STATS_DIR, { recursive: true });
 }
 
+function isInformativeRecord(record) {
+  if (!record) return false;
+  const input = Number(record.input_tokens || 0);
+  const cacheRead = Number(record.cache_read_tokens || 0);
+  const output = Number(record.output_tokens || 0);
+  return input > 0 || cacheRead > 0 || output > 0;
+}
+
 /** Append a single cache-stat record atomically.
  * Schema: {ts, provider, model?, cache_read_tokens, input_tokens, output_tokens?, executed?}.
  * Atomic strategy: write+rename on temp file when target absent; otherwise plain append
@@ -36,6 +44,9 @@ function appendCacheStat(record, opts = {}) {
     output_tokens: Number(record.output_tokens || 0),
     executed: record.executed ?? null,
   };
+  if (!isInformativeRecord(normalized)) {
+    return { ok: false, skipped: true, reason: 'non_informative_record', file, line: null };
+  }
   const line = JSON.stringify(normalized) + '\n';
   fs.appendFileSync(file, line, { encoding: 'utf8', flag: 'a' });
   return { ok: true, file, line };
@@ -68,4 +79,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { appendCacheStat, fromTokenRecord, STATS_FILE };
+module.exports = { appendCacheStat, fromTokenRecord, isInformativeRecord, STATS_FILE };
