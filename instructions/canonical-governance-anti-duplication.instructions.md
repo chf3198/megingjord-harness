@@ -96,6 +96,16 @@ Before implementing governance feature X, verify:
 **Runtime-specific feature needed everywhere?**  
 → Upstream to shared contract; deprecate runtime-specific with migration guide
 
+## Adapter parity (#1798 F5 decision)
+
+The Python governance hooks under `hooks/scripts/*.py` are wired into Copilot (`~/.copilot/hooks/global-standards.json`) and Codex (`~/.codex/hooks.json`) runtime adapters. **Claude Code is intentionally exempt** — `~/.claude/settings.json` carries no `"hooks"` block.
+
+Rationale: Claude Code session lifecycle, memory model, and tool API are owned by Anthropic's runtime. Wiring shared Python hooks into Claude would duplicate logic already present in Claude Code's native gates (e.g., `manager-ticket-lifecycle` skill, baton-orchestrator skill). Adding Python-hook parity would create a second enforcement surface that drifts from Claude Code's primary baton enforcement path.
+
+The trade-off favored: **G5 (portability) + G9 (interoperability)** over **G7 (throughput consistency)**. Operators on Copilot or Codex see hook-driven warnings; operators on Claude Code see skill-driven warnings; the substantive governance contract (Team&Model signing, baton order, ticket-first, dedicated worktree) is enforced on all three via different mechanisms.
+
+Cross-team contract entry point: `governance/README.md`. Operators should consult that file as the canonical reference rather than relying on hook-driven warnings as a checklist.
+
 ## Enforcement
 
 Mandatory checks for governance changes:

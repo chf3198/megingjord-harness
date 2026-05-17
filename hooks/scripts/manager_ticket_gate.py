@@ -26,18 +26,26 @@ def main() -> int:
     if not is_repo_enabled(cwd):
         return 0
 
+    # Phase guard (#1798/F3): only fire on explicit handoff markers, not common
+    # English words like "work" or "task" that produced high false-positive rates.
     if not any(
-        w in prompt
-        for w in ["manager", "scope", "gates", "constraint", "work", "task"]
+        m in prompt
+        for m in ["manager_handoff", "manager handoff", "scope:", "acceptance:"]
     ):
         return 0
 
     state = ensure_state(cwd)
     issue_num = extract_issue_num(prompt)
 
+    # Accept state.active_ticket as ticket evidence if prompt has no #N
+    # (Manager operating via `gh` CLI on existing tickets is a normal flow).
+    if not issue_num:
+        issue_num = state.get("active_ticket")
+
     if issue_num:
         state.setdefault("roles", {})["manager"] = True
         state["active_ticket"] = issue_num
+        state["current_phase"] = "manager"
         save_state(state)
         return 0
 

@@ -8,7 +8,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from wiki_wisdom import admin_steps, post_merge_checklist
+from wiki_wisdom import post_merge_checklist
 
 CODE_UNCOMMITTED_EXTS = (".sh", ".js", ".py", ".ts", ".json", ".md")
 
@@ -28,8 +28,12 @@ ADMIN_STEPS = (
 
 def check_uncommitted(
     uncommitted: list[str],
+    roles: dict | None = None,
 ) -> tuple[str | None, str | None]:
     if not uncommitted:
+        return None, None
+    # Phase guard (#1798 F1): pre-collab uncommitted state is in-progress or unrelated, not an Admin gap.
+    if roles is not None and not roles.get("collaborator", False):
         return None, None
     code_files = [
         f for f in uncommitted
@@ -51,6 +55,9 @@ def check_admin_ops(
     flags: dict, ops: dict, roles: dict, repo_type: str,
 ) -> tuple[str | None, str | None]:
     """Check admin op completion. Returns (block_reason, message)."""
+    # Phase guard (#1798 F2): Admin ops only meaningful after Collaborator completes.
+    if not roles.get("collaborator", False):
+        return None, None
     base = (
         ["commit", "push", "pr_create", "ci_green", "merge"]
         if flags.get("code_touched") else []
@@ -72,16 +79,11 @@ def check_admin_ops(
     return None, None
 
 
-def post_merge_messages(
-    signals: list[str], has_messages: bool,
-) -> list[str]:
+def post_merge_messages(signals: list[str], has_messages: bool) -> list[str]:
     if "code-changed" in signals or "extension-changed" in signals:
         return [post_merge_checklist()]
     if not has_messages:
-        return [
-            "Before ending: confirm checks/releases are evidence-backed "
-            "and docs are synchronized."
-        ]
+        return ["Before ending: confirm checks/releases are evidence-backed and docs are synchronized."]
     return []
 
 

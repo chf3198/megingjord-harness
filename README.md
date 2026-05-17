@@ -98,6 +98,7 @@ npm run deploy:both:apply
 | `governance:epic` | `node scripts/global/epic-evidence.js` |
 | `governance:epics` | `node scripts/global/epic-close-validator.js` |
 | `governance:generate` | `node scripts/global/governance-generate.js` |
+| `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
 | `governance:manifest:test` | `node scripts/global/governance-manifest-validate.spec.js` |
 | `governance:manifest:validate` | `node scripts/global/governance-manifest-validate.js` |
 | `governance:no-sync-http` | `node scripts/global/no-sync-http-handlers.js` |

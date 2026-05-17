@@ -41,7 +41,7 @@ def main() -> int:
     messages = []
     block_reason = None
 
-    block_reason, msg = check_uncommitted(uncommitted)
+    block_reason, msg = check_uncommitted(uncommitted, roles)
     if msg:
         messages.append(msg)
 
