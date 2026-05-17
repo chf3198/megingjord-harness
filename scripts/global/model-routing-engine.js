@@ -8,6 +8,7 @@ const { readTelemetry, summarize } = require('./model-routing-telemetry');
 const FILE = path.join(__dirname, 'model-routing-policy.json');
 const ADAPTER_FILE = path.join(__dirname, 'routing-provider-adapters.json');
 const POLICY_OVERRIDES = path.join(os.homedir(), '.megingjord', 'cascade-policy-overrides.json');
+const PROMPT_HINT_MAX_LENGTH = 160;
 
 // Wave 8 child 2 (#977): convergence-design item 4 consumer side.
 // Read overrides if present; falls back silently when missing/malformed.
@@ -32,8 +33,8 @@ function classifyTask(prompt, classes) {
   let best = keys[0] || 'routine';
   let top = -1;
   for (const k of keys) {
-    const s = score(text, classes[k]);
-    if (s > top) { top = s; best = k; }
+    const scoreValue = score(text, classes[k]);
+    if (scoreValue > top) { top = scoreValue; best = k; }
   }
   return best;
 }
@@ -43,52 +44,53 @@ function normalizePremiumRationale(route, prompt, taskClass, complexity) {
   if (provided && provided.reason && provided.evidence) {
     return { reason: String(provided.reason), evidence: String(provided.evidence) };
   }
-  const promptHint = String(prompt || '').slice(0, 160) || 'no prompt context';
+  const promptHint = String(prompt || '').slice(0, PROMPT_HINT_MAX_LENGTH) || 'no prompt context';
   return {
     reason: `task_class=${taskClass}; complexity=${Number(complexity ?? 0).toFixed(2)}`,
     evidence: promptHint,
   };
 }
 
-function resolvePremiumBudget(policy, route, lane) {
+function getPolicyDefaults(policy) {
   const budget = policy.premiumBudget || {};
-  const disabled = route.disablePremiumBudget === true;
-  if (lane !== 'premium' || disabled) {
-    return { enabled: !disabled, downgraded: false, premiumShare30d: null,
-      downgradeReason: null, softLimit: budget.softLimitShare ?? 0.11,
-      hardLimit: budget.hardLimitShare ?? 0.12 };
-  }
-  const windowDays = budget.windowDays || 30;
-  const premiumShare30d = Number.isFinite(route.premiumShare30d)
+  return {
+    softLimit: budget.softLimitShare ?? 0.11,
+    hardLimit: budget.hardLimitShare ?? 0.12,
+    windowDays: budget.windowDays || 30,
+  };
+}
+
+function computePremiumShare(route, windowDays) {
+  return Number.isFinite(route.premiumShare30d)
     ? Number(route.premiumShare30d)
     : summarize(readTelemetry(windowDays)).premiumShare;
-  const softLimit = budget.softLimitShare ?? 0.11;
-  const hardLimit = budget.hardLimitShare ?? 0.12;
-  if (premiumShare30d >= hardLimit) {
-    return {
-      enabled: true,
-      downgraded: true,
-      premiumShare30d,
-      downgradeReason: 'premium_budget_hard_limit',
-      softLimit,
-      hardLimit,
-    };
+}
+
+function decidePremiumDowngrade(premiumShare, softLimit, hardLimit) {
+  if (premiumShare >= hardLimit) {
+    return { downgraded: true, reason: 'premium_budget_hard_limit' };
   }
-  if (premiumShare30d >= softLimit) {
-    return {
-      enabled: true,
-      downgraded: true,
-      premiumShare30d,
-      downgradeReason: 'premium_budget_soft_limit',
-      softLimit,
-      hardLimit,
-    };
+  if (premiumShare >= softLimit) {
+    return { downgraded: true, reason: 'premium_budget_soft_limit' };
   }
+  return { downgraded: false, reason: null };
+}
+
+function resolvePremiumBudget(policy, route, lane) {
+  const disabled = route.disablePremiumBudget === true;
+  if (lane !== 'premium' || disabled) {
+    const { softLimit, hardLimit } = getPolicyDefaults(policy);
+    return { enabled: !disabled, downgraded: false, premiumShare30d: null,
+      downgradeReason: null, softLimit, hardLimit };
+  }
+  const { softLimit, hardLimit, windowDays } = getPolicyDefaults(policy);
+  const premiumShare30d = computePremiumShare(route, windowDays);
+  const { downgraded, reason } = decidePremiumDowngrade(premiumShare30d, softLimit, hardLimit);
   return {
     enabled: true,
-    downgraded: false,
+    downgraded,
     premiumShare30d,
-    downgradeReason: null,
+    downgradeReason: reason,
     softLimit,
     hardLimit,
   };
@@ -119,23 +121,16 @@ function shouldRollback(policy) {
     stats.premiumShare > (rb.maxPremiumShare ?? 0.45);
 }
 
-function resolveRouting(prompt, route) {
-  const policy = loadPolicy();
-  const rollbackApplied = route.disableRollback ? false : shouldRollback(policy);
-  let lane = rollbackApplied ? policy.rollback.forceLane : route.lane;
-  const cx = route.complexity ?? 0.5;
-  const taskClass = classifyTask(prompt, policy.taskClasses);
-  const thresh = policy.complexityThresholds || {};
-  if (lane === 'premium' && cx < (thresh.premium ?? 0.7)) lane = cx < (thresh.haiku ?? 0.3) ? 'fleet' : 'haiku';
-  const premiumRationale = lane === 'premium'
-    ? normalizePremiumRationale(route, prompt, taskClass, cx)
-    : null;
-  const budgetStatus = resolvePremiumBudget(policy, route, lane);
-  if (lane === 'premium' && budgetStatus.downgraded) lane = 'haiku';
-  const model = policy.models[lane] || policy.models.fallback;
-  const capStatus = resolvePriceCap(route, lane, model);
-  const adapter = loadAdapters().lanes?.[lane] || {};
-  const overrides = loadOverrides();
+function classifyLane(lane, complexity, thresholds) {
+  const thresh = thresholds || {};
+  if (lane === 'premium' && complexity < (thresh.premium ?? 0.7)) {
+    return complexity < (thresh.haiku ?? 0.3) ? 'fleet' : 'haiku';
+  }
+  return lane;
+}
+
+function assembleRouting(lane, adapter, model, taskClass, rollbackApplied, cx, premiumRationale,
+    budgetStatus, capStatus, overrides) {
   return {
     lane,
     modelId: adapter.capabilityTier || model.id,
@@ -155,6 +150,26 @@ function resolveRouting(prompt, route) {
     overridesApplied: overrides !== null,
     overridesStale: overrides?.stale ?? false,
   };
+}
+
+function resolveRouting(prompt, route) {
+  const policy = loadPolicy();
+  const rollbackApplied = route.disableRollback ? false : shouldRollback(policy);
+  let lane = rollbackApplied ? policy.rollback.forceLane : route.lane;
+  const cx = route.complexity ?? 0.5;
+  const taskClass = classifyTask(prompt, policy.taskClasses);
+  lane = classifyLane(lane, cx, policy.complexityThresholds);
+  const premiumRationale = lane === 'premium'
+    ? normalizePremiumRationale(route, prompt, taskClass, cx)
+    : null;
+  const budgetStatus = resolvePremiumBudget(policy, route, lane);
+  if (lane === 'premium' && budgetStatus.downgraded) lane = 'haiku';
+  const model = policy.models[lane] || policy.models.fallback;
+  const capStatus = resolvePriceCap(route, lane, model);
+  const adapter = loadAdapters().lanes?.[lane] || {};
+  const overrides = loadOverrides();
+  return assembleRouting(lane, adapter, model, taskClass, rollbackApplied, cx, premiumRationale,
+    budgetStatus, capStatus, overrides);
 }
 
 module.exports = { resolveRouting, loadPolicy, loadAdapters, loadOverrides };

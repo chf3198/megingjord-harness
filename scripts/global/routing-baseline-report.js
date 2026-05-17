@@ -22,12 +22,12 @@ if (entries.length === 0) {
 }
 
 const summary = summarize(entries);
-const n = entries.length;
+const queryCount = entries.length;
 
 // Cost calculations
-const frontierOnlyCost = n * AVG_TOKENS_PER_QUERY * COST_PER_1K.premium / 1000;
+const frontierOnlyCost = queryCount * AVG_TOKENS_PER_QUERY * COST_PER_1K.premium / 1000;
 const actualCost = Object.entries(summary.laneDistribution).reduce((total, [lane, share]) => {
-  return total + share * n * AVG_TOKENS_PER_QUERY * (COST_PER_1K[lane] || COST_PER_1K.premium) / 1000;
+  return total + share * queryCount * AVG_TOKENS_PER_QUERY * (COST_PER_1K[lane] || COST_PER_1K.premium) / 1000;
 }, 0);
 const savingsPct = frontierOnlyCost > 0
   ? (((frontierOnlyCost - actualCost) / frontierOnlyCost) * 100).toFixed(1)
@@ -40,7 +40,7 @@ entries.filter(e => e.qualityReason).forEach(e => {
 });
 
 const report = {
-  period_days: days, samples: n, summary,
+  period_days: days, samples: queryCount, summary,
   cost_analysis: {
     frontier_only_usd: +frontierOnlyCost.toFixed(4),
     actual_usd: +actualCost.toFixed(4),
@@ -55,7 +55,7 @@ const report = {
 if (json) { console.log(JSON.stringify(report, null, 2)); process.exit(0); }
 
 console.log(`\n=== Routing Baseline Report (last ${days} days) ===`);
-console.log(`Samples: ${n}`);
+console.log(`Samples: ${queryCount}`);
 console.log(`\nTier distribution:`);
 Object.entries(summary.laneDistribution).forEach(([k, v]) =>
   console.log(`  ${k.padEnd(9)} ${(v * 100).toFixed(1)}%`));

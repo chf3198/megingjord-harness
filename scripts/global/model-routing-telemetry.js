@@ -17,9 +17,8 @@ function pctMap(counts, sampleCount) {
   );
 }
 
-function recordTelemetry(entry) {
-  ensureDir();
-  const legacy = {
+function buildLegacyRecord(entry) {
+  return {
     ts: new Date().toISOString(),
     lane: entry.lane || 'free',
     model: entry.model || 'unknown',
@@ -37,6 +36,11 @@ function recordTelemetry(entry) {
     priceCapOverride: entry.priceCapOverride || false,
     execute: entry.execute || false,
   };
+}
+
+function recordTelemetry(entry) {
+  ensureDir();
+  const legacy = buildLegacyRecord(entry);
   const canonical = normalizeTokenRecord({
     ...entry,
     lane: legacy.lane,
@@ -61,8 +65,7 @@ function readTelemetry(days = 30) {
     .filter(r => r && new Date(r.ts).getTime() >= cutoff);
 }
 
-function summarize(entries) {
-  const sampleCount = entries.length || 1;
+function countDistributions(entries) {
   const byLane = { free: 0, fleet: 0, haiku: 0, premium: 0 };
   const byConfidence = { exact: 0, estimated: 0, other: 0 };
   const escalations = { haiku: 0, premium: 0 };
@@ -76,6 +79,12 @@ function summarize(entries) {
       escalations[entry.escalation] = (escalations[entry.escalation] || 0) + 1;
     }
   });
+  return { byLane, byConfidence, escalations };
+}
+
+function summarize(entries) {
+  const sampleCount = entries.length || 1;
+  const { byLane, byConfidence, escalations } = countDistributions(entries);
   const premium = entries.filter(e => e.lane === 'premium').length;
   const ok = entries.filter(e => e.outcome === 'ok').length;
   const rollback = entries.filter(e => e.rollbackApplied).length;

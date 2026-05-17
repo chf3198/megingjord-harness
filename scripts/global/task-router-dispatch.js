@@ -55,50 +55,32 @@ async function buildDecision(route, resolved) {
   return { action: 'recommend-sonnet', reason: 'premium lane' };
 }
 
-async function main() {
-  const route = classifyPrompt(prompt);
-  const resolved = resolveRouting(prompt, { ...route, execute: true });
-  if (resolved.priceCapBlocked) {
-    recordTelemetry({
-      lane: resolved.lane,
-      model: resolved.providerModelId,
-      multiplier: resolved.multiplier,
-      taskClass: resolved.taskClass,
-      complexityScore: route.complexity ?? null,
-      rollbackApplied: resolved.rollbackApplied,
-      outcome: 'fail',
-      execute: true,
-      premiumRationale: resolved.premiumRationale,
-      premiumBudget: resolved.premiumBudget,
-      priceCapBlocked: true,
-      priceCapPer1kTokens: resolved.priceCapPer1kTokens,
-      routePricePer1kTokens: resolved.routePricePer1kTokens,
-      priceCapOverride: resolved.priceCapOverride,
-    });
-    console.error('blocked-price-cap');
-    console.error(`lane=${resolved.lane} price=${resolved.routePricePer1kTokens} cap=${resolved.priceCapPer1kTokens}`);
-    process.exit(1);
-  }
-  const effectiveRoute = { ...route, lane: resolved.lane,
-    recommendedModel: resolved.modelId, providerModel: resolved.providerModelId };
-  const decision = await buildDecision(effectiveRoute, resolved);
-  const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
-  // #1797: escalation events MUST carry a structured reason for coverage gate compliance.
-  const escalation_reason = outcome === 'fail' ? (decision.action || 'unknown-escalation') : null;
-  recordTelemetry({ lane: resolved.lane, model: resolved.providerModelId,
+function handlePriceCapBlock(resolved) {
+  const capBlockedEvent = {
+    lane: resolved.lane,
+    model: resolved.providerModelId,
     multiplier: resolved.multiplier,
-    taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
-    rollbackApplied: resolved.rollbackApplied, outcome, execute: true,
+    taskClass: resolved.taskClass,
+    complexityScore: null,
+    rollbackApplied: resolved.rollbackApplied,
+    outcome: 'fail',
+    execute: true,
     premiumRationale: resolved.premiumRationale,
     premiumBudget: resolved.premiumBudget,
-    priceCapBlocked: resolved.priceCapBlocked,
+    priceCapBlocked: true,
     priceCapPer1kTokens: resolved.priceCapPer1kTokens,
     routePricePer1kTokens: resolved.routePricePer1kTokens,
     priceCapOverride: resolved.priceCapOverride,
-  });
-  recordCostEvent(resolved.lane, resolved.providerModelId, { outcome, escalation_reason });
-  const result = { route: effectiveRoute, routing: resolved, decision };
-  if (json) {
+  };
+  recordTelemetry(capBlockedEvent);
+  console.error('blocked-price-cap');
+  console.error(`lane=${resolved.lane} price=${resolved.routePricePer1kTokens} cap=${resolved.priceCapPer1kTokens}`);
+  process.exit(1);
+}
+
+function outputResult(effectiveRoute, decision, isJson) {
+  if (isJson) {
+    const result = { route: effectiveRoute, decision };
     console.log(JSON.stringify(result, null, 2));
   } else {
     console.log(`lane=${effectiveRoute.lane}`);
@@ -107,6 +89,26 @@ async function main() {
     if (decision.chat?.ok) console.log('\n' + decision.chat.content);
     if (decision.chat && !decision.chat.ok) console.error('Fleet error:', decision.chat.error);
   }
+}
+
+async function main() {
+  const route = classifyPrompt(prompt);
+  const resolved = resolveRouting(prompt, { ...route, execute: true });
+  if (resolved.priceCapBlocked) handlePriceCapBlock(resolved);
+  const effectiveRoute = { ...route, lane: resolved.lane,
+    recommendedModel: resolved.modelId, providerModel: resolved.providerModelId };
+  const decision = await buildDecision(effectiveRoute, resolved);
+  const outcome = decision.action === 'fleet-unavailable' ? 'fail' : 'ok';
+  const escalationReason = outcome === 'fail' ? (decision.action || 'unknown-escalation') : null;
+  recordTelemetry({ lane: resolved.lane, model: resolved.providerModelId,
+    multiplier: resolved.multiplier, taskClass: resolved.taskClass, complexityScore: route.complexity ?? null,
+    rollbackApplied: resolved.rollbackApplied, outcome, execute: true,
+    premiumRationale: resolved.premiumRationale, premiumBudget: resolved.premiumBudget,
+    priceCapBlocked: resolved.priceCapBlocked, priceCapPer1kTokens: resolved.priceCapPer1kTokens,
+    routePricePer1kTokens: resolved.routePricePer1kTokens, priceCapOverride: resolved.priceCapOverride,
+  });
+  recordCostEvent(resolved.lane, resolved.providerModelId, { outcome, escalation_reason: escalationReason });
+  outputResult(effectiveRoute, decision, json);
   process.exit(decision.action === 'fleet-unavailable' ? 1 : 0);
 }
 
