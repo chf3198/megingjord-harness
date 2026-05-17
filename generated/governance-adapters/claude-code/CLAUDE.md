@@ -18,7 +18,8 @@ applyTo: "**"
 priority: P1
 targets: "copilot,cline,claude-code,continue"
 ---
-# Harness Goal Constitution
+Harness Goal Constitution
+========================
 
 Source: instructions/harness-goals.instructions.md
 Targets: copilot, cline, claude-code, continue
