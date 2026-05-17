@@ -32,6 +32,16 @@ All four entry-point files MUST mention each invariant. `cross-team-contract-che
 3. **Ticket-first workflow** — no governed work without a linked GitHub issue per `instructions/ticket-driven-work.instructions.md`.
 4. **Dedicated-worktree protocol** — one live worktree per agent per `research/concurrent-agent-worktrees-2026-04-24.md`.
 
+## State taxonomy (Epic #1828)
+
+The harness uses an 11-state status taxonomy enforcing **single-status cardinality**:
+
+- `backlog` (Epic untouched / child without parent context) · `queued` (child of active Epic) · `triage` · `ready` · `in-progress` · `testing` · `review` · `done` · `cancelled` · `dormant` (Epic-only) · `deferred` (Epic-only)
+
+**Single-status invariant**: exactly one `status:*` label per ticket at any time. Enforced by `scripts/global/label-lint-status-cardinality.js` via the label-lint workflow.
+
+**Rule E2 v2**: Epic carries `role:manager` (default lifecycle) OR `role:consultant` (transient during `status:review` only). Never Collaborator/Admin. Detail in `instructions/epic-governance.instructions.md`.
+
 ## Adapter pattern (per #1692 architecture decision)
 
 When runtime A needs different behavior than B:

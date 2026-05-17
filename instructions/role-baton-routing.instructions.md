@@ -12,22 +12,32 @@ The GitHub issue **is** the baton. One active role at a time. Every state carrie
 Authoritative board: **Megingjord Harness Board** (GitHub Projects).
 Baton view filter: `status:triage,ready,in-progress,testing,review` (backlog/done/cancelled/dormant/deferred hidden from active baton view).
 
-## Status Workflow (10-state taxonomy v1.1, aligned with `instructions/ticket-driven-work.instructions.md`)
+## Status Workflow (11-state taxonomy v1.2, Epic #1828)
 
 ```
-Status         Role Label          Gate / Trigger
+Status         Role Label                       Gate / Trigger
 ──────────────────────────────────────────────────────────────────────
-backlog        — (Epic: manager)   Created; not yet scoped
-triage         role:manager        Manager actively scoping AC + gates
-ready          —                   MANAGER_HANDOFF emitted; awaiting Collaborator pickup
-in-progress    role:collaborator   Implementation active (Epic: role:manager per Rule E3)
-testing        role:admin          COLLABORATOR_HANDOFF emitted; CI gates running
-review         role:consultant     ADMIN_HANDOFF emitted; critique + closeout active
-done           — (terminal)        CONSULTANT_CLOSEOUT emitted; issue closed
-cancelled      — (terminal)        Goal invalidated; Manager authority
-dormant        role:manager        Epic-only: paused; 90d EPIC_REVIEW (Rule E5)
-deferred       role:manager        Epic-only: blocked, no ETA (Rule E5)
+backlog        — (Epic: manager)                Created; Epic untouched; child has no parent context yet
+queued         —                                Child of active Epic; awaiting Manager pickup (#1828)
+triage         role:manager                     Manager actively scoping AC + gates
+ready          —                                MANAGER_HANDOFF emitted; awaiting Collaborator pickup
+in-progress    role:collaborator                Implementation active (Epic: role:manager per Rule E3)
+testing        role:admin                       COLLABORATOR_HANDOFF emitted; CI gates running
+review         role:consultant                  ADMIN_HANDOFF emitted; critique + closeout active
+                                                (Epic: role:consultant transient — Rule E2 v2, #1828)
+done           — (terminal)                     CONSULTANT_CLOSEOUT emitted; issue closed
+cancelled      — (terminal)                     Goal invalidated; Manager authority
+dormant        role:manager                     Epic-only: paused; 90d EPIC_REVIEW (Rule E5)
+deferred       role:manager                     Epic-only: blocked, no ETA (Rule E5)
 ```
+
+**Single-status invariant**: at any time, a ticket carries **exactly one** `status:*` label. Multi-status carriage is a Rule 1 violation, enforced by label-lint (Epic #1828 AC6).
+
+**Status sub-flow for child tickets of an active Epic**:
+- Independent ticket: `backlog → triage → ready → in-progress → testing → review → done`
+- Child of Epic at `status:backlog`: child stays at `backlog`
+- Child of Epic at `status:in-progress | dormant | deferred`: child progresses `backlog → queued → triage → ready → in-progress → testing → review → done`
+- Transition `backlog → queued` is Manager-initiated when the parent Epic moves out of `status:backlog`. Label-lint emits an advisory comment when this transition is pending.
 
 ## Transition Guards
 

@@ -6,22 +6,24 @@ applyTo: "**"
 
 # Epic Governance
 
-## Epic vs. Child Ticket — Role Boundary
+## Epic vs. Child Ticket — Role Boundary (Rule E2 v2 — Epic #1828)
 
-- Epic always carries `role:manager` — never changes. Active agent role lives on the child ticket, not the epic.
+- Epic carries `role:manager` (default, throughout `backlog | triage | in-progress | dormant | deferred`) OR `role:consultant` (transient, **only during `status:review`** phase preceding terminal close to compose the CONSULTANT_EPIC_CLOSEOUT artifact).
+- Collaborator and Admin roles **never** apply to Epics — those roles act on child tickets, not the Epic itself. The orchestrator-worker contract holds: Manager (and during closeout-review, Consultant) own the Epic; workers own the children.
+- At terminal (`status:done` / `status:cancelled`): role label removed.
 
 ## Epic Status Advancement Rules
 
-| Epic Status | Condition to Enter |
-|---|---|
-| `backlog` | Created; no children started |
-| `triage` | Manager scoping children; at least one child exists |
-| `in-progress` | First child ticket moves to `status:in-progress` |
-| `dormant` | Active goal; no current work; awaits external trigger or 90d review |
-| `deferred` | Active goal; externally blocked; no ETA |
-| `review` | All children are terminal (closed); epic-level closeout pending |
-| `done` + closed | CONSULTANT_CLOSEOUT emitted on epic; all children confirmed terminal |
-| `cancelled` | Manager authority; **goal invalidated** (NOT used for stalled work) |
+| Epic Status | Condition to Enter | Allowed Role |
+|---|---|---|
+| `backlog` | Created; no children started | `role:manager` |
+| `triage` | Manager scoping children; at least one child exists | `role:manager` |
+| `in-progress` | First child ticket moves to `status:in-progress` | `role:manager` |
+| `dormant` | Active goal; no current work; awaits external trigger or 90d review | `role:manager` |
+| `deferred` | Active goal; externally blocked; no ETA | `role:manager` |
+| `review` | All children are terminal (closed); epic-level closeout pending | `role:consultant` (transient) |
+| `done` + closed | CONSULTANT_EPIC_CLOSEOUT emitted; all children confirmed terminal | (no role) |
+| `cancelled` | Manager authority; **goal invalidated** (NOT used for stalled work) | (no role) |
 
 Epic status is advanced by the Manager agent at each gate — it does **not** auto-advance.
 
@@ -41,7 +43,7 @@ An Epic at `status:in-progress` auto-transitions to `status:dormant` when ALL of
 2. No linked PR has activity (commit, review, comment) in the last 7 days.
 3. No Manager comment posted in the last 7 days containing the marker `EPIC_ACTIVE: <reason>` overriding the auto-transition.
 
-Operator can tune the 7-day window via `EPIC_DORMANT_AFTER_DAYS` env var on the workflow.
+Operator can tune the 7-day window via `EPIC_DORMANT_AFTER_DAYS` env var on the workflow. <!-- soak-language-override: pre-existing #1342 calendar threshold; velocity-relative translation tracked in Epic #1827 v2 -->
 
 Auto-transition posts an `EPIC_AUTO_PAUSE` comment naming the implicit resume trigger (the next child action) and swaps `status:in-progress → status:dormant`. Idempotent.
 

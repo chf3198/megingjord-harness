@@ -19,20 +19,23 @@ applyTo: "**"
 | Doc | Documentation | `type:doc` |
 | Research | Investigation/spike | `type:research` |
 
-## Label taxonomy (v1.1 — agent-typed 10-status; 2 Epic-only)
+## Label taxonomy (v1.2 — agent-typed 11-status; 2 Epic-only; Epic #1828)
 
 | Status | Active Agent | Gate Condition |
 |---|---|---|
-| `status:backlog` | — (Epic: `role:manager`) | Queued; unassigned |
+| `status:backlog` | — (Epic: `role:manager`) | Queued; unassigned; Epic untouched |
+| `status:queued` | — | **Child of active Epic; awaiting Manager pickup** (Epic #1828, distinct from `backlog`) |
 | `status:triage` | `role:manager` | Manager scoping AC + gates |
 | `status:ready` | — | MANAGER_HANDOFF emitted; awaiting Collaborator pickup |
 | `status:in-progress` | `role:collaborator` (Epic: `role:manager`) | Implementation active |
 | `status:testing` | `role:admin` | COLLABORATOR_HANDOFF emitted; CI/gates running |
-| `status:review` | `role:consultant` | ADMIN_HANDOFF emitted; critique + closeout active |
+| `status:review` | `role:consultant` | ADMIN_HANDOFF emitted; critique + closeout active (Epic: `role:consultant` transient — Rule E2 v2) |
 | `status:done` | — | CONSULTANT_CLOSEOUT emitted; issue closes |
 | `status:cancelled` | — | Abandoned; Manager authority; **goal invalidated** |
 | `status:dormant` | `role:manager` | **Epic-only**: paused; 90d review |
 | `status:deferred` | `role:manager` | **Epic-only**: blocked, no ETA |
+
+**Single-status invariant**: at any time, a ticket carries **exactly one** `status:*` label. Multi-status carriage is a Rule 1 violation, enforced by label-lint (Epic #1828 AC6).
 
 - **Priority**: `priority:P1` (urgent) · `priority:P2` (normal) · `priority:P3` (low)
 - **Area**: `area:dashboard` · `area:hooks` · `area:skills` · `area:instructions` · `area:agents` · `area:scripts` · `area:infra`
@@ -51,13 +54,15 @@ All work types use `role:collaborator`. Work types with CI gates (development, b
 ## Forbidden combinations
 
 - Closed issue + any execution `role:*` label.
-- `status:backlog` or `status:ready` or `status:done` or `status:cancelled` with any `role:*` label — **except Epics**, which carry `role:manager` throughout their lifecycle (per `epic-governance.instructions.md` and label-lint Rule E2).
+- Multiple `status:*` labels on the same ticket (Rule 1, Epic #1828 AC6).
+- `status:backlog`, `status:queued`, `status:ready`, `status:done`, or `status:cancelled` with any `role:*` label — **except Epics**, which carry `role:manager` throughout most of their lifecycle (per `epic-governance.instructions.md` Rule E2 v2 and label-lint).
 - `status:triage` with non-manager role.
 - `status:in-progress` with admin/consultant role — **except Epics**, which carry `role:manager` (Rule E3).
 - `status:testing` with collaborator/consultant role.
-- `status:review` with manager/collaborator/admin role.
+- `status:review` with manager/collaborator/admin role — **except Epics**, which carry `role:consultant` transiently during review (Rule E2 v2).
 - `status:done` on an open issue (done must coincide with issue close).
 - `status:dormant` or `status:deferred` on non-Epic tickets (Rule E5).
+- `status:queued` on non-child tickets (queued is only valid for children of an active Epic per Rule E6).
 
 ## Manager Responsibilities
 

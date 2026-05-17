@@ -160,6 +160,8 @@
     "governance:review-score:test": "node --test tests/review-score-classifier.spec.js",
     "governance:price-cap": "node scripts/global/provider-price-cap-gate.js",
     "governance:price-cap:test": "node --test tests/provider-price-cap-gate.spec.js",
+    "governance:status-cardinality": "node scripts/global/label-lint-status-cardinality.js",
+    "governance:status-cardinality:test": "node --test tests/label-lint-status-cardinality.spec.js",
     "governance:hook-parity": "node scripts/global/hook-parity-check.js",
     "governance:hook-parity:test": "node --test tests/hook-parity-check.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",

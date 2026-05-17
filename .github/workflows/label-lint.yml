@@ -63,13 +63,34 @@ jobs:
             }
             if (issue.state === 'closed' && closeRoles.length > 0) {
               const isEpic = labels.includes('type:epic');
+              // #1828 Rule E2 v2: Epic may carry role:manager (default lifecycle)
+              // OR role:consultant (transient during review). Both are valid at close-time
+              // and the close-time scrub should leave neither stripped if they're
+              // already gone (the consultant role is dropped at terminal by the
+              // close pattern; manager remains for archival per #1472).
               for (const role of closeRoles) {
                 if (role === 'role:archived') continue;
-                if (isEpic && role === 'role:manager') continue; // #1472: Rule E2 — Epic always carries role:manager
+                if (isEpic && role === 'role:manager') continue; // #1472 + #1828 E2 v2
+                if (isEpic && role === 'role:consultant') continue; // #1828 E2 v2 — transient review role
                 await github.rest.issues.removeLabel({
                   owner, repo, issue_number: issueNum, name: role,
                 }).catch(() => {});
               }
+            }
+
+            // Phase 1.5: single-status invariant (Epic #1828 AC6).
+            // Decision logic lives in scripts/global/label-lint-status-cardinality.js
+            // for unit-testability.
+            const statusCardinality = require('./scripts/global/label-lint-status-cardinality.js');
+            const statusEval = statusCardinality.evaluate(labels);
+            if (!statusEval.ok && statusEval.rule === 'multi-status') {
+              const statusMarker = '<!-- adr-010-status-cardinality -->';
+              const existingStatusComment = recentComments.find(c => c.body?.includes(statusMarker));
+              const body = statusCardinality.violationComment(statusEval, issueNum);
+              if (!existingStatusComment) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: issueNum, body });
+              }
+              core.setFailed(`Issue #${issueNum}: multi-status violation (Epic #1828 AC6) — ${statusEval.found.join(', ')}`);
             }
 
             // Phase 2: evaluate via shared rules and post comment
