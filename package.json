@@ -149,6 +149,8 @@
     "governance:audit": "node scripts/global/governance-audit.js",
     "governance:cross-team-check": "node scripts/global/cross-team-contract-check.js",
     "governance:cross-team-check:test": "node --test tests/cross-team-contract-check.spec.js",
+    "governance:duplicate-check": "node scripts/global/ticket-duplicate-guard.js --scan",
+    "governance:duplicate-check:test": "node --test tests/ticket-duplicate-guard.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",
     "goals:regen": "node scripts/global/goals-contract-generate.js"
   },
