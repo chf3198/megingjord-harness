@@ -19,6 +19,7 @@ const testDiscoverability = require('./test-discoverability.js');
 const signerFormatCanonical = require('./signer-format-canonical.js');
 const flawEmission = require('./flaw-emission.js');
 const crossCheckoutDestructive = require('./cross-checkout-destructive.js');
+const soakLanguageGuard = require('./soak-language-guard.js');
 
 const VALIDATORS = {
   'manager-handoff': manager,
@@ -36,6 +37,7 @@ const VALIDATORS = {
   'signer-format-canonical': signerFormatCanonical,
   'flaw-emission': flawEmission,
   'cross-checkout-destructive': crossCheckoutDestructive,
+  'soak-language-guard': soakLanguageGuard,
 };
 
 function runAll(input) {

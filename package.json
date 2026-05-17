@@ -154,6 +154,8 @@
     "governance:hooks:test": "python3 -m unittest discover -s tests/hooks -p 'test_*.py'",
     "governance:escalation-coverage": "node scripts/global/escalation-coverage-gate.js",
     "governance:escalation-coverage:test": "node --test tests/escalation-coverage-gate.spec.js",
+    "governance:soak-language": "node scripts/global/megalint/soak-language-guard.js",
+    "governance:soak-language:test": "node --test tests/soak-language-guard.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",
     "goals:regen": "node scripts/global/goals-contract-generate.js"
   },

@@ -54,7 +54,7 @@ Add new values to the informal taxonomy as new escalation paths emerge.
 
 ## CI integration
 
-Wire into the same gate suite as other `governance:*` scripts (e.g., `npm run governance:verify`). The gate is currently advisory; promote to required after a 14-day soak per Path D rollout.
+Wire into the same gate suite as other `governance:*` scripts (e.g., `npm run governance:verify`). The gate is currently advisory; promote to required when `soak-replay-runner.js` shows sustained ≥95% coverage across the historical cost-telemetry sample per Epic #1771's replay-based eval pattern. See `docs/howto/soak-to-replay-translation.md` (#1809).
 
 ## Tests
 

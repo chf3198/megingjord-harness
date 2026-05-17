@@ -46,8 +46,10 @@ See `instructions/canonical-governance-anti-duplication.instructions.md` for the
 ## Drift prevention chain
 
 ```
-manifest validate → adapter emit → sync check → cross-team contract check
+manifest validate → adapter emit → sync check → cross-team contract check → soak-language guard
 ```
+
+The final step (`soak-language-guard`, #1809) catches calendar-bound "N-day soak" prose in baton artifacts, PR bodies, and docs. Translation rubric: `docs/howto/soak-to-replay-translation.md`. Replay infrastructure lives at `scripts/global/soak-replay-runner.js` per closed Epic #1771.
 
 CI commands (all should pass on every governance-area PR):
 
