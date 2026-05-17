@@ -78,11 +78,10 @@ async function handleApi(req, res, copilotHome) {
   }
   if (u === '/api/wiki-health') {
     try {
-      const wikiDir = path.join(copilotHome, 'wiki');
-      const entities = fs.existsSync(path.join(wikiDir, 'entities')) ?
-        fs.readdirSync(path.join(wikiDir, 'entities')).filter(f => f.endsWith('.md')).length : 0;
-      return jsonRes(res, 200, { entities, wikiDir, status: entities > 0 ? 'healthy' : 'empty' });
-    } catch { return jsonRes(res, 200, { entities: 0, status: 'unavailable' }); }
+      const { scanHealth } = require('../wiki/health-contract');
+      const h = scanHealth(path.join(copilotHome, 'wiki'));
+      return jsonRes(res, 200, { ...h, status: h.pages > 0 ? 'healthy' : 'empty' });
+    } catch { return jsonRes(res, 200, { pages: 0, issues: 0, status: 'unavailable' }); }
   }
   jsonRes(res, 404, { error: 'not found' });
 }

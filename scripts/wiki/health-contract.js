@@ -12,7 +12,18 @@ function links(content) {
   return [...String(content).matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);
 }
 
-function computeWikiHealth(pages = null) {
+function listPagesFrom(dir) {
+  const pages = [];
+  for (const d of CATS) {
+    const dp = path.join(dir, d);
+    if (!fs.existsSync(dp)) continue;
+    for (const f of fs.readdirSync(dp).filter(x => x.endsWith('.md')))
+      pages.push({ slug: f.replace('.md', ''), type: d, path: path.join(dp, f) });
+  }
+  return pages;
+}
+
+function computeWikiHealth(pages = null, wikiDir = WIKI_DIR) {
   const set = pages || listPages();
   const allSlugs = new Set(set.map(p => p.slug));
   const broken = []; const orphans = []; const frontmatter = []; const indexSync = [];
@@ -26,7 +37,7 @@ function computeWikiHealth(pages = null) {
       if (!allSlugs.has(target)) broken.push(`${page.slug}→${target}`);
     }
   }
-  const indexPath = path.join(WIKI_DIR, 'index.md');
+  const indexPath = path.join(wikiDir, 'index.md');
   const idx = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf-8') : '';
   for (const target of links(idx)) inbound.add(target);
   for (const slug of allSlugs) {
@@ -34,13 +45,19 @@ function computeWikiHealth(pages = null) {
     if (!idx.includes(`[[${slug}]]`)) indexSync.push(slug);
   }
   return {
-    loaded: true,
-    pages: set.length,
-    dirs: CATS.length,
+    loaded: true, pages: set.length, dirs: CATS.length,
     issues: broken.length + orphans.length + frontmatter.length + indexSync.length,
     broken, orphans, frontmatter, indexSync,
     lastCheck: new Date().toISOString(),
   };
 }
 
-module.exports = { computeWikiHealth, REQUIRED_FIELDS, CATS };
+function scanHealth(wikiDir = WIKI_DIR) {
+  const pages = listPagesFrom(wikiDir);
+  const h = computeWikiHealth(pages, wikiDir);
+  const score = h.pages === 0 ? 100 : Math.max(0, 100 - Math.round(h.issues / h.pages * 100));
+  const grade = score >= 90 ? 'A' : score >= 75 ? 'B' : score >= 60 ? 'C' : 'D';
+  return { ...h, stale: [], weakLinks: [], score, grade };
+}
+
+module.exports = { computeWikiHealth, scanHealth, REQUIRED_FIELDS, CATS };
