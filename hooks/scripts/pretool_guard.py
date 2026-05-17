@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse hook: pre-tool guards and admin sequencing gates."""
-import json, re, sys
+import json, re, subprocess, sys
 from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path: sys.path.insert(0, str(SCRIPT_DIR))
@@ -12,9 +12,19 @@ from governance_state import ensure_state
 from live_checks import ci_all_pass, linked_issue_has_collab_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
+RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
+
+def current_branch(cwd: str) -> str | None:
+    try:
+        res = subprocess.run(["git", "branch", "--show-current"], cwd=cwd,
+                             check=False, capture_output=True, text=True)
+        b = (res.stdout or "").strip()
+        return b or None
+    except Exception:
+        return None
 
 def emit(decision: str, reason: str, extra: str | None = None) -> int:
     hook = {"hookEventName":"PreToolUse","permissionDecision":decision,"permissionDecisionReason":reason}
@@ -33,6 +43,17 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening.")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
         return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
+    if RE_GIT_COMMIT.search(joined):
+        branch = current_branch(cwd)
+        match = RE_BRANCH_TICKET.match(branch or "")
+        if match:
+            expected = f"#{match.group(2)}"
+            refs = RE_ISSUE_REF.findall(joined)
+            if expected not in refs:
+                return emit("deny", f"Commit blocked: branch ticket {expected} must be referenced in commit message.")
+            mismatched = sorted({ref for ref in refs if ref != expected})
+            if mismatched:
+                return emit("deny", f"Commit blocked: one branch = one ticket. Remove mismatched refs: {', '.join(mismatched)}")
     if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
         return emit("deny","Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
