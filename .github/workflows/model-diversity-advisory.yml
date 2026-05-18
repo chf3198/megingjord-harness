@@ -47,11 +47,18 @@ jobs:
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
                 body: '<!-- model-diversity-advisory -->\n' +
-                      '## Model-diversity advisory (Epic #1568 AC-3, #1572)\n\n' +
+                      '## Model-diversity advisory (Epic #1568 AC-3 / #1572 / #1612 rescope)\n\n' +
                       detail + '\n\n' +
                       'Waive with label `model-diversity:waived` + rationale comment, ' +
                       'or rotate the relevant role to a different `Team&Model`. ' +
                       'Cross-model within provider passes (e.g. Opus vs Sonnet). ' +
-                      'This advisory does not block merge during the soak window.',
+                      '\n\n' +
+                      '**Status: ADVISORY-PERMANENT** (per Epic #1612 replay-eval ' +
+                      'against last 50 merged PRs: 97.3% FP-rate against the literal ' +
+                      'Team&Model equality rule because single-operator workflows ' +
+                      'necessarily use one Team&Model for all 4 roles). Promoting to ' +
+                      'required would require cross-team review on every PR — that ' +
+                      'is the long-term goal but not the current operating model. ' +
+                      'This signal informs reviewers; it does not block merge.',
               });
             }

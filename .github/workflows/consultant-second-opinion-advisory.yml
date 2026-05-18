@@ -47,10 +47,16 @@ jobs:
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
                 body: '<!-- consultant-second-opinion-advisory -->\n' +
-                      '## Consultant second-opinion advisory (Epic #1568 AC-4, #1573)\n\n' +
-                      'CONSULTANT_CLOSEOUT does not include a `SECOND_OPINION` block from a cross-provider rater. ' +
-                      'Run a cross-family rater against the rubric and append the result via ' +
-                      '`scripts/global/consultant-second-opinion.js` `appendSecondOpinionBlock(...)`. ' +
-                      'Waive with label `second-opinion:waived` if intentional. Does not block merge during soak.',
+                      '## Consultant second-opinion advisory (Epic #1568 AC-4 / #1573 / #1612 rescope)\n\n' +
+                      'CONSULTANT_CLOSEOUT does not include a `SECOND_OPINION` block from a cross-family rater. ' +
+                      'Run: `node scripts/global/second-opinion-runner.js <closeout-file>` to invoke ' +
+                      'the HAMR-wrapped fleet rater (qwen2.5-coder:32b on fleet-large tier). ' +
+                      'If max_abs_delta > 1.0, `second-opinion-tier3-trigger.js` auto-files Tier-3. ' +
+                      'Waive with label `second-opinion:waived` if intentional. ' +
+                      '\n\n' +
+                      '**Status: ADVISORY-PERMANENT** (per Epic #1612 replay-eval: 0/37 historical ' +
+                      'PRs included a SECOND_OPINION block before the runner shipped — promotion to ' +
+                      'required would have been retroactively blocking. Runner now exists; advisory ' +
+                      'informs reviewers; auto-file Tier-3 handles disagreement when invoked).',
               });
             }
