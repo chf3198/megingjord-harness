@@ -90,6 +90,7 @@ npm run deploy:both:apply
 | `git:freshness-check` | `node scripts/global/git-freshness-check.js` |
 | `git:freshness-check:test` | `node --test tests/git-freshness-check.spec.js` |
 | `goals:regen` | `node scripts/global/goals-contract-generate.js` |
+| `governance:actuator-transitions:test` | `node --test tests/actuator-transitions.spec.js` |
 | `governance:adapters:emit` | `node scripts/global/governance-adapter-emit.js` |
 | `governance:adapters:test` | `node scripts/global/governance-adapter-emit.spec.js` |
 | `governance:anneal-decision-audit` | `node scripts/global/anneal-decision-audit.js` |
@@ -108,6 +109,8 @@ npm run deploy:both:apply
 | `governance:escalation-coverage` | `node scripts/global/escalation-coverage-gate.js` |
 | `governance:escalation-coverage:test` | `node --test tests/escalation-coverage-gate.spec.js` |
 | `governance:generate` | `node scripts/global/governance-generate.js` |
+| `governance:ghs-feedback-loop:test` | `node --test tests/ghs-feedback-loop.spec.js` |
+| `governance:goal-tier-resolver:test` | `python3 -m unittest tests.hooks.test_goal_tier_resolver` |
 | `governance:hook-parity` | `node scripts/global/hook-parity-check.js` |
 | `governance:hook-parity:test` | `node --test tests/hook-parity-check.spec.js` |
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
