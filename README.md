@@ -88,6 +88,8 @@ npm run deploy:both:apply
 | `goals:regen` | `node scripts/global/goals-contract-generate.js` |
 | `governance:adapters:emit` | `node scripts/global/governance-adapter-emit.js` |
 | `governance:adapters:test` | `node scripts/global/governance-adapter-emit.spec.js` |
+| `governance:anneal-decision-audit` | `node scripts/global/anneal-decision-audit.js` |
+| `governance:anneal-decision-detector:test` | `node --test tests/anneal-decision-detector.spec.js` |
 | `governance:audit` | `node scripts/global/governance-audit.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
@@ -104,6 +106,8 @@ npm run deploy:both:apply
 | `governance:hook-parity` | `node scripts/global/hook-parity-check.js` |
 | `governance:hook-parity:test` | `node --test tests/hook-parity-check.spec.js` |
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
+| `governance:lease-heartbeat` | `node scripts/global/worktree-lease-heartbeat.js` |
+| `governance:lease-heartbeat:test` | `node --test tests/worktree-lease-heartbeat.spec.js` |
 | `governance:manifest:test` | `node scripts/global/governance-manifest-validate.spec.js` |
 | `governance:manifest:validate` | `node scripts/global/governance-manifest-validate.js` |
 | `governance:no-sync-http` | `node scripts/global/no-sync-http-handlers.js` |
@@ -124,7 +128,9 @@ npm run deploy:both:apply
 | `governance:tokens` | `node scripts/global/governance-token-lint.js` |
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
+| `governance:worktree-intercept:test` | `node --test tests/worktree-write-intercept.spec.js` |
 | `governance:worktree-inventory` | `node scripts/global/worktree-inventory.js` |
+| `governance:worktree-lock:test` | `node --test tests/worktree-active-session-lock.spec.js` |
 | `governance:worktrees` | `node scripts/global/worktree-governance-audit.js --json` |
 | `hamr:activate` | `bash scripts/global/hamr-activate.sh` |
 | `hamr:batch-route:test` | `node --test tests/batch-route-async.spec.js` |
