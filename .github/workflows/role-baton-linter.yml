@@ -1,0 +1,56 @@
+name: Role-Baton Linter
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: role-baton-linter-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  role-baton-linter:
+    name: role-baton-linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: '22' }
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { lint } = require('./scripts/global/role-baton-linter.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) {
+              core.info('No Refs #N in PR body — role-baton-linter skipped.');
+              return;
+            }
+            const linkedNum = parseInt(refsMatch[1], 10);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+            });
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+              per_page: 100,
+            });
+            const result = lint({
+              number: linkedNum, title: issue.title, state: issue.state,
+              labels: issue.labels.map(l => l.name),
+              comments: comments.map(c => ({ body: c.body })),
+            });
+            if (result.ok) {
+              core.info(`Role-baton shape OK for #${linkedNum} (${result.type})`);
+              return;
+            }
+            const summary = result.violations.map(v => `- ${v.rule}: ${v.detail}`).join('\n');
+            const advisory =
+              `<!-- role-baton-linter -->\n` +
+              `## ⚠ Role-Baton Workflow Violation (Epic #1876)\n\n` +
+              `Issue #${linkedNum} (${result.type}):\n${summary}\n\n` +
+              `See \`instructions/epic-governance.instructions.md\` (Rule E2 v2) ` +
+              `and \`instructions/role-baton-routing.instructions.md\` (baton-v2.0).`;
+            core.warning(advisory);
+            // Advisory-mode v1 per Epic #1875 promotion model.
+            // NEW Epics/children landing post-merge get blocking via per-validator
+            // replay-eval (Epic #1771 pattern). NO calendar threshold.

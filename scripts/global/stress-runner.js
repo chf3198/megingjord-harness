@@ -15,12 +15,14 @@ const SERVICE = 'megingjord-stress-runner';
 const EPIC_WORKTREE = 1854;
 const EPIC_ANNEAL = 1855;
 const EPIC_REBASE = 1827;
+const EPIC_ROLE_BATON = 1876;
 const SUITE_TIMEOUT_MS = 120000;
 const OUTPUT_TRUNCATE = 500;
 const SUITES = [
   { id: 'worktree-isolation', spec: 'tests/stress-worktree-isolation.spec.js', epic: EPIC_WORKTREE },
   { id: 'anneal-decision', spec: 'tests/stress-anneal-decision.spec.js', epic: EPIC_ANNEAL },
   { id: 'rebase-discipline', spec: 'tests/stress-rebase-discipline.spec.js', epic: EPIC_REBASE },
+  { id: 'role-baton-linter', spec: 'tests/stress-role-baton-linter.spec.js', epic: EPIC_ROLE_BATON },
 ];
 
 function ensureDir(file) {

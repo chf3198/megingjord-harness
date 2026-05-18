@@ -9,6 +9,16 @@ const ARTIFACT_ROLE = {
   CONSULTANT_CLOSEOUT: 'consultant',
 };
 
+// Epic-shape contract (Rule E2 v2): Epic-typed issues only carry MANAGER_HANDOFF
+// + CONSULTANT_CLOSEOUT (the latter only during status:review). ADMIN/COLLAB
+// artifacts on an Epic are violations — the orchestrator-worker contract puts
+// those phases on the CHILDREN. Closes the Epic-#1857 violation class.
+const EPIC_FORBIDDEN_ARTIFACTS = ['ADMIN_HANDOFF', 'COLLABORATOR_HANDOFF'];
+
+function isEpic(labels) {
+  return (labels || []).some(name => String(name).toLowerCase() === 'type:epic');
+}
+
 function roleFromBody(body) {
   const m = String(body || '').match(/Role\s*:\s*(\w+)/i);
   return m ? m[1].toLowerCase() : null;
@@ -27,21 +37,27 @@ function entries(comments) {
 
 function analyzeComments(comments, opts = {}) {
   const violations = [];
+  const linkedIsEpic = isEpic(opts.linkedIssueLabels);
   for (const entry of entries(comments)) {
+    if (linkedIsEpic && EPIC_FORBIDDEN_ARTIFACTS.includes(entry.artifact)) {
+      violations.push({ artifact: entry.artifact, rule: 'epic-shape-forbidden-artifact',
+        detail: `${entry.artifact} forbidden on type:epic per Rule E2 v2. ` +
+          `Epic only carries MANAGER_HANDOFF (lifecycle) + CONSULTANT_CLOSEOUT (status:review). ` +
+          `${entry.artifact === 'ADMIN_HANDOFF' ? 'Admin' : 'Collaborator'} phase belongs on CHILD tickets.` });
+      continue;
+    }
     const actualRole = roleFromBody(entry.body);
     if (!actualRole || actualRole !== entry.role) {
-      violations.push({
-        artifact: entry.artifact,
-        rule: 'artifact-role-mismatch',
-        detail: `Expected Role: ${entry.role} for ${entry.artifact}.`,
-      });
+      violations.push({ artifact: entry.artifact, rule: 'artifact-role-mismatch',
+        detail: `Expected Role: ${entry.role} for ${entry.artifact}.` });
     }
     const alias = validateArtifactAlias(entry.body, opts);
     if (alias.ok) continue;
     if (alias.violation) violations.push({ artifact: entry.artifact, ...alias.violation });
-    else violations.push({ artifact: entry.artifact, rule: 'signer-fields-invalid', detail: alias.skipped || 'invalid signer fields' });
+    else violations.push({ artifact: entry.artifact, rule: 'signer-fields-invalid',
+      detail: alias.skipped || 'invalid signer fields' });
   }
   return { ok: violations.length === 0, count: entries(comments).length, violations };
 }
 
-module.exports = { analyzeComments, ARTIFACT_ROLE };
+module.exports = { analyzeComments, ARTIFACT_ROLE, isEpic, EPIC_FORBIDDEN_ARTIFACTS };
