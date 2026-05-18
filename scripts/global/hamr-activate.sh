@@ -7,6 +7,12 @@ set -euo pipefail
 repo_root=$(git rev-parse --show-toplevel)
 echo "▶ HAMR activation for: $repo_root"
 
+# Source repo-root .env for provider keys if present; secrets are never echoed.
+if [ -f "$repo_root/.env" ]; then
+  # shellcheck source=/dev/null
+  set -a; . "$repo_root/.env"; set +a
+fi
+
 step() { echo ""; echo "── $1 ──"; }
 
 step "1/5 install R9.2 git hooks (#934)"
