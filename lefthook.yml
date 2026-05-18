@@ -21,3 +21,5 @@ pre-push:
       run: node scripts/global/closeout-preflight.js
     test-evidence-diff:
       run: node scripts/global/test-evidence-validator.js --diff-only || true
+    git-freshness:
+      run: node scripts/global/git-freshness-check.js || true

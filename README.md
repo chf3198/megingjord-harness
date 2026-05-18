@@ -85,12 +85,17 @@ npm run deploy:both:apply
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `git-state:drift` | `node scripts/global/git-state-drift-sensor.js` |
+| `git:conflict-predict` | `node scripts/global/git-conflict-predict.js` |
+| `git:conflict-predict:test` | `node --test tests/git-conflict-predict.spec.js` |
+| `git:freshness-check` | `node scripts/global/git-freshness-check.js` |
+| `git:freshness-check:test` | `node --test tests/git-freshness-check.spec.js` |
 | `goals:regen` | `node scripts/global/goals-contract-generate.js` |
 | `governance:adapters:emit` | `node scripts/global/governance-adapter-emit.js` |
 | `governance:adapters:test` | `node scripts/global/governance-adapter-emit.spec.js` |
 | `governance:anneal-decision-audit` | `node scripts/global/anneal-decision-audit.js` |
 | `governance:anneal-decision-detector:test` | `node --test tests/anneal-decision-detector.spec.js` |
 | `governance:audit` | `node scripts/global/governance-audit.js` |
+| `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
