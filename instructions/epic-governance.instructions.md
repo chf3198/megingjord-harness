@@ -49,6 +49,16 @@ Auto-transition posts an `EPIC_AUTO_PAUSE` comment naming the implicit resume tr
 
 **Inverse transition** (`dormant → in-progress`): triggered when a child ticket moves to `status:in-progress` OR a new PR is opened against any linked child. Mirrors the entry rule.
 
+## Research-First Epic Phase Gate
+
+A research-first Epic (label `type:epic` + presence of `AC-R*` acceptance criteria in body) MUST satisfy the following gate before any implementation child tickets or development ACs may be authored:
+
+1. All research children (`AC-R1` through `AC-Rn-1`) MUST be closed with Consultant peer-review rubric >= 7 across all G1-G9 goals.
+2. The terminal research child (`AC-Rn`, this rule itself) MUST be closed with Consultant approval.
+3. The Epic MUST receive a Manager `EPIC_RESCOPE` or equivalent comment summarizing Phase-0 outcomes before transitioning out of `status:in-progress`.
+4. Phase-1 implementation child tickets MUST cite the Phase-0 research children they consume in their body (`Refs #N` per source child).
+5. If any Phase-0 child is reopened, the gate re-arms and Phase-1 work is paused until the reopened child closes again.
+
 ## Epic Progress Comment Protocol
 
 When any child ticket is closed, the Manager posts a progress update to the epic:
