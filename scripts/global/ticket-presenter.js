@@ -45,7 +45,7 @@ function isChild(item, parentMap) {
   return Boolean(m && parentMap[Number(m[1])] === 'OPEN');
 }
 
-const DEFAULT_LIMIT = 200;
+const DEFAULT_LIMIT = 100;
 const SORT_KEY_LENGTH = 3;
 const labelsOf = issue => issue.labels.nodes.map(node => node.name);
 const priOf = labels => { for (const label of labels) if (label in PRI) return label; return 'priority:P3'; };
