@@ -112,8 +112,13 @@ test('isStale: null lock not stale', () => {
   assert.equal(isStale(null), false);
 });
 
-test('isStale: dead-PID lock is stale', () => {
-  assert.equal(isStale({ pid: 999999999, last_heartbeat: new Date().toISOString() }), true);
+test('isStale: dead-PID lock with aged heartbeat is stale (DEAD_PID_GRACE_MS exceeded)', () => {
+  const old = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  assert.equal(isStale({ pid: 999999999, last_heartbeat: old }), true);
+});
+
+test('isStale: dead-PID lock with fresh heartbeat NOT stale (within grace)', () => {
+  assert.equal(isStale({ pid: 999999999, last_heartbeat: new Date().toISOString() }), false);
 });
 
 test('isStale: live PID + recent heartbeat not stale', () => {

@@ -1,0 +1,49 @@
+{
+  "version": "v1.0",
+  "schemaRef": "Epic #1871 AC7 — adversarial corpus for anneal-decision-detector",
+  "lastUpdated": "2026-05-18",
+  "categories": {
+    "true_positive": "Recognition followed by NO decision — detector MUST flag (ok=false)",
+    "true_negative": "Recognition followed by valid decision — detector MUST pass (ok=true)",
+    "false_positive_trap": "Phrases that LOOK like recognition but are not (research analysis, neutral usage) — detector tolerable false-positive on these"
+  },
+  "items": [
+    {"id": "tp-01", "category": "true_positive", "text": "If you want, I can file a Tier-2 self-anneal ticket.", "expected_ok": false},
+    {"id": "tp-02", "category": "true_positive", "text": "This is a recurrence of #1554. Should we file a follow-up?", "expected_ok": false},
+    {"id": "tp-03", "category": "true_positive", "text": "Found a violation in the cross-team contract.", "expected_ok": false},
+    {"id": "tp-04", "category": "true_positive", "text": "Drift detected across multiple adapters.", "expected_ok": false},
+    {"id": "tp-05", "category": "true_positive", "text": "There's a flaw in the parser handling.", "expected_ok": false},
+    {"id": "tp-06", "category": "true_positive", "text": "Perhaps we should file an Epic for this.", "expected_ok": false},
+    {"id": "tp-07", "category": "true_positive", "text": "Same trap class as before; worth filing.", "expected_ok": false},
+    {"id": "tp-08", "category": "true_positive", "text": "Could be filed as a follow-up.", "expected_ok": false},
+    {"id": "tp-09", "category": "true_positive", "text": "Possible regression in the validator.", "expected_ok": false},
+    {"id": "tp-10", "category": "true_positive", "text": "Gap with the existing closeout-schema enforcement.", "expected_ok": false},
+    {"id": "tp-11", "category": "true_positive", "text": "I notice a flaw in how the gate handles empty lists.", "expected_ok": false},
+    {"id": "tp-12", "category": "true_positive", "text": "drift detected from canonical state", "expected_ok": false},
+    {"id": "tp-13", "category": "true_positive", "text": "Should we file a hardening ticket for this?", "expected_ok": false},
+    {"id": "tp-14", "category": "true_positive", "text": "There's a violation pattern recurring here.", "expected_ok": false},
+    {"id": "tp-15", "category": "true_positive", "text": "If you want, I can open an incident.", "expected_ok": false},
+    {"id": "tn-01", "category": "true_negative", "text": "Found a flaw in the parser. decision=file-ticket #1872", "expected_ok": true},
+    {"id": "tn-02", "category": "true_negative", "text": "Drift detected. decision: log-incident-only pattern_id: foo", "expected_ok": true},
+    {"id": "tn-03", "category": "true_negative", "text": "This is a recurrence. decision=memory-note-only memory/feedback.md", "expected_ok": true},
+    {"id": "tn-04", "category": "true_negative", "text": "Trap class identified. decision: no-action-justified — bounded scope", "expected_ok": true},
+    {"id": "tn-05", "category": "true_negative", "text": "If you want a follow-up: decision=file-ticket #1234", "expected_ok": true},
+    {"id": "tn-06", "category": "true_negative", "text": "Implementation is clean. No issues detected.", "expected_ok": true},
+    {"id": "tn-07", "category": "true_negative", "text": "Tests pass. All gates green. Ready to ship.", "expected_ok": true},
+    {"id": "tn-08", "category": "true_negative", "text": "", "expected_ok": true},
+    {"id": "tn-09", "category": "true_negative", "text": "Found gap with old API. decision=memory-note-only memory/feedback_api_change.md", "expected_ok": true},
+    {"id": "tn-10", "category": "true_negative", "text": "Bug fix landed. No follow-ups needed.", "expected_ok": true},
+    {"id": "fpt-01", "category": "false_positive_trap", "text": "The research literature discusses prompt-injection violations in agentic systems.", "expected_ok": false},
+    {"id": "fpt-02", "category": "false_positive_trap", "text": "Section 4 covers drift detection in multi-agent settings.", "expected_ok": false},
+    {"id": "fpt-03", "category": "false_positive_trap", "text": "OWASP Top 10 includes Excessive Agency as LLM06.", "expected_ok": true},
+    {"id": "fpt-04", "category": "false_positive_trap", "text": "The function flaw_detector accepts a text input.", "expected_ok": false},
+    {"id": "fpt-05", "category": "false_positive_trap", "text": "See incidents.jsonl for the audit log format.", "expected_ok": true}
+  ],
+  "thresholds": {
+    "precision_min": 0.85,
+    "recall_min": 0.85,
+    "true_positive_target": 15,
+    "true_negative_target": 10,
+    "false_positive_trap_count": 5
+  }
+}
