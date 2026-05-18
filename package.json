@@ -95,6 +95,8 @@
     "governance:role-baton-linter": "node scripts/global/role-baton-linter.js",
     "governance:role-baton-linter:test": "node --test tests/role-baton-linter.spec.js",
     "governance:role-baton-audit": "node scripts/global/role-baton-audit.js",
+    "governance:list-tickets": "node scripts/global/ticket-presenter.js",
+    "governance:list-tickets:test": "node --test tests/ticket-presenter.spec.js",
     "stress:role-baton": "node --test tests/stress-role-baton-linter.spec.js",
     "governance:ghs-feedback-loop:test": "node --test tests/ghs-feedback-loop.spec.js",
     "governance:actuator-transitions:test": "node --test tests/actuator-transitions.spec.js",

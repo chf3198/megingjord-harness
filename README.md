@@ -122,6 +122,8 @@ npm run deploy:both:apply
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
 | `governance:lease-heartbeat` | `node scripts/global/worktree-lease-heartbeat.js` |
 | `governance:lease-heartbeat:test` | `node --test tests/worktree-lease-heartbeat.spec.js` |
+| `governance:list-tickets` | `node scripts/global/ticket-presenter.js` |
+| `governance:list-tickets:test` | `node --test tests/ticket-presenter.spec.js` |
 | `governance:manifest:test` | `node scripts/global/governance-manifest-validate.spec.js` |
 | `governance:manifest:validate` | `node scripts/global/governance-manifest-validate.js` |
 | `governance:model-diversity-replay` | `node scripts/global/model-diversity-replay-eval.js` |
