@@ -29,13 +29,6 @@ function readStatsJsonl(file = CACHE_STATS_FILE) {
   return out;
 }
 
-/** Compute rolling 7-day hit rate from in-memory records.
- * Each record: { ts: epoch_ms, provider: string, cache_read_tokens, input_tokens }.
- * Hit rate = sum(cache_read_tokens) / sum(input_tokens) within window.
- * @param {Array<object>} records - Cache-stat records.
- * @param {object} [opts] - { now, windowMs }.
- * @returns {{hit_rate: number|null, sample_count: number, cache_read_total: number, input_total: number}} Stats.
- */
 // #1793: legacy records lack cache_eligible; backfill the same predicate at read.
 function recordIsCacheEligible(record) {
   if (record.cache_eligible === true) return true;
@@ -44,6 +37,11 @@ function recordIsCacheEligible(record) {
   return Number(record.input_tokens || 0) >= 50;
 }
 
+/** Compute rolling 7-day hit rate from in-memory records.
+ * @param {Array<object>} records - Cache-stat records.
+ * @param {object} [opts] - { now, windowMs }.
+ * @returns {object} Stats.
+ */
 function computeHitRate(records, opts = {}) {
   const now = opts.now ?? Date.now();
   const windowMs = opts.windowMs ?? ROLLING_WINDOW_MS;
