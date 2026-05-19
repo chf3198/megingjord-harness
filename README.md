@@ -34,6 +34,43 @@ flowchart LR
 - LLM wiki integration for reusable institutional knowledge
 - Accessibility + UX baseline checks aligned to WCAG 2.2 and Core Web Vitals
 
+## How it works — two-tier model
+
+Installing Megingjord in a project seeds two independent layers:
+
+**Global layer** — lives in your home directory, shared by all projects:
+
+| Runtime | Path | What lives there |
+|---|---|---|
+| GitHub Copilot Chat | `~/.copilot/` | skills, instructions, hooks, scripts, wiki |
+| Claude Code | `~/.claude/` | commands, agents, hooks, settings |
+| Codex | `~/.codex/` | AGENTS.md, config, hooks, rules |
+
+One `npm run deploy:apply` and every project on the machine inherits the full
+governance toolkit — skills, routing, telemetry, wiki — for all three runtimes.
+
+**Workspace layer** — checked into each project repo, workspace-specific:
+
+| Extension | File(s) | Purpose |
+|---|---|---|
+| Copilot | `.github/copilot-instructions.md` | workspace override + adapter |
+| Claude Code | `CLAUDE.md`, `.claude/settings.json` | workspace override + adapter |
+| Codex | `AGENTS.md`, `.codex/` | workspace override + adapter |
+
+Workspace files extend or override the global layer. Global governance wins by
+default; local files add project-specific context and commands.
+
+**Multi-project reuse**: `npm run deploy:apply` is idempotent. Multiple projects
+share one global skill and governance layer while each keeps its own baton
+history, workspace wiki, and local overrides.
+
+**Multi-runtime parity**: A skill, hook, or governance rule written once deploys
+to all three runtimes — Copilot, Claude Code, and Codex are equal first-class
+citizens.
+
+See [`docs/howto/installation.md`](docs/howto/installation.md) for the full
+install walkthrough, including adding a second project.
+
 ## Quick start
 
 ```bash
@@ -254,6 +291,7 @@ npm run deploy:both:apply
 | `stress:surface-audit` | `node scripts/global/stress-surface-audit.js` |
 | `stress:surface-audit:test` | `node --test tests/stress-surface-audit.spec.js` |
 | `stress:test` | `node scripts/global/stress-runner.js` |
+| `stress:wiki-metrics:test` | `node --test tests/stress-wiki-metrics.spec.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |
