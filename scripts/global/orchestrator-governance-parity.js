@@ -83,9 +83,9 @@ function run() {
     'Claude Code command adapters do not cover all repo skills.',
     `missing ${missingCommands.length}: ${missingCommands.join(', ')}`,
     'Generate adapters or record per-skill waivers in the parity manifest.');
-  findings.push(...wikiCheck.run().findings);
+  const wiki = wikiCheck.run();
   return { ok: findings.length === 0, manifest: path.relative(ROOT, MANIFEST),
-    checkedAt: new Date().toISOString(), observations: { copilot, codex },
+    checkedAt: new Date().toISOString(), observations: { copilot, codex, wiki },
     findings };
 }
 

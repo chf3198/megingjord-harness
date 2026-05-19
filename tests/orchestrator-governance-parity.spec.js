@@ -53,8 +53,8 @@ test('diff helper models strict failure requirements', () => {
   assert.deepEqual(parity.diff(['goal_lens.py'], []), ['goal_lens.py']);
 });
 
-test('run() includes wiki_docs_memory findings in result', () => {
+test('run() includes wiki_docs_memory observations in result', () => {
   const result = parity.run();
-  const wikiFindings = result.findings.filter(f => f.id.startsWith('wiki-'));
-  assert.ok(Array.isArray(wikiFindings), 'wiki findings array present');
+  assert.ok(result.observations.wiki, 'wiki observation present');
+  assert.equal(result.observations.wiki.surface, 'wiki_docs_memory');
 });

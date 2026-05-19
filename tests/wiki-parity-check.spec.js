@@ -50,6 +50,10 @@ test('each finding has required schema fields', () => {
 });
 
 test('deployed environment has no wiki parity gaps', () => {
+  if (process.env.CI) {
+    console.log('    skip: CI environment has no deployed wiki runtime');
+    return;
+  }
   const result = run();
   const ids = result.findings.map(f => f.id);
   if (ids.length) console.log(`    advisory: ${ids.join(', ')}`);
