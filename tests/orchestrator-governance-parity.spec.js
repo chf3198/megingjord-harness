@@ -11,9 +11,9 @@ test('parity audit reports structured findings without throwing', () => {
   assert.equal(result.manifest, 'inventory/orchestrator-governance-parity.json');
 });
 
-test('parity audit detects current Claude hook adapter gap', () => {
+test('parity audit detects Claude hook adapter coverage', () => {
   const ids = parity.run().findings.map(f => f.id);
-  assert.ok(ids.includes('claude-hooks-missing'));
+  assert.equal(ids.includes('claude-hooks-missing'), false);
 });
 
 test('parity audit detects Codex canonical gate coverage gap', () => {

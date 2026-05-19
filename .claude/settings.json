@@ -15,5 +15,53 @@
     "additionalDirectories": [
       "/home/curtisfranks/devenv-ops/.claude"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/session_context.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/hamr_activation_check.py"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/manager_ticket_gate.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/goal_lens.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/userprompt_gate.py"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/commit_ticket_gate.py"
+      },
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/pretool_guard.py"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/posttool_reminders.py"
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 ~/.claude/hooks/scripts/stop_reminder.py"
+      }
+    ]
   }
 }
