@@ -3,14 +3,13 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-
+const wikiCheck = require('./wiki-parity-check');
 const ROOT = path.resolve(__dirname, '..', '..');
 const MANIFEST = path.join(ROOT, 'inventory', 'orchestrator-governance-parity.json');
 
 function readJson(rel) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
 }
-
 function read(rel) {
   const full = path.join(ROOT, rel);
   return fs.existsSync(full) ? fs.readFileSync(full, 'utf8') : '';
@@ -84,8 +83,9 @@ function run() {
     'Claude Code command adapters do not cover all repo skills.',
     `missing ${missingCommands.length}: ${missingCommands.join(', ')}`,
     'Generate adapters or record per-skill waivers in the parity manifest.');
+  const wiki = wikiCheck.run();
   return { ok: findings.length === 0, manifest: path.relative(ROOT, MANIFEST),
-    checkedAt: new Date().toISOString(), observations: { copilot, codex },
+    checkedAt: new Date().toISOString(), observations: { copilot, codex, wiki },
     findings };
 }
 

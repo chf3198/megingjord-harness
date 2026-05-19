@@ -45,5 +45,37 @@
     "deploy": "Operators can deploy one, any pair, or all three runtimes clearly",
     "skills": "Every canonical skill has an adapter or explicit waiver per runtime",
     "tests": "Parity checks inspect registrations, not only copied script bytes"
+  },
+  "wikiDocsParity": {
+    "auditedAt": "2026-05-19",
+    "ingestionContract": "Megingjord-only (npm run wiki:ingest); ingest-only artifacts (sources/, syntheses/, lint.js) deployed to Copilot wiki only; downstream runtimes read deployed artifacts",
+    "runtimes": {
+      "copilot": {
+        "wikiPath": "~/.copilot/wiki/",
+        "searchScript": "~/.copilot/scripts/wiki-search.js",
+        "deployTarget": "copilot",
+        "status": "full",
+        "subdirs": ["concepts", "entities", "sources", "syntheses", "skills"]
+      },
+      "codex": {
+        "wikiPath": "~/.codex/devenv-ops/wiki/",
+        "searchScript": "~/.codex/devenv-ops/scripts/wiki-search.js",
+        "deployTarget": "codex",
+        "status": "partial",
+        "subdirs": ["concepts", "entities", "skills"],
+        "notes": "sources/ and syntheses/ are ingest-only; not deployed to Codex"
+      },
+      "claude-code": {
+        "wikiPath": "~/.copilot/wiki/ (cross-runtime read)",
+        "searchScript": null,
+        "deployTarget": null,
+        "status": "cross-runtime-read",
+        "notes": "Reads from ~/.copilot/wiki/ via wiki-knowledge.instructions.md; search command is node ~/.copilot/scripts/wiki-search.js"
+      }
+    },
+    "parityGaps": [
+      "claude-code has no dedicated wiki home — reads Copilot runtime by design",
+      "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)"
+    ]
   }
 }
