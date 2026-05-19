@@ -2,46 +2,42 @@
 // #1682: page-level telemetry fix + atomic write + Epic #1942 forward-compat
 // (wikiType discriminator defaults to 'wisdom' for current Karpathy Wiki).
 const fs = require('fs'); const path = require('path');
+const S = require('./wiki-metrics-store');
 const ROOT = path.resolve(__dirname, '..');
 const METRICS_FILE = path.join(ROOT, 'logs', 'wiki-metrics.json');
-const TMP_SUFFIX = '.tmp';
 const DEFAULT_WIKI_TYPE = 'wisdom';
 
 function loadMetrics(file = METRICS_FILE) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return { totalAccess: 0, sections: {}, pages: {}, pagesByType: {}, firstSeen: new Date().toISOString() }; }
+  return S.loadJson(file, () => ({ totalAccess: 0, sections: {}, pages: {},
+    pagesByType: {}, firstSeen: new Date().toISOString() }));
 }
 
 function saveMetrics(m, file = METRICS_FILE) {
-  try {
-    const dir = path.dirname(file);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    const tmp = file + TMP_SUFFIX + '.' + process.pid + '.' + Date.now();
-    fs.writeFileSync(tmp, JSON.stringify(m, null, 2));
-    fs.renameSync(tmp, file);
-  } catch { /* non-blocking */ }
+  try { S.saveJsonAtomic(m, file); } catch { /* non-blocking */ }
 }
 
 function recordAccess(section, slug, opts = {}) {
   const file = opts.file || METRICS_FILE;
   const wikiType = opts.wikiType || DEFAULT_WIKI_TYPE;
   const slugs = Array.isArray(slug) ? slug : (slug ? [slug] : []);
-  const m = loadMetrics(file);
-  m.totalAccess = (m.totalAccess || 0) + 1;
-  m.sections = m.sections || {};
-  m.pages = m.pages || {};
-  m.pagesByType = m.pagesByType || {};
-  m.pagesByType[wikiType] = m.pagesByType[wikiType] || {};
-  if (section) m.sections[section] = (m.sections[section] || 0) + 1;
-  for (const oneSlug of slugs) {
-    if (oneSlug && typeof oneSlug === 'string') {
-      m.pages[oneSlug] = (m.pages[oneSlug] || 0) + 1;
-      m.pagesByType[wikiType][oneSlug] = (m.pagesByType[wikiType][oneSlug] || 0) + 1;
+  return S.withFileLock(file, () => {
+    const m = loadMetrics(file);
+    m.totalAccess = (m.totalAccess || 0) + 1;
+    m.sections = m.sections || {};
+    m.pages = m.pages || {};
+    m.pagesByType = m.pagesByType || {};
+    m.pagesByType[wikiType] = m.pagesByType[wikiType] || {};
+    if (section) m.sections[section] = (m.sections[section] || 0) + 1;
+    for (const oneSlug of slugs) {
+      if (oneSlug && typeof oneSlug === 'string') {
+        m.pages[oneSlug] = (m.pages[oneSlug] || 0) + 1;
+        m.pagesByType[wikiType][oneSlug] = (m.pagesByType[wikiType][oneSlug] || 0) + 1;
+      }
     }
-  }
-  m.lastAccess = new Date().toISOString();
-  saveMetrics(m, file);
-  return m;
+    m.lastAccess = new Date().toISOString();
+    saveMetrics(m, file);
+    return m;
+  });
 }
 
 function computeGrade(health, metrics) {
