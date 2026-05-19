@@ -291,6 +291,7 @@ npm run deploy:both:apply
 | `stress:surface-audit` | `node scripts/global/stress-surface-audit.js` |
 | `stress:surface-audit:test` | `node --test tests/stress-surface-audit.spec.js` |
 | `stress:test` | `node scripts/global/stress-runner.js` |
+| `stress:wiki-metrics:test` | `node --test tests/stress-wiki-metrics.spec.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |
