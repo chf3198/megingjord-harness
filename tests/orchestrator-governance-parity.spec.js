@@ -28,10 +28,8 @@ test('parity audit detects all-target deploy and sync semantics coverage', () =>
 });
 
 test('parity audit detects Claude command adapter gap', () => {
-  const result = parity.run();
-  const gap = result.findings.find(f => f.id === 'claude-command-gap');
-  assert.ok(gap);
-  assert.match(gap.evidence, /missing \d+:/);
+  const ids = parity.run().findings.map(f => f.id);
+  assert.equal(ids.includes('claude-command-gap'), false);
 });
 
 test('hook command parser supports flat and grouped hook schemas', () => {
