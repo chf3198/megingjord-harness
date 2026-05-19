@@ -1,3 +1,9 @@
+pre-commit:
+  parallel: false
+  commands:
+    docs-check-on-package-json:
+      run: node scripts/global/pre-commit-docs-check.js
+
 pre-push:
   parallel: true
   commands:
