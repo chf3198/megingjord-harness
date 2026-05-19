@@ -1,30 +1,46 @@
-// Wiki Metrics — track access counts and compute health grade
+// Wiki Metrics — track access counts and compute health grade.
+// #1682: page-level telemetry fix + atomic write + Epic #1942 forward-compat
+// (wikiType discriminator defaults to 'wisdom' for current Karpathy Wiki).
 const fs = require('fs'); const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const METRICS_FILE = path.join(ROOT, 'logs', 'wiki-metrics.json');
+const TMP_SUFFIX = '.tmp';
+const DEFAULT_WIKI_TYPE = 'wisdom';
 
-function loadMetrics() {
-  try { return JSON.parse(fs.readFileSync(METRICS_FILE, 'utf8')); }
-  catch { return { totalAccess: 0, sections: {}, pages: {}, firstSeen: new Date().toISOString() }; }
+function loadMetrics(file = METRICS_FILE) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+  catch { return { totalAccess: 0, sections: {}, pages: {}, pagesByType: {}, firstSeen: new Date().toISOString() }; }
 }
 
-function saveMetrics(m) {
+function saveMetrics(m, file = METRICS_FILE) {
   try {
-    const dir = path.dirname(METRICS_FILE);
+    const dir = path.dirname(file);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(METRICS_FILE, JSON.stringify(m, null, 2));
+    const tmp = file + TMP_SUFFIX + '.' + process.pid + '.' + Date.now();
+    fs.writeFileSync(tmp, JSON.stringify(m, null, 2));
+    fs.renameSync(tmp, file);
   } catch { /* non-blocking */ }
 }
 
-function recordAccess(section, slug) {
-  const m = loadMetrics();
+function recordAccess(section, slug, opts = {}) {
+  const file = opts.file || METRICS_FILE;
+  const wikiType = opts.wikiType || DEFAULT_WIKI_TYPE;
+  const slugs = Array.isArray(slug) ? slug : (slug ? [slug] : []);
+  const m = loadMetrics(file);
   m.totalAccess = (m.totalAccess || 0) + 1;
   m.sections = m.sections || {};
   m.pages = m.pages || {};
+  m.pagesByType = m.pagesByType || {};
+  m.pagesByType[wikiType] = m.pagesByType[wikiType] || {};
   if (section) m.sections[section] = (m.sections[section] || 0) + 1;
-  if (slug) m.pages[slug] = (m.pages[slug] || 0) + 1;
+  for (const oneSlug of slugs) {
+    if (oneSlug && typeof oneSlug === 'string') {
+      m.pages[oneSlug] = (m.pages[oneSlug] || 0) + 1;
+      m.pagesByType[wikiType][oneSlug] = (m.pagesByType[wikiType][oneSlug] || 0) + 1;
+    }
+  }
   m.lastAccess = new Date().toISOString();
-  saveMetrics(m);
+  saveMetrics(m, file);
   return m;
 }
 
@@ -48,10 +64,18 @@ function computeGrade(health, metrics) {
   return { grade, score, reasons };
 }
 
-function getWikiMetrics(health) {
-  const m = loadMetrics();
+function getWikiMetrics(health, opts = {}) {
+  const m = loadMetrics(opts.file);
   const gradeInfo = computeGrade(health, m);
   return { ...m, grade: gradeInfo.grade, score: gradeInfo.score, gradeReasons: gradeInfo.reasons };
 }
 
-module.exports = { recordAccess, getWikiMetrics };
+function getTopPages(metrics, n = 5, wikiType) {
+  if (!metrics) return [];
+  const source = wikiType ? ((metrics.pagesByType || {})[wikiType] || {}) : (metrics.pages || {});
+  return Object.entries(source).sort((a, b) => b[1] - a[1]).slice(0, n)
+    .map(([slug, count]) => ({ slug, count }));
+}
+
+module.exports = { recordAccess, getWikiMetrics, loadMetrics, saveMetrics,
+  computeGrade, getTopPages, METRICS_FILE, DEFAULT_WIKI_TYPE };
