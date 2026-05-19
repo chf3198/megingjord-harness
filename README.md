@@ -73,6 +73,8 @@ npm run deploy:both:apply
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
 | `deploy` | `bash scripts/deploy.sh` |
+| `deploy:all` | `bash scripts/deploy.sh --target all` |
+| `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all` |
 | `deploy:apply` | `bash scripts/deploy.sh --apply` |
 | `deploy:both` | `bash scripts/deploy.sh --target both` |
 | `deploy:both:apply` | `bash scripts/deploy.sh --apply --target both` |
@@ -133,6 +135,8 @@ npm run deploy:both:apply
 | `governance:no-sync-http` | `node scripts/global/no-sync-http-handlers.js` |
 | `governance:operator-ownership:eval` | `node scripts/global/operator-ownership-eval.js` |
 | `governance:operator-ownership:test` | `node --test tests/operator-ownership-rules.spec.js tests/delegation-phrase-lint.spec.js tests/operator-ownership-eval.spec.js tests/runtime-side-effect-guard.spec.js` |
+| `governance:orchestrator-parity` | `node scripts/global/orchestrator-governance-parity.js --json` |
+| `governance:orchestrator-parity:test` | `node --test tests/orchestrator-governance-parity.spec.js` |
 | `governance:parity:test` | `node scripts/global/governance-parity.spec.js` |
 | `governance:pre-pr-gate` | `node scripts/global/pre-pr-gate.js` |
 | `governance:pre-pr-gate:test` | `node --test tests/pre-pr-gate.spec.js` |
@@ -249,6 +253,8 @@ npm run deploy:both:apply
 | `stress:test` | `node scripts/global/stress-runner.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
 | `sync` | `bash scripts/sync.sh` |
+| `sync:all` | `bash scripts/sync.sh --target all` |
+| `sync:all:dry` | `bash scripts/sync.sh --dry-run --target all` |
 | `sync:both` | `bash scripts/sync.sh --target both` |
 | `sync:both:dry` | `bash scripts/sync.sh --dry-run --target both` |
 | `sync:claude` | `bash scripts/sync.sh --target claude` |

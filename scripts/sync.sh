@@ -11,12 +11,12 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true ;;
     --target) TARGET="${2:-copilot}"; shift ;;
-    *) echo "Usage: sync.sh [--dry-run] [--target copilot|codex|claude|both]"; exit 1 ;;
+    *) echo "Usage: sync.sh [--dry-run] [--target copilot|codex|claude|both|all]"; exit 1 ;;
   esac
   shift
 done
 
-[[ "$TARGET" =~ ^(copilot|codex|claude|both)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
+[[ "$TARGET" =~ ^(copilot|codex|claude|both|all)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
 $DRY_RUN && CODEX_ARGS+=(--dry-run)
 
 sync_dir() {
@@ -60,13 +60,13 @@ sync_files() {
   echo ""
 }
 
-if [[ "$TARGET" == "codex" || "$TARGET" == "both" ]]; then
+if [[ "$TARGET" == "codex" || "$TARGET" == "both" || "$TARGET" == "all" ]]; then
   node "$ROOT/scripts/global/codex-runtime.js" sync "${CODEX_ARGS[@]}"
 fi
 [[ "$TARGET" == "codex" ]] && exit 0
-if [[ "$TARGET" == "claude" ]]; then
+if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
   $DRY_RUN && echo "(dry run) Would sync ~/.claude/ → .claude/" || rsync -a --exclude='*.local*' "$HOME/.claude/" "$ROOT/.claude/" && echo "✅ ~/.claude/ → .claude/"
-  exit 0; fi
+  [[ "$TARGET" == "claude" ]] && exit 0; fi
 echo "Syncing from: $COPILOT → $ROOT"
 sync_dir "$COPILOT/skills" "$ROOT/skills" "Skills"
 sync_files "$COPILOT/instructions" "$ROOT/instructions" "Instructions"

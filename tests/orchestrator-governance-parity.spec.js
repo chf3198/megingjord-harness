@@ -22,9 +22,9 @@ test('parity audit detects Codex canonical gate coverage gap', () => {
   assert.ok(ids.includes('codex-permission-gap'));
 });
 
-test('parity audit detects all-target deploy and sync semantics gap', () => {
+test('parity audit detects all-target deploy and sync semantics coverage', () => {
   const ids = parity.run().findings.map(f => f.id);
-  assert.ok(ids.includes('all-target-missing'));
+  assert.equal(ids.includes('all-target-missing'), false);
 });
 
 test('parity audit detects Claude command adapter gap', () => {
