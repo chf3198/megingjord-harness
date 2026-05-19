@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const { spawnSync } = require('node:child_process');
 const { test } = require('node:test');
 const parity = require('../scripts/global/orchestrator-governance-parity');
 
@@ -37,4 +38,17 @@ test('hook command parser supports flat and grouped hook schemas', () => {
     { command: 'python3 ~/.x/stop_reminder.py' },
   ] }] } };
   assert.deepEqual(parity.hookCommands(config).scripts, ['stop_reminder.py']);
+});
+
+test('strict mode exits cleanly when parity is complete', () => {
+  const result = spawnSync(process.execPath, [
+    'scripts/global/orchestrator-governance-parity.js',
+    '--strict',
+  ], { encoding: 'utf8' });
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /"ok": true/);
+});
+
+test('diff helper models strict failure requirements', () => {
+  assert.deepEqual(parity.diff(['goal_lens.py'], []), ['goal_lens.py']);
 });
