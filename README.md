@@ -34,47 +34,6 @@ flowchart LR
 - LLM wiki integration for reusable institutional knowledge
 - Accessibility + UX baseline checks aligned to WCAG 2.2 and Core Web Vitals
 
-## How it works — two-tier model
-
-Installing Megingjord in a project seeds two independent layers that work
-together across every AI extension you use:
-
-**Global layer** — lives in your home directory, shared by all your projects:
-
-| Runtime | Path | What lives there |
-|---|---|---|
-| GitHub Copilot Chat | `~/.copilot/` | skills, instructions, hooks, scripts, wiki |
-| Claude Code | `~/.claude/` | commands, agents, hooks, settings |
-| Codex | `~/.codex/` | AGENTS.md, config, hooks, rules |
-
-After one `npm run deploy:apply`, every project on the machine inherits the
-full governance toolkit — skills, routing, telemetry, and the LLM wiki —
-without any per-project setup.
-
-**Workspace layer** — checked into each project repo, workspace-specific:
-
-| Extension | File(s) | Purpose |
-|---|---|---|
-| Copilot | `.github/copilot-instructions.md` | Workspace override + adapter |
-| Claude Code | `CLAUDE.md`, `.claude/settings.json` | Workspace override + adapter |
-| Codex | `AGENTS.md`, `.codex/` | Workspace override + adapter |
-
-Workspace files can extend or override the global layer. Global governance
-wins by default; local files add project-specific context, commands, and
-wiki content.
-
-**Multi-project reuse**: Running `npm run deploy:apply` in any project
-re-deploys the same global layer idempotently. Multiple projects share one
-set of global skills and governance rules while each keeps its own baton
-history, workspace wiki, and local overrides.
-
-**Multi-runtime parity**: A skill, hook, or governance rule written once in
-this repo deploys to all three runtimes. Copilot, Claude Code, and Codex
-are equal first-class citizens.
-
-See [`docs/howto/installation.md`](docs/howto/installation.md) for the full
-installation walkthrough, including adding a second project.
-
 ## Quick start
 
 ```bash
