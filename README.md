@@ -138,6 +138,8 @@ npm run deploy:both:apply
 | `governance:orchestrator-parity` | `node scripts/global/orchestrator-governance-parity.js --json` |
 | `governance:orchestrator-parity:test` | `node --test tests/orchestrator-governance-parity.spec.js` |
 | `governance:parity:test` | `node scripts/global/governance-parity.spec.js` |
+| `governance:pre-commit-docs-check` | `node scripts/global/pre-commit-docs-check.js` |
+| `governance:pre-commit-docs-check:test` | `node --test tests/pre-commit-docs-check.spec.js` |
 | `governance:pre-pr-gate` | `node scripts/global/pre-pr-gate.js` |
 | `governance:pre-pr-gate:test` | `node --test tests/pre-pr-gate.spec.js` |
 | `governance:price-cap` | `node scripts/global/provider-price-cap-gate.js` |
