@@ -26,11 +26,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/session_context.py"
+            "command": "python3 ~/.copilot/hooks/scripts/session_context.py"
           },
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/hamr_activation_check.py"
+            "command": "python3 ~/.copilot/hooks/scripts/hamr_activation_check.py"
           }
         ]
       }
@@ -41,15 +41,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/manager_ticket_gate.py"
+            "command": "python3 ~/.copilot/hooks/scripts/manager_ticket_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/goal_lens.py"
+            "command": "python3 ~/.copilot/hooks/scripts/goal_lens.py"
           },
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/userprompt_gate.py"
+            "command": "python3 ~/.copilot/hooks/scripts/userprompt_gate.py"
           }
         ]
       }
@@ -60,11 +60,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/commit_ticket_gate.py"
+            "command": "python3 ~/.copilot/hooks/scripts/commit_ticket_gate.py"
           },
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/pretool_guard.py"
+            "command": "python3 ~/.copilot/hooks/scripts/pretool_guard.py"
           }
         ]
       }
@@ -75,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/posttool_reminders.py"
+            "command": "python3 ~/.copilot/hooks/scripts/posttool_reminders.py"
           }
         ]
       }
@@ -86,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.claude/hooks/scripts/stop_reminder.py"
+            "command": "python3 ~/.copilot/hooks/scripts/stop_reminder.py"
           }
         ]
       }
