@@ -54,6 +54,8 @@
     "governance:no-sync-http": "node scripts/global/no-sync-http-handlers.js",
     "governance:operator-ownership:eval": "node scripts/global/operator-ownership-eval.js",
     "governance:operator-ownership:test": "node --test tests/operator-ownership-rules.spec.js tests/delegation-phrase-lint.spec.js tests/operator-ownership-eval.spec.js tests/runtime-side-effect-guard.spec.js",
+    "governance:orchestrator-parity": "node scripts/global/orchestrator-governance-parity.js --json",
+    "governance:orchestrator-parity:test": "node --test tests/orchestrator-governance-parity.spec.js",
     "governance:runtime-guard:test": "node --test tests/runtime-side-effect-guard.spec.js",
     "governance:tokens": "node scripts/global/governance-token-lint.js",
     "governance:reconcile": "node scripts/global/ticket-reconcile.js --json",

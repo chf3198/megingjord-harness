@@ -1,0 +1,49 @@
+{
+  "epic": 1912,
+  "goal": "Equivalent governance outcomes across Claude Code, Copilot, and Codex",
+  "runtimes": ["claude-code", "copilot", "codex"],
+  "canonicalSurfaces": [
+    "instructions",
+    "skills_or_commands",
+    "agents_or_subagents",
+    "hooks_or_gates",
+    "state_store",
+    "deploy_sync",
+    "hamr_routing",
+    "ticket_lifecycle",
+    "team_model_signing",
+    "dedicated_worktrees",
+    "visual_qa",
+    "wiki_docs_memory"
+  ],
+  "commonHookEvents": [
+    "SessionStart",
+    "UserPromptSubmit",
+    "PreToolUse",
+    "PostToolUse",
+    "Stop"
+  ],
+  "requiredHookScripts": [
+    "session_context.py",
+    "hamr_activation_check.py",
+    "manager_ticket_gate.py",
+    "goal_lens.py",
+    "userprompt_gate.py",
+    "commit_ticket_gate.py",
+    "pretool_guard.py",
+    "posttool_reminders.py",
+    "stop_reminder.py"
+  ],
+  "runtimeEventNotes": {
+    "codex": ["PermissionRequest is Codex-native and must be mapped or waived"],
+    "copilot": ["PreCompact and SubagentStart are currently wired"],
+    "claude-code": ["Claude Code supports hooks through settings.json"]
+  },
+  "deployTargets": ["copilot", "codex", "claude", "all"],
+  "strictAcceptance": {
+    "hooks": "Every supported runtime has equivalent gate outcomes",
+    "deploy": "Operators can deploy one, any pair, or all three runtimes clearly",
+    "skills": "Every canonical skill has an adapter or explicit waiver per runtime",
+    "tests": "Parity checks inspect registrations, not only copied script bytes"
+  }
+}
