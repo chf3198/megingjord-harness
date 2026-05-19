@@ -1,8 +1,13 @@
-// Wiki Reader — browse real wiki pages from /api/wiki-pages
+// Wiki Reader — browse real wiki pages from /api/wiki-pages.
+// #1682: auto-record top-N slugs per category on render so pages map is
+// populated (not just first file per category). Forward-compat with
+// Epic #1942: wikiType discriminator defaults to 'wisdom' for the
+// current Karpathy Wiki; Phase-1 can pass other types.
 
 let _wikiPagesCache = [];
 let _lastAutoRecord = 0;
 const AUTO_RECORD_INTERVAL_MS = 3600000;
+const TOP_N_PER_CATEGORY = 10;
 
 async function loadWikiPages() {
   try {
@@ -27,10 +32,12 @@ function renderWikiReader(pages) {
   }
   const now = Date.now();
   if (now - _lastAutoRecord > AUTO_RECORD_INTERVAL_MS) {
-    Object.entries(cats).forEach(([c, files]) => {
+    Object.entries(cats).forEach(([cat, files]) => {
       if (typeof trackWikiAccess !== 'function') return;
-      trackWikiAccess(c, '');
-      if (files[0]?.slug) trackWikiAccess(c, files[0].slug);
+      trackWikiAccess(cat, '');
+      files.slice(0, TOP_N_PER_CATEGORY).forEach(file => {
+        if (file?.slug) trackWikiAccess(cat, file.slug);
+      });
     });
     _lastAutoRecord = now;
   }

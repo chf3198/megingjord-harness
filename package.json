@@ -107,6 +107,7 @@
     "governance:instructional-coverage:test": "node --test tests/instructional-coverage-audit.spec.js",
     "governance:pre-commit-docs-check": "node scripts/global/pre-commit-docs-check.js",
     "governance:pre-commit-docs-check:test": "node --test tests/pre-commit-docs-check.spec.js",
+    "governance:wiki-metrics:test": "node --test tests/wiki-metrics.spec.js",
     "stress:role-baton": "node --test tests/stress-role-baton-linter.spec.js",
     "governance:ghs-feedback-loop:test": "node --test tests/ghs-feedback-loop.spec.js",
     "governance:actuator-transitions:test": "node --test tests/actuator-transitions.spec.js",
