@@ -120,6 +120,8 @@ npm run deploy:both:apply
 | `governance:hook-parity` | `node scripts/global/hook-parity-check.js` |
 | `governance:hook-parity:test` | `node --test tests/hook-parity-check.spec.js` |
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
+| `governance:instructional-coverage` | `node scripts/global/instructional-coverage-audit.js` |
+| `governance:instructional-coverage:test` | `node --test tests/instructional-coverage-audit.spec.js` |
 | `governance:lease-heartbeat` | `node scripts/global/worktree-lease-heartbeat.js` |
 | `governance:lease-heartbeat:test` | `node --test tests/worktree-lease-heartbeat.spec.js` |
 | `governance:list-tickets` | `node scripts/global/ticket-presenter.js` |
@@ -132,6 +134,8 @@ npm run deploy:both:apply
 | `governance:operator-ownership:eval` | `node scripts/global/operator-ownership-eval.js` |
 | `governance:operator-ownership:test` | `node --test tests/operator-ownership-rules.spec.js tests/delegation-phrase-lint.spec.js tests/operator-ownership-eval.spec.js tests/runtime-side-effect-guard.spec.js` |
 | `governance:parity:test` | `node scripts/global/governance-parity.spec.js` |
+| `governance:pre-pr-gate` | `node scripts/global/pre-pr-gate.js` |
+| `governance:pre-pr-gate:test` | `node --test tests/pre-pr-gate.spec.js` |
 | `governance:price-cap` | `node scripts/global/provider-price-cap-gate.js` |
 | `governance:price-cap:test` | `node --test tests/provider-price-cap-gate.spec.js` |
 | `governance:reconcile` | `node scripts/global/ticket-reconcile.js --json` |
