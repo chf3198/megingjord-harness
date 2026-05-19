@@ -10,6 +10,7 @@ const { fleetCall } = require('./fleet-via-hamr.js');
 
 const DEFAULT_TIMEOUT_MS = 240000;
 const DEFAULT_RAW_CAP = 2000;
+const ARTIFACT_CHAR_CAP = 6000;
 const MODELS = [
   { id: 'qwen-32b', team: 'fleet', model: 'qwen2.5-coder:32b', tier: 'fleet-large', family: 'alibaba' },
   { id: 'granite-3b', team: 'fleet', model: 'granite-code:3b', tier: 'fleet-large', family: 'ibm' },
@@ -29,7 +30,7 @@ ARTIFACT:
 {{ARTIFACT}}`;
 
 function buildPrompt(artifact) {
-  return PROMPT_TEMPLATE.replace('{{ARTIFACT}}', String(artifact || '').slice(0, 6000));
+  return PROMPT_TEMPLATE.replace('{{ARTIFACT}}', String(artifact || '').slice(0, ARTIFACT_CHAR_CAP));
 }
 
 async function critiqueOne(model, prompt, opts = {}) {
