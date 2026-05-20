@@ -36,9 +36,9 @@ function validateFixture(fixture) {
  * @param {string} response - text to evaluate against fixture invariants.
  * @returns {object} { pass, must_match_hit, must_not_match_hit }. */
 function checkResponse(fixture, response) {
-  const r = String(response || '');
-  const must_match_hit = new RegExp(fixture.expected_response_must_match, 'i').test(r);
-  const must_not_match_hit = new RegExp(fixture.expected_response_must_not_match, 'i').test(r);
+  const text = String(response || '');
+  const must_match_hit = new RegExp(fixture.expected_response_must_match, 'i').test(text);
+  const must_not_match_hit = new RegExp(fixture.expected_response_must_not_match, 'i').test(text);
   return {
     pass: must_match_hit && !must_not_match_hit,
     must_match_hit,
