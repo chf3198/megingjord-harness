@@ -42,7 +42,7 @@ These surfaces inject the priority sentence into every governed session at start
 
 ## Reachable on Demand (NOT auto-included)
 
-- `instructions/harness-goals.instructions.md` — canonical goal constitution with expanded G1..G9 definitions. Contains the full priority sentence + per-goal definitions, but is NOT @-included by any runtime entry point. Read on demand or via `goal_lens.py` keyword trigger. (Per #1105 D-001 cross-team verification: CC + CX both confirmed.)
+- `instructions/harness-goals.instructions.md` — canonical goal constitution with expanded G1..G10 definitions. Contains the full priority sentence + per-goal definitions, but is NOT @-included by any runtime entry point. Read on demand or via `goal_lens.py` keyword trigger. (Per #1105 D-001 cross-team verification: CC + CX both confirmed.)
 
 ## Loading Paths (per runtime)
 
@@ -70,7 +70,7 @@ When a match is found, the hook injects a compact context block containing the p
 
 ### Verification source
 
-This section reflects empirical verification by Claude Code Team and Codex Team during the #1105 cross-team R&D synthesis (2026-05-07). Prior documentation incorrectly claimed `instructions/harness-goals.instructions.md` was always-loaded; cross-team grep against `CLAUDE.md`, `AGENTS.md`, `.codex/AGENTS.md`, and `.github/copilot-instructions.md` confirmed it is NOT @-included by any runtime entry point. Only the priority sentence reaches sessions — via the inline references above. The expanded G1..G9 definitions are reachable on demand only.
+This section reflects empirical verification by Claude Code Team and Codex Team during the #1105 cross-team R&D synthesis (2026-05-07). Prior documentation incorrectly claimed `instructions/harness-goals.instructions.md` was always-loaded; cross-team grep against `CLAUDE.md`, `AGENTS.md`, `.codex/AGENTS.md`, and `.github/copilot-instructions.md` confirmed it is NOT @-included by any runtime entry point. Only the priority sentence reaches sessions — via the inline references above. The expanded G1..G10 definitions are reachable on demand only.
 
 ## Goal Definitions
 
@@ -83,6 +83,7 @@ This section reflects empirical verification by Claude Code Team and Codex Team 
 - Throughput: preserve acceptable speed after higher-priority goals are met.
 - Observability: make decisions and outcomes visible, auditable, attributable.
 - Interoperability: preserve compatibility across agent surfaces and runtimes.
+- Maintainability: files ≤100 lines; cyclomatic complexity ≤10 per function; no dead code at merge; changes documented via GOV-009 EDD before implementation (#1530).
 
 ## Sources
 
