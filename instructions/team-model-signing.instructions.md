@@ -60,3 +60,9 @@ applyTo: "**"
 ## Override rule
 
 - When local rules differ, use the local alias/trailer format and keep canonical `Team&Model` provenance present.
+
+## Cross-Team Artifact-Write Signing
+
+`TEAM_QUESTION` and `TEAM_RESPONSE` comments in the cross-team artifact-write
+sign-off workflow must carry standard signing fields. See
+`instructions/cross-team-artifact-write.instructions.md` for the full contract.

@@ -181,6 +181,12 @@ The brief evidence MUST include the 4 structured fields: `Signed-by`, `Team&Mode
 
 A repo may override via `.github/copilot-instructions.md`; local wins on conflict.
 
+## Cross-Team Artifact-Write Gate
+
+When a MANAGER_HANDOFF involves writing files consumed by another team's runtime,
+the `cross_runtime_writes` field is required and must include `target_team_sign_off`
+before the baton advances. See `instructions/cross-team-artifact-write.instructions.md`.
+
 ## Skill Mapping
 
 Manager: `role-manager-execution` | Collaborator: `role-collaborator-execution`
