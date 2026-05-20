@@ -136,8 +136,9 @@ Exit 0 on success regardless of band (the classifier is observation only in advi
 - LLM-as-judge composition (deferred to future "review-quality optimization" Epic).
 - Hard-fail promotion (gated on calibration corpus; future replay-eval validation).
 - Auto-ticket-filing for Tier-3 actions (Phase 4 emits incidents.jsonl events; auto-ticketing is a separate ship to minimize blast radius).
-- G10 (Maintainability) in rubric (deferred to rubric-v3; #1746 gap 4).
 - Migration from Playwright to node --test for rubric-score spec (deferred; #1746 gap 5).
+
+G10 (Maintainability) in rubric: SHIPPED in v3 (`inventory/rubric-g1-g10-v3.json`) per #1967 (closes #1746 gap 4). Scorer accepts both v2 and v3; existing v2 closeouts remain valid.
 
 ## Related
 
