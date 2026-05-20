@@ -93,7 +93,7 @@ All governed provider calls route through HAMR (`https://hamr.chf3198.workers.de
 
 ## Harness Goal Constitution (priority)
 
-Apply this decision order: Governance > Quality > Zero Cost > Privacy > Portability > Resilience > Throughput > Observability > Interoperability. Record rationale in ticket/PR evidence when a lower-priority goal wins.
+Apply this decision order: Governance > Quality > Zero Cost > Privacy > Portability > Resilience > Throughput > Observability > Interoperability > Maintainability. Record rationale in ticket/PR evidence when a lower-priority goal wins.
 
 ## Hook Behavior Overrides — see `instructions/hook-behavior-overrides.instructions.md` (advisory-vs-blocking contract; Tier-2 self-anneal threshold).
 

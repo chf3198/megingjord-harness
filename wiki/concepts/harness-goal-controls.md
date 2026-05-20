@@ -112,6 +112,16 @@ Each of the nine harness goals has at least one enforcement primitive (lint rule
 | Evidence | end-to-end provider adapter tests | `tests/hamr-team-integration.spec.js` |
 | Evidence | cross-runtime parity (CC/CP/CX deployed assets sync) | `npm run sync:codex`, `sync:claude` |
 
+## G10 Maintainability
+
+| Layer | Primitive / Signal | File:line |
+| --- | --- | --- |
+| Enforcement | lint: ≤100 lines per file | `npm run lint` |
+| Enforcement | cyclomatic complexity checks (≤10 per fn) | `lint-configs/` |
+| Enforcement | no dead code at merge | Danger `Dangerfile.js` |
+| Evidence | G10 in priority sentence across always-loaded surfaces | #1966 (this ticket) |
+| Evidence | Consultant rubric G10 box | `instructions/role-consultant-critique.instructions.md` |
+
 ## How to use this page
 
 - **Authoring a new control**: pick the goal it primarily serves; add a row under the right Layer (Enforcement vs Evidence). If a control serves multiple goals, list it under each.

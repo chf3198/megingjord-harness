@@ -23,6 +23,7 @@ cost routing, privacy, runtime behavior, and cross-team compatibility aligned.
 7. Throughput
 8. Observability
 9. Interoperability
+10. Maintainability
 
 ## Decision Rule
 
