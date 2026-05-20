@@ -1,4 +1,8 @@
 {
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "1800000"
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -6,11 +10,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 hooks/scripts/baton_gate.py"
+            "command": "python3 hooks/scripts/baton_gate.py",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 hooks/scripts/pretool_guard.py"
+            "command": "python3 hooks/scripts/pretool_guard.py",
+            "timeout": 5
           }
         ]
       }
@@ -21,7 +27,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 hooks/scripts/posttool_reminders.py"
+            "command": "python3 hooks/scripts/posttool_reminders.py",
+            "timeout": 3
           }
         ]
       }
@@ -31,11 +38,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 hooks/scripts/stop_checks.py"
+            "command": "python3 hooks/scripts/stop_checks.py",
+            "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 hooks/scripts/stop_reminder.py"
+            "command": "python3 hooks/scripts/stop_reminder.py",
+            "timeout": 5
           }
         ]
       }
