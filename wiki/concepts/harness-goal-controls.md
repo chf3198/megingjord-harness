@@ -122,6 +122,23 @@ Each of the nine harness goals has at least one enforcement primitive (lint rule
 | Evidence | G10 in priority sentence across always-loaded surfaces | #1966 (this ticket) |
 | Evidence | Consultant rubric G10 box | `instructions/role-consultant-critique.instructions.md` |
 
+## OWASP Agentic Top 10 Risk Coverage
+
+Source: OWASP Top 10 for Agentic Applications (December 2025). Full mapping in `instructions/owasp-agentic-mapping.instructions.md`.
+
+| # | Risk | Mapped Goals | Coverage | Notes |
+|---|---|---|---|---|
+| OA1 | Goal Hijacking | G1 G2 | Advisory | Ticket-first + operator-identity gates; no blocking test fixture yet |
+| OA2 | Tool Misuse | G1 G4 | Enforced | `pretool_guard.py` permissions allowlist; blast-radius declarations pending |
+| OA3 | Identity Abuse | G1 G4 | Enforced | `team-model-signing`; signer-alias-canonical gate |
+| OA4 | Memory Poisoning | G2 G4 | Partial | `memory-watchdog`; schema validation on auto-writes gap |
+| OA5 | Cascading Failures | G6 | Partial | Header-spillover + sticky-route TTL; circuit-breaker gap |
+| OA6 | Rogue Agents | G1 G9 | Enforced | Broker quarantine + single-thread baton; inter-agent tamper-evidence pending |
+| OA7 | Supply Chain | G4 | Enforced | Dependency-review + secret-scanning + cosign attestation |
+| OA8 | Insecure Communications | G4 | Partial | DPoP for HAMR; cross-runtime zero-trust mesh gap |
+| OA9 | Human-Agent Trust Exploitation | G1 G8 | Advisory | Closeout evidence required; append-only wiki/log.md |
+| OA10 | Code Execution | G4 | Enforced | No LLM eval; no shell-from-prompt; sandbox boundaries auditable |
+
 ## How to use this page
 
 - **Authoring a new control**: pick the goal it primarily serves; add a row under the right Layer (Enforcement vs Evidence). If a control serves multiple goals, list it under each.
@@ -140,4 +157,5 @@ Each of the nine harness goals has at least one enforcement primitive (lint rule
 - `wiki/concepts/harness-goals.md` — priority order + canonical definitions
 - `instructions/harness-goals.instructions.md` — canonical instruction file
 - `instructions/global-standards.instructions.md` — priority sentence (always-loaded)
+- `instructions/owasp-agentic-mapping.instructions.md` — OWASP Agentic Top 10 risk-to-goal mapping
 - Epic #1113 — multi-layer self-annealing goal-governance (consumes this map as sensor input)
