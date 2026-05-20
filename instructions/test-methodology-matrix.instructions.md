@@ -86,3 +86,4 @@ Open a `type:research` ticket against `area:governance` proposing the surface de
 - Visual QA: `instructions/visual-qa-governance.instructions.md`
 - Goal-lens: `instructions/global-standards.instructions.md`
 - Schema: `instructions/role-baton-routing.instructions.md` (`MANAGER_HANDOFF` `test_strategy` field)
+- Replay-eval over calendar waits: `docs/howto/soak-to-replay-translation.md` (#1809) — when writing validation prose, translate "N-day soak" language to replay-based eval per Epic #1771 infrastructure.
