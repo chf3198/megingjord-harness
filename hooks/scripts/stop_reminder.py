@@ -46,7 +46,7 @@ def main() -> int:
         messages.append(msg)
 
     if not block_reason:
-        block_reason, msg = check_admin_ops(flags, ops, roles, repo_type)
+        block_reason, msg = check_admin_ops(flags, ops, roles, repo_type, uncommitted)
         if msg:
             messages.append(msg)
 

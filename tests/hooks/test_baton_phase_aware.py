@@ -167,5 +167,72 @@ class UserPromptGatePhaseGuard(unittest.TestCase):
         self.assertIn("commit", missing)
 
 
+import tool_activity  # noqa: E402
+
+
+class ReadOnlySessionNoCodeTouched(unittest.TestCase):
+    """#1960 — Bash read-only commands must NOT set code_touched (AC5/AC6)."""
+
+    def _make_state(self):
+        return {"roles": {}, "flags": {}, "admin_ops": {}}
+
+    def test_readonly_bash_cat_does_not_set_code_touched(self):
+        state = self._make_state()
+        tool_activity.mark_tool_activity(state, {
+            "tool_name": "Bash",
+            "tool_input": {"command": "cat hooks/scripts/stop_reminder.py"},
+        })
+        self.assertFalse(state["flags"].get("code_touched", False))
+
+    def test_readonly_bash_ls_does_not_set_code_touched(self):
+        state = self._make_state()
+        for cmd in ["ls -la scripts/global/", "git log --oneline -5",
+                    "git status --porcelain", "gh issue view 1960",
+                    "gh pr list", "gh label list", "tail -n 20 hooks/scripts/tool_activity.py",
+                    "stat hooks/scripts/stop_reminder.py",
+                    "cat hooks/scripts/git_checks.py",
+                    "git diff HEAD~1 HEAD -- hooks/scripts/stop_checks.py"]:
+            tool_activity.mark_tool_activity(state, {
+                "tool_name": "Bash",
+                "tool_input": {"command": cmd},
+            })
+        self.assertFalse(state["flags"].get("code_touched", False))
+        self.assertFalse(state["roles"].get("collaborator", False))
+
+    def test_create_file_sets_code_touched(self):
+        # AC6: positive fixture — file-edit tool MUST set code_touched.
+        state = self._make_state()
+        tool_activity.mark_tool_activity(state, {
+            "tool_name": "create_file",
+            "tool_input": {"filePath": "hooks/scripts/new_helper.py", "content": "# test"},
+        })
+        self.assertTrue(state["flags"].get("code_touched", False))
+        self.assertTrue(state["roles"].get("collaborator", False))
+
+    def test_clean_tree_no_commit_skips_admin_check(self):
+        # AC1: clean tree + no commit recorded → check_admin_ops returns None.
+        flags = {"code_touched": True}
+        ops = {}
+        roles = {"collaborator": True}
+        block, msg = stop_checks.check_admin_ops(flags, ops, roles, "generic", uncommitted=[])
+        self.assertIsNone(block)
+        self.assertIsNone(msg)
+
+    def test_clean_tree_with_commit_still_checks_admin(self):
+        # Positive: clean tree but commit recorded means push/PR still needed.
+        flags = {"code_touched": True}
+        ops = {"commit": True}
+        roles = {"collaborator": True}
+        block, msg = stop_checks.check_admin_ops(flags, ops, roles, "generic", uncommitted=[])
+        self.assertIsNotNone(block)
+
+    def test_dot_claude_settings_not_blocked(self):
+        # AC4: .claude/ files excluded from uncommitted block.
+        roles = {"collaborator": True}
+        block, msg = stop_checks.check_uncommitted([".claude/settings.json"], roles)
+        self.assertIsNone(block)
+        self.assertIsNone(msg)
+
+
 if __name__ == "__main__":
     unittest.main()
