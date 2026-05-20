@@ -25,7 +25,7 @@ def _default_state(cwd: str) -> dict[str, Any]:
     return {"cwd": cwd, "repo_type": detect_repo_type(cwd), "routing": {
         "lane": "free", "backend": "auto", "recommended_model": "Auto",
         "confidence": "medium", "rationale": "default"},
-        "current_phase": "manager",
+        "current_phase": "manager", "active_branch": None,
         "roles": {"manager": False, "collaborator": False,
                   "admin": False, "consultant": False},
         "flags": {"code_touched": False, "docs_touched": False,
@@ -51,6 +51,7 @@ def load_state(cwd: str) -> dict[str, Any]:
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
         data.setdefault("current_phase", defaults["current_phase"])
+        data.setdefault("active_branch", None)
         for key in keys:
             if key not in data:
                 data[key] = defaults[key]
@@ -81,4 +82,17 @@ def ensure_state(cwd: str) -> dict[str, Any]:
 def reset_state(cwd: str) -> dict[str, Any]:
     state = _default_state(cwd)
     save_state(state)
+    return state
+
+
+def reset_on_branch_change(cwd: str, current_branch: str | None) -> dict[str, Any]:
+    """Reset transient state on branch change; preserve routing + drift (#1975)."""
+    state = load_state(cwd)
+    if current_branch and state.get("active_branch") != current_branch:
+        defaults = _default_state(cwd)
+        for k in ("roles", "flags", "admin_ops"):
+            state[k] = defaults[k]
+        state["current_phase"] = defaults["current_phase"]
+        state["active_branch"] = current_branch
+        save_state(state)
     return state

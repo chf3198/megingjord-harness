@@ -17,6 +17,7 @@ from state_store import (  # noqa: F401
     STATE_ROOT,
     ensure_state,
     load_state,
+    reset_on_branch_change,
     reset_state,
     save_state,
     state_path,
