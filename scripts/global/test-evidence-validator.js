@@ -2,12 +2,9 @@
 'use strict';
 // test-evidence-validator (#1214) — pure function consumed by .github/workflows/test-evidence.yml.
 // Per instructions/test-methodology-matrix.instructions.md.
+// Enum constants sourced from test-strategy-enum.js (#1236).
 
-const ALLOWED_STRATEGIES = ['tdd-pyramid', 'tdd-trophy', 'contract-test', 'golden-file',
-  'eval-harness', 'visual-regression', 'drift-lint', 'peer-review', 'manual-verify', 'none'];
-const NONE_PERMITTED_LANES = ['lane:trivial', 'lane:docs-research', 'lane:docs-only',
-  'lane:research', 'lane:config-only'];
-const PEER_REVIEW_RUBRIC_THRESHOLD = 7;
+const { ALLOWED_STRATEGIES, NONE_PERMITTED_LANES, PEER_REVIEW_RUBRIC_THRESHOLD } = require('./test-strategy-enum');
 
 function fail(rule, detail) { return { ok: false, reason: rule, violations: [{ rule, detail }] }; }
 function ok(reason = 'evidence-present') { return { ok: true, reason, violations: [] }; }
