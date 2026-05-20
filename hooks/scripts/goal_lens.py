@@ -17,7 +17,7 @@ from goal_tier_resolver import (
 GOALS = (
     "G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy > "
     "G5 Portability > G6 Resilience > G7 Throughput > "
-    "G8 Observability > G9 Interoperability"
+    "G8 Observability > G9 Interoperability > G10 Maintainability"
 )
 
 ANNEAL_RE = re.compile(
