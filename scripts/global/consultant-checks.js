@@ -49,7 +49,16 @@ const checks = [
   }],
   [id('gov', 4), 'governance', () => { const gitLog = run("git log --oneline -99"); const matchCount = (gitLog.match(/#\d+/g) || []).length; const total = gitLog ? gitLog.split('\n').length : 0; return ok(id('gov', 4), 'governance', total > 0 && matchCount / total >= 0.8, `${matchCount}/${total} commit refs`, 'commit-issue-linkage', 'reference issue numbers in commits'); }],
   [id('gov', 5), 'governance', () => issue ? ok(id('gov', 5), 'governance', lib.decideGov005(run(`gh issue view ${issue}`)), 'issue body checklist scanned', 'ac-evidence-completeness', 'complete unchecked ACs') : skip(id('gov', 5), 'governance', 'missing --issue')],
-  [id('gov', 6), 'governance', () => { const branch = run('git branch --show-current'); return ok(id('gov', 6), 'governance', /^(feat|fix|skill|hook)\//.test(branch), branch || 'unknown-branch', 'branch-naming', 'use approved branch prefix'); }],
+  [id('gov', 6), 'governance', () => {
+    const branch = run('git branch --show-current');
+    // #1615: issue-only lanes (docs-research, trivial, Epic closeouts) run from
+    // main — branch-naming does not apply; skip instead of false-positive FAIL.
+    if (issue) {
+      const labels = run(`gh issue view ${issue} --json labels -q '.labels[].name'`);
+      if (lib.isIssueOnlyLane(labels)) return skip(id('gov', 6), 'governance', `issue-only lane (${branch}) — branch-name check not enforced`);
+    }
+    return ok(id('gov', 6), 'governance', /^(feat|fix|skill|hook)\//.test(branch), branch || 'unknown-branch', 'branch-naming', 'use approved branch prefix');
+  }],
   [id('gov', 7), 'governance', () => {
     if (!issue) return skip(id('gov', 7), 'governance', 'missing --issue');
     let comments = [];

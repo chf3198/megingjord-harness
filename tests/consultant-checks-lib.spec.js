@@ -83,3 +83,25 @@ test('#1241 AC1: readWithMainFallback returns empty when neither path has file',
   expect(result).toBe('');
   fs.rmSync(tmp, { recursive: true, force: true });
 });
+
+test('#1615 isIssueOnlyLane: lane:docs-research → true (skip branch check)', () => {
+  expect(lib.isIssueOnlyLane('lane:docs-research\ntype:research\npriority:P1')).toBe(true);
+});
+
+test('#1615 isIssueOnlyLane: type:epic → true (Epic closeout from main is valid)', () => {
+  expect(lib.isIssueOnlyLane('type:epic\nstatus:review\npriority:P2')).toBe(true);
+});
+
+test('#1615 isIssueOnlyLane: lane:trivial → true (no PR expected)', () => {
+  expect(lib.isIssueOnlyLane('lane:trivial\ntype:task')).toBe(true);
+});
+
+test('#1615 isIssueOnlyLane: lane:code-change → false (branch check enforced)', () => {
+  expect(lib.isIssueOnlyLane('lane:code-change\ntype:bug\npriority:P2')).toBe(false);
+});
+
+test('#1615 isIssueOnlyLane: empty/null → false (branch check enforced)', () => {
+  expect(lib.isIssueOnlyLane('')).toBe(false);
+  expect(lib.isIssueOnlyLane(null)).toBe(false);
+  expect(lib.isIssueOnlyLane(undefined)).toBe(false);
+});
