@@ -13,6 +13,9 @@ const os = require('os');
 const REPORT_DIR = path.join(os.homedir(), '.megingjord', 'lint-reports');
 const CONFIG = path.join(__dirname, '..', '..', 'lint-configs', 'eslint.config.devenv.js');
 
+/** Run ESLint against the targets and parse JSON output.
+ * @param {string[]} targets - paths to lint.
+ * @returns {Array} ESLint JSON report or [] on failure. */
 function runEslintJson(targets) {
   try {
     const out = execFileSync('npx',
@@ -28,6 +31,9 @@ function runEslintJson(targets) {
   }
 }
 
+/** Filter ESLint report to complexity rule violations only.
+ * @param {Array} eslintReport - ESLint JSON output.
+ * @returns {Array} violations with file/line/column/message/severity. */
 function extractComplexityViolations(eslintReport) {
   const violations = [];
   for (const file of eslintReport) {
@@ -43,6 +49,9 @@ function extractComplexityViolations(eslintReport) {
   return violations;
 }
 
+/** Write complexity violations as dated JSON report.
+ * @param {Array} violations - extracted complexity violations.
+ * @returns {string} absolute path to the written report. */
 function writeReport(violations) {
   fs.mkdirSync(REPORT_DIR, { recursive: true });
   const date = new Date().toISOString().slice(0, 10);
@@ -59,6 +68,9 @@ function writeReport(violations) {
   return reportPath;
 }
 
+/** CLI entry point: run lint, extract, write, log.
+ * @param {string[]} argv - target paths or default to known dirs.
+ * @returns {number} count of complexity violations found. */
 function main(argv) {
   const targets = argv.length ? argv : ['dashboard/js', 'scripts/global', 'scripts/wiki'];
   const eslintReport = runEslintJson(targets);
