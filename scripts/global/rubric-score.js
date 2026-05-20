@@ -37,7 +37,9 @@ function evaluateCommand(command, ctx) {
 function validateRubric(rubric) {
   const goals = rubric.goals || {};
   const missing = [];
-  for (let n = 1; n <= 9; n += 1) {
+  // v2 covers G1-G9 (9 goals); v3 covers G1-G10 (#1967). Derive max from rubric version.
+  const maxGoal = String(rubric.version || '').includes('g10') ? 10 : 9;
+  for (let n = 1; n <= maxGoal; n += 1) {
     const goal = goals[`G${n}`];
     if (!goal || !Array.isArray(goal.boxes) || goal.boxes.length < 3) missing.push(`G${n}`);
   }

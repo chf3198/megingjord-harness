@@ -1,0 +1,60 @@
+{
+  "version": "g1-g10-v3",
+  "predecessor": "g1-g9-v2",
+  "transition_legacy_v2_until_replay_eval_pass": true,
+  "score_formula": "(boxes_checked / boxes_total) * 10",
+  "command_dsl": "contains|regex|not_regex:<trail|diff|closeout>:<literal-or-regex>; contains uses | as all-required literals",
+  "goals": {
+    "G1": {"title": "Governance", "boxes": [
+      {"id": "g1-baton-all-four", "check": "Issue trail has all four baton artifacts.", "evidence_command": "contains:trail:MANAGER_HANDOFF|COLLABORATOR_HANDOFF|ADMIN_HANDOFF|CONSULTANT_CLOSEOUT"},
+      {"id": "g1-signed-closeout", "check": "Closeout has signed Team&Model consultant provenance.", "evidence_command": "contains:closeout:Signed-by:|Team&Model:|Role: consultant"},
+      {"id": "g1-terminal-state", "check": "Trail records review/done terminal governance state.", "evidence_command": "regex:trail:status:(review|done)"}
+    ]},
+    "G2": {"title": "Quality", "boxes": [
+      {"id": "g2-tests-referenced", "check": "Evidence references a test command or test file.", "evidence_command": "regex:trail:(npm test|npx playwright|node --test|tests?/[^\\s]+\\.(spec|test)\\.)"},
+      {"id": "g2-test-file-diff", "check": "Diff includes a focused test fixture/spec.", "evidence_command": "regex:diff:tests?/[^\\s]+\\.(spec|test)\\.js"},
+      {"id": "g2-no-skipped-tests", "check": "Diff does not add skipped tests.", "evidence_command": "not_regex:diff:\\btest\\.skip\\b|\\bdescribe\\.skip\\b"}
+    ]},
+    "G3": {"title": "Zero Cost", "boxes": [
+      {"id": "g3-hamr-or-local", "check": "Trail documents HAMR, local, or zero-cost routing.", "evidence_command": "regex:trail:(HAMR|zero[- ]cost|local[- ]first|fleet)"},
+      {"id": "g3-no-paid-secrets", "check": "Diff does not add paid provider secrets.", "evidence_command": "not_regex:diff:(OPENAI_API_KEY|ANTHROPIC_API_KEY|paid_provider)"},
+      {"id": "g3-no-new-paid-dep", "check": "Diff does not add paid SaaS dependency language.", "evidence_command": "not_regex:diff:(stripe|billing|subscription|paid tier)"}
+    ]},
+    "G4": {"title": "Privacy & Security", "boxes": [
+      {"id": "g4-no-env-diff", "check": "Diff does not touch committed env/secrets files.", "evidence_command": "not_regex:diff:(^|\\n)(\\+\\+\\+ b/)?\\.env\\b|secrets?\\."},
+      {"id": "g4-no-secret-token", "check": "Diff avoids obvious secret/token material.", "evidence_command": "not_regex:diff:(api[_-]?key|token|password)\\s*[:=]"},
+      {"id": "g4-privacy-review", "check": "Closeout records privacy or security review.", "evidence_command": "regex:closeout:(privacy|security|secret)"}
+    ]},
+    "G5": {"title": "Portability", "boxes": [
+      {"id": "g5-no-home-paths", "check": "Diff avoids hard-coded operator home paths.", "evidence_command": "not_regex:diff:/home/curtisfranks|C:\\\\Users"},
+      {"id": "g5-node-cli", "check": "Diff adds portable Node or shell harness code.", "evidence_command": "regex:diff:(node |#!/usr/bin/env node|bash )"},
+      {"id": "g5-relative-paths", "check": "Closeout mentions relative or repo-local paths.", "evidence_command": "regex:closeout:(repo-local|relative path|portable)"}
+    ]},
+    "G6": {"title": "Resilience", "boxes": [
+      {"id": "g6-graceful-degrade", "check": "Closeout names degraded-mode behavior or fallback.", "evidence_command": "regex:closeout:(degraded|fallback|graceful)"},
+      {"id": "g6-compat-window", "check": "Closeout references compatibility or transition behavior.", "evidence_command": "regex:closeout:(compat|transition|legacy)"},
+      {"id": "g6-no-destructive-git", "check": "Diff does not add destructive git cleanup.", "evidence_command": "not_regex:diff:git\\s+(reset --hard|clean -fd|checkout --)"}
+    ]},
+    "G7": {"title": "Throughput", "boxes": [
+      {"id": "g7-automation-script", "check": "Diff includes an executable automation path.", "evidence_command": "regex:diff:(scripts/global|bin/env node|npm run)"},
+      {"id": "g7-machine-readable", "check": "Closeout or diff includes machine-readable JSON output.", "evidence_command": "regex:closeout:(JSON|json|machine-readable|boxes_checked)"},
+      {"id": "g7-bounded-scope", "check": "Trail records bounded scope or out-of-scope constraints.", "evidence_command": "regex:trail:(scope|out of scope|bounded)"}
+    ]},
+    "G8": {"title": "Observability", "boxes": [
+      {"id": "g8-structured-output", "check": "Rubric emits per-goal structured fields.", "evidence_command": "regex:closeout:(boxes_checked|boxes_total|mean)"},
+      {"id": "g8-validation-evidence", "check": "Trail includes validation evidence.", "evidence_command": "regex:trail:(validation|AC evidence|test results|gates)"},
+      {"id": "g8-timestamped", "check": "Closeout has verification timestamp.", "evidence_command": "regex:closeout:verification[ _-]?timestamp"}
+    ]},
+    "G9": {"title": "Interoperability", "boxes": [
+      {"id": "g9-legacy-accepted", "check": "Closeout or diff references legacy v2 compatibility.", "evidence_command": "regex:closeout:(legacy v2|v2|back[- ]compat)"},
+      {"id": "g9-common-cli", "check": "Diff exposes a common CLI/script contract.", "evidence_command": "regex:diff:(process\\.argv|--trail|--diff|--closeout)"},
+      {"id": "g9-cross-team-safe", "check": "Trail records cross-team conflict avoidance.", "evidence_command": "regex:trail:(cross-team|Claude|Copilot|conflict)"}
+    ]},
+    "G10": {"title": "Maintainability", "boxes": [
+      {"id": "g10-lines-cap-pass", "check": "Diff does not add files exceeding the 100-line cap.", "evidence_command": "not_regex:trail:(exceed.*100[- ]line|line[- ]cap.*FAIL)"},
+      {"id": "g10-complexity-pass", "check": "Diff does not add complexity violations beyond baseline.", "evidence_command": "not_regex:trail:complexity[- ](rule|gate).*FAIL"},
+      {"id": "g10-no-dead-code", "check": "Closeout asserts no dead code in shipped diff.", "evidence_command": "regex:closeout:(no dead code|removed unused|cleanup)"},
+      {"id": "g10-test-plan-declared", "check": "Manager handoff declares test_strategy.", "evidence_command": "regex:trail:test_strategy:\\s*(tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|stress-test)"}
+    ]}
+  }
+}
