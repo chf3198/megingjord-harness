@@ -16,6 +16,9 @@ from repo_detection import classify_path
 PATCH_FILE_RE = re.compile(
     r"^\*\*\*\s+(?:Update|Add|Delete)\s+File:\s+(.+?)\s*$", re.MULTILINE
 )
+# Bash/terminal tools: inputs are shell commands, not file paths.
+# Path classification is skipped for these to prevent false code_touched.
+BASH_TOOLS = {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}
 
 
 def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
@@ -33,12 +36,20 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     }:
         roles["collaborator"] = True
 
+    # #1960: Do not classify Bash command strings as file paths.
+    # Only extract explicit patch-file names from Bash inputs.
     candidate_paths: list[str] = []
-    for value in values:
-        candidate_paths.append(value)
-        if "***" in value and "File:" in value:
-            for m in PATCH_FILE_RE.findall(value):
-                candidate_paths.append(m.strip())
+    if tool not in BASH_TOOLS:
+        for value in values:
+            candidate_paths.append(value)
+            if "***" in value and "File:" in value:
+                for m in PATCH_FILE_RE.findall(value):
+                    candidate_paths.append(m.strip())
+    else:
+        for value in values:
+            if "***" in value and "File:" in value:
+                for m in PATCH_FILE_RE.findall(value):
+                    candidate_paths.append(m.strip())
 
     for value in candidate_paths:
         if "/" not in value and "." not in value:
@@ -58,7 +69,7 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
             flags["code_touched"] = True
             roles["collaborator"] = True
 
-    if tool not in {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}:
+    if tool not in BASH_TOOLS:
         return
 
     _match_ops = [

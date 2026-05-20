@@ -35,9 +35,11 @@ def check_uncommitted(
     # Phase guard (#1798 F1): pre-collab uncommitted state is in-progress or unrelated, not an Admin gap.
     if roles is not None and not roles.get("collaborator", False):
         return None, None
+    # #1960: exclude harness-auto-managed paths (.claude/) from block.
     code_files = [
         f for f in uncommitted
         if any(f.endswith(e) for e in CODE_UNCOMMITTED_EXTS)
+        and not f.startswith(".claude/")
     ]
     if not code_files:
         return None, None
@@ -53,10 +55,14 @@ def check_uncommitted(
 
 def check_admin_ops(
     flags: dict, ops: dict, roles: dict, repo_type: str,
+    uncommitted: list[str] | None = None,
 ) -> tuple[str | None, str | None]:
     """Check admin op completion. Returns (block_reason, message)."""
     # Phase guard (#1798 F2): Admin ops only meaningful after Collaborator completes.
     if not roles.get("collaborator", False):
+        return None, None
+    # #1960: clean tree + no commit = code was reverted; AC#1 clean-tree pass.
+    if uncommitted is not None and not uncommitted and not ops.get("commit"):
         return None, None
     base = (
         ["commit", "push", "pr_create", "ci_green", "merge"]
