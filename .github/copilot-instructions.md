@@ -96,5 +96,5 @@ All governed provider calls route through HAMR (`https://hamr.chf3198.workers.de
 Apply this decision order: Governance > Quality > Zero Cost > Privacy > Portability > Resilience > Throughput > Observability > Interoperability > Maintainability. Record rationale in ticket/PR evidence when a lower-priority goal wins.
 
 ## Hook Behavior Overrides — see `instructions/hook-behavior-overrides.instructions.md` (advisory-vs-blocking contract; Tier-2 self-anneal threshold).
-
+## OWASP Agentic Security — see `instructions/owasp-agentic-mapping.instructions.md` (OA1-OA10 risk-to-goal mapping; G1-G10 coverage classification).
 ## Skill Index — auto-derived per `docs/skills-copilot.md`; regenerate via `node scripts/global/skill-views-derive.js`.

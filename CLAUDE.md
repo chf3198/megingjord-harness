@@ -26,6 +26,7 @@ and AI agent governance. All instructions below are binding for Claude Code sess
 @instructions/wiki-knowledge.instructions.md
 @instructions/hamr-routing.instructions.md
 @instructions/observability.instructions.md
+@instructions/owasp-agentic-mapping.instructions.md
 
 ## Runtime Context
 
