@@ -14,7 +14,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from git_checks import detect_session_signals, detect_uncommitted_changes
-from governance_state import ensure_state, save_state
+from governance_state import ensure_state, reset_on_branch_change, save_state
 from stop_checks import (
     check_admin_ops, check_uncommitted, post_merge_messages, wiki_pending_message,
 )
@@ -31,6 +31,13 @@ def main() -> int:
 
     cwd = payload.get("cwd") or os.getcwd()
     state = ensure_state(cwd)
+    import subprocess
+    try:
+        branch = subprocess.check_output(["git","rev-parse","--abbrev-ref","HEAD"],
+                                         cwd=cwd, text=True, stderr=subprocess.DEVNULL).strip()
+    except Exception:
+        branch = None
+    state = reset_on_branch_change(cwd, branch)
     signals = detect_session_signals(cwd)
     uncommitted = detect_uncommitted_changes(cwd)
     flags = state.get("flags", {})

@@ -92,6 +92,8 @@ def main() -> int:
     values = list(iter_strings(payload.get("tool_input",{})))
     cwd = str(payload.get("cwd","")) or str(Path.cwd())
     state = ensure_state(cwd)
+    from state_store import reset_on_branch_change
+    state = reset_on_branch_change(cwd, current_branch(cwd))
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file"}:
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
