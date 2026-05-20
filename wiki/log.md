@@ -234,7 +234,7 @@ self-annealing, wiki-pattern, governance-enforcement.
 Cross-linked with [[wikilinks]]. Epic #85 ticket #87.
 Total wiki pages now: 33.
 
-## [2026-07-14] create | Dashboard Codebase Gold Rules
+## [2026-04-18] create | Dashboard Codebase Gold Rules
 Synthesis from deep audit of 40 JS files. 10 gold rules
 covering namespace isolation, error handling, Alpine v3 API,
 Playwright config, script loading. Epic #290.
