@@ -41,6 +41,21 @@ function violationComment(result, issueNumber) {
   return null;
 }
 
+// #1380: auto-strip helper — returns which labels to remove when a terminal
+// status (done/cancelled) coexists with non-terminal ones (Rule 1 fix).
+const TERMINAL_STATUSES = ['status:done', 'status:cancelled'];
+function resolveTerminalConflict(labels) {
+  const found = statusLabels(labels);
+  if (found.length < 2) return { hasConflict: false };
+  const terminal = found.find(l => TERMINAL_STATUSES.includes(l));
+  if (!terminal) return { hasConflict: false };
+  return {
+    hasConflict: true,
+    keepLabel: terminal,
+    removeLabels: found.filter(l => l !== terminal),
+  };
+}
+
 if (require.main === module) {
   // CLI: pass --labels "a,b,c" or read from stdin JSON.
   const idx = process.argv.indexOf('--labels');
@@ -61,4 +76,4 @@ if (require.main === module) {
   process.exit(result.ok ? 0 : 1);
 }
 
-module.exports = { evaluate, statusLabels, violationComment, STATUS_PREFIX };
+module.exports = { evaluate, statusLabels, violationComment, resolveTerminalConflict, TERMINAL_STATUSES, STATUS_PREFIX };

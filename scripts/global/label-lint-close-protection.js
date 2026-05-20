@@ -32,10 +32,13 @@ function decide({ state, labels = [], comments = [] }) {
   const closeoutPresent = hasCloseoutComment(comments);
   const preCloseLabel = VALID_PRE_CLOSE_LABELS.find((l) => labels.includes(l));
   if (closeoutPresent && preCloseLabel) {
+    // #1380: strip ALL status:* labels (not just preCloseLabel) to prevent
+    // Rule 1 multi-status drift when a stale label like status:backlog lingers.
+    const allStatusLabels = labels.filter(l => l.startsWith('status:'));
     return {
       action: 'auto-transition',
       from: preCloseLabel,
-      removeLabels: [preCloseLabel, 'role:consultant'],
+      removeLabels: [...allStatusLabels, 'role:consultant'],
       addLabels: ['status:done', 'resolution:completed'],
       reason: `closeout-present-from-${preCloseLabel}`,
     };

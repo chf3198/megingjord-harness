@@ -120,3 +120,29 @@ test('#1515: hasCloseoutComment exported and usable in isolation', () => {
   expect(lib.hasCloseoutComment([{ body: 'no closeout here' }])).toBe(false);
   expect(lib.hasCloseoutComment([])).toBe(false);
 });
+
+// #1380: expanded removeLabels — strips ALL status:* labels on auto-transition
+test('#1380 auto-transition with lingering status:backlog strips it (not just pre-close label)', () => {
+  const result = lib.decide({
+    state: 'closed',
+    labels: ['type:task', 'status:review', 'status:backlog', 'role:consultant', 'priority:P2'],
+    comments: [closeoutComment()],
+  });
+  expect(result.action).toBe('auto-transition');
+  expect(result.removeLabels).toContain('status:review');
+  expect(result.removeLabels).toContain('status:backlog');
+  expect(result.removeLabels).toContain('role:consultant');
+  expect(result.addLabels).toEqual(['status:done', 'resolution:completed']);
+});
+
+test('#1380 auto-transition with only expected pre-close label still works (regression)', () => {
+  const result = lib.decide({
+    state: 'closed',
+    labels: ['type:task', 'status:testing', 'role:admin'],
+    comments: [closeoutComment()],
+  });
+  expect(result.action).toBe('auto-transition');
+  expect(result.removeLabels).toContain('status:testing');
+  expect(result.removeLabels).toContain('role:consultant');
+  expect(result.removeLabels).not.toContain('status:backlog');
+});
