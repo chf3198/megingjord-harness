@@ -52,8 +52,8 @@ Role: admin
 
 ## Worked example
 
-Chain: #1917 (cause) → #1951 (triage) → #1952 / `c857ce8` (fix) →
-#1953 (casualty closed) → #1954 (casualty refiled).
+Chain: #1917 (cause) → #1951 (triage) → #1952 / `c857ce8` (fix)
+→ #1953 (casualty closed) → #1954 (casualty refiled).
 
 See full narrative in `instructions/breaking-change-recovery.instructions.md`
 Phase 6 "Worked Example" section.
