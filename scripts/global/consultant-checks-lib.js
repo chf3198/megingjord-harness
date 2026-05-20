@@ -12,6 +12,10 @@ const decideGov003 = (fleetLog, eventLog) =>
 
 const decideGov005 = issueBody => !/- \[ \]/.test(issueBody);
 
+// #1615: lanes where no implementation branch or PR is expected
+const ISSUE_ONLY_LANES = /lane:docs-research|lane:trivial|type:epic/;
+const isIssueOnlyLane = labels => ISSUE_ONLY_LANES.test(labels || '');
+
 // #1241: events.jsonl / fleet-health.jsonl are runtime artifacts written by
 // the main checkout; fresh worktrees never have them. When the worktree path
 // is empty, fall through to the main checkout discovered via
@@ -30,4 +34,4 @@ function readWithMainFallback({ fs, path, run, cwdRoot, relPath }) {
   return content;
 }
 
-module.exports = { decideGov002, decideGov003, decideGov005, readWithMainFallback };
+module.exports = { decideGov002, decideGov003, decideGov005, readWithMainFallback, isIssueOnlyLane, ISSUE_ONLY_LANES };
