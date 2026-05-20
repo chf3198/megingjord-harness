@@ -57,7 +57,7 @@ def main() -> int:
         if msg:
             messages.append(msg)
 
-    messages.extend(post_merge_messages(signals, bool(messages)))
+    messages.extend(post_merge_messages(signals, bool(messages), ops))
     wiki_msg = wiki_pending_message(cwd, flags, ops)
     if wiki_msg:
         messages.append(wiki_msg)

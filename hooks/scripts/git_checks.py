@@ -24,12 +24,17 @@ def detect_session_signals(cwd: str) -> list[str]:
         )
         if result.returncode == 0:
             changed = [f for f in result.stdout.strip().split("\n") if f]
-            if any(f.endswith(e) for f in changed for e in CODE_EXTS):
-                signals.append("code-changed")
+            # Gate on recent-commits: only signal code changes from the current
+            # session. git diff HEAD~1 HEAD reflects permanent repo history;
+            # without this guard, the warning fires in every new session after
+            # any code-changing merge (Gap 2, #2005).
+            if "recent-commits" in signals:
+                if any(f.endswith(e) for f in changed for e in CODE_EXTS):
+                    signals.append("code-changed")
+                if any(f.startswith("vscode-extension/") for f in changed):
+                    signals.append("extension-changed")
             if any("README" in f or "CHANGELOG" in f for f in changed):
                 signals.append("docs-updated")
-            if any(f.startswith("vscode-extension/") for f in changed):
-                signals.append("extension-changed")
     except Exception:
         pass
     return signals

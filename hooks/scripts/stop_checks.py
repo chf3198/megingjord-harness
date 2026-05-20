@@ -85,7 +85,13 @@ def check_admin_ops(
     return None, None
 
 
-def post_merge_messages(signals: list[str], has_messages: bool) -> list[str]:
+def post_merge_messages(
+    signals: list[str], has_messages: bool, ops: dict | None = None
+) -> list[str]:
+    # Completion guard (#2005 Gap 1): if merge op is confirmed, admin cycle is
+    # done — suppress the checklist regardless of session signals.
+    if ops and ops.get("merge"):
+        return []
     if "code-changed" in signals or "extension-changed" in signals:
         return [post_merge_checklist()]
     if not has_messages:
