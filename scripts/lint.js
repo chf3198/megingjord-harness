@@ -27,6 +27,8 @@ const IGNORE_FILES = [
   'package.json',
   // Signer registry grows with teams × roles × key rotations (#1716 Phase 3.3)
   'team-model-signatures.json',
+  // Parity registry grows with surfaces × runtimes × features — catalog by design (#1912)
+  'orchestrator-governance-parity.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
