@@ -2,6 +2,7 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const bypassTracker = require('./session-bypass-tracker');
 
 const BYPASSED_GATES = [
   'branch-name regex check',
@@ -30,6 +31,7 @@ function run(argv = process.argv.slice(2), env = process.env) {
   const bypass = shouldBypass(argv, env);
   if (bypass) {
     warnBypass(bypass);
+    bypassTracker.record(env);
     return 0;
   }
   if (env.PRE_PUSH_GATES_FAKE_STATUS) {
