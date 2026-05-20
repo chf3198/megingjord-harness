@@ -69,6 +69,15 @@ Authority: Consultant only. Triggered when consultant rubric finds G1–G9 goal 
 - Anneal step counter aborts with `decision: defer` if >50 tool calls
 - All trips emit `event:kill-switch-trip` for dashboard observability
 
+## Breaking-Change Recovery Handoff
+
+When Tier-3 Consultant escalation identifies a G1–G9 goal violation caused by a
+merged breaking change, invoke the **Breaking-Change Recovery Protocol** from
+`instructions/breaking-change-recovery.instructions.md`. The protocol covers
+six phases: Detect → Revert → Triage → Fix → Re-merge with smoke evidence →
+Casualty re-author. Tier-3 authority (Consultant) initiates; Manager and Admin
+execute the revert and fix phases.
+
 ## Documentation drift detection
 
 Run `docs-drift-maintenance` skill after any change to:
