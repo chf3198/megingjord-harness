@@ -98,6 +98,8 @@ npm run deploy:both:apply
 | `agent:coord:remote` | `node scripts/global/agent-coord-remote.js` |
 | `agent:tier-c` | `node scripts/global/tier-c-guard.js` |
 | `anneal:detect` | `node scripts/global/workflow-anneal-detect.js` |
+| `anneal:goal-sensor` | `node scripts/global/anneal-goal-sensor.js` |
+| `anneal:graph` | `node scripts/global/anneal-graph.js` |
 | `anneal:review` | `node scripts/global/anneal-review.js` |
 | `anneal:rotate` | `node scripts/global/anneal-log-rotate.js` |
 | `anneal:schedule-health` | `node scripts/global/anneal-schedule-health.js` |
