@@ -52,6 +52,13 @@ export default [
 
       // --- Tier 2: Code quality (P1) ---
       'jsdoc/no-undefined-types': 'warn',
+
+      // --- G10 Maintainability: cyclomatic complexity (#1971) ---
+      // Caps function complexity at 10 to complement the 100-line per-file
+      // cap. Mode is 'warn' so baseline violations don't block; promotion to
+      // 'error' is replay-eval-gated (no calendar threshold) per #1771.
+      // Trend tracked by scripts/global/complexity-report.js.
+      complexity: ['warn', 10],
     },
   },
   {
