@@ -202,6 +202,7 @@ npm run deploy:both:apply
 | `governance:status-cardinality` | `node scripts/global/label-lint-status-cardinality.js` |
 | `governance:status-cardinality:test` | `node --test tests/label-lint-status-cardinality.spec.js` |
 | `governance:sync-check` | `node scripts/global/governance-sync-check.js` |
+| `governance:ticket-redundancy:test` | `node --test tests/validate-ticket-redundancy.spec.js` |
 | `governance:tokens` | `node scripts/global/governance-token-lint.js` |
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
