@@ -194,6 +194,7 @@
     "test:headed": "npx playwright test --headed",
     "test:quality": "npx playwright test tests/google-quality.spec.js",
     "ticket:create": "node scripts/global/ticket-create.js",
+    "epic:sync": "node scripts/global/actuator-epic-sync.js",
     "toolchain:readability:install": "node scripts/global/install-readability-toolchain.js",
     "validate:compat": "node scripts/validate-plugin-compat.js",
     "validate:triage": "node scripts/validate-plugin-triage.js",
