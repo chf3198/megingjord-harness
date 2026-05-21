@@ -34,13 +34,34 @@ function run(argv = process.argv.slice(2), env = process.env) {
     bypassTracker.record(env);
     return 0;
   }
+
+  if (env.SKIP_DRIFT_LINT === 'true') {
+    console.log(`⚠️ SKIP_DRIFT_LINT active — bypass recorded`);
+    const file = require('path').join(require('os').homedir(), '.megingjord', 'incidents.jsonl');
+    try {
+      require('fs').mkdirSync(require('path').dirname(file), { recursive: true });
+      require('fs').appendFileSync(file, JSON.stringify({ timestamp: new Date().toISOString(), pattern_id: 'ticket-drift-lint-bypass', message: 'skipped pre-push linter' }) + '\n');
+    } catch {}
+  } else {
+    try {
+      const { lintEpicDrift } = require('./lint-epic-drift.js');
+      const raw = require('child_process').execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).trim();
+      const [owner, repo] = raw.split('/');
+      const findings = lintEpicDrift(owner, repo);
+      if (findings.length) {
+        console.error('❌ pre-push-gates: Ticket Governance Drift Detected:');
+        findings.forEach(f => console.error(`  - [Class ${f.class}] ${f.message}`));
+        return 1;
+      }
+    } catch (e) {
+      console.log(`⚠️ pre-push-gates: epic-drift-check skipped or fetch error: ${e.message}`);
+    }
+  }
+
   if (env.PRE_PUSH_GATES_FAKE_STATUS) {
     return Number(env.PRE_PUSH_GATES_FAKE_STATUS);
   }
-  const child = spawnSync('npx', ['lefthook', 'run', 'pre-push'], {
-    stdio: 'inherit',
-    env,
-  });
+  const child = spawnSync('npx', ['lefthook', 'run', 'pre-push'], { stdio: 'inherit', env });
   if (typeof child.status === 'number') return child.status;
   console.error('pre-push-gates: lefthook execution failed');
   return 1;
