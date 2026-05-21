@@ -15,10 +15,10 @@ const extractLeadTicket = b => { const m = String(b || '').match(/^(?:feat|fix|h
 const fetchIssueComments = t => { try { return JSON.parse(gh(['issue', 'view', String(t), '--json', 'comments'])).comments || []; } catch { return []; } };
 const findArtifact = (comments, kind) => comments.slice().reverse().find(c => (c.body || '').includes(kind)) || null;
 
-function checkBatonCompleteness(comments) {
-  const missing = ARTIFACTS.filter(kind => !findArtifact(comments, kind));
-  return missing.length === 0 ? null : { rule: 'baton-incomplete', detail: `Linked issue missing ${missing.length} baton: ${missing.join(', ')}` };
-}
+const checkBatonCompleteness = comments => {
+  const m = ARTIFACTS.filter(k => !findArtifact(comments, k));
+  return m.length ? { rule: 'baton-incomplete', detail: `Linked issue missing ${m.length} baton: ${m.join(', ')}` } : null;
+};
 
 function checkPredateWindow(comments, nowMs) {
   const collab = findArtifact(comments, 'COLLABORATOR_HANDOFF');
@@ -29,11 +29,7 @@ function checkPredateWindow(comments, nowMs) {
 
 function checkClosesKeyword(prBodyDraft, leadTicket) {
   if (prBodyDraft === null || prBodyDraft === undefined) return null;
-  const refs = new RegExp(`\\bRefs\\s+#${leadTicket}\\b`, 'i').test(prBodyDraft);
-  const closes = new RegExp(`\\b(Closes|Fixes|Resolves)\\s+#${leadTicket}\\b`, 'i').test(prBodyDraft);
-  const missing = [];
-  if (!refs) missing.push(`Refs #${leadTicket}`);
-  if (!closes) missing.push(`Closes #${leadTicket}`);
+  const missing = [!new RegExp(`\\bRefs\\s+#${leadTicket}\\b`, 'i').test(prBodyDraft) && `Refs #${leadTicket}`, !new RegExp(`\\b(Closes|Fixes|Resolves)\\s+#${leadTicket}\\b`, 'i').test(prBodyDraft) && `Closes #${leadTicket}`].filter(Boolean);
   return missing.length === 0 ? null : { rule: 'pr-body-keyword-missing', detail: `PR body missing: ${missing.join(', ')}` };
 }
 
@@ -50,7 +46,6 @@ function check(opts = {}) {
   const closes = checkClosesKeyword(opts.prBodyDraft, leadTicket);
   if (closes) violations.push(closes);
 
-  // Epic Drift Gate integration
   const isTestEnv = opts.skipDrift || (typeof global.test === 'function') || process.env.NODE_ENV === 'test';
   if (isTestEnv) {
     // skip drift checks in unit test runner
@@ -71,6 +66,12 @@ function check(opts = {}) {
     } catch (e) {
       process.stderr.write(`⚠️ epic-drift-check: bypass or fetch error: ${e.message}\n`);
     }
+  }
+
+  if (!isTestEnv) {
+    try {
+      require('./lint-ticket-redundancy.js').lintTicketRedundancy().forEach(r => process.stderr.write(`⚠️ ticket-redundancy-warn: ${r.message}\n`));
+    } catch (e) {}
   }
 
   return { ok: violations.length === 0, leadTicket, branch, violations };
