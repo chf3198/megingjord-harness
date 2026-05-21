@@ -6,19 +6,55 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const FIXTURE_DIR = path.join(__dirname, '..', '..', 'tests', 'fixtures', 'goal-hijack');
+const MANIFEST_FILE = path.join(FIXTURE_DIR, 'MANIFEST.sha256');
 
-/** Load all fixture JSON files from the fixture directory.
- * @returns {Array} array of fixture objects with computed source path. */
-function loadAllFixtures() {
+/** Read the cryptographic manifest of canonical fixture hashes.
+ * @returns {object} filename -> expected hex digest. */
+function readManifest() {
+  if (!fs.existsSync(MANIFEST_FILE)) return {};
+  try { return JSON.parse(fs.readFileSync(MANIFEST_FILE, 'utf8')); }
+  catch { return {}; }
+}
+
+/** Compute the digest of a file's content (sha-two-five-six).
+ * @param {string} filePath - path to fixture file.
+ * @returns {string} hex digest. */
+function sha256(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+/** Verify a fixture file matches its manifest entry.
+ * @param {string} filename - basename of fixture.
+ * @param {object} manifest - the manifest map.
+ * @returns {object} { ok, expected, actual, reason }. */
+function verifyIntegrity(filename, manifest) {
+  if (!(filename in manifest)) {
+    return { ok: false, reason: 'missing-from-manifest', filename };
+  }
+  const actual = sha256(path.join(FIXTURE_DIR, filename));
+  const expected = manifest[filename];
+  return { ok: actual === expected, expected, actual, filename };
+}
+
+/** Load all fixture JSON files from the fixture directory, verifying integrity.
+ * @param {object} [opts] - { skipIntegrity: false } to bypass for stress testing.
+ * @returns {Array} array of fixture objects with computed source path + _integrity. */
+function loadAllFixtures(opts = {}) {
   if (!fs.existsSync(FIXTURE_DIR)) return [];
-  return fs.readdirSync(FIXTURE_DIR)
-    .filter((f) => f.endsWith('.json'))
-    .map((f) => {
-      const fullPath = path.join(FIXTURE_DIR, f);
-      return { ...JSON.parse(fs.readFileSync(fullPath, 'utf8')), _path: fullPath };
-    });
+  const manifest = opts.skipIntegrity ? {} : readManifest();
+  const out = [];
+  for (const filename of fs.readdirSync(FIXTURE_DIR).filter((x) => x.endsWith('.json'))) {
+    const fullPath = path.join(FIXTURE_DIR, filename);
+    const integrity = opts.skipIntegrity ? { ok: true, reason: 'skipped' } : verifyIntegrity(filename, manifest);
+    if (!integrity.ok && !opts.allowFailed) {
+      throw new Error(`Fixture integrity failure on ${filename}: ${integrity.reason || 'hash-mismatch'}`);
+    }
+    out.push({ ...JSON.parse(fs.readFileSync(fullPath, 'utf8')), _path: fullPath, _integrity: integrity });
+  }
+  return out;
 }
 
 /** Validate a fixture has all required keys.
@@ -63,4 +99,4 @@ if (require.main === module) {
   console.log(JSON.stringify(report, null, 2));
 }
 
-module.exports = { loadAllFixtures, validateFixture, checkResponse, summarise, FIXTURE_DIR };
+module.exports = { loadAllFixtures, validateFixture, checkResponse, summarise, readManifest, sha256, verifyIntegrity, FIXTURE_DIR, MANIFEST_FILE };
