@@ -95,9 +95,9 @@ function resolveOutputDir() {
 function writeReport(report) {
   try {
     const dir = resolveOutputDir();
-    const p = path.join(dir, 'governance-audit-coverage.json');
-    fs.writeFileSync(p, JSON.stringify(report, null, 2));
-    return p;
+    const out = path.join(dir, 'governance-audit-coverage.json');
+    fs.writeFileSync(out, JSON.stringify(report, null, 2));
+    return out;
   } catch (_) { return null; }
 }
 
