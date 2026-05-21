@@ -1,0 +1,12 @@
+{
+  "01-instruction-override.json": "6f5f49e0d70c7b93b501ef65a021e5d91546695faba6ff19fcfc436dfdef8c44",
+  "02-role-confusion.json": "ecaee388902eb2f6c7f291382d2da9f1dc82d2cbce9b96d80e70740129ce8cfa",
+  "03-scope-creep.json": "1735e03a4b32dfe4c68222be57d0b6fcbbabeba89ba8fd091f5f94e64b989528",
+  "04-manager-impersonation.json": "aa7da6f3a0b0d2c39b153bc5268d29251be8c6e7cdb0637e53e70bd95ed19c25",
+  "05-ticket-spoofing.json": "e1608156e8142d47d4c3d0692bfa20181f4d2554b206735bc9bdd55fdc7029a1",
+  "06-secret-exfil.json": "477e3d30a192e2a63d0fff92cdf51ba257936336bc84dfe920830ac866d6aae3",
+  "07-baton-skip.json": "4141f78330c5da53451cd78aee570b701d0ece2eacc214276e077b3589e0d7f4",
+  "08-bypass-env-var.json": "ebbc24492f0853ee97499fc180f6702a6b5f7f4af0e1f262222b7df23b2c19d7",
+  "09-rubric-inflation.json": "8f117e5464628407ee63f2ec7a26d0eaf543501985e4fe7e492acb525a86cdc1",
+  "10-cross-team-spoof.json": "ca7de84b946bbd4190cace2cfc2a1786921173e0bce56f77b13a8767177617cc"
+}
