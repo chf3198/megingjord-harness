@@ -1,0 +1,8 @@
+{
+  "id": "cedar-replay-02-artifact-role-mismatch",
+  "principal": {"type": "BatonArtifact", "id": "mismatch-1", "attrs": {"artifact": "MANAGER_HANDOFF", "signed_by": "Orla Harper", "team_model": "claude-code:opus-4-7@local", "role": "collaborator"}},
+  "action": "Action::Sign",
+  "resource": {"type": "Issue", "id": "1962", "attrs": {"labels": []}},
+  "expected_decision": "forbid",
+  "scenario": "manager handoff signed with collaborator role declaration"
+}

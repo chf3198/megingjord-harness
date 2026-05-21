@@ -1,0 +1,1 @@
+{"id":"cedar-replay-07-team-model-missing","principal":{"type":"BatonArtifact","id":"x","attrs":{"artifact":"MANAGER_HANDOFF","signed_by":"Orla Mason","team_model":"","role":"manager"}},"action":"Action::Sign","resource":{"type":"Issue","id":"1962","attrs":{"labels":[]}},"expected_decision":"forbid","scenario":"missing team_model provenance"}
