@@ -1,0 +1,8 @@
+{
+  "id": "cedar-replay-01-valid-manager",
+  "principal": {"type": "BatonArtifact", "id": "manager-handoff-1", "attrs": {"artifact": "MANAGER_HANDOFF", "signed_by": "Orla Mason", "team_model": "claude-code:opus-4-7@local", "role": "manager"}},
+  "action": "Action::Sign",
+  "resource": {"type": "Issue", "id": "1962", "attrs": {"labels": ["type:epic"]}},
+  "expected_decision": "permit",
+  "scenario": "canonical manager alias signing manager handoff on Epic"
+}

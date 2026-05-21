@@ -1,0 +1,8 @@
+{
+  "id": "cedar-replay-03-signer-independence-violation",
+  "principal": {"type": "BatonArtifact", "id": "admin-1", "attrs": {"artifact": "ADMIN_HANDOFF", "signed_by": "Orla Harper", "team_model": "claude-code:opus-4-7@local", "role": "admin"}},
+  "action": "Action::Sign",
+  "resource": {"type": "Issue", "id": "1962", "attrs": {"labels": [], "collab_signed_by": "Orla Harper"}},
+  "expected_decision": "forbid",
+  "scenario": "admin signer identical to collaborator signer — signer-independence rule violated"
+}
