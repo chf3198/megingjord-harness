@@ -5,7 +5,7 @@ const { execFileSync } = require('child_process');
 const parentRx = /##\s+Parent Epic\s*\n#(\d+)/i;
 const uniq = items => [...new Set(items)].sort((a, b) => a - b);
 const refs = (txt, rx) => [...(txt || '').matchAll(rx)].map(m => +m[1]);
-const gh = args => execFileSync('gh', args, { encoding: 'utf8' }).trim();
+const gh = args => execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }).trim();
 const json = args => JSON.parse(gh(args));
 const existsPr = number => {
   try { gh(['pr', 'view', String(number), '--json', 'number']); return true; }
