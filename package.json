@@ -232,6 +232,7 @@
     "governance:hook-parity": "node scripts/global/hook-parity-check.js",
     "governance:hook-parity:test": "node --test tests/hook-parity-check.spec.js",
     "governance:ticket-redundancy:test": "node --test tests/validate-ticket-redundancy.spec.js",
+    "governance:wiki-catalog:test": "node --test tests/validate-wiki-catalog.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",
     "goals:regen": "node scripts/global/goals-contract-generate.js"
   },

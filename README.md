@@ -206,6 +206,7 @@ npm run deploy:both:apply
 | `governance:tokens` | `node scripts/global/governance-token-lint.js` |
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
+| `governance:wiki-catalog:test` | `node --test tests/validate-wiki-catalog.spec.js` |
 | `governance:wiki-metrics:test` | `node --test tests/wiki-metrics.spec.js` |
 | `governance:worktree-intercept:test` | `node --test tests/worktree-write-intercept.spec.js` |
 | `governance:worktree-inventory` | `node scripts/global/worktree-inventory.js` |
