@@ -47,12 +47,20 @@ jobs:
             if (decision.action === 'auto-transition') {
               for (const name of decision.removeLabels) {
                 if (labels.includes(name)) {
-                  await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name }).catch(() => {});
+                  try {
+                    await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name });
+                  } catch (e) {
+                    console.log(`#${issueNum}: removeLabel(${name}) failed: ${e.status} ${e.message} (#1596)`);
+                    core.setFailed(`label-lint auto-transition failed on removeLabel(${name}): ${e.message}`);
+                  }
                 }
               }
-              await github.rest.issues.addLabels({
-                owner, repo, issue_number: issueNum, labels: decision.addLabels,
-              }).catch(() => {});
+              try {
+                await github.rest.issues.addLabels({ owner, repo, issue_number: issueNum, labels: decision.addLabels });
+              } catch (e) {
+                console.log(`#${issueNum}: addLabels(${decision.addLabels}) failed: ${e.status} ${e.message} (#1596)`);
+                core.setFailed(`label-lint auto-transition failed on addLabels: ${e.message}`);
+              }
               console.log(`#${issueNum}: auto-transitioned (${decision.reason}) → status:done`);
             } else if (decision.action === 'reopen') {
               await github.rest.issues.update({ owner, repo, issue_number: issueNum, state: 'open' });
