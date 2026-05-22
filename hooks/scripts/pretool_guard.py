@@ -8,12 +8,14 @@ from admin_patterns import (  # noqa: E501
     DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE, RE_GIT_COMMIT,
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
+from canonical_main_enforcer import is_main_checkout, evaluate_path
 from governance_state import ensure_state
 from live_checks import ci_all_pass, linked_issue_has_collab_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
+RE_BRANCH_SWITCH = re.compile(r"git\s+(?:switch|checkout)\s+(?!-[bcCq])([^\s-]\S*)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 
@@ -36,6 +38,10 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
+    if is_main_checkout(cwd):
+        sw = RE_BRANCH_SWITCH.search(joined)
+        if sw and sw.group(1) not in ("main", "master"):
+            return emit("deny", f"Canonical-main read-only: branch switch to '{sw.group(1)}' from main checkout rejected (#2107). Use a worktree (devenv-ops-<team-or-ticket>/) instead.")
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
@@ -94,7 +100,14 @@ def main() -> int:
     state = ensure_state(cwd)
     from state_store import reset_on_branch_change
     state = reset_on_branch_change(cwd, current_branch(cwd))
-    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file"}:
+    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit"}:
+        if is_main_checkout(cwd):
+            for value in values:
+                if not (value.startswith("/") or value.startswith("./") or "/" in value):
+                    continue
+                allowed, reason = evaluate_path(value, cwd)
+                if not allowed:
+                    return emit("deny", f"Canonical-main read-only (#2107): {reason}")
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
