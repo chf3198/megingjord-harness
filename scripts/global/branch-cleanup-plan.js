@@ -1,8 +1,22 @@
 'use strict';
-// Operator-safe branch cleanup policy (dry-run only). Refs #1610.
+// Operator-safe branch cleanup policy (dry-run only). Refs #1610 #2048.
 // Sandbox/ launchers and active leases are never flagged (three-team safety).
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const leaseRegistry = require('./cross-team-lease-registry');
+
+// Conservative branch-name allowlist — git permits broader names, but the cleanup
+// planner only ever acts on Conventional-Commit-shaped branches plus sandbox/launcher
+// prefixes. Anything outside this set is treated as untrusted input and routed to
+// keep-active (safe classification). Refs #2048 (shell-injection defense).
+const SAFE_BRANCH_RE = /^[a-zA-Z0-9][a-zA-Z0-9/_.@-]*$/;
+const SAFE_BRANCH_MAX_LEN = 200;
+
+function isSafeBranchName(name) {
+  return typeof name === 'string'
+    && name.length > 0
+    && name.length <= SAFE_BRANCH_MAX_LEN
+    && SAFE_BRANCH_RE.test(name);
+}
 
 function sh(cmd) {
   try { return execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim(); }
@@ -16,11 +30,19 @@ function localBranches() {
 }
 
 function isMergedToMain(branch) {
-  return sh(`git merge-base --is-ancestor "refs/heads/${branch}" origin/main && echo yes`) === 'yes';
+  if (!isSafeBranchName(branch)) return false;
+  const res = spawnSync('git', ['merge-base', '--is-ancestor', `refs/heads/${branch}`, 'origin/main'],
+    { stdio: ['pipe', 'pipe', 'pipe'] });
+  return res.status === 0;
 }
 
 function prState(branch) {
-  const raw = sh(`gh pr list --head "${branch}" --state all --json number,state --jq '.[0]'`);
+  if (!isSafeBranchName(branch)) return null;
+  const res = spawnSync('gh',
+    ['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state', '--jq', '.[0]'],
+    { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+  if (res.status !== 0) return null;
+  const raw = (res.stdout || '').trim();
   try { return raw ? JSON.parse(raw) : null; } catch { return null; }
 }
 
@@ -46,9 +68,15 @@ function classify(branch, merged, pr) {
 }
 
 function commandsFor(branch, state) {
+  // Output commands are presented to operator review (dry-run plan), not executed
+  // automatically. Single-quote branch names so any shell metacharacter that leaked
+  // through earlier classification is inert when the operator pastes the command.
+  // Defense-in-depth pairs with the SAFE_BRANCH_RE allowlist at the call sites of
+  // isMergedToMain + prState. Refs #2048.
+  const q = `'${String(branch).replace(/'/g, "'\\''")}'`;
   if (state === 'merged-clean' || state === 'merged-no-pr')
-    return [`git branch -d ${branch}`, `git push origin --delete ${branch} || true`];
-  if (state === 'closed-pr') return [`git branch -d ${branch}`];
+    return [`git branch -d ${q}`, `git push origin --delete ${q} || true`];
+  if (state === 'closed-pr') return [`git branch -d ${q}`];
   return [];
 }
 
@@ -88,4 +116,4 @@ function run(argv = process.argv.slice(2)) {
 }
 
 if (require.main === module) run();
-module.exports = { classify, commandsFor, plan };
+module.exports = { classify, commandsFor, plan, isSafeBranchName, isMergedToMain, prState };
