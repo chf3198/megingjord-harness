@@ -48,14 +48,14 @@ function prState(branch) {
 
 function orphanedLeases(branches, registryFn) {
   const readFn = registryFn || leaseRegistry.read;
-  let reg;
   try {
-    reg = readFn(leaseRegistry.DEFAULT_PATH);
+    const reg = readFn(leaseRegistry.DEFAULT_PATH);
+    const leases = leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
+    return { leases, error: null };
   } catch (err) {
     process.stderr.write(`[branch-cleanup-plan] lease registry unavailable (${leaseRegistry.DEFAULT_PATH}): ${err.message}\n`);
-    return [];
+    return { leases: [], error: err.message };
   }
-  return leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
 }
 
 function classify(branch, merged, pr) {
@@ -84,18 +84,20 @@ function plan(overrides = {}) {
   const branches = overrides.branches || localBranches();
   const getIsMerged = overrides.isMergedToMain || isMergedToMain;
   const getPr = overrides.prState || prState;
-  const orphans = overrides.leases !== undefined
-    ? overrides.leases
+  const leaseResult = overrides.leases !== undefined
+    ? { leases: overrides.leases, error: null }
     : orphanedLeases(branches, overrides.leaseRegistryReader);
   const entries = branches.map(branch => {
     const { state, evidence } = classify(branch, getIsMerged(branch), getPr(branch));
     return { branch, cleanupState: state, evidence, commands: commandsFor(branch, state) };
   });
-  return {
+  const report = {
     generatedAt: new Date().toISOString(), mode: 'dry-run',
     branches: entries,
-    orphanedLeases: orphans.map(l => ({ ticket: l.ticket, branch: l.branch, action: 'lease-close' })),
+    orphanedLeases: leaseResult.leases.map(l => ({ ticket: l.ticket, branch: l.branch, action: 'lease-close' })),
   };
+  if (leaseResult.error) report.registryError = leaseResult.error;
+  return report;
 }
 
 function run(argv = process.argv.slice(2)) {
@@ -111,6 +113,9 @@ function run(argv = process.argv.slice(2)) {
   if (report.orphanedLeases.length) {
     console.log('\nOrphaned leases (branch deleted, lease not closed):');
     for (const lease of report.orphanedLeases) console.log(`  ticket #${lease.ticket}: ${lease.branch}`);
+  }
+  if (report.registryError) {
+    console.log(`\n[warn] Orphaned lease list may be incomplete — registry unavailable: ${report.registryError}`);
   }
   return report;
 }
