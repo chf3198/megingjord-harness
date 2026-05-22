@@ -37,3 +37,26 @@ test('#1472 AC4: Epic-role-protection guard appears INSIDE the closed-state clea
   expect(closedBlockStart).toBeGreaterThan(-1);
   expect(epicGuardIdx).toBeGreaterThan(closedBlockStart);
 });
+
+test('#1596 AC3: auto-transition removeLabel uses try/catch + core.setFailed (not silent catch)', () => {
+  // Locate the auto-transition block and verify no .catch(() => {}) on the removeLabel call
+  const blockStart = WORKFLOW.indexOf("decision.action === 'auto-transition'");
+  const blockEnd = WORKFLOW.indexOf("decision.action === 'reopen'");
+  const block = WORKFLOW.slice(blockStart, blockEnd);
+  // Must NOT have the silent swallow pattern on removeLabel
+  expect(block).not.toMatch(/removeLabel\([^)]+\)\.catch/);
+  // Must have explicit try/catch with core.setFailed for removeLabel
+  expect(block).toMatch(/try\s*\{[\s\S]*?removeLabel/);
+  expect(block).toContain('core.setFailed');
+  expect(block).toContain('#1596');
+});
+
+test('#1596 AC4: auto-transition addLabels uses try/catch + core.setFailed (not silent catch)', () => {
+  const blockStart = WORKFLOW.indexOf("decision.action === 'auto-transition'");
+  const blockEnd = WORKFLOW.indexOf("decision.action === 'reopen'");
+  const block = WORKFLOW.slice(blockStart, blockEnd);
+  // Must NOT have .catch(() => {}) on the addLabels call
+  expect(block).not.toMatch(/addLabels\([^)]+\)\.catch/);
+  // Must have explicit try/catch wrapping addLabels
+  expect(block).toMatch(/try\s*\{[\s\S]*?addLabels/);
+});
