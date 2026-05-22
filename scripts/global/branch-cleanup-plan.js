@@ -26,13 +26,14 @@ function prState(branch) {
 
 function orphanedLeases(branches, registryFn) {
   const readFn = registryFn || leaseRegistry.read;
+  let reg;
   try {
-    const reg = readFn(leaseRegistry.DEFAULT_PATH);
-    return leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
+    reg = readFn(leaseRegistry.DEFAULT_PATH);
   } catch (err) {
-    process.stderr.write(`[branch-cleanup-plan] lease registry unavailable: ${err.message}\n`);
+    process.stderr.write(`[branch-cleanup-plan] lease registry unavailable (${leaseRegistry.DEFAULT_PATH}): ${err.message}\n`);
     return [];
   }
+  return leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
 }
 
 function classify(branch, merged, pr) {
