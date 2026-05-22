@@ -40,7 +40,7 @@ function isDisabled() {
   return false;
 }
 
-function emitStatSafe(provider, payload) {
+function emitStatSafe(provider, payload, opts = {}) {
   try {
     const adapter = ADAPTERS[provider];
     if (!adapter) return;
@@ -51,6 +51,7 @@ function emitStatSafe(provider, payload) {
       input_tokens: tokenRecord.input_tokens ?? 0,
       output_tokens: tokenRecord.output_tokens ?? 0,
       executed: 'hamr-provider-wrapper',
+      tier: opts.tier ?? null,
     });
   } catch { /* never let stats break the call */ }
 }
@@ -66,7 +67,7 @@ async function wrapProviderCall(provider, callFn, opts = {}) {
     const value = await callFn({ headers: {}, bodyExtras: {} });
     return { ok: true, value, sticky: null, spillover: null, hamr_disabled: true };
   }
-  const sticky = opts.tier
+  const sticky = (opts.tier && opts.tier !== 'diagnostic')
     ? pickStickyProvider(opts.tier, { previousProvider: opts.previousProvider })
     : null;
   const effectiveProvider = sticky?.provider || provider;
@@ -74,7 +75,7 @@ async function wrapProviderCall(provider, callFn, opts = {}) {
   let response;
   try { response = await callFn(hints); }
   catch (err) { return { ok: false, error: err?.message || 'provider_call_failed', sticky, spillover: null }; }
-  emitStatSafe(effectiveProvider, response);
+  emitStatSafe(effectiveProvider, response, opts);
   const respShape = { status: response?.status ?? response?.response?.status ?? HTTP_OK_DEFAULT, headers: response?.headers ?? new Map() };
   const spillover = maybeSpillover(effectiveProvider, respShape);
   return { ok: true, value: response, sticky, spillover };

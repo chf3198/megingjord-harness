@@ -54,6 +54,7 @@ function appendCacheStat(record, opts = {}) {
     input_tokens: Number(record.input_tokens || 0),
     output_tokens: Number(record.output_tokens || 0),
     executed: record.executed ?? null,
+    tier: typeof record.tier === 'string' ? record.tier : null,
   };
   normalized.cache_eligible = isCacheEligible(normalized);
   if (!isInformativeRecord(normalized)) {

@@ -29,6 +29,8 @@ const IGNORE_FILES = [
   'team-model-signatures.json',
   // Parity registry grows with surfaces × runtimes × features — catalog by design (#1912)
   'orchestrator-governance-parity.json',
+  // JSON schemas (standard third-party metadata)
+  'claude-code-settings.schema.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];

@@ -54,3 +54,22 @@ The report separates active leases, stale leases, conflicts, and cleanup
 candidates. Treat active leases as owned by their ticket holder. Treat cleanup
 candidates as plan-only until their owning ticket has merged and its lease is
 closed.
+
+## Branch Cleanup (dry-run only)
+
+After a sprint or release, local branches that are merged or have closed PRs
+accumulate. Run the branch cleanup planner to identify candidates:
+
+```bash
+npm run cleanup:branches
+# or with JSON output:
+npm run cleanup:branches -- --json
+```
+
+Three-team safety guarantees:
+- **sandbox/** launcher branches are never flagged.
+- Branches with an active lease entry are treated as owned by their ticket holder and skipped.
+- All output is **plan-only**. Listed `git branch -d` commands must be run manually after review.
+
+For orphaned lease entries (branch deleted, lease not closed), the plan prints
+the ticket number and the `cross-team-lease.js close` command to run.

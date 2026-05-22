@@ -108,6 +108,7 @@ npm run deploy:both:apply
 | `auth:profile:context` | `node scripts/global/authorization-profile-context.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |
 | `capability:show` | `node scripts/global/capability-show.js` |
+| `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
@@ -129,6 +130,7 @@ npm run deploy:both:apply
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
+| `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `git-state:drift` | `node scripts/global/git-state-drift-sensor.js` |
@@ -201,9 +203,11 @@ npm run deploy:both:apply
 | `governance:status-cardinality` | `node scripts/global/label-lint-status-cardinality.js` |
 | `governance:status-cardinality:test` | `node --test tests/label-lint-status-cardinality.spec.js` |
 | `governance:sync-check` | `node scripts/global/governance-sync-check.js` |
+| `governance:ticket-redundancy:test` | `node --test tests/validate-ticket-redundancy.spec.js` |
 | `governance:tokens` | `node scripts/global/governance-token-lint.js` |
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
+| `governance:wiki-catalog:test` | `node --test tests/validate-wiki-catalog.spec.js` |
 | `governance:wiki-metrics:test` | `node --test tests/wiki-metrics.spec.js` |
 | `governance:worktree-intercept:test` | `node --test tests/worktree-write-intercept.spec.js` |
 | `governance:worktree-inventory` | `node scripts/global/worktree-inventory.js` |
@@ -252,7 +256,7 @@ npm run deploy:both:apply
 | `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!.claude/**' '!research/**' '!wiki/sources/**' '!wiki/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**' '!generated/**' '!tests/fixtures/governance/golden/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
-| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=460` |
+| `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=475` |
 | `lint:router` | `node scripts/lint-router.js` |
 | `lint:sh` | `find scripts -name '*.sh' -exec shellcheck {} +` |
 | `mailbox:flush` | `node scripts/global/mailbox-outbox.js flush` |

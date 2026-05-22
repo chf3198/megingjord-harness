@@ -42,6 +42,16 @@ on response (#932), and returns spillover hint via `maybeSpillover` (#927) on ra
 Treat runtime and provider as separate fields: Codex is a runtime, while
 OpenAI-compatible, Anthropic, Ollama, LiteLLM, or OpenRouter are provider paths.
 
+## Diagnostic carve-out (per #1155)
+
+For diagnostic calls, integration test probes, or health checks that must be excluded from production utilization and cost metrics:
+- Pass `opts.tier = 'diagnostic'` to `wrapProviderCall`. This ensures the call bypasses provider stickiness/routing, executes directly, and is tagged as `tier: 'diagnostic'` in `cache-stats.jsonl` to exclude it from production metrics.
+- For genuinely uncoverable raw connection bypasses (very rare), prefix the bypass with:
+  ```js
+  // hamr-bypass-ok: diagnostic <reason>
+  ```
+  This prevents linter alerts and reserves bypass status exclusively for necessary testing.
+
 ## Token telemetry policy
 
 - Prefer exact provider usage from HAMR-wrapped responses or aggregate usage APIs.

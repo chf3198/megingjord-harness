@@ -72,3 +72,17 @@ test('emitStatSafe writes to cache-stats.jsonl on successful call', async () => 
   const last = fs.readFileSync(statsFile, 'utf8').trim().split('\n').pop();
   expect(JSON.parse(last).executed).toBe('hamr-provider-wrapper');
 });
+
+test('wrapProviderCall tags stat with tier: diagnostic and bypasses sticky routing', async () => {
+  const statsFile = path.join(os.homedir(), '.megingjord', 'cache-stats.jsonl');
+  const result = await WRAP.wrapProviderCall('openai', () => ({
+    status: 200, headers: new Map(),
+    usage: { prompt_tokens: 100, completion_tokens: 10, prompt_cache_hit_tokens: 0 },
+  }), { tier: 'diagnostic' });
+  expect(result.ok).toBe(true);
+  expect(result.sticky).toBeNull();
+  
+  const last = fs.readFileSync(statsFile, 'utf8').trim().split('\n').pop();
+  const parsed = JSON.parse(last);
+  expect(parsed.tier).toBe('diagnostic');
+});
