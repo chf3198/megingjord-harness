@@ -1,0 +1,14 @@
+# catch-empty golden-file fixture: UNSUPPRESSED empty catch — lint gate MUST FAIL
+# Used by test-evidence-validator (golden-file strategy) for ticket #2090.
+# This file intentionally contains a bare .catch(() => {}) with no suppression comment.
+# The lint.yml grep step should flag this file.
+on: [push]
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch(() => {})

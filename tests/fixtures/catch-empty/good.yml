@@ -1,0 +1,13 @@
+# catch-empty golden-file fixture: SUPPRESSED empty catch — lint gate MUST PASS
+# Used by test-evidence-validator (golden-file strategy) for ticket #2090.
+# The suppression comment // catch-empty: <reason> on the same line satisfies the gate.
+on: [push]
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch(() => {}) // catch-empty: label may not exist; 404 is expected and safe to ignore
