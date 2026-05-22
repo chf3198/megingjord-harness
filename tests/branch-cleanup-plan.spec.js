@@ -76,6 +76,17 @@ test('plan returns empty orphaned leases and classifies branches when registry t
   expect(report.orphanedLeases).toEqual([]);
   expect(report.branches[0].cleanupState).toBe('merged-clean');
   expect(report.mode).toBe('dry-run');
+  expect(report.registryError).toBe('registry file not found');
+});
+
+test('plan has no registryError when registry succeeds', () => {
+  const report = planner.plan({
+    branches: ['feat/500-active'],
+    isMergedToMain: () => false,
+    prState: () => null,
+    leases: [],
+  });
+  expect(report.registryError).toBeUndefined();
 });
 
 // Refs #2048 — shell-injection defense.
