@@ -67,15 +67,15 @@ function run(argv = process.argv.slice(2)) {
   const report = plan();
   if (argv.includes('--json')) { process.stdout.write(`${JSON.stringify(report, null, 2)}\n`); return report; }
   console.log(`\nBranch Cleanup Plan (dry-run) — ${report.generatedAt}\n`);
-  for (const b of report.branches) {
-    if (b.cleanupState === 'keep-active' || b.cleanupState === 'keep-launcher') continue;
-    console.log(`  [${b.cleanupState}] ${b.branch}`);
-    console.log(`    evidence: ${b.evidence}`);
-    for (const cmd of b.commands) console.log(`    > ${cmd}`);
+  for (const entry of report.branches) {
+    if (entry.cleanupState === 'keep-active' || entry.cleanupState === 'keep-launcher') continue;
+    console.log(`  [${entry.cleanupState}] ${entry.branch}`);
+    console.log(`    evidence: ${entry.evidence}`);
+    for (const cmd of entry.commands) console.log(`    > ${cmd}`);
   }
   if (report.orphanedLeases.length) {
     console.log('\nOrphaned leases (branch deleted, lease not closed):');
-    for (const l of report.orphanedLeases) console.log(`  ticket #${l.ticket}: ${l.branch}`);
+    for (const lease of report.orphanedLeases) console.log(`  ticket #${lease.ticket}: ${lease.branch}`);
   }
   return report;
 }
