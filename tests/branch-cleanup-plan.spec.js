@@ -84,7 +84,7 @@ test('plan has no registryError when registry succeeds', () => {
     branches: ['feat/500-active'],
     isMergedToMain: () => false,
     prState: () => null,
-    leases: [],
+    leaseRegistryReader: () => ({ leases: [] }),
   });
   expect(report.registryError).toBeUndefined();
 });

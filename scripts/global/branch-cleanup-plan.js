@@ -48,15 +48,14 @@ function prState(branch) {
 
 function orphanedLeases(branches, registryFn) {
   const readFn = registryFn || leaseRegistry.read;
-  let reg;
   try {
-    reg = readFn(leaseRegistry.DEFAULT_PATH);
+    const reg = readFn(leaseRegistry.DEFAULT_PATH);
+    const leases = leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
+    return { leases, error: null };
   } catch (err) {
     process.stderr.write(`[branch-cleanup-plan] lease registry unavailable (${leaseRegistry.DEFAULT_PATH}): ${err.message}\n`);
     return { leases: [], error: err.message };
   }
-  const leases = leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
-  return { leases, error: null };
 }
 
 function classify(branch, merged, pr) {
