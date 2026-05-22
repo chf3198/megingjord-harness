@@ -30,10 +30,25 @@ Check wiki before research tasks, when answering fleet/governance/architecture q
 ## Wiki Structure
 
 - `wiki/index.md` — read this first to find relevant pages
-- `wiki/entities/` — devices, services, tools
-- `wiki/concepts/` — patterns, protocols, decisions
-- `wiki/sources/` — digests of raw research documents
-- `wiki/syntheses/` — cross-cutting analysis
+
+### Three-Wiki typology (Phase-1 stubs from #2051; full migration follow-on)
+
+Per `research/three-wiki-typology-synthesis-1943.md` (Epic #1942 Phase-0):
+
+- `wiki/code/` (Wiki A) — Code-Base Wiki (per-project; symbols + concepts)
+- `wiki/work-log/` (Wiki B) — Project Work-Log Wiki (per-project; mirrors GitHub tickets + PRs)
+- `wiki/wisdom/project/` (Wiki C scope=project) — Project-specific research wisdom (per-project, **NEVER distributed cross-project**)
+- `wiki/wisdom/global/` (Wiki C scope=global) — Cross-project wisdom (distributed to operator-global `~/.copilot/wiki/`)
+
+### Legacy paths (still in use; will migrate to wiki/wisdom/global/)
+
+- `wiki/entities/` — devices, services, tools (→ `wiki/wisdom/global/entities/`)
+- `wiki/concepts/` — patterns, protocols, decisions (→ `wiki/wisdom/global/concepts/`)
+- `wiki/sources/` — digests of raw research documents (→ `wiki/wisdom/global/sources/`)
+- `wiki/syntheses/` — cross-cutting analysis (→ `wiki/wisdom/global/syntheses/`)
+- `wiki/skills/` (→ `wiki/wisdom/global/skills/`)
+
+Physical migration of legacy paths is queued as a follow-on to #2051.
 
 ## Rules
 

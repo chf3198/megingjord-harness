@@ -42,7 +42,8 @@ logs/copilot-usage.json
 
 # Local pre-GitHub-canonical baton history (#820)
 # Authoritative ticket data lives in GitHub Issues; tickets/*.md is local-only legacy.
-tickets/
+# Anchored to root only (#2051): wiki/work-log/tickets/ is Wiki B per-project mirror, committed.
+/tickets/
 .worktrees/
 
 # Operator-local spike outputs (Wave 1 #891/#892/#893) — never committed
