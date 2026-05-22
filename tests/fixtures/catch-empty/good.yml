@@ -1,13 +1,32 @@
-# catch-empty golden-file fixture: SUPPRESSED empty catch — lint gate MUST PASS
+# catch-empty golden-file fixture: SUPPRESSED forms — lint gate MUST PASS
 # Used by test-evidence-validator (golden-file strategy) for ticket #2090.
-# The suppression comment // catch-empty: <reason> on the same line satisfies the gate.
+# GOOD-1: single-line suppressed (original pattern)
+# GOOD-2: named-param suppressed
+# GOOD-3: multiline suppressed — annotation on opening line
 on: [push]
 jobs:
-  example:
+  good-single-line:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
         with:
           script: |
             await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
-              .catch(() => {}) // catch-empty: label may not exist; 404 is expected and safe to ignore
+              .catch(() => {}) // catch-empty: label may not exist; 404 is expected
+  good-named-param:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch((e) => {}) // catch-empty: best-effort; error logged via console above
+  good-multiline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch(() => { // catch-empty: label may not exist; 404 is safe to ignore
+              })
