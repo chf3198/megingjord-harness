@@ -24,9 +24,15 @@ function prState(branch) {
   try { return raw ? JSON.parse(raw) : null; } catch { return null; }
 }
 
-function orphanedLeases(branches) {
-  const reg = leaseRegistry.read(leaseRegistry.DEFAULT_PATH);
-  return leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
+function orphanedLeases(branches, registryFn) {
+  const readFn = registryFn || leaseRegistry.read;
+  try {
+    const reg = readFn(leaseRegistry.DEFAULT_PATH);
+    return leaseRegistry.active(reg).filter(l => l.branch && !branches.includes(l.branch));
+  } catch (err) {
+    process.stderr.write(`[branch-cleanup-plan] lease registry unavailable: ${err.message}\n`);
+    return [];
+  }
 }
 
 function classify(branch, merged, pr) {
@@ -51,7 +57,7 @@ function plan(overrides = {}) {
   const getPr = overrides.prState || prState;
   const orphans = overrides.leases !== undefined
     ? overrides.leases
-    : orphanedLeases(branches);
+    : orphanedLeases(branches, overrides.leaseRegistryReader);
   const entries = branches.map(branch => {
     const { state, evidence } = classify(branch, getIsMerged(branch), getPr(branch));
     return { branch, cleanupState: state, evidence, commands: commandsFor(branch, state) };
