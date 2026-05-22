@@ -52,6 +52,32 @@ deferred       role:manager                     Epic-only: blocked, no ETA (Rule
 - `in-progress ↔ deferred` (Epic-only): Manager flags external blocker; carries `role:manager`.
 - Manager ticket-health checks, AC edits, and label fixes are out-of-band; no handoff required.
 
+## Gate entry conditions — Admin and Consultant (Refs #1944)
+
+The two most-failure-prone transitions in the baton are `in-progress → testing` (Collaborator → Admin) and `testing → review` (Admin → Consultant). Both gates carry four facets that ALL must hold before the next role may pick up.
+
+### Admin gate (entry to `status:testing`)
+
+| Facet | Requirement |
+|---|---|
+| Trigger artifact | `COLLABORATOR_HANDOFF` comment posted on the linked issue. The comment must carry the four signing fields (`Signed-by`, `Team&Model`, `Role: collaborator`, plus `test_strategy:`) and the per-AC verification block. Validator: `scripts/global/megalint/collaborator-handoff.js`. |
+| Role-label transition | Remove `role:collaborator`; add `role:admin`. Single-role invariant holds at every instant per Rule 1. |
+| Status-label transition | Remove `status:in-progress`; add `status:testing`. Single-status invariant per the §"Single-status invariant" rule above. |
+| Preconditions | (a) ALL declared ACs verified PASS in the COLLABORATOR_HANDOFF per-AC block. (b) `test_strategy` evidence present per `instructions/test-methodology-matrix.instructions.md` — validator `scripts/global/megalint/test-discoverability.js`. (c) Lint clean for the lane (lane:code-change requires `npm run lint` green; lane:docs-research requires `wiki-lint` if wiki touched). |
+
+### Consultant gate (entry to `status:review`)
+
+| Facet | Requirement |
+|---|---|
+| Trigger artifact | `ADMIN_HANDOFF` comment posted on the linked issue. Must carry signing fields with `Role: admin`, plus `branch:`, `commit:`, `signer-independence-check: PASS`, and `deploy-runtime-impact:` (or `sync-verification: N/A` per `feature-completion-governance.instructions.md`). Validator: `scripts/global/megalint/admin-handoff.js`. |
+| Role-label transition | Remove `role:admin`; add `role:consultant`. |
+| Status-label transition | Remove `status:testing`; add `status:review`. |
+| Preconditions | (a) Signer-independence: Admin signer alias MUST differ from Collaborator signer alias — validator `scripts/global/megalint/signer-fidelity.js`. (b) ALL required CI checks PASS on the linked PR — observed via `gh pr checks <PR#>` or `live_checks.ci_all_pass()`; pre-merge gate `merge-evidence-pr-gate.js` enforces. (c) PR merged OR merge-evidence-override-approved label present on the linked issue per the merge-evidence batch contract. (d) For lane:code-change touching deployed runtime artifacts: `npm run sync:codex` + `npm run sync:claude` + `npm run hamr:sync-verify` outputs cited per `feature-completion-governance.instructions.md`. |
+
+### Validation evidence — recent practice (memory-codified)
+
+The gates above match observed practice in: PR #2045 (Epic #2038 ship; three iterations of cross-family rater + four baton artifacts before PR), PR #2047 (#1943 Three-Wiki synthesis; cross-team file bundling with explicit attribution). Memory anchors: `feedback-all-baton-artifacts-before-pr` (post all four before `gh pr create`; seven consecutive clean ships once applied), `feedback-admin-ci-gate` (Admin verifies ALL required checks green before merge), `feedback-baton-artifacts-in-pr` (PR body must include handoff strings).
+
 ## Collaborator role
 
 Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:collab-{type}` form). Capability profile is reflected in ticket area labels (`area:scripts`, `area:hooks`, `area:dashboard`, etc.) rather than role-suffix typing. Each Collaborator may have only **1 `in-progress` ticket at a time** (enforced by baton-gates Action).
