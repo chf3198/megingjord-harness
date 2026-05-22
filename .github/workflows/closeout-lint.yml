@@ -48,6 +48,7 @@ jobs:
             });
             const prLabels = (context.payload.pull_request.labels || []).map(l => l.name);
 
+            const path = require('path');
             const input = {
               comments, lane, labels,
               body: issue.body || '',
@@ -58,6 +59,7 @@ jobs:
               ticketRef: `#${linkedIssue}`,
               prFiles,
               labelsOnPR: prLabels,
+              incidentsPath: path.join(process.env.GITHUB_WORKSPACE || '.', 'incidents.jsonl'),
             };
 
             const mh = megalint.run('manager-handoff', input);
