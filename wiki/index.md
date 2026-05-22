@@ -10,6 +10,21 @@ The LLM updates this on every ingest operation.
 3. At moderate scale (~100 sources, ~hundreds of pages), this avoids
    the need for embedding-based RAG infrastructure.
 
+## Storage Layout (Three-Wiki typology — Phase-1 stubs from #2051)
+
+Per `research/three-wiki-typology-synthesis-1943.md`, the wiki is organized into four scopes:
+
+- **`wiki/code/`** (Wiki A) — Code-Base Wiki (per-project, committed). Symbols + concepts derived from this repo's source code. Stub only until Phase-1 child #2053 ships ingestion logic.
+- **`wiki/work-log/`** (Wiki B) — Project Work-Log Wiki (per-project, committed). Mirror of GitHub tickets + PRs. Stub only until Phase-1 child #2054 ships ingestion logic.
+- **`wiki/wisdom/project/`** (Wiki C scope=project) — Project-specific research-based wisdom (per-project, committed, NEVER distributed cross-project). Phase-0 research+planning syntheses land here (e.g. Epic #2091 will land its Phase-0 synthesis at `wiki/wisdom/project/research/harness-state-isolation.md`).
+- **`wiki/wisdom/global/`** (Wiki C scope=global) — Cross-project wisdom (committed in this repo, distributed to operator-global `~/.copilot/wiki/`). Currently EMPTY — the legacy paths `wiki/concepts/`, `wiki/entities/`, `wiki/sources/`, `wiki/syntheses/`, `wiki/skills/` ARE conceptually this scope but live at their pre-migration paths. Physical migration is queued as a follow-on to #2051.
+
+Each subtree has a README.md documenting its purpose.
+
+### Legacy paths (still in use)
+
+The sections below (`## Entities`, `## Concepts`, etc.) continue to enumerate content at the LEGACY paths (`wiki/entities/`, `wiki/concepts/`, etc.). Until the legacy-path migration ticket ships, treat them as `wiki/wisdom/global/<section>/` content despite the physical path.
+
 ## Entities
 
 - [[penguin-1]] — Penguin-1 (SML Chromebook)
