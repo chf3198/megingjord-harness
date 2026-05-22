@@ -77,6 +77,6 @@ jobs:
               await github.rest.issues.addLabels({
                 owner, repo, issue_number: Number(ref),
                 labels: ['coordinator:cross-team-needs-hand-off']
-              }).catch(() => {});
+              }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
             }
             core.info('parallel-PR warn posted and coordinator label applied');

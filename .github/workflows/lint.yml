@@ -72,3 +72,13 @@ jobs:
           reporter: github-pr-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: No unsuppressed empty catch in github-script blocks
+        run: |
+          if grep -rn '\.catch(() => {})' .github/workflows/ | grep -v '// catch-empty:'; then
+            echo ""
+            echo "ERROR: Found an unsuppressed empty catch in a workflow file."
+            echo "Replace the empty catch with error handling, or add"
+            echo "  '// catch-empty: <reason>'  on the same line to mark it intentional."
+            exit 1
+          fi
+          echo "OK: no unsuppressed empty catches found."

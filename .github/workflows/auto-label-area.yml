@@ -47,7 +47,7 @@ jobs:
             const issue = (await github.rest.issues.get({ owner, repo, issue_number: num })).data;
             const stale = issue.labels.map(l => l.name).filter(l => l.startsWith('area:') && l !== targetLabel);
             for (const l of stale) {
-              await github.rest.issues.removeLabel({ owner, repo, issue_number: num, name: l }).catch(() => {});
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: num, name: l }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
             }
 
             await github.rest.issues.addLabels({ owner, repo, issue_number: num, labels: [targetLabel] });

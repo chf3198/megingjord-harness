@@ -79,10 +79,10 @@ jobs:
                 if (decision.dormant && !dryRun) {
                   await github.rest.issues.removeLabel({
                     owner, repo, issue_number: epic.number, name: 'status:in-progress',
-                  }).catch(() => {});
+                  }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
                   await github.rest.issues.addLabels({
                     owner, repo, issue_number: epic.number, labels: ['status:dormant'],
-                  }).catch(() => {});
+                  }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
                   await github.rest.issues.createComment({
                     owner, repo, issue_number: epic.number,
                     body: det.autoPauseComment(epic.number, decision.reason, null),
@@ -94,10 +94,10 @@ jobs:
                 if (decision.reactivate && !dryRun) {
                   await github.rest.issues.removeLabel({
                     owner, repo, issue_number: epic.number, name: 'status:dormant',
-                  }).catch(() => {});
+                  }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
                   await github.rest.issues.addLabels({
                     owner, repo, issue_number: epic.number, labels: ['status:in-progress'],
-                  }).catch(() => {});
+                  }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
                 }
               }
             }

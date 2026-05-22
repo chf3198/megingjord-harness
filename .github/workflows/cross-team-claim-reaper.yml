@@ -51,11 +51,11 @@ jobs:
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: epic.number, name: 'consultant:cross-team-in-progress',
-              }).catch(() => {});
+              }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
               await github.rest.issues.addLabels({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: epic.number, labels: ['consultant:cross-team-needed'],
-              }).catch(() => {});
+              }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
             }
             const summary = `Scanned ${epics.length} cross-team-in-progress Epics; expired ${expired.length} claim(s)`;
             console.log(`cross-team-claim-reaper: ${summary}`);
