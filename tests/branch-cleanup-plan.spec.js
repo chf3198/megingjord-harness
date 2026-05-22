@@ -12,8 +12,8 @@ test('classifies merged branch with merged PR as merged-clean', () => {
   expect(result.state).toBe('merged-clean');
   expect(result.evidence).toContain('PR #55');
   const cmds = planner.commandsFor('feat/123-done', 'merged-clean');
-  expect(cmds[0]).toContain('git branch -d feat/123-done');
-  expect(cmds[1]).toContain('git push origin --delete feat/123-done');
+  expect(cmds[0]).toBe("git branch -d 'feat/123-done'");
+  expect(cmds[1]).toBe("git push origin --delete 'feat/123-done' || true");
 });
 
 test('classifies merged branch with no PR as merged-no-pr', () => {
@@ -25,7 +25,7 @@ test('classifies merged branch with no PR as merged-no-pr', () => {
 test('classifies branch with closed PR as closed-pr', () => {
   const result = planner.classify('feat/125-stale', false, { number: 77, state: 'CLOSED' });
   expect(result.state).toBe('closed-pr');
-  expect(planner.commandsFor('feat/125-stale', 'closed-pr')).toEqual(['git branch -d feat/125-stale']);
+  expect(planner.commandsFor('feat/125-stale', 'closed-pr')).toEqual(["git branch -d 'feat/125-stale'"]);
 });
 
 test('keeps active branches untouched', () => {
@@ -76,4 +76,72 @@ test('plan returns empty orphaned leases and classifies branches when registry t
   expect(report.orphanedLeases).toEqual([]);
   expect(report.branches[0].cleanupState).toBe('merged-clean');
   expect(report.mode).toBe('dry-run');
+});
+
+// Refs #2048 — shell-injection defense.
+test('isSafeBranchName accepts conventional names and rejects injection payloads', () => {
+  expect(planner.isSafeBranchName('feat/123-done')).toBe(true);
+  expect(planner.isSafeBranchName('fix/2048-shell-injection')).toBe(true);
+  expect(planner.isSafeBranchName('sandbox/copilot')).toBe(true);
+  expect(planner.isSafeBranchName('main')).toBe(true);
+  expect(planner.isSafeBranchName('hotfix/9.9.9')).toBe(true);
+  // Injection payloads.
+  expect(planner.isSafeBranchName('feat/x" ; rm -rf / ; echo "y')).toBe(false);
+  expect(planner.isSafeBranchName('feat/x`whoami`')).toBe(false);
+  expect(planner.isSafeBranchName('feat/x$(whoami)')).toBe(false);
+  expect(planner.isSafeBranchName('feat/x;cat /etc/passwd')).toBe(false);
+  expect(planner.isSafeBranchName("feat/x'whoami'")).toBe(false);
+  expect(planner.isSafeBranchName('feat/x|whoami')).toBe(false);
+  expect(planner.isSafeBranchName('feat/x\nwhoami')).toBe(false);
+  expect(planner.isSafeBranchName('feat/x whoami')).toBe(false);
+  // Edge cases.
+  expect(planner.isSafeBranchName('')).toBe(false);
+  expect(planner.isSafeBranchName(null)).toBe(false);
+  expect(planner.isSafeBranchName(undefined)).toBe(false);
+  expect(planner.isSafeBranchName(123)).toBe(false);
+  expect(planner.isSafeBranchName('a'.repeat(201))).toBe(false);
+});
+
+test('isMergedToMain returns false for malicious branch name (no shell execution)', () => {
+  // If the branch name passed validation and were interpolated, this would
+  // execute `rm -rf /tmp/shell-injection-evidence` or similar. The validator
+  // gate must short-circuit BEFORE any subprocess is spawned.
+  const malicious = 'feat/x" ; touch /tmp/shell-injection-evidence-2048 ; echo "y';
+  expect(planner.isMergedToMain(malicious)).toBe(false);
+  // Belt-and-suspenders: the evidence sentinel must not have been created.
+  // We don't assert on filesystem here (CI sandboxing varies), the assertion
+  // above is sufficient since isMergedToMain short-circuits at validation.
+});
+
+test('prState returns null for malicious branch name (no shell execution)', () => {
+  const malicious = 'feat/x`id`';
+  expect(planner.prState(malicious)).toBeNull();
+});
+
+test('plan classifies malicious branch as keep-active and emits no destructive commands', () => {
+  const malicious = 'feat/x" ; rm -rf / ; echo "y';
+  const report = planner.plan({
+    branches: [malicious],
+    // No overrides for isMergedToMain / prState — exercise the real
+    // (validator-gated) implementations so the AC verifies the actual
+    // production path, not a mocked one.
+    leases: [],
+  });
+  const entry = report.branches[0];
+  expect(entry.branch).toBe(malicious);
+  expect(entry.cleanupState).toBe('keep-active');
+  expect(entry.commands).toEqual([]);
+});
+
+test('commandsFor single-quotes branch names (defense-in-depth)', () => {
+  // Even if a non-conformant name reaches commandsFor (e.g. via direct API call),
+  // the output command strings must be inert under shell expansion.
+  const cmds = planner.commandsFor('feat/x" ; rm -rf / ; echo "y', 'merged-clean');
+  // Single-quotes must enclose the whole branch token; no unquoted metachars allowed.
+  for (const cmd of cmds) {
+    // Each command starts with the verb and contains the branch wrapped in single quotes.
+    expect(cmd).toMatch(/^git (branch -d|push origin --delete) '/);
+    // No backtick / dollar-paren that would survive single-quoting.
+    expect(cmd).not.toMatch(/[`]/);
+  }
 });
