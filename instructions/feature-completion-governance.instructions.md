@@ -12,7 +12,6 @@ The four baton role transitions advance under explicit, validator-enforced entry
 - **Consultant gate** (Admin → Consultant): triggers when ADMIN_HANDOFF is posted with signing + branch/commit/signer-independence fields; role-label flips `role:admin → role:consultant`; status-label flips `status:testing → status:review`; preconditions enforced by `admin-handoff` + `signer-fidelity` + `merge-evidence-pr-gate` validators plus signer-independence Admin-vs-Collaborator alias-difference check.
 - **Close gate** (Consultant → done): triggers when CONSULTANT_CLOSEOUT carries verdict + rubric + anneal-tickets-filed + mid-flight-flaws blocks; role-label removed; status-label flips `status:review → status:done`; issue closes atomically; preconditions enforced by `consultant-closeout` validator and the merge-recorded admin_ops state.
 
-
 Completion intent semantics are strict:
 - "complete", "finish", or "ship" means terminal workflow delivery in one session when feasible once the active role identifies that intent in task scope.
 - Do not pause after implementation to wait for another user nudge to run Admin or Consultant phases.
