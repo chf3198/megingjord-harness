@@ -65,3 +65,15 @@ test('plan flags merged clean branches and skips active ones', () => {
   expect(merged.cleanupState).toBe('merged-clean');
   expect(active.cleanupState).toBe('keep-active');
 });
+
+test('plan returns empty orphaned leases and classifies branches when registry throws', () => {
+  const report = planner.plan({
+    branches: ['feat/400-merged'],
+    isMergedToMain: () => true,
+    prState: () => ({ number: 401, state: 'MERGED' }),
+    leaseRegistryReader: () => { throw new Error('registry file not found'); },
+  });
+  expect(report.orphanedLeases).toEqual([]);
+  expect(report.branches[0].cleanupState).toBe('merged-clean');
+  expect(report.mode).toBe('dry-run');
+});
