@@ -1,0 +1,33 @@
+# catch-empty golden-file fixture: UNSUPPRESSED forms — lint gate MUST FAIL
+# Used by test-evidence-validator (golden-file strategy) for ticket #2090.
+# BAD-1: bare single-line form (original pattern)
+# BAD-2: named-param form — .catch((e) => {}) bypasses naive grep
+# BAD-3: multiline form — .catch(() => {\n}) bypasses naive grep
+# The scripts/global/catch-empty-lint.sh should flag all three.
+on: [push]
+jobs:
+  bad-single-line:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch(() => {})
+  bad-named-param:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch((e) => {})
+  bad-multiline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({ owner: 'x', repo: 'y', issue_number: 1, name: 'z' })
+              .catch(() => {
+              })

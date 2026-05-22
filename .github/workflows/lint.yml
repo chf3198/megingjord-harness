@@ -72,3 +72,5 @@ jobs:
           reporter: github-pr-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: No unsuppressed empty catch in github-script blocks
+        run: bash scripts/global/catch-empty-lint.sh .github/workflows

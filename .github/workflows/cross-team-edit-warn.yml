@@ -75,5 +75,5 @@ jobs:
             await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: msg });
             await github.rest.issues.addLabels({
               owner, repo, issue_number: issue.number, labels: ['coordinator:cross-team-needs-hand-off']
-            }).catch(() => {});
+            }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
             core.info('issues.labeled sibling-role warn posted');

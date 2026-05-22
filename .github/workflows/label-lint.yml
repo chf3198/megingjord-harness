@@ -82,7 +82,7 @@ jobs:
                 if (isEpic && role === 'role:consultant') continue; // #1828 E2 v2 — transient review role
                 await github.rest.issues.removeLabel({
                   owner, repo, issue_number: issueNum, name: role,
-                }).catch(() => {});
+                }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
               }
             }
 
@@ -97,7 +97,7 @@ jobs:
               const conflict = statusCardinality.resolveTerminalConflict(labels);
               if (conflict.hasConflict) {
                 for (const name of conflict.removeLabels) {
-                  await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name }).catch(() => {});
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNum, name }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
                 }
                 console.log(`#${issueNum}: #1380 auto-stripped stale status labels (${conflict.removeLabels.join(', ')}) → ${conflict.keepLabel}`);
               } else {

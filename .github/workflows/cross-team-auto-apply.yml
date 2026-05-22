@@ -41,4 +41,4 @@ jobs:
                     `Auto-applied label \`${decision.label}\` per #1590. ` +
                     `Receiving teams can claim via the \`cross-team-consult-pickup\` skill ` +
                     `(see \`instructions/cross-team-consultant.instructions.md\`).`,
-            }).catch(() => {});
+            }).catch(() => {}); // catch-empty: best-effort notification; comment failure is non-critical
