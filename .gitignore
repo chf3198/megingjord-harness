@@ -18,8 +18,15 @@ node_modules/
 playwright-report/
 test-results/
 
-# Secrets
+# Secrets (#2107 broadened from `.env` to match the canonical-main-enforcer
+# allowlist + 2026 secrets-management trajectory; per-operator config never
+# committed)
 .env
+.env.local
+.env.*.local
+.env.production
+.envrc
+.npmrc
 
 # Raw sources (large/copyrighted — keep locally, don't push)
 raw/articles/*.pdf

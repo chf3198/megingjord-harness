@@ -35,6 +35,18 @@ applyTo: "**"
 - When tradeoffs occur, explicitly justify why a lower-priority goal overrides a higher one.
 - Keep the justification short and evidence-based in ticket comments, PR body, or closeout notes.
 
+## Canonical-main checkout policy (#2107)
+
+The main checkout (`${HOME}/devenv-ops/`) is canonical-only during sessions. Per Epic #2091 Phase-0 synthesis (`wiki/wisdom/project/research/harness-state-isolation.md` Fix #3):
+
+- **Writes permitted**: ONLY to paths matching `.gitignore` patterns (per-operator config: `.env`, `.env.local`, `.envrc`, `.npmrc`; tooling artifacts: `node_modules`, `dist`, `.cache`, `tmp`, `.dashboard`, `.log4brains`, etc.)
+- **Writes rejected**: tracked files (the codebase); branch switches off `main`; commits; `git stash` on tracked changes; `git worktree add` inside main checkout's working tree
+- **Enforcer**: `hooks/scripts/canonical_main_enforcer.py` invoked by `pretool_guard.py` (rejects deny-decision with redirect-to-worktree message)
+
+**Worktree pattern**: all team work happens in `${HOME}/devenv-ops-<team-or-ticket>/` worktrees. The main checkout is a canonical reference, not a workspace.
+
+**2026 secrets caveat**: industry is migrating secrets out of `.env` toward workload-identity (Bitwarden Secrets Manager, Infisical, Zylos). As Megingjord adopts a secrets manager, the `.gitignore`-allowlist should narrow.
+
 ## Cross-team GitHub tool surface
 
 - Default to the official GitHub MCP server (`github/github-mcp-server`) for
