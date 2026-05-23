@@ -1,10 +1,14 @@
 'use strict';
 const cp = require('child_process');
 
-const raw = cp.execFileSync('gh', ['issue', 'list', '--state', 'open', '--limit', '500', '--json', 'number,title,body,labels'], { encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
+const OPEN_LIMIT = '500';
+const ALL_LIMIT = '1000';
+const MAX_BUFFER_BYTES = 50 * 1024 * 1024;
+
+const raw = cp.execFileSync('gh', ['issue', 'list', '--state', 'open', '--limit', OPEN_LIMIT, '--json', 'number,title,body,labels'], { encoding: 'utf8', maxBuffer: MAX_BUFFER_BYTES });
 const issues = JSON.parse(raw);
 
-const rawAllEpics = cp.execFileSync('gh', ['issue', 'list', '--limit', '1000', '--json', 'number,title,body,labels'], { encoding: 'utf8', maxBuffer: 50 * 1024 * 1024 });
+const rawAllEpics = cp.execFileSync('gh', ['issue', 'list', '--limit', ALL_LIMIT, '--json', 'number,title,body,labels'], { encoding: 'utf8', maxBuffer: MAX_BUFFER_BYTES });
 const allIssues = JSON.parse(rawAllEpics);
 const epicNumbers = new Set(allIssues.filter(i => i.labels.some(l => l.name === 'type:epic')).map(i => i.number));
 

@@ -102,7 +102,7 @@ function writeReport(report) {
 }
 
 /** CLI entry: read catalog, audit, write, set exit code.
- * @param {string[]} argv - process argv slice.
+ * @param {string[]} _argv - process argv slice (unused).
  * @returns {number} exit code (0 ok, 1 violations, 2 degraded parse failure). */
 function main(_argv) {
   let md;
