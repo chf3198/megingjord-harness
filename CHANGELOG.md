@@ -1,6 +1,13 @@
+<!-- markdownlint-disable MD024 MD060 -->
+<!-- MD024 is per-file disabled due to documented siblings_only edge case
+     (markdownlint issue #1591, still open as of 2025-05). Each release section
+     has its own ### Added/### Changed/### Fixed which markdownlint cannot
+     reliably distinguish across H2 parents. Per Phase-0 synthesis (#2121),
+     C2 (#TBD) refits the aggregator to consolidate fragments and will allow
+     re-enabling MD024. -->
 # Changelog
 
-# 1111
+## [1111]
 
 - Added team-scoped wiki append locks for parallel cross-team R&D notes.
 - Added team-append provenance fields: `thread_id` and `append_position`.
@@ -186,7 +193,7 @@ The fleet-via-hamr.js shim from #1149 covers production-inference call sites (`/
 
 - **governance**: PR template (`.github/PULL_REQUEST_TEMPLATE.md`) gains `## Test strategy` section nudging contributors to declare strategy + evidence artifact upfront. Validation checklist gains `test-evidence` gate row. Closes Epic #1211 child #1217.
 
-## #1236 — Extract test_strategy enum to single source of truth
+## [1236] — Extract test_strategy enum to single source of truth
 
 **Type**: refactor
 **Area**: `area:scripts`
@@ -1067,7 +1074,7 @@ Closes #1574. Self-Refine (arXiv 2303.17651) shows refinement gain tapers after 
 ### Self-application
 This very PR is composed by a solo Opus session. Manager → Collaborator → Admin → Consultant baton runs on the same model; `model-diversity:waived` label applied with rationale (Epic #1568 AC-3 / #1572 advisory).
 
-# 1575
+## [1575]
 
 - Added deterministic G1-G9 rubric inventory and scorer CLI.
 - Accepted structured rubric closeouts alongside legacy v1 during transition.
@@ -1200,7 +1207,7 @@ Closes Epic #1612 (self-anneal for Epic #1568 advisory rollout). Composes Epic #
 - Lease created BEFORE editing.
 - harness:self-test 12/12 post-implementation.
 
-## #1615 Fix gov-006 false-positive on issue-only Epic/research closeouts
+## [1615] — Fix gov-006 false-positive on issue-only Epic/research closeouts
 
 `consultant-checks.js` gov-006 (branch-naming check) now skips when the
 target ticket carries `lane:docs-research`, `lane:trivial`, or `type:epic`.
@@ -1210,7 +1217,7 @@ These workflows run from `main` (no implementation branch) so enforcing a
 Helper `isIssueOnlyLane(labels)` added to `consultant-checks-lib.js` and
 covered by five new unit tests.
 
-# 1618
+## [1618]
 
 - Added a provider-neutral cross-team lease registry contract for active
   harness work claims.
@@ -1222,7 +1229,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-# 1619
+## [1619]
 
 - Added a provider-neutral pre-edit conflict gate for cross-team lease claims.
 - Added evidence markers for conflict checks and issue-comment mirroring.
@@ -1232,7 +1239,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-# 1620
+## [1620]
 
 - Added a plan-only worktree cleanup script for safe VS Code clutter control.
 - Added VS Code active-worktree workspace generation from live lease state.
@@ -1242,7 +1249,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-# 1621
+## [1621]
 
 - Added structured cross-team communication artifact templates and validation.
 - Added tests for malformed comments, ticket refs, signatures, and duplicates.
@@ -1253,7 +1260,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-# 1622 Cross-Team Coordination View
+## [1622] — Cross-Team Coordination View
 
 - Added `scripts/global/cross-team-coordination-view.js` for read-only active
   lease, stale lease, conflict, and cleanup-candidate summaries.
@@ -1267,7 +1274,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-# 1623
+## [1623]
 
 - Added a provider-neutral governance instruction with Codex, Copilot, and
   Claude Code adapter sections.
@@ -1821,7 +1828,7 @@ Gemma3:1b: `CONTRACT_SOUND: yes`, `LOOPHOLE: none`. The contract's "single diff 
 - Resolves the conditional dependency on #1721 AC5 (lands option (a) per the conditional wording from the prior remediation).
 - Aligns with `[[feedback-all-baton-artifacts-before-pr]]` (addendum appended).
 
-## #1715 — session-bypass-tracker: Tier-2 anneal on bypass-env threshold
+## [1715] — session-bypass-tracker: Tier-2 anneal on bypass-env threshold
 
 ### Added
 
@@ -2201,7 +2208,7 @@ Codex `PreCompact` feature request `openai/codex#12208` is closed as duplicate o
 
 Closes #1804
 
-## Fixed
+### Fixed
 - Added commit-time branch-ticket parity in the pretool guard so `git commit` on `feat/<N>-...`, `fix/<N>-...`, and `hotfix/<N>-...` must reference `#N` and cannot include mismatched ticket refs.
 - Added hook unit tests covering matching, missing, and mismatched ticket references plus non-ticket branch behavior.
 
@@ -2757,7 +2764,7 @@ Only one fleet family (Alibaba via qwen2.5-coder:32b) currently has a model larg
 - Added explicit `deploy:all` and `sync:all` commands so operators can target
   Claude Code, Copilot, and Codex together without overloading `both`.
 
-## #1919 Codex parity governance gates
+## [1919] — Codex parity governance gates
 
 - Wires Codex `goal_lens.py` into the repo-owned prompt hook source.
 - Maps Codex `PermissionRequest` to the existing pre-tool governance guard.
@@ -2767,7 +2774,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-## #1920 Claude command skill adapters
+## [1920] — Claude command skill adapters
 
 - Adds missing Claude Code command adapters for canonical repo skills.
 - Keeps adapters as thin pointers to `skills/<name>/SKILL.md` to prevent rule forks.
@@ -2777,7 +2784,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-## #1921 Orchestrator parity CI
+## [1921] — Orchestrator parity CI
 
 - Adds a strict orchestrator parity workflow for runtime adapter changes.
 - Documents waiver expectations for justified runtime parity exceptions.
@@ -2787,7 +2794,7 @@ Signed-by: Quill Harper
 Team&Model: codex:gpt-5.4@openai
 Role: collaborator
 
-## Added
+### Added
 
 - `scripts/global/delegation-phrase-lint.js`: governance lint for instruction surfaces — detects prohibited delegation phrases ("you will need to", "please manually", "the user must")
 - `scripts/global/operator-ownership-rules.js`: assertion matrix evaluation for operator-ownership language in canonical governance files
@@ -2903,7 +2910,7 @@ in `~/.megingjord/incidents.jsonl` on 2026-05-19.
 
 - Three-Wiki typology storage-layout stubs: `wiki/code/`, `wiki/work-log/`, `wiki/wisdom/project/`, `wiki/wisdom/global/` directories with README stubs documenting each Wiki's scope and purpose. Updates `wiki/index.md` and `instructions/wiki-knowledge.instructions.md` with the new layout. Legacy paths (`wiki/concepts/`, `wiki/entities/`, `wiki/sources/`, `wiki/syntheses/`, `wiki/skills/`) remain at their current locations; physical migration to `wiki/wisdom/global/` is queued as a follow-on ticket. (#2051)
 
-## Added
+### Added
 - `branch-cleanup-plan.js`: `plan()` now includes `registryError: <message>` in
   its return object when the lease registry is unavailable. Callers can detect
   the degraded state rather than treating `orphanedLeases: []` as an
