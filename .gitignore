@@ -53,5 +53,10 @@ logs/copilot-usage.json
 /tickets/
 .worktrees/
 
+# Build output + operator-local planning area (#2113): never committed.
+# Root-anchored so wiki/work-log/planning/ (#2054, Wiki B) can exist if filed.
+/dist/
+/planning/
+
 # Operator-local spike outputs (Wave 1 #891/#892/#893) — never committed
 tmp/
