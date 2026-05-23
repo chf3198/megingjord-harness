@@ -5,8 +5,7 @@ log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*"; }
 die() { log "ERROR: $*"; exit 1; }
 warn() { log "WARN: $*"; exit 2; }
 
-# #1378: auto-link node_modules so pre-push hooks (prettier/eslint) work in
-# fresh worktrees. Idempotent — skips if already linked.
+# #1378: auto-link node_modules; idempotent.
 bootstrap_node_modules() {
   local worktree_root="$1"
   local main_root resolved
@@ -15,7 +14,6 @@ bootstrap_node_modules() {
     log "node_modules bootstrap: no main checkout node_modules found at $main_root; skipping"
     return 0
   fi
-  # #1540: refuse to chain a broken self-referential symlink at main.
   if [[ -L "$main_root/node_modules" ]]; then
     resolved="$(readlink -f "$main_root/node_modules" 2>/dev/null || echo BROKEN)"
     if [[ "$resolved" == "BROKEN" || "$resolved" == "$main_root/node_modules" ]]; then
@@ -33,6 +31,24 @@ bootstrap_node_modules() {
   fi
   ln -sf "$main_root/node_modules" "$worktree_root/node_modules"
   log "node_modules bootstrap: linked $worktree_root/node_modules → $main_root/node_modules"
+}
+
+# C4 (#2105): set per-worktree core.hooksPath (Fix #2).
+configure_per_worktree_hooks() {
+  local worktree_root="$1"
+  local hooks_path=""
+  if [[ -d "$HOME/.codex/devenv-ops/hooks/scripts" ]]; then
+    hooks_path="$HOME/.codex/devenv-ops/hooks/scripts"
+  elif [[ -d "$HOME/.copilot/hooks/scripts" ]]; then
+    hooks_path="$HOME/.copilot/hooks/scripts"
+  fi
+  if [[ -z "$hooks_path" ]]; then
+    log "per-worktree hooks: no deployed hooks dir found; skipping core.hooksPath"
+    return 0
+  fi
+  git -C "$worktree_root" config extensions.worktreeConfig true 2>/dev/null || true
+  git -C "$worktree_root" config --worktree core.hooksPath "$hooks_path"
+  log "per-worktree hooks: core.hooksPath → $hooks_path"
 }
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
@@ -79,5 +95,6 @@ fi
 
 git switch -c "$task_branch"
 bootstrap_node_modules "$root"
+configure_per_worktree_hooks "$root"
 log "ready on task branch: $task_branch"
 log "next: implement scoped changes and open PR with Refs #<ticket>"
