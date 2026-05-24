@@ -65,6 +65,8 @@ jobs:
         run: npm run governance:reconcile
       - name: Markdown lint
         run: npm run lint:md
+      - name: Changelog fragment validation (#2128)
+        run: node scripts/global/changelog-aggregate.js --validate-only
       - name: Vale prose lint
         uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2
         with:
