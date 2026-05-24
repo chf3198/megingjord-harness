@@ -78,3 +78,37 @@ So you can use either pattern; the gate passes both.
 
 See `.changes/unreleased/` for the most recent in-flight fragments (if any).
 The 7 piloted fragments from Epic #1103 (May 2026) were the precedent.
+
+## Fragment validation gate (#2128 / Epic #2120)
+
+The `lint-required` CI workflow runs `node scripts/global/changelog-aggregate.js --validate-only` on every PR. The validator (`scripts/global/changelog-fragment-validator.js`) enforces Keep-a-Changelog 1.1.0 fragment hierarchy. Two failure modes:
+
+- **T3** — fragment contains `# H1` or `## H2`. Release headers are aggregator-managed; fragments must use H3 categories only.
+- **T4** — fragment top-level heading is not H3, or heading hierarchy skips a level (e.g., H3 → H5).
+
+### Common violations + fixes
+
+| Violation | Bad | Good |
+|---|---|---|
+| H1 in fragment (T3) | `# Big feature\n\n### Added\n- ...` | `### Added\n\n- Big feature: ...` |
+| H2 in fragment (T3) | `## [1.2.3]\n\n### Added\n- ...` | `### Added\n\n- Release-N item ...` |
+| Wrong top-level (T4) | `#### Added\n- ...` | `### Added\n- ...` |
+| Heading skip (T4) | `### Added\n##### sub\n- ...` | `### Added\n#### sub\n- ...` |
+
+### Local pre-PR check
+
+Before pushing a PR that adds a fragment, run:
+
+```bash
+node scripts/global/changelog-aggregate.js --validate-only
+```
+
+Exit 0 = clean. Exit 1 + violation message = fix and re-run.
+
+### Allowed H3 categories (Keep-a-Changelog 1.1.0)
+
+`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
+
+### Why this gate exists
+
+Phase-0 research at `wiki/wisdom/project/research/changelog-aggregator-2120.md` identified that prior aggregator drift (#2090 dbb2ac4 era) introduced 89 cumulative MD024+MD001 baseline-lint errors over multiple releases by accepting unvalidated fragments. C3 closes the loop with fragment-time enforcement — drift cannot accumulate again.
