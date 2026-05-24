@@ -18,6 +18,8 @@ Run `workflow-self-anneal` skill when any of these conditions is true:
 - Ticket/epic local markdown state diverges from observable GitHub issue/PR evidence.
 - Any P0/P1 ticket remains `status:ready` for more than 24h without a blocker note.
 - Governance-gate bypass env var (e.g. `SKIP_CLOSEOUT_PREFLIGHT`, `PUSH_GATES_BYPASS`) used 2+ times in the same session — triggers an immediate Tier-2 anneal that promotes the underlying bug-fix to first-work in the current session. Tracked by `scripts/global/session-bypass-tracker.js`.
+- Tool-block emission (sandbox denial, hook deny, classifier deny) followed by session termination within 1 turn — Tier-2 trigger. The tool-block is redirect guidance, not a terminal state; the right adaptation is documented in operator-local memory `feedback-bash-sleep-block-recovery` (Pattern A; #2116). Surfaced after PR #2113 cycle stalled on `sleep N && cmd` sandbox block.
+- Background-task dispatch (`Bash run_in_background: true`, scheduled wake) followed by user-visible closing text without a follow-up tool call — Tier-2 trigger. Dispatch is a notification subscription, not a turn-end signal; 8 unnecessary stops in a single 2026-05-24 session followed this exact anti-pattern. See operator-local memory `feedback-bash-sleep-block-recovery` Pattern B (#2116).
 
 Ready-stall blocker note required fields: `BLOCKER_NOTE`, `owner`, `unblock_condition`, `eta_or_review_time`.
 
