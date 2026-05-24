@@ -29,9 +29,23 @@ function localBranches() {
     .filter(b => b && b !== 'main');
 }
 
-function isMergedToMain(branch) {
+// Default-branch resolution fallback chain (Refs #2049):
+// 1. overrides.env.DEFAULT_BRANCH (test injection) or process.env.DEFAULT_BRANCH (live)
+// 2. git symbolic-ref refs/remotes/origin/HEAD --short  (auto-detection)
+// 3. 'origin/main'  (hardcoded last-resort fallback)
+function resolveDefaultBranch(overrides = {}) {
+  const env = overrides.env !== undefined ? overrides.env : process.env;
+  if (env.DEFAULT_BRANCH) return `origin/${env.DEFAULT_BRANCH}`;
+  const shFn = overrides.sh !== undefined ? overrides.sh : sh;
+  const detected = shFn('git symbolic-ref refs/remotes/origin/HEAD --short');
+  if (detected) return detected;
+  return 'origin/main';
+}
+
+function isMergedToMain(branch, overrides = {}) {
   if (!isSafeBranchName(branch)) return false;
-  const res = spawnSync('git', ['merge-base', '--is-ancestor', `refs/heads/${branch}`, 'origin/main'],
+  const defaultBranch = overrides.defaultBranch || resolveDefaultBranch(overrides);
+  const res = spawnSync('git', ['merge-base', '--is-ancestor', `refs/heads/${branch}`, defaultBranch],
     { stdio: ['pipe', 'pipe', 'pipe'] });
   return res.status === 0;
 }
@@ -121,4 +135,4 @@ function run(argv = process.argv.slice(2)) {
 }
 
 if (require.main === module) run();
-module.exports = { classify, commandsFor, plan, isSafeBranchName, isMergedToMain, prState };
+module.exports = { classify, commandsFor, plan, isSafeBranchName, isMergedToMain, prState, resolveDefaultBranch };
