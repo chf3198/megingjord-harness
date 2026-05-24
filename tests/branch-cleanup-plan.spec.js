@@ -156,3 +156,34 @@ test('commandsFor single-quotes branch names (defense-in-depth)', () => {
     expect(cmd).not.toMatch(/[`]/);
   }
 });
+
+// Refs #2049 — configurable default branch
+
+test('resolveDefaultBranch returns env-var override as origin/<name> (AC1)', () => {
+  const result = planner.resolveDefaultBranch({ env: { DEFAULT_BRANCH: 'trunk' } });
+  expect(result).toBe('origin/trunk');
+});
+
+test('resolveDefaultBranch uses symbolic-ref when env is absent (AC2)', () => {
+  const result = planner.resolveDefaultBranch({ env: {}, sh: () => 'origin/master' });
+  expect(result).toBe('origin/master');
+});
+
+test('resolveDefaultBranch falls back to origin/main when symbolic-ref is empty (AC2)', () => {
+  const result = planner.resolveDefaultBranch({ env: {}, sh: () => '' });
+  expect(result).toBe('origin/main');
+});
+
+test('plan(overrides) isMergedToMain injection allows non-main default branch (AC4)', () => {
+  // Confirm the plan() override mechanism works for operators on trunk/master repos.
+  const report = planner.plan({
+    branches: ['feat/600-trunk-merged'],
+    isMergedToMain: (b, opts) => {
+      const ref = (opts && opts.defaultBranch) || 'origin/trunk';
+      return b === 'feat/600-trunk-merged' && ref === 'origin/trunk';
+    },
+    prState: () => null,
+    leases: [],
+  });
+  expect(report.branches[0].cleanupState).toBe('merged-no-pr');
+});
