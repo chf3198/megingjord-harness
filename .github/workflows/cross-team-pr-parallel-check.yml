@@ -67,7 +67,7 @@ jobs:
                   if (hasCoord) {
                     await github.rest.issues.removeLabel({
                       owner, repo, issue_number: Number(ref), name: 'coordinator:cross-team-needs-hand-off'
-                    }).catch(() => {});
+                    }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
                     core.info(`#${ref}: stripped stale coordinator label (no parallel PR detected) (#1830)`);
                   }
                 } catch (e) { core.info(`#${ref}: skip coordinator-strip check: ${e.message}`); }
