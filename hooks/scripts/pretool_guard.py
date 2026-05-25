@@ -18,6 +18,24 @@ RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
 RE_BRANCH_SWITCH = re.compile(r"git\s+(?:switch|checkout)\s+(?!-[bcCq])([^\s-]\S*)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
+IT_OPS_MARKERS_RE = re.compile(r"\[it-ops\]|chore\(it-ops\)\s*:", re.IGNORECASE)
+
+def detect_it_ops_bypass(joined: str, env: dict | None = None) -> tuple[bool, str | None]:
+    """#2142: IT-ops commit-gate bypass detector.
+
+    Returns (True, marker) if any of the documented markers matches:
+    - env var MEGINGJORD_IT_OPS=1
+    - commit message contains [it-ops] literal
+    - commit message uses chore(it-ops): Conventional-Commits type prefix
+    Returns (False, None) otherwise.
+    """
+    import os
+    env = env if env is not None else os.environ
+    if env.get("MEGINGJORD_IT_OPS") == "1":
+        return True, "env:MEGINGJORD_IT_OPS=1"
+    if IT_OPS_MARKERS_RE.search(joined):
+        return True, "commit-subject-marker"
+    return False, None
 
 def current_branch(cwd: str) -> str | None:
     try:
@@ -47,9 +65,12 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
     if any(marker in joined for marker in runtime_hook_paths()):
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening.")
-    if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
-        return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
     if RE_GIT_COMMIT.search(joined):
+        bypass, marker = detect_it_ops_bypass(joined)
+        if bypass:
+            return emit("allow", f"IT-ops commit bypass (#2142): {marker}")
+        if not RE_ISSUE_REF.search(joined):
+            return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
         branch = current_branch(cwd)
         match = RE_BRANCH_TICKET.match(branch or "")
         if match:
