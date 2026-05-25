@@ -50,8 +50,26 @@ function detectViolations(tickets) {
     if (isEpic && status === 'status:backlog' && !labels.includes('role:manager')) {
       violations.push({ ticket: ticket.number, rule: 'Rule E2', detail: 'Epic backlog missing role:manager' });
     }
+    detectTitleBodyDrift(ticket, violations);
   }
   return violations;
+}
+
+// Three governance-audit checks for title-case and body-structure drift.
+function detectTitleBodyDrift(ticket, violations) {
+  if (ticket.title && /^[a-z]/.test(ticket.title)) {
+    violations.push({ ticket: ticket.number, rule: 'title-case',
+      detail: `title starts with lowercase: "${ticket.title.slice(0, 60)}"` });
+  }
+  if (ticket.title && /^[a-z]+(\([^)]+\))?:\s/.test(ticket.title)) {
+    violations.push({ ticket: ticket.number, rule: 'title-conventional-prefix',
+      detail: `commit-style prefix in issue title: "${ticket.title.slice(0, 60)}"` });
+  }
+  const body = ticket.body || '';
+  if (body.length > 0 && !/^##\s+(Summary|Problem|Goal|Why|Acceptance Criteria)/im.test(body)) {
+    violations.push({ ticket: ticket.number, rule: 'body-structure',
+      detail: 'body missing structured section (Summary/Problem/Goal/Why/Acceptance Criteria)' });
+  }
 }
 
 function computeGoalHealth(violationCount) {
