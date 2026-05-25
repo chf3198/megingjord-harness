@@ -78,7 +78,9 @@ def evaluate_path(path: str, repo_root: str) -> tuple[bool, str]:
       allowed=False → path is tracked OR not ignored; write is rejected.
                       Reason explains and recommends worktree redirection.
 
-    Edge cases handled: empty path → reject; path outside repo → reject;
+    Edge cases handled: empty path → reject; absolute path outside repo →
+    allow (operator-local, other worktrees, /tmp — not canonical-main concerns);
+    relative path escaping repo via `..` → reject (path-traversal guard);
     symlinks resolved by git ls-files / check-ignore semantics.
     """
     if not path:
@@ -96,7 +98,14 @@ def evaluate_path(path: str, repo_root: str) -> tuple[bool, str]:
         repo_norm = Path(os.path.normpath(str(Path(repo_root).absolute())))
         normalized.relative_to(repo_norm)
     except ValueError:
-        return False, f"path outside repo: {path}"
+        # Path is outside the canonical main-checkout repo root.
+        # If the original path was absolute, it is an out-of-scope location
+        # (operator-local memory, another worktree, /tmp, etc.) and is allowed.
+        # If the original path was relative but escaped via `..`, treat it as a
+        # path-traversal attempt and deny it.
+        if Path(path).is_absolute():
+            return True, "allowed: path outside main-checkout repo"
+        return False, f"path-traversal rejected: relative path escapes repo root: {path}"
     rel = str(normalized.relative_to(repo_norm))
     if is_tracked(rel, repo_root):
         return False, (

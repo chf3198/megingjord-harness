@@ -93,3 +93,23 @@ test('evaluate_path REJECTS empty path', () => {
   const out = callEnforcer('evaluate_path', '', REPO_ROOT);
   expect(out).toMatch(/False/);
 });
+
+test('evaluate_path ALLOWS operator-local memory path outside repo', () => {
+  const memPath = path.join(os.homedir(), '.claude', 'projects', 'abc123', 'memories', 'test.md');
+  const out = callEnforcer('evaluate_path', memPath, REPO_ROOT);
+  expect(out).toMatch(/True/);
+  expect(out).toMatch(/outside main-checkout repo/);
+});
+
+test('evaluate_path ALLOWS other-worktree path (devenv-ops-2116)', () => {
+  const worktreePath = path.join(os.homedir(), 'devenv-ops-2116', 'hooks', 'scripts', 'test.py');
+  const out = callEnforcer('evaluate_path', worktreePath, REPO_ROOT);
+  expect(out).toMatch(/True/);
+  expect(out).toMatch(/outside main-checkout repo/);
+});
+
+test('evaluate_path ALLOWS system tmp path', () => {
+  const out = callEnforcer('evaluate_path', '/tmp/test-artifact-2132.json', REPO_ROOT);
+  expect(out).toMatch(/True/);
+  expect(out).toMatch(/outside main-checkout repo/);
+});
