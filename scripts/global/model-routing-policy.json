@@ -8,51 +8,114 @@
     "premium": 0.7
   },
   "taskClasses": {
-    "routine": ["search", "grep", "read", "docs", "simple", "list", "find"],
-    "coding": ["implement", "refactor", "tests", "integration", "generate", "config"],
-    "architecture": ["architecture", "design", "risk", "security", "concurrency", "multi-file"]
+    "routine": [
+      "search",
+      "grep",
+      "read",
+      "docs",
+      "simple",
+      "list",
+      "find"
+    ],
+    "coding": [
+      "implement",
+      "refactor",
+      "tests",
+      "integration",
+      "generate",
+      "config"
+    ],
+    "architecture": [
+      "architecture",
+      "design",
+      "risk",
+      "security",
+      "concurrency",
+      "multi-file"
+    ]
   },
   "escalationRules": {
-    "premiumOn": ["failed", "stuck", "unclear", "cross-system", "trade-off"],
-    "fleetOn": ["medium", "repeated", "workflow", "generate", "coverage"]
+    "premiumOn": [
+      "failed",
+      "stuck",
+      "unclear",
+      "cross-system",
+      "trade-off"
+    ],
+    "fleetOn": [
+      "medium",
+      "repeated",
+      "workflow",
+      "generate",
+      "coverage",
+      "critique",
+      "review",
+      "consultant",
+      "closeout"
+    ]
   },
   "models": {
-    "free":    { "id": "free-auto",             "mult": 0,    "costPer1kTokens": 0 },
-    "fleet":   { "id": "fleet-coding-local",    "mult": 0,    "costPer1kTokens": 0,      "endpoint": "ollama" },
-    "haiku":   { "id": "balanced-cloud",        "mult": 0.08, "costPer1kTokens": 0.00088 },
-    "premium": { "id": "frontier-reasoning",    "mult": 1,    "costPer1kTokens": 0.009   },
-    "fallback":{ "id": "balanced-cloud",        "mult": 0.08, "costPer1kTokens": 0.00088 }
+    "free": {
+      "id": "free-auto",
+      "mult": 0,
+      "costPer1kTokens": 0
+    },
+    "fleet": {
+      "id": "fleet-coding-local",
+      "mult": 0,
+      "costPer1kTokens": 0,
+      "endpoint": "ollama"
+    },
+    "haiku": {
+      "id": "balanced-cloud",
+      "mult": 0.08,
+      "costPer1kTokens": 0.00088
+    },
+    "premium": {
+      "id": "frontier-reasoning",
+      "mult": 1,
+      "costPer1kTokens": 0.009
+    },
+    "fallback": {
+      "id": "balanced-cloud",
+      "mult": 0.08,
+      "costPer1kTokens": 0.00088
+    }
   },
   "capability_matrix": {
     "_doc": "Per-dimension tier thresholds. Manager uses this for ticket assignment.",
     "reasoning_depth": {
-      "fleet":   "single-hop lookup, extraction, slot-filling",
-      "haiku":   "2-3 step reasoning, structured output with schema",
+      "fleet": "single-hop lookup, extraction, slot-filling",
+      "haiku": "2-3 step reasoning, structured output with schema",
       "premium": "multi-hop chain-of-thought, planning, proof"
     },
     "code_complexity": {
-      "fleet":   "autocomplete, boilerplate, single-function (<30 lines), config gen",
-      "haiku":   "single-file refactor, test generation, bug fix with clear root cause",
+      "fleet": "autocomplete, boilerplate, single-function (<30 lines), config gen",
+      "haiku": "single-file refactor, test generation, bug fix with clear root cause",
       "premium": "multi-file refactor, cross-module debugging, architecture design"
     },
     "context_length": {
-      "fleet":   "<8K tokens (7B model effective window)",
-      "haiku":   "8K-32K tokens",
+      "fleet": "<8K tokens (7B model effective window)",
+      "haiku": "8K-32K tokens",
       "premium": ">32K tokens or coherence across large context required"
     },
     "tool_call_chain": {
-      "fleet":   "1-2 tool calls, well-specified inputs, structured outputs",
-      "haiku":   "3-4 tool calls with retry, moderate output variance",
+      "fleet": "1-2 tool calls, well-specified inputs, structured outputs",
+      "haiku": "3-4 tool calls with retry, moderate output variance",
       "premium": "5+ tool calls, long-horizon agent plan, error amplification risk"
     },
     "ambiguity_level": {
-      "fleet":   "well-specified with clear output schema, in-distribution task",
-      "haiku":   "multi-constraint with some ambiguity, defined acceptance criteria",
+      "fleet": "well-specified with clear output schema, in-distribution task",
+      "haiku": "multi-constraint with some ambiguity, defined acceptance criteria",
       "premium": "underspecified, competing constraints, OOD novel task"
     },
     "escalation_direct_to_premium": [
-      "security review", "vulnerability audit", "architecture design",
-      "incident response", "cross-system trade-off", "concurrency analysis"
+      "security review",
+      "vulnerability audit",
+      "architecture design",
+      "incident response",
+      "cross-system trade-off",
+      "concurrency analysis"
     ]
   },
   "fleetTargets": {
@@ -69,22 +132,38 @@
       "inferenceClass": "coding",
       "warmTokPerSec": 7.3,
       "gpu": false,
-      "note": "Set OLLAMA_KEEP_ALIVE=24h on this host — see research/ollama-keepalive-runbook.md"
+      "note": "Set OLLAMA_KEEP_ALIVE=24h on this host \u2014 see research/ollama-keepalive-runbook.md"
+    },
+    "reasoning": {
+      "deviceId": "36gbwinresource",
+      "ollamaUrl": "http://100.91.113.16:11434",
+      "model": "qwen3:32b",
+      "inferenceClass": "reasoning",
+      "warmTokPerSec": 5,
+      "gpu": "partial",
+      "note": "CPU-offloaded 32B reasoning; mutually exclusive with qwen2.5-coder:32b. Use for Consultant critique and architecture review. G3>G7: zero cost accepted over throughput."
     }
   },
   "cascade": {
     "enabled": true,
-    "tiers": ["fleet", "haiku", "premium"],
+    "tiers": [
+      "fleet",
+      "haiku",
+      "premium"
+    ],
     "qualityThresholds": {
       "minResponseLength": 30,
       "structuralValidation": true,
-      "confidenceLevels": { "high": "return", "low": "escalate_to_haiku" }
+      "confidenceLevels": {
+        "high": "return",
+        "low": "escalate_to_haiku"
+      }
     }
   },
   "judge": {
-    "_doc": "Layer 2 judge gate enabled: GPU-backed fleet node is available (36gbwinresource).",
+    "_doc": "Layer 2 judge gate: qwen3:32b on 36gbwinresource. Provides reasoning-quality evaluation for fleet responses.",
     "enabled": true,
-    "model": "phi3:mini",
+    "model": "qwen3:32b",
     "threshold": 0.7,
     "fallback_on_error": true,
     "requires_gpu": true
@@ -93,7 +172,7 @@
     "enabled": true,
     "windowDays": 7,
     "minSuccessRate": 0.75,
-    "maxPremiumShare": 0.20,
+    "maxPremiumShare": 0.2,
     "forceLane": "fleet"
   },
   "premiumBudget": {
