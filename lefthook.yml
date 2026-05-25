@@ -25,7 +25,11 @@ pre-push:
       run: node scripts/global/megalint/index.js
     closeout-preflight:
       run: node scripts/global/closeout-preflight.js
-    test-evidence-diff:
-      run: node scripts/global/test-evidence-validator.js --diff-only || true
+    # #1613: removed `test-evidence-diff` step. The validator at
+    # scripts/global/test-evidence-validator.js requires server-state inputs
+    # (PR body labels, PR comments, PR file list) that aren't available
+    # pre-push. The prior command called a non-existent --diff-only flag,
+    # silently failed, and was suppressed by `|| true`. The gate runs
+    # server-side via .github/workflows/test-evidence.yml on PR.
     git-freshness:
       run: node scripts/global/git-freshness-check.js || true

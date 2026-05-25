@@ -22,7 +22,17 @@ This reduces avoidable CI reruns by failing fast before push.
 - `npm run lint:sh` (advisory while legacy baseline warnings are being burned down)
 - `node scripts/global/megalint/index.js`
 - `node scripts/global/closeout-preflight.js`
-- `node scripts/global/test-evidence-validator.js --diff-only` (advisory in local pre-push)
+
+### Server-state-only gates (not available pre-push)
+
+Some validators inherently require server-state inputs (PR body labels, PR comments, PR file list) that aren't available pre-push without a round-trip to GitHub. These are documented here for clarity but do NOT run as local pre-push hooks:
+
+- **test-evidence** (`scripts/global/test-evidence-validator.js`) — needs `test_strategy` declared in MANAGER_HANDOFF + per-strategy evidence (spec files in PR diff, evidence comments in trail). Runs server-side via `.github/workflows/test-evidence.yml` on PR open/sync. Prior `--diff-only` invocation was removed (#1613) — the flag was never implemented; the call silently failed under `|| true`.
+
+The local pre-push gate distinction:
+- **Blocking gates**: branch-name regex, lint-js, lint-md, lint-readability, megalint, closeout-preflight — these BLOCK push on failure.
+- **Advisory gates**: lint-py, lint-sh — these run but suppress failures (`|| true`) while baseline warnings are being burned down.
+- **Server-state-only gates**: test-evidence — these CANNOT run locally; documented for operator awareness but not invoked by lefthook.
 
 ## Manual run
 
