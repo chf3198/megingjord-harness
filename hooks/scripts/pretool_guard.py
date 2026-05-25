@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse hook: pre-tool guards and admin sequencing gates."""
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
 from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path: sys.path.insert(0, str(SCRIPT_DIR))
@@ -14,6 +14,7 @@ from live_checks import ci_all_pass, linked_issue_has_collab_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
+RE_IT_OPS_MARKERS = re.compile(r"\[it-ops\]|\bchore\(it-ops\)\s*:", re.IGNORECASE)
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
 RE_BRANCH_SWITCH = re.compile(r"git\s+(?:switch|checkout)\s+(?!-[bcCq])([^\s-]\S*)")
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
@@ -34,6 +35,17 @@ def emit(decision: str, reason: str, extra: str | None = None) -> int:
     print(json.dumps({"hookSpecificOutput": hook}))
     return 0
 
+
+
+def detect_it_ops_bypass(joined: str, env: dict[str, str] | None = None) -> tuple[bool, str | None]:
+    environment = env if env is not None else os.environ
+    if environment.get("MEGINGJORD_IT_OPS") == "1":
+        return True, "MEGINGJORD_IT_OPS=1"
+    marker = RE_IT_OPS_MARKERS.search(joined)
+    if marker:
+        return True, marker.group(0)
+    return False, None
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
@@ -47,6 +59,10 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
     if any(marker in joined for marker in runtime_hook_paths()):
         return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening.")
+    if RE_GIT_COMMIT.search(joined):
+        bypass, marker = detect_it_ops_bypass(joined)
+        if bypass:
+            return emit("allow", f"IT-ops commit bypass (#2142): {marker}")
     if RE_GIT_COMMIT.search(joined) and not RE_ISSUE_REF.search(joined):
         return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
     if RE_GIT_COMMIT.search(joined):
