@@ -8,7 +8,7 @@ applyTo: "**"
 ## Ticket-first governance
 
 - No code or config work without a linked GitHub issue (ticket-first gate).
-- Every commit message must reference `#N` (issue number).
+- Every commit message must reference `#N` (issue number). **IT-ops bypass (#2142)**: maintenance commits that touch tracked files but don't warrant Agile baton workflow (model pulls, fleet config updates, local-only environment changes) may set env var `MEGINGJORD_IT_OPS=1`, include literal `[it-ops]` in the commit subject, OR use `chore(it-ops):` Conventional-Commits prefix. The bypass emits an `allow` advisory naming the matched marker (not silent).
 - Branch naming: `<type>/<issue#>-<slug>` (e.g., `feat/62-multi-ticket-baton`).
 - Research tickets skip branching; findings posted as ticket comments.
 - Pull latest `main` into feature branch before creating PR.
