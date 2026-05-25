@@ -50,6 +50,22 @@ function detectViolations(tickets) {
     if (isEpic && status === 'status:backlog' && !labels.includes('role:manager')) {
       violations.push({ ticket: ticket.number, rule: 'Rule E2', detail: 'Epic backlog missing role:manager' });
     }
+    // #1438 AC1: title-case (issues must be imperative sentences per github-governance.instructions.md)
+    if (ticket.title && /^[a-z]/.test(ticket.title)) {
+      violations.push({ ticket: ticket.number, rule: 'title-case',
+        detail: `title starts with lowercase: "${ticket.title.slice(0, 60)}"` });
+    }
+    // #1438 AC2: title-conventional-commits prefix forbidden on issues (commit/PR-only style)
+    if (ticket.title && /^[a-z]+(\([^)]+\))?:\s/.test(ticket.title)) {
+      violations.push({ ticket: ticket.number, rule: 'title-conventional-prefix',
+        detail: `commit-style prefix in issue title: "${ticket.title.slice(0, 60)}"` });
+    }
+    // #1438 AC3: body-structure missing — at least one canonical section heading required
+    const body = ticket.body || '';
+    if (body.length > 0 && !/^##\s+(Summary|Problem|Goal|Why|Acceptance Criteria)/im.test(body)) {
+      violations.push({ ticket: ticket.number, rule: 'body-structure',
+        detail: 'body missing structured section (Summary/Problem/Goal/Why/Acceptance Criteria)' });
+    }
   }
   return violations;
 }
