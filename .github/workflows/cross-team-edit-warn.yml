@@ -64,7 +64,17 @@ jobs:
             const conflicts = siblings.filter(s =>
               s.number !== issue.number && (s.labels || []).some(l => l.name === role) && teamOf(s) !== thisTeam
             );
-            if (!conflicts.length) return core.info('no sibling role conflicts');
+            if (!conflicts.length) {
+              // #1830 auto-strip: if coordinator label is present but no active conflict, remove it.
+              const labelNames = (issue.labels || []).map(l => l.name || l);
+              if (labelNames.includes('coordinator:cross-team-needs-hand-off')) {
+                await github.rest.issues.removeLabel({
+                  owner, repo, issue_number: issue.number, name: 'coordinator:cross-team-needs-hand-off'
+                }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
+                core.info(`#${issue.number}: stripped stale coordinator label (sibling-role conflict resolved) (#1830)`);
+              }
+              return core.info('no sibling role conflicts');
+            }
             const marker = '<!-- cross-team-role-sibling-warn -->';
             const existing = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issue.number, per_page: 100

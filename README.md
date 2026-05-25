@@ -147,6 +147,7 @@ npm run deploy:both:apply
 | `governance:audit` | `node scripts/global/governance-audit.js` |
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
+| `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
 | `governance:delegation-lint` | `node scripts/global/delegation-phrase-lint.js` |
