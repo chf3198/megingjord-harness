@@ -1,5 +1,5 @@
 
-const { acquire } = require('/home/curtisfranks/devenv-ops/scripts/global/worktree-active-session-lock.js');
+const { acquire } = require('/home/curtisfranks/devenv-ops-1890/scripts/global/worktree-active-session-lock.js');
 const [,, rootDir, team, ticket] = process.argv;
 const r = acquire(rootDir, team, Number(ticket));
 process.send && process.send(r);

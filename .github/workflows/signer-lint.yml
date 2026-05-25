@@ -7,6 +7,8 @@ name: Signer Lint
 on:
   issues:
     types: [opened, edited, reopened]
+  issue_comment:
+    types: [created, edited]
 
 permissions:
   issues: write
@@ -30,11 +32,19 @@ jobs:
               owner, repo, issue_number: issueNum,
             })).data;
 
-            const result = validate({ body: issue.body || '' });
-
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner, repo, issue_number: issueNum, per_page: 100,
             });
+            // #1890: validate issue body AND every comment with a Signed-by field
+            const bodyResult = validate({ body: issue.body || '' });
+            const allViolations = bodyResult.ok ? [] : bodyResult.violations.map(v => ({ ...v, source: 'issue-body' }));
+            for (const cm of comments) {
+              if (!cm.body || !cm.body.includes('Signed-by')) continue;
+              if (cm.body.includes(marker)) continue; // skip our own marker comments
+              const cr = validate({ body: cm.body });
+              if (!cr.ok) for (const v of cr.violations) allViolations.push({ ...v, source: `comment-${cm.id}`, url: cm.html_url });
+            }
+            const result = { ok: allViolations.length === 0, violations: allViolations };
             const lintComment = comments.find(c => (c.body || '').includes(marker));
 
             if (result.ok) {
@@ -55,11 +65,11 @@ jobs:
               'artifacts must use a derived worker alias per `instructions/team-model-signing.instructions.md`.',
               '',
               '**Violations**:', '',
-              result.violations.map(v => `- \`${v.rule}\` — ${v.detail}`).join('\n'),
+              result.violations.map(v => v.source ? `- \`${v.rule}\` [${v.source}](${v.url || '#'}) — ${v.detail}` : `- \`${v.rule}\` — ${v.detail}`).join('\n'),
               '',
               '**Suggested fix**: replace `Signed-by: Curtis Franks` with the appropriate',
               'worker alias from `inventory/team-model-signatures.json` (e.g., `Nova Mason` for',
-              'Copilot Manager, `Cole Mason` for Claude Code Manager).',
+              'Copilot Manager, `Orla Mason` for Claude Code Manager).',
               '',
               '_Posted by signer-lint workflow (advisory — promotes to required after 2-week soak)._',
             ].join('\n');
