@@ -55,7 +55,25 @@ jobs:
                 }
               }
             }
-            if (!parallel.length) return core.info('no parallel PRs detected — OK');
+            if (!parallel.length) {
+              // #1830 auto-strip: if any referenced issue carries the coordinator label but no
+              // parallel PR was detected, remove the label (the prior parallel PR was likely merged/closed).
+              for (const ref of refs) {
+                try {
+                  const issueData = (await github.rest.issues.get({
+                    owner, repo, issue_number: Number(ref)
+                  })).data;
+                  const hasCoord = (issueData.labels || []).some(l => (l.name || l) === 'coordinator:cross-team-needs-hand-off');
+                  if (hasCoord) {
+                    await github.rest.issues.removeLabel({
+                      owner, repo, issue_number: Number(ref), name: 'coordinator:cross-team-needs-hand-off'
+                    }).catch(() => {});
+                    core.info(`#${ref}: stripped stale coordinator label (no parallel PR detected) (#1830)`);
+                  }
+                } catch (e) { core.info(`#${ref}: skip coordinator-strip check: ${e.message}`); }
+              }
+              return core.info('no parallel PRs detected — OK');
+            }
             core.warning(`parallel PRs detected: ${JSON.stringify(parallel)}`);
             const marker = '<!-- cross-team-pr-parallel-check -->';
             const existing = await github.paginate(github.rest.issues.listComments, {
