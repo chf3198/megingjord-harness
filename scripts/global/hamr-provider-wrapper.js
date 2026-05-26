@@ -57,7 +57,7 @@ function emitStatSafe(provider, payload, opts = {}) {
 }
 
 /** Wrap any provider call with HAMR cost levers + observability.
- * @param {string} provider - 'anthropic'|'openai'|'gemini'|'groq'|'cerebras'|'openrouter'.
+ * @param {string} provider - 'anthropic'|'openai'|'gemini'|'groq'|'cerebras'|'openrouter'|'ollama'.
  * @param {Function} callFn - async fn that performs the provider call; receives `{headers, bodyExtras}`.
  * @param {object} [opts] - { tier, previousProvider, ttlSeconds, cacheKey, request }.
  * @returns {Promise<{ok: boolean, value?: object, sticky?: object, spillover?: object, error?: string}>} Wrapped result.
@@ -70,7 +70,11 @@ async function wrapProviderCall(provider, callFn, opts = {}) {
   const sticky = (opts.tier && opts.tier !== 'diagnostic')
     ? pickStickyProvider(opts.tier, { previousProvider: opts.previousProvider })
     : null;
-  const effectiveProvider = sticky?.provider || provider;
+  // Refs #2178 — fleet-local + ollama-explicit must pin to caller-supplied provider so
+  // cost-stats records the actual call target (not a sticky-mis-pick paid provider).
+  const effectiveProvider = (opts.tier === 'fleet-local' || provider === 'ollama')
+    ? provider
+    : (sticky?.provider || provider);
   const hints = cacheHeaders(effectiveProvider, opts);
   let response;
   try { response = await callFn(hints); }
