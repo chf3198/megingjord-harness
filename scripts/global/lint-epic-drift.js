@@ -17,6 +17,14 @@ function gh(args) {
   return cp.execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }).trim();
 }
 
+function childProgressComplete(child, comments) {  // EPIC_CLOSEOUT-aware
+  const ref = `#${child.number}`;
+  return comments.some(c =>
+    (c.includes('## Epic Progress Update') && c.includes(ref)) ||
+    (c.includes('## CONSULTANT_CLOSEOUT') && c.includes(ref)) ||
+    (c.includes('## CONSULTANT_EPIC_CLOSEOUT') && c.includes(ref)));
+}
+
 function lintEpicDrift(owner, repo) {
   const payload = JSON.parse(gh(['api', 'graphql', '-f', `query=${QUERY}`, '-F', `owner=${owner}`, '-F', `repo=${repo}`]));
   const epics = payload?.data?.repository?.issues?.nodes || [];
@@ -41,9 +49,7 @@ function lintEpicDrift(owner, repo) {
 
     for (const child of children) {
       if (child.state === 'CLOSED') {
-        const cited = comments.some(c => c.includes(`## Epic Progress Update`) && c.includes(`#${child.number}`));
-        const inCloseout = comments.some(c => c.includes(`## CONSULTANT_CLOSEOUT`) && c.includes(`#${child.number}`));
-        if (!cited && !inCloseout) {
+        if (!childProgressComplete(child, comments)) {
           findings.push({
             epic: epic.number,
             class: 'C',
@@ -83,16 +89,9 @@ if (require.main === module) {
     const raw = gh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner']);
     const [owner, repo] = raw.split('/');
     const findings = lintEpicDrift(owner, repo);
-    if (findings.length) {
-      console.error('❌ Ticket Governance Drift Detected:');
-      findings.forEach(f => console.error(`- [Class ${f.class}] ${f.message}`));
-      process.exit(1);
-    }
+    if (findings.length) { console.error('❌ Ticket Governance Drift Detected:'); findings.forEach(f => console.error(`- [Class ${f.class}] ${f.message}`)); process.exit(1); }
     console.log('✅ Ticket Governance Drift: PASS');
-  } catch (err) {
-    console.error('Error running drift lint:', err.message);
-    process.exit(1);
-  }
+  } catch (err) { console.error('Error:', err.message); process.exit(1); }
 }
 
-module.exports = { lintEpicDrift, QUERY };
+module.exports = { lintEpicDrift, QUERY, childProgressComplete };
