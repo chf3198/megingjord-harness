@@ -63,3 +63,12 @@ test('matrix entries all have required + suggested arrays', () => {
     assert.ok(Array.isArray(matrix[area].suggested), `${area} missing suggested[]`);
   }
 });
+
+test('golden-file: parses tests/fixtures/doc-coverage/sample-matrix.yml to expected output', () => {
+  const fixturePath = path.join(__dirname, 'fixtures', 'doc-coverage', 'sample-matrix.yml');
+  const expectedPath = path.join(__dirname, 'fixtures', 'doc-coverage', 'expected-parse.json');
+  const text = fs.readFileSync(fixturePath, 'utf8');
+  const expected = JSON.parse(fs.readFileSync(expectedPath, 'utf8'));
+  const parsed = parseYamlSurfaces(text);
+  assert.deepEqual(parsed, expected);
+});
