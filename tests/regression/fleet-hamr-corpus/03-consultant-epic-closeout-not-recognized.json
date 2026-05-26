@@ -1,0 +1,15 @@
+{
+  "id": "consultant-epic-closeout-not-recognized",
+  "source": "#1993 fix in lint-epic-drift.js",
+  "description": "lintEpicDrift childProgressComplete predicate MUST recognize Epic-level ## CONSULTANT_EPIC_CLOSEOUT artifact (per epic-governance.instructions.md Epic Progress Comment Protocol), not only per-child ## CONSULTANT_CLOSEOUT.",
+  "assertion": {
+    "type": "module-export-and-predicate",
+    "module": "scripts/global/lint-epic-drift.js",
+    "exports": ["childProgressComplete"],
+    "predicate_check": {
+      "input_comments": ["## CONSULTANT_EPIC_CLOSEOUT enumerating #2174 #2175"],
+      "input_child": { "number": 2174 },
+      "expected_result": true
+    }
+  }
+}
