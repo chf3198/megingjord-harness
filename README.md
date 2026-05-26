@@ -108,6 +108,7 @@ npm run deploy:both:apply
 | `auth:profile:context` | `node scripts/global/authorization-profile-context.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |
 | `capability:show` | `node scripts/global/capability-show.js` |
+| `catch-empty` | `bash scripts/global/catch-empty-lint.sh .github/workflows` |
 | `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
@@ -131,7 +132,6 @@ npm run deploy:both:apply
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
-| `catch-empty` | `scripts/global/catch-empty-lint.sh .github/workflows` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
