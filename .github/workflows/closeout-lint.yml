@@ -20,6 +20,31 @@ jobs:
             const megalint = require('./scripts/global/megalint/index.js');
             const alias = require('./scripts/global/signer-alias.js');
 
+
+            const isTransientApiError = (err) => {
+              const status = Number(err?.status || err?.response?.status || 0);
+              const msg = String(err?.message || '').toLowerCase();
+              return [403, 422, 429, 502, 503, 504].includes(status)
+                || msg.includes('resource not accessible by integration')
+                || msg.includes('rate limit')
+                || msg.includes('secondary rate limit');
+            };
+            const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            const withApiRetry = async (label, fn, retries = 2, backoffMs = 2000) => {
+              let lastErr;
+              for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                  return await fn();
+                } catch (err) {
+                  lastErr = err;
+                  if (!isTransientApiError(err) || attempt === retries) break;
+                  core.warning(`${label}: transient API error attempt ${attempt + 1}/${retries + 1}; retrying in ${backoffMs}ms (${err.message})`);
+                  await wait(backoffMs);
+                }
+              }
+              throw lastErr;
+            };
+
             const body = context.payload.pull_request.body || '';
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) {
@@ -28,24 +53,72 @@ jobs:
             }
             const linkedIssue = parseInt(refsMatch[1], 10);
 
-            const { data: issue } = await github.rest.issues.get({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: linkedIssue,
-            });
-            const labels = issue.labels.map(l => l.name);
-            const lane = labels.find(l => l.startsWith('lane:')) || 'lane:code-change';
+            const transientMarker = '<!-- closeout-schema-api-transient -->';
+            const postApiTransientAdvisory = async (phase, err) => {
+              const status = err?.status || err?.response?.status || 'unknown';
+              const advisory = `${transientMarker}
+## ⚠️ closeout-schema: api-transient
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: linkedIssue, per_page: 100,
-            });
+`
+                + `Transient GitHub API failure while reading closeout evidence (${phase}).
 
-            // #1554: fetch PR files to detect cross-checkout-destructive
-            // symlink deletions. Advisory-first per Epic #1486 Path D.
-            const { data: prFiles } = await github.rest.pulls.listFiles({
-              owner: context.repo.owner, repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number, per_page: 100,
-            });
+`
+                + `status: ${status}
+message: ${String(err?.message || 'unknown')}
+
+`
+                + `Action: rerun failed jobs once GitHub API access recovers. This transient class is advisory for this run.`;
+              try {
+                const advisoryComments = (await withApiRetry(
+                  'issues.listComments(advisory)',
+                  () => github.rest.issues.listComments({
+                    owner: context.repo.owner, repo: context.repo.repo,
+                    issue_number: linkedIssue, per_page: 100,
+                  })
+                )).data;
+                const existing = advisoryComments.find(c => (c.body || '').includes(transientMarker));
+                if (existing) {
+                  await withApiRetry('issues.updateComment(advisory)', () => github.rest.issues.updateComment({
+                    owner: context.repo.owner, repo: context.repo.repo,
+                    comment_id: existing.id, body: advisory,
+                  }));
+                } else {
+                  await withApiRetry('issues.createComment(advisory)', () => github.rest.issues.createComment({
+                    owner: context.repo.owner, repo: context.repo.repo,
+                    issue_number: linkedIssue, body: advisory,
+                  }));
+                }
+              } catch (advisoryErr) {
+                core.warning(`closeout-schema advisory post failed: ${advisoryErr.message}`);
+              }
+            };
+
+            let issue, labels, lane, comments, prFiles;
+            try {
+              issue = (await withApiRetry('issues.get(linkedIssue)', () => github.rest.issues.get({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: linkedIssue,
+              }))).data;
+              labels = issue.labels.map(l => l.name);
+              lane = labels.find(l => l.startsWith('lane:')) || 'lane:code-change';
+              comments = (await withApiRetry('issues.listComments(linkedIssue)', () => github.rest.issues.listComments({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: linkedIssue, per_page: 100,
+              }))).data;
+              // #1554: fetch PR files to detect cross-checkout-destructive
+              // symlink deletions. Advisory-first per Epic #1486 Path D.
+              prFiles = (await withApiRetry('pulls.listFiles', () => github.rest.pulls.listFiles({
+                owner: context.repo.owner, repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number, per_page: 100,
+              }))).data;
+            } catch (err) {
+              if (isTransientApiError(err)) {
+                await postApiTransientAdvisory('initial-data-fetch', err);
+                core.notice('closeout-schema: api-transient advisory emitted; skipping failure for this transient class.');
+                return;
+              }
+              throw err;
+            }
             const prLabels = (context.payload.pull_request.labels || []).map(l => l.name);
 
             const path = require('path');
@@ -148,10 +221,10 @@ jobs:
                 + `- Add to PR body: \`<!-- cross-checkout-destructive: <reason> -->\`\n`
                 + `- OR apply label: \`cross-checkout-destructive:approved\`\n\n`
                 + `See #1554 and #1539 (the incident this rule guards against).`;
-              const prComments = (await github.rest.issues.listComments({
+              const prComments = (await withApiRetry('issues.listComments(pr)', () => github.rest.issues.listComments({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number, per_page: 50,
-              })).data;
+              }))).data;
               const existing = prComments.find(c => (c.body || '').includes(xcdMarker));
               if (existing) {
                 await github.rest.issues.updateComment({
