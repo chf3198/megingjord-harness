@@ -1,0 +1,18 @@
+{
+  "_description": "Prompt budget policy per Epic #2150 #2204. Per-model context + prompt-cap + reserve thresholds.",
+  "version": 1,
+  "default": { "context_tokens": 8192, "prompt_cap_tokens": 6144, "reserve_tokens": 1024 },
+  "models": {
+    "qwen2.5-coder:32b": { "context_tokens": 32768, "prompt_cap_tokens": 24576, "reserve_tokens": 4096 },
+    "qwen2.5-coder:14b": { "context_tokens": 32768, "prompt_cap_tokens": 24576, "reserve_tokens": 4096 },
+    "qwen2.5-coder:7b": { "context_tokens": 32768, "prompt_cap_tokens": 24576, "reserve_tokens": 4096 },
+    "gemma3:1b": { "context_tokens": 8192, "prompt_cap_tokens": 6144, "reserve_tokens": 1024 },
+    "claude-opus-4-7": { "context_tokens": 200000, "prompt_cap_tokens": 180000, "reserve_tokens": 16384 },
+    "claude-sonnet-4-6": { "context_tokens": 200000, "prompt_cap_tokens": 180000, "reserve_tokens": 16384 }
+  },
+  "rag_fallback": {
+    "trigger_chars": 80000,
+    "max_chunks": 16,
+    "chunk_overlap_chars": 400
+  }
+}
