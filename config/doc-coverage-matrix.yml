@@ -1,0 +1,58 @@
+# Refs #2155 — doc-coverage matrix
+# Maps area-* labels to documentation surfaces that must be updated
+# when a ticket carrying that area-label ships. The Tech-Writer
+# sub-phase validator (#2154) and the doc-coverage validator
+# (scripts/global/megalint/doc-coverage.js) consume this matrix.
+#
+# Schema: each entry is { required: [...], suggested: [...] }
+# Validators emit advisory coverage block on the issue.
+
+version: 1
+surfaces:
+  area:hooks:
+    required:
+      - docs/howto/hooks.md
+    suggested:
+      - wiki/code/hooks.md
+      - README.md
+  area:scripts:
+    required:
+      - README.md
+    suggested:
+      - wiki/code/scripts.md
+  area:instructions:
+    required:
+      - docs/workflow/learnings.md
+    suggested:
+      - wiki/wisdom/project/
+  area:governance:
+    required:
+      - .changes/unreleased/
+      - docs/workflow/learnings.md
+    suggested:
+      - wiki/wisdom/global/concepts/
+  area:dashboard:
+    required:
+      - dashboard/README.md
+    suggested:
+      - wiki/code/dashboard.md
+  area:agents:
+    required:
+      - .claude/agents/
+    suggested:
+      - wiki/code/agents.md
+  area:skills:
+    required:
+      - .claude/commands/
+    suggested:
+      - wiki/code/skills.md
+  area:infra:
+    required:
+      - docs/runtime-substrate-discovery-2026-05-09.md
+    suggested:
+      - wiki/code/infra.md
+  area:knowledge:
+    required:
+      - wiki/wisdom/global/
+    suggested:
+      - WIKI.md

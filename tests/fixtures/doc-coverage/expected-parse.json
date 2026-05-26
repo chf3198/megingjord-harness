@@ -1,0 +1,10 @@
+{
+  "area:sample-a": {
+    "required": ["docs/sample-a.md"],
+    "suggested": ["wiki/sample-a.md"]
+  },
+  "area:sample-b": {
+    "required": ["README.md"],
+    "suggested": ["wiki/sample-b.md", "docs/sample-b.md"]
+  }
+}
