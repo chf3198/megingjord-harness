@@ -1,0 +1,33 @@
+{
+  "_description": "Adaptive timeout policy per Epic #2150 #2201. Defaults derived from Phase-0 #2174 dog-food observations.",
+  "version": 1,
+  "default_ms": 600000,
+  "classes": {
+    "fleet-red-team-rate": {
+      "ms": 1200000,
+      "rationale": "qwen2.5-coder:32b on Tailscale fleet hit 907s p99 per Phase-0 #2174; 1200s adds 30% headroom"
+    },
+    "fleet-dispatch-basic": {
+      "ms": 300000,
+      "rationale": "qwen2.5-coder:7b or smaller fleet models; faster turnaround"
+    },
+    "hamr-cache-stat": {
+      "ms": 30000,
+      "rationale": "local file append; should never exceed 30s"
+    },
+    "hamr-substrate-health": {
+      "ms": 60000,
+      "rationale": "remote KV poll; bounded retry"
+    },
+    "ollama-chromebook-local": {
+      "ms": 180000,
+      "rationale": "local gemma3:1b fallback; CPU-bound"
+    }
+  },
+  "lane_overrides": {
+    "lane:trivial": { "multiplier": 0.5, "rationale": "trivial work shouldn't exceed half the class budget" },
+    "lane:code-change": { "multiplier": 1.0 },
+    "lane:docs-research": { "multiplier": 1.0 },
+    "lane:config-only": { "multiplier": 0.75 }
+  }
+}
