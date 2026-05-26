@@ -1,9 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('path');
-const { loadStats, withinWindow, aggregate, renderReport, generateReport } = require('../scripts/global/fleet-hamr-weekly-report.js');
+const { loadStats, withinWindow, aggregate, renderReport, generateReport } = require('../../scripts/global/fleet-hamr-weekly-report.js');
 
-const FIXTURE = path.join(__dirname, 'fixtures', 'fleet-hamr', 'sample-stats.jsonl');
+const FIXTURE = path.join(__dirname, '..', 'fixtures', 'fleet-hamr', 'sample-stats.jsonl');
 
 test('loadStats: parses JSONL fixture', () => {
   const stats = loadStats(FIXTURE);
