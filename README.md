@@ -131,6 +131,7 @@ npm run deploy:both:apply
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
+| `catch-empty` | `scripts/global/catch-empty-lint.sh .github/workflows` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
