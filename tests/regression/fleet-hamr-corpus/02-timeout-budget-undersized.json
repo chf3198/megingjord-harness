@@ -1,0 +1,15 @@
+{
+  "id": "timeout-budget-undersized",
+  "source": "Phase-0 #2174 dog-food (907s p99) -> Epic #2150 P1-1 #2201 timeout-policy.js",
+  "description": "Adaptive timeout policy MUST bound qwen2.5-coder:32b dispatch at >= 1200s (30% headroom over observed 907s p99). Hardcoded 600s ceiling is forbidden for fleet-red-team-rate class.",
+  "assertion": {
+    "type": "module-export-and-policy-table",
+    "module": "scripts/global/timeout-policy.js",
+    "exports": ["getTimeout"],
+    "policy_check": {
+      "model": "qwen2.5-coder:32b",
+      "min_ms": 900000,
+      "expected_class": "fleet-red-team-rate"
+    }
+  }
+}
