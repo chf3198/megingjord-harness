@@ -1,0 +1,15 @@
+# Refs #2155 - golden fixture for doc-coverage matrix tests
+# Minimal valid matrix used to verify parseYamlSurfaces() behavior
+version: 1
+surfaces:
+  area:sample-a:
+    required:
+      - docs/sample-a.md
+    suggested:
+      - wiki/sample-a.md
+  area:sample-b:
+    required:
+      - README.md
+    suggested:
+      - wiki/sample-b.md
+      - docs/sample-b.md
