@@ -12,6 +12,8 @@ const IGNORE = [
   'node_modules', '.git', 'playwright-report',
   'test-results', 'package-lock.json', '.dashboard',
   'logs', '.claude', '.log4brains', '.worktrees',
+  // Generated artifacts (rebuilt on demand; not committed)
+  'generated',
   // Global resources have their own governance
   'skills', 'hooks'
 ];

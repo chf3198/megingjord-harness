@@ -126,6 +126,7 @@ npm run deploy:both:apply
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
 | `deps:review` | `node scripts/global/dep-proposals-review.js` |
+| `doc-graph` | `node scripts/global/doc-graph-builder.js` |
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |

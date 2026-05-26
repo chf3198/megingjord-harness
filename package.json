@@ -236,7 +236,8 @@
     "governance:wiki-catalog:test": "node --test tests/validate-wiki-catalog.spec.js",
     "git-state:drift": "node scripts/global/git-state-drift-sensor.js",
     "goals:regen": "node scripts/global/goals-contract-generate.js",
-    "governance:coordinator-cleanup": "node scripts/global/coordinator-label-cleanup.js"
+    "governance:coordinator-cleanup": "node scripts/global/coordinator-label-cleanup.js",
+    "doc-graph": "node scripts/global/doc-graph-builder.js"
   },
   "keywords": [
     "devops",

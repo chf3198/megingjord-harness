@@ -60,3 +60,6 @@ logs/copilot-usage.json
 
 # Operator-local spike outputs (Wave 1 #891/#892/#893) — never committed
 tmp/
+
+# Refs #2153 — doc-graph artifact (rebuilt on demand)
+generated/doc-graph.json
