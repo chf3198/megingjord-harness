@@ -1,0 +1,12 @@
+{
+  "id": "sticky-route-mis-recording",
+  "source": "P1-7 #2178; Phase-0 dog-food on Epic #2041 P1-1 #2175",
+  "description": "wrapProviderCall('ollama', cb, {tier:'fleet'}) must NOT mis-record as paid sticky-pick provider in cache-stats.jsonl. Tier 'fleet-local' is the canonical fix; provider='ollama' arg should pin.",
+  "assertion": {
+    "type": "module-export-presence",
+    "module": "scripts/global/sticky-route.js",
+    "exports": ["pickStickyProvider", "TIER_PROVIDER_MAP"],
+    "tier_must_exist": "fleet-local",
+    "tier_must_map_to": "ollama"
+  }
+}
