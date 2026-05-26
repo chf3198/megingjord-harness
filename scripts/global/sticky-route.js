@@ -11,10 +11,11 @@ const SUBSTRATE_HEALTH_FILE = path.join(os.homedir(), '.megingjord', 'substrate-
 
 // Tier → preferred-provider sequence per v3.2 §R3 capability matrix.
 const TIER_PROVIDER_MAP = {
-  free:    ['ollama', 'gemini', 'groq', 'cerebras'],
-  fleet:   ['groq', 'cerebras', 'gemini', 'openrouter'],
-  haiku:   ['anthropic', 'openrouter'],
-  premium: ['anthropic', 'openai', 'openrouter'],
+  free:        ['ollama', 'gemini', 'groq', 'cerebras'],
+  fleet:       ['groq', 'cerebras', 'gemini', 'openrouter'],
+  'fleet-local': ['ollama'],
+  haiku:       ['anthropic', 'openrouter'],
+  premium:     ['anthropic', 'openai', 'openrouter'],
 };
 
 function readSubstrateHealth(file = SUBSTRATE_HEALTH_FILE) {
