@@ -1,0 +1,36 @@
+# Refs #2156 — wiki-lint pre-merge gate (advisory in first ship)
+# Wraps existing npm run wiki:lint script. Phase-1 of Epic #2148.
+#
+# ADVISORY MODE: continue-on-error: true. The step result is reported as
+# annotation but does not fail the PR. Admin promotes to required-check
+# after baseline wiki drift is cleared (separate ticket).
+
+name: wiki-lint-gate
+on:
+  pull_request:
+    paths:
+      - 'wiki/**'
+      - 'README.md'
+      - 'vscode-extension/README.md'
+
+permissions: read-all
+
+jobs:
+  wiki-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run wiki-lint (advisory)
+        id: wikilint
+        continue-on-error: true
+        run: npm run wiki:lint
+      - name: Report status
+        if: steps.wikilint.outcome == 'failure'
+        run: |
+          echo "::warning::wiki:lint reported issues (advisory; not blocking). Refs #2156."

@@ -65,6 +65,18 @@ The two most-failure-prone transitions in the baton are `in-progress → testing
 | Status-label transition | Remove `status:in-progress`; add `status:testing`. Single-status invariant per the §"Single-status invariant" rule above. |
 | Preconditions | (a) ALL declared ACs verified PASS in the COLLABORATOR_HANDOFF per-AC block. (b) `test_strategy` evidence present per `instructions/test-methodology-matrix.instructions.md` — validator `scripts/global/megalint/test-discoverability.js`. (c) Lint clean for the lane (lane:code-change requires `npm run lint` green; lane:docs-research requires `wiki-lint` if wiki touched). |
 
+### Tech-Writer sub-phase (mandatory before posting the-collaborator-handoff per Epic #2148 / #2154)
+
+Before the role-collaborator-label holder posts the-collaborator-handoff, the comment MUST include a doc-coverage block per applicable surface in [config/doc-coverage-matrix.yml](../config/doc-coverage-matrix.yml). For each required + suggested surface the area-label maps to, declare one of:
+
+```
+doc-coverage:
+  UPDATED: <path-or-link> — <one-line summary of update>
+  N/A: <surface> — <reason: out-of-scope | covered-by-sibling-pr | docs-only-no-functional-change>
+```
+
+ADVISORY in first ship (Epic #2148 C1 #2154); the-collaborator-handoff validator (`scripts/global/megalint/collaborator-handoff.js`) parses the block when present and emits an advisory; missing block on lane:code-change emits a warning. Promotion to BLOCKING happens after Epic #2148 close, tracked as a follow-on.
+
 ### Consultant gate (entry to `status:review`)
 
 | Facet | Requirement |
