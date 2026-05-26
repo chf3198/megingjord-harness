@@ -11,6 +11,16 @@ function findCollaboratorHandoff(comments) {
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
 }
 
+const DOC_COVERAGE_RE = /(^|\n)\s*doc-coverage\s*:/i;
+
+function checkDocCoverageAdvisory(body, lane) {
+  // Refs Epic #2148 / #2154 - Tech-Writer sub-phase advisory
+  if (lane !== 'lane:code-change') return [];
+  if (DOC_COVERAGE_RE.test(body)) return [];
+  return [{ rule: 'doc-coverage-advisory', severity: 'advisory',
+    detail: 'COLLABORATOR_HANDOFF lacks doc-coverage block (Tech-Writer sub-phase advisory per Epic #2148).' }];
+}
+
 function checkSignerFields(body) {
   const violations = [];
   if (!/Signed-by:/i.test(body)) {
@@ -38,8 +48,9 @@ function validate(input) {
       detail: 'COLLABORATOR_HANDOFF comment not found on issue' }], found: false };
   }
   const violations = checkSignerFields(handoff.body || '');
+  const advisory = checkDocCoverageAdvisory(handoff.body || '', input.lane);
   const signer = roleIdentity({ body: handoff.body, author: handoff.user && handoff.user.login });
-  return { ok: violations.length === 0, violations, found: true, signer };
+  return { ok: violations.length === 0, violations, advisory, found: true, signer };
 }
 
-module.exports = { validate, findCollaboratorHandoff };
+module.exports = { validate, findCollaboratorHandoff, checkDocCoverageAdvisory };
