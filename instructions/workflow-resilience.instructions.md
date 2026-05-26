@@ -88,3 +88,9 @@ Run `docs-drift-maintenance` skill after any change to:
 - Configuration files, defaults, or environment variables.
 - Workflows, CI/CD pipelines, or automation scripts.
 - UX-visible behavior, user-facing features, or settings.
+
+## catch-empty suppression contract
+
+- `scripts/global/catch-empty-lint.sh` intentionally scans `.github/workflows/` only.
+- `scripts/global/` and `hooks/scripts/` may contain intentional non-empty catch handlers and are governed by code review plus unit tests instead of the workflow YAML lint.
+- Use `// catch-empty: <reason>` only for best-effort label/comment cleanup or equivalent known-safe GitHub API misses; if the handler can distinguish expected failures, prefer filtering the expected status code and rethrowing everything else.

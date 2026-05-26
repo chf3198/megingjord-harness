@@ -76,3 +76,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: No unsuppressed empty catch in github-script blocks
         run: bash scripts/global/catch-empty-lint.sh .github/workflows
+      - name: Catch-empty suppression summary
+        shell: bash
+        run: |
+          count=$(grep -Rho '// catch-empty:' .github/workflows 2>/dev/null | wc -l | tr -d ' ')
+          {
+            echo '### catch-empty suppressions'
+            echo "Active suppressions in .github/workflows: $count"
+          } >> "$GITHUB_STEP_SUMMARY"
