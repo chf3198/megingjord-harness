@@ -18,3 +18,7 @@ After every PR merge or deployment that changes user-facing behavior, run these 
 7. **Artifact attestation**: Tag-triggered releases MUST produce both cosign-bundle signature AND GitHub Artifact Attestation (Sigstore-backed; via `actions/attest-build-provenance`). C13 (#999) enables the parallel attestation signal alongside the existing cosign path.
 
 Do not consider a PR merge or deployment task complete until steps 1-7 are explicitly addressed (either completed or confirmed not applicable).
+
+## Merge-time documentation governance
+
+For the operator-facing runbook describing how Epic #2148 children (C0+C1+C2+C3+C5+C7) compose into the four-surface merge-time documentation governance system, see [docs/howto/merge-time-doc-governance.md](../docs/howto/merge-time-doc-governance.md).
