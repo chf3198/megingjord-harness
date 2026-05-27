@@ -64,3 +64,12 @@ Consultant invokes it before posting CONSULTANT_CLOSEOUT (advisory: SHOULD).
 - Epic #1830 (related, advisory governance hygiene)
 - `instructions/role-baton-routing.instructions.md` flaw-recognition anneal
   decision contract
+
+## Red-team evidence quality fallback (Epic #1942 / #2273)
+
+When posting a red-team artifact to an Epic/ticket thread, use `## RED_TEAM_ANALYSIS` (or `<!-- red-team-analysis -->`) and include:
+- at least one explicit file path that exists in the changed diff
+- at least one concrete exploit/failure chain statement
+- `out-of-scope: access-control` when the comment mentions access-control but no auth-surface files changed
+
+If model output is generic or non-diff-grounded, do not post it directly. Route to consultant/manual synthesis first.
