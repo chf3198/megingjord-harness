@@ -159,6 +159,7 @@ npm run deploy:both:apply
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
+| `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-lease-dispatch:test` | `node --test tests/cross-team-lease-dispatch.spec.js` |
 | `governance:delegation-lint` | `node scripts/global/delegation-phrase-lint.js` |
 | `governance:dispatcher-set-labels:test` | `node --test tests/github-dispatcher-set-labels.spec.js` |
