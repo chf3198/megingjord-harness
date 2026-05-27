@@ -214,6 +214,7 @@ npm run deploy:both:apply
 | `governance:sync-check` | `node scripts/global/governance-sync-check.js` |
 | `governance:ticket-redundancy:test` | `node --test tests/validate-ticket-redundancy.spec.js` |
 | `governance:tokens` | `node scripts/global/governance-token-lint.js` |
+| `governance:validate-config-schemas-workflow:test` | `node --test tests/validate-config-schemas-workflow.spec.js` |
 | `governance:verify` | `node scripts/global/governance-verify.js --json` |
 | `governance:weekly` | `node scripts/global/governance-weekly-report.js` |
 | `governance:wiki-catalog:test` | `node --test tests/validate-wiki-catalog.spec.js` |

@@ -1,0 +1,42 @@
+# validate-config-schemas — JSON-schema validation gate for cross-runtime
+# config files. Refs #1957 / Epic #1956. Validates .claude/settings.json
+# against config/claude-code-settings.schema.json using Python jsonschema
+# (Draft 2020-12 compatible). Codex equivalent is advisory until a schema
+# is published. Fails on the flat-hook-entry regression that broke #1917.
+name: validate-config-schemas
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.claude/**'
+      - '.codex/**'
+      - 'config/**'
+      - 'scripts/global/validate-config-schemas.js'
+      - 'tests/fixtures/flat_hook_settings.json'
+      - 'tests/validate-config-schemas.spec.js'
+      - '.github/workflows/validate-config-schemas.yml'
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: validate-config-schemas-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate-config-schemas:
+    name: validate-config-schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install jsonschema (Draft 2020-12)
+        run: python3 -m pip install jsonschema
+      - name: Validate cross-runtime config files
+        run: node scripts/global/validate-config-schemas.js
+      - name: Run regression-fixture assertion (flat-hook-entry must FAIL validation)
+        run: node --test tests/validate-config-schemas.spec.js
