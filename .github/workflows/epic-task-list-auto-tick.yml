@@ -1,0 +1,53 @@
+# epic-task-list-auto-tick — when a child issue closes, tick the matching
+# `- [ ] #N <sep>` task-list line on any open Epic body that references it.
+# Refs #1337. Handles prose-style `Refs Epic #N` linkage only; Sub-issues
+# primitive has native GitHub auto-rollup and is NOT duplicated here (AC6).
+name: epic-task-list-auto-tick
+on:
+  issues:
+    types: [closed]
+permissions:
+  issues: write
+  contents: read
+concurrency:
+  group: epic-task-list-auto-tick-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  auto-tick:
+    if: "!contains(github.event.issue.labels.*.name, 'type:epic')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      - name: Discover parent Epics + tick the closed-child task-list line
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { discoverParents, tickChildRef } = require('./scripts/global/epic-task-list-auto-tick');
+            const closedN = context.issue.number;
+            const { data: epics } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'type:epic', state: 'open', per_page: 100,
+            });
+            const parents = discoverParents(
+              epics.map(e => ({ number: e.number, body: e.body || '' })),
+              closedN,
+            );
+            if (parents.length === 0) {
+              console.log(`No open Epic references typed child-ref for #${closedN}; no-op.`);
+              return;
+            }
+            for (const p of parents) {
+              const r = tickChildRef(p.body, closedN);
+              if (!r.changed) {
+                console.log(`Epic #${p.number}: no-change (${r.reason})`);
+                continue;
+              }
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: p.number, body: r.body,
+              });
+              console.log(`Ticked #${closedN} on Epic #${p.number}`);
+            }
