@@ -11,6 +11,10 @@ const { appendCacheStat } = require('./cache-stats-emit');
 const ADAPTERS = require('./token-provider-adapters');
 const { maybeSpillover } = require('./header-spillover');
 const { pickStickyProvider } = require('./sticky-route');
+// Refs #2234 — wire governance-context injection per Epic #2029 P1-1 #2221.
+let injectGoalContext;
+try { ({ injectGoalContext } = require('./governance-context')); }
+catch { injectGoalContext = () => ({ systemPrefix: null, injected: false }); }
 
 const HTTP_OK_DEFAULT = 200;
 const TEAM_CONFIG_PATHS = [
@@ -76,6 +80,11 @@ async function wrapProviderCall(provider, callFn, opts = {}) {
     ? provider
     : (sticky?.provider || provider);
   const hints = cacheHeaders(effectiveProvider, opts);
+  // Refs #2234 — opt-out via opts.inject_goal_context=false or tier=diagnostic|test.
+  const goalCtx = injectGoalContext(opts);
+  if (goalCtx.injected && goalCtx.systemPrefix) {
+    hints.bodyExtras = Object.assign({}, hints.bodyExtras || {}, { systemPrefix: goalCtx.systemPrefix });
+  }
   let response;
   try { response = await callFn(hints); }
   catch (err) { return { ok: false, error: err?.message || 'provider_call_failed', sticky, spillover: null }; }
