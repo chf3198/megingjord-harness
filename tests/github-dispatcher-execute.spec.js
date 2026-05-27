@@ -31,6 +31,11 @@ test('buildCliArgs returns null for unknown operation', () => {
   expect(buildCliArgs('not-an-op', {})).toBe(null);
 });
 
+test('buildCliArgs appends repeated labels for create-issue', () => {
+  const args = buildCliArgs('create-issue', { labels: ['one', 'two'] });
+  expect(args).toEqual(['issue', 'create', '--label', 'one', '--label', 'two']);
+});
+
 test('executeViaCli returns ok=true when runner succeeds', async () => {
   let captured = null;
   const fakeRunner = async (cmd, args) => { captured = { cmd, args }; return { stdout: 'OUT', stderr: '' }; };

@@ -43,6 +43,9 @@ function buildCliArgs(operation, params = {}) {
   if (params.issue !== undefined) args.push(String(params.issue));
   if (params.title) args.push('--title', params.title);
   if (params.body) args.push('--body', params.body);
+  if (Array.isArray(params.labels)) {
+    for (const label of params.labels) args.push('--label', label);
+  }
   if (params.label) args.push('--add-label', params.label);
   if (params.json) args.push('--json', params.json);
   return args;
