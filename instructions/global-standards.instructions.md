@@ -28,6 +28,20 @@ applyTo: "**"
 - Use deterministic checks and objective pass/fail gates whenever possible.
 - If evidence is incomplete, state uncertainty and gather missing evidence.
 
+## Deferred-finalize merge-evidence contract (Epic #2295 P1.3)
+
+PR bodies MUST include merge evidence for their linked issue. Two accepted forms:
+
+- **Preferred** — `merge-evidence-deferred-final: #N`: satisfies `merge-evidence-pr-gate`
+  WITHOUT triggering GitHub auto-close on merge. Consultant retains explicit terminal-finalize
+  authority and closes the issue via `gh issue close #N` after posting `CONSULTANT_CLOSEOUT`.
+- **Backward-compat** — `Closes #N` (or `Fixes #N` / `Resolves #N`): still accepted; triggers
+  GitHub auto-close on merge. Use only when Consultant-explicit-close is not required.
+
+Carve-out rationale: the deferred-finalize form resolves the PR-template vs merge-evidence-gate
+conflict (template says "use Refs, not Closes"; gate previously required Closes). Registry entry:
+`governance-carve-outs/index.md` entry `closes-vs-refs-deferred-final-carveout`.
+
 ## Goal-lens decision lint (required)
 
 - Apply this priority order to all governed decisions:
