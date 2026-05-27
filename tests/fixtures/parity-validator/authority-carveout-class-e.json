@@ -1,0 +1,28 @@
+{
+  "description": "Authority carve-out rule with contradiction — class (e) emitted when no carve-out registered",
+  "expected_rules": [
+    {
+      "rule_id": "dormant-deferred-epic-only",
+      "class": "authority-carve-out",
+      "statement": "status:dormant and status:deferred are Epic-only states.",
+      "source": "instructions/ticket-driven-work.instructions.md",
+      "enum_values": ["status:dormant", "status:deferred"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "dormant-deferred-epic-only",
+      "class": "authority-carve-out",
+      "statement": "Dormant tickets are allowed on any issue type for legacy compat.",
+      "source": "scripts/global/megalint/label-lint.js",
+      "enum_values": ["status:dormant", "status:deferred"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "carve_out_ids": [],
+  "expect_conflict_class": "authority-carve-out",
+  "expect_conflicts": 1
+}

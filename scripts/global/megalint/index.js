@@ -1,8 +1,7 @@
 'use strict';
 // megalint — schema-aware governance lint orchestrator. Epic #1407.
-// Dispatches to 7 domain-decomposed validators. Each validator is a pure
-// function returning {ok, violations[]}. Caller (CI workflow) decides whether
-// each violation is advisory or blocking based on context.
+// Dispatches to domain-decomposed validators. Each validator returns
+// {ok, violations[]}. Caller (CI workflow) decides blocking context.
 
 const manager = require('./manager-handoff.js');
 const collaborator = require('./collaborator-handoff.js');
@@ -21,6 +20,19 @@ const flawEmission = require('./flaw-emission.js');
 const crossCheckoutDestructive = require('./cross-checkout-destructive.js');
 const soakLanguageGuard = require('./soak-language-guard.js');
 const researchFirstPhaseGate = require('./research-first-phase-gate.js');
+const parityValidator = require('./parity-validator.js');
+
+// parity-validator exposes run() not validate(); wrap to standard interface.
+const parityValidatorAdapter = {
+  validate: (input) => {
+    const result = parityValidator.run(Object.assign({ backfill: false }, input || {}));
+    const violations = (result.conflicts || []).map(c => ({
+      rule: `parity-${c.class}`,
+      detail: `${c.rule_id}: ${c.id} [${c.severity}]`,
+    }));
+    return { ok: violations.length === 0, violations };
+  },
+};
 
 const VALIDATORS = {
   'manager-handoff': manager,
@@ -40,6 +52,7 @@ const VALIDATORS = {
   'cross-checkout-destructive': crossCheckoutDestructive,
   'soak-language-guard': soakLanguageGuard,
   'research-first-phase-gate': researchFirstPhaseGate,
+  'parity-validator': parityValidatorAdapter,
 };
 
 function runAll(input) {
@@ -63,7 +76,8 @@ function runAll(input) {
 
 function run(validatorName, input) {
   if (!VALIDATORS[validatorName]) {
-    throw new Error(`Unknown validator: ${validatorName}. Known: ${Object.keys(VALIDATORS).join(', ')}`);
+    throw new Error(
+      `Unknown validator: ${validatorName}. Known: ${Object.keys(VALIDATORS).join(', ')}`);
   }
   return VALIDATORS[validatorName].validate(input);
 }

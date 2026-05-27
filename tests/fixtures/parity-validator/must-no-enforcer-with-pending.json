@@ -1,0 +1,17 @@
+{
+  "description": "MUST-without-enforcer where pending-enforcement tag present — advisory only",
+  "expected_rules": [
+    {
+      "rule_id": "ticket-first-no-code-without-issue",
+      "class": "doc-vs-no-enforcement",
+      "statement": "No code may begin without a linked issue. pending-enforcement: #1234",
+      "source": "instructions/global-standards.instructions.md",
+      "enum_values": [],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [],
+  "expect_conflict_severity": "advisory",
+  "expect_conflicts": 1
+}

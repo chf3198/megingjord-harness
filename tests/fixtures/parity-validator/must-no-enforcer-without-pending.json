@@ -1,0 +1,17 @@
+{
+  "description": "MUST-without-enforcer with no pending-enforcement tag — error (hard-mandatory)",
+  "expected_rules": [
+    {
+      "rule_id": "ticket-first-no-code-without-issue",
+      "class": "doc-vs-no-enforcement",
+      "statement": "No code or config work may begin without a linked GitHub issue.",
+      "source": "instructions/global-standards.instructions.md",
+      "enum_values": [],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [],
+  "expect_conflict_severity": "hard-mandatory",
+  "expect_conflicts": 1
+}

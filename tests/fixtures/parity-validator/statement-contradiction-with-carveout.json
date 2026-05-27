@@ -1,0 +1,27 @@
+{
+  "description": "Statement contradiction WITH carve-out registered — should be suppressed",
+  "expected_rules": [
+    {
+      "rule_id": "refs-not-closes-in-pr",
+      "class": "doc-vs-enforcement",
+      "statement": "PR bodies must use Refs not Closes to link the issue.",
+      "source": "instructions/github-governance.instructions.md",
+      "enum_values": [],
+      "severity": "soft-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "refs-not-closes-in-pr",
+      "class": "doc-vs-enforcement",
+      "statement": "PR bodies SHOULD prefer Closes keywords for auto-close behavior.",
+      "source": "scripts/global/megalint/merge-evidence-pr-gate.js",
+      "enum_values": [],
+      "severity": "soft-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "carve_out_ids": ["refs-not-closes-in-pr"],
+  "expect_conflicts": 0
+}

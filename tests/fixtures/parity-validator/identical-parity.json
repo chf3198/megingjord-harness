@@ -1,0 +1,26 @@
+{
+  "description": "Identical rule-card sets — expect zero conflicts (parity OK)",
+  "expected_rules": [
+    {
+      "rule_id": "lane-enum-values",
+      "class": "enum-drift",
+      "statement": "Lane values must be from the canonical set.",
+      "source": "instructions/role-baton-routing.instructions.md",
+      "enum_values": ["lane:code-change", "lane:trivial"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "lane-enum-values",
+      "class": "enum-drift",
+      "statement": "Lane values must be from the canonical set.",
+      "source": "scripts/global/lane-enum.js",
+      "enum_values": ["lane:code-change", "lane:trivial"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "expect_conflicts": 0
+}
