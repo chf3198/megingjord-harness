@@ -58,4 +58,4 @@ function validate(input) {
   return { ok: violations.length === 0, violations, found: true, signer };
 }
 
-module.exports = { validate, findAdminHandoff };
+module.exports = { validate, findAdminHandoff, LIGHTWEIGHT };

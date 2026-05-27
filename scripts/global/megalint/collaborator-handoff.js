@@ -53,4 +53,4 @@ function validate(input) {
   return { ok: violations.length === 0, violations, advisory, found: true, signer };
 }
 
-module.exports = { validate, findCollaboratorHandoff, checkDocCoverageAdvisory };
+module.exports = { validate, findCollaboratorHandoff, checkDocCoverageAdvisory, LIGHTWEIGHT };

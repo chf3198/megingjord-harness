@@ -201,6 +201,8 @@ npm run deploy:both:apply
 | `governance:role-baton-audit` | `node scripts/global/role-baton-audit.js` |
 | `governance:role-baton-linter` | `node scripts/global/role-baton-linter.js` |
 | `governance:role-baton-linter:test` | `node --test tests/role-baton-linter.spec.js` |
+| `governance:rule-parity` | `node scripts/global/governance-rule-parity.js` |
+| `governance:rule-parity:test` | `node --test tests/governance-rule-parity.spec.js` |
 | `governance:runtime-guard:test` | `node --test tests/runtime-side-effect-guard.spec.js` |
 | `governance:second-opinion-replay` | `node scripts/global/second-opinion-replay-eval.js` |
 | `governance:second-opinion-replay:test` | `node --test tests/second-opinion-replay-eval.spec.js` |
