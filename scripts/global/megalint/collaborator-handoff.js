@@ -1,10 +1,11 @@
 'use strict';
 // collaborator-handoff — validates COLLABORATOR_HANDOFF signer + content.
+// Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
+// Updated to include lane:research (was missing vs canonical set).
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
-
-const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:config-only'];
+const { LIGHTWEIGHT } = require(path.join(__dirname, '..', 'lane-enum.js'));
 
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
