@@ -1,0 +1,88 @@
+name: Parity Validator Nightly
+# Nightly cron + on-demand run for governance rule parity. Refs #2306.
+# Opens a governance-rule-drift issue when NEW conflicts are detected.
+# Deduplicates against open issues by hashing the conflict set.
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: parity-validator-nightly-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  parity:
+    name: governance-parity-check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+      - run: npm ci
+      - name: Run parity validator (full mode with backfill)
+        id: parity
+        run: |
+          set +e
+          node scripts/global/megalint/parity-validator.js --full \
+            > /tmp/parity-result.json 2>/tmp/parity-stderr.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          NEW_CONFLICTS=$(node -e "
+            const r = require('/tmp/parity-result.json');
+            const n = (r.conflicts||[]).filter(c=>c.pr_introduced).length;
+            process.stdout.write(String(n));
+          " 2>/dev/null || echo "0")
+          echo "new_conflicts=${NEW_CONFLICTS}" >> "$GITHUB_OUTPUT"
+          HASH=$(node -e "
+            const r = require('/tmp/parity-result.json');
+            const ids = (r.conflicts||[]).map(c=>c.id).sort().join(',');
+            const crypto=require('node:crypto');
+            process.stdout.write(crypto.createHash('sha256').update(ids).digest('hex').slice(0,16));
+          " 2>/dev/null || echo "unknown")
+          echo "conflict_hash=${HASH}" >> "$GITHUB_OUTPUT"
+      - name: Open drift issue if new conflicts exist
+        if: steps.parity.outputs.new_conflicts != '0'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const hash = '${{ steps.parity.outputs.conflict_hash }}';
+            const dedup = `governance-rule-drift-${hash}`;
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'governance:drift-detected', per_page: 50,
+            });
+            const already = existing.data.some(i => i.body && i.body.includes(dedup));
+            if (already) { console.log('Dedup match — issue already open.'); return; }
+            const result = require('/tmp/parity-result.json');
+            const conflicts = (result.conflicts||[]).filter(c=>c.pr_introduced);
+            const rows = conflicts.map(c=>
+              `| \`${c.rule_id}\` | ${c.class} | ${c.severity} |`).join('\n');
+            const body = [
+              '## Governance Rule Parity Drift Detected',
+              '',
+              `Dedup-token: ${dedup}`,
+              '',
+              `**New conflicts introduced**: ${conflicts.length}`,
+              '',
+              '| rule_id | class | severity |',
+              '|---|---|---|',
+              rows,
+              '',
+              'Run `npm run gov:parity` for full details.',
+              'Refs Epic #2295',
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner, repo: context.repo.repo,
+              title: `governance-rule-drift: ${conflicts.length} new conflict(s) detected`,
+              body, labels: ['governance:drift-detected', 'priority:P2', 'type:task'],
+            });

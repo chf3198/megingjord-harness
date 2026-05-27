@@ -1,0 +1,7 @@
+{
+  "description": "Corrupted governance-rules.yaml input — validator must not crash",
+  "simulate_corrupt_yaml": true,
+  "corrupt_content": "rules: [{{invalid yaml: :::}",
+  "expect_error_field": true,
+  "expect_conflicts": 0
+}

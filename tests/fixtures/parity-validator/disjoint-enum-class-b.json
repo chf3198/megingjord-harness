@@ -1,0 +1,27 @@
+{
+  "description": "Disjoint enum on enforcement-vs-enforcement rule (class b)",
+  "expected_rules": [
+    {
+      "rule_id": "signer-independence-admin-vs-collaborator",
+      "class": "enforcement-vs-enforcement",
+      "statement": "Admin alias must differ from Collaborator alias.",
+      "source": "scripts/global/megalint/signer-fidelity.js",
+      "enum_values": ["admin", "collaborator"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "signer-independence-admin-vs-collaborator",
+      "class": "enforcement-vs-enforcement",
+      "statement": "Admin alias must differ from Collaborator alias.",
+      "source": "scripts/global/megalint/signer-fidelity.js",
+      "enum_values": ["admin", "collaborator", "consultant"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "expect_conflict_class": "enforcement-vs-enforcement",
+  "expect_conflicts": 1
+}

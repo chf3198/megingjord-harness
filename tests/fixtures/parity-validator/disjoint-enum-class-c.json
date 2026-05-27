@@ -1,0 +1,27 @@
+{
+  "description": "Disjoint enum (class c enum-drift) — doc has extra values vs gate",
+  "expected_rules": [
+    {
+      "rule_id": "test-strategy-enum-values",
+      "class": "enum-drift",
+      "statement": "test_strategy must be one of the allowed values.",
+      "source": "instructions/test-methodology-matrix.instructions.md",
+      "enum_values": ["tdd-pyramid", "tdd-trophy", "manual-verify", "new-strategy"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "test-strategy-enum-values",
+      "class": "enum-drift",
+      "statement": "test_strategy must be one of the allowed values.",
+      "source": "scripts/global/test-strategy-enum.js",
+      "enum_values": ["tdd-pyramid", "tdd-trophy", "manual-verify"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "expect_conflict_class": "enum-drift",
+  "expect_conflicts": 1
+}

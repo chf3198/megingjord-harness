@@ -248,7 +248,8 @@
     "worktree:start": "bash scripts/worktree-session-start.sh",
     "governance:rule-parity": "node scripts/global/governance-rule-parity.js",
     "governance:rule-parity:test": "node --test tests/governance-rule-parity.spec.js",
-    "gov:extract": "node scripts/global/rule-card-extractor.js --all > /tmp/rule-cards.json"
+    "gov:extract": "node scripts/global/rule-card-extractor.js --all > /tmp/rule-cards.json",
+    "gov:parity": "node scripts/global/megalint/parity-validator.js"
   },
   "keywords": [
     "devops",

@@ -1,0 +1,7 @@
+{
+  "description": "Large-scale: 100 matching rule-cards — stress perf p99 ≤ 1.5s",
+  "rule_count": 100,
+  "all_identical": true,
+  "expect_conflicts": 0,
+  "perf_budget_ms": 1500
+}

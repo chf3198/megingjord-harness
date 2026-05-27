@@ -1,0 +1,28 @@
+{
+  "description": "Pre-existing conflict (pr_introduced=false) — should be advisory only",
+  "expected_rules": [
+    {
+      "rule_id": "branch-name-prefix-enum",
+      "class": "enum-drift",
+      "statement": "Branch names must match an allowed prefix.",
+      "source": "hooks/scripts/validate-branch-name.sh",
+      "enum_values": ["feat", "fix", "chore"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "actual_cards": [
+    {
+      "rule_id": "branch-name-prefix-enum",
+      "class": "enum-drift",
+      "statement": "Branch names must match an allowed prefix.",
+      "source": "hooks/scripts/validate-branch-name.sh",
+      "enum_values": ["feat", "fix", "chore", "extra"],
+      "severity": "hard-mandatory",
+      "cross_runtime_applicability": ["all"]
+    }
+  ],
+  "pr_diff_includes_rule_id": false,
+  "expect_gate_decision": "advisory",
+  "expect_conflicts": 1
+}
