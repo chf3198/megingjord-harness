@@ -155,6 +155,7 @@ npm run deploy:both:apply
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
 | `governance:cross-team-lease-dispatch:test` | `node --test tests/cross-team-lease-dispatch.spec.js` |
 | `governance:delegation-lint` | `node scripts/global/delegation-phrase-lint.js` |
+| `governance:dispatcher-set-labels:test` | `node --test tests/github-dispatcher-set-labels.spec.js` |
 | `governance:drift` | `node scripts/global/governance-drift-classifier.js --json` |
 | `governance:duplicate-check` | `node scripts/global/ticket-duplicate-guard.js --scan` |
 | `governance:duplicate-check:test` | `node --test tests/ticket-duplicate-guard.spec.js` |
@@ -171,6 +172,7 @@ npm run deploy:both:apply
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |
 | `governance:instructional-coverage` | `node scripts/global/instructional-coverage-audit.js` |
 | `governance:instructional-coverage:test` | `node --test tests/instructional-coverage-audit.spec.js` |
+| `governance:issue-transition-dispatch:test` | `node --test tests/issue-transition-dispatch.spec.js` |
 | `governance:lease-heartbeat` | `node scripts/global/worktree-lease-heartbeat.js` |
 | `governance:lease-heartbeat:test` | `node --test tests/worktree-lease-heartbeat.spec.js` |
 | `governance:list-tickets` | `node scripts/global/ticket-presenter.js` |
