@@ -43,6 +43,9 @@ case "$provider" in
   ollama|fleet|provider-neutral) ;;
   *) echo "⚠ unknown HAMR_PROVIDER=$provider; provider key check skipped" ;;
 esac
+if [ -n "${TAVILY_API_KEY:-}" ] && ! grep -q "^\[mcp_servers\.tavily\]" "$repo_root/.codex/runtime.config.toml" 2>/dev/null; then
+  echo "⚠ TAVILY_API_KEY detected but [mcp_servers.tavily] is missing from .codex/runtime.config.toml"
+fi
 if [ "${#missing[@]}" -eq 0 ]; then
   echo "✅ all required env present"
 else
