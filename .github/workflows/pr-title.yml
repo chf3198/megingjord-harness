@@ -26,6 +26,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          # Canonical 11-type set -- source of truth: scripts/global/conventional-commits-enum.js (#2304)
+          # CI sync guard: tests/conventional-commits-enum.spec.js asserts parity with JS module.
           types: |
             feat
             fix
@@ -36,6 +38,8 @@ jobs:
             docs
             style
             test
+            skill
+            hotfix
           requireScope: false
           subjectPattern: ^.{1,60}$
           subjectPatternError: >
