@@ -366,6 +366,7 @@ npm run deploy:both:apply
 | `wiki:search` | `node scripts/wiki/search.js` |
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
+<!-- /docs -->
 ## Token telemetry reconciliation configuration
 
 - Run `npm run routing:reconcile` to generate `logs/token-telemetry-reconcile.json`.
