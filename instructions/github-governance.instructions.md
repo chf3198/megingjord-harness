@@ -15,7 +15,7 @@ applyTo: "**"
 ## Commits and PR titles — Conventional Commits
 
 - Format: `type(scope): imperative description` ≤72 chars.
-- Allowed types: `feat` `fix` `chore` `content` `perf` `refactor` `docs` `style` `test`.
+- Allowed types: `feat` `fix` `chore` `content` `perf` `refactor` `docs` `style` `test` `skill` `hotfix`. (Canonical 11-type set; source of truth: `scripts/global/conventional-commits-enum.js` per #2304.)
 - Branch naming: `<type>/<issue-number>-<short-slug>` (e.g. `fix/5-nav-contrast`).
 
 ## Ticket lifecycle gates

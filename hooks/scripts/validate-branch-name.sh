@@ -13,9 +13,11 @@ if echo "$BRANCH" | grep -qE "^sandbox/"; then
   exit 1
 fi
 
-# Allowed patterns (per #1336 AC1: add docs/content/perf/refactor/style/test
-# to match instructions/github-governance.instructions.md's published branch types)
-VALID="^(feat|fix|chore|skill|hotfix|docs|content|perf|refactor|style|test)/[a-z0-9][-a-z0-9]*$|^main$|^develop$"
+# Allowed type prefixes -- canonical 11-type set defined in #2304.
+# Source of truth: scripts/global/conventional-commits-enum.js
+# CI sync guard: tests/conventional-commits-enum.spec.js asserts this
+# literal matches the JS module's CONVENTIONAL_COMMIT_TYPES array.
+VALID="^(feat|fix|chore|content|perf|refactor|docs|style|test|skill|hotfix)/[a-z0-9][-a-z0-9]*$|^main$|^develop$"
 
 if ! echo "$BRANCH" | grep -qE "$VALID"; then
   echo "❌ Branch name '$BRANCH' violates naming convention."
