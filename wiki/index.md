@@ -20,6 +20,10 @@ Per `research/three-wiki-typology-synthesis-1943.md`, the wiki is organized into
 - **`wiki/wisdom/global/`** (Wiki C scope=global) — Cross-project wisdom (committed in this repo, distributed to operator-global `~/.copilot/wiki/`). Currently EMPTY — the legacy paths `wiki/concepts/`, `wiki/entities/`, `wiki/sources/`, `wiki/syntheses/`, `wiki/skills/` ARE conceptually this scope but live at their pre-migration paths. Physical migration is queued as a follow-on to #2051.
 
 Each subtree has a README.md documenting its purpose.
+## Work Log
+
+Mirror of GitHub tickets + PRs. Wiki B pages are written here by the shared wiki I/O layer and keep the work-log catalog distinct from the legacy research pages below.
+
 
 ### Legacy paths (still in use)
 
