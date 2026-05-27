@@ -108,6 +108,7 @@ npm run deploy:both:apply
 | `auth:profile:context` | `node scripts/global/authorization-profile-context.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |
 | `capability:show` | `node scripts/global/capability-show.js` |
+| `catch-empty` | `bash scripts/global/catch-empty-lint.sh .github/workflows` |
 | `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
