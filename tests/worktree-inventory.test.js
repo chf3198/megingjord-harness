@@ -58,11 +58,14 @@ test('behind main is warning evidence only, not removal-safe proof', () => {
   const item = enrich({ path: '.', head: 'abc', branch: 'feat/2250-x' }, runner({
     'status --porcelain --untracked-files=all': '',
     'rev-parse --abbrev-ref --symbolic-full-name @{u}': 'origin/feat/2250-x',
-    'rev-list --left-right --count origin/feat/2250-x...HEAD': '63 0',
+    'rev-list --left-right --count origin/feat/2250-x...HEAD': '0 0',
+    'rev-list --left-right --count origin/main...HEAD': '63 0',
     'log -1 --format=%cI': '2026-05-27T00:00:00Z',
   }));
   assert.strictEqual(item.lifecycleState, 'stale-warning');
   assert.strictEqual(item.removalSafe, false);
+  assert.strictEqual(item.ahead, 0);
+  assert.strictEqual(item.behind, 63);
 });
 
 test('inventory emits JSON-ready enriched worktree records', () => {
@@ -72,6 +75,7 @@ branch refs/heads/feat/2250-x`, { runGit: runner({
     'status --porcelain --untracked-files=all': '?? note.txt',
     'rev-parse --abbrev-ref --symbolic-full-name @{u}': 'origin/feat/2250-x',
     'rev-list --left-right --count origin/feat/2250-x...HEAD': '1 0',
+    'rev-list --left-right --count origin/main...HEAD': '1 0',
     'log -1 --format=%cI': '2026-05-27T00:00:00Z',
   }) });
   assert.strictEqual(report.mode, 'read-only');

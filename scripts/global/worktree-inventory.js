@@ -72,11 +72,14 @@ function enrich(entry, runGit = git) {
   }
   const status = splitStatus(runGit(['status', '--porcelain', '--untracked-files=all'], entry.path));
   const upstream = runGit(['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], entry.path);
-  const div = upstream ? runGit(['rev-list', '--left-right', '--count', `${upstream}...HEAD`], entry.path) : '';
-  const [behind, ahead] = div ? div.split(/\s+/).map(Number) : [null, null];
+  const upstreamDiv = upstream ? runGit(['rev-list', '--left-right', '--count', `${upstream}...HEAD`], entry.path) : '';
+  const mainDiv = runGit(['rev-list', '--left-right', '--count', 'origin/main...HEAD'], entry.path);
+  const [upstreamBehind, upstreamAhead] = upstreamDiv ? upstreamDiv.split(/\s+/).map(Number) : [null, null];
+  const [behind, mainAhead] = mainDiv ? mainDiv.split(/\s+/).map(Number) : [null, null];
   const lastActivity = runGit(['log', '-1', '--format=%cI'], entry.path) || null;
   const enriched = { ...entry, ticket: ticketFrom(entry.branch || ''), upstream: upstream || null,
-    ahead, behind, dirtyCount: status.dirtyCount, untrackedCount: status.untrackedCount,
+    ahead: upstreamAhead, behind, mainAhead, upstreamBehind,
+    dirtyCount: status.dirtyCount, untrackedCount: status.untrackedCount,
     dirty: status.dirtyCount > 0, untracked: status.untrackedCount > 0,
     mergedToMain: mergedToMain(entry, runGit), lastActivity };
   const lifecycleState = classify(enriched);
