@@ -1,0 +1,8 @@
+on:
+  issues:
+    types: [opened, edited, labeled, unlabeled]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - closed
