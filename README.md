@@ -167,6 +167,7 @@ npm run deploy:both:apply
 | `governance:generate` | `node scripts/global/governance-generate.js` |
 | `governance:ghs-feedback-loop:test` | `node --test tests/ghs-feedback-loop.spec.js` |
 | `governance:goal-tier-resolver:test` | `python3 -m unittest tests.hooks.test_goal_tier_resolver` |
+| `governance:hamr-bypass-workflow:test` | `node --test tests/hamr-bypass-lint-workflow.spec.js` |
 | `governance:hook-parity` | `node scripts/global/hook-parity-check.js` |
 | `governance:hook-parity:test` | `node --test tests/hook-parity-check.spec.js` |
 | `governance:hooks:test` | `python3 -m unittest discover -s tests/hooks -p 'test_*.py'` |

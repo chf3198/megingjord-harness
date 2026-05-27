@@ -1,4 +1,4 @@
-name: HAMR Bypass Lint (advisory)
+name: HAMR Bypass Lint
 
 on:
   pull_request:
@@ -16,17 +16,19 @@ permissions:
 
 jobs:
   hamr-bypass-lint:
-    name: HAMR-bypass detection (advisory)
+    name: HAMR-bypass detection
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run HAMR-bypass lint
+      - name: Run HAMR-bypass lint (required gate)
+        env:
+          HAMR_BYPASS_GATE: '1'
         run: node scripts/global/lint-hamr-bypass.js
-        continue-on-error: true
       - name: Note
         run: |
-          echo "Per #1150 / #1130 D-1148-003: advisory-first."
-          echo "Promote to required (HAMR_BYPASS_GATE=1) after #1158 + 2w stable."
+          echo "Promoted to required per #1157: HAMR_BYPASS_GATE=1, continue-on-error removed."
+          echo "Stability evidence at promotion: 29/30 recent runs successful (#1158 close cycle)."
+          echo "Required-status-checks list updated separately via Admin gh api PATCH (#1157 AC3)."
