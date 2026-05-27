@@ -243,7 +243,8 @@
     "wiki:reindex": "node scripts/wiki/reindex.js",
     "wiki:search": "node scripts/wiki/search.js",
     "worktree:bootstrap": "bash scripts/worktree-bootstrap-node-modules.sh",
-    "worktree:start": "bash scripts/worktree-session-start.sh"
+    "worktree:start": "bash scripts/worktree-session-start.sh",
+    "governance:credentials-env": "node scripts/global/credentials-env-guard.js"
   },
   "keywords": [
     "devops",
