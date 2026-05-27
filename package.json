@@ -1,7 +1,7 @@
 {
   "name": "megingjord-harness",
   "version": "3.3.8",
-  "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex \u2014 multi-runtime skills, hooks, agents, wiki, and install tooling",
+  "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
     "adr:build": "log4brains build",
@@ -203,7 +203,7 @@
     "routing:refresh": "node scripts/global/routing-refresh.js --update-matrix",
     "routing:report": "node scripts/global/routing-baseline-report.js --days 7",
     "routing:telemetry": "node scripts/global/token-telemetry-report.js --json",
-    "setup": "npm install && echo '\u2705 megingjord ready \u2014 run: npm start'",
+    "setup": "npm install && echo '✅ megingjord ready — run: npm start'",
     "signing:bootstrap": "node scripts/global/crypto-signing-bootstrap.js",
     "start": "node scripts/dashboard-server.js",
     "state:offload": "node scripts/global/state-offload-client.js",
