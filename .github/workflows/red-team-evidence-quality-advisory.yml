@@ -1,0 +1,57 @@
+name: red-team-evidence-quality-advisory
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  advisory:
+    name: red-team-evidence-quality-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const V = require('./scripts/global/megalint/red-team-evidence-quality.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number, per_page: 100,
+            });
+            const changedFiles = files.map(f => f.filename);
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const artifact = comments.slice().reverse().find(c => V.isRedTeamArtifact(c.body || ''));
+            if (!artifact) { console.log('No RED_TEAM_ANALYSIS artifact found; skipping.'); return; }
+            const result = V.validate({ commentBody: artifact.body || '', changedFiles });
+            const status = result.ok ? 'PASS' : 'ADVISORY-VIOLATION';
+            await core.summary.addRaw(`### Red-team evidence quality advisory\n\n${status}\n`).write();
+            const marker = '<!-- red-team-evidence-quality-advisory -->';
+            const advisory = [
+              marker, '',
+              '## Red-team evidence quality advisory (#2273)', '',
+              `Source artifact: ${artifact.html_url}`,
+              result.ok ? 'Status: PASS' : 'Status: ADVISORY-VIOLATION', '',
+              ...(result.ok ? [] : result.violations.map(v => `- \`${v.rule}\` — ${v.detail}`)),
+              '',
+              'Fallback: if model output is generic or non-diff-grounded, do not post directly; route to consultant/manual synthesis.',
+            ].join('\n');
+            const prComments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number, per_page: 100,
+            });
+            const existing = prComments.find(c => (c.body || '').includes(marker));
+            if (existing) await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body: advisory });
+            else await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.payload.pull_request.number, body: advisory });
+            if (!result.ok) core.warning(`red-team-evidence-quality violations: ${result.violations.length}`);
