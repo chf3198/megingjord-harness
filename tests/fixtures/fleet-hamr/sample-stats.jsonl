@@ -1,0 +1,5 @@
+{"ts":1779820000000,"provider":"ollama","model":"qwen2.5-coder:32b","tier":"fleet-local","input_tokens":1500,"output_tokens":800}
+{"ts":1779820500000,"provider":"ollama","model":"qwen2.5-coder:32b","tier":"fleet-local","input_tokens":1200,"output_tokens":600}
+{"ts":1779821000000,"provider":"anthropic","model":"claude-opus-4-7","tier":"premium","input_tokens":2000,"output_tokens":1000}
+{"ts":1779821500000,"provider":"groq","model":"unknown","tier":"fleet","input_tokens":500,"output_tokens":200}
+{"ts":1779822000000,"provider":"ollama","model":"qwen2.5-coder:32b","tier":"fleet-local","input_tokens":1800,"output_tokens":900}

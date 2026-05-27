@@ -70,7 +70,7 @@ jobs:
               if (labelNames.includes('coordinator:cross-team-needs-hand-off')) {
                 await github.rest.issues.removeLabel({
                   owner, repo, issue_number: issue.number, name: 'coordinator:cross-team-needs-hand-off'
-                }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
+                }).catch((err) => { if (err?.status !== 404) throw err; });
                 core.info(`#${issue.number}: stripped stale coordinator label (sibling-role conflict resolved) (#1830)`);
               }
               return core.info('no sibling role conflicts');
@@ -85,5 +85,5 @@ jobs:
             await github.rest.issues.createComment({ owner, repo, issue_number: issue.number, body: msg });
             await github.rest.issues.addLabels({
               owner, repo, issue_number: issue.number, labels: ['coordinator:cross-team-needs-hand-off']
-            }).catch(() => {}); // catch-empty: addLabels throws 422 if label already applied
+            }).catch((err) => { if (err?.status !== 422) throw err; });
             core.info('issues.labeled sibling-role warn posted');
