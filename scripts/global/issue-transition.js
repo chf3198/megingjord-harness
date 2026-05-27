@@ -16,6 +16,7 @@ const ROLE_FOR = {
   review: 'consultant',
 };
 const { verifyEpicEvidence } = require('./epic-evidence');
+const { checkTransition, logBypass } = require('./phase-gate');
 
 const [,, issue, fromStatus, toStatus, ...extras] = process.argv;
 const force = extras.includes('--force');
@@ -56,6 +57,15 @@ if (toStatus === 'done' && labels.includes('type:epic')) {
     console.error('Use --force only for explicit emergency override.');
     process.exit(1);
   }
+}
+if (toStatus === 'in-progress') {
+  const failures = checkTransition({ number: Number(issue), body: data.body || '' });
+  if (failures.length && !force) {
+    failures.forEach(item => console.error(item));
+    console.error('Use --force only for explicit emergency override.');
+    process.exit(1);
+  }
+  if (failures.length && force) logBypass({ issue: Number(issue), fromStatus, toStatus }, failures);
 }
 
 const next = labels.filter(label => !label.startsWith('status:') && !label.startsWith('role:'));
