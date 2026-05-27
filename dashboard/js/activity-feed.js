@@ -1,5 +1,6 @@
 // Live Activity Feed — Agile lifecycle event log
 // Shows only meaningful events, suppresses repetitive noise
+/* global esc */
 
 const MAX_ACTIVITY = 30;
 const SUPPRESS_TYPES = new Set(['refresh']);
@@ -49,3 +50,6 @@ function activityIcon(type) {
   };
   return icons[type] || '📌';
 }
+
+window.addActivity = addActivity;
+window.renderActivityFeed = renderActivityFeed;
