@@ -245,7 +245,9 @@
     "wiki:reindex": "node scripts/wiki/reindex.js",
     "wiki:search": "node scripts/wiki/search.js",
     "worktree:bootstrap": "bash scripts/worktree-bootstrap-node-modules.sh",
-    "worktree:start": "bash scripts/worktree-session-start.sh"
+    "worktree:start": "bash scripts/worktree-session-start.sh",
+    "governance:rule-parity": "node scripts/global/governance-rule-parity.js",
+    "governance:rule-parity:test": "node --test tests/governance-rule-parity.spec.js"
   },
   "keywords": [
     "devops",
