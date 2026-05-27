@@ -70,7 +70,8 @@ const checks = [
       id('gov', 7), 'governance', result.ok,
       result.ok ? `${result.count} baton artifact comments validated` : `${first?.artifact || 'artifact'} ${first?.rule || 'unknown'}`,
       'signer-role-consistency',
-      'rebuild artifact via baton-comment-build.js or agent-signature.js and correct role fields'
+      first?.remediation?.suggestedFix ||
+        'rebuild artifact via baton-comment-build.js or agent-signature.js and correct role fields'
     );
   }],
   [id('tool', 1), 'tools', () => ok(id('tool', 1), 'tools', exists('wiki/index.md') && exists('wiki/log.md'), 'wiki index/log presence', 'wiki-growth-ready', 'maintain wiki index/log updates')],
