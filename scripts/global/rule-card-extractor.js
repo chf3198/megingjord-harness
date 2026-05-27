@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // rule-card-extractor.js — 8 typological adapters for governance rule-card
 // extraction. Refs #2301 (Epic #2295 Phase-1 child P1.2).
-// CommonJS for max cross-runtime portability (Claude Code/Codex/Copilot/Antigravity).
+// CommonJS for max cross-runtime portability (Claude Code/Codex/Copilot).
 'use strict';
 
 const fs = require('node:fs');
@@ -9,6 +9,9 @@ const path = require('node:path');
 const cp = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const GH_LABEL_LIMIT = 200;
+const GH_TIMEOUT_MS = 10000;
+
 const VALID_CLASSES = [
   'doc-vs-enforcement', 'enforcement-vs-enforcement', 'enum-drift',
   'doc-vs-no-enforcement', 'authority-carve-out',
@@ -46,7 +49,7 @@ function parseKV(raw) {
     if (ml) { out[ml[1]] = ml[2]; continue; }
   }
   // Single-line form: key=value key2="quoted value" (HTML comments)
-  const singleRe = /([\w_]+)=(?:"([^"]*)"|([\S]+))/g;
+  const singleRe = /([\w_]+)=(?:"([^"]*)"|(\S+))/g;
   let sm;
   while ((sm = singleRe.exec(raw)) !== null) {
     if (!out[sm[1]]) out[sm[1]] = sm[2] !== undefined ? sm[2] : sm[3];
@@ -54,128 +57,129 @@ function parseKV(raw) {
   return out;
 }
 
+function splitEnum(raw) {
+  return (raw || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function htmlCommentCards(src, srcRel) {
+  const cards = [];
+  const htmlRe = /<!--\s*rule-card:\s*([\s\S]*?)-->/g;
+  let match;
+  while ((match = htmlRe.exec(src)) !== null) {
+    const kv = parseKV(match[1]);
+    if (kv.rule_id) {
+      cards.push(makeCard({ ...kv, source: srcRel,
+        enum_values: splitEnum(kv.enum_values) }));
+    }
+  }
+  return cards;
+}
+
+function fencedCards(src, srcRel) {
+  const cards = [];
+  const fenceRe = /```rule-card\r?\n([\s\S]*?)```/g;
+  let match;
+  while ((match = fenceRe.exec(src)) !== null) {
+    const kv = parseKV(match[1]);
+    if (kv.rule_id) {
+      cards.push(makeCard({ ...kv, source: srcRel,
+        enum_values: splitEnum(kv.enum_values) }));
+    }
+  }
+  return cards;
+}
+
 // ---------------------------------------------------------------------------
-// Adapter 1: instructions/*.md — HTML comment blocks + fenced rule-card blocks
+// Adapter 1: instructions/*.md
 // ---------------------------------------------------------------------------
 function extractFromInstructions(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
-  const cards = [];
   const srcRel = rel(filePath);
-
-  // HTML-comment form: <!-- rule-card: rule_id=foo class=bar statement="..." -->
-  const htmlRe = /<!--\s*rule-card:\s*([\s\S]*?)-->/g;
-  let m;
-  while ((m = htmlRe.exec(src)) !== null) {
-    const kv = parseKV(m[1]);
-    if (kv.rule_id) {
-      cards.push(makeCard({ ...kv, source: srcRel,
-        enum_values: kv.enum_values ? kv.enum_values.split(',').map(s => s.trim()) : [],
-      }));
-    }
-  }
-
-  // Fenced ```rule-card``` blocks
-  const fenceRe = /```rule-card\r?\n([\s\S]*?)```/g;
-  while ((m = fenceRe.exec(src)) !== null) {
-    const kv = parseKV(m[1]);
-    if (kv.rule_id) {
-      cards.push(makeCard({ ...kv, source: srcRel,
-        enum_values: kv.enum_values ? kv.enum_values.split(',').map(s => s.trim()) : [],
-      }));
-    }
-  }
-  return cards;
+  return [...htmlCommentCards(src, srcRel), ...fencedCards(src, srcRel)];
 }
 
 // ---------------------------------------------------------------------------
-// Adapter 2: .github templates — HTML-comment-annotated enum lists
+// Adapter 2: .github templates
 // ---------------------------------------------------------------------------
 function extractFromTemplate(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
+  return htmlCommentCards(src, rel(filePath));
+}
+
+// ---------------------------------------------------------------------------
+// Adapter 3: .github/workflows/*.yml — types: enum blocks
+// ---------------------------------------------------------------------------
+function workflowInlineCards(src, srcRel, baseName) {
   const cards = [];
-  const srcRel = rel(filePath);
-  const re = /<!--\s*rule-card:\s*([\s\S]*?)-->/g;
-  let m;
-  while ((m = re.exec(src)) !== null) {
-    const kv = parseKV(m[1]);
-    if (kv.rule_id) {
-      cards.push(makeCard({ ...kv, source: srcRel,
-        enum_values: kv.enum_values ? kv.enum_values.split(',').map(s => s.trim()) : [],
+  const inlineRe = /types\s*:\s*\[([^\]]+)\]/g;
+  let match;
+  while ((match = inlineRe.exec(src)) !== null) {
+    const vals = match[1].split(',')
+      .map(s => s.trim().replace(/^['"]|['"]$/g, ''));
+    if (vals.length > 1) {
+      cards.push(makeCard({
+        rule_id: `workflow-types-enum-${baseName}`,
+        class: 'enum-drift',
+        statement: `Workflow ${baseName}.yml constrains event types to a fixed enum.`,
+        source: srcRel, enum_values: vals, severity: 'soft-mandatory',
+        cross_runtime_applicability: ['all'],
       }));
     }
   }
   return cards;
 }
 
-// ---------------------------------------------------------------------------
-// Adapter 3: .github/workflows/*.yml — types: enum blocks in with: sections
-// ---------------------------------------------------------------------------
+function workflowMultilineCards(src, srcRel, baseName) {
+  const cards = [];
+  const mlRe = /\btypes\s*:\s*\n((?:\s+-[^\n]+\n)+)/g;
+  let match;
+  while ((match = mlRe.exec(src)) !== null) {
+    const vals = match[1].split('\n')
+      .map(l => l.replace(/^\s+-\s*/, '').trim()).filter(Boolean);
+    if (vals.length > 1) {
+      cards.push(makeCard({
+        rule_id: `workflow-types-multiline-${baseName}`,
+        class: 'enum-drift',
+        statement: `Workflow ${baseName}.yml constrains event types to a fixed enum.`,
+        source: srcRel, enum_values: vals, severity: 'soft-mandatory',
+        cross_runtime_applicability: ['all'],
+      }));
+    }
+  }
+  return cards;
+}
+
 function extractFromWorkflow(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
   const srcRel = rel(filePath);
-  const cards = [];
-  // Capture `types: [a, b, c]` or multi-line `types:\n  - a\n  - b`
-  const inlineRe = /types\s*:\s*\[([^\]]+)\]/g;
-  let m;
-  while ((m = inlineRe.exec(src)) !== null) {
-    const vals = m[1].split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
-    if (vals.length > 1) {
-      cards.push(makeCard({
-        rule_id: `workflow-types-enum-${path.basename(filePath, '.yml')}`,
-        class: 'enum-drift',
-        statement: `Workflow ${path.basename(filePath)} constrains event types to a fixed enum.`,
-        source: srcRel,
-        enum_values: vals,
-        severity: 'soft-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-  }
-  // Multi-line `types:` list
-  const mlRe = /\btypes\s*:\s*\n((?:\s+-[^\n]+\n)+)/g;
-  while ((m = mlRe.exec(src)) !== null) {
-    const vals = m[1].split('\n')
-      .map(l => l.replace(/^\s+-\s*/, '').trim())
-      .filter(Boolean);
-    if (vals.length > 1) {
-      cards.push(makeCard({
-        rule_id: `workflow-types-multiline-${path.basename(filePath, '.yml')}`,
-        class: 'enum-drift',
-        statement: `Workflow ${path.basename(filePath)} constrains event types to a fixed enum.`,
-        source: srcRel,
-        enum_values: vals,
-        severity: 'soft-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-  }
-  return cards;
+  const baseName = path.basename(filePath, '.yml');
+  return [
+    ...workflowInlineCards(src, srcRel, baseName),
+    ...workflowMultilineCards(src, srcRel, baseName),
+  ];
 }
 
 // ---------------------------------------------------------------------------
-// Adapter 4: scripts/global/megalint/*.js — hardcoded const arrays
+// Adapter 4: scripts/global/megalint/*.js and scripts/global/*.js
 // ---------------------------------------------------------------------------
 function extractFromValidator(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
   const srcRel = rel(filePath);
   const cards = [];
-  // Match: const NAME = ['a', 'b', ...]  or  const NAME = ["a","b",...]
   const re = /const\s+([A-Z_][A-Z0-9_]*)\s*=\s*\[([^\]]+)\]/g;
-  let m;
-  while ((m = re.exec(src)) !== null) {
-    const vals = m[2].split(',')
-      .map(s => s.trim().replace(/^['"`]|['"`]$/g, ''))
-      .filter(Boolean);
+  let match;
+  while ((match = re.exec(src)) !== null) {
+    const vals = match[2].split(',')
+      .map(s => s.trim().replace(/^['"`]|['"`]$/g, '')).filter(Boolean);
     if (vals.length > 1) {
-      const constName = m[1];
+      const constName = match[1];
+      const slug = constName.toLowerCase().replace(/_/g, '-');
+      const base = path.basename(filePath, '.js');
       cards.push(makeCard({
-        rule_id: `validator-const-${constName.toLowerCase().replace(/_/g, '-')}`
-          + `-${path.basename(filePath, '.js')}`,
+        rule_id: `validator-const-${slug}-${base}`,
         class: 'enum-drift',
-        statement: `Validator ${path.basename(filePath)} enforces ${constName} as a fixed set.`,
-        source: srcRel,
-        enum_values: vals,
-        severity: 'hard-mandatory',
+        statement: `Validator ${base}.js enforces ${constName} as a fixed set.`,
+        source: srcRel, enum_values: vals, severity: 'hard-mandatory',
         cross_runtime_applicability: ['all'],
       }));
     }
@@ -184,28 +188,26 @@ function extractFromValidator(filePath) {
 }
 
 // ---------------------------------------------------------------------------
-// Adapter 5: hooks/scripts/*.py — Python enum constants
+// Adapter 5: hooks/scripts/*.py
 // ---------------------------------------------------------------------------
 function extractFromHook(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
   const srcRel = rel(filePath);
   const cards = [];
-  // Match: NAME = ['a', 'b', ...] or NAME = ("a", "b", ...)
   const re = /([A-Z_][A-Z0-9_]*)\s*=\s*[\[(]([^)\]]+)[\])]/g;
-  let m;
-  while ((m = re.exec(src)) !== null) {
-    const vals = m[2].split(',')
+  let match;
+  while ((match = re.exec(src)) !== null) {
+    const vals = match[2].split(',')
       .map(s => s.trim().replace(/^['"]|['"]$/g, ''))
       .filter(s => s.length > 0 && !s.startsWith('#'));
     if (vals.length > 1) {
+      const slug = match[1].toLowerCase().replace(/_/g, '-');
+      const base = path.basename(filePath, '.py');
       cards.push(makeCard({
-        rule_id: `hook-const-${m[1].toLowerCase().replace(/_/g, '-')}`
-          + `-${path.basename(filePath, '.py')}`,
+        rule_id: `hook-const-${slug}-${base}`,
         class: 'enum-drift',
-        statement: `Hook ${path.basename(filePath)} enforces ${m[1]} as a fixed set.`,
-        source: srcRel,
-        enum_values: vals,
-        severity: 'soft-mandatory',
+        statement: `Hook ${base}.py enforces ${match[1]} as a fixed set.`,
+        source: srcRel, enum_values: vals, severity: 'soft-mandatory',
         cross_runtime_applicability: ['all'],
       }));
     }
@@ -214,197 +216,157 @@ function extractFromHook(filePath) {
 }
 
 // ---------------------------------------------------------------------------
-// Adapter 6: lefthook.yml — commands keys + run values
+// Adapter 6: lefthook.yml
 // ---------------------------------------------------------------------------
 function extractFromPrecommit(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
-  const srcRel = rel(filePath);
-  const cards = [];
-  // Extract command names from `commands:` blocks
   const cmdNames = [];
   const cmdRe = /^\s{4}([a-z][a-z0-9_-]+)\s*:/gm;
-  let m;
-  while ((m = cmdRe.exec(src)) !== null) {
-    cmdNames.push(m[1]);
-  }
-  if (cmdNames.length > 0) {
+  let match;
+  while ((match = cmdRe.exec(src)) !== null) cmdNames.push(match[1]);
+  if (cmdNames.length === 0) return [];
+  return [makeCard({
+    rule_id: 'lefthook-pre-commit-commands',
+    class: 'enforcement-vs-enforcement',
+    statement: 'lefthook.yml defines the set of pre-commit/pre-push gates '
+      + 'that must all pass before a push is accepted.',
+    source: rel(filePath), enum_values: cmdNames, severity: 'hard-mandatory',
+    cross_runtime_applicability: ['claude-code', 'codex', 'copilot', 'antigravity'],
+  })];
+}
+
+// ---------------------------------------------------------------------------
+// Adapter 7: config/*.schema.json
+// ---------------------------------------------------------------------------
+function walkSchemaEnums(obj, pathParts, srcRel, baseName, cards) {
+  if (!obj || typeof obj !== 'object') return;
+  if (Array.isArray(obj.enum) && obj.enum.length > 1) {
+    const propName = pathParts[pathParts.length - 1] || 'root';
+    const slug = `schema-enum-${baseName}-${propName}`
+      .replace(/[^a-z0-9-]/gi, '-').toLowerCase();
     cards.push(makeCard({
-      rule_id: 'lefthook-pre-commit-commands',
-      class: 'enforcement-vs-enforcement',
-      statement: 'lefthook.yml defines the set of pre-commit/pre-push gates '
-        + 'that must all pass before a push is accepted.',
-      source: srcRel,
-      enum_values: cmdNames,
-      severity: 'hard-mandatory',
-      cross_runtime_applicability: ['claude-code', 'codex', 'copilot', 'antigravity'],
+      rule_id: slug, class: 'enum-drift',
+      statement: `Schema ${baseName}.json constrains ${pathParts.join('.')} to an enum.`,
+      source: srcRel, enum_values: obj.enum.map(String), severity: 'soft-mandatory',
+      cross_runtime_applicability: ['all'],
     }));
   }
-  return cards;
+  for (const [key, val] of Object.entries(obj)) {
+    if (key !== 'enum' && val && typeof val === 'object') {
+      walkSchemaEnums(val, [...pathParts, key], srcRel, baseName, cards);
+    }
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Adapter 7: config/*.schema.json — enum arrays
-// ---------------------------------------------------------------------------
 function extractFromConfigSchema(filePath) {
   let data;
-  try {
-    data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  } catch {
-    return [];
-  }
-  const srcRel = rel(filePath);
+  try { data = JSON.parse(fs.readFileSync(filePath, 'utf8')); } catch { return []; }
   const cards = [];
-
-  function walk(obj, pathParts) {
-    if (!obj || typeof obj !== 'object') return;
-    if (Array.isArray(obj.enum) && obj.enum.length > 1) {
-      const propName = pathParts[pathParts.length - 1] || 'root';
-      cards.push(makeCard({
-        rule_id: `schema-enum-${path.basename(filePath, '.json')}-${propName}`
-          .replace(/[^a-z0-9-]/gi, '-').toLowerCase(),
-        class: 'enum-drift',
-        statement: `Schema ${path.basename(filePath)} constrains `
-          + `${pathParts.join('.')} to an enum.`,
-        source: srcRel,
-        enum_values: obj.enum.map(String),
-        severity: 'soft-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-    for (const [k, v] of Object.entries(obj)) {
-      if (k !== 'enum' && v && typeof v === 'object') walk(v, [...pathParts, k]);
-    }
-  }
-  walk(data, []);
+  walkSchemaEnums(data, [], rel(filePath), path.basename(filePath, '.json'), cards);
   return cards;
 }
 
 // ---------------------------------------------------------------------------
-// Adapter 8: gh label list — best-effort live label enum
+// Adapter 8: gh label list (best-effort)
 // ---------------------------------------------------------------------------
+function labelsToCards(labels) {
+  const cards = [];
+  const statusVals = labels.filter(l => l.startsWith('status:'));
+  const roleVals = labels.filter(l => l.startsWith('role:'));
+  const laneVals = labels.filter(l => l.startsWith('lane:'));
+  if (statusVals.length > 0) {
+    cards.push(makeCard({ rule_id: 'live-labels-status-enum', class: 'enum-drift',
+      statement: 'Live GitHub label set defines the allowed status:* values.',
+      source: 'gh:label-list', enum_values: statusVals, severity: 'hard-mandatory',
+      cross_runtime_applicability: ['all'] }));
+  }
+  if (roleVals.length > 0) {
+    cards.push(makeCard({ rule_id: 'live-labels-role-enum', class: 'enum-drift',
+      statement: 'Live GitHub label set defines the allowed role:* values.',
+      source: 'gh:label-list', enum_values: roleVals, severity: 'hard-mandatory',
+      cross_runtime_applicability: ['all'] }));
+  }
+  if (laneVals.length > 0) {
+    cards.push(makeCard({ rule_id: 'live-labels-lane-enum', class: 'enum-drift',
+      statement: 'Live GitHub label set defines the allowed lane:* values.',
+      source: 'gh:label-list', enum_values: laneVals, severity: 'hard-mandatory',
+      cross_runtime_applicability: ['all'] }));
+  }
+  return cards;
+}
+
 function extractFromLabels() {
   try {
-    const out = cp.execFileSync('gh', ['label', 'list', '--json', 'name', '--limit', '200'],
-      { stdio: ['pipe', 'pipe', 'pipe'], timeout: 10000 });
+    const out = cp.execFileSync(
+      'gh', ['label', 'list', '--json', 'name', '--limit', String(GH_LABEL_LIMIT)],
+      { stdio: ['pipe', 'pipe', 'pipe'], timeout: GH_TIMEOUT_MS });
     const labels = JSON.parse(out.toString()).map(l => l.name);
-    if (labels.length === 0) return [];
-    const statusVals = labels.filter(l => l.startsWith('status:'));
-    const roleVals = labels.filter(l => l.startsWith('role:'));
-    const laneVals = labels.filter(l => l.startsWith('lane:'));
-    const cards = [];
-    if (statusVals.length > 0) {
-      cards.push(makeCard({
-        rule_id: 'live-labels-status-enum',
-        class: 'enum-drift',
-        statement: 'Live GitHub label set defines the allowed status:* values.',
-        source: 'gh:label-list',
-        enum_values: statusVals,
-        severity: 'hard-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-    if (roleVals.length > 0) {
-      cards.push(makeCard({
-        rule_id: 'live-labels-role-enum',
-        class: 'enum-drift',
-        statement: 'Live GitHub label set defines the allowed role:* values.',
-        source: 'gh:label-list',
-        enum_values: roleVals,
-        severity: 'hard-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-    if (laneVals.length > 0) {
-      cards.push(makeCard({
-        rule_id: 'live-labels-lane-enum',
-        class: 'enum-drift',
-        statement: 'Live GitHub label set defines the allowed lane:* values.',
-        source: 'gh:label-list',
-        enum_values: laneVals,
-        severity: 'hard-mandatory',
-        cross_runtime_applicability: ['all'],
-      }));
-    }
-    return cards;
-  } catch {
-    return []; // best-effort; no gh or no auth
-  }
+    return labels.length === 0 ? [] : labelsToCards(labels);
+  } catch { return []; }
 }
 
 // ---------------------------------------------------------------------------
 // extractAll — walks harness file tree, unions all adapter outputs
 // ---------------------------------------------------------------------------
-function extractAll(opts) {
-  const rootDir = (opts && opts.root) || ROOT;
-  const cards = [];
-
-  function globSync(dir, ext, maxDepth) {
-    const results = [];
-    function recurse(cur, depth) {
-      if (depth > maxDepth) return;
-      let entries;
-      try { entries = fs.readdirSync(cur, { withFileTypes: true }); } catch { return; }
-      for (const e of entries) {
-        if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
-        const full = path.join(cur, e.name);
-        if (e.isDirectory()) { recurse(full, depth + 1); }
-        else if (e.name.endsWith(ext)) results.push(full);
-      }
+function globSync(dir, ext, maxDepth) {
+  const results = [];
+  function recurse(cur, depth) {
+    if (depth > maxDepth) return;
+    let entries;
+    try { entries = fs.readdirSync(cur, { withFileTypes: true }); } catch { return; }
+    for (const entry of entries) {
+      if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue;
+      const full = path.join(cur, entry.name);
+      if (entry.isDirectory()) recurse(full, depth + 1);
+      else if (entry.name.endsWith(ext)) results.push(full);
     }
-    recurse(dir, 0);
-    return results;
   }
+  recurse(dir, 0);
+  return results;
+}
 
-  // Adapter 1: instructions
-  for (const f of globSync(path.join(rootDir, 'instructions'), '.md', 1)) {
-    try { cards.push(...extractFromInstructions(f)); } catch { /* skip */ }
+function collectAdapter(files, fn, cards) {
+  for (const filePath of files) {
+    try { cards.push(...fn(filePath)); } catch { /* skip unreadable */ }
   }
+}
 
-  // Adapter 2: .github templates
-  for (const f of [
+function collectFromTree(rootDir, cards) {
+  collectAdapter(
+    globSync(path.join(rootDir, 'instructions'), '.md', 1),
+    extractFromInstructions, cards);
+  const templateFiles = [
     path.join(rootDir, '.github', 'PULL_REQUEST_TEMPLATE.md'),
     ...globSync(path.join(rootDir, '.github', 'ISSUE_TEMPLATE'), '.md', 1),
-  ]) {
-    if (fs.existsSync(f)) {
-      try { cards.push(...extractFromTemplate(f)); } catch { /* skip */ }
-    }
-  }
-
-  // Adapter 3: workflows
-  for (const f of globSync(path.join(rootDir, '.github', 'workflows'), '.yml', 1)) {
-    try { cards.push(...extractFromWorkflow(f)); } catch { /* skip */ }
-  }
-
-  // Adapter 4: megalint validators
-  for (const f of globSync(path.join(rootDir, 'scripts', 'global', 'megalint'), '.js', 1)) {
-    try { cards.push(...extractFromValidator(f)); } catch { /* skip */ }
-  }
-  // Also scan scripts/global/*.js for top-level const enums
-  for (const f of globSync(path.join(rootDir, 'scripts', 'global'), '.js', 0)) {
-    try { cards.push(...extractFromValidator(f)); } catch { /* skip */ }
-  }
-
-  // Adapter 5: python hooks
-  for (const f of globSync(path.join(rootDir, 'hooks', 'scripts'), '.py', 1)) {
-    try { cards.push(...extractFromHook(f)); } catch { /* skip */ }
-  }
-
-  // Adapter 6: lefthook
+  ].filter(fp => fs.existsSync(fp));
+  collectAdapter(templateFiles, extractFromTemplate, cards);
+  collectAdapter(
+    globSync(path.join(rootDir, '.github', 'workflows'), '.yml', 1),
+    extractFromWorkflow, cards);
+  collectAdapter(
+    globSync(path.join(rootDir, 'scripts', 'global', 'megalint'), '.js', 1),
+    extractFromValidator, cards);
+  collectAdapter(
+    globSync(path.join(rootDir, 'scripts', 'global'), '.js', 0),
+    extractFromValidator, cards);
+  collectAdapter(
+    globSync(path.join(rootDir, 'hooks', 'scripts'), '.py', 1),
+    extractFromHook, cards);
   const lefthook = path.join(rootDir, 'lefthook.yml');
   if (fs.existsSync(lefthook)) {
     try { cards.push(...extractFromPrecommit(lefthook)); } catch { /* skip */ }
   }
+  collectAdapter(
+    globSync(path.join(rootDir, 'config'), '.json', 1)
+      .filter(fp => fp.endsWith('.schema.json')),
+    extractFromConfigSchema, cards);
+}
 
-  // Adapter 7: config schemas
-  for (const f of globSync(path.join(rootDir, 'config'), '.json', 1)) {
-    if (f.endsWith('.schema.json')) {
-      try { cards.push(...extractFromConfigSchema(f)); } catch { /* skip */ }
-    }
-  }
-
-  // Adapter 8: live labels (best-effort)
+function extractAll(opts) {
+  const rootDir = (opts && opts.root) || ROOT;
+  const cards = [];
+  collectFromTree(rootDir, cards);
   cards.push(...extractFromLabels());
-
   return cards;
 }
 
@@ -423,16 +385,8 @@ if (require.main === module) {
 }
 
 module.exports = {
-  extractFromInstructions,
-  extractFromTemplate,
-  extractFromWorkflow,
-  extractFromValidator,
-  extractFromHook,
-  extractFromPrecommit,
-  extractFromConfigSchema,
-  extractFromLabels,
-  extractAll,
-  VALID_CLASSES,
-  VALID_SEVERITIES,
-  makeCard,
+  extractFromInstructions, extractFromTemplate, extractFromWorkflow,
+  extractFromValidator, extractFromHook, extractFromPrecommit,
+  extractFromConfigSchema, extractFromLabels, extractAll,
+  VALID_CLASSES, VALID_SEVERITIES, makeCard,
 };
