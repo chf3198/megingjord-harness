@@ -1,16 +1,17 @@
 'use strict';
-// tests/hamr-bypass-lint-workflow.spec.js — golden-file structural assertions for #1157.
+// tests/hamr-bypass-lint-workflow.spec.js — golden-file + structural assertions for #1157.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
 const WORKFLOW = path.resolve(__dirname, '..', '.github/workflows/hamr-bypass-lint.yml');
+const FIXTURE = path.resolve(__dirname, 'fixtures/hamr-bypass-lint-workflow-promoted.yml');
 
 function readYaml() { return fs.readFileSync(WORKFLOW, 'utf8'); }
 
-test('workflow file exists', () => {
-  assert.ok(fs.existsSync(WORKFLOW), 'workflow file missing');
+test('golden-file byte-equality: workflow matches fixture snapshot', () => {
+  assert.equal(fs.readFileSync(WORKFLOW, 'utf8'), fs.readFileSync(FIXTURE, 'utf8'));
 });
 
 test('workflow name does NOT include "(advisory)" — post-promotion state per AC5', () => {
