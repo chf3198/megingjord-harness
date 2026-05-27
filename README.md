@@ -89,6 +89,12 @@ npm test
 npm run deploy:both:apply
 ```
 
+## Env-backed credentials
+
+- Copy `.env.example` to `.env` for local resource credentials.
+- Tavily MCP must keep the secret only in `TAVILY_API_KEY`; do not inline Tavily keys in MCP URLs or tracked config.
+- Verify env-backed Tavily wiring with `npm run governance:credentials-env`.
+
 ## Research-first gate notes
 
 - Research-first Epic detection is label-first: `phase-gate:research-first` on `type:epic` tickets.
