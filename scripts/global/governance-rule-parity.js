@@ -13,8 +13,7 @@ function read(rel) { return fs.readFileSync(path.join(ROOT, rel), 'utf8'); }
 function sameSet(a, b) { return a.length === b.length && a.every(v => b.includes(v)); }
 function severity(introduced, carvedOut) { return carvedOut ? 'advisory' : introduced ? 'hard' : 'advisory'; }
 
-function buildFindings() {
-  const findings = [];
+function buildFindings() { const findings = [];
   const template = read('.github/PULL_REQUEST_TEMPLATE.md');
   if (/Refs #/.test(template) && /auto-close keyword/i.test(read('scripts/global/megalint/merge-evidence-pr-gate.js'))) {
     findings.push({
