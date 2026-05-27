@@ -16,9 +16,11 @@ function leaseFor(entry, leases) {
 }
 
 function classify(entry, lease) {
+  const ticket = ticketFrom(entry.branch);
   if (lease) return 'active-lease';
   if (entry.locked) return 'keep-locked';
   if ((entry.branch || '').startsWith('sandbox/')) return 'keep-launcher';
+  if (entry.branch && entry.branch !== 'main' && ticket === null) return 'keep-review';
   if (entry.dirtyCount > 0 || entry.untrackedCount > 0 || entry.ahead > 0) return 'preserve-dirty';
   if (entry.openPr) return 'stale-open-pr';
   if (entry.mergedToMain) return 'merged-clean';
