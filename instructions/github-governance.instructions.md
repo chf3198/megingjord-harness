@@ -21,7 +21,13 @@ applyTo: "**"
 ## Ticket lifecycle gates
 
 - Every change needs a linked issue with taxonomy label (`type:*`), priority label, domain label, milestone, and project assignment before coding starts.
-- PR requires `Refs #N`, milestone, labels, and gate-suite evidence. Use `Refs` not `Closes` — issue close is Consultant authority via `gh issue close` after CONSULTANT_CLOSEOUT.
+- PR body MUST include `Refs #N` for issue linkage AND one of the following merge-evidence
+  forms (per Epic #2295 Phase-1 P1.3):
+  - **Preferred**: `merge-evidence-deferred-final: #N` — satisfies `merge-evidence-pr-gate`
+    without auto-closing the issue on merge. Consultant retains explicit terminal-finalize
+    authority and closes via `gh issue close #N` after `CONSULTANT_CLOSEOUT`.
+  - **Backward-compat**: `Closes #N` (or `Fixes #N` / `Resolves #N`) — still accepted;
+    triggers GitHub auto-close on merge.
 - Issues must include: problem/objective, expected outcome, acceptance criteria.
 - Large work is decomposed with sub-issues and `blocked by` / `blocking` dependencies.
 - Templates required: at minimum bug, task, and epic forms. `blank_issues_enabled: false` in config.yml.
