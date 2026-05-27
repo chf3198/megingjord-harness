@@ -78,7 +78,7 @@ test('#1498 AC3: lightweight lanes skipped (docs-research)', () => {
 });
 
 test('#1498 AC3: lightweight lanes skipped (trivial, docs-only, research)', () => {
-  for (const lane of ['lane:trivial', 'lane:docs-only', 'lane:research']) {
+  for (const lane of ['lane:trivial', 'lane:docs-only', 'lane:research', 'lane:no-code-remediation']) {
     const result = rule.validate({
       state: 'closed', labels: ['status:done', 'type:task', lane], mergedPRRefs: [],
     });

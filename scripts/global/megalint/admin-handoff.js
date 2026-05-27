@@ -4,7 +4,7 @@
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 
-const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial'];
+const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:no-code-remediation'];
 
 function findAdminHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?ADMIN_HANDOFF\b/;

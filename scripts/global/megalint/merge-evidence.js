@@ -5,7 +5,7 @@
 // stays side-effect-free per existing megalint convention.
 
 const LIGHTWEIGHT_LANES = new Set([
-  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research',
+  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:no-code-remediation',
 ]);
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 

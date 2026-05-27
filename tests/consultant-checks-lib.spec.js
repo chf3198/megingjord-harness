@@ -96,6 +96,10 @@ test('#1615 isIssueOnlyLane: lane:trivial → true (no PR expected)', () => {
   expect(lib.isIssueOnlyLane('lane:trivial\ntype:task')).toBe(true);
 });
 
+test('#2264 isIssueOnlyLane: lane:no-code-remediation → true (manager/consultant path)', () => {
+  expect(lib.isIssueOnlyLane('lane:no-code-remediation\ntype:task')).toBe(true);
+});
+
 test('#1615 isIssueOnlyLane: lane:code-change → false (branch check enforced)', () => {
   expect(lib.isIssueOnlyLane('lane:code-change\ntype:bug\npriority:P2')).toBe(false);
 });

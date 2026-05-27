@@ -6,7 +6,7 @@
 // the merge-evidence-override:approved label on the issue.
 
 const LIGHTWEIGHT_LANES = new Set([
-  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research',
+  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:no-code-remediation',
 ]);
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 const CLOSE_KEYWORDS_RE = /\b(close[sd]?|fix(es|ed)?|resolve[sd]?)\s+#(\d+)/gi;

@@ -4,7 +4,7 @@
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 
-const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:config-only'];
+const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:config-only', 'lane:no-code-remediation'];
 
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;

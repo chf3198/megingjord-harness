@@ -13,7 +13,7 @@ const ALLOWED_STRATEGIES = [
 
 const NONE_PERMITTED_LANES = [
   'lane:trivial', 'lane:docs-research', 'lane:docs-only',
-  'lane:research', 'lane:config-only',
+  'lane:research', 'lane:config-only', 'lane:no-code-remediation',
 ];
 
 const PEER_REVIEW_RUBRIC_THRESHOLD = 7;
