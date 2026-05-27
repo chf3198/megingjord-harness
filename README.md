@@ -147,6 +147,7 @@ npm run deploy:both:apply
 | `governance:anneal-decision-audit` | `node scripts/global/anneal-decision-audit.js` |
 | `governance:anneal-decision-detector:test` | `node --test tests/anneal-decision-detector.spec.js` |
 | `governance:audit` | `node scripts/global/governance-audit.js` |
+| `governance:baton-latency:test` | `node --test tests/baton-latency-report.spec.js` |
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
