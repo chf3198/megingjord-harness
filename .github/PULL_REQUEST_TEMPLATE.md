@@ -26,7 +26,7 @@ Refs #<!-- issue number -->
 <!-- Per instructions/test-methodology-matrix.instructions.md.
      Must match MANAGER_HANDOFF.test_strategy on linked issue. -->
 
-- Strategy: <!-- tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|none -->
+- Strategy: <!-- tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|stress-test|none -->
 - Evidence artifact: <!-- spec file path / fixture path / VISUAL_QA_EVIDENCE link / "see linked issue MANAGER_HANDOFF" -->
 
 ## Validation
