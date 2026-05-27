@@ -169,9 +169,9 @@ npm run deploy:both:apply
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
+| `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
-| `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-lease-dispatch:test` | `node --test tests/cross-team-lease-dispatch.spec.js` |
 | `governance:delegation-lint` | `node scripts/global/delegation-phrase-lint.js` |
 | `governance:dispatcher-set-labels:test` | `node --test tests/github-dispatcher-set-labels.spec.js` |
@@ -366,10 +366,6 @@ npm run deploy:both:apply
 | `wiki:search` | `node scripts/wiki/search.js` |
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
-<!-- /docs -->
-
-This table is auto-generated from `package.json` by `npm run docs:compile` (#796). Do not edit by hand inside the fenced region — CI fails when README diverges from sources.
-
 ## Token telemetry reconciliation configuration
 
 - Run `npm run routing:reconcile` to generate `logs/token-telemetry-reconcile.json`.
