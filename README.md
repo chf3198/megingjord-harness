@@ -141,6 +141,7 @@ npm run deploy:both:apply
 | `git:freshness-check` | `node scripts/global/git-freshness-check.js` |
 | `git:freshness-check:test` | `node --test tests/git-freshness-check.spec.js` |
 | `goals:regen` | `node scripts/global/goals-contract-generate.js` |
+| `gov:extract` | `node scripts/global/rule-card-extractor.js --all > /tmp/rule-cards.json` |
 | `governance:actuator-transitions:test` | `node --test tests/actuator-transitions.spec.js` |
 | `governance:adapters:emit` | `node scripts/global/governance-adapter-emit.js` |
 | `governance:adapters:test` | `node scripts/global/governance-adapter-emit.spec.js` |

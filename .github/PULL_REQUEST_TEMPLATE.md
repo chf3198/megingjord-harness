@@ -5,7 +5,16 @@
 ## Linked Issue
 
 Refs #<!-- issue number -->
-<!-- Note: Consultant closes the issue explicitly via gh issue close after CONSULTANT_CLOSEOUT. Do NOT use "Closes #N" — it auto-closes the issue before Consultant review. -->
+
+## Merge Evidence
+
+<!-- PREFERRED: deferred-finalize marker — satisfies merge-evidence gate WITHOUT auto-closing
+     the issue on merge. Consultant retains explicit terminal-finalize authority and closes
+     the issue manually via `gh issue close #N` after CONSULTANT_CLOSEOUT is posted. -->
+merge-evidence-deferred-final: #<!-- issue number -->
+
+<!-- BACKWARD COMPAT: `Closes #N` remains accepted by merge-evidence-pr-gate and triggers
+     GitHub auto-close on merge. Use only when Consultant-explicit-close is not required. -->
 
 ## Changes
 
@@ -26,7 +35,7 @@ Refs #<!-- issue number -->
 <!-- Per instructions/test-methodology-matrix.instructions.md.
      Must match MANAGER_HANDOFF.test_strategy on linked issue. -->
 
-- Strategy: <!-- tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|none -->
+- Strategy: <!-- tdd-pyramid|tdd-trophy|contract-test|golden-file|eval-harness|visual-regression|drift-lint|peer-review|manual-verify|stress-test|none -->
 - Evidence artifact: <!-- spec file path / fixture path / VISUAL_QA_EVIDENCE link / "see linked issue MANAGER_HANDOFF" -->
 
 ## Validation

@@ -2,6 +2,7 @@
 // manager-handoff — validates MANAGER_HANDOFF schema + crypto signature fields.
 
 const sig = require('../governance-artifact-signature');
+const { isValidStrategy } = require('../test-strategy-enum');
 const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates'];
 const PHASE_ONE_LABEL = process.env.PHASE_ONE_LABEL || 'phase-gate:phase-1';
 
@@ -25,6 +26,19 @@ function checkRequiredFields(body) {
   if (!/Team&Model:/i.test(body)) violations.push({ rule: 'missing-team-model', detail: 'MANAGER_HANDOFF missing Team&Model field' });
   if (!/Role:\s*manager/i.test(body)) violations.push({ rule: 'missing-role-manager', detail: 'MANAGER_HANDOFF missing Role: manager field' });
   return violations;
+}
+function checkTestStrategy(body) {
+  const declared = extractField(body, 'test_strategy');
+  if (!declared) return []; // missing-field already caught by checkRequiredFields
+  if (!isValidStrategy(declared)) {
+    return [{
+      rule: 'lane:unknown-test-strategy',
+      detail: `MANAGER_HANDOFF test_strategy '${declared}' is not in the canonical enum. ` +
+        'See scripts/global/test-strategy-enum.js for valid values.',
+      severity: 'advisory',
+    }];
+  }
+  return [];
 }
 function checkLaneConsistency(body, expectedLane) {
   if (!expectedLane) return [];
@@ -70,6 +84,7 @@ function validate(input) {
   }
   const violations = [
     ...checkRequiredFields(handoff.body),
+    ...checkTestStrategy(handoff.body),
     ...checkLaneConsistency(handoff.body, input.lane),
     ...checkPhaseOneFields(handoff.body, input.labels),
     ...checkCrypto(handoff.body),

@@ -1,10 +1,11 @@
 'use strict';
 // admin-handoff — validates ADMIN_HANDOFF signer + independence vs Collaborator.
+// Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
+// Updated to include lane:config-only and lane:research (were missing vs canonical set).
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
-
-const LIGHTWEIGHT = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:no-code-remediation'];
+const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 
 function findAdminHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?ADMIN_HANDOFF\b/;
@@ -23,9 +24,15 @@ function nameOnly(commentBody) {
 
 function checkSignerFields(body) {
   const violations = [];
-  if (!/Signed-by:/i.test(body)) violations.push({ rule: 'missing-signer', detail: 'ADMIN_HANDOFF missing Signed-by field' });
-  if (!/Team&Model:/i.test(body)) violations.push({ rule: 'missing-team-model', detail: 'ADMIN_HANDOFF missing Team&Model field' });
-  if (!/Role:\s*admin/i.test(body)) violations.push({ rule: 'missing-role-admin', detail: 'ADMIN_HANDOFF missing Role: admin field' });
+  if (!/Signed-by:/i.test(body)) {
+    violations.push({ rule: 'missing-signer', detail: 'ADMIN_HANDOFF missing Signed-by field' });
+  }
+  if (!/Team&Model:/i.test(body)) {
+    violations.push({ rule: 'missing-team-model', detail: 'ADMIN_HANDOFF missing Team&Model field' });
+  }
+  if (!/Role:\s*admin/i.test(body)) {
+    violations.push({ rule: 'missing-role-admin', detail: 'ADMIN_HANDOFF missing Role: admin field' });
+  }
   return violations;
 }
 
@@ -35,13 +42,14 @@ function checkIndependence(adminBody, collaboratorHandoff) {
   const adminName = nameOnly(adminBody);
   if (collabName && adminName && collabName === adminName) {
     return [{ rule: 'admin-signer-not-independent',
-      detail: `ADMIN_HANDOFF signer "${adminName}" matches COLLABORATOR_HANDOFF signer — independent verification requires a distinct identity` }];
+      detail: `ADMIN_HANDOFF signer "${adminName}" matches COLLABORATOR_HANDOFF signer`
+        + ` — independent verification requires a distinct identity` }];
   }
   return [];
 }
 
 function validate(input) {
-  if (LIGHTWEIGHT.includes(input.lane)) {
+  if (LIGHTWEIGHT.includes(input.lane) || laneSeverity(input.lane) === 'issue-only') {
     return { ok: true, violations: [], reason: 'lightweight-lane-skip' };
   }
   const comments = input.comments || [];

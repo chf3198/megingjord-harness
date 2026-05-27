@@ -1,0 +1,195 @@
+# governance-rules.yaml — v1 content-addressed registry of harness governance rules
+# Refs #2301 (P1.2 of Epic #2295)
+#
+# Schema:
+#   rule_id:     unique kebab-case identifier
+#   class:       one of the 8 typological classes
+#   statement:   human-readable rule statement (one sentence)
+#   source:      file path (relative to repo root) + optional line reference
+#   enum_values: list of valid values (if class involves an enum)
+#   severity:    advisory | soft-mandatory | hard-mandatory
+#   cross_runtime_applicability: list of runtimes this rule applies to
+#
+# Classes:
+#   doc-vs-enforcement           — doc says X but no gate enforces X
+#   enforcement-vs-enforcement   — two gates enforce conflicting values
+#   enum-drift                   — enum in code differs from enum in docs
+#   doc-vs-no-enforcement        — rule documented but entirely unenforced
+#   authority-carve-out          — rule has explicit exception/carve-out path
+#   cross-runtime-fragmentation  — rule applies differently across runtimes
+#   maintenance-drift            — gate was once enforced but removed/relaxed
+#   context-substituting-for-guardrail — context substitutes for a hard gate
+
+version: 1
+generated_by: seed-rules-v1
+rules:
+
+  - rule_id: refs-not-closes-in-pr
+    class: doc-vs-enforcement
+    statement: >
+      PR bodies must use "Refs #N" (not "Closes #N") to link the issue;
+      issue closure is Consultant authority after CONSULTANT_CLOSEOUT.
+    source: instructions/github-governance.instructions.md
+    enum_values: []
+    severity: soft-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: lane-enum-values
+    class: enum-drift
+    statement: >
+      The lane field in MANAGER_HANDOFF must be one of the allowed lane
+      values; unknown lane values are rejected by the test-evidence gate.
+    source: instructions/role-baton-routing.instructions.md
+    enum_values:
+      - lane:code-change
+      - lane:docs-research
+      - lane:config-only
+      - lane:no-code-remediation
+      - lane:trivial
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: signer-independence-admin-vs-collaborator
+    class: enforcement-vs-enforcement
+    statement: >
+      The Admin signer alias must differ from the Collaborator signer alias;
+      identical aliases fail the signer-fidelity gate and block the
+      testing-to-review transition.
+    source: scripts/global/megalint/signer-fidelity.js
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: single-status-invariant
+    class: enforcement-vs-enforcement
+    statement: >
+      Every ticket must carry exactly one status:* label at all times;
+      multi-status carriage is a Rule 1 violation enforced by label-lint.
+    source: instructions/role-baton-routing.instructions.md
+    enum_values:
+      - status:backlog
+      - status:queued
+      - status:triage
+      - status:ready
+      - status:in-progress
+      - status:testing
+      - status:review
+      - status:done
+      - status:cancelled
+      - status:dormant
+      - status:deferred
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - all
+
+  - rule_id: branch-name-prefix-enum
+    class: enum-drift
+    statement: >
+      Branch names must match one of the allowed prefix patterns; the
+      branch-name-required CI gate rejects branches not in the allowed set.
+    source: hooks/scripts/validate-branch-name.sh
+    enum_values:
+      - feat
+      - fix
+      - chore
+      - skill
+      - hotfix
+      - docs
+      - content
+      - perf
+      - refactor
+      - style
+      - test
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: test-strategy-enum-values
+    class: enum-drift
+    statement: >
+      The test_strategy field in MANAGER_HANDOFF must be one of the allowed
+      strategy values defined in test-strategy-enum.js; unknown values fail
+      the test-evidence gate.
+    source: scripts/global/test-strategy-enum.js
+    enum_values:
+      - tdd-pyramid
+      - tdd-trophy
+      - contract-test
+      - golden-file
+      - eval-harness
+      - visual-regression
+      - drift-lint
+      - peer-review
+      - manual-verify
+      - none
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: client-identity-never-signer
+    class: doc-vs-enforcement
+    statement: >
+      Client identity (Curtis Franks) must never appear in the Signed-by
+      field of any baton artifact; the signer-fidelity gate blocks such
+      artifacts.
+    source: scripts/global/megalint/signer-fidelity.js
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - all
+
+  - rule_id: four-baton-artifacts-before-pr
+    class: doc-vs-enforcement
+    statement: >
+      All four baton artifacts must be posted on the linked issue before
+      gh pr create; the baton-gates CI fails when any artifact is absent.
+    source: instructions/role-baton-routing.instructions.md
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
+
+  - rule_id: ticket-first-no-code-without-issue
+    class: doc-vs-no-enforcement
+    statement: >
+      No code or config work may begin without a linked GitHub issue; the
+      ticket-first gate requires every commit message to reference #N.
+    source: instructions/global-standards.instructions.md
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - all
+
+  - rule_id: dormant-deferred-epic-only
+    class: authority-carve-out
+    statement: >
+      status:dormant and status:deferred are Epic-only states; non-Epic
+      tickets carrying these statuses violate Rule E5 enforced by label-lint.
+    source: instructions/ticket-driven-work.instructions.md
+    enum_values:
+      - status:dormant
+      - status:deferred
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - all

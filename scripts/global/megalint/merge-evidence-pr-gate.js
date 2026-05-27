@@ -3,18 +3,24 @@
 // that promotes merge-evidence from advisory to required. Ensures every
 // non-lightweight, non-epic PR commits to atomically closing its linked
 // issue via GitHub auto-close keywords (Closes/Fixes/Resolves), or carries
+// a deferred-finalize marker (merge-evidence-deferred-final: #N), or carries
 // the merge-evidence-override:approved label on the issue.
+// Refs #2302: LIGHTWEIGHT_LANES imported from lane-enum.js (single source of truth).
+// Refs #2303: deferred-finalize marker (Option C carve-out) preserves Consultant
+// terminal-finalize authority — the marker satisfies merge-evidence WITHOUT
+// triggering GitHub auto-close, so Consultant explicitly closes via gh issue close.
 
-const LIGHTWEIGHT_LANES = new Set([
-  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:no-code-remediation',
-]);
+const path = require('path');
+const { LIGHTWEIGHT_LANES, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 const CLOSE_KEYWORDS_RE = /\b(close[sd]?|fix(es|ed)?|resolve[sd]?)\s+#(\d+)/gi;
+const DEFERRED_FINAL_RE = /\bmerge-evidence-deferred-final:\s*#(\d+)/gi;
 
 function findCloseTargets(prBody) {
   const out = new Set();
   if (!prBody) return out;
   for (const m of prBody.matchAll(CLOSE_KEYWORDS_RE)) out.add(parseInt(m[3], 10));
+  for (const m of prBody.matchAll(DEFERRED_FINAL_RE)) out.add(parseInt(m[1], 10));
   return out;
 }
 
@@ -22,6 +28,7 @@ function shouldSkip(labels) {
   if (labels.includes('type:epic')) return 'epic-bypass';
   if (labels.includes(OVERRIDE_LABEL)) return 'override-approved';
   for (const label of labels) if (LIGHTWEIGHT_LANES.has(label)) return `lightweight-lane:${label}`;
+  for (const label of labels) if (laneSeverity(label) === 'issue-only') return `lightweight-lane:${label}`;
   return null;
 }
 
@@ -42,10 +49,11 @@ function validate(input) {
     ok: false,
     violations: [{
       rule: 'merge-evidence-pr-gate-missing',
-      detail: `PR body must include a GitHub auto-close keyword for issue #${issueNumber} `
-        + `(e.g. "Closes #${issueNumber}"). This commits the PR to closing the issue on merge, `
-        + `which is the merge evidence the harness will then validate. Override via `
-        + `\`${OVERRIDE_LABEL}\` on the issue if closure-without-merge is intentional.`,
+      detail: `PR body must include merge evidence for issue #${issueNumber}. `
+        + `Preferred: "merge-evidence-deferred-final: #${issueNumber}" (preserves Consultant `
+        + `terminal-finalize authority; does NOT auto-close on merge). `
+        + `Backward-compat: a GitHub auto-close keyword (e.g. "Closes #${issueNumber}"). `
+        + `Override via \`${OVERRIDE_LABEL}\` on the issue if closure-without-merge is intentional.`,
       issueNumber, closeTargetsFound: [...closeTargets],
     }],
   };
@@ -53,5 +61,5 @@ function validate(input) {
 
 module.exports = {
   validate, findCloseTargets, shouldSkip,
-  LIGHTWEIGHT_LANES, OVERRIDE_LABEL, CLOSE_KEYWORDS_RE,
+  LIGHTWEIGHT_LANES, OVERRIDE_LABEL, CLOSE_KEYWORDS_RE, DEFERRED_FINAL_RE,
 };

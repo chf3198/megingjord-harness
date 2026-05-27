@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "lane": {
+      "type": "string",
+      "enum": ["lane:code-change", "lane:trivial", "lane:config-only"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["advisory", "soft-mandatory", "hard-mandatory"]
+    }
+  }
+}
