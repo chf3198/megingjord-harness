@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 'use strict';
+// cross-team-lease.js — wraps cross-team-lease-registry with CLI surface +
+// optional GitHub comment posting. Per #1997: comment posting routes through
+// github-dispatcher.js execute() (MCP-first with gh-CLI fallback); selection
+// controlled by MEGINGJORD_MCP_DISABLED env per #1629 contract.
 
-const { execFileSync } = require('child_process');
 const leaseRegistry = require('./cross-team-lease-registry');
+const { execute } = require('./github-dispatcher');
 
 function parse(args) {
   const out = { _: [] };
@@ -14,13 +18,17 @@ function parse(args) {
   return out;
 }
 
-function post(issue, body) {
-  execFileSync('gh', ['issue', 'comment', String(issue), '--body', body], {
-    stdio: 'inherit',
-  });
+async function post(issue, body, opts = {}) {
+  const res = await execute('add-comment', { issue: String(issue), body }, opts);
+  if (!res.ok) {
+    throw new Error(
+      `add-comment failed via ${res.provider || 'dispatcher'}: ${res.error || res.reason || 'unknown'}`,
+    );
+  }
+  return res;
 }
 
-function run(argv = process.argv.slice(2)) {
+async function run(argv = process.argv.slice(2), opts = {}) {
   const args = parse(argv);
   const cmd = args._[0];
   const registry = leaseRegistry.read(args.file || leaseRegistry.DEFAULT_PATH);
@@ -35,14 +43,14 @@ function run(argv = process.argv.slice(2)) {
   const result = commands[cmd]();
   if (cmd !== 'list') leaseRegistry.write(registry, args.file || leaseRegistry.DEFAULT_PATH);
   if (args.post_comment && result && !Array.isArray(result)) {
-    post(result.ticket, leaseRegistry.commentBlock(cmd, result));
+    await post(result.ticket, leaseRegistry.commentBlock(cmd, result), opts);
   }
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   return result;
 }
 
 if (require.main === module) {
-  try { run(); } catch (error) { console.error(error.message); process.exit(1); }
+  run().catch((error) => { console.error(error.message); process.exit(1); });
 }
 
-module.exports = { run, parse };
+module.exports = { run, parse, post };
