@@ -133,10 +133,15 @@ def main() -> int:
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
         # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
+        # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.
         try:
             from hamr_bypass_detector import detect_bypass, emit_incident
+            from hamr_fleet_direct_block import should_block, block_message
             _det = detect_bypass("\n".join(values))
             emit_incident(_det)
+            _blk = should_block(_det)
+            if _blk.get("block"):
+                return emit("deny", block_message(_det))
         except Exception:
             pass  # detector failure must not break pre-tool flow
         result = check_terminal("\n".join(values), state, cwd)
