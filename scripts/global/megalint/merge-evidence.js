@@ -6,7 +6,7 @@
 // Refs #2302: LIGHTWEIGHT_LANES imported from lane-enum.js (single source of truth).
 
 const path = require('path');
-const { LIGHTWEIGHT_LANES } = require(path.join(__dirname, '..', 'lane-enum.js'));
+const { LIGHTWEIGHT_LANES, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 
 function shouldSkip(labels, state) {
@@ -16,6 +16,7 @@ function shouldSkip(labels, state) {
   if (!labels.includes('status:done')) return 'non-done-terminal';
   if (labels.includes(OVERRIDE_LABEL)) return 'override-approved';
   for (const label of labels) if (LIGHTWEIGHT_LANES.has(label)) return `lightweight-lane:${label}`;
+  for (const label of labels) if (laneSeverity(label) === 'issue-only') return `lightweight-lane:${label}`;
   return null;
 }
 

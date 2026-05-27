@@ -28,7 +28,7 @@ const DEFAULT_KEYWORDS = [
   'MANAGER_HANDOFF', 'COLLABORATOR_HANDOFF', 'ADMIN_HANDOFF', 'CONSULTANT_CLOSEOUT',
   'role:manager', 'role:collaborator', 'role:admin', 'role:consultant',
   'status:backlog', 'status:triage', 'status:ready', 'status:in-progress', 'status:testing', 'status:review', 'status:done',
-  'lane:code-change', 'lane:docs-research', 'lane:config-only',
+  'lane:code-change', 'lane:docs-research', 'lane:config-only', 'lane:no-code-remediation',
   'Refs #', 'BLOCKER_NOTE', 'evidence-completeness', 'baton-gates',
   'Conventional Commits', 'GITHUB_TOKEN', 'AI-Signature', 'AI-Team-Model', 'AI-Role',
   'visual_qa', 'pr-title-required', 'collaborator-gate', 'admin-gate', 'consultant-gate',

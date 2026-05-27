@@ -91,8 +91,8 @@ test.describe('test-evidence-validator (#1214)', () => {
     expect(r.violations[0].rule).toMatch(/unknown-strategy/);
   });
 
-  test('ALLOWED_STRATEGIES enum has all 10', () => {
-    expect(ALLOWED_STRATEGIES.length).toBe(10);
+  test('ALLOWED_STRATEGIES enum has all 11', () => {
+    expect(ALLOWED_STRATEGIES.length).toBe(11);
     expect(ALLOWED_STRATEGIES).toContain('tdd-pyramid');
     expect(ALLOWED_STRATEGIES).toContain('none');
   });

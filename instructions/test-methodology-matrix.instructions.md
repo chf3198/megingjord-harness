@@ -57,7 +57,7 @@ A surface does NOT require `stress-test` when ALL of:
 | `peer-review` | `CONSULTANT_CLOSEOUT` with rubric ≥7 per `role-consultant-critique` |
 | `manual-verify` | Before/after value + rationale in `ADMIN_HANDOFF` |
 | `stress-test` | One of: `tests/stress-*.spec.js` file in PR diff, OR `npm run stress:*` invocation cited in `COLLABORATOR_HANDOFF` Pre-handoff verification. Stress spec MUST assert: ≥1 chaos / fault-injection path (G6) AND ≥1 p99 latency budget (G7). Canonical examples: `tests/stress-{worktree-isolation,anneal-decision,rebase-discipline}.spec.js` from Epic #1871. |
-| `none` | Permitted only when lane ∈ {trivial, docs-research, docs-only, research, config-only} |
+| `none` | Permitted only when lane ∈ {trivial, docs-research, docs-only, research, config-only, no-code-remediation} |
 
 ## Stress promotion model (NO calendar threshold per Epic #1771 / #1827 lesson)
 

@@ -11,7 +11,7 @@
 // triggering GitHub auto-close, so Consultant explicitly closes via gh issue close.
 
 const path = require('path');
-const { LIGHTWEIGHT_LANES } = require(path.join(__dirname, '..', 'lane-enum.js'));
+const { LIGHTWEIGHT_LANES, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 const CLOSE_KEYWORDS_RE = /\b(close[sd]?|fix(es|ed)?|resolve[sd]?)\s+#(\d+)/gi;
 const DEFERRED_FINAL_RE = /\bmerge-evidence-deferred-final:\s*#(\d+)/gi;
@@ -28,6 +28,7 @@ function shouldSkip(labels) {
   if (labels.includes('type:epic')) return 'epic-bypass';
   if (labels.includes(OVERRIDE_LABEL)) return 'override-approved';
   for (const label of labels) if (LIGHTWEIGHT_LANES.has(label)) return `lightweight-lane:${label}`;
+  for (const label of labels) if (laneSeverity(label) === 'issue-only') return `lightweight-lane:${label}`;
   return null;
 }
 

@@ -13,7 +13,7 @@ const decideGov003 = (fleetLog, eventLog) =>
 const decideGov005 = issueBody => !/- \[ \]/.test(issueBody);
 
 // #1615: lanes where no implementation branch or PR is expected
-const ISSUE_ONLY_LANES = /lane:docs-research|lane:trivial|type:epic/;
+const ISSUE_ONLY_LANES = /lane:docs-research|lane:trivial|lane:no-code-remediation|type:epic/;
 const isIssueOnlyLane = labels => ISSUE_ONLY_LANES.test(labels || '');
 
 // #1241: events.jsonl / fleet-health.jsonl are runtime artifacts written by

@@ -48,7 +48,7 @@ test('#1506 AC1: passes when PR closes multiple issues including the linked one'
 });
 
 test('#1506 AC3: lightweight lanes skip the gate', () => {
-  for (const lane of ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research']) {
+  for (const lane of ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:no-code-remediation']) {
     const result = gate.validate(ctx({ labels: ['type:task', lane], prBody: '' }));
     expect(result.ok, `lane=${lane}`).toBe(true);
     expect(result.skipped).toBe(`lightweight-lane:${lane}`);
