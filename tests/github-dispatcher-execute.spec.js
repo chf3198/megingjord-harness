@@ -13,6 +13,10 @@ test('cliArgs returns null for unknown operation', () => {
   expect(cliArgs('not-an-op')).toBe(null);
 });
 
+test('cliArgs maps get-pull-request to pr view', () => {
+  expect(cliArgs('get-pull-request')).toEqual(['pr', 'view']);
+});
+
 test('buildCliArgs appends --title and --body', () => {
   const args = buildCliArgs('create-issue', { title: 'T', body: 'B' });
   expect(args).toEqual(['issue', 'create', '--title', 'T', '--body', 'B']);

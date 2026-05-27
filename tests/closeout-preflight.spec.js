@@ -5,6 +5,7 @@ const { spawnSync } = require('node:child_process');
 const path = require('path');
 
 const SCRIPT = path.resolve(__dirname, '..', 'scripts', 'global', 'closeout-preflight.js');
+const preflight = require('../scripts/global/closeout-preflight.js');
 
 function runWith(issueJson, branch) {
   return spawnSync(process.execPath, [SCRIPT], {
@@ -77,4 +78,37 @@ test('closeout-preflight skips when SKIP_CLOSEOUT_PREFLIGHT=1', () => {
   });
   expect(result.status).toBe(0);
   expect(result.stdout).toContain('skipped');
+});
+
+test('readIssue supports MCP path when forced', async () => {
+  let tool = '';
+  const issue = await preflight.readIssue(1995, {
+    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    mcpClient: { invoke: async (name) => { tool = name; return { issue: { title: 'T', body: '', comments: [], labels: [], state: 'open' } }; } },
+  });
+  expect(tool).toBe('mcp__github__get_issue');
+  expect(issue.title).toBe('T');
+});
+
+test('fetchPrBody supports MCP path when forced', async () => {
+  let tool = '';
+  const body = await preflight.fetchPrBody('fix/1995-closeout-preflight-mcp', {
+    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    mcpClient: { invoke: async (name) => { tool = name; return { pullRequest: { body: 'hello from mcp' } }; } },
+  });
+  expect(tool).toBe('mcp__github__get_pull_request');
+  expect(body).toBe('hello from mcp');
+});
+
+test('readIssue honors MCP-disabled CLI fallback', async () => {
+  let args = [];
+  const issue = await preflight.readIssue(1995, {
+    env: { MEGINGJORD_MCP_DISABLED: '1' },
+    cliRunner: async (_cmd, cliArgs) => {
+      args = cliArgs;
+      return { stdout: JSON.stringify({ title: 'CLI', body: '', comments: [], labels: [], state: 'open' }), stderr: '' };
+    },
+  });
+  expect(args.slice(0, 3)).toEqual(['issue', 'view', '1995']);
+  expect(issue.title).toBe('CLI');
 });

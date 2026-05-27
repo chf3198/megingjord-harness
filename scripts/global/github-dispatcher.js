@@ -1,7 +1,5 @@
 'use strict';
-// github-dispatcher (#1643 + #1710 execute layer) — MCP-vs-gh-CLI dispatcher.
-// dispatch() returns selection metadata; execute() actually invokes the chosen
-// provider. Per #1629 contract, fallback to gh CLI when MCP unavailable.
+// MCP-vs-gh-CLI dispatcher. Falls back to gh CLI when MCP is unavailable.
 
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
@@ -14,30 +12,28 @@ function provider(env = process.env) {
 }
 
 function toolName(operation, prov) {
-  const MAP = {
+  const map = {
     'create-issue': { mcp: 'mcp__github__create_issue', cli: 'gh issue create' },
     'add-comment': { mcp: 'mcp__github__create_issue_comment', cli: 'gh issue comment' },
     'get-issue': { mcp: 'mcp__github__get_issue', cli: 'gh issue view' },
     'list-issues': { mcp: 'mcp__github__list_issues', cli: 'gh issue list' },
     'update-issue': { mcp: 'mcp__github__update_issue', cli: 'gh issue edit' },
+    'get-pull-request': { mcp: 'mcp__github__get_pull_request', cli: 'gh pr view' },
     'update-project-v2-item-field': {
-      mcp: 'mcp__github__update_project_v2_item_field_value',
-      cli: 'gh api graphql -f query=...',
+      mcp: 'mcp__github__update_project_v2_item_field_value', cli: 'gh api graphql -f query=...',
     },
   };
-  if (!MAP[operation]) return null;
-  return prov === 'mcp' ? MAP[operation].mcp : MAP[operation].cli;
+  if (!map[operation]) return null;
+  return prov === 'mcp' ? map[operation].mcp : map[operation].cli;
 }
 
 function cliArgs(operation) {
-  const ARGS = {
-    'create-issue': ['issue', 'create'],
-    'add-comment': ['issue', 'comment'],
-    'get-issue': ['issue', 'view'],
-    'list-issues': ['issue', 'list'],
-    'update-issue': ['issue', 'edit'],
+  const map = {
+    'create-issue': ['issue', 'create'], 'add-comment': ['issue', 'comment'],
+    'get-issue': ['issue', 'view'], 'list-issues': ['issue', 'list'],
+    'update-issue': ['issue', 'edit'], 'get-pull-request': ['pr', 'view'],
   };
-  return ARGS[operation] || null;
+  return map[operation] || null;
 }
 
 function buildCliArgs(operation, params = {}) {
@@ -58,9 +54,7 @@ async function executeViaCli(operation, params = {}, runner = execFileAsync) {
   try {
     const { stdout, stderr } = await runner('gh', args);
     return { ok: true, provider: 'gh-cli', stdout, stderr };
-  } catch (error) {
-    return { ok: false, provider: 'gh-cli', error: error.message };
-  }
+  } catch (error) { return { ok: false, provider: 'gh-cli', error: error.message }; }
 }
 
 async function executeViaMcp(operation, params = {}, mcpClient) {
@@ -72,18 +66,14 @@ async function executeViaMcp(operation, params = {}, mcpClient) {
   try {
     const result = await mcpClient.invoke(tool, params);
     return { ok: true, provider: 'mcp', tool, result };
-  } catch (error) {
-    return { ok: false, provider: 'mcp', tool, error: error.message };
-  }
+  } catch (error) { return { ok: false, provider: 'mcp', tool, error: error.message }; }
 }
 
 async function execute(operation, params = {}, opts = {}) {
   const { env = process.env, mcpClient = null, cliRunner = execFileAsync } = opts;
-  const prov = provider(env);
-  if (prov === 'mcp') {
+  if (provider(env) === 'mcp') {
     const mcpResult = await executeViaMcp(operation, params, mcpClient);
     if (mcpResult.ok) return mcpResult;
-    return executeViaCli(operation, params, cliRunner);
   }
   return executeViaCli(operation, params, cliRunner);
 }
