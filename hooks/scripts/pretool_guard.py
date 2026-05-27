@@ -132,6 +132,13 @@ def main() -> int:
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
+        # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
+        try:
+            from hamr_bypass_detector import detect_bypass, emit_incident
+            _det = detect_bypass("\n".join(values))
+            emit_incident(_det)
+        except Exception:
+            pass  # detector failure must not break pre-tool flow
         result = check_terminal("\n".join(values), state, cwd)
         if result is not None: return result
     suspicious = [v for v in values if "/" in v or "." in v]
