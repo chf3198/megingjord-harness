@@ -23,6 +23,10 @@ test('toolName maps create-issue to gh CLI when provider=gh-cli', () => {
   expect(toolName('create-issue', 'gh-cli')).toBe('gh issue create');
 });
 
+test('toolName maps get-pull-request to MCP tool', () => {
+  expect(toolName('get-pull-request', 'mcp')).toBe('mcp__github__get_pull_request');
+});
+
 test('toolName maps update-project-v2-item-field to GraphQL CLI fallback', () => {
   expect(toolName('update-project-v2-item-field', 'gh-cli')).toContain('gh api graphql');
 });
