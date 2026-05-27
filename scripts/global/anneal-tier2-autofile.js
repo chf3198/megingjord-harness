@@ -8,6 +8,7 @@ const { classifyTier1 } = require('./anneal-severity-classifier');
 const { stepGate, patternRateGate, singleFlightGate, releaseSingleFlight } = require('./anneal-kill-switch');
 const { emitEvent, readEvents } = require('./anneal-event-schema');
 const { gateCandidate, markConfirmed } = require('./anneal-worker-confirmation');
+const { execute } = require('./github-dispatcher');
 
 const INCIDENTS = path.join(os.homedir(), '.megingjord', 'incidents.jsonl');
 const SUPPRESS_FILE = path.join(os.homedir(), '.megingjord', 'suppression-registry.json');
@@ -52,20 +53,31 @@ function buildBody(candidate, meta, nowIso) {
   return [
     'SELF_ANNEAL_PROPOSAL', `proposal_id: ${meta.proposal_id}`, `dedupe_key: ${meta.dedupe_key}`,
     `pattern_id: ${candidate.pattern_id}`, `severity: ${candidate.severity}`, `count_7d: ${candidate.count}`,
-    `threshold: >=2 in 7d`, `detected_at: ${nowIso}`, '', 'Evidence', ev, '',
+    'threshold: >=2 in 7d', `detected_at: ${nowIso}`, '', 'Evidence', ev, '',
     'Proposed remediation', '- run workflow-self-anneal with collected evidence',
     '- update instruction/guardrail only after review approval',
   ].join('\n');
 }
-function maybeCreateTicket(candidate, meta, nowIso, applyFlag) {
+function normalizeCreateResult(res) {
+  if (res.provider === 'gh-cli') return (res.stdout || '').trim();
+  const issue = res.result?.issue || res.result || {};
+  return issue.url || issue.html_url || (issue.number ? `#${issue.number}` : 'MCP-CREATED');
+}
+async function maybeCreateTicket(candidate, meta, nowIso, applyFlag, opts = {}) {
   const body = buildBody(candidate, meta, nowIso);
   if (!applyFlag) return 'DRY-RUN';
-  const existing = dedupeHit(meta.dedupe_key); if (existing) return existing;
-  const args = ['issue', 'create', '--title', `Anneal Proposal: ${candidate.pattern_id}`,
-    '--label', 'type:task', '--label', 'area:governance', '--label', 'status:backlog', '--body', body];
-  return execFileSync('gh', args, { encoding: 'utf8' }).trim();
+  const dedupeLookup = opts.dedupeLookup || dedupeHit;
+  const existing = dedupeLookup(meta.dedupe_key);
+  if (existing) return existing;
+  const res = await execute('create-issue', {
+    title: `Anneal Proposal: ${candidate.pattern_id}`,
+    body,
+    labels: ['type:task', 'area:governance', 'status:backlog'],
+  }, opts.dispatcherOpts || {});
+  if (!res.ok) throw new Error(res.error || res.reason || 'issue create failed');
+  return normalizeCreateResult(res);
 }
-function processOneCandidate(candidate, ctx, out) {
+async function processOneCandidate(candidate, ctx, out) {
   if (!stepGate(out.length + Number('1')).ok) {
     emitKillSwitch('step-counter', candidate.pattern_id, ctx.sessionId, ctx.nowIso);
     return 'break';
@@ -78,7 +90,10 @@ function processOneCandidate(candidate, ctx, out) {
     out.push({ pattern_id: candidate.pattern_id, severity: candidate.severity, proposal_id: meta.proposal_id, dedupe_key: meta.dedupe_key, ticket_ref: `PENDING-CONFIRMATION:${confirmGate.reason}` });
     return 'continue';
   }
-  const ticketRef = maybeCreateTicket(candidate, meta, ctx.nowIso, ctx.applyFlag);
+  const ticketRef = await maybeCreateTicket(candidate, meta, ctx.nowIso, ctx.applyFlag, {
+    dedupeLookup: ctx.dedupeLookup,
+    dispatcherOpts: ctx.dispatcherOpts,
+  });
   emitEvent({ version: TWO, timestamp: ctx.nowIso, tier: TWO, trigger_role: 'system', trigger_type: 'sensor-driven',
     pattern_id: candidate.pattern_id, severity: candidate.severity, evidence: [`count=${candidate.count}`],
     ticket_ref: ticketRef, epic_ref: '#1308', proposal_id: meta.proposal_id, dedupe_key: meta.dedupe_key, session_id: ctx.sessionId,
@@ -87,7 +102,7 @@ function processOneCandidate(candidate, ctx, out) {
   return 'next';
 }
 
-function run(argv) {
+async function run(argv, opts = {}) {
   const applyFlag = argv.includes('--apply');
   const confirmIdx = argv.indexOf('--apply-confirmed');
   if (confirmIdx >= 0 && argv[confirmIdx + 1]) markConfirmed(argv[confirmIdx + 1]);
@@ -101,10 +116,10 @@ function run(argv) {
   const flight = singleFlightGate(sessionId); if (!flight.ok) return emitKillSwitch(flight.reason, '', sessionId, nowIso);
   const candidates = buildCandidates(tier1).filter((item) => !isSuppressed(item.pattern_id, suppressions));
   const out = [];
-  const ctx = { applyFlag, nowIso, sessionId, tier2 };
+  const ctx = { applyFlag, nowIso, sessionId, tier2, dispatcherOpts: opts.dispatcherOpts || {}, dedupeLookup: opts.dedupeLookup };
   try {
     for (const candidate of candidates) {
-      const decision = processOneCandidate(candidate, ctx, out);
+      const decision = await processOneCandidate(candidate, ctx, out);
       if (decision === 'break') break;
     }
   } finally {
@@ -112,5 +127,7 @@ function run(argv) {
   }
   process.stdout.write(JSON.stringify({ created: out.length, records: out }, null, TWO) + '\n');
 }
-if (require.main === module) run(process.argv.slice(TWO));
-module.exports = { buildCandidates, isSuppressed, proposalMeta, loadSuppressions, run };
+if (require.main === module) {
+  run(process.argv.slice(TWO)).catch((error) => { console.error(error.message); process.exit(1); });
+}
+module.exports = { buildCandidates, isSuppressed, proposalMeta, loadSuppressions, maybeCreateTicket, run };
