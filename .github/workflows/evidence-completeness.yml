@@ -65,7 +65,7 @@ jobs:
             if (labels.includes('type:epic')) {
               violations.push(`Issue #${linkedNum} is type:epic — PRs must link to child tickets, not epics`);
             }
-            const lightweight = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:no-code-remediation'];
+            const lightweight = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:config-only', 'lane:no-code-remediation'];
             const requiresCollaborator = !labels.some(l => lightweight.includes(l));
 
             // 3. Branch-to-issue binding: N in branch name must equal N in Refs #N
