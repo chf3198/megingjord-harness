@@ -24,7 +24,6 @@ Each subtree has a README.md documenting its purpose.
 
 Mirror of GitHub tickets + PRs. Wiki B pages are written here by the shared wiki I/O layer and keep the work-log catalog distinct from the legacy research pages below.
 
-
 ### Legacy paths (still in use)
 
 The sections below (`## Entities`, `## Concepts`, etc.) continue to enumerate content at the LEGACY paths (`wiki/entities/`, `wiki/concepts/`, etc.). Until the legacy-path migration ticket ships, treat them as `wiki/wisdom/global/<section>/` content despite the physical path.
