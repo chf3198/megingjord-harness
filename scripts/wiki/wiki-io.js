@@ -5,18 +5,23 @@ const matter = require('gray-matter');
 const WIKI_DIR = path.join(__dirname, '../../wiki');
 const DATE_TOLERANCE_DAYS = 1;
 const CATS = ['entities', 'concepts', 'sources', 'syntheses', 'skills'];
+const WORK_LOG_DIRS = [{ dir: 'work-log/tickets', type: 'ticket' }, { dir: 'work-log/prs', type: 'pr' }];
 const TYPE_DIR = {
   entity: 'entities', entities: 'entities',
   concept: 'concepts', concepts: 'concepts',
   source: 'sources', sources: 'sources',
   synthesis: 'syntheses', syntheses: 'syntheses',
   skill: 'skills', skills: 'skills',
+  ticket: 'work-log/tickets', tickets: 'work-log/tickets',
+  pr: 'work-log/prs', prs: 'work-log/prs',
 };
 const SECTION_MAP = {
   entity: '## Entities', entities: '## Entities',
   concept: '## Concepts', concepts: '## Concepts',
   source: '## Source Summaries', sources: '## Source Summaries',
   synthesis: '## Syntheses', syntheses: '## Syntheses',
+  ticket: '## Work Log', tickets: '## Work Log',
+  pr: '## Work Log', prs: '## Work Log',
 };
 
 function parseFrontmatter(content) {
@@ -28,8 +33,8 @@ function parseFrontmatter(content) {
   }
 }
 
-function updateIndex(slug, title, type) {
-  const indexPath = path.join(WIKI_DIR, 'index.md');
+function updateIndex(slug, title, type, wikiDir = WIKI_DIR) {
+  const indexPath = path.join(wikiDir, 'index.md');
   let content = fs.readFileSync(indexPath, 'utf-8');
   const section = SECTION_MAP[type] || '## Source Summaries';
   const entry = `- [[${slug}]] — ${title}`;
@@ -41,7 +46,7 @@ function updateIndex(slug, title, type) {
   content = insertAt === -1
     ? `${content}\n${entry}\n`
     : `${content.slice(0, insertAt)}\n${entry}\n${content.slice(insertAt)}`;
-  const pages = countPages();
+  const pages = countPages(wikiDir);
   content = content.replace(
     /\*\*Pages\*\*:.*$/m,
     `**Pages**: ${pages} | **Last updated**: ${new Date().toISOString().split('T')[0]}`
@@ -49,46 +54,45 @@ function updateIndex(slug, title, type) {
   fs.writeFileSync(indexPath, content);
 }
 
-function writePage(slug, type, content) {
+function writePage(slug, type, content, wikiDir = WIKI_DIR) {
   const dir = TYPE_DIR[type] || 'sources';
-  const pagePath = path.join(WIKI_DIR, dir, `${slug}.md`);
+  const pagePath = path.join(wikiDir, dir, `${slug}.md`);
   fs.mkdirSync(path.dirname(pagePath), { recursive: true });
   fs.writeFileSync(pagePath, content);
   const { frontmatter } = parseFrontmatter(content);
-  updateIndex(slug, frontmatter.title || slug, type);
+  updateIndex(slug, frontmatter.title || slug, type, wikiDir);
   return pagePath;
 }
 
-function appendLog(date, operation, subject) {
+function appendLog(date, operation, subject, wikiDir = WIKI_DIR) {
   const now = Date.now();
   const maxFutureMs = now + DATE_TOLERANCE_DAYS * 86400000;
   const parsedDate = Date.parse(`${date}T00:00:00Z`);
   if (!Number.isFinite(parsedDate)) throw new Error(`Invalid wiki log date: ${date}`);
   if (parsedDate > maxFutureMs) throw new Error(`Refusing future wiki log date '${date}' (tolerance ${DATE_TOLERANCE_DAYS} day).`);
-  const logPath = path.join(WIKI_DIR, 'log.md');
+  const logPath = path.join(wikiDir, 'log.md');
   fs.appendFileSync(logPath, `\n## [${date}] ${operation} | ${subject}\n`);
 }
-function countPages() {
-  let count = 0;
-  for (const d of CATS) {
-    const dp = path.join(WIKI_DIR, d);
-    if (!fs.existsSync(dp)) continue;
-    count += fs.readdirSync(dp).filter((f) => f.endsWith('.md')).length;
-  }
-  return count;
-}
-function listPages() {
+
+function listPages(wikiDir = WIKI_DIR) {
   const pages = [];
   for (const d of CATS) {
-    const dp = path.join(WIKI_DIR, d);
+    const dp = path.join(wikiDir, d);
     if (!fs.existsSync(dp)) continue;
     for (const f of fs.readdirSync(dp).filter((x) => x.endsWith('.md')))
       pages.push({ slug: f.replace('.md', ''), type: d, path: path.join(dp, f) });
   }
+  for (const { dir, type } of WORK_LOG_DIRS) {
+    const dp = path.join(wikiDir, dir);
+    if (!fs.existsSync(dp)) continue;
+    for (const f of fs.readdirSync(dp).filter((x) => x.endsWith('.md')))
+      pages.push({ slug: f.replace('.md', ''), type, path: path.join(dp, f) });
+  }
   return pages;
 }
 
-module.exports = {
-  parseFrontmatter, updateIndex, writePage, appendLog,
-  countPages, listPages, WIKI_DIR, DATE_TOLERANCE_DAYS,
-};
+function countPages(wikiDir = WIKI_DIR) {
+  return listPages(wikiDir).length;
+}
+
+module.exports = { parseFrontmatter, updateIndex, writePage, appendLog, countPages, listPages, WIKI_DIR, DATE_TOLERANCE_DAYS, CATS, WORK_LOG_DIRS, TYPE_DIR, SECTION_MAP };
