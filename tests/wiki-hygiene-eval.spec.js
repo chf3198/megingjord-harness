@@ -50,7 +50,11 @@ test('hygiene orphans/frontmatter match unified health contract', () => {
   expect(scan.frontmatter.sort()).toEqual(health.frontmatter.sort());
 });
 
-test('health contract recognizes Wiki B work-log pages', () => {
+test('health contract rejects scan root outside repo wiki by default', () => {
+  expect(() => HC.scanHealth(path.resolve(W.WIKI_DIR, '..'))).toThrow(/Refusing external wikiDir/);
+});
+
+test('health contract recognizes Wiki B work-log pages with explicit external override', () => {
   const wikiDir = tmpWikiDir();
   fs.mkdirSync(path.join(wikiDir, 'entities'), { recursive: true });
   fs.mkdirSync(path.join(wikiDir, 'work-log', 'tickets'), { recursive: true });
@@ -69,7 +73,8 @@ test('health contract recognizes Wiki B work-log pages', () => {
   fs.writeFileSync(path.join(wikiDir, 'work-log', 'tickets', '2054.md'), '---\ntitle: Wiki B mirror\ntype: ticket\ncreated: 2026-05-27\nstatus: draft\n---\n');
   fs.writeFileSync(path.join(wikiDir, 'work-log', 'prs', '2101.md'), '---\ntitle: Wiki B PR\ntype: pr\ncreated: 2026-05-27\nstatus: draft\n---\n');
 
-  const health = HC.computeWikiHealth(W.listPages(wikiDir), wikiDir);
+  const pages = W.listPages(wikiDir, { allowExternalWikiDir: true });
+  const health = HC.computeWikiHealth(pages, wikiDir, { allowExternalWikiDir: true });
   expect(health.pages).toBe(3);
   expect(health.indexSync).toEqual([]);
   expect(health.orphans).toEqual([]);
