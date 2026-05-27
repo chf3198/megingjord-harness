@@ -64,6 +64,18 @@ test('extractArtifactFields: pulls Signed-by / Team&Model / Role', () => {
   expect(fields.role).toBe('manager');
 });
 
+test('extractArtifactFields: ignores prose lowercase role before signature', () => {
+  const body = [
+    'role: collaborator',
+    'notes: prose field should not be treated as signer role',
+    'Signed-by: Orla Mason',
+    'Team&Model: claude-code:opus-4-7@anthropic',
+    'Role: manager',
+  ].join('\n');
+  const fields = R.extractArtifactFields(body);
+  expect(fields.role).toBe('manager');
+});
+
 test('validateArtifactAlias: drift "Cole Mason" on claude-code:opus → violation with expected="Orla Mason"', () => {
   const file = makeRegistry();
   const body = 'Signed-by: Cole Mason\nTeam&Model: claude-code:opus-4-7@anthropic\nRole: manager';

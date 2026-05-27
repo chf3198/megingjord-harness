@@ -47,9 +47,14 @@ function expectedAliasFor({ team, model, role, device, registryOverride }) {
 
 function extractArtifactFields(body) {
   const text = body || '';
-  const signedBy = (text.match(/Signed-by\s*:\s*([^·,\n]+?)(?=\s*[·,\n]|$)/i) || [])[1];
-  const teamModel = (text.match(/Team&Model\s*:\s*(\S+)/i) || [])[1];
-  const role = (text.match(/Role\s*:\s*(\w+)/i) || [])[1];
+  const field = (label, value) => {
+    const pattern = new RegExp(`(?:^|[·,\\n])\\s*${label}\\s*:\\s*(${value})`, 'gm');
+    const matches = [...text.matchAll(pattern)];
+    return matches.length ? matches[matches.length - 1][1] : null;
+  };
+  const signedBy = field('Signed-by', '[^·,\\n]+');
+  const teamModel = field('Team&Model', '\\S+');
+  const role = field('Role', '\\w+');
   return {
     signedBy: signedBy ? signedBy.trim() : null,
     teamModel,

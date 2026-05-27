@@ -1,6 +1,6 @@
 'use strict';
 
-const { validateArtifactAlias } = require('./megalint/signer-registry-check');
+const { extractArtifactFields, validateArtifactAlias } = require('./megalint/signer-registry-check');
 
 const ARTIFACT_ROLE = {
   MANAGER_HANDOFF: 'manager',
@@ -20,8 +20,7 @@ function isEpic(labels) {
 }
 
 function roleFromBody(body) {
-  const m = String(body || '').match(/Role\s*:\s*(\w+)/i);
-  return m ? m[1].toLowerCase() : null;
+  return extractArtifactFields(body).role;
 }
 
 function entries(comments) {
@@ -33,6 +32,25 @@ function entries(comments) {
     }
   }
   return out;
+}
+
+function fixable(rule) {
+  return [
+    'artifact-role-mismatch',
+    'signer-alias-not-registry-derived',
+    'signer-fields-invalid',
+  ].includes(rule);
+}
+
+function violation(artifact, rule, detail) {
+  const v = { artifact, rule, detail };
+  if (fixable(rule)) {
+    v.remediation = {
+      mode: 'source-edit-first',
+      suggestedFix: 'Edit the offending issue comment/artifact in place, then rerun consultant checks. Use additive audit comments only when the source artifact cannot be edited.',
+    };
+  }
+  return v;
 }
 
 function analyzeComments(comments, opts = {}) {
@@ -48,16 +66,17 @@ function analyzeComments(comments, opts = {}) {
     }
     const actualRole = roleFromBody(entry.body);
     if (!actualRole || actualRole !== entry.role) {
-      violations.push({ artifact: entry.artifact, rule: 'artifact-role-mismatch',
-        detail: `Expected Role: ${entry.role} for ${entry.artifact}.` });
+      violations.push(violation(entry.artifact, 'artifact-role-mismatch',
+        `Expected Role: ${entry.role} for ${entry.artifact}.`));
     }
     const alias = validateArtifactAlias(entry.body, opts);
     if (alias.ok) continue;
-    if (alias.violation) violations.push({ artifact: entry.artifact, ...alias.violation });
-    else violations.push({ artifact: entry.artifact, rule: 'signer-fields-invalid',
-      detail: alias.skipped || 'invalid signer fields' });
+    if (alias.violation) violations.push(violation(entry.artifact,
+      alias.violation.rule, alias.violation.detail));
+    else violations.push(violation(entry.artifact, 'signer-fields-invalid',
+      alias.skipped || 'invalid signer fields'));
   }
   return { ok: violations.length === 0, count: entries(comments).length, violations };
 }
 
-module.exports = { analyzeComments, ARTIFACT_ROLE, isEpic, EPIC_FORBIDDEN_ARTIFACTS };
+module.exports = { analyzeComments, ARTIFACT_ROLE, isEpic, EPIC_FORBIDDEN_ARTIFACTS, violation };

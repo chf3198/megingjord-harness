@@ -36,3 +36,19 @@ test('fails on artifact-role mismatch', () => {
   expect(r.ok).toBe(false);
   expect(r.violations.some(v => v.rule === 'artifact-role-mismatch')).toBe(true);
 });
+
+test('source-fixable role mismatch carries source-edit-first guidance', () => {
+  const comments = [{
+    body: [
+      'role: collaborator',
+      '## COLLABORATOR_HANDOFF',
+      'Signed-by: Nova Mason',
+      'Team&Model: codex:gpt-5.4@codex-cli',
+      'Role: manager',
+    ].join('\n'),
+  }];
+  const r = G.analyzeComments(comments);
+  const v = r.violations.find(x => x.rule === 'artifact-role-mismatch');
+  expect(v.remediation.mode).toBe('source-edit-first');
+  expect(v.remediation.suggestedFix).toContain('Edit the offending issue comment');
+});
