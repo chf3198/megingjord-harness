@@ -1,9 +1,16 @@
 // Wiki hygiene scanner + eval harness tests (#870 + #872).
 const { test, expect } = require('@playwright/test');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const H = require(path.resolve(__dirname, '..', 'scripts', 'wiki', 'hygiene.js'));
 const E = require(path.resolve(__dirname, '..', 'scripts', 'wiki', 'eval-harness.js'));
 const HC = require(path.resolve(__dirname, '..', 'scripts', 'wiki', 'health-contract.js'));
+const W = require(path.resolve(__dirname, '..', 'scripts', 'wiki', 'wiki-io.js'));
+
+function tmpWikiDir() {
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'wiki-health-'));
+}
 
 test('hygiene tokens lowercases and drops short tokens', () => {
   const t = H.tokens('Hello World HAMR_test xy');
@@ -41,6 +48,32 @@ test('hygiene orphans/frontmatter match unified health contract', () => {
   const health = HC.computeWikiHealth();
   expect(scan.orphans.sort()).toEqual(health.orphans.sort());
   expect(scan.frontmatter.sort()).toEqual(health.frontmatter.sort());
+});
+
+test('health contract recognizes Wiki B work-log pages', () => {
+  const wikiDir = tmpWikiDir();
+  fs.mkdirSync(path.join(wikiDir, 'entities'), { recursive: true });
+  fs.mkdirSync(path.join(wikiDir, 'work-log', 'tickets'), { recursive: true });
+  fs.mkdirSync(path.join(wikiDir, 'work-log', 'prs'), { recursive: true });
+  fs.writeFileSync(path.join(wikiDir, 'index.md'), [
+    '# Wiki Index',
+    '',
+    '## Work Log',
+    '- [[2054]] — Wiki B mirror',
+    '- [[2101]] — Wiki B PR',
+    '',
+    '## Entities',
+    '- [[openclaw]] — OpenClaw',
+  ].join('\n'));
+  fs.writeFileSync(path.join(wikiDir, 'entities', 'openclaw.md'), '---\ntitle: OpenClaw\ntype: entity\ncreated: 2026-05-27\nstatus: draft\n---\n');
+  fs.writeFileSync(path.join(wikiDir, 'work-log', 'tickets', '2054.md'), '---\ntitle: Wiki B mirror\ntype: ticket\ncreated: 2026-05-27\nstatus: draft\n---\n');
+  fs.writeFileSync(path.join(wikiDir, 'work-log', 'prs', '2101.md'), '---\ntitle: Wiki B PR\ntype: pr\ncreated: 2026-05-27\nstatus: draft\n---\n');
+
+  const health = HC.computeWikiHealth(W.listPages(wikiDir), wikiDir);
+  expect(health.pages).toBe(3);
+  expect(health.indexSync).toEqual([]);
+  expect(health.orphans).toEqual([]);
+  expect(health.frontmatter).toEqual([]);
 });
 
 test('eval precisionAtK returns hits/k', () => {

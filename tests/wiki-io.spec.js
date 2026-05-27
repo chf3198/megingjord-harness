@@ -1,37 +1,12 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
+const fs = require('fs'); const os = require('os'); const path = require('path');
 const W = require(path.resolve(__dirname, '..', 'scripts', 'wiki', 'wiki-io.js'));
+const tmpWikiDir = () => fs.mkdtempSync(path.join(os.tmpdir(), 'wiki-io-'));
 
-test('parseFrontmatter preserves colon values via gray-matter', () => {
-  const doc = [
-    '---',
-    'title: "Routing: Anthropic Batch"',
-    'type: source',
-    'created: 2026-05-16',
-    'status: draft',
-    '---',
-    '',
-    'body here',
-  ].join('\n');
-  const { frontmatter, body } = W.parseFrontmatter(doc);
-  expect(frontmatter.title).toBe('Routing: Anthropic Batch');
-  expect(frontmatter.type).toBe('source');
-  expect(body.trim()).toBe('body here');
-});
-
-test('appendLog rejects far future dates', () => {
-  expect(() => W.appendLog('2099-01-01', 'test', 'future guard')).toThrow(/Refusing future wiki log date/);
-});
-
-test('appendLog rejects dates 2 days in the future (boundary precision per #1681)', () => {
-  const twoDaysAhead = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
-  expect(() => W.appendLog(twoDaysAhead, 'test', 'two-day boundary')).toThrow(/Refusing future wiki log date/);
-});
-
-test('appendLog rejects malformed date strings (Invalid wiki log date)', () => {
-  expect(() => W.appendLog('not-a-date', 'test', 'invalid input')).toThrow(/Invalid wiki log date/);
-});
-
-test('appendLog date tolerance constant remains 1 day', () => {
-  expect(W.DATE_TOLERANCE_DAYS).toBe(1);
-});
+test('parseFrontmatter preserves colon values via gray-matter', () => { const doc = ['---','title: "Routing: Anthropic Batch"','type: source','created: 2026-05-16','status: draft','---','','body here'].join('\n'); const { frontmatter, body } = W.parseFrontmatter(doc); expect(frontmatter.title).toBe('Routing: Anthropic Batch'); expect(frontmatter.type).toBe('source'); expect(body.trim()).toBe('body here'); });
+test('appendLog rejects far future dates', () => { expect(() => W.appendLog('2099-01-01', 'test', 'future guard')).toThrow(/Refusing future wiki log date/); });
+test('appendLog rejects dates 2 days in the future (boundary precision per #1681)', () => { const twoDaysAhead = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10); expect(() => W.appendLog(twoDaysAhead, 'test', 'two-day boundary')).toThrow(/Refusing future wiki log date/); });
+test('appendLog rejects malformed date strings (Invalid wiki log date)', () => { expect(() => W.appendLog('not-a-date', 'test', 'invalid input')).toThrow(/Invalid wiki log date/); });
+test('appendLog date tolerance constant remains 1 day', () => { expect(W.DATE_TOLERANCE_DAYS).toBe(1); });
+test('listPages includes Wiki B ticket and PR pages', () => { const wikiDir = tmpWikiDir(); fs.mkdirSync(path.join(wikiDir, 'entities'), { recursive: true }); fs.mkdirSync(path.join(wikiDir, 'work-log', 'tickets'), { recursive: true }); fs.mkdirSync(path.join(wikiDir, 'work-log', 'prs'), { recursive: true }); fs.writeFileSync(path.join(wikiDir, 'entities', 'openclaw.md'), '---\ntitle: OpenClaw\n---\n'); fs.writeFileSync(path.join(wikiDir, 'work-log', 'tickets', '2054.md'), '---\ntitle: Wiki B mirror\n---\n'); fs.writeFileSync(path.join(wikiDir, 'work-log', 'prs', '2101.md'), '---\ntitle: Wiki B PR\n---\n'); const pages = W.listPages(wikiDir); expect(pages).toEqual(expect.arrayContaining([expect.objectContaining({ slug: 'openclaw', type: 'entities' }), expect.objectContaining({ slug: '2054', type: 'ticket' }), expect.objectContaining({ slug: '2101', type: 'pr' })])); });
+test('writePage routes ticket pages into work-log/tickets and updates index', () => { const wikiDir = tmpWikiDir(); fs.mkdirSync(path.join(wikiDir, 'work-log', 'tickets'), { recursive: true }); fs.mkdirSync(path.join(wikiDir, 'work-log', 'prs'), { recursive: true }); fs.writeFileSync(path.join(wikiDir, 'index.md'), ['# Wiki Index','','## Work Log','','## Concepts',''].join('\n')); const pagePath = W.writePage('2054', 'ticket', ['---','title: Wiki B mirror','type: ticket','created: 2026-05-27','status: draft','---','','body here'].join('\n'), wikiDir); expect(pagePath).toBe(path.join(wikiDir, 'work-log', 'tickets', '2054.md')); expect(fs.readFileSync(pagePath, 'utf8')).toContain('Wiki B mirror'); expect(fs.readFileSync(path.join(wikiDir, 'index.md'), 'utf8')).toContain('[[2054]]'); });
