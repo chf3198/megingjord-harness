@@ -37,6 +37,12 @@ test('preserves dirty or unpushed work with rescue commands', () => {
   expect(planner.commands(entry(), state)[0]).toContain('rescue/1700-preserve');
 });
 
+test('preserves untracked-only work with rescue commands', () => {
+  const state = planner.classify(entry({ untrackedCount: 1, mergedToMain: true }), null);
+  expect(state).toBe('preserve-dirty');
+  expect(planner.commands(entry(), state)[0]).toContain('rescue/1700-preserve');
+});
+
 test('keeps active lease worktrees visible', () => {
   const report = planner.plan({
     inventory: { worktrees: [entry({ branch: 'feat/1704-active' })] },

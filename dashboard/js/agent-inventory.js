@@ -1,5 +1,6 @@
 // Agent Inventory — renders defined agent personas for the Agents panel
 // Source: agents/roster.json (embedded; update when roster changes)
+/* global esc */
 
 const AGENT_ROSTER = [
   { id: 'manny-scope', name: 'Manny Scope', role: 'manager', specialty: 'Scope definition, constraints, AC gates' },

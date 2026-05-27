@@ -1,6 +1,7 @@
+/* global Alpine, esc */
 (function() { // Baton Filter — dropdown filter for epic and status
 
-let _batonFilter = { epic: '', status: '' };
+const _batonFilter = { epic: '', status: '' };
 
 function getBatonFilter() { return _batonFilter; }
 function setBatonFilter(key, val) {
@@ -13,21 +14,21 @@ function setBatonFilter(key, val) {
 }
 
 function applyBatonFilter(tickets) {
-  const f = _batonFilter;
+  const filter = _batonFilter;
   return tickets.filter(t =>
-    (!f.epic || String(t.epic) === f.epic) &&
-    (!f.status || t.status === f.status));
+    (!filter.epic || String(t.epic) === filter.epic) &&
+    (!filter.status || t.status === filter.status));
 }
 
 function renderBatonFilterBar(tickets) {
   const epics = [...new Set(tickets.map(t => t.epic).filter(Boolean))].sort();
   const statuses = [...new Set(tickets.map(t => t.status).filter(Boolean))];
-  const f = _batonFilter;
+  const filter = _batonFilter;
   const epicOpts = epics.map(e =>
-    `<option value="${e}" ${f.epic == e ? 'selected' : ''}>Epic #${e}</option>`
+    `<option value="${e}" ${filter.epic === String(e) ? 'selected' : ''}>Epic #${e}</option>`
   ).join('');
   const statusOpts = statuses.map(s =>
-    `<option value="${s}" ${f.status === s ? 'selected' : ''}>${esc(s)}</option>`
+    `<option value="${s}" ${filter.status === s ? 'selected' : ''}>${esc(s)}</option>`
   ).join('');
   return `<div class="baton-filter-bar">
     <select onchange="setBatonFilter('epic',this.value)" title="Filter by epic">
