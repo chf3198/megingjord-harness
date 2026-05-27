@@ -1,0 +1,15 @@
+pre-commit:
+  parallel: false
+  commands:
+    docs-check:
+      run: node scripts/check.js
+    lint-check:
+      run: npm run lint
+
+pre-push:
+  parallel: true
+  commands:
+    branch-name-regex:
+      run: hooks/scripts/validate-branch-name.sh
+    lint-line-cap:
+      run: npm run lint
