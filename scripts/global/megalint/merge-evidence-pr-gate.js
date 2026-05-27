@@ -4,10 +4,10 @@
 // non-lightweight, non-epic PR commits to atomically closing its linked
 // issue via GitHub auto-close keywords (Closes/Fixes/Resolves), or carries
 // the merge-evidence-override:approved label on the issue.
+// Refs #2302: LIGHTWEIGHT_LANES imported from lane-enum.js (single source of truth).
 
-const LIGHTWEIGHT_LANES = new Set([
-  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research',
-]);
+const path = require('path');
+const { LIGHTWEIGHT_LANES } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 const CLOSE_KEYWORDS_RE = /\b(close[sd]?|fix(es|ed)?|resolve[sd]?)\s+#(\d+)/gi;
 

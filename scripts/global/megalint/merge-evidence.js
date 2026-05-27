@@ -3,10 +3,10 @@
 // closed as status:done with no merged PR referencing them on main. Caller
 // supplies mergedPRRefs (already filtered to merged-to-main); this rule
 // stays side-effect-free per existing megalint convention.
+// Refs #2302: LIGHTWEIGHT_LANES imported from lane-enum.js (single source of truth).
 
-const LIGHTWEIGHT_LANES = new Set([
-  'lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research',
-]);
+const path = require('path');
+const { LIGHTWEIGHT_LANES } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const OVERRIDE_LABEL = 'merge-evidence-override:approved';
 
 function shouldSkip(labels, state) {
