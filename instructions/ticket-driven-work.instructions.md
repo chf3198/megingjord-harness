@@ -49,7 +49,12 @@ applyTo: "**"
 
 ## Valid owner × work-type matrix
 
-All work types use `role:collaborator`. Work types with CI gates (development, bug fix, infra/ops) include `testing`; all others skip it. Valid statuses: `triage` → `ready` → `in-progress` → [`testing`] → `review` → `done`.
+Default lanes use `role:collaborator`. Work types with CI gates (development, bug fix, infra/ops) include `testing`; docs/research may use reduced markers as defined in baton routing. Valid statuses: `triage` → `ready` → `in-progress` → [`testing`] → `review` → `done`.
+
+No-code remediation lane (`lane:no-code-remediation`) is issue-only and manager/consultant scoped:
+- Valid transitions: `triage` → `review` → `done`
+- Required markers: `COLLABORATOR_HANDOFF: N/A` and `ADMIN_HANDOFF: N/A`
+- Any repository diff, workflow edit, or validator fix requiring file changes must re-route to normal baton (`lane:code-change`).
 
 ## Forbidden combinations
 

@@ -101,8 +101,35 @@ Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:
 | code-change  | Code, infra, deploy (default)  | Manager→Collab→Admin→Consultant   | none                           |
 | research     | Analysis, wiki — no git branch | Manager→Collab(analyst)→Admin→Consultant | Admin = doc reviewer, not CI |
 | config-only  | Single-value config, no design | Manager→Admin→Consultant          | COLLABORATOR_HANDOFF: N/A      |
+| no-code-remediation | Issue-only drift normalization (no repo edits) | Manager→Consultant | COLLABORATOR_HANDOFF: N/A, ADMIN_HANDOFF: N/A |
 
 Lane set at ticket creation via `lane:*` label and `Lane` Project field. Default: **code-change**.
+
+### No-code remediation lane contract (Refs #2258 #2268)
+
+Eligibility:
+- Ticket drift is limited to issue metadata/evidence normalization (labels, stale advisories, baton artifacts, or closeout evidence) with no source changes.
+- Corrective action is issue/thread state only; no PR diff is needed.
+- Runtime-deploy sync verification is `N/A` because deployed runtime artifacts are untouched.
+
+Exclusions (must escalate to normal baton lane):
+- Any tracked file edit, generated artifact edit, workflow/config change, or test change.
+- Any required CI or validator remediation that needs code/doc changes.
+- Any ambiguity about whether the incident is issue-only versus implementation drift.
+
+Required evidence blocks:
+- `MANAGER_HANDOFF` must state `lane: lane:no-code-remediation`, explicit eligibility rationale, and the exact issue-only actions.
+- `CONSULTANT_CLOSEOUT` must verify each issue-only action completed and include flaw-accounting (`mid_flight_flaws`) plus `verdict` and `rubric_rating`.
+
+False positives and escalation path:
+- If a no-code run reveals required repository edits, Manager posts a correction comment and routes to `lane:code-change` with the standard four-role baton.
+- If stale advisory labels conflict with merged evidence, clear the stale label as issue-only remediation; if merge evidence is absent, escalate to normal baton.
+
+Examples:
+- Valid: remove stale `governance:close-without-merge` on an already-merged closed ticket.
+- Invalid: changing `instructions/**` to satisfy a validator; this is `lane:code-change` (docs/code diff exists).
+
+Operator runbook: `docs/howto/no-code-remediation-workflow.md`.
 
 ## Archival
 
@@ -140,7 +167,7 @@ This decision must be cited in baton artifacts and summarized in `CONSULTANT_CLO
 
 Required fields on every `MANAGER_HANDOFF` comment:
 - `scope:` — what changes
-- `lane:` — `lane:code-change | lane:docs-research | lane:config-only | lane:trivial`
+- `lane:` — `lane:code-change | lane:docs-research | lane:config-only | lane:no-code-remediation | lane:trivial`
 - `test_strategy:` — one of `tdd-pyramid | tdd-trophy | contract-test | golden-file | eval-harness | visual-regression | drift-lint | peer-review | manual-verify | none`
 - `acceptance:` — AC checklist
 - `gates:` — CI/governance gates that must pass
