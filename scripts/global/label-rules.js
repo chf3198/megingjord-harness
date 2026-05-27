@@ -8,6 +8,7 @@ const STATUS_ROLE_REQUIRED = {
   'status:review':      'role:consultant',
 };
 const EPIC_ONLY_STATES = ['status:dormant', 'status:deferred'];
+const TERMINAL_STATES = ['status:done', 'status:cancelled'];
 
 function evaluate(issue) {
   const labels = (issue.labels || []).map(l => typeof l === 'string' ? l : l.name);
@@ -33,6 +34,8 @@ function evaluate(issue) {
     if (!statusLabels.some(s => s === 'status:done' || s === 'status:cancelled')) {
       violations.push('Rule 7b: closed issue must have status:done or status:cancelled');
     }
+  } else if (statusLabels.some(s => TERMINAL_STATES.includes(s))) {
+    violations.push('Rule 12: open issue must not carry terminal status:done or status:cancelled');
   }
 
   if (isEpic) {

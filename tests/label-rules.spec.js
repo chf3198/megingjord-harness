@@ -94,3 +94,7 @@ test('Rule 11: either label alone is OK', () => {
   expect(v1.filter(x => x.includes('Rule 11'))).toEqual([]);
   expect(v2.filter(x => x.includes('Rule 11'))).toEqual([]);
 });
+
+test('Rule 12: open issues cannot carry terminal statuses', () => { for (const terminal of ['status:done', 'status:cancelled']) {
+  const v = R.evaluate(mk(['type:task', terminal, 'area:governance'])); expect(v.some(x => x.includes('Rule 12'))).toBe(true); }
+});
