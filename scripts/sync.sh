@@ -21,11 +21,13 @@ done
 [[ "$TARGET" =~ ^(copilot|codex|claude|both|all)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
 $DRY_RUN && CODEX_ARGS+=(--dry-run)
 
-# #2355 guardrail: refuse canonical-main writes (sync.sh copies ~/.copilot/ INTO checkout).
+# #2355 guardrail: refuse canonical-main writes; emit incident JSONL on trip (exit 2).
 if [[ "$ROOT" == "$HOME/devenv-ops" && "$ALLOW_CANONICAL" != "true" && "$DRY_RUN" != "true" ]]; then
-  echo "x canonical-main read-only: sync.sh writes ~/.copilot/ INTO ~/devenv-ops/ (#2355)." >&2
+  echo "x canonical-main read-only: sync.sh writes ~/.copilot/ INTO ~/devenv-ops/ (#2355 exit 2)." >&2
   echo "  Stale ~/.copilot/ regresses tracked files. Use 'npm run deploy:apply' (forward)" >&2
   echo "  or run from a worktree; pass --allow-canonical-write for IT-ops override." >&2
+  mkdir -p "$HOME/.megingjord" 2>/dev/null || true
+  printf '{"ts":"%s","version":"v3","service":"megingjord-harness","env":"local","event":"sync-canonical-main-refused","pattern_id":"sync-sh-reverse-direction-regresses-main","severity":"medium","ticket":2355,"_summary":"sync.sh refused canonical-main write"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$HOME/.megingjord/incidents.jsonl" 2>/dev/null || true
   exit 2
 fi
 
