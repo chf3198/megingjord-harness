@@ -4,6 +4,7 @@ date: 2026-05-28
 lane: docs-research
 source_tickets: [2254, 2356, 2357]
 seed_attribution: https://github.com/chf3198/megingjord-harness/issues/2357#issuecomment-4568080084
+seed_author: unknown (comment posted without Signed-by/Team&Model block; URL preserves archaeological lineage only)
 signers:
   manager: Orla Mason (claude-code:opus-4-7@local)
   collaborator: Orla Harper (claude-code:opus-4-7@local)
@@ -45,7 +46,17 @@ Current `baton-gates.yml` short-circuits with `lightweight-lane-skip` for `lane:
 - `lane:docs-research` then MANAGER + COLLABORATOR + CONSULTANT (no ADMIN-CI; rubric still required)
 - `lane:no-code-remediation` then MANAGER + CONSULTANT (carve-out remains)
 
-**Invariant**: no lane maps to an empty check set. Each "skip" becomes "apply lighter set X."
+Quantitative check-count comparison (full-lane baseline = 7 process checks: MGR-handoff, COLLAB-handoff, ADMIN-handoff, CONSULT-closeout, signer-independence, changelog-fragment, rubric):
+
+| Lane | Current (blanket-skip) | Proposed lighter set | Delta vs current | Delta vs full |
+|---|---|---|---|---|
+| trivial | 0 of 7 | MGR + ADMIN signing = 2 of 7 | +2 (heavier than today) | -5 (lighter than full) |
+| docs-research | 0 of 7 | MGR + COLLAB + CONSULT + rubric = 4 of 7 | +4 (heavier than today) | -3 (lighter than full) |
+| no-code-remediation | 0 of 7 | MGR + CONSULT = 2 of 7 | +2 (heavier than today) | -5 (lighter than full) |
+
+The proposed sets are HEAVIER than the current blanket-skip (closing the #2254 gap) and LIGHTER than the full-lane requirement (preserving the lightweight-lane intent).
+
+**Invariant**: no lane maps to an empty check set. Each blanket skip becomes a lighter explicit set.
 
 ## 4. Session-Start Gate (Epic #2356 SC4)
 
