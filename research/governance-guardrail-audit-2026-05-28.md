@@ -3,7 +3,7 @@ title: Governance Guardrail Audit (2026-05-28) — Phase-0 for Epic #2356
 date: 2026-05-28
 lane: docs-research
 source_tickets: [2254, 2356, 2357]
-seed_attribution: https://github.com/chf3198/megingjord-harness/issues/2357#issuecomment-4567966103
+seed_attribution: https://github.com/chf3198/megingjord-harness/issues/2357#issuecomment-4568080084
 signers:
   manager: Orla Mason (claude-code:opus-4-7@local)
   collaborator: Orla Harper (claude-code:opus-4-7@local)
