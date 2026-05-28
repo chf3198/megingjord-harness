@@ -71,6 +71,14 @@ citizens.
 See [`docs/howto/installation.md`](docs/howto/installation.md) for the full
 install walkthrough, including adding a second project.
 
+## Ownership Semantics Rollout
+
+Execution role labels represent the active baton holder only.
+Waiting and terminal states must not carry execution role labels.
+
+See [docs/howto/baton-workflow.md](docs/howto/baton-workflow.md) for board filters,
+no-code remediation lane constraints, and the operator rollout checklist.
+
 ## Quick start
 
 ```bash

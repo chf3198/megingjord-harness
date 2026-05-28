@@ -6,8 +6,10 @@ Refs #639 #335
 ## Overview
 
 Every change in Megingjord goes through a single-threaded baton sequence. One role is
-active at a time per ticket. The GitHub issue IS the baton — whoever holds the active
-`role:*` label owns the current step.
+active at a time per ticket. The GitHub issue IS the baton.
+
+Execution `role:*` labels indicate the active baton holder on active states only.
+Terminal and waiting states carry no execution role label.
 
 ```
 Manager → Collaborator → Admin → Consultant → done + closed
@@ -166,21 +168,23 @@ gh issue close N
 
 ## Reduced Lanes
 
-### docs/research lane (Manager → Consultant only)
+### docs/research lane (Manager → Collaborator → Admin → Consultant)
 
-For PRs that only change `.md` files, instructions, or research docs:
+Docs/research changes still follow the four-role baton unless the ticket is explicitly
+classified as no-code remediation.
 
-Post these N/A markers on the issue before creating the PR:
+### no-code remediation lane (Manager → Consultant)
+
+Use this only for issue/thread metadata repair with zero repository file changes.
+
+Required issue markers:
 
 ```
-COLLABORATOR_HANDOFF: N/A — docs/research lane
-ADMIN_HANDOFF: N/A — docs/research lane
+COLLABORATOR_HANDOFF: N/A — no-code remediation lane
+ADMIN_HANDOFF: N/A — no-code remediation lane
 ```
 
-The CI `baton-gates.yml` reads the issue comments for these strings. N/A markers satisfy
-the gate while still enforcing the ≥60 s timing check against their timestamps.
-
-### config-only lane (Admin → Consultant only)
+### config-only lane (Manager → Admin → Consultant)
 
 For trivial single-value config changes with no design decision:
 
@@ -206,6 +210,36 @@ COLLABORATOR_HANDOFF: N/A — config-only lane
 - `status:backlog` or `status:done` with any `role:*` label — **except Epics**, which carry `role:manager` throughout their lifecycle (label-lint Rule E2; per Epic #1074)
 - `status:dormant` or `status:deferred` on non-Epic tickets (Rule E5)
 - Skipping a role without posting an explicit N/A marker
+
+## Board Filter Guidance
+
+Use this board filter for active baton work:
+
+```
+status:triage,status:ready,status:in-progress,status:testing,status:review
+```
+
+Use this filter for queue/terminal ownership hygiene:
+
+```
+status:queued,status:backlog,status:done,status:cancelled
+```
+
+## Rollout Announcement + Operator Checklist
+
+Announcement text:
+
+```
+Ownership semantics rollout: execution role labels now represent only active baton
+holders. Waiting and terminal states do not carry execution role labels. Historical
+ownership is reporting metadata, not a ticket role label.
+```
+
+Operator checklist:
+- Verify no closed ticket carries any execution `role:*` label
+- Verify waiting states (`backlog`, `queued`, `ready`) carry no execution role labels
+- Verify active states carry the matching execution role label
+- Verify board filters separate active baton work from queue/terminal hygiene
 
 ## Quick Reference
 
