@@ -186,5 +186,45 @@
     "minFleetUtilizationShare": 0.85,
     "windowDays": 7,
     "violationEscalationReason": "fleet-bypass"
+  },
+  "per_role_lane_preferences": {
+    "_doc": "Per-role preferred lane by complexity tier. Consumed by resolveRouting when opts.role is set. Refs #2320.",
+    "_tiers": "low=[0,0.3) mid=[0.3,0.7) high=[0.7,1.0]",
+    "manager": {
+      "low": "fleet",
+      "mid": "haiku",
+      "high": "premium",
+      "_rationale": "Scoping novel work requires premium at high complexity; templatable tasks are fleet-eligible."
+    },
+    "collaborator": {
+      "low": "fleet",
+      "mid": "fleet",
+      "high": "haiku",
+      "_rationale": "Known-pattern implementation defaults fleet; multi-file novel work escalates to haiku."
+    },
+    "admin": {
+      "low": "fleet",
+      "mid": "fleet",
+      "high": "haiku",
+      "_rationale": "CI ops and deploy verification are templatable; git/release rarely needs above haiku."
+    },
+    "consultant": {
+      "low": "fleet",
+      "mid": "haiku",
+      "high": "premium",
+      "_rationale": "Critique needs independent reasoning; fleet for routine closeout; premium for novel G1-G9 rubric."
+    },
+    "it": {
+      "low": "fleet",
+      "mid": "fleet",
+      "high": "fleet",
+      "_rationale": "IT-ops maintenance fully fleet-eligible per D3. Escalate only on direct-to-premium trigger."
+    },
+    "red-team": {
+      "low": "fleet",
+      "mid": "fleet",
+      "high": "haiku",
+      "_rationale": "Cross-family adversarial review prefers fleet (qwen2.5-coder). Haiku ceiling for high-complexity exploit reasoning."
+    }
   }
 }
