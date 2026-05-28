@@ -1,0 +1,6 @@
+{
+  "id": "fixture-04",
+  "description": "PR changes only a test file — no wiki delta expected",
+  "pr_diff": "diff --git a/tests/some-test.spec.js b/tests/some-test.spec.js\n+test('sanity', () => { expect(1).toBe(1); });",
+  "expected_wiki_delta": []
+}

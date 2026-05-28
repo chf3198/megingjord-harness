@@ -1,0 +1,14 @@
+{
+  "id": "fixture-03",
+  "description": "PR updates wiki ingest pipeline — expect source page upsert",
+  "pr_diff": "diff --git a/scripts/wiki/ingest.js b/scripts/wiki/ingest.js\n+// Auto-ingest raw articles into wiki/sources\n+async function ingestArticle(filePath) { /* reads raw, writes source page */ }\n+module.exports = { ingestArticle };",
+  "expected_wiki_delta": [
+    {
+      "operation": "upsert",
+      "type": "source",
+      "slug": "ingest-pipeline",
+      "title": "Ingest Pipeline",
+      "summary": "Auto-ingest raw articles into wiki sources"
+    }
+  ]
+}

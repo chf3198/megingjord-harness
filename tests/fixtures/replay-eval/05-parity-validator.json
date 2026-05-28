@@ -1,0 +1,14 @@
+{
+  "id": "fixture-05",
+  "description": "PR lands parity-validator governance script — expect concept page",
+  "pr_diff": "diff --git a/scripts/global/parity-validator.js b/scripts/global/parity-validator.js\n+// Nightly cron parity validator for runtime sync\n+function validateParity(sourceDir, targetDir) { /* compares deployed vs source */ }\n+module.exports = { validateParity };",
+  "expected_wiki_delta": [
+    {
+      "operation": "upsert",
+      "type": "concept",
+      "slug": "parity-validator",
+      "title": "Parity Validator",
+      "summary": "Nightly cron parity validator for runtime sync"
+    }
+  ]
+}

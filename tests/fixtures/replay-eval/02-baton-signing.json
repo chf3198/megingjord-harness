@@ -1,0 +1,14 @@
+{
+  "id": "fixture-02",
+  "description": "PR adds baton signing module — expect concept page for baton-signing",
+  "pr_diff": "diff --git a/scripts/global/baton-signing.js b/scripts/global/baton-signing.js\n+// Ed25519 DPoP signing for HAMR MCP capability dispatch\n+async function signRequest(payload, keyId) { /* ... */ }\n+module.exports = { signRequest };",
+  "expected_wiki_delta": [
+    {
+      "operation": "upsert",
+      "type": "concept",
+      "slug": "baton-signing",
+      "title": "Baton Signing",
+      "summary": "Ed25519 DPoP signing for HAMR MCP capability dispatch"
+    }
+  ]
+}
