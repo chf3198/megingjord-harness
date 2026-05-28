@@ -18,7 +18,7 @@ PATCH_FILE_RE = re.compile(
 )
 # Bash/terminal tools: inputs are shell commands, not file paths.
 # Path classification is skipped for these to prevent false code_touched.
-BASH_TOOLS = {"run_in_terminal", "terminal", "runTerminalCommand", "Bash"}
+BASH_TOOLS = {"run_in_terminal", "terminal", "runTerminalCommand", "Bash", "run_command", "send_command_input"}
 
 
 def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
@@ -33,6 +33,7 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     if tool in {
         "apply_patch", "create_file",
         "edit_notebook_file", "create_new_jupyter_notebook",
+        "write_to_file", "replace_file_content", "multi_replace_file_content",
     }:
         roles["collaborator"] = True
 

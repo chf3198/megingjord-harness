@@ -130,7 +130,7 @@ def main() -> int:
     state = ensure_state(cwd)
     from state_store import reset_on_branch_change
     state = reset_on_branch_change(cwd, current_branch(cwd))
-    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit"}:
+    if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit","write_to_file","replace_file_content","multi_replace_file_content"}:
         if is_main_checkout(cwd):
             for value in values:
                 if not (value.startswith("/") or value.startswith("./") or "/" in value):
@@ -140,7 +140,7 @@ def main() -> int:
                     return emit("deny", f"Canonical-main read-only (#2107): {reason}")
         if not state.get("active_ticket"):
             return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
-    if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash"}:
+    if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash","run_command","send_command_input"}:
         # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
         # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.
         try:

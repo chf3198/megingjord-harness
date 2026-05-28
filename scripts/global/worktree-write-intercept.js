@@ -10,7 +10,10 @@ const path = require('node:path');
 const { read } = require('./cross-team-lease-registry');
 const { readLock } = require('./worktree-active-session-lock');
 
-const WRITE_TOOLS = new Set(['Write', 'Edit', 'NotebookEdit', 'MultiEdit']);
+const WRITE_TOOLS = new Set([
+  'Write', 'Edit', 'NotebookEdit', 'MultiEdit',
+  'write_to_file', 'replace_file_content', 'multi_replace_file_content'
+]);
 const BASH_DESTRUCTIVE_RE = /\b(rm|mv)\s+-[rfRF]+|>\s*['"]?[^|&;]+['"]?\s*(\||$)/;
 
 function isWriteTool(toolName) {
@@ -47,7 +50,7 @@ function pathCovered(leases, ticket, relPath, now = new Date().toISOString()) {
 function evaluate(input, opts = {}) {
   const rootDir = opts.rootDir || process.cwd();
   const toolName = input.tool_name;
-  const filePath = (input.tool_input || {}).file_path;
+  const filePath = (input.tool_input || {}).file_path || (input.tool_input || {}).TargetFile;
   if (!isWriteTool(toolName) && !isDestructiveBash(toolName, input.tool_input)) {
     return { decision: 'allow', reason: 'non-write-tool' };
   }

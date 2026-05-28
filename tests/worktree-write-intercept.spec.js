@@ -16,8 +16,8 @@ function writeLock(r, lock) {
     JSON.stringify(lock));
 }
 
-test('isWriteTool: Write/Edit/MultiEdit/NotebookEdit are writes', () => {
-  for (const t of ['Write', 'Edit', 'MultiEdit', 'NotebookEdit']) {
+test('isWriteTool: Write/Edit/MultiEdit/NotebookEdit and Antigravity tools are writes', () => {
+  for (const t of ['Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'write_to_file', 'replace_file_content', 'multi_replace_file_content']) {
     assert.equal(isWriteTool(t), true, `${t} should be write`);
   }
 });
@@ -113,5 +113,19 @@ test('evaluate: write with lock but path not in lease returns warn', () => {
     assert.equal(decision.decision, 'warn');
     assert.equal(decision.reason, 'path-not-covered-by-lease');
     assert.match(decision.advice, /add.*instructions\/foo\.md/);
+  } finally { rm(r); }
+});
+
+test('evaluate: Antigravity write_to_file with lock + TargetFile covered by lease is allowed', () => {
+  const r = mkRoot();
+  try {
+    writeLock(r, { team: 'antigravity', ticket: 1854, pid: process.pid,
+      last_heartbeat: new Date().toISOString() });
+    const decision = evaluate(
+      { tool_name: 'write_to_file', tool_input: { TargetFile: path.join(r, 'scripts/global/foo.js') } },
+      { rootDir: r, registry: { leases: [
+        { status: 'active', ticket: 1854, paths: ['scripts/global'] }] } });
+    assert.equal(decision.decision, 'allow');
+    assert.equal(decision.reason, 'covered-by-lease');
   } finally { rm(r); }
 });
