@@ -262,6 +262,7 @@ npm run deploy:both:apply
 | `hooks:install` | `bash scripts/global/install-hooks.sh` |
 | `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
+| `it-ops:usage-report` | `node scripts/global/it-bypass-usage-report.js` |
 | `lint` | `node scripts/lint.js` |
 | `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md && npm run lint:decisions` |
 | `lint:coverage-metric` | `node scripts/global/lint-coverage-metric.js` |
@@ -291,6 +292,7 @@ npm run deploy:both:apply
 | `router:weekly` | `node scripts/global/model-routing-weekly-report.js` |
 | `routing:baseline` | `node scripts/global/routing-baseline-report.js` |
 | `routing:calibrate` | `node scripts/global/cascade-calibrate.js` |
+| `routing:fallback-report` | `node scripts/global/routing-fallback-report.js` |
 | `routing:freshness` | `node scripts/global/matrix-freshness.js` |
 | `routing:reconcile` | `node scripts/global/token-telemetry-reconcile.js --json` |
 | `routing:refresh` | `node scripts/global/routing-refresh.js --update-matrix` |
