@@ -96,6 +96,32 @@ defaults to OpenAI-compatible activation and checks `OPENAI_API_KEY`.
 Provider-neutral, fleet, and Ollama activation modes do not require a cloud
 provider key at activation time. Set `HAMR_PROVIDER` to override the default.
 
+## Per-role lane preferences (Refs #2320)
+
+`model-routing-policy.json` now carries a `per_role_lane_preferences` block that
+encodes a preferred lane (free|fleet|haiku|premium) per role × complexity tier
+(low `[0,0.3)` / mid `[0.3,0.7)` / high `[0.7,1.0]`).
+
+When `resolveRouting(prompt, route, { role })` is called with an active baton role,
+the per-role preference overrides the base cascade lane — subject to rollback and
+budget governors. The preference is skipped when a rollback is in effect.
+
+Supported roles: `manager`, `collaborator`, `admin`, `consultant`, `it`, `red-team`.
+
+Usage from any runtime:
+
+```js
+const { resolveRouting } = require('./model-routing-engine');
+const resolved = resolveRouting(prompt, route, { role: 'collaborator' });
+// resolved.rolePrefApplied === true when preference was applied
+// resolved.activeRole === 'collaborator'
+```
+
+Design intent per D3 (fleet-first for role-execution):
+- `collaborator`, `admin`, `it`: fleet at low+mid complexity; haiku only at high.
+- `manager`, `consultant`: haiku at mid; premium at high (scoping/critique require reasoning).
+- `red-team`: fleet at low+mid; haiku ceiling even at high (cross-family, not cloud-first).
+
 ## Override
 
 Repos that explicitly opt out (e.g., air-gapped) MUST set `MEGINGJORD_HAMR_DISABLED=1`.
