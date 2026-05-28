@@ -12,6 +12,34 @@ The GitHub issue **is** the baton. One active role at a time. Every state carrie
 Authoritative board: **Megingjord Harness Board** (GitHub Projects).
 Baton view filter: `status:triage,ready,in-progress,testing,review` (backlog/done/cancelled/dormant/deferred hidden from active baton view).
 
+## Role Taxonomy (7-role canonical set, Epic #2299)
+
+The harness recognizes seven named roles. Operator is a meta-term (see
+`instructions/operator-identity-context.instructions.md`), not an eighth role.
+
+| Role | Scope | GitHub baton label |
+|---|---|---|
+| Manager | Scope, AC authoring, baton routing, Epic oversight | `role:manager` |
+| Collaborator | Implementation, deliverable production, test authoring | `role:collaborator` |
+| Admin | Git/release ops, merge, runtime sync, publish | `role:admin` |
+| Consultant | Independent critique, rubric scoring, closeout authority | `role:consultant` |
+| IT | Fleet hardware + service setup/config (no GitHub workflow) | `role:it` |
+| Red-Team | Adversarial cross-family review; structured hallucination audit | `role:red-team` |
+| Client | Design direction + UAT confirmation; overrides Consultant carve-outs | `role:client` |
+
+**Guest-Collaborator (RESERVED)**: placeholder for non-adversarial external
+contributions (fleet-coding-local dispatch, cross-team feature contributions,
+external human wiki-ingest) that are NOT adversarial/critique-class. Not
+currently active; use Red-Team for all adversarial/review dispatches (D1,
+Epic #2299). Reserved to prevent taxonomy namespace collision.
+
+IT role note: IT scope covers fleet hardware (hosts, Tailscale mesh, Ollama
+models, MCP provisioning) and services (HAMR activation, cron, hook install).
+IT does NOT create tickets, push branches, commit, or comment on issues. The
+`[it-ops]` / `MEGINGJORD_IT_OPS=1` / `chore(it-ops):` bypass markers are the
+documented IT-role escape hatch for the rare tracked-file edit that does not
+warrant a full baton cycle.
+
 ## Status Workflow (11-state taxonomy v1.2, Epic #1828)
 
 ```

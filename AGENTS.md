@@ -87,3 +87,10 @@ Preferred form: `merge-evidence-deferred-final: #N` — satisfies `merge-evidenc
 without triggering GitHub auto-close, preserving Consultant terminal-finalize authority.
 Backward-compat: `Closes #N` remains accepted. This convention applies to Claude Code,
 Codex, and Copilot team PRs equally. See `governance-carve-outs/index.md` for rationale.
+
+## Role Taxonomy
+
+The harness uses a 7-role canonical taxonomy: Manager / Collaborator / Admin /
+Consultant / IT / Red-Team / Client. Guest-Collaborator is reserved but not active.
+Operator is a meta-term for the AI agent — not a distinct role.
+Canonical definition: `instructions/role-baton-routing.instructions.md` §"Role Taxonomy".
