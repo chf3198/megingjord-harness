@@ -1,0 +1,50 @@
+# Refs #2058 — Bi-directional wiki drift gate (advisory Phase-1)
+# Runs drift-detector on PRs touching scripts/global/**, instructions/**, or wiki/**.
+# ADVISORY: continue-on-error: true. Does not block PRs; posts annotation only.
+# Promoted to required gate in Phase-2 after replay-eval calibration (Epic #1942).
+
+name: wiki-drift-gate-advisory
+
+on:
+  push:
+    paths:
+      - 'scripts/global/**'
+      - 'instructions/**'
+      - 'wiki/**'
+  pull_request:
+    paths:
+      - 'scripts/global/**'
+      - 'instructions/**'
+      - 'wiki/**'
+
+permissions: read-all
+
+jobs:
+  wiki-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run wiki drift detector (advisory)
+        id: drift
+        continue-on-error: true
+        run: |
+          node scripts/wiki/drift-detector.js > drift-report.json 2>&1
+          cat drift-report.json
+      - name: Annotate drift findings
+        if: steps.drift.outcome == 'failure'
+        run: |
+          echo "::warning::wiki-drift-gate: drift detected (advisory; not blocking). Refs #2058."
+          echo "Review drift-report.json artifact for details."
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-drift-report
+          path: drift-report.json
+          retention-days: 7
