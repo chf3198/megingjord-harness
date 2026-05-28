@@ -30,8 +30,8 @@ function classifyTask(prompt, classes) {
   let best = keys[0] || 'routine';
   let top = -1;
   for (const k of keys) {
-    const scoreValue = score(text, classes[k]);
-    if (scoreValue > top) { top = scoreValue; best = k; }
+    const sv = score(text, classes[k]);
+    if (sv > top) { top = sv; best = k; }
   }
   return best;
 }
@@ -53,34 +53,51 @@ function applyComplexityThresholds(lane, complexity, thresholds) {
   return lane;
 }
 
-function resolveRouting(prompt, route) {
+// Refs #2320: resolve per-role preferred lane given complexity score.
+// Returns null when role is absent or not in policy, deferring to standard cascade.
+function resolveRolePreference(policy, role, complexity) {
+  const prefs = policy.per_role_lane_preferences;
+  if (!prefs || !role) return null;
+  const rolePref = prefs[String(role).toLowerCase()];
+  if (!rolePref) return null;
+  const thresh = policy.complexityThresholds || {};
+  if (complexity < (thresh.haiku ?? 0.3)) return rolePref.low || null;
+  if (complexity < (thresh.premium ?? 0.7)) return rolePref.mid || null;
+  return rolePref.high || null;
+}
+
+function buildRoutingResult(lane, cx, role, rolePrefLane, prompt, route, taskClass, policy) {
+  const premiumRationale = lane === 'premium'
+    ? normalizePremiumRationale(route, prompt, taskClass, cx) : null;
+  const budget = resolveBudget(policy, route, lane);
+  if (budget.downgraded) lane = 'haiku'; // eslint-disable-line no-param-reassign
+  const model = policy.models[lane] || policy.models.fallback;
+  const adapter = loadAdapters().lanes?.[lane] || {};
+  const overrides = loadOverrides();
+  return {
+    lane, modelId: adapter.capabilityTier || model.id,
+    providerModelId: adapter.defaultModelId || model.id,
+    providerPath: adapter.defaultProvider || model.endpoint || null,
+    adapterId: adapter.defaultAdapter || null,
+    multiplier: model.mult, taskClass,
+    complexity: cx, rolePrefApplied: rolePrefLane !== null, activeRole: role,
+    premiumRationale, premiumBudget: budget,
+    overridesApplied: overrides !== null, overridesStale: overrides?.stale ?? false,
+  };
+}
+
+function resolveRouting(prompt, route, opts) {
   const policy = loadPolicy();
   const rollbackApplied = route.disableRollback ? false : shouldRollback(policy);
   let lane = rollbackApplied ? policy.rollback.forceLane : route.lane;
   const cx = route.complexity ?? 0.5;
   lane = applyComplexityThresholds(lane, cx, policy.complexityThresholds);
+  const role = (opts && opts.role) || route.role || null;
+  const rolePrefLane = !rollbackApplied ? resolveRolePreference(policy, role, cx) : null;
+  if (rolePrefLane) lane = rolePrefLane;
   const taskClass = classifyTask(prompt, policy.taskClasses);
-  const premiumRationale = lane === 'premium' ? normalizePremiumRationale(route, prompt, taskClass, cx) : null;
-  const budget = resolveBudget(policy, route, lane);
-  if (budget.downgraded) lane = 'haiku';
-  const model = policy.models[lane] || policy.models.fallback;
-  const adapter = loadAdapters().lanes?.[lane] || {};
-  const overrides = loadOverrides();
-  return {
-    lane,
-    modelId: adapter.capabilityTier || model.id,
-    providerModelId: adapter.defaultModelId || model.id,
-    providerPath: adapter.defaultProvider || model.endpoint || null,
-    adapterId: adapter.defaultAdapter || null,
-    multiplier: model.mult,
-    taskClass,
-    rollbackApplied,
-    complexity: cx,
-    premiumRationale,
-    premiumBudget: budget,
-    overridesApplied: overrides !== null,
-    overridesStale: overrides?.stale ?? false,
-  };
+  return { rollbackApplied,
+    ...buildRoutingResult(lane, cx, role, rolePrefLane, prompt, route, taskClass, policy) };
 }
 
-module.exports = { resolveRouting, loadPolicy, loadAdapters, loadOverrides };
+module.exports = { resolveRouting, resolveRolePreference, loadPolicy, loadAdapters, loadOverrides };
