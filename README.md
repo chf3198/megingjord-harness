@@ -333,6 +333,7 @@ npm run deploy:both:apply
 | `validate:compat` | `node scripts/validate-plugin-compat.js` |
 | `validate:triage` | `node scripts/validate-plugin-triage.js` |
 | `wiki:anneal` | `node scripts/wiki/anneal.js` |
+| `wiki:auto-update` | `node scripts/wiki/auto-update-pipeline.js` |
 | `wiki:drift` | `node scripts/wiki/drift-detector.js` |
 | `wiki:ingest` | `node scripts/wiki/ingest.js` |
 | `wiki:ingest:code` | `node scripts/wiki/ingest-code.js` |
