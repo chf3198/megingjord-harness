@@ -6,7 +6,7 @@ applyTo: "**"
 
 ## LLM Wiki Availability
 
-Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governance, architecture, and research.
+Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governance, architecture, research.
 
 ## Access Model
 
@@ -16,43 +16,73 @@ Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governan
 | **Read** | Any repo | Read `~/.copilot/wiki/index.md` then drill into pages |
 | **Search (source)** | Megingjord only | `npm run wiki:search -- "query"` |
 | **Ingest** | Megingjord only | `npm run wiki:ingest -- raw/articles/<file>.md` |
-| **Lint** | Megingjord only | `npm run wiki:lint` |
-| **Anneal** | Megingjord only | `npm run wiki:anneal` |
+| **Lint/Anneal** | Megingjord only | `npm run wiki:lint` / `npm run wiki:anneal` |
 
-End-to-end ingest pipeline (raw/articles → wiki/sources → entity/concept
-pages → index.md → log.md) is documented in `WIKI.md`; the
-contributor walkthrough is `docs/howto/contribute-to-wiki.md`.
+Ingest pipeline (raw/articles → wiki/sources → pages → index.md): `WIKI.md` + `docs/howto/contribute-to-wiki.md`.
 
 ## When to Use the Wiki
 
-Check wiki before research tasks, when answering fleet/governance/architecture questions, when cross-referencing skills or ADRs, and after significant work (suggest updates).
+Check wiki before research tasks, governance/architecture questions, cross-referencing skills or ADRs.
 
-## Wiki Structure
+## Three-Wiki Typology v2 (Epic #1942, Phase-0 #1943)
 
-- `wiki/index.md` — read this first to find relevant pages
+Canonical synthesis: `research/three-wiki-typology-synthesis-1943.md`.
 
-### Three-Wiki typology (Phase-1 stubs from #2051; full migration follow-on)
+**Wiki A — Code-Base** (`wiki/code/`, per-project): mirrors source code semantics (G3 cost).
+- `wiki/code/symbols/` structural: file + symbol + signature maps (repo-map schema)
+- `wiki/code/concepts/` semantic: feature explainers, dependency graphs, known-issue notes
 
-Per `research/three-wiki-typology-synthesis-1943.md` (Epic #1942 Phase-0):
+**Wiki B — Work-Log** (`wiki/work-log/`, per-project): mirrors GitHub tickets + PRs (G3/G7).
+- `wiki/work-log/tickets/<N>.md` — `gh issue view N` mirror
+- `wiki/work-log/prs/<N>.md` — `gh pr view N` mirror
 
-- `wiki/code/` (Wiki A) — Code-Base Wiki (per-project; symbols + concepts)
-- `wiki/work-log/` (Wiki B) — Project Work-Log Wiki (per-project; mirrors GitHub tickets + PRs)
-- `wiki/wisdom/project/` (Wiki C scope=project) — Project-specific research wisdom (per-project, **NEVER distributed cross-project**)
-- `wiki/wisdom/global/` (Wiki C scope=global) — Cross-project wisdom (distributed to operator-global `~/.copilot/wiki/`)
+**Wiki C — Research Wisdom** (`wiki/wisdom/`, dual-scope, G2/G3):
+- `wiki/wisdom/global/` — cross-project; distributed to `~/.copilot/wiki/`
+- `wiki/wisdom/project/` — project-specific; **NEVER distributed cross-project** (A4 isolation)
 
-### Legacy paths (still in use; will migrate to wiki/wisdom/global/)
+Storage layout: `wiki/{code/symbols, code/concepts, work-log/tickets, work-log/prs, wisdom/global, wisdom/project, index.md}`
 
-- `wiki/entities/` — devices, services, tools (→ `wiki/wisdom/global/entities/`)
-- `wiki/concepts/` — patterns, protocols, decisions (→ `wiki/wisdom/global/concepts/`)
-- `wiki/sources/` — digests of raw research documents (→ `wiki/wisdom/global/sources/`)
-- `wiki/syntheses/` — cross-cutting analysis (→ `wiki/wisdom/global/syntheses/`)
-- `wiki/skills/` (→ `wiki/wisdom/global/skills/`)
+### Legacy paths (migrating → wiki/wisdom/global/)
 
-Physical migration of legacy paths is queued as a follow-on to #2051.
+`wiki/entities/` · `wiki/concepts/` · `wiki/sources/` · `wiki/syntheses/` · `wiki/skills/`
+Physical migration queued: #2051 / #2098.
+
+## Frontmatter Contract (schema enforced by #2052)
+
+All wiki pages require: `wiki_type` (code|work-log|wisdom), `content_hash`, `last_updated` (ISO-8601),
+`freshness_window` (7d|14d|30d|none), `content_trust_score`. Wisdom pages add `scope` (project|global).
+Code + work-log pages add `source_path`, `source_sha256`; code pages add `sub_layer` (structural|semantic).
+`freshness_window: none` = intentionally archival (exempt from freshness enforcement).
+
+## Retrieval Routing
+
+| Query type | Target |
+|---|---|
+| Symbol / signature lookup | Wiki A `wiki/code/symbols/` |
+| Feature / concept explanation | Wiki A `wiki/code/concepts/` |
+| Ticket / PR history | Wiki B `wiki/work-log/` |
+| Governance / research wisdom | Wiki C `wiki/wisdom/` |
+
+Fallback on hash-mismatch: wiki page → `gh`/`Read` live lookup → wiki page + `STALE:` prefix.
+
+## Auto-Update Pipeline (per #2055)
+
+GitHub Action on PR merge: diff-classify → content-trust → signed-commit → Unicode-scan →
+trust-scoring → per-type ingest → hash-record → namespace-isolation → drift-gate →
+replay-eval (≥30% token-cost-reduction) → commit.
+Phase-1 adapters: `semantic-store`, `structural-index`, `memory`, `trace-eval`.
+Phase-2 deferred: `graph` adapter (Wiki C GraphRAG, Epic #1942 Phase-2).
+
+## Bi-Directional Drift Gate (per #2058)
+
+`wiki-drift-required` CI on every PR. Advisory Phase-1; required Phase-2 post replay-eval
+calibration (Epic #1771/#1827 — replay-eval over calendar pattern).
+Detects: code-changed-wiki-stale, instruction-wiki-divergence, readme-wiki-divergence.
 
 ## Rules
 
 - Wiki at `~/.copilot/wiki/` is **read-only** from non-Megingjord repos
 - Never edit `~/.copilot/wiki/` directly — changes flow through Megingjord
+- `wiki/wisdom/project/` MUST NOT be distributed cross-project (A4 namespace isolation)
 - Cite wiki pages with `[[page-name]]` wikilink syntax
 - If wiki content is stale, note it for Megingjord maintenance
