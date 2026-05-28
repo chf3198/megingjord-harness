@@ -1,0 +1,112 @@
+# wiki-auto-update.yml — Auto-update wiki on PR merge (11-stage pipeline)
+# Triggers on pull_request closed + merged. Refs #2055 Epic #1942 Phase-1 C5.
+# Stage 2 rejects HIGH-severity invisible characters and aborts the run.
+name: wiki-auto-update
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: wiki-auto-update-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    name: wiki-auto-update-pipeline
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # -----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # -----------------------------------------------------------------------
+      # Stage 1 — Classify diff
+      # -----------------------------------------------------------------------
+      - name: Stage 1 - Classify diff
+        id: classify
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          FILES=$(gh pr view "$PR_NUMBER" --json files \
+            --jq '.files[].path' | tr '\n' ',')
+          echo "changed_files=$FILES" >> "$GITHUB_OUTPUT"
+          echo "Classified files: $FILES"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      # -----------------------------------------------------------------------
+      # Stage 2 — Invisible-char scan (HIGH-severity aborts)
+      # -----------------------------------------------------------------------
+      - name: Stage 2 - Invisible-char scan
+        id: invis_scan
+        env:
+          CHANGED_FILES: ${{ steps.classify.outputs.changed_files }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          node -e "
+          const { scanInvisibleChars } = require('./scripts/wiki/auto-update-pipeline');
+          const fs = require('fs');
+          const files = (process.env.CHANGED_FILES || '').split(',').filter(Boolean);
+          let allText = '';
+          for (const f of files) {
+            try { allText += fs.readFileSync(f, 'utf-8') + '\n'; } catch (_) {}
+          }
+          const result = scanInvisibleChars(allText);
+          console.log(JSON.stringify(result));
+          if (result.maxSeverity === 'HIGH') {
+            const names = result.findings.filter(f => f.severity === 'HIGH').map(f => f.name);
+            process.stderr.write('Stage 2 abort: HIGH invisible chars: ' + names.join(', ') + '\n');
+            process.exit(1);
+          }
+          console.log('Stage 2 pass: no HIGH-severity invisible chars');
+          "
+
+      # -----------------------------------------------------------------------
+      # Stages 3-11 — orchestrator script
+      # -----------------------------------------------------------------------
+      - name: Stages 3-11 - Run pipeline orchestrator
+        id: pipeline
+        env:
+          CHANGED_FILES: ${{ steps.classify.outputs.changed_files }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          OUTPUT=$(node scripts/wiki/auto-update-pipeline.js)
+          echo "$OUTPUT"
+          {
+            echo 'summary<<PIPELINE_SUMMARY_EOF'
+            echo "$OUTPUT"
+            echo 'PIPELINE_SUMMARY_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # Stage 11 — Post summary comment on originating PR
+      # -----------------------------------------------------------------------
+      - name: Stage 11 - Post summary comment
+        if: always() && steps.pipeline.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SUMMARY: ${{ steps.pipeline.outputs.summary }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "$SUMMARY"

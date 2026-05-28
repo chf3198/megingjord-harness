@@ -1,0 +1,3 @@
+scripts/wiki/auto-update-pipeline.js
+scripts/global/agent-signature.js
+dashboard/js/panel-anim.js

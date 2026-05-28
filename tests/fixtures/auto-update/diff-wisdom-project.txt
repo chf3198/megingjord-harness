@@ -1,0 +1,2 @@
+instructions/wiki-knowledge.instructions.md
+docs/howto/contribute-to-wiki.md
