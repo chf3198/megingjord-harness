@@ -4,7 +4,8 @@
   "runtimes": [
     "claude-code",
     "copilot",
-    "codex"
+    "codex",
+    "antigravity"
   ],
   "canonicalSurfaces": [
     "instructions",
@@ -100,10 +101,10 @@
     },
     "digestManifest": {
       "copilot": {
-        "indexMd": "1153dc560d2034cc97c9ec53b4cc4b6a0f7d7299e4f83333fe70967b40f468d8"
+        "indexMd": "c9079d21adc5676771965428c507e802ba37489870e27ca344849745aa729efe"
       },
       "codex": {
-        "indexMd": "1153dc560d2034cc97c9ec53b4cc4b6a0f7d7299e4f83333fe70967b40f468d8"
+        "indexMd": "c9079d21adc5676771965428c507e802ba37489870e27ca344849745aa729efe"
       }
     },
     "runtimeTiers": {
