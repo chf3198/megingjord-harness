@@ -1,0 +1,90 @@
+# Red-Team Model Selection Matrix — A1 selection function
+# Refs #2317 (Phase-1 P1.1 of Epic #2299)
+# Consumed by: scripts/global/fleet-red-team-dispatch.js selectModel()
+#
+# A1 selection function: choose the first model where all factor requirements
+# are satisfied, evaluated top-to-bottom. Caller passes taskContext + opts.
+
+cross_family_required: true
+fleet_host_default: "http://100.91.113.16:11434"
+
+# Factors evaluated per model:
+#   availability  — is the model reachable on the fleet host?
+#   capability    — is the model capable for this task complexity?
+#   cost          — GPU-hours / request (relative: low | medium | high)
+#   throughput    — requests/hour estimate (fleet-local)
+#   cross_family  — model family must differ from primary authoring family
+
+models:
+  - id: "qwen2.5-coder:32b"
+    family: "qwen"
+    cross_family_ok: true
+    availability: "conditional"
+    availability_note: >
+      Host 36gbwinresource (100.91.113.16) via Tailscale. Requires ~24 GB VRAM.
+      Spills to CPU on low-resource if VRAM insufficient (Epic #2295 P1 finding).
+      Check host health before dispatch; fall back to 7b if unavailable.
+    capability_vs_task:
+      governance_artifacts: high
+      pr_diff_large: high
+      instruction_edit: high
+      pr_diff_small: high
+      epic_scope: high
+    cost: medium
+    throughput_rph: 12
+    stakes_threshold: high
+    default_for_stakes: ["high", "medium"]
+    notes: "Preferred for high-stakes and medium-stakes reviews. ~3-5 min/call."
+
+  - id: "qwen2.5-coder:7b"
+    family: "qwen"
+    cross_family_ok: true
+    availability: "generally_available"
+    availability_note: >
+      Same fleet host; fits in 8 GB VRAM. Reliable fast path.
+    capability_vs_task:
+      governance_artifacts: medium
+      pr_diff_large: medium
+      instruction_edit: medium
+      pr_diff_small: high
+      epic_scope: low
+    cost: low
+    throughput_rph: 60
+    stakes_threshold: low
+    default_for_stakes: ["low"]
+    notes: "Fast fallback. Use when 32b unavailable or stakes=low. ~30-60 sec."
+
+  - id: "qwen3:32b"
+    family: "qwen"
+    cross_family_ok: true
+    availability: "untested"
+    availability_note: >
+      Untested on fleet host as of Epic #2295 P1. Host-resource-spilled during
+      trial run. Do not use as default until host-fit confirmed.
+    capability_vs_task:
+      governance_artifacts: unknown
+      pr_diff_large: unknown
+      instruction_edit: unknown
+      pr_diff_small: unknown
+      epic_scope: unknown
+    cost: high
+    throughput_rph: 6
+    stakes_threshold: high
+    notes: "Blocked pending host-fit verification. Not in default selection path."
+    blocked: true
+
+# Selection algorithm (implemented in fleet-red-team-dispatch.js selectModel()):
+#
+#   1. Filter to models where blocked != true
+#   2. Filter to models where cross_family_ok == true (always required)
+#   3. If opts.model explicitly set, use that model (bypasses matrix)
+#   4. If taskContext.stakes == 'high' or 'medium':
+#        select first model where 'high' or 'medium' in default_for_stakes
+#   5. If taskContext.stakes == 'low' or unset:
+#        select first model where 'low' in default_for_stakes
+#   6. Verify availability != 'untested'; warn if 'conditional'
+#   7. Return { modelId, rationale, warningIfConditional }
+
+selection_defaults:
+  stakes_when_unset: "low"
+  fallback_chain: ["qwen2.5-coder:32b", "qwen2.5-coder:7b"]
