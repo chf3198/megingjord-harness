@@ -5,6 +5,7 @@ const path = require('path');
 const os = require('os');
 const { readTelemetry, summarize } = require('./model-routing-telemetry');
 const { normalizePremiumRationale, resolveBudget } = require('./premium-budget-governor');
+const { emitFallback } = require('./routing-fallback-emit');
 
 const FILE = path.join(__dirname, 'model-routing-policy.json');
 const ADAPTER_FILE = path.join(__dirname, 'routing-provider-adapters.json');
@@ -66,12 +67,27 @@ function resolveRolePreference(policy, role, complexity) {
   return rolePref.high || null;
 }
 
+// Refs #2351: resolve model for lane, emit telemetry when fallback path is taken.
+function resolveModel(policy, lane, role, prompt) {
+  const laneModel = policy.models[lane];
+  if (laneModel) return laneModel;
+  const fallbackModel = policy.models.fallback;
+  emitFallback({
+    role,
+    laneIntended: lane,
+    laneActual: 'fallback',
+    fallbackReason: 'lane_model_missing',
+    prompt,
+  });
+  return fallbackModel;
+}
+
 function buildRoutingResult(lane, cx, role, rolePrefLane, prompt, route, taskClass, policy) {
   const premiumRationale = lane === 'premium'
     ? normalizePremiumRationale(route, prompt, taskClass, cx) : null;
   const budget = resolveBudget(policy, route, lane);
   if (budget.downgraded) lane = 'haiku'; // eslint-disable-line no-param-reassign
-  const model = policy.models[lane] || policy.models.fallback;
+  const model = resolveModel(policy, lane, role, prompt);
   const adapter = loadAdapters().lanes?.[lane] || {};
   const overrides = loadOverrides();
   return {
