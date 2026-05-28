@@ -339,6 +339,7 @@ npm run deploy:both:apply
 | `wiki:ingest:code` | `node scripts/wiki/ingest-code.js` |
 | `wiki:lint` | `node scripts/wiki/lint.js` |
 | `wiki:reindex` | `node scripts/wiki/reindex.js` |
+| `wiki:replay-eval` | `node scripts/wiki/replay-eval-harness.js` |
 | `wiki:search` | `node scripts/wiki/search.js` |
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |

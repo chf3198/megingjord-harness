@@ -1,0 +1,14 @@
+{
+  "id": "fixture-01",
+  "description": "PR adds HAMR cache adapter doc — expect new concept wiki page",
+  "pr_diff": "diff --git a/scripts/global/hamr-cache.js b/scripts/global/hamr-cache.js\n+// HAMR cache adapter for Anthropic provider\n+function cacheHeaders(provider) { return { 'anthropic-beta': 'prompt-caching-2024-07-31' }; }\n+module.exports = { cacheHeaders };",
+  "expected_wiki_delta": [
+    {
+      "operation": "upsert",
+      "type": "concept",
+      "slug": "cache-adapters",
+      "title": "Cache Adapters",
+      "summary": "HAMR cache adapter for Anthropic provider"
+    }
+  ]
+}
