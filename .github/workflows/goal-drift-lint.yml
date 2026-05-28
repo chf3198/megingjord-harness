@@ -9,7 +9,7 @@ on:
       - 'hooks/scripts/goal_lens.py'
       - '.codex/AGENTS.md'
       - '.github/copilot-instructions.md'
-      - 'wiki/concepts/harness-goals.md'
+      - 'wiki/wisdom/global/concepts/harness-goals.md'
       - 'generated/goals-contract.json'
   schedule:
     - cron: '17 6 * * *'

@@ -20,8 +20,8 @@ const SHORT_LINE_MAX = 200;
 const TIERS = {
   'fim-5kb': { target_chars: TIER_FIM, sources: ['instructions/role-baton-routing.instructions.md'], extras: [] },
   'routing-12kb': { target_chars: TIER_ROUTING, sources: ['instructions/role-baton-routing.instructions.md', 'instructions/global-task-router.instructions.md', 'instructions/ticket-driven-work.instructions.md'], extras: [] },
-  'governance-30kb': { target_chars: TIER_GOVERNANCE, sources: ['instructions/'], extras: ['wiki/concepts/baton-signing.md', 'wiki/concepts/judge-quorum.md', 'wiki/concepts/hamr-doctor.md', 'wiki/concepts/hamr-core-worker.md'] },
-  'architect-90kb': { target_chars: TIER_ARCHITECT, sources: ['instructions/', 'wiki/concepts/'], extras: [] },
+  'governance-30kb': { target_chars: TIER_GOVERNANCE, sources: ['instructions/'], extras: ['wiki/wisdom/global/concepts/baton-signing.md', 'wiki/wisdom/global/concepts/judge-quorum.md', 'wiki/wisdom/global/concepts/hamr-doctor.md', 'wiki/wisdom/global/concepts/hamr-core-worker.md'] },
+  'architect-90kb': { target_chars: TIER_ARCHITECT, sources: ['instructions/', 'wiki/wisdom/global/concepts/'], extras: [] },
 };
 
 const DEFAULT_KEYWORDS = [

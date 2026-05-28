@@ -58,7 +58,7 @@ Research tickets skip branch/PR/merge. Baton sequence:
 ## Required references
 
 - `repo-standards-router` for standards/gates.
-- `anneal-trigger-router` classifies drift signals into tier-1/2/3 routes; when it emits `action:request-pivot`, this orchestrator executes the pivot sequence (snapshot → assume Manager → `workflow-self-anneal` → file Manager tickets → restore baton). Single-flight per session; kill-switch trip aborts cleanly, preserving baton state. See `wiki/concepts/andon-pull-protocol.md`.
+- `anneal-trigger-router` classifies drift signals into tier-1/2/3 routes; when it emits `action:request-pivot`, this orchestrator executes the pivot sequence (snapshot → assume Manager → `workflow-self-anneal` → file Manager tickets → restore baton). Single-flight per session; kill-switch trip aborts cleanly, preserving baton state. See `wiki/wisdom/global/concepts/andon-pull-protocol.md`.
 - `workflow-self-anneal` for the bounded protocol run during pivots; standalone use only for post-failure/process drift outside the router.
 - Domain skills for specialized checks (release/docs/security/profile).
 

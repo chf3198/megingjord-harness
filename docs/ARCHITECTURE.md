@@ -62,7 +62,7 @@ Codex                          policy.json          OR Cloud (Claude /        + 
 
 - `inventory/devices.json` — Tailscale IPs, Ollama models, GPU/CPU class
 - `scripts/health-check.js` — fleet connectivity probe
-- `wiki/entities/{36gbwinresource,openclaw,penguin-1}.md` — per-device authoritative state
+- `wiki/wisdom/global/entities/{36gbwinresource,openclaw,penguin-1}.md` — per-device authoritative state
 
 ## Data flows
 

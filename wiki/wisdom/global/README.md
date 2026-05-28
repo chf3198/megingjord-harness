@@ -16,25 +16,14 @@ House research and synthesis that is REUSABLE across projects. Examples:
 
 ## Subdirectories
 
-(Empty until follow-on physical-migration ticket — see "Legacy paths" below)
-
-Designed layout (per #1943 synthesis):
 - `concepts/` — Cross-project concept pages
 - `entities/` — Cross-project entity pages (services, tools, frameworks)
+- `sources/` — Source summary digests
 - `syntheses/` — Cross-project synthesis pages
-
-## Legacy paths (pre-migration)
-
-The following directories at `wiki/<dir>/` (one level up) ARE conceptually Wiki C scope=global content but live at their legacy paths pending the physical migration:
-
-- `wiki/concepts/` → will move to `wiki/wisdom/global/concepts/`
-- `wiki/entities/` → will move to `wiki/wisdom/global/entities/`
-- `wiki/sources/` → will move to `wiki/wisdom/global/sources/`
-- `wiki/syntheses/` → will move to `wiki/wisdom/global/syntheses/`
-- `wiki/skills/` → will move to `wiki/wisdom/global/skills/`
-
-**Physical migration deferred to follow-on ticket** (filed at #2051 closeout). The migration requires updating `scripts/wiki/*.js` path-pattern matching, validator regression, and Megingjord deploy/distribution scripts — too invasive for a single docs-research lane ticket.
+- `skills/` — Cross-project skill pages
 
 ## Status
 
-**Phase-1 stub** — created by #2051. Physical migration deferred. Until migration completes, treat `wiki/concepts/`, `wiki/entities/`, etc. AS this directory.
+**Fully migrated** — Physical migration completed by #2098. Legacy paths
+(`wiki/concepts/`, `wiki/entities/`, `wiki/sources/`, `wiki/syntheses/`,
+`wiki/skills/`) have been moved here via `git mv` to preserve history.

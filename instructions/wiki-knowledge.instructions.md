@@ -18,7 +18,7 @@ Compiled wiki at `~/.copilot/wiki/` — cross-referenced fleet, skills, governan
 | **Ingest** | Megingjord only | `npm run wiki:ingest -- raw/articles/<file>.md` |
 | **Lint/Anneal** | Megingjord only | `npm run wiki:lint` / `npm run wiki:anneal` |
 
-Ingest pipeline (raw/articles → wiki/sources → pages → index.md): `WIKI.md` + `docs/howto/contribute-to-wiki.md`.
+Ingest pipeline (raw/articles → wiki/wisdom/global/sources → pages → index.md): `WIKI.md` + `docs/howto/contribute-to-wiki.md`.
 
 ## When to Use the Wiki
 
@@ -42,10 +42,11 @@ Canonical synthesis: `research/three-wiki-typology-synthesis-1943.md`.
 
 Storage layout: `wiki/{code/symbols, code/concepts, work-log/tickets, work-log/prs, wisdom/global, wisdom/project, index.md}`
 
-### Legacy paths (migrating → wiki/wisdom/global/)
+### wiki/wisdom/global/ subdirectories (migration complete #2098)
 
-`wiki/entities/` · `wiki/concepts/` · `wiki/sources/` · `wiki/syntheses/` · `wiki/skills/`
-Physical migration queued: #2051 / #2098.
+`wiki/wisdom/global/entities/` · `wiki/wisdom/global/concepts/` · `wiki/wisdom/global/sources/`
+`wiki/wisdom/global/syntheses/` · `wiki/wisdom/global/skills/`
+Physical migration completed by #2098 (`git mv` with full history preservation).
 
 ## Frontmatter Contract (schema enforced by #2052)
 

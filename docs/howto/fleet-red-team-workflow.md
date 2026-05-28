@@ -77,7 +77,7 @@ Ollama on Tailscale fleet host is `$0/call` — budget enforces fleet-host load 
 
 - Epic #2041 + Phase-0 #2174 (research foundation)
 - `instructions/hamr-routing.instructions.md` (HAMR contract)
-- `wiki/concepts/cache-adapters.md` (cost-tracking pattern)
+- `wiki/wisdom/global/concepts/cache-adapters.md` (cost-tracking pattern)
 - Memory `feedback-red-team-iteration-pattern` (cross-family convergence)
 - Memory `feedback-cross-family-review-model-choice` (qwen2.5-coder:32b on fleet host)
 

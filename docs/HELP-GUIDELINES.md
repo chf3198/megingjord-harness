@@ -50,8 +50,8 @@ help file approaches 90 lines, split by topic into a new file (e.g.
 
 ## Wikilink discipline
 
-Only reference wiki pages that exist in `~/.copilot/wiki/concepts/` or
-`~/.copilot/wiki/entities/`. The `docs-lint` CI gate (#722) fails on any
+Only reference wiki pages that exist in `~/.copilot/wiki/wisdom/global/concepts/` or
+`~/.copilot/wiki/wisdom/global/entities/`. The `docs-lint` CI gate (#722) fails on any
 broken wikilink. Run `npm run docs:lint` locally before committing.
 
 To check available pages: `npm run help:topic -- <term>`.

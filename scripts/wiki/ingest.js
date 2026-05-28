@@ -37,7 +37,7 @@ async function ingest(sourcePath) {
   const today = new Date().toISOString().split('T')[0];
   const summaryContent = buildSourcePage(title, today, sourcePath, result);
   writePage(slug, 'source', summaryContent);
-  console.log(`   ✅ wiki/sources/${slug}.md`);
+  console.log(`   ✅ wiki/wisdom/global/sources/${slug}.md`);
 
   // Step 3: Update index and log
   spawnSync(process.execPath, [path.join(__dirname, 'reindex.js')], { stdio: 'ignore' });

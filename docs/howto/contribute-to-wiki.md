@@ -17,7 +17,7 @@ decision.
 | Schema | `WIKI.md` | Co-owned, by agreement |
 
 You always start in `raw/articles/`. The wiki itself is a derived
-artifact — never hand-author `wiki/sources/`.
+artifact — never hand-author `wiki/wisdom/global/sources/`.
 
 ## Step-by-step ingest
 
@@ -35,7 +35,7 @@ status: pending
 ```
 
 Filename slug is `kebab-case` and is the join key — both
-`wiki/sources/<slug>.md` and the index entry derive from it.
+`wiki/wisdom/global/sources/<slug>.md` and the index entry derive from it.
 
 ### 2. Run the ingest script
 
@@ -48,7 +48,7 @@ npm run wiki:ingest -- raw/articles/<slug>.md
 The `scripts/wiki/ingest.js` script:
 
 1. Calls the configured fleet LLM (OpenClaw primary, Groq/Cerebras failover) to produce a structured summary
-2. Writes `wiki/sources/<slug>.md`
+2. Writes `wiki/wisdom/global/sources/<slug>.md`
 3. Updates `wiki/index.md`
 4. Appends an entry to `wiki/log.md`
 5. Flips the raw source frontmatter to `status: ingested`
@@ -63,7 +63,7 @@ or concept pages — that's the LLM's judgment call after reading the
 source. After ingest:
 
 1. Identify entities/concepts mentioned (devices, services, patterns, decisions)
-2. Create or update the relevant `wiki/entities/<name>.md` or `wiki/concepts/<name>.md`
+2. Create or update the relevant `wiki/wisdom/global/entities/<name>.md` or `wiki/wisdom/global/concepts/<name>.md`
 3. Add `[[source-slug]]` to the entity/concept's `sources:` frontmatter
 4. Add reciprocal `[[entity-name]]` links from the source page's `related:` field
 
@@ -84,7 +84,7 @@ Lint catches:
 Fix any flagged issues, then commit:
 
 ```bash
-git add raw/articles/<slug>.md wiki/sources/<slug>.md wiki/entities/<...>.md wiki/concepts/<...>.md wiki/index.md wiki/log.md
+git add raw/articles/<slug>.md wiki/wisdom/global/sources/<slug>.md wiki/wisdom/global/entities/<...>.md wiki/wisdom/global/concepts/<...>.md wiki/index.md wiki/log.md
 git commit -m "wiki: ingest <slug>"
 ```
 

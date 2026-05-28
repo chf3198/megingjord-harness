@@ -5,12 +5,18 @@ const { REPO_WIKI_DIR, assertWikiDir } = require('./path-guard');
 
 const WIKI_DIR = REPO_WIKI_DIR;
 const DATE_TOLERANCE_DAYS = 1;
-const CATS = ['entities', 'concepts', 'sources', 'syntheses', 'skills'];
+const CATS = [
+  'wisdom/global/entities', 'wisdom/global/concepts',
+  'wisdom/global/sources', 'wisdom/global/syntheses', 'wisdom/global/skills',
+];
 const WORK_LOG_DIRS = [{ dir: 'work-log/tickets', type: 'ticket' }, { dir: 'work-log/prs', type: 'pr' }];
 const TYPE_DIR = {
-  entity: 'entities', entities: 'entities', concept: 'concepts', concepts: 'concepts',
-  source: 'sources', sources: 'sources', synthesis: 'syntheses', syntheses: 'syntheses',
-  skill: 'skills', skills: 'skills', ticket: 'work-log/tickets', tickets: 'work-log/tickets',
+  entity: 'wisdom/global/entities', entities: 'wisdom/global/entities',
+  concept: 'wisdom/global/concepts', concepts: 'wisdom/global/concepts',
+  source: 'wisdom/global/sources', sources: 'wisdom/global/sources',
+  synthesis: 'wisdom/global/syntheses', syntheses: 'wisdom/global/syntheses',
+  skill: 'wisdom/global/skills', skills: 'wisdom/global/skills',
+  ticket: 'work-log/tickets', tickets: 'work-log/tickets',
   pr: 'work-log/prs', prs: 'work-log/prs',
 };
 const SECTION_MAP = {

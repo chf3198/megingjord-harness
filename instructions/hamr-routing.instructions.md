@@ -69,8 +69,8 @@ Bundle SHA may be advertised via `x-hamr-bundle-sha` for SLSA gate verification.
 
 ## Cost levers (covered here, do NOT redefine in team docs)
 
-- Cache adapters per provider — see `wiki/concepts/cache-adapters.md` (#926).
-- Header-driven spillover across 6 providers — `wiki/concepts/header-spillover.md` (#927).
+- Cache adapters per provider — see `wiki/wisdom/global/concepts/cache-adapters.md` (#926).
+- Header-driven spillover across 6 providers — `wiki/wisdom/global/concepts/header-spillover.md` (#927).
 - Sticky-route per tier — `scripts/global/sticky-route.js` (#926).
 - Anthropic Batch routing for time-elastic work (`isBatchEligible`, #927).
 

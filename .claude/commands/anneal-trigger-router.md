@@ -7,7 +7,7 @@ argument-hint: "[signal|trigger-phrase]"
 
 ## Purpose
 
-Classify drift signals — from sensors, manual pulls, or Consultant goal-failure escalations — into a routing decision per the three-tier model in `instructions/workflow-resilience.instructions.md`. See also `wiki/concepts/distributed-self-anneal.md` and `wiki/concepts/andon-pull-protocol.md`.
+Classify drift signals — from sensors, manual pulls, or Consultant goal-failure escalations — into a routing decision per the three-tier model in `instructions/workflow-resilience.instructions.md`. See also `wiki/wisdom/global/concepts/distributed-self-anneal.md` and `wiki/wisdom/global/concepts/andon-pull-protocol.md`.
 
 ## Trigger phrases (auto-discovered via this skill's `description:` field)
 
@@ -74,11 +74,11 @@ Kill-switch trip during pivot aborts cleanly; original baton state preserved. Em
 
 ## Event schema v2 reference
 
-Defined in Epic #1308 architecture contract; full field-by-field spec in `wiki/concepts/andon-pull-protocol.md`. Router emits events per that schema (`tier`, `trigger_role`, `trigger_type`, `pattern_id`, `severity`, `evidence`, `ticket_ref`, `epic_ref`, `session_id`).
+Defined in Epic #1308 architecture contract; full field-by-field spec in `wiki/wisdom/global/concepts/andon-pull-protocol.md`. Router emits events per that schema (`tier`, `trigger_role`, `trigger_type`, `pattern_id`, `severity`, `evidence`, `ticket_ref`, `epic_ref`, `session_id`).
 
 ## See also
 
 - `role-baton-orchestrator` — executes the pivot when this router emits `action:request-pivot`
 - `role-consultant-critique` — invokes tier:3 escalation when rubric < threshold
 - `workflow-self-anneal` — bounded protocol run during the pivot
-- `wiki/concepts/distributed-self-anneal.md`, `wiki/concepts/andon-pull-protocol.md` — concept-page details
+- `wiki/wisdom/global/concepts/distributed-self-anneal.md`, `wiki/wisdom/global/concepts/andon-pull-protocol.md` — concept-page details
