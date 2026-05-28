@@ -246,6 +246,7 @@
     "wiki:lint": "node scripts/wiki/lint.js",
     "wiki:reindex": "node scripts/wiki/reindex.js",
     "wiki:search": "node scripts/wiki/search.js",
+    "mcp:project-state": "node scripts/global/mcp-project-state.js",
     "worktree:bootstrap": "bash scripts/worktree-bootstrap-node-modules.sh",
     "worktree:start": "bash scripts/worktree-session-start.sh",
     "governance:rule-parity": "node scripts/global/governance-rule-parity.js",
