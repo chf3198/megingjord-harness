@@ -36,3 +36,7 @@ status: draft
 See: [[workflow-design]], [[copilot-governance-actions]]
 
 See also: [[help-best-practices]], [[help-section-structure]], [[dashboard-codebase-gold-rules]]
+
+## Phase-0 audits
+
+- [[governance-guardrail-audit-2026-05-28]] — gap analysis exposed by the #2254 Auto-tier session; Phase-0 input for Epic #2356 (process-compliance enforcement at transition time, lightweight-lane bypass elimination, session-start baton gate, regression test for synthetic non-compliant docs sessions).
