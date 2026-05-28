@@ -44,6 +44,23 @@ logs/copilot-usage.json
 .harness/worktrees/
 .claude/worktrees/
 
+# Claude Code runtime cache directories — generated, never project content (#2342)
+# Keeps VS Code file watchers from being overwhelmed on Chromebook/Crostini.
+.claude/file-history/
+.claude/backups/
+.claude/projects/
+.claude/sessions/
+.claude/shell-snapshots/
+.claude/ide/
+.claude/telemetry/
+.claude/session-env/
+.claude/plans/
+.claude/mcp-needs-auth-cache.json
+.claude/.last-cleanup
+.claude/.credentials.json
+.claude/hamr-config.json
+.claude/scheduled_tasks.lock
+
 # log4brains build output (#798)
 .log4brains/
 

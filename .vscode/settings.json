@@ -7,15 +7,48 @@
     ".git/**",
     "test-results/**"
   ],
-  "foam.files.noteExtensions": ["md"],
+  "foam.files.noteExtensions": [
+    "md"
+  ],
   "foam.graph.style": {
-    "node": { "source": "#4ecdc4", "concept": "#ff6b6b", "entity": "#ffe66d", "synthesis": "#a8e6cf" }
+    "node": {
+      "source": "#4ecdc4",
+      "concept": "#ff6b6b",
+      "entity": "#ffe66d",
+      "synthesis": "#a8e6cf"
+    }
   },
   "foam.openDailyNote.directory": "wiki",
-  "foam.orphans.exclude": ["raw/**", "research/**", "instructions/**"],
-  "foam.placeholders.exclude": ["raw/**"],
+  "foam.orphans.exclude": [
+    "raw/**",
+    "research/**",
+    "instructions/**"
+  ],
+  "foam.placeholders.exclude": [
+    "raw/**"
+  ],
   "editor.wordWrap": "on",
   "[markdown]": {
-    "editor.quickSuggestions": { "other": true, "comments": false, "strings": false }
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": false
+    }
+  },
+  "files.watcherExclude": {
+    "**/.claude/file-history/**": true,
+    "**/.claude/sessions/**": true,
+    "**/.claude/backups/**": true,
+    "**/.claude/shell-snapshots/**": true,
+    "**/.claude/ide/**": true,
+    "**/.claude/telemetry/**": true,
+    "**/node_modules/**": true
+  },
+  "files.exclude": {
+    "**/.claude/file-history": true,
+    "**/.claude/sessions": true,
+    "**/.claude/backups": true,
+    "**/.claude/shell-snapshots": true,
+    "**/.claude/ide": true
   }
 }

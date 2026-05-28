@@ -1,5 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 7,
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "600000",
     "BASH_MAX_TIMEOUT_MS": "1800000"
@@ -38,6 +39,11 @@
             "type": "command",
             "command": "python3 ~/.copilot/hooks/scripts/hamr_activation_check.py",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.copilot/hooks/scripts/prune_file_history.py",
+            "timeout": 10
           }
         ]
       }
