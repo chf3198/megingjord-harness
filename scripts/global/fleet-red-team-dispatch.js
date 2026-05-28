@@ -2,6 +2,7 @@
 // fleet-red-team-dispatch — HAMR-wrapped Ollama dispatcher for adversarial review.
 // Refs #2175 (Phase-1 P1-1 of Epic #2041). Consumes templates from #2181 P1-3.
 // Uses tier='fleet-local' (per #2178 P1-7) so cache-stats records ollama provider correctly.
+// selectModel() added by #2317 (Phase-1 P1.1 of Epic #2299): reads matrix at dispatch time.
 
 'use strict';
 const fs = require('node:fs');
@@ -14,10 +15,62 @@ const TIER = 'fleet-local';
 const RETRY_DELAYS_MS = [1000, 4000];
 const REQUEST_TIMEOUT_MS = 600_000;
 const TEMPLATES_PATH = path.join(__dirname, '..', '..', 'config', 'fleet-red-team-prompts.json');
+const MATRIX_PATH = path.join(__dirname, '..', '..', 'config', 'red-team-model-matrix.yml');
 const TOKEN_BUDGET_HEADROOM = 200;
 const MAX_NUM_PREDICT = 2000;
 const REFUSAL_PATTERNS = [/^i cannot help with/i, /^i'm sorry, but i cannot/i, /^i am unable to/i];
 const ARXIV_HALLUCINATION_RE = /arxiv\.org\/abs\/[0-9]{4}\.[0-9]{4,5}/gi;
+
+// Minimal inline YAML parser for the model matrix (no external dep required).
+function loadMatrix(matrixPath = MATRIX_PATH) {
+  const raw = fs.readFileSync(matrixPath, 'utf8');
+  const models = [];
+  let cur = null;
+  for (const line of raw.split('\n')) {
+    const mId = line.match(/^  - id:\s*"([^"]+)"/);
+    if (mId) { if (cur) models.push(cur); cur = { id: mId[1] }; continue; }
+    if (!cur) continue;
+    const mB = line.match(/^\s+blocked:\s*(true|false)/);
+    if (mB) { cur.blocked = mB[1] === 'true'; continue; }
+    const mCF = line.match(/^\s+cross_family_ok:\s*(true|false)/);
+    if (mCF) { cur.cross_family_ok = mCF[1] === 'true'; continue; }
+    const mAv = line.match(/^\s+availability:\s*"([^"]+)"/);
+    if (mAv) { cur.availability = mAv[1]; continue; }
+    const mSt = line.match(/^\s+default_for_stakes:\s*\[([^\]]+)\]/);
+    if (mSt) { cur.default_for_stakes = mSt[1].split(',').map((s) => s.trim().replace(/"/g, '')); }
+  }
+  if (cur) models.push(cur);
+  const mFB = raw.match(/fallback_chain:\s*\[([^\]]+)\]/);
+  const fallbackChain = mFB ? mFB[1].split(',').map((s) => s.trim().replace(/"/g, '')) : [DEFAULT_MODEL];
+  return { models, fallbackChain };
+}
+
+/**
+ * selectModel(taskContext, opts) — A1 selection function per red-team-model-matrix.yml.
+ * taskContext: { stakes?: 'high'|'medium'|'low' }
+ * opts: { model?: string, matrixPath?: string }
+ * Returns: { modelId: string, rationale: string, warning?: string }
+ */
+function selectModel(taskContext = {}, opts = {}) {
+  if (opts.model) return { modelId: opts.model, rationale: 'caller-override' };
+  const { models, fallbackChain } = loadMatrix(opts.matrixPath);
+  const stakes = (taskContext.stakes || 'low').toLowerCase();
+  const candidates = models.filter((m) => !m.blocked && m.cross_family_ok !== false);
+  const match = candidates.find(
+    (m) => Array.isArray(m.default_for_stakes) && m.default_for_stakes.includes(stakes),
+  );
+  if (match) {
+    const warning = match.availability === 'conditional'
+      ? `model ${match.id} is conditional-availability — verify fleet host before dispatch`
+      : undefined;
+    return { modelId: match.id, rationale: `matrix-stakes-${stakes}`, warning };
+  }
+  for (const fbId of fallbackChain) {
+    const fb = candidates.find((m) => m.id === fbId);
+    if (fb) return { modelId: fb.id, rationale: 'fallback-chain' };
+  }
+  return { modelId: DEFAULT_MODEL, rationale: 'hardcoded-default' };
+}
 
 function loadTemplate(artifactType, templatesPath = TEMPLATES_PATH) {
   const obj = JSON.parse(fs.readFileSync(templatesPath, 'utf8'));
@@ -78,18 +131,34 @@ function parseFindings(raw) {
   return { findings: lines.map((line) => ({ raw: line.trim() })), warning: null };
 }
 
-async function dispatchRedTeam({ artifactType, content, model = DEFAULT_MODEL, host = DEFAULT_HOST, templatesPath = TEMPLATES_PATH } = {}) {
+async function dispatchRedTeam({
+  artifactType, content, model, host = DEFAULT_HOST,
+  templatesPath = TEMPLATES_PATH, taskContext = {}, matrixPath,
+} = {}) {
+  const resolved = model ? { modelId: model, rationale: 'caller-arg' } : selectModel(taskContext, { matrixPath });
+  const activeModel = resolved.modelId;
   const template = loadTemplate(artifactType, templatesPath);
   const prompt = buildPrompt(template, content);
   const numPredict = Math.min(template.expected_token_range[1] + TOKEN_BUDGET_HEADROOM, MAX_NUM_PREDICT);
   const start = Date.now();
-  const envelope = await wrapProviderCall('ollama', () => callWithRetry({ host, model, prompt, num_predict: numPredict }), { tier: TIER });
+  const envelope = await wrapProviderCall(
+    'ollama',
+    () => callWithRetry({ host, model: activeModel, prompt, num_predict: numPredict }),
+    { tier: TIER },
+  );
   const elapsed = Date.now() - start;
   if (!envelope.ok) {
-    return { findings: [], raw: null, hamrStats: { ok: false, elapsed, error: envelope.error } };
+    return { findings: [], raw: null, modelUsed: activeModel,
+      hamrStats: { ok: false, elapsed, error: envelope.error } };
   }
   const { findings, warning } = parseFindings(envelope.value);
-  return { findings, raw: envelope.value, hamrStats: { ok: true, elapsed, sticky: envelope.sticky, warning } };
+  return { findings, raw: envelope.value, modelUsed: activeModel,
+    hamrStats: { ok: true, elapsed, sticky: envelope.sticky, warning,
+      modelRationale: resolved.rationale } };
 }
 
-module.exports = { dispatchRedTeam, loadTemplate, buildPrompt, callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal, TIER, RETRY_DELAYS_MS };
+module.exports = {
+  dispatchRedTeam, selectModel, loadMatrix, loadTemplate, buildPrompt,
+  callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
+  TIER, RETRY_DELAYS_MS, MATRIX_PATH,
+};
