@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://megingjord.internal/schemas/wiki-frontmatter.json",
+  "title": "Wiki Page Frontmatter",
+  "description": "Contract for wiki page YAML frontmatter. Loadable by all runtimes. Refs #2052",
+  "type": "object",
+  "required": ["title", "type", "content_trust_score", "created", "updated"],
+  "additionalProperties": true,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable page title."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["code", "work-log", "wisdom-global", "wisdom-project"],
+      "description": "Wiki typology class (Three-Wiki typology, Epic #1942)."
+    },
+    "content_trust_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Bounded [0, 1] trust score for page content quality."
+    },
+    "trust_attestation": {
+      "type": "object",
+      "description": "Optional Ed25519 attestation. When present all sub-fields are required.",
+      "required": ["algorithm", "signer", "signature_b64", "signed_payload_hash"],
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "const": "ed25519"
+        },
+        "signer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature_b64": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signed_payload_hash": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "created": {
+      "description": "ISO 8601 creation date (string or Date object after YAML parse).",
+      "oneOf": [
+        { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}" },
+        { "type": "object" }
+      ]
+    },
+    "updated": {
+      "description": "ISO 8601 last-updated date (string or Date object after YAML parse).",
+      "oneOf": [
+        { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}" },
+        { "type": "object" }
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "related": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "type": "string"
+    }
+  }
+}
