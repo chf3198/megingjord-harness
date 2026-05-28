@@ -4,7 +4,8 @@ date: 2026-05-28
 lane: docs-research
 source_tickets: [2254, 2356, 2357]
 seed_attribution: https://github.com/chf3198/megingjord-harness/issues/2357#issuecomment-4568080084
-seed_author: unknown (comment posted without Signed-by/Team&Model block; URL preserves archaeological lineage only)
+seed_author: unverifiable (comment posted without Signed-by/Team&Model block; the URL preserves audit-trail lineage only, NOT author attestation)
+seed_use_basis: incorporated as public-issue-comment lineage per cross-team artifact-write contract; no authorship claim is made for the seed content; the formalization, extension, signing, and rubric-defense in this file are the work of the signers listed below
 signers:
   manager: Orla Mason (claude-code:opus-4-7@local)
   collaborator: Orla Harper (claude-code:opus-4-7@local)
