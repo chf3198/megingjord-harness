@@ -254,7 +254,9 @@
     "governance:rule-parity": "node scripts/global/governance-rule-parity.js",
     "governance:rule-parity:test": "node --test tests/governance-rule-parity.spec.js",
     "gov:extract": "node scripts/global/rule-card-extractor.js --all > /tmp/rule-cards.json",
-    "gov:parity": "node scripts/global/megalint/parity-validator.js"
+    "gov:parity": "node scripts/global/megalint/parity-validator.js",
+    "routing:fallback-report": "node scripts/global/routing-fallback-report.js",
+    "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js"
   },
   "keywords": [
     "devops",

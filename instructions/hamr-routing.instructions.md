@@ -126,3 +126,48 @@ Design intent per D3 (fleet-first for role-execution):
 
 Repos that explicitly opt out (e.g., air-gapped) MUST set `MEGINGJORD_HAMR_DISABLED=1`.
 Non-set defaults to opt-in for governed work.
+
+## Measurement & Drift Detection (Refs #2351)
+
+Fleet-fallback events and IT-ops bypass usage are measured automatically to
+detect aspirational-vs-actual drift. Two JSONL surfaces and two aggregator
+scripts provide per-role-per-week and per-marker-per-week counters.
+
+### Fleet-fallback telemetry
+
+When `resolveRouting` falls back to `policy.models.fallback` (intended lane
+model missing), it emits one event to `~/.megingjord/routing-fallback.jsonl`:
+
+```json
+{"ts":"...","role":"collaborator","lane_intended":"fleet","lane_actual":"fallback",
+ "fallback_reason":"lane_model_missing","prompt_hash":"abc123def456"}
+```
+
+Run the aggregator report:
+
+```bash
+npm run routing:fallback-report
+```
+
+Tier-2 anneal is emitted to `~/.megingjord/incidents.jsonl` when any role's
+fallback count exceeds 25% of total fallback events in a week. Override
+threshold with env var `ROUTING_FALLBACK_THRESHOLD=0.10` (fractional, default 0.25).
+
+### IT-bypass usage telemetry
+
+When `pretool_guard.py` detects an IT-ops bypass marker on a commit, it emits
+one event to `~/.megingjord/it-bypass-usage.jsonl`:
+
+```json
+{"ts":"...","marker":"env:MEGINGJORD_IT_OPS=1","commit_sha":"abc1234",
+ "justification":"chore(it-ops): restart dashboard pid"}
+```
+
+Run the aggregator report:
+
+```bash
+npm run it-ops:usage-report
+```
+
+Tier-2 anneal is emitted when any marker's usage exceeds 5 events per week.
+Override threshold with env var `IT_BYPASS_THRESHOLD=10` (integer, default 5).

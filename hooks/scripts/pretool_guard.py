@@ -52,6 +52,14 @@ def emit(decision: str, reason: str, extra: str | None = None) -> int:
     print(json.dumps({"hookSpecificOutput": hook}))
     return 0
 
+def _emit_it_bypass_telemetry(marker: str, cwd: str) -> None:
+    """Refs #2351: best-effort IT-bypass usage telemetry. Never blocks the hook."""
+    try:
+        from it_bypass_emit import emit_bypass
+        emit_bypass(marker, cwd)
+    except Exception:
+        pass  # telemetry failure must not affect hook decision
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
@@ -68,6 +76,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     if RE_GIT_COMMIT.search(joined):
         bypass, marker = detect_it_ops_bypass(joined)
         if bypass:
+            _emit_it_bypass_telemetry(marker, cwd)
             return emit("allow", f"IT-ops commit bypass (#2142): {marker}")
         if not RE_ISSUE_REF.search(joined):
             return emit("deny","Commit blocked: no issue ref (#N). Link a ticket first.")
