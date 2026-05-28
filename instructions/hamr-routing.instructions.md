@@ -122,7 +122,6 @@ Design intent per D3 (fleet-first for role-execution):
 - `manager`, `consultant`: haiku at mid; premium at high (scoping/critique require reasoning).
 - `red-team`: fleet at low+mid; haiku ceiling even at high (cross-family, not cloud-first).
 
-
 ## Override
 
 Repos that explicitly opt out (e.g., air-gapped) MUST set `MEGINGJORD_HAMR_DISABLED=1`.
