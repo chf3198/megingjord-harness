@@ -76,7 +76,7 @@ function stage6GenerateFrontmatter(ctx) {
     const body = `# ${fm.title}\n\nAuto-generated from PR #${prN}.\n`;
     ctx.generatedPages.push({ slug, wikiType, fm, body });
   };
-  for (const d of ctx.codeDeltas) push(d.slug, 'code', ctx.prNumber);
+  for (const delta of ctx.codeDeltas) push(delta.slug, 'code', ctx.prNumber);
   for (const e of ctx.workLogEntries) push(e.slug, 'work-log', ctx.prNumber);
   for (const e of ctx.wisdomEntries) push(e.slug, 'wisdom-project', ctx.prNumber);
   ctx.log.push({ stage: 6, name: 'generate-frontmatter', pages: ctx.generatedPages.length });

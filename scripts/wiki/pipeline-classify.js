@@ -35,13 +35,13 @@ function classifyDiff(changedFiles) {
   const code = [];
   const workLog = [];
   const wisdom = [];
-  for (const f of changedFiles) {
-    if (/^(scripts|cloudflare|dashboard)\//.test(f) || /\.(ts|js)$/.test(f)) {
-      code.push(f);
-    } else if (/^\.github\/workflows\//.test(f) || /\.(yml|yaml)$/.test(f)) {
-      workLog.push(f);
-    } else if (/\.(md|txt)$/.test(f)) {
-      wisdom.push(f);
+  for (const filePath of changedFiles) {
+    if (/^(scripts|cloudflare|dashboard)\//.test(filePath) || /\.(ts|js)$/.test(filePath)) {
+      code.push(filePath);
+    } else if (/^\.github\/workflows\//.test(filePath) || /\.(yml|yaml)$/.test(filePath)) {
+      workLog.push(filePath);
+    } else if (/\.(md|txt)$/.test(filePath)) {
+      wisdom.push(filePath);
     }
   }
   return { code, workLog, wisdom };
