@@ -6,8 +6,9 @@ applyTo: "**"
 
 # Role Baton Routing (v2.0)
 
-The GitHub issue **is** the baton. One active role at a time. Every state carries exactly one
-`role:*` label — no exceptions, including closed tickets.
+The GitHub issue **is** the baton. One active role at a time.
+Execution `role:*` labels are present only on active, role-owned states.
+Terminal states do not carry execution roles.
 
 Authoritative board: **Megingjord Harness Board** (GitHub Projects).
 Baton view filter: `status:triage,ready,in-progress,testing,review` (backlog/done/cancelled/dormant/deferred hidden from active baton view).
@@ -159,14 +160,17 @@ Examples:
 
 Operator runbook: `docs/howto/no-code-remediation-workflow.md`.
 
-## Archival
+## Closed-ticket ownership model
 
-Closed tickets retain `role:manager`. A nightly Action swaps `role:manager` → `role:archived`
-on issues closed >30 days. Archived tickets are excluded from all dashboard and baton queries.
+Closed tickets do not carry execution `role:*` labels.
+Accountability ownership is historical metadata, not an execution-role label.
+Dashboard/audit views may resolve historical ownership to manager for reporting,
+but this must not re-add a `role:*` label to terminal issues.
 
 ## Hard Rules
 
-- `role:*` is never null — exactly one present at all times.
+- Execution `role:*` labels are required for active role-owned states only (`triage`, `in-progress`, `testing`, `review`, and Epic-only `dormant`/`deferred`).
+- Terminal and waiting states (`backlog`, `queued`, `ready`, `done`, `cancelled`) carry no execution `role:*` label, except Epic role exceptions documented in this file.
 - No concurrent role execution on a single ticket.
 - Emit the named handoff artifact before transitioning to the next role.
 - `ADMIN_HANDOFF` signer identity must differ from `COLLABORATOR_HANDOFF`.
