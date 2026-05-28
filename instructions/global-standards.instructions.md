@@ -61,6 +61,8 @@ The main checkout (`${HOME}/devenv-ops/`) is canonical-only during sessions. Per
 
 **2026 secrets caveat**: industry is migrating secrets out of `.env` toward workload-identity (Bitwarden Secrets Manager, Infisical, Zylos). As Megingjord adopts a secrets manager, the `.gitignore`-allowlist should narrow.
 
+**Sync-direction trap (#2355)**: `scripts/sync.sh` copies `~/.copilot/ -> checkout` (the inverse of `scripts/deploy.sh`). Running it from canonical main while `~/.copilot/` is stale silently regresses tracked files to pre-merge content (root cause of #2355: 16 files reverted at 2026-05-27 22:14:10 across a single sync run, undoing merged PRs #2304 + #2308). The enforcer at `canonical_main_enforcer.py` intercepts Claude Code Edit/Write tool invocations but does NOT see shell-level `cp`/`rsync` inside script bodies. The shell-script blind spot is closed by `sync.sh` itself: when invoked from canonical main without `--allow-canonical-write`, it exits 2 with a redirect to `npm run deploy:apply` (forward direction) or a worktree (for genuine inverse-reload use). Coverage: `tests/sync-canonical-main-refuse.spec.js`.
+
 ## Cross-team GitHub tool surface
 
 - Default to the official GitHub MCP server (`github/github-mcp-server`) for
