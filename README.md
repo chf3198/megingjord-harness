@@ -334,6 +334,7 @@ npm run deploy:both:apply
 | `wiki:anneal` | `node scripts/wiki/anneal.js` |
 | `wiki:drift` | `node scripts/wiki/drift-detector.js` |
 | `wiki:ingest` | `node scripts/wiki/ingest.js` |
+| `wiki:ingest:code` | `node scripts/wiki/ingest-code.js` |
 | `wiki:lint` | `node scripts/wiki/lint.js` |
 | `wiki:reindex` | `node scripts/wiki/reindex.js` |
 | `wiki:search` | `node scripts/wiki/search.js` |
