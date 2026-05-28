@@ -31,9 +31,12 @@ helpFiles.forEach(name => {
 
   const wikiRegex = /\[\[([\w-]+)\]\]/g;
   while ((match = wikiRegex.exec(content)) !== null) {
-    const conceptPath = path.join(WIKI_BASE, 'concepts', `${match[1]}.md`);
-    const entityPath = path.join(WIKI_BASE, 'entities', `${match[1]}.md`);
-    if (!fs.existsSync(conceptPath) && !fs.existsSync(entityPath)) {
+    const conceptPath = path.join(WIKI_BASE, 'wisdom/global/concepts', `${match[1]}.md`);
+    const entityPath = path.join(WIKI_BASE, 'wisdom/global/entities', `${match[1]}.md`);
+    const conceptLegacy = path.join(WIKI_BASE, 'concepts', `${match[1]}.md`);
+    const entityLegacy = path.join(WIKI_BASE, 'entities', `${match[1]}.md`);
+    if (!fs.existsSync(conceptPath) && !fs.existsSync(entityPath) &&
+        !fs.existsSync(conceptLegacy) && !fs.existsSync(entityLegacy)) {
       console.log(`❌ Missing wiki: ${match[1]} in ${name}`);
       failCount += 1;
     }

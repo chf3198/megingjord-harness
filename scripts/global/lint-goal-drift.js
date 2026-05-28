@@ -40,7 +40,7 @@ const SURFACES = [
   { path: 'hooks/scripts/goal_lens.py', form: 'g-prefix' },
   { path: '.codex/AGENTS.md', form: 'plain' },
   { path: '.github/copilot-instructions.md', form: 'plain' },
-  { path: 'wiki/concepts/harness-goals.md', form: 'numbered' },
+  { path: 'wiki/wisdom/global/concepts/harness-goals.md', form: 'numbered' },
 ];
 
 function findChain(text, form) {

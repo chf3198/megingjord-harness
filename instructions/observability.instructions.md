@@ -2,7 +2,7 @@
 
 Canonical reference for harness + HAMR observability. Codifies decisions
 from Epic #1339 (C1–C8). For evidence-signal-to-goal mapping, see
-`wiki/concepts/harness-logging-inventory.md`.
+`wiki/wisdom/global/concepts/harness-logging-inventory.md`.
 
 ## Logging surfaces
 
@@ -73,7 +73,7 @@ brightness + drop-shadow rather than color-only signaling.
 
 ## Goal-lens mapping (G1..G9)
 
-Per `wiki/concepts/harness-logging-inventory.md` mapping table. Live view
+Per `wiki/wisdom/global/concepts/harness-logging-inventory.md` mapping table. Live view
 at `/api/goal-coverage` + dashboard "Goal Coverage" panel (#1359). Status
 classification: `ok` (≥3 signals / 7d), `low` (1–2), `gap` (0).
 
@@ -89,7 +89,7 @@ field records which role emitted (or `system` for sensor-driven).
 
 ## When in doubt
 
-Read `wiki/concepts/harness-logging-inventory.md` for the surface map,
+Read `wiki/wisdom/global/concepts/harness-logging-inventory.md` for the surface map,
 `research/harness-logging-rd-2026-05-11.md` for the R&D rationale, and
 `research/logging-token-cost-benchmark-2026-05-11.md` for the
 schema-cost trade-off analysis. Open a question against Epic #1339 if

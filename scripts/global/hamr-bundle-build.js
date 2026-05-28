@@ -12,7 +12,7 @@ const OUT_DIR = path.resolve(ROOT, 'dist/bundles');
 const TIERS = {
   'governance-30kb': {
     sources: ['instructions/'],
-    extras: ['wiki/concepts/baton-signing.md', 'wiki/concepts/judge-quorum.md', 'wiki/concepts/hamr-doctor.md', 'wiki/concepts/hamr-core-worker.md'],
+    extras: ['wiki/wisdom/global/concepts/baton-signing.md', 'wiki/wisdom/global/concepts/judge-quorum.md', 'wiki/wisdom/global/concepts/hamr-doctor.md', 'wiki/wisdom/global/concepts/hamr-core-worker.md'],
   },
 };
 

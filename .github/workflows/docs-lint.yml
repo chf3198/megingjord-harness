@@ -35,8 +35,8 @@ jobs:
           node-version: '22'
       - name: Sync wiki cache
         run: |
-          mkdir -p "$HOME/.copilot/wiki/concepts" "$HOME/.copilot/wiki/entities"
-          if [ -d wiki/concepts ]; then cp -r wiki/concepts/* "$HOME/.copilot/wiki/concepts/" 2>/dev/null || true; fi
-          if [ -d wiki/entities ]; then cp -r wiki/entities/* "$HOME/.copilot/wiki/entities/" 2>/dev/null || true; fi
+          mkdir -p "$HOME/.copilot/wiki/wisdom/global/concepts" "$HOME/.copilot/wiki/wisdom/global/entities"
+          if [ -d wiki/wisdom/global/concepts ]; then cp -r wiki/wisdom/global/concepts/* "$HOME/.copilot/wiki/wisdom/global/concepts/" 2>/dev/null || true; fi
+          if [ -d wiki/wisdom/global/entities ]; then cp -r wiki/wisdom/global/entities/* "$HOME/.copilot/wiki/wisdom/global/entities/" 2>/dev/null || true; fi
       - name: Run docs:lint
         run: node scripts/docs-lint.js

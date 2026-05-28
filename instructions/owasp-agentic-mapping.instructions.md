@@ -52,6 +52,6 @@ Every OA risk maps to one or more G1-G10 goals:
 
 ## Related
 
-- `wiki/concepts/harness-goal-controls.md` — per-goal enforcement catalog with OWASP risk rows
+- `wiki/wisdom/global/concepts/harness-goal-controls.md` — per-goal enforcement catalog with OWASP risk rows
 - `instructions/harness-goals.instructions.md` — canonical G1-G10 definitions
 - `instructions/global-standards.instructions.md` — always-loaded priority sentence

@@ -7,7 +7,7 @@ const { listPages, parseFrontmatter, WIKI_DIR } = require('./wiki-io');
 const { assertWikiDir } = require('./path-guard');
 
 const REQUIRED_FIELDS = ['title', 'type', 'created', 'status'];
-const CATS = ['entities', 'concepts', 'sources', 'syntheses', 'work-log/tickets', 'work-log/prs'];
+const CATS = ['wisdom/global/entities', 'wisdom/global/concepts', 'wisdom/global/sources', 'wisdom/global/syntheses', 'work-log/tickets', 'work-log/prs'];
 
 function links(content) {
   return [...String(content).matchAll(/\[\[([^\]]+)\]\]/g)].map(m => m[1]);

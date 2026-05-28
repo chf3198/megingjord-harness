@@ -42,5 +42,5 @@ const HELP_USER_SECTIONS = [
   { id: 'use-wiki-reader', title: '📚 Wiki Reader',
     body: 'Browse and search research/ markdown pages inline. Click a page title to expand its rendered content. Search filters by title and body text.' },
   { id: 'use-wiki-ingest', title: '📥 Wiki Ingest',
-    body: 'Drop a source in raw/articles/&lt;slug&gt;.md (frontmatter status: pending), then run <code>npm run wiki:ingest -- raw/articles/&lt;slug&gt;.md</code>. The fleet LLM writes wiki/sources/&lt;slug&gt;.md, updates wiki/index.md and wiki/log.md, and flips the raw source to status: ingested. Walkthrough: <em>docs/howto/contribute-to-wiki.md</em>.' },
+    body: 'Drop a source in raw/articles/&lt;slug&gt;.md (frontmatter status: pending), then run <code>npm run wiki:ingest -- raw/articles/&lt;slug&gt;.md</code>. The fleet LLM writes wiki/wisdom/global/sources/&lt;slug&gt;.md, updates wiki/index.md and wiki/log.md, and flips the raw source to status: ingested. Walkthrough: <em>docs/howto/contribute-to-wiki.md</em>.' },
 ];

@@ -15,10 +15,10 @@
 
 | Type | Directory | Purpose |
 |---|---|---|
-| Entity | `wiki/entities/` | Person, device, service, tool |
-| Concept | `wiki/concepts/` | Idea, pattern, technique, decision |
-| Source summary | `wiki/sources/` | Digest of one raw source |
-| Synthesis | `wiki/syntheses/` | Cross-cutting analysis, comparisons |
+| Entity | `wiki/wisdom/global/entities/` | Person, device, service, tool |
+| Concept | `wiki/wisdom/global/concepts/` | Idea, pattern, technique, decision |
+| Source summary | `wiki/wisdom/global/sources/` | Digest of one raw source |
+| Synthesis | `wiki/wisdom/global/syntheses/` | Cross-cutting analysis, comparisons |
 
 ## Frontmatter (required on every wiki page)
 
@@ -59,13 +59,13 @@ status: stub | draft | mature
 
 `wiki:search` is exposed globally as `node ~/.copilot/scripts/wiki-search.js` after deploy.
 
-### Ingest pipeline (raw/articles → wiki/sources → entities/concepts)
+### Ingest pipeline (raw/articles → wiki/wisdom/global/sources → entities/concepts)
 
 `wiki:ingest` implements steps 3–6; 1–2 and 7 are judgment calls.
 
 1. Human places source in `raw/articles/<slug>.md` with `status: pending`
 2. LLM reads source, discusses key takeaways
-3. LLM writes `wiki/sources/<slug>.md` summary
+3. LLM writes `wiki/wisdom/global/sources/<slug>.md` summary
 4. LLM updates entity/concept pages
 5. LLM updates `wiki/index.md`
 6. LLM appends entry to `wiki/log.md`
