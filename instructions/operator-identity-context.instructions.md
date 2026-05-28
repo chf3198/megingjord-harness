@@ -31,3 +31,18 @@ applyTo: "**"
    - Each role emits a named handoff artifact (`MANAGER_HANDOFF`, `COLLABORATOR_HANDOFF`, `ADMIN_HANDOFF`, `CONSULTANT_CLOSEOUT`) before the next role begins.
 
 6. **Self-anneal check:** If you catch yourself writing "you will need to…", "please manually…", or "the user must…" — stop, invoke the research protocol from the `operator-identity-context` skill, and find the automation path instead.
+
+## Role taxonomy disambiguation
+
+**Operator** is a meta-term for the AI agent (Claude Code, Codex, etc.) that executes
+the four baton roles (Manager, Collaborator, Admin, Consultant) in single-thread
+sequence. It is NOT a distinct role in the 7-role taxonomy.
+
+The canonical 7-role set is enumerated in
+`instructions/role-baton-routing.instructions.md` §"Role Taxonomy". The full list:
+Manager / Collaborator / Admin / Consultant / IT / Red-Team / Client.
+Guest-Collaborator is reserved but not active.
+
+When reading baton artifacts: "operator" in prose refers to the AI agent entity,
+never to a baton-step role. Use the exact role name (e.g. "the admin role") when
+referring to a specific baton position.
