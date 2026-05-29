@@ -7,23 +7,19 @@ const VALIDATOR_SRC = fs.readFileSync(
   path.join(__dirname, '..', 'scripts', 'validate-plugin-compat.js'),
   'utf8');
 
-test('validate-plugin-compat.js includes antigravity-plugin path', () => {
-  assert.match(VALIDATOR_SRC, /\.antigravity-plugin\/plugin\.json/,
-    'antigravity-plugin path must be in the validation-paths array');
+test('REQUIRED_PLUGIN_PATHS contains Claude Code + Copilot canonical paths', () => {
+  assert.match(VALIDATOR_SRC, /REQUIRED_PLUGIN_PATHS\s*=\s*\[\s*'\.claude-plugin\/plugin\.json',\s*'\.github\/plugin\/plugin\.json'\s*\]/);
 });
 
-test('validate-plugin-compat.js retains existing platform paths', () => {
-  assert.match(VALIDATOR_SRC, /\.claude-plugin\/plugin\.json/);
-  assert.match(VALIDATOR_SRC, /\.github\/plugin\/plugin\.json/);
+test('OPTIONAL_PLUGIN_PATHS contains Antigravity path', () => {
+  assert.match(VALIDATOR_SRC, /OPTIONAL_PLUGIN_PATHS\s*=\s*\[\s*'\.antigravity-plugin\/plugin\.json'\s*\]/);
 });
 
-test('validation-paths array enumerates all three platforms', () => {
-  const m = VALIDATOR_SRC.match(/\['([^']+)',\s*'([^']+)',\s*'([^']+)'\]/);
-  assert.ok(m, 'expected three-element string array');
-  const paths = [m[1], m[2], m[3]];
-  assert.deepStrictEqual(paths.sort(), [
-    '.antigravity-plugin/plugin.json',
-    '.claude-plugin/plugin.json',
-    '.github/plugin/plugin.json',
-  ]);
+test('Antigravity path missing emits informational note, not error', () => {
+  assert.match(VALIDATOR_SRC, /Optional plugin manifest absent/);
+});
+
+test('Existing Claude Code + Copilot paths missing still emits error', () => {
+  assert.match(VALIDATOR_SRC, /isOptional/);
+  assert.match(VALIDATOR_SRC, /Missing: \$\{rel\}/);
 });
