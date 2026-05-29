@@ -41,6 +41,7 @@
 .agent-copilot { border-color: #58a6ff; }
 .agent-claude  { border-color: #f97316; }
 .agent-codex   { border-color: #8b5cf6; }
+.agent-antigravity { border-color: #34a853; }
 .agent-cursor  { border-color: #10b981; }
 .agent-cline   { border-color: #d29922; }
 .agent-unknown { border-color: var(--border); }
