@@ -259,7 +259,8 @@
     "gov:parity": "node scripts/global/megalint/parity-validator.js",
     "routing:fallback-report": "node scripts/global/routing-fallback-report.js",
     "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js",
-    "test:compatibility": "node --test tests/orchestrator-compatibility.spec.js"
+    "test:compatibility": "node --test tests/orchestrator-compatibility.spec.js",
+    "synthesis:init": "node scripts/global/synthesis-init.js"
   },
   "keywords": [
     "devops",
