@@ -9,7 +9,7 @@
 [![Quality Gates](https://github.com/chf3198/megingjord-harness/actions/workflows/quality-gates.yml/badge.svg)](https://github.com/chf3198/megingjord-harness/actions/workflows/quality-gates.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/chf3198/megingjord-harness/badge)](https://scorecard.dev/viewer/?uri=github.com/chf3198/megingjord-harness)
 
-**Megingjord** is a governance-first AI agent harness with skills, hooks, agents, runtime scripts, and a Karpathy-style LLM wiki.
+**Megingjord** is a governance-first AI agent harness with skills, hooks, agents, runtime scripts, and a Karpathy-style LLM wiki. It operates as a control plane for AI coding agent runtimes — governing Copilot, Claude Code, and Codex the way Kubernetes governs containers: deploying configuration, enforcing policy, and maintaining desired workflow state across all three simultaneously.
 
 ## Architecture at a glance
 
