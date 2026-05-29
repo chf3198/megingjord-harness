@@ -11,7 +11,7 @@ const plugin = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'
 console.log(`✅ plugin.json: name="${plugin.name}", ${plugin.skills.length} skills`);
 
 // 2. Symlinks exist and are symlinks (not copies)
-for (const rel of ['.claude-plugin/plugin.json', '.github/plugin/plugin.json']) {
+for (const rel of ['.claude-plugin/plugin.json', '.github/plugin/plugin.json', '.antigravity-plugin/plugin.json']) {
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) { console.error(`❌ Missing: ${rel}`); errors++; continue; }
   const stat = fs.lstatSync(full);
