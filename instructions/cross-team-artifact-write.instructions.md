@@ -51,6 +51,28 @@ cross_runtime_writes:
 A manager-handoff with `target_team_sign_off: pending` is incomplete. The baton
 does NOT advance to Collaborator until sign-off is received.
 
+## TEAM_RESPONSE Signer Fidelity (validator-enforced)
+
+TEAM_RESPONSE artifacts MUST be authored by the target team, not by the
+source team using a target-team alias. The validator at
+`scripts/global/megalint/cross-team-response-fidelity.js` enforces this
+by comparing the artifact's `from:` (target team) field against the
+signer's `Team&Model:` team string parsed via
+`scripts/global/megalint/signer-registry-check.js#parseTeamModel`.
+Violations: `team-response-signer-team-mismatch` when the signer's team
+does not match the from-field; `signer-alias-non-derived` when the
+`Signed-by:` literal does not match the registry-derived alias for the
+asserted (team, model, role) tuple.
+
+Residual gap: perfect-forgery (source team forges both alias AND team-
+model string) requires the optional Crypto-Signature fields per
+`instructions/team-model-signing.instructions.md` to detect. The
+validator catches the common case which is the round-2 + round-3
+evidence on #2360 (#2370 anneal).
+
+Validator promotion: ships advisory; promotion to blocking is a CI-
+workflow-config decision after one cycle of advisory soak.
+
 ## Failure Mode: Schema Regression Recovery
 
 If a cross-team artifact write causes a runtime schema rejection after merge,
