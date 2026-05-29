@@ -11,9 +11,15 @@ const plugin = JSON.parse(fs.readFileSync(path.join(root, 'plugin.json'), 'utf8'
 console.log(`✅ plugin.json: name="${plugin.name}", ${plugin.skills.length} skills`);
 
 // 2. Symlinks exist and are symlinks (not copies)
-for (const rel of ['.claude-plugin/plugin.json', '.github/plugin/plugin.json']) {
+const REQUIRED_PLUGIN_PATHS = ['.claude-plugin/plugin.json', '.github/plugin/plugin.json'];
+const OPTIONAL_PLUGIN_PATHS = ['.antigravity-plugin/plugin.json'];
+for (const rel of [...REQUIRED_PLUGIN_PATHS, ...OPTIONAL_PLUGIN_PATHS]) {
   const full = path.join(root, rel);
-  if (!fs.existsSync(full)) { console.error(`❌ Missing: ${rel}`); errors++; continue; }
+  const isOptional = OPTIONAL_PLUGIN_PATHS.includes(rel);
+  if (!fs.existsSync(full)) {
+    if (isOptional) { console.log(`ℹ️  Optional plugin manifest absent: ${rel}`); continue; }
+    console.error(`❌ Missing: ${rel}`); errors++; continue;
+  }
   const stat = fs.lstatSync(full);
   if (!stat.isSymbolicLink()) { console.error(`❌ Not a symlink: ${rel}`); errors++; continue; }
   const content = JSON.parse(fs.readFileSync(full, 'utf8'));
