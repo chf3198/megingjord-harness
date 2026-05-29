@@ -258,7 +258,8 @@
     "gov:extract": "node scripts/global/rule-card-extractor.js --all > /tmp/rule-cards.json",
     "gov:parity": "node scripts/global/megalint/parity-validator.js",
     "routing:fallback-report": "node scripts/global/routing-fallback-report.js",
-    "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js"
+    "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js",
+    "test:compatibility": "node --test tests/orchestrator-compatibility.spec.js"
   },
   "keywords": [
     "devops",
