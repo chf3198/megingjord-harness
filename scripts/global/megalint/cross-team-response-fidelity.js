@@ -24,34 +24,34 @@ function checkTeamResponse(body) {
   const violations = [];
   const fromTeam = extractFromField(body);
   if (!fromTeam) {
-    violations.push({ rule: 'missing-from-field',
+    violations.push({ rule: 'missing-from-field', severity: 'advisory',
       detail: 'TEAM_RESPONSE missing `from:` target-team field' });
     return violations;
   }
   const fields = extractArtifactFields(body);
   if (!fields.signedBy || !fields.teamModel || !fields.role) {
-    violations.push({ rule: 'missing-signing-block',
+    violations.push({ rule: 'missing-signing-block', severity: 'advisory',
       detail: 'TEAM_RESPONSE missing Signed-by/Team&Model/Role signing block' });
     return violations;
   }
   const parsed = parseTeamModel(fields.teamModel);
   if (!parsed) {
-    violations.push({ rule: 'invalid-team-model',
+    violations.push({ rule: 'invalid-team-model', severity: 'advisory',
       detail: `TEAM_RESPONSE Team&Model value '${fields.teamModel}' did not parse as team:model@substrate` });
     return violations;
   }
   if (parsed.team !== fromTeam) {
     violations.push({
-      rule: 'team-response-signer-team-mismatch',
+      rule: 'team-response-signer-team-mismatch', severity: 'advisory',
       detail: `TEAM_RESPONSE 'from: ${fromTeam}' signed by operator on team '${parsed.team}' ` +
         `(alias '${fields.signedBy}', model '${parsed.model}'). The response must be authored by the target team, ` +
         'not the source team using a target-team alias. See cross-team-artifact-write.instructions.md.',
     });
   }
   const expected = expectedAliasFor({ team: parsed.team, model: parsed.model, role: fields.role.toLowerCase() });
-  if (expected && fields.signedBy && fields.signedBy.trim() !== expected) {
+  if (expected && fields.signedBy && fields.signedBy.trim().toLowerCase() !== expected.toLowerCase()) {
     violations.push({
-      rule: 'signer-alias-non-derived',
+      rule: 'signer-alias-non-derived', severity: 'advisory',
       detail: `TEAM_RESPONSE signer alias '${fields.signedBy}' does not match registry-derived ` +
         `'${expected}' for (${parsed.team}, ${parsed.model}, ${fields.role}).`,
     });

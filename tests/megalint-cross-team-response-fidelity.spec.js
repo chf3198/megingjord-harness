@@ -91,3 +91,21 @@ test('actual round-3 #2360 forgery #15 reproduction (claude-code response signed
   })]});
   assert.strictEqual(r.ok, true);
 });
+
+test('Q5 case-insensitive alias comparison: lowercase signedBy does not false-positive', () => {
+  const r = validator.validate({ comments: [teamResponse({
+    fromTeam: 'codex', signedBy: 'quill vale', teamModel: 'codex:gpt-5.4@local', role: 'consultant',
+  })]});
+  assert.ok(!r.violations.some(v => v.rule === 'signer-alias-non-derived'),
+    `case-insensitive compare expected; got ${JSON.stringify(r.violations)}`);
+});
+
+test('Q7 every emitted violation carries severity field for advisory-mode-soak', () => {
+  const r = validator.validate({ comments: [teamResponse({
+    fromTeam: 'claude-code', signedBy: 'Apollo Vale', teamModel: 'antigravity:gemini-2.0-pro@google', role: 'consultant',
+  })]});
+  for (const v of r.violations) {
+    assert.ok(v.severity, `violation ${v.rule} missing severity field for advisory-mode gating`);
+  }
+});
+
