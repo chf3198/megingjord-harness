@@ -1,3 +1,7 @@
+> **SUPERSEDED-BY-v3** (2026-05-29): the canonical cross-team R&D protocol is now `instructions/cross-team-rd-synthesis.instructions.md` (v3). This v2 document is preserved for archeological reference and for §0 case-study tracking. New synthesis runs should consult the v3 instructions file. v3 incorporates dispatcher hybrid (#2393), admin rotation (#2394), per-team-MD canonical with optional GNAP overlay (#2395), K-S adaptive + 24h ceiling termination (#2396), A2A envelope wrapping, and tier-graceful degradation (#2400).
+
+---
+
 # Cross-Team R&D Protocol v2 — Iterative Debate with Evidence
 
 **Author**: Orla Harper (claude-code:opus-4-7@anthropic, role: collaborator)
