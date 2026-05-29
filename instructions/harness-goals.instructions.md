@@ -48,13 +48,23 @@ resource when available AND MUST degrade gracefully to the lowest available
 tier when the higher resource is absent or unreachable.
 
 - "Available" is determined by environment (G5): the operator's asserted
-  MEGINGJORD_MINIMUM_TIER (Epic #2398) defines the highest tier the
-  implementation may assume.
+  minimum tier (env var MEGINGJORD_MINIMUM_TIER specified in the future
+  Epic-tracked tier-portability work, currently Epic #2398) defines the
+  highest tier the implementation may assume. Until that env var ships,
+  the rule is interpreted from the operator's documented baseline.
 - "Unreachable" is determined by runtime (G6): network outage, rate-limit,
   authentication failure, or any other transient condition.
 - The two are distinct: G5 absent means "this operator never has the resource";
   G6 unreachable means "the resource is normally present but currently down."
   Both lead to the same fallback path.
+
+Cross-runtime applicability: the pattern is runtime-agnostic. It applies
+uniformly to Claude Code, Codex, Copilot, and Antigravity runtimes (and any
+future entrants verified via the cross-orchestrator compatibility suite
+tests/orchestrator-compatibility.spec.js shipped in #2388). Runtime-specific
+tier assertions (e.g., a fleet-only feature for OpenClaw) carry their own
+MINIMUM_TIER and per-runtime fallback design but the optimal-with-fallback
+discipline holds identically.
 
 Reference implementation: scripts/global/mailbox-client.js MAY post to HAMR R2
 when MEGINGJORD_HAMR_DISABLED is unset and the worker is reachable, falling
@@ -65,7 +75,10 @@ IS the upgrade.
 Engineering practice: when introducing a feature that uses a tier-2-or-higher
 resource, the same PR must ship the tier-1 fallback. Single-tier dependencies
 on resources above the operator's asserted minimum are rejected at code review
-as G5 violations.
+as G5 violations. CI enforcement (a megalint validator that scans PR diffs for
+tier-2-or-higher dependencies without tier-1 fallback) is tracked as a follow-on
+under Epic #2398 AC3 (per-script tier audit + frontmatter tags); until that
+validator ships, the rule is reviewer-enforced.
 
 ## Decision Lens (lightweight, required)
 
