@@ -14,7 +14,8 @@
       "copilot",
       "codex",
       "claude-code",
-      "openclaw"
+      "openclaw",
+      "antigravity"
     ],
     "substrates": [
       "github-copilot",
@@ -22,7 +23,8 @@
       "codex-cli",
       "codex-vscode-ide",
       "openclaw-gateway",
-      "local"
+      "local",
+      "google"
     ],
     "note": "Human-readable Signed-by/Team&Model/Role remains canonical for readers; Crypto-* fields add non-repudiation."
   },
@@ -31,9 +33,15 @@
     "codex-cli": "codex",
     "codex-vscode-ide": "codex",
     "claude-code-cli": "claude-code",
-    "openclaw-gateway": "openclaw"
+    "openclaw-gateway": "openclaw",
+    "google": "antigravity"
   },
   "registry": [
+    {
+      "team": "antigravity",
+      "modelPattern": "^gemini-2\\.0-pro$",
+      "aliasSeed": "Apollo"
+    },
     {
       "team": "codex",
       "modelPattern": "^gpt-5\\.4$",
