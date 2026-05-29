@@ -337,6 +337,7 @@ npm run deploy:both:apply
 | `sync:codex:dry` | `bash scripts/sync.sh --dry-run --target codex` |
 | `sync:dry` | `bash scripts/sync.sh --dry-run` |
 | `test` | `npx playwright test` |
+| `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
 | `test:headed` | `npx playwright test --headed` |
 | `test:quality` | `npx playwright test tests/google-quality.spec.js` |
 | `test:sse-load` | `node scripts/tools/sse-load-test.js` |
