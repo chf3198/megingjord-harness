@@ -78,3 +78,14 @@ test('parity matrix exported to ~/.megingjord/', () => {
   fs.writeFileSync(outFile, JSON.stringify(report, null, 2));
   assert.ok(fs.existsSync(outFile));
 });
+
+test('any applicable:false marker carries non-empty evidence (Q4 abuse-prevention)', () => {
+  for (const [orch, surfaces] of Object.entries(report)) {
+    for (const [name, result] of Object.entries(surfaces)) {
+      if (result.applicable === false) {
+        assert.ok(result.evidence && result.evidence.length > 0,
+          `${orch} × ${name} marked applicable:false but evidence missing/empty — applicable:false must always document WHY`);
+      }
+    }
+  }
+});

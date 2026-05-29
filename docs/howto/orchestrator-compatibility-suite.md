@@ -48,4 +48,12 @@ After each PR ships, re-run the suite to verify the surface flips from not-recog
 
 Optional: add a CI job that runs the suite on every PR and posts the parity report as a comment. This is a Phase-2 enhancement; out of scope for this initial landing.
 
+## Maintenance contract (Q7)
+
+When a NEW orchestrator-recognition surface is added to the harness, the contributor MUST add a corresponding surface entry to the SURFACES map in `tests/orchestrator-compatibility.spec.js`. The suite is the source of truth for "what surfaces require per-orchestrator registration"; a surface that lives outside the suite is effectively invisible to compatibility verification. Reviewers should flag any PR that adds a per-orchestrator switch (e.g. `if (orch === 'antigravity')`) without a corresponding SURFACES entry.
+
+## Q4 abuse-prevention contract
+
+A surface marked `applicable: false` for an orchestrator MUST carry a non-empty `evidence` string explaining WHY the surface does not apply. A meta-test asserts this contract. Codex+plugin-manifest is the canonical example: `applicable: false, evidence: 'orchestrator has no canonical plugin convention; surface not applicable'`. The escape hatch exists for genuine architectural differences, not to hide real gaps.
+
 Refs Epic #2362 · Refs #2360 round-4 §3 surfaces enumeration
