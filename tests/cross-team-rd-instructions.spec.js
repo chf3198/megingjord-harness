@@ -47,3 +47,6 @@ test('v2 source has SUPERSEDED-BY-v3 marker', () => {
     'utf8');
   assert.match(v2, /SUPERSEDED-BY-v3/);
 });
+test('v3 has dedicated §14 cross-team-response-fidelity validator section', () => {
+  assert.match(SRC, /## §14 Cross-team-response-fidelity validator/);
+});

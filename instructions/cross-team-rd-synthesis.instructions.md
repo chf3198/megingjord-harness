@@ -201,7 +201,20 @@ When the protocol's own iteration requires multi-team R&D, the single-team-autho
 
 v3 is validated against ≥1 real Epic per Epic #1112 AC8 (#2407). First validation target candidate: Epic #2398 (resource-tier portability) — well-scoped, no in-flight contamination, would benefit from cross-team perspectives on the per-script tier classification.
 
-## §14 References
+## §14 Cross-team-response-fidelity validator (CI enforcement)
+
+`scripts/global/megalint/cross-team-response-fidelity.js` (shipped #2370) enforces TEAM_RESPONSE signer-team-from-team match at CI. Synthesis runs MUST pass this validator at the Phase-C closeout PR; failures block merge.
+
+Rules enforced:
+- `team-response-signer-team-mismatch`: TEAM_RESPONSE `from: <team>` must match the signer's parsed `Team&Model:` team string
+- `signer-alias-non-derived`: `Signed-by:` must equal the registry-derived alias for the asserted (team, model, role) tuple
+- `missing-from-field`, `missing-signing-block`, `invalid-team-model`: structural completeness
+
+The validator ships in advisory mode initially; promotion to blocking is a CI-workflow-config decision after one cycle of advisory soak per the validator-promotion convention.
+
+Synthesis-run interaction: Phase-D wave responses that take the form of TEAM_RESPONSE artifacts (cross-team formal sign-off on a decision) are validated; Phase-D wave responses that are append-only position-log entries are not (those follow the §6 file-system shape and §7 sign-off format directly).
+
+## §15 References
 
 - Epic #1112 productization parent
 - #2393 dispatcher Phase-0
