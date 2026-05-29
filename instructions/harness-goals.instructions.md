@@ -28,12 +28,44 @@ G10 Maintainability.
   minimal-resource fallback. Operator-environment variance is a first-class
   portability dimension distinct from G6: G6 covers temporary outages of normally-
   available resources, G5 covers baseline-absent resources for a given operator.
+  See "Tier-graceful degradation" below for the optimal-with-fallback
+  pattern that bridges G5 and G6.
 - G6 Resilience: graceful degradation and fallback paths for partial outages.
+  See "Tier-graceful degradation" below for the cross-cutting pattern that
+  ties G5 baseline-absent and G6 transiently-unreachable into a single
+  fallback path.
 - G7 Throughput: acceptable speed after higher-priority goals are satisfied.
 - G8 Observability: decisions and outcomes are visible, auditable, and attributable.
 - G9 Interoperability: preserve compatibility across agent surfaces and runtimes.
 - G10 Maintainability: files <=100 lines; cyclomatic complexity <=10 per function;
   no dead code at merge; changes documented via GOV-009 EDD before implementation.
+
+
+## Tier-graceful degradation (cross-cutting pattern between G5 and G6)
+
+Every feature that can benefit from a higher-tier resource SHOULD use that
+resource when available AND MUST degrade gracefully to the lowest available
+tier when the higher resource is absent or unreachable.
+
+- "Available" is determined by environment (G5): the operator's asserted
+  MEGINGJORD_MINIMUM_TIER (Epic #2398) defines the highest tier the
+  implementation may assume.
+- "Unreachable" is determined by runtime (G6): network outage, rate-limit,
+  authentication failure, or any other transient condition.
+- The two are distinct: G5 absent means "this operator never has the resource";
+  G6 unreachable means "the resource is normally present but currently down."
+  Both lead to the same fallback path.
+
+Reference implementation: scripts/global/mailbox-client.js MAY post to HAMR R2
+when MEGINGJORD_HAMR_DISABLED is unset and the worker is reachable, falling
+back to .gnap/messages/<team>/<timestamp>.json committed to the issue branch
+when either condition fails. The fallback IS the default; the optimization
+IS the upgrade.
+
+Engineering practice: when introducing a feature that uses a tier-2-or-higher
+resource, the same PR must ship the tier-1 fallback. Single-tier dependencies
+on resources above the operator's asserted minimum are rejected at code review
+as G5 violations.
 
 ## Decision Lens (lightweight, required)
 
