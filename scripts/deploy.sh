@@ -10,11 +10,11 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --apply) APPLY=true ;;
     --target) TARGET="${2:-copilot}"; shift ;;
-    *) echo "Usage: deploy.sh [--apply] [--target copilot|codex|claude|both|all]"; exit 1 ;;
+    *) echo "Usage: deploy.sh [--apply] [--target copilot|codex|claude|antigravity|both|all]"; exit 1 ;;
   esac
   shift
 done
-[[ "$TARGET" =~ ^(copilot|codex|claude|both|all)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
+[[ "$TARGET" =~ ^(copilot|codex|claude|antigravity|both|all)$ ]] || { echo "Invalid target: $TARGET"; exit 1; }
 $APPLY && CODEX_ARGS+=(--apply)
 deploy_dir() {
   local src="$1" dest="$2" label="$3"
@@ -59,9 +59,10 @@ if [[ "$TARGET" == "codex" || "$TARGET" == "both" || "$TARGET" == "all" ]]; then
   node "$ROOT/scripts/global/codex-runtime.js" deploy "${CODEX_ARGS[@]}"
 fi
 [[ "$TARGET" == "codex" ]] && exit 0
-if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then
-  $APPLY && rsync -a --exclude='*.local*' "$ROOT/.claude/" "$HOME/.claude/" && echo "✅ .claude/ → ~/.claude/" || echo "(dry run) Would deploy .claude/ → ~/.claude/"
+if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then $APPLY && rsync -a --exclude='*.local*' "$ROOT/.claude/" "$HOME/.claude/" && echo "✅ .claude/ → ~/.claude/" || echo "(dry run) Would deploy .claude/ → ~/.claude/"
   [[ "$TARGET" == "claude" ]] && exit 0; fi
+if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.antigravity"; rsync -a --exclude='*.local*' "$ROOT/.antigravity/" "$HOME/.antigravity/" 2>/dev/null || true; echo "ok .antigravity/ -> ~/.antigravity/"; } || echo "(dry run) Would deploy .antigravity/ -> ~/.antigravity/"
+  [[ "$TARGET" == "antigravity" ]] && exit 0; fi
 echo "Source: $ROOT → $COPILOT"
 if ! $APPLY; then
   echo "=== DRY RUN (pass --apply to deploy) ==="

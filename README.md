@@ -124,6 +124,8 @@ npm run deploy:both:apply
 | `deploy` | `bash scripts/deploy.sh` |
 | `deploy:all` | `bash scripts/deploy.sh --target all` |
 | `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all` |
+| `deploy:antigravity` | `bash scripts/deploy.sh --target antigravity` |
+| `deploy:antigravity:apply` | `bash scripts/deploy.sh --apply --target antigravity` |
 | `deploy:apply` | `bash scripts/deploy.sh --apply` |
 | `deploy:both` | `bash scripts/deploy.sh --target both` |
 | `deploy:both:apply` | `bash scripts/deploy.sh --apply --target both` |
