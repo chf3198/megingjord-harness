@@ -21,6 +21,7 @@ const crossCheckoutDestructive = require('./cross-checkout-destructive.js');
 const soakLanguageGuard = require('./soak-language-guard.js');
 const researchFirstPhaseGate = require('./research-first-phase-gate.js');
 const parityValidator = require('./parity-validator.js');
+const crossTeamResponseFidelity = require('./cross-team-response-fidelity.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -53,6 +54,7 @@ const VALIDATORS = {
   'soak-language-guard': soakLanguageGuard,
   'research-first-phase-gate': researchFirstPhaseGate,
   'parity-validator': parityValidatorAdapter,
+  'cross-team-response-fidelity': crossTeamResponseFidelity,
 };
 
 function runAll(input) {
