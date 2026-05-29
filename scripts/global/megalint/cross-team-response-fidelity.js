@@ -20,42 +20,42 @@ function extractFromField(body) {
   return m ? m[1].trim().replace(/^[`'"]+|[`'"]+$/g, '').toLowerCase() : null;
 }
 
+function checkSignerTeamMismatch(parsed, fromTeam, signedBy) {
+  if (parsed.team === fromTeam) return null;
+  return {
+    rule: 'team-response-signer-team-mismatch', severity: 'advisory',
+    detail: `TEAM_RESPONSE 'from: ${fromTeam}' signed by operator on team '${parsed.team}' ` +
+      `(alias '${signedBy}', model '${parsed.model}'). The response must be authored by ` +
+      'the target team, not the source team using a target-team alias.',
+  };
+}
+
+function checkAliasDerivation(parsed, role, signedBy) {
+  const expected = expectedAliasFor({ team: parsed.team, model: parsed.model, role: role.toLowerCase() });
+  if (!expected || !signedBy) return null;
+  if (signedBy.trim().toLowerCase() === expected.toLowerCase()) return null;
+  return {
+    rule: 'signer-alias-non-derived', severity: 'advisory',
+    detail: `TEAM_RESPONSE signer alias '${signedBy}' does not match registry-derived ` +
+      `'${expected}' for (${parsed.team}, ${parsed.model}, ${role}).`,
+  };
+}
+
 function checkTeamResponse(body) {
   const violations = [];
   const fromTeam = extractFromField(body);
-  if (!fromTeam) {
-    violations.push({ rule: 'missing-from-field', severity: 'advisory',
-      detail: 'TEAM_RESPONSE missing `from:` target-team field' });
-    return violations;
-  }
+  if (!fromTeam) return [{ rule: 'missing-from-field', severity: 'advisory',
+    detail: 'TEAM_RESPONSE missing `from:` target-team field' }];
   const fields = extractArtifactFields(body);
-  if (!fields.signedBy || !fields.teamModel || !fields.role) {
-    violations.push({ rule: 'missing-signing-block', severity: 'advisory',
-      detail: 'TEAM_RESPONSE missing Signed-by/Team&Model/Role signing block' });
-    return violations;
-  }
+  if (!fields.signedBy || !fields.teamModel || !fields.role) return [{ rule: 'missing-signing-block', severity: 'advisory',
+    detail: 'TEAM_RESPONSE missing Signed-by/Team&Model/Role signing block' }];
   const parsed = parseTeamModel(fields.teamModel);
-  if (!parsed) {
-    violations.push({ rule: 'invalid-team-model', severity: 'advisory',
-      detail: `TEAM_RESPONSE Team&Model value '${fields.teamModel}' did not parse as team:model@substrate` });
-    return violations;
-  }
-  if (parsed.team !== fromTeam) {
-    violations.push({
-      rule: 'team-response-signer-team-mismatch', severity: 'advisory',
-      detail: `TEAM_RESPONSE 'from: ${fromTeam}' signed by operator on team '${parsed.team}' ` +
-        `(alias '${fields.signedBy}', model '${parsed.model}'). The response must be authored by the target team, ` +
-        'not the source team using a target-team alias. See cross-team-artifact-write.instructions.md.',
-    });
-  }
-  const expected = expectedAliasFor({ team: parsed.team, model: parsed.model, role: fields.role.toLowerCase() });
-  if (expected && fields.signedBy && fields.signedBy.trim().toLowerCase() !== expected.toLowerCase()) {
-    violations.push({
-      rule: 'signer-alias-non-derived', severity: 'advisory',
-      detail: `TEAM_RESPONSE signer alias '${fields.signedBy}' does not match registry-derived ` +
-        `'${expected}' for (${parsed.team}, ${parsed.model}, ${fields.role}).`,
-    });
-  }
+  if (!parsed) return [{ rule: 'invalid-team-model', severity: 'advisory',
+    detail: `TEAM_RESPONSE Team&Model value '${fields.teamModel}' did not parse as team:model@substrate` }];
+  const mismatch = checkSignerTeamMismatch(parsed, fromTeam, fields.signedBy);
+  if (mismatch) violations.push(mismatch);
+  const aliasDrift = checkAliasDerivation(parsed, fields.role, fields.signedBy);
+  if (aliasDrift) violations.push(aliasDrift);
   return violations;
 }
 
@@ -64,9 +64,8 @@ function validate(input) {
   const responses = findTeamResponses(comments);
   const violations = [];
   for (const comment of responses) {
-    const found = checkTeamResponse(comment.body || '');
-    for (const v of found) {
-      violations.push(Object.assign({}, v,
+    for (const violation of checkTeamResponse(comment.body || '')) {
+      violations.push(Object.assign({}, violation,
         comment.url ? { source: comment.url } : null,
         comment.id ? { commentId: comment.id } : null));
     }
