@@ -40,7 +40,6 @@ G10 Maintainability.
 - G10 Maintainability: files <=100 lines; cyclomatic complexity <=10 per function;
   no dead code at merge; changes documented via GOV-009 EDD before implementation.
 
-
 ## Tier-graceful degradation (cross-cutting pattern between G5 and G6)
 
 Every feature that can benefit from a higher-tier resource SHOULD use that
