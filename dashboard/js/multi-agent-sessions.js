@@ -2,11 +2,11 @@
 // Epic #742 | ≤100 lines
 
 const VENDOR_ICONS = {
-  copilot: '🤖', claude: '🟠', codex: '🟦', cursor: '🎯', cline: '🔧', unknown: '❓'
+  copilot: '🤖', claude: '🟠', codex: '🟦', antigravity: '🌌', cursor: '🎯', cline: '🔧', unknown: '❓'
 };
 const VENDOR_COLORS = {
   copilot: 'agent-copilot', claude: 'agent-claude', codex: 'agent-codex',
-  cursor: 'agent-cursor', cline: 'agent-cline', unknown: 'agent-unknown'
+  antigravity: 'agent-antigravity', cursor: 'agent-cursor', cline: 'agent-cline', unknown: 'agent-unknown'
 };
 const AGENT_HEARTBEAT_KEY = 'agent_heartbeats';
 const MAX_VISIBLE = 3;
