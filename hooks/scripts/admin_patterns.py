@@ -40,3 +40,16 @@ RE_GH_RELEASE_CREATE = re.compile(r"\bgh\s+release\s+create\b")
 RE_GH_ISSUE_CLOSE = re.compile(r"\bgh\s+issue\s+close\b")
 RE_GH_ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+create\b")
 RE_GIT_TAG = re.compile(r"\bgit\s+tag\b")
+
+
+def required_admin_ops(flags: dict, repo_type: str) -> list[str]:
+    """Admin op keys required for completion. Stays in sync with
+    stop_checks.check_admin_ops base/ext logic (#2444)."""
+    base = (["commit", "push", "pr_create", "ci_green", "merge"]
+            if flags.get("code_touched") else [])
+    ext: list[str] = []
+    if repo_type == "vscode-extension" and flags.get("extension_touched"):
+        ext = ["publish", "release_integrity", "gh_release"]
+    if flags.get("ui_touched"):
+        ext.append("visual_qa")
+    return base + ext

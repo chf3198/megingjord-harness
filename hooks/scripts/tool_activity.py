@@ -9,7 +9,7 @@ from admin_patterns import (
     RE_GH_ISSUE_CLOSE, RE_GH_ISSUE_CREATE, RE_GH_RELEASE_CREATE,
     RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
     RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, RE_VSCE_SHOW,
-    iter_strings,
+    iter_strings, required_admin_ops,
 )
 from repo_detection import classify_path
 
@@ -89,3 +89,10 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     for pattern, key in _match_ops:
         if pattern.search(joined):
             ops[key] = True
+
+    # #2444: auto-emit roles.admin once all required ops complete.
+    # Mirrors check_admin_ops base/ext logic via shared helper.
+    repo_type = state.get("repo_type", "generic")
+    required = required_admin_ops(flags, repo_type)
+    if required and all(ops.get(k) for k in required):
+        roles["admin"] = True
