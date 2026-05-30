@@ -13,6 +13,7 @@ jobs:
     name: collaborator-gate
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
@@ -45,6 +46,13 @@ jobs:
                 `COLLABORATOR_HANDOFF not found in issue #${linkedIssue} comments. ` +
                 'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
+              return;
+            }
+            const { validate } = require('./scripts/global/megalint/collaborator-handoff.js');
+            const result = validate({ comments: comments.map(c => c.body), labels });
+            if (!result.ok) {
+              const detail = (result.violations || []).map(v => v.rule + (v.detail ? ': ' + v.detail : '')).join('; ');
+              core.setFailed(`collaborator-handoff violations in #${linkedIssue}: ${detail}`);
             }
 
   admin-gate:
@@ -125,3 +133,28 @@ jobs:
                 'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
             }
+
+  changelog-fragment:
+    name: changelog-fragment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { validate } = require('./scripts/global/megalint/changelog-fragment-presence.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: parseInt(refsMatch[1]),
+            });
+            const labels = issue.labels.map(l => l.name);
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner, repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            const result = validate({ labels, prBody: body, prFiles: files.map(f => f.filename) });
+            if (!result.ok) core.setFailed(`changelog-fragment: ${result.reason}`);
+            else console.log(`changelog-fragment ok: ${result.reason}`);
