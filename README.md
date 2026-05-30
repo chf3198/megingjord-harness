@@ -337,6 +337,7 @@ npm run deploy:both:apply
 | `sync:codex:dry` | `bash scripts/sync.sh --dry-run --target codex` |
 | `sync:dry` | `bash scripts/sync.sh --dry-run` |
 | `synthesis:init` | `node scripts/global/synthesis-init.js` |
+| `synthesis:status` | `node scripts/global/broker-synthesis-status.js` |
 | `test` | `npx playwright test` |
 | `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
 | `test:headed` | `npx playwright test --headed` |
