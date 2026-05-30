@@ -34,7 +34,12 @@ G10 Maintainability.
   See "Tier-graceful degradation" below for the cross-cutting pattern that
   ties G5 baseline-absent and G6 transiently-unreachable into a single
   fallback path.
-- G7 Throughput: acceptable speed after higher-priority goals are satisfied.
+- G7 Throughput: coding workflow speed — CI pipeline efficiency, tool response
+  time, and developer/agent velocity. Evaluated after G1–G6 are satisfied.
+  Latency that is the inherent cost of satisfying a higher-priority goal (e.g.,
+  fleet model wait time for G3, cross-family review time for G2) is NOT a G7
+  concern — the priority order governs that trade-off. G7 violations are
+  unnecessary slowdowns removable without compromising G1–G6.
 - G8 Observability: decisions and outcomes are visible, auditable, and attributable.
 - G9 Interoperability: preserve compatibility across agent surfaces and runtimes.
 - G10 Maintainability: files <=100 lines; cyclomatic complexity <=10 per function;
