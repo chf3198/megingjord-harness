@@ -194,6 +194,7 @@ This decision must be cited in baton artifacts and summarized in `CONSULTANT_CLO
 |------|-------------|
 | Collaborator/Admin signer independence | `baton-gates.yml` admin-gate blocks identical signer identity |
 | Test strategy declared per matrix | `test-evidence.yml` gate consumes `test_strategy` from `MANAGER_HANDOFF` |
+| `roles.admin` auto-emission on full baton (#2444) | `hooks/scripts/tool_activity.py` `mark_tool_activity` flips `roles["admin"] = True` when every key returned by `admin_patterns.required_admin_ops(flags, repo_type)` is set in `admin_ops`. Stop-hook `check_admin_ops` consumes the same helper. No manual state patching required. |
 
 ## MANAGER_HANDOFF schema (with test_strategy)
 

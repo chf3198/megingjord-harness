@@ -8,6 +8,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from admin_patterns import required_admin_ops
 from wiki_wisdom import post_merge_checklist
 
 CODE_UNCOMMITTED_EXTS = (".sh", ".js", ".py", ".ts", ".json", ".md")
@@ -64,16 +65,8 @@ def check_admin_ops(
     # #1960: clean tree + no commit = code was reverted; AC#1 clean-tree pass.
     if uncommitted is not None and not uncommitted and not ops.get("commit"):
         return None, None
-    base = (
-        ["commit", "push", "pr_create", "ci_green", "merge"]
-        if flags.get("code_touched") else []
-    )
-    ext: list[str] = []
-    if repo_type == "vscode-extension" and flags.get("extension_touched"):
-        ext = ["publish", "release_integrity", "gh_release"]
-    if flags.get("ui_touched"):  # #1817: scope visual_qa to actual UI paths, not all code in web-app repos
-        ext.append("visual_qa")
-    missing = [k for k in base + ext if not ops.get(k)]
+    required = required_admin_ops(flags, repo_type)
+    missing = [k for k in required if not ops.get(k)]
     if missing:
         reason = f"Stop blocked: missing Admin steps ({', '.join(missing)})."
         return reason, f"Hard governance gate. Missing: {', '.join(missing)}."
