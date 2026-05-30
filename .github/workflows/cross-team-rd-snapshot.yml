@@ -1,0 +1,42 @@
+# cross-team-rd-snapshot — 6h cron snapshot job per protocol v3 §5 termination.
+# Refs Epic #1112 AC4 (#2405). Tier-1 (GitHub Actions; free for public repos)
+# per #2400 tier-graceful degradation; HAMR cron is Tier-2 optimization.
+name: cross-team-rd-snapshot
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      epic:
+        description: 'Epic number to snapshot (required for manual trigger)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-node@5e3eda69cf3aa8f7c95a82cfafa7b94c98a72d8a
+        with:
+          node-version: '24'
+      - name: Discover active synthesis runs
+        id: discover
+        run: |
+          synths=$(ls -d planning/synthesis-*/ 2>/dev/null | sed 's|planning/synthesis-||;s|/||' | tr '\n' ' ')
+          echo "synths=$synths" >> "$GITHUB_OUTPUT"
+      - name: Run snapshot per active synthesis
+        if: steps.discover.outputs.synths != ''
+        run: |
+          for rdN in ${{ steps.discover.outputs.synths }}; do
+            node scripts/global/synthesis-snapshot.js --epic "$rdN" > "/tmp/snapshot-$rdN.json" || exit_code=$?
+            cat "/tmp/snapshot-$rdN.json"
+            # exit code 2 = terminate; post WAVE_SUMMARY + TERMINATE_SYNTHESIS marker
+            if [ "$exit_code" = "2" ]; then
+              echo "TERMINATE_SYNTHESIS detected for #$rdN"
+            fi
+          done
