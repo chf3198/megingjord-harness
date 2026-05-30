@@ -30,6 +30,15 @@ function checkSignerFields(body) {
   return violations;
 }
 
+function checkCrossFamily(body) {
+  const advisory = s => ({ rule: s, detail: `COLLABORATOR_HANDOFF missing ${s.replace('missing-', '').replace(/-/g, '_')}: field`, severity: 'advisory' });
+  return [
+    /cross_family_reviewer:/i.test(body) ? null : advisory('missing-cross-family-reviewer'),
+    /cross_family_rating:/i.test(body) ? null : advisory('missing-cross-family-rating'),
+    /reviewer_family:/i.test(body) ? null : advisory('missing-reviewer-family'),
+  ].filter(Boolean);
+}
+
 function validate(input) {
   if (LIGHTWEIGHT.includes(input.lane) || laneSeverity(input.lane) === 'issue-only') {
     return { ok: true, violations: [], reason: 'lightweight-lane-skip' };
@@ -46,8 +55,12 @@ function validate(input) {
     try { matrix = docCoverage.loadMatrix(); } catch (_) { matrix = null; }
     if (matrix) violations.push(...docCoverage.checkBlock(body, input.labels || [], matrix));
   }
+  if (input.lane === 'lane:code-change') {
+    violations.push(...checkCrossFamily(body));
+  }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });
-  return { ok: violations.length === 0, violations, found: true, signer };
+  const blocking = violations.filter(v => v.severity !== 'advisory');
+  return { ok: blocking.length === 0, violations, found: true, signer };
 }
 
 module.exports = { validate, findCollaboratorHandoff, LIGHTWEIGHT };
