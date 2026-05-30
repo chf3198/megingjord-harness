@@ -20,7 +20,7 @@ test('validate: blocking when doc-coverage: block missing on lane:code-change wi
 
 test('validate: passes when doc-coverage: block has required surfaces', () => {
   const body = HANDOFF_SIGNED(
-    'doc-coverage:\n  .changes/unreleased/: DONE — #2424.md\n  docs/workflow/learnings.md: N/A — no new pattern\n'
+    'doc-coverage:\n  .changes/unreleased/: DONE — #2424.md\n  docs/workflow/learnings.md: N/A — no new pattern\n  governance/README.md: DONE\n  docs/howto/baton-workflow.md: DONE\n'
   );
   const result = validate({
     lane: 'lane:code-change', labels: ['area:governance'],
