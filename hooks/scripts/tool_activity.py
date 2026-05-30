@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from baton_event_emitter import emit_role_handoff
 from admin_patterns import (
     RE_GH_ISSUE_CLOSE, RE_GH_ISSUE_CREATE, RE_GH_RELEASE_CREATE,
     RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
@@ -95,4 +96,14 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     repo_type = state.get("repo_type", "generic")
     required = required_admin_ops(flags, repo_type)
     if required and all(ops.get(k) for k in required):
+        if not roles.get("admin"):
+            # #2457: emit baton-event on role transition
+            try:
+                import re as _re
+                branch = state.get("active_branch") or ""
+                m = _re.match(r"^[a-z]+/(\d+)-", branch)
+                if m:
+                    emit_role_handoff("collaborator", "admin", int(m.group(1)))
+            except Exception:
+                pass  # never break the gate on emitter failure
         roles["admin"] = True
