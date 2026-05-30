@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import threading
 import time
 from typing import Optional
@@ -36,6 +37,16 @@ def feature_enabled() -> bool:
 def _empty_roles() -> dict:
     return {"manager": False, "collaborator": False, "admin": False, "consultant": False}
 
+
+
+def _warn_degraded(reason: str, ticket_n: int) -> None:
+    """G8 observability: emit user-visible degradation note to stderr (#2460)."""
+    if os.environ.get("MEGINGJORD_QUIET_RESOLVER", "").strip() == "1":
+        return
+    sys.stderr.write(
+        f"[role-resolver] degraded: {reason} for #{ticket_n}; "
+        f"falling back to {'stale cache' if reason != 'cold-miss' else 'local-state'}\n"
+    )
 
 def _gh_view(ticket_n: int, timeout: float = 10.0) -> Optional[dict]:
     """Call gh CLI; return parsed JSON or None on failure (G6 fallback)."""
@@ -80,7 +91,9 @@ def derive_roles_from_github(ticket_n: int) -> Optional[dict]:
     if issue is None:
         # G6 with bound: serve stale only if within MAX_STALE_SECONDS
         if cached and (now - cached[0]) < MAX_STALE_SECONDS:
+            _warn_degraded("gh-fetch-failed-using-stale", ticket_n)
             return cached[1]
+        _warn_degraded("cold-miss", ticket_n)
         return None
 
     roles = _parse_roles(issue)

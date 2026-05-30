@@ -177,3 +177,69 @@ class TestMaxStaleBound(unittest.TestCase):
                 self.assertIsNone(result, "G6 bound: should not serve cache beyond MAX_STALE")
                 resolver.CACHE_TTL_SECONDS = 60
                 resolver.MAX_STALE_SECONDS = 300
+
+
+class TestChaosOffline(unittest.TestCase):
+    """#2460: chaos paths for offline behavior."""
+
+    def setUp(self):
+        resolver.clear_cache()
+
+    def test_chaos_gh_cli_not_found_no_cache(self):
+        """gh CLI absent (FileNotFoundError) returns None when no cache."""
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1",
+                                       "MEGINGJORD_QUIET_RESOLVER": "1"}):
+            with patch("subprocess.run", side_effect=FileNotFoundError("gh not found")):
+                self.assertIsNone(resolver.derive_roles_from_github(2460))
+
+    def test_chaos_gh_cli_not_found_with_cache(self):
+        """gh CLI absent serves stale cache within max-stale (G6)."""
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1",
+                                       "MEGINGJORD_QUIET_RESOLVER": "1"}):
+            with patch.object(resolver, "_gh_view") as mock_gh:
+                mock_gh.return_value = {"labels": [{"name": "role:admin"}]}
+                resolver.derive_roles_from_github(2460)
+                # Force expiry + simulate gh CLI absent
+                resolver.CACHE_TTL_SECONDS = 0
+                with patch("subprocess.run", side_effect=FileNotFoundError("gh not found")):
+                    result = resolver.derive_roles_from_github(2460)
+                self.assertIsNotNone(result)
+                self.assertTrue(result["admin"])
+                resolver.CACHE_TTL_SECONDS = 60
+
+    def test_chaos_rate_limit_returns_none_no_cache(self):
+        """Simulated rate-limit (subprocess returncode != 0) returns None."""
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1",
+                                       "MEGINGJORD_QUIET_RESOLVER": "1"}):
+            mock_result = type("R", (), {"returncode": 1, "stdout": "", "stderr": "rate limit"})
+            with patch("subprocess.run", return_value=mock_result):
+                self.assertIsNone(resolver.derive_roles_from_github(2460))
+
+    def test_chaos_timeout_returns_none_no_cache(self):
+        """Subprocess timeout returns None."""
+        import subprocess as _sp
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1",
+                                       "MEGINGJORD_QUIET_RESOLVER": "1"}):
+            with patch("subprocess.run", side_effect=_sp.TimeoutExpired("gh", 10)):
+                self.assertIsNone(resolver.derive_roles_from_github(2460))
+
+    def test_user_visible_warning_emitted(self):
+        """G8: stderr message on degraded path unless MEGINGJORD_QUIET_RESOLVER set."""
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1"}):
+            os.environ.pop("MEGINGJORD_QUIET_RESOLVER", None)
+            import io as _io
+            with patch("sys.stderr", new=_io.StringIO()) as stderr:
+                with patch.object(resolver, "_gh_view", return_value=None):
+                    resolver.derive_roles_from_github(99999)
+                self.assertIn("degraded", stderr.getvalue())
+                self.assertIn("#99999", stderr.getvalue())
+
+    def test_quiet_mode_suppresses_warning(self):
+        """G3: cron/CI mode can suppress stderr noise."""
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1",
+                                       "MEGINGJORD_QUIET_RESOLVER": "1"}):
+            import io as _io
+            with patch("sys.stderr", new=_io.StringIO()) as stderr:
+                with patch.object(resolver, "_gh_view", return_value=None):
+                    resolver.derive_roles_from_github(99999)
+                self.assertEqual(stderr.getvalue(), "")

@@ -285,6 +285,27 @@ When a MANAGER_HANDOFF involves writing files consumed by another team's runtime
 the `cross_runtime_writes` field is required and must include `target_team_sign_off`
 before the baton advances. See `instructions/cross-team-artifact-write.instructions.md`.
 
+
+
+## Offline contract for derive_roles_from_github (#2460, Epic #2451 Move 5)
+
+When the GitHub-derived role resolver (#2456, feature-flagged via `MEGINGJORD_DERIVE_ROLES_FROM_GH`) cannot reach GitHub:
+
+| Condition | Behavior | Operator-visible signal |
+|---|---|---|
+| First call (cold-miss): gh CLI unreachable or returns non-zero | Returns `None`; callers fall back to local-state | stderr: `[role-resolver] degraded: cold-miss for #N; falling back to local-state` |
+| Subsequent call (warm cache + gh fail) within 300s MAX_STALE | Returns last-cached value | stderr: `[role-resolver] degraded: gh-fetch-failed-using-stale for #N; falling back to stale cache` |
+| Subsequent call beyond MAX_STALE_SECONDS | Returns `None`; callers fall back to local-state | stderr: cold-miss line |
+| `gh` CLI absent (FileNotFoundError) | Same as above per cache state | same stderr lines |
+| Subprocess timeout (10s default) | Same as above per cache state | same stderr lines |
+
+**Quiet mode** for CI/cron contexts: set `MEGINGJORD_QUIET_RESOLVER=1` to suppress stderr output.
+
+**Goal-lens justification**:
+- **G6 resilience**: G6 is preserved via stale-cache fallback bounded by MAX_STALE_SECONDS=300; legacy `roles{}` continues to function when feature flag off
+- **G8 observability**: each degraded path emits a labeled stderr line so operators can diagnose; not silent
+- **G3 zero-cost in CI**: quiet-mode env flag suppresses noise without disabling the fallback path
+
 ## Skill Mapping
 
 Manager: `role-manager-execution` | Collaborator: `role-collaborator-execution`
