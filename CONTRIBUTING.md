@@ -96,5 +96,5 @@ All sections require `Signed-by:`, `Team&Model:`, and `Role:`; Admin must differ
 PRs >10 files or >500 LOC require `BLOCKER_NOTE` plus evidence closeout.
 
 Admin merge checklist: `pr-title-required` ≤60 chars, all gates green, artifacts present.
-Lane model: `code-change` (full baton), `docs/research` (Manager+Consultant),
-`config-only` (Admin+Consultant). See role-baton-routing.instructions.md.
+Lane model: `code-change` (full baton), `docs/research` (Manager+Consultant), `config-only` (Admin+Consultant).
+`COLLABORATOR_HANDOFF` on `lane:code-change` must include a `doc-coverage:` block per `config/doc-coverage-matrix.yml`.
