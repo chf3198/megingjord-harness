@@ -34,8 +34,8 @@ surfaces:
       - AGENTS.md
       - .github/copilot-instructions.md
       - .codex/AGENTS.md
-    suggested:
       - wiki/wisdom/project/
+    suggested:
       - instructions/
 
   area:governance:
@@ -44,12 +44,12 @@ surfaces:
       - docs/workflow/learnings.md
       - governance/README.md
       - docs/howto/baton-workflow.md
+      - wiki/wisdom/global/concepts/
     suggested:
       - CONTRIBUTING.md
       - .github/CONTRIBUTING.md
       - governance-carve-outs/index.md
       - docs/decisions.md
-      - wiki/wisdom/global/concepts/
       - .github/SECURITY.md
 
   area:dashboard:
