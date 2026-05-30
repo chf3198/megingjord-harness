@@ -11,11 +11,14 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import threading
 import time
 from typing import Optional
 
 CACHE_TTL_SECONDS = 60
+MAX_STALE_SECONDS = 300  # G6: serve stale up to 5 min on GitHub-down
 _cache: dict[int, tuple[float, dict]] = {}
+_cache_lock = threading.Lock()
 
 ROLE_LABELS = {
     "role:manager": "manager",
@@ -61,22 +64,28 @@ def _parse_roles(issue: dict) -> dict:
 def derive_roles_from_github(ticket_n: int) -> Optional[dict]:
     """Return roles dict derived from GitHub, or None if feature disabled / offline.
 
-    Cached with 60s TTL. Returns stale cache if fresh fetch fails (G6 resilience).
+    Cached with 60s TTL (thread-safe via _cache_lock). Returns stale cache up to
+    MAX_STALE_SECONDS old if fresh fetch fails (G6 resilience with bounded staleness).
     """
     if not feature_enabled() or not ticket_n:
         return None
 
     now = time.monotonic()
-    cached = _cache.get(ticket_n)
-    if cached and (now - cached[0]) < CACHE_TTL_SECONDS:
-        return cached[1]
+    with _cache_lock:
+        cached = _cache.get(ticket_n)
+        if cached and (now - cached[0]) < CACHE_TTL_SECONDS:
+            return cached[1]
 
     issue = _gh_view(ticket_n)
     if issue is None:
-        return cached[1] if cached else None  # G6: stale > nothing
+        # G6 with bound: serve stale only if within MAX_STALE_SECONDS
+        if cached and (now - cached[0]) < MAX_STALE_SECONDS:
+            return cached[1]
+        return None
 
     roles = _parse_roles(issue)
-    _cache[ticket_n] = (now, roles)
+    with _cache_lock:
+        _cache[ticket_n] = (now, roles)
     return roles
 
 

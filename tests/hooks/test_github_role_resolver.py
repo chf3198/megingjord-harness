@@ -144,3 +144,36 @@ class TestEffectiveRoles(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestMaxStaleBound(unittest.TestCase):
+    """Per qwen-7b review of c49dbc5: stale cache must have upper bound."""
+
+    def setUp(self):
+        resolver.clear_cache()
+
+    def test_stale_within_max_returns_cache(self):
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1"}):
+            with patch.object(resolver, "_gh_view") as mock_gh:
+                mock_gh.return_value = {"labels": [{"name": "role:admin"}]}
+                resolver.derive_roles_from_github(2456)
+                # Force cache age within stale-bound but past TTL
+                resolver.CACHE_TTL_SECONDS = 0
+                mock_gh.return_value = None
+                result = resolver.derive_roles_from_github(2456)
+                self.assertIsNotNone(result)
+                resolver.CACHE_TTL_SECONDS = 60
+
+    def test_stale_beyond_max_returns_none(self):
+        with patch.dict(os.environ, {"MEGINGJORD_DERIVE_ROLES_FROM_GH": "1"}):
+            with patch.object(resolver, "_gh_view") as mock_gh:
+                mock_gh.return_value = {"labels": [{"name": "role:admin"}]}
+                resolver.derive_roles_from_github(2456)
+                # Force cache age past MAX_STALE
+                resolver.CACHE_TTL_SECONDS = 0
+                resolver.MAX_STALE_SECONDS = 0
+                mock_gh.return_value = None
+                result = resolver.derive_roles_from_github(2456)
+                self.assertIsNone(result, "G6 bound: should not serve cache beyond MAX_STALE")
+                resolver.CACHE_TTL_SECONDS = 60
+                resolver.MAX_STALE_SECONDS = 300
