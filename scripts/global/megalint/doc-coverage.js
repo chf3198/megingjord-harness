@@ -1,6 +1,7 @@
 'use strict';
-// doc-coverage — advisory validator that reads config/doc-coverage-matrix.yml
-// and emits a coverage block. Refs #2155.
+// doc-coverage — validates doc-coverage: block in COLLABORATOR_HANDOFF.
+// Upgraded from advisory to blocking. Refs #2426.
+// Set DOC_COVERAGE_GATE_ADVISORY=1 for advisory-only mode (G5 escape hatch).
 
 const fs = require('fs');
 const path = require('path');
@@ -10,8 +11,7 @@ const MATRIX_PATH = path.join(__dirname, '..', '..', '..', 'config', 'doc-covera
 function parseYamlSurfaces(text) {
   const lines = text.split('\n');
   const out = {};
-  let area = null;
-  let bucket = null;
+  let area = null; let bucket = null;
   for (const raw of lines) {
     const line = raw.replace(/\s+$/, '');
     if (!line || line.startsWith('#') || line === 'surfaces:') continue;
@@ -26,13 +26,11 @@ function parseYamlSurfaces(text) {
 }
 
 function loadMatrix(matrixPath = MATRIX_PATH) {
-  const text = fs.readFileSync(matrixPath, 'utf8');
-  return parseYamlSurfaces(text);
+  return parseYamlSurfaces(fs.readFileSync(matrixPath, 'utf8'));
 }
 
 function surfacesForLabels(labels, matrix) {
-  const required = new Set();
-  const suggested = new Set();
+  const required = new Set(); const suggested = new Set();
   for (const label of labels || []) {
     const entry = matrix[label];
     if (!entry) continue;
@@ -42,22 +40,45 @@ function surfacesForLabels(labels, matrix) {
   return { required: [...required].sort(), suggested: [...suggested].sort() };
 }
 
-function validate(input) {
-  let matrix;
-  try { matrix = loadMatrix(); }
-  catch (error) {
-    return { ok: true, violations: [], found: false, advisory: `doc-coverage matrix not loadable: ${error.message}` };
+function parseDocBlock(body) {
+  const lines = (body || '').split('\n');
+  let inBlock = false; const entries = {};
+  for (const line of lines) {
+    if (!inBlock) {
+      if (/^\s*doc-coverage\s*:/i.test(line)) { inBlock = true; continue; }
+    } else {
+      if (/^\S/.test(line)) break;
+      const m = line.match(/^\s+([^:]+):\s*(.+)/);
+      if (m) entries[m[1].trim()] = m[2].trim();
+    }
   }
-  const expected = surfacesForLabels(input.labels, matrix);
-  if (!expected.required.length && !expected.suggested.length) {
-    return { ok: true, violations: [], advisory: null };
-  }
-  const advisory = [
-    'Doc-coverage advisory:',
-    `  required surfaces: ${expected.required.join(', ') || '(none)'}`,
-    `  suggested surfaces: ${expected.suggested.join(', ') || '(none)'}`,
-  ].join('\n');
-  return { ok: true, violations: [], advisory };
+  return inBlock ? entries : null;
 }
 
-module.exports = { validate, loadMatrix, parseYamlSurfaces, surfacesForLabels };
+function checkBlock(body, labels, matrix) {
+  const expected = surfacesForLabels(labels, matrix);
+  if (!expected.required.length) return [];
+  const block = parseDocBlock(body);
+  if (!block) return [{ rule: 'doc-coverage-missing-block',
+    detail: `COLLABORATOR_HANDOFF missing doc-coverage: block. Required: ${expected.required.join(', ')}` }];
+  return expected.required
+    .filter(s => !Object.keys(block).some(k => k.startsWith(s) || s.startsWith(k)))
+    .map(s => ({ rule: 'doc-coverage-surface-missing',
+      detail: `doc-coverage: required surface "${s}" not found in block` }));
+}
+
+function validate(input) {
+  if (process.env.DOC_COVERAGE_GATE_ADVISORY === '1') {
+    return { ok: true, violations: [], advisory: 'doc-coverage: advisory mode (DOC_COVERAGE_GATE_ADVISORY=1)' };
+  }
+  let matrix;
+  try { matrix = loadMatrix(); }
+  catch (e) { return { ok: true, violations: [], advisory: `doc-coverage: matrix not loadable: ${e.message}` }; }
+  const handoff = (input.comments || []).slice().reverse()
+    .find(c => /(^|\n)\s*(?:##\s*)?COLLABORATOR_HANDOFF\b/i.test(c.body || ''));
+  const body = handoff ? handoff.body : (input.body || '');
+  const violations = checkBlock(body, input.labels, matrix);
+  return { ok: violations.length === 0, violations };
+}
+
+module.exports = { validate, loadMatrix, parseYamlSurfaces, surfacesForLabels, parseDocBlock, checkBlock };

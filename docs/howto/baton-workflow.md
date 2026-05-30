@@ -72,7 +72,16 @@ Role: collaborator
 AC evidence:
 - AC1: <test output or command result>
 - AC2: <file path or CI link>
+
+doc-coverage:
+  <surface-1>: DONE — <evidence or path>
+  <surface-2>: N/A — <reason why not applicable>
 ```
+
+The `doc-coverage:` block is **required** for `lane:code-change` tickets when
+area labels mandate surfaces (see `config/doc-coverage-matrix.yml`). Each line
+lists a required surface path-prefix and its status (`DONE` or `N/A — reason`).
+Set `DOC_COVERAGE_GATE_ADVISORY=1` to revert to advisory mode. Refs #2424.
 
 Wait at least 60 seconds, then create the PR:
 
