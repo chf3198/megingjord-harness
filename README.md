@@ -401,3 +401,7 @@ This table is auto-generated from `package.json` by `npm run docs:compile` (#796
 - [Discussions](https://github.com/chf3198/megingjord-harness/discussions)
 
 > Formerly DevEnv Ops. Codex name rejected due product conflict; Aegis rejected due broad name reuse.
+
+## Cross-team R&D synthesis
+
+For Epics that benefit from multi-team independent perspectives, see [How-to: Run a cross-team R&D synthesis](docs/howto/cross-team-rd-synthesis.md). One-line kickoff: `npm run synthesis:init -- --epic <N>`. Canonical protocol at [instructions/cross-team-rd-synthesis.instructions.md](instructions/cross-team-rd-synthesis.instructions.md). Tier-1 by default; HAMR R2 mailbox is the Tier-2 optimization.
