@@ -38,28 +38,32 @@ function shouldTerminate(stability, ceilingReached) {
   return stable || ceilingReached;
 }
 
+function loadOrInitStability(stabilityPath) {
+  if (fs.existsSync(stabilityPath)) return JSON.parse(fs.readFileSync(stabilityPath, 'utf8'));
+  return { wave_p_values: [], threshold: KS_THRESHOLD, consecutive_required: CONSECUTIVE_REQUIRED };
+}
+
+function computeWaveKs(synthDir, currentWave) {
+  const prev = readWaveDistribution(synthDir, currentWave - 1);
+  const curr = readWaveDistribution(synthDir, currentWave);
+  if (prev.length === 0 || curr.length === 0) return { p_value: 1, ks_statistic: 0, computed: false };
+  return { ...ks2Sample(prev, curr), computed: true };
+}
+
 function snapshot(rdN, opts = {}) {
   if (!rdN || !Number.isInteger(rdN)) throw new Error('--epic <N> required (integer)');
   const root = opts.root || process.cwd();
   const synthDir = path.join(root, 'planning', `synthesis-${rdN}`);
   if (!fs.existsSync(synthDir)) throw new Error(`synthesis-${rdN} does not exist`);
   const stabilityPath = path.join(synthDir, 'stability.json');
-  const stability = fs.existsSync(stabilityPath)
-    ? JSON.parse(fs.readFileSync(stabilityPath, 'utf8'))
-    : { wave_p_values: [], threshold: KS_THRESHOLD, consecutive_required: CONSECUTIVE_REQUIRED };
+  const stability = loadOrInitStability(stabilityPath);
   const pulse = JSON.parse(fs.readFileSync(path.join(synthDir, 'pulse.json'), 'utf8'));
   const currentWave = (stability.wave_p_values?.length || 0) + 1;
-  const prev = readWaveDistribution(synthDir, currentWave - 1);
-  const curr = readWaveDistribution(synthDir, currentWave);
-  let result = { p_value: 1, ks_statistic: 0, computed: false };
-  if (prev.length > 0 && curr.length > 0) {
-    result = { ...ks2Sample(prev, curr), computed: true };
-  }
+  const result = computeWaveKs(synthDir, currentWave);
   if (result.computed) stability.wave_p_values.push(result.p_value);
   fs.writeFileSync(stabilityPath, JSON.stringify(stability, null, 2) + '\n');
   const now = opts.now ? new Date(opts.now) : new Date();
-  const kickoff = new Date(pulse.kickoff);
-  const elapsedHours = (now - kickoff) / MS_PER_HOUR;
+  const elapsedHours = (now - new Date(pulse.kickoff)) / MS_PER_HOUR;
   const ceilingHours = opts.ceilingHours || DEFAULT_CEILING_HOURS;
   const ceilingReached = elapsedHours >= ceilingHours;
   const terminate = shouldTerminate(stability, ceilingReached);
