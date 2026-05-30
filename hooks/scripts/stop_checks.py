@@ -8,7 +8,9 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+import re
 from admin_patterns import required_admin_ops
+from github_role_resolver import derive_roles_from_github, feature_enabled as _resolver_enabled
 from wiki_wisdom import post_merge_checklist
 
 CODE_UNCOMMITTED_EXTS = (".sh", ".js", ".py", ".ts", ".json", ".md")
@@ -25,6 +27,35 @@ ADMIN_STEPS = (
     "  9. gh release create vX.Y.Z\n"
     " 10. gh issue close N"
 )
+
+
+
+_BRANCH_TICKET_RE = re.compile(r"^[a-z]+/(\d+)-")
+
+
+def ticket_from_branch(branch: str | None) -> int | None:
+    """Extract issue number from branch name like fix/2456-slug."""
+    if not branch:
+        return None
+    m = _BRANCH_TICKET_RE.match(branch)
+    return int(m.group(1)) if m else None
+
+
+def effective_roles(state_roles: dict, branch: str | None) -> dict:
+    """Resolve effective roles. When feature flag set, GitHub-derived overrides
+    local-state. Falls back to local-state on offline or feature-off (#2456)."""
+    if not _resolver_enabled():
+        return state_roles
+    ticket_n = ticket_from_branch(branch)
+    if ticket_n is None:
+        return state_roles
+    derived = derive_roles_from_github(ticket_n)
+    if derived is None:
+        return state_roles
+    # Merge: derived roles win on overlap; preserve any local keys derived doesn't track
+    merged = dict(state_roles)
+    merged.update(derived)
+    return merged
 
 
 def check_uncommitted(
