@@ -8,6 +8,7 @@ import { mailboxRead, mailboxWrite } from './routes/mailbox';
 import { quota } from './routes/quota';
 import { cacheStats } from './routes/cache-stats';
 import { substrateHealth } from './routes/substrate-health';
+import { mergeClaimAcquire, mergeClaimRelease, mergeClaimStatus } from './routes/merge-claim';
 import { scheduled as scheduledHandler } from './scheduled';
 
 export interface Env {
@@ -48,6 +49,18 @@ export default {
       else if (url.pathname === '/mailbox/read' && m === 'GET') res = await mailboxRead(request, env);
       else if (url.pathname === '/mailbox/write' && m === 'POST') res = await mailboxWrite(request, env);
       else if (url.pathname === '/quota' && m === 'GET') res = await quota(env);
+      else if (url.pathname.startsWith('/merge-claim/acquire/') && m === 'POST') {
+        const ticketN = url.pathname.slice('/merge-claim/acquire/'.length);
+        res = await mergeClaimAcquire(ticketN, request, env);
+      }
+      else if (url.pathname.startsWith('/merge-claim/release/') && m === 'POST') {
+        const claimId = url.pathname.slice('/merge-claim/release/'.length);
+        res = await mergeClaimRelease(claimId, request, env);
+      }
+      else if (url.pathname.startsWith('/merge-claim/status/') && m === 'GET') {
+        const ticketN = url.pathname.slice('/merge-claim/status/'.length);
+        res = await mergeClaimStatus(ticketN, env);
+      }
       else if (url.pathname === '/cache-stats' && m === 'POST') res = await cacheStats(request, env);
       else if (url.pathname === '/substrate-health' && m === 'POST') res = await substrateHealth(request, env);
       else res = notFound();
