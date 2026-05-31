@@ -1,0 +1,83 @@
+# Antigravity Direct-Main Guard — #2484 (Epic #2362 Phase-2).
+# Server-side companion to client-side guard from #2471.
+# Fires on every push to main; detects Antigravity-team commits that bypassed
+# PR flow; posts advisory to Epic #2362 + appends incident to incidents.jsonl.
+# Advisory-only: no revert, no block. AC5 escalation path via Epic #2362.
+name: antigravity-direct-main-guard
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+  issues: write
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Detect direct Antigravity commits
+        id: detect
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const AG_RE = /\bantigravity\b/i;
+            const APOLLO_RE = /\bapollo\s+(?:mason|harper|reyes|vale)\b/i;
+            const PR_SQUASH_RE = /\(#\d+\)\s*$/;
+            const findings = [];
+            for (const c of (context.payload.commits || [])) {
+              const msg = c.message || '';
+              const name = (c.author || {}).name || '';
+              if (!AG_RE.test(msg) && !APOLLO_RE.test(name) && !APOLLO_RE.test(msg)) continue;
+              const subj = msg.split('\n')[0];
+              if (PR_SQUASH_RE.test(subj)) {
+                core.info(`AG via PR OK: ${c.id.slice(0,8)}`); continue;
+              }
+              findings.push({ sha: c.id.slice(0,8), author: name, subject: subj });
+            }
+            if (findings.length === 0) { core.info('no direct AG commits'); return; }
+            core.setOutput('findings', JSON.stringify(findings));
+            core.setOutput('detected', 'true');
+            core.warning(`${findings.length} direct Antigravity commit(s) on main`);
+      - name: Append events to incidents.jsonl
+        if: steps.detect.outputs.detected == 'true'
+        env:
+          FINDINGS: ${{ steps.detect.outputs.findings }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os
+          from datetime import datetime, timezone
+          ts = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+          findings = json.loads(os.environ['FINDINGS'])
+          with open('incidents.jsonl', 'a') as fh:
+            for f in findings:
+              fh.write(json.dumps({'ts': ts, 'version': 3,
+                'service': 'antigravity-direct-main-guard',
+                'event': 'direct-main-commit',
+                'pattern_id': 'antigravity-commit-on-main', 'data': f}) + '\n')
+          print(f'appended {len(findings)} event(s)')
+          PYEOF
+          git config user.email 'actions@github.com'
+          git config user.name 'GitHub Actions'
+          git add incidents.jsonl
+          git diff --cached --quiet || git commit -m '[it-ops] antigravity-direct-main-guard: append incidents'
+          git push
+      - name: Post advisory to Epic #2362
+        if: steps.detect.outputs.detected == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          FINDINGS: ${{ steps.detect.outputs.findings }}
+        with:
+          script: |
+            const findings = JSON.parse(process.env.FINDINGS);
+            const lines = findings.map(f =>
+              `- \`${f.sha}\` author=\`${f.author}\` subject=\`${f.subject}\``
+            );
+            const body = '## Antigravity Direct-Main Advisory\n\n'
+              + 'Server-side guard detected direct commit(s) to main '
+              + 'by Antigravity team (no PR).\n\n'
+              + lines.join('\n')
+              + '\n\n_Advisory. See Epic #2362 escalation path. #2484 AC5._';
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: 2362, body,
+            });
+            core.info('advisory posted to #2362');
