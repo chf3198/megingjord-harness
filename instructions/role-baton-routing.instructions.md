@@ -309,3 +309,23 @@ When the GitHub-derived role resolver (#2456, feature-flagged via `MEGINGJORD_DE
 Manager: `role-manager-execution` | Collaborator: `role-collaborator-execution`
 Admin: `role-admin-execution` | Consultant: `role-consultant-critique`
 Orchestration: `role-baton-orchestrator`
+
+
+## Operator decision routing (#2509)
+
+When the operator (the AI agent running the baton) faces a routine yes/no dev decision (file follow-on ticket Y/N? two-ticket-or-one? accept fleet-rater verdict?), the DEFAULT routing is:
+
+1. Route to fleet decision oracle: `node scripts/global/fleet-decision-oracle.js` via `decideOnce(question, opts)`
+2. Fleet returns `{verdict: approve|reject|partial|inconclusive, rationale, model_used, escalate_to_client: bool}`
+3. If `escalate_to_client` is true (verdict inconclusive OR fleet unreachable) → THEN ask client
+4. Otherwise → operator executes per verdict; no client touch needed
+
+**Why:** per the harness's operator-identity contract (`instructions/operator-identity-context.instructions.md`), the client is design + UAT only. Asking the client to adjudicate routine dev decisions is governance-misalignment. The fleet rater (free, qwen-7b at ~30s) is the correct decision substrate.
+
+**When NOT to use fleet:**
+- Design direction (new architecture, scope expansion)
+- UAT confirmation (does the shipped behavior match user expectation)
+- Budget decisions (paid-provider lane authorization)
+- Memory has prior client preference on the specific class
+
+**Memory anchor:** `feedback_route_decisions_to_fleet_not_client` (operator-personal).
