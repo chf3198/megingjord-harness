@@ -94,6 +94,7 @@ source deploys to all three. See [`docs/howto/installation.md`](howto/installati
 ## Related documents
 
 - `docs/howto/installation.md` — install walkthrough, two-layer model
+- `docs/howto/sandbox-worktree-governance.md` — worktree lifecycle taxonomy, evidence checkpoints, and safe cleanup rules
 - `docs/HELP-GUIDELINES.md` — HELP panel UX patterns
 - `docs/DECISIONS.md` — architecture decision records; `docs/STYLE-GUIDE.md` — terminology
 - `research/adr/` — full ADR set

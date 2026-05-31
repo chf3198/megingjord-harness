@@ -9,7 +9,7 @@ Use ticket-linked feature, fix, or hotfix branches for implementation work.
 - `sandbox/codex`
 - `sandbox/claude-code`
 
-## Session Start
+## Session Start Evidence
 
 Before implementation, refresh the launcher and move to a ticket branch:
 
@@ -17,59 +17,76 @@ Before implementation, refresh the launcher and move to a ticket branch:
 bash scripts/worktree-session-start.sh <copilot|codex|claude-code> feat/<issue#>-<slug>
 ```
 
-## Audit Commands
+Record this evidence at session start:
+- `git worktree list` output.
+- Branch name follows `feat/<N>-...` or `fix/<N>-...`.
+- Ticket linkage exists before edits (`#N`).
 
-Run the full fleet audit before releases or governance reviews:
+## Stale-Worktree Taxonomy
+
+Use inventory and governance outputs as classification evidence.
+
+| State | Meaning | Operator action |
+|---|---|---|
+| `keep-main` | Canonical operator checkout | Never remove. |
+| `keep-active` | Clean, unmerged, ticket-aligned worktree | Keep until PR and closeout complete. |
+| `keep-locked` | Owned by another orchestrator or lease lock | Do not modify or remove. |
+| `review-dirty` | Local modifications exist | Quarantine or rescue before cleanup. |
+| `review-detached` | Detached HEAD; ticket ownership unclear | Classify manually before deletion. |
+| `remove-after-merge` | Branch head merged to `origin/main` and clean | Eligible for safe cleanup after evidence checks. |
+| `prune-metadata` | Git metadata is stale | Run `git worktree prune`; no branch deletion implied. |
+
+`behind main` alone is warning evidence, not safe-removal evidence.
+
+## Audit Commands
 
 ```bash
 npm run governance:worktrees
-```
-
-Run a target-specific audit when validating one runtime without being blocked by
-another team's launcher freshness:
-
-```bash
 node scripts/global/worktree-governance-audit.js --target=codex --json
 ```
 
-Valid targets are `copilot`, `codex`, and `claude-code`. The default audit still
-checks every launcher branch and should remain the release-quality signal.
+Valid targets are `copilot`, `codex`, and `claude-code`.
 
-## Coordination View
+## Cleanup vs Quarantine vs Rescue
 
-Use the read-only coordination view before opening VS Code on a multi-team
-workspace:
+Decision rules:
+- Safe cleanup: `remove-after-merge`, clean worktree, closed lease, merged branch.
+- Quarantine: `review-dirty` or `review-detached` with unclear ownership.
+- Rescue: preserve valuable local changes on a rescue branch before cleanup.
+
+Never delete worktrees based only on stale age or behind count.
+
+## Coordination and Handoff Evidence
+
+Use the read-only coordination view:
 
 ```bash
 node scripts/global/cross-team-coordination-view.js --json
-```
-
-Write a static report for dashboard ingestion or review packets:
-
-```bash
 node scripts/global/cross-team-coordination-view.js --json --out .dashboard/cross-team-coordination.json
 ```
 
-The report separates active leases, stale leases, conflicts, and cleanup
-candidates. Treat active leases as owned by their ticket holder. Treat cleanup
-candidates as plan-only until their owning ticket has merged and its lease is
-closed.
+Required evidence checkpoints:
+- Handoff: inventory/coordination snapshot plus lease status.
+- Post-merge: PR/merge proof and lease close event.
+- Scheduled audit: `npm run governance:worktrees` output and stale-lease resolution.
+- Closeout: reason each removed worktree met safe-cleanup criteria.
 
 ## Branch Cleanup (dry-run only)
 
-After a sprint or release, local branches that are merged or have closed PRs
-accumulate. Run the branch cleanup planner to identify candidates:
-
 ```bash
 npm run cleanup:branches
-# or with JSON output:
 npm run cleanup:branches -- --json
 ```
 
 Three-team safety guarantees:
-- **sandbox/** launcher branches are never flagged.
-- Branches with an active lease entry are treated as owned by their ticket holder and skipped.
-- All output is **plan-only**. Listed `git branch -d` commands must be run manually after review.
+- `sandbox/*` launcher branches are never cleanup candidates.
+- Active leases are treated as owned and skipped.
+- Output is plan-only; execute removal commands only after review.
 
-For orphaned lease entries (branch deleted, lease not closed), the plan prints
-the ticket number and the `cross-team-lease.js close` command to run.
+## Related Governance References
+
+- `instructions/sandbox-worktree-governance.instructions.md`
+- `docs/worktree-substrate-isolation.md`
+- `scripts/global/worktree-inventory.js`
+- `scripts/global/worktree-governance-audit.js`
+- `scripts/global/worktree-cleanup-plan.js`
