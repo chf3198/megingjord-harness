@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "governance-decision-policy",
+  "version": 1,
+  "title": "Megingjord governance decision policy",
+  "description": "Per-transition x per-lane x per-runtime-profile check-set resolution. See research/governance-decision-engine-design-2026-05-30.md.",
+  "type": "object",
+  "required": [
+    "version",
+    "transitions",
+    "check_sets",
+    "runtime_profiles"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "transitions": {
+      "type": "object",
+      "properties": {
+        "manager_to_collaborator": {
+          "$ref": "#/$defs/transition"
+        },
+        "collaborator_to_admin": {
+          "$ref": "#/$defs/transition"
+        },
+        "admin_to_consultant": {
+          "$ref": "#/$defs/transition"
+        },
+        "consultant_to_done": {
+          "$ref": "#/$defs/transition"
+        }
+      },
+      "required": [
+        "manager_to_collaborator",
+        "collaborator_to_admin",
+        "admin_to_consultant",
+        "consultant_to_done"
+      ]
+    },
+    "check_sets": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          }
+        }
+      }
+    },
+    "runtime_profiles": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "object",
+          "properties": {
+            "all_checks_blocking": {
+              "type": "boolean"
+            },
+            "advisory_after": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "skip": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "transition": {
+      "type": "object",
+      "required": [
+        "default_check_set"
+      ],
+      "properties": {
+        "default_check_set": {
+          "type": "string"
+        },
+        "lane_overrides": {
+          "type": "object",
+          "patternProperties": {
+            "^lane:[a-z-]+$": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "default_policy": {
+    "transitions": {
+      "manager_to_collaborator": {
+        "default_check_set": "full",
+        "lane_overrides": {
+          "lane:docs-research": "docs",
+          "lane:trivial": "trivial",
+          "lane:no-code-remediation": "no-code"
+        }
+      },
+      "collaborator_to_admin": {
+        "default_check_set": "full",
+        "lane_overrides": {
+          "lane:docs-research": "docs",
+          "lane:trivial": "trivial"
+        }
+      },
+      "admin_to_consultant": {
+        "default_check_set": "full",
+        "lane_overrides": {
+          "lane:docs-research": "docs",
+          "lane:trivial": "trivial",
+          "lane:no-code-remediation": "no-code"
+        }
+      },
+      "consultant_to_done": {
+        "default_check_set": "full",
+        "lane_overrides": {
+          "lane:docs-research": "docs",
+          "lane:trivial": "trivial",
+          "lane:no-code-remediation": "no-code"
+        }
+      }
+    },
+    "check_sets": {
+      "full": [
+        "signer-fidelity",
+        "test-evidence",
+        "doc-coverage",
+        "merge-evidence",
+        "lint-required"
+      ],
+      "docs": [
+        "signer-fidelity",
+        "doc-coverage",
+        "lint-md"
+      ],
+      "trivial": [
+        "signer-fidelity",
+        "lint-required"
+      ],
+      "no-code": [
+        "signer-fidelity"
+      ]
+    },
+    "runtime_profiles": {
+      "ci": {
+        "all_checks_blocking": true
+      },
+      "local": {
+        "advisory_after": [
+          "doc-coverage"
+        ]
+      },
+      "offline": {
+        "skip": [
+          "merge-evidence"
+        ]
+      }
+    }
+  }
+}
