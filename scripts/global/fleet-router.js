@@ -8,6 +8,10 @@ const fs = require('node:fs');
 const DEFAULT_DEVICES = path.resolve(__dirname, '..', '..', 'inventory', 'devices.json');
 const DEFAULT_PROFILE = path.resolve(__dirname, '..', '..', 'inventory', 'fleet-latency-profile.json');
 
+const DEFAULT_TTFT_P99_S = 999;
+const DEFAULT_TOTAL_P99_S = 9999;
+const DEFAULT_TIMEOUT_S = 600;
+
 const TIER_LOCAL = 0;
 const TIER_FLEET = 1;
 const TIER_CLOUD_FREE = 2;
@@ -43,9 +47,9 @@ function candidatesFromInventory({ devices, profile, max_tier = TIER_CLOUD_CHEAP
         model,
         tier,
         priority: dev.routing && dev.routing.priority || 0,
-        ttft_p99_s: lat.ttft_p99_s || 999,
-        total_p99_s: lat.total_p99_s || 9999,
-        timeout_recommendation_s: lat.timeout_recommendation_s || 600,
+        ttft_p99_s: lat.ttft_p99_s || DEFAULT_TTFT_P99_S,
+        total_p99_s: lat.total_p99_s || DEFAULT_TOTAL_P99_S,
+        timeout_recommendation_s: lat.timeout_recommendation_s || DEFAULT_TIMEOUT_S,
       });
     }
   }
