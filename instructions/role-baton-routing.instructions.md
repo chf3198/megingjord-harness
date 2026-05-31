@@ -285,8 +285,6 @@ When a MANAGER_HANDOFF involves writing files consumed by another team's runtime
 the `cross_runtime_writes` field is required and must include `target_team_sign_off`
 before the baton advances. See `instructions/cross-team-artifact-write.instructions.md`.
 
-
-
 ## Offline contract for derive_roles_from_github (#2460, Epic #2451 Move 5)
 
 When the GitHub-derived role resolver (#2456, feature-flagged via `MEGINGJORD_DERIVE_ROLES_FROM_GH`) cannot reach GitHub:
