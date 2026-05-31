@@ -406,6 +406,13 @@ npm run deploy:both:apply
 
 > Formerly DevEnv Ops. Codex name rejected due product conflict; Aegis rejected due broad name reuse.
 
+
+## /xteam — cross-runtime synthesis slash command
+
+Kick off cross-team R&D synthesis across all 4 AI runtimes with a single slash command. After [installing the MCP server per runtime](docs/howto/xteam-mcp-install.md), type `/xteam <epic-N>` or `/xteam-create <description>` in any team's chat.
+
+See [docs/howto/cross-team-rd-synthesis.md](docs/howto/cross-team-rd-synthesis.md) for the full workflow.
+
 ## Cross-team R&D synthesis
 
 For Epics that benefit from multi-team independent perspectives, see [How-to: Run a cross-team R&D synthesis](docs/howto/cross-team-rd-synthesis.md). One-line kickoff: `npm run synthesis:init -- --epic <N>`. Canonical protocol at [instructions/cross-team-rd-synthesis.instructions.md](instructions/cross-team-rd-synthesis.instructions.md). Tier-1 by default; HAMR R2 mailbox is the Tier-2 optimization.
