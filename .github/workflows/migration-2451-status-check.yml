@@ -1,0 +1,116 @@
+name: Epic 2451 Migration Status Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Weekly on Monday at 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-migration-flags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check feature flag readiness
+        id: flags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, subprocess
+          from datetime import datetime, timezone, timedelta
+
+          FLAGS = [
+              'DERIVE_ROLES_FROM_GH',
+              'BATON_EVENT_LOG',
+              'MERGE_CLAIM',
+          ]
+
+          # Check incidents.jsonl for false-positives on role resolver
+          cutoff = datetime.now(timezone.utc) - timedelta(days=14)
+          fp_count = 0
+          try:
+              with open('incidents.jsonl') as f:
+                  for line in f:
+                      line = line.strip()
+                      if not line:
+                          continue
+                      try:
+                          entry = json.loads(line)
+                          pid = entry.get('pattern_id', '')
+                          ts_str = entry.get('timestamp', '')
+                          is_gh_resolver = pid in (
+                              'derive-roles-gh-false-positive',
+                              'role-resolver-degraded',
+                          )
+                          if is_gh_resolver and ts_str:
+                              ts = datetime.fromisoformat(
+                                  ts_str.rstrip('Z') + '+00:00'
+                              )
+                              if ts >= cutoff:
+                                  fp_count += 1
+                      except (json.JSONDecodeError, ValueError):
+                          continue
+          except FileNotFoundError:
+              pass
+
+          flag_status = {f: 'unknown' for f in FLAGS}
+
+          state_file = '.github/migration-2451-state.json'
+          zero_weeks = 0
+          try:
+              with open(state_file) as f:
+                  state = json.load(f)
+              zero_weeks = state.get('consecutive_zero_fp_weeks', 0)
+          except (FileNotFoundError, json.JSONDecodeError):
+              pass
+
+          if fp_count == 0:
+              zero_weeks += 1
+          else:
+              zero_weeks = 0
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'fp_count={fp_count}\n')
+              f.write(f'zero_weeks={zero_weeks}\n')
+              f.write(f'flag_status={json.dumps(flag_status)}\n')
+          PYEOF
+
+      - name: Post status comment to ticket
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FP_COUNT: ${{ steps.flags.outputs.fp_count }}
+          ZERO_WEEKS: ${{ steps.flags.outputs.zero_weeks }}
+        run: |
+          DATE=$(date -u '+%Y-%m-%d')
+          BODY="## Migration #2451 Weekly Status — $DATE
+
+Feature flags monitored: DERIVE_ROLES_FROM_GH, BATON_EVENT_LOG, MERGE_CLAIM
+
+False-positive resolver incidents (last 14 days): $FP_COUNT
+Consecutive zero-FP weeks: $ZERO_WEEKS / 2 required
+
+Status: $( [ "$FP_COUNT" -eq 0 ] && echo 'CLEAN' || echo 'FP_DETECTED' )
+Refs #2480 Epic #2451"
+          gh issue comment 2480             --repo chf3198/megingjord-harness             --body "$BODY"
+
+      - name: Auto-file production enable ticket if ready
+        if: ${{ fromJSON(steps.flags.outputs.zero_weeks) >= 2 }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZERO_WEEKS: ${{ steps.flags.outputs.zero_weeks }}
+        run: |
+          gh issue create \
+            --repo chf3198/megingjord-harness \
+            --title 'enable Move 1 production: Epic #2451 feature flags' \
+            --body "Auto-filed by migration-2451-status-check.yml.
+
+$ZERO_WEEKS consecutive weeks of zero false-positive resolver incidents.
+Ready to enable DERIVE_ROLES_FROM_GH, BATON_EVENT_LOG, MERGE_CLAIM in production.
+
+Refs #2480 Epic #2451" \
+            --label 'type:task,priority:P1,area:governance'
