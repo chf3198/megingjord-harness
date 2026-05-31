@@ -89,6 +89,12 @@ npm test
 npm run deploy:both:apply
 ```
 
+## Env-backed credentials
+
+- Copy `.env.example` to `.env` for local resource credentials.
+- Tavily MCP must keep the secret only in `TAVILY_API_KEY`; do not inline Tavily keys in MCP URLs or tracked config.
+- Verify env-backed Tavily wiring with `npm run governance:credentials-env`.
+
 ## Research-first gate notes
 
 - Research-first Epic detection is label-first: `phase-gate:research-first` on `type:epic` tickets.
@@ -163,6 +169,7 @@ npm run deploy:both:apply
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
+| `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
 | `governance:cross-team-check:test` | `node --test tests/cross-team-contract-check.spec.js` |
 | `governance:cross-team-lease-dispatch:test` | `node --test tests/cross-team-lease-dispatch.spec.js` |
@@ -360,9 +367,6 @@ npm run deploy:both:apply
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
 <!-- /docs -->
-
-This table is auto-generated from `package.json` by `npm run docs:compile` (#796). Do not edit by hand inside the fenced region — CI fails when README diverges from sources.
-
 ## Token telemetry reconciliation configuration
 
 - Run `npm run routing:reconcile` to generate `logs/token-telemetry-reconcile.json`.
