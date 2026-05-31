@@ -112,3 +112,34 @@ test('#1500: malformed items silently skipped (no throw)', () => {
   expect(plan.violations).toHaveLength(0);
   expect(plan.passed).toHaveLength(0);
 });
+
+// #2372: deferred-final form tests
+test('#2372 AC3: deferred-final token in merged PR body treated as passed', () => {
+  const plan = reconciler.reconcile([
+    {
+      issue: issue(999),
+      mergedPRRefs: [{ number: 888, body: 'merge-evidence-deferred-final: #999\nRefs #999' }],
+    },
+  ]);
+  expect(plan.passed).toHaveLength(1);
+  expect(plan.violations).toHaveLength(0);
+});
+
+test('#2372 AC3: hasDeferredFinalEvidence returns false for wrong issue number', () => {
+  const refs = [{ body: 'merge-evidence-deferred-final: #998' }];
+  expect(reconciler.hasDeferredFinalEvidence(refs, 999)).toBe(false);
+  expect(reconciler.hasDeferredFinalEvidence(refs, 998)).toBe(true);
+});
+
+test('#2372 AC3: hasDeferredFinalEvidence is case-insensitive', () => {
+  const refs = [{ body: 'MERGE-EVIDENCE-DEFERRED-FINAL: #42' }];
+  expect(reconciler.hasDeferredFinalEvidence(refs, 42)).toBe(true);
+  expect(reconciler.hasDeferredFinalEvidence(refs, 43)).toBe(false);
+});
+
+test('#2372 AC3: empty mergedPRRefs with no body = violation (cannot detect)', () => {
+  const plan = reconciler.reconcile([
+    { issue: issue(888), mergedPRRefs: [] },
+  ]);
+  expect(plan.violations).toHaveLength(1);
+});

@@ -45,7 +45,7 @@ jobs:
               });
               items.push({
                 issue: { ...issue, state: 'closed' },
-                mergedPRRefs: prs.map(p => ({ number: p.number })),
+                mergedPRRefs: prs.map(p => ({ number: p.number, body: p.body || '' })),
               });
             }
             const plan = reconciler.reconcile(items, { batchSize });

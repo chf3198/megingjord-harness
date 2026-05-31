@@ -3,25 +3,38 @@
 // items through the merge-evidence rule and returns a remediation plan.
 // Pure(ish): callers provide GitHub data; this module produces decisions.
 // The caller (cron workflow) applies labels and posts comments.
+// Refs #2372: recognizes merge-evidence-deferred-final form as evidence-present.
 
 const rule = require('./megalint/merge-evidence.js');
 
 const DEFAULT_BATCH_SIZE = 20;
 const COMMENT_MARKER = '<!-- merge-evidence-reconciler -->';
 const VIOLATION_LABEL = 'governance:close-without-merge';
+const DEFERRED_FINAL_TOKEN = 'merge-evidence-deferred-final:';
+
+// Returns true if any PR body contains the deferred-final token for issueNumber.
+// mergedPRRefs entries should include a `body` property (empty string if absent).
+function hasDeferredFinalEvidence(mergedPRRefs, issueNumber) {
+  const token = `${DEFERRED_FINAL_TOKEN} #${issueNumber}`.toLowerCase();
+  return (mergedPRRefs || []).some(pr => (pr.body || '').toLowerCase().includes(token));
+}
 
 function classifyItem(item, buckets) {
   if (!item || typeof item.issue !== 'object') return;
   const issue = item.issue;
+  const refs = item.mergedPRRefs || [];
   const result = rule.validate({
     state: issue.state,
     labels: (issue.labels || []).map(l => typeof l === 'string' ? l : l.name),
-    mergedPRRefs: item.mergedPRRefs || [],
+    mergedPRRefs: refs,
   });
   const entry = { number: issue.number, title: issue.title };
   if (result.skipped) buckets.skipped.push({ ...entry, reason: result.skipped });
-  else if (!result.ok) buckets.violations.push({ ...entry, violations: result.violations });
-  else buckets.passed.push({ ...entry, mergedPRCount: result.mergedPRCount });
+  else if (!result.ok && !hasDeferredFinalEvidence(refs, issue.number)) {
+    buckets.violations.push({ ...entry, violations: result.violations });
+  } else {
+    buckets.passed.push({ ...entry, mergedPRCount: result.mergedPRCount || 0 });
+  }
 }
 
 function reconcile(items, opts = {}) {
@@ -50,5 +63,6 @@ function buildComment(item) {
 }
 
 module.exports = {
-  reconcile, buildComment, DEFAULT_BATCH_SIZE, COMMENT_MARKER, VIOLATION_LABEL,
+  reconcile, buildComment, hasDeferredFinalEvidence,
+  DEFAULT_BATCH_SIZE, COMMENT_MARKER, VIOLATION_LABEL, DEFERRED_FINAL_TOKEN,
 };
