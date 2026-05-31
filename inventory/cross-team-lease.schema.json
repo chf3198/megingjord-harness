@@ -29,7 +29,7 @@
         "properties": {
           "ticket": { "type": "integer", "minimum": 1 },
           "team": {
-            "enum": ["codex", "copilot", "claude-code", "openclaw", "operator"]
+            "enum": ["codex", "copilot", "claude-code", "openclaw", "operator", "antigravity"]
           },
           "role": {
             "enum": ["manager", "collaborator", "admin", "consultant"]
