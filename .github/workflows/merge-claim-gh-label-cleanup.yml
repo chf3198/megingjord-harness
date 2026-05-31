@@ -1,0 +1,52 @@
+# Merge-claim GitHub-label cleanup — Tier-1 fallback TTL enforcement.
+# Removes stale merge-claim:held:<team> labels after TTL_MINUTES (default 5).
+# Companion to GitHub-label fallback mode in merge_claim_client.py #2479.
+name: merge-claim-gh-label-cleanup
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      ttl_minutes:
+        description: 'TTL in minutes (default 5)'
+        default: '5'
+permissions:
+  issues: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove stale merge-claim labels
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const PREFIX = 'merge-claim:held:';
+            const ttlMin = parseInt(core.getInput('ttl_minutes') || '5', 10);
+            const TTL_MS = ttlMin * 60 * 1000;
+            const now = Date.now();
+            const allLabels = await github.paginate(
+              github.rest.issues.listLabelsForRepo,
+              { ...context.repo, per_page: 100 }
+            );
+            const claimLabels = allLabels.filter(l => l.name.startsWith(PREFIX));
+            if (!claimLabels.length) { core.info('no merge-claim labels'); return; }
+            for (const label of claimLabels) {
+              const issues = await github.paginate(github.rest.issues.listForRepo, {
+                ...context.repo, labels: label.name, state: 'open', per_page: 100
+              });
+              for (const issue of issues) {
+                const events = await github.rest.issues.listEvents({
+                  ...context.repo, issue_number: issue.number, per_page: 100
+                });
+                const ev = events.data.filter(e =>
+                  e.event === 'labeled' && e.label?.name === label.name
+                ).pop();
+                if (!ev) continue;
+                const age = now - new Date(ev.created_at).getTime();
+                if (age < TTL_MS) continue;
+                await github.rest.issues.removeLabel({
+                  ...context.repo, issue_number: issue.number, name: label.name
+                });
+                core.info(`removed stale ${label.name} from #${issue.number} (${Math.round(age/60000)}m)`);
+              }
+            }
