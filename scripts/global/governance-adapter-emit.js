@@ -8,7 +8,7 @@ const { validate } = require('./governance-manifest-validate');
 const root = path.resolve(__dirname, '..', '..');
 const manifestPath = path.join(root, 'inventory', 'governance-manifest.sample.json');
 const defaultOutRoot = path.join(root, 'generated', 'governance-adapters');
-const targets = ['copilot', 'cline', 'claude-code', 'continue'];
+const targets = ['copilot', 'cline', 'claude-code', 'continue', 'antigravity'];
 
 function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
 function write(file, content) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, `${content}\n`); }
@@ -34,6 +34,7 @@ function targetPath(target, unit, outRoot = defaultOutRoot) {
   if (target === 'cline') return path.join(base, '.clinerules', `${unit.id}.md`);
   if (target === 'claude-code') return path.join(base, 'CLAUDE.md');
   if (target === 'continue') return path.join(base, '.continue', 'rules', `${unit.id}.md`);
+  if (target === 'antigravity') return path.join(base, '.antigravity', `${unit.id}.md`);
   throw new Error(`unsupported target: ${target}`);
 }
 function frontmatter(target, unit) {

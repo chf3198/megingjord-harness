@@ -7,7 +7,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
 const schemaPath = path.join(root, 'inventory', 'governance-manifest.schema.json');
 const defaultManifestPath = path.join(root, 'inventory', 'governance-manifest.sample.json');
-const allowedTargets = new Set(['copilot', 'cline', 'claude-code', 'continue']);
+const allowedTargets = new Set(['copilot', 'cline', 'claude-code', 'continue', 'antigravity']);
 const allowedPriority = new Set(['P0', 'P1', 'P2', 'P3']);
 
 function fail(msg) { process.stderr.write(`manifest-validate: ${msg}\n`); }
