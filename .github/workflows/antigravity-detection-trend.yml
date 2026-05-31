@@ -1,0 +1,132 @@
+name: Antigravity Detection Trend Monitor
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Weekly on Monday at 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: write
+
+jobs:
+  check-trend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count antigravity incidents (last 14 days)
+        id: count
+        run: |
+          python3 - << 'PYEOF'
+          import json, os
+          from datetime import datetime, timezone, timedelta
+
+          cutoff = datetime.now(timezone.utc) - timedelta(days=14)
+          count = 0
+          try:
+              with open('incidents.jsonl') as f:
+                  for line in f:
+                      line = line.strip()
+                      if not line:
+                          continue
+                      try:
+                          entry = json.loads(line)
+                          pid = entry.get('pattern_id', '')
+                          ts_str = entry.get('timestamp', '')
+                          if pid == 'antigravity-commit-on-main' and ts_str:
+                              ts = datetime.fromisoformat(
+                                  ts_str.rstrip('Z') + '+00:00'
+                              )
+                              if ts >= cutoff:
+                                  count += 1
+                      except (json.JSONDecodeError, ValueError):
+                          continue
+          except FileNotFoundError:
+              pass
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'count={count}\n')
+          PYEOF
+
+      - name: Load consecutive-zero state
+        id: state
+        run: |
+          STATE_FILE=.github/antigravity-trend-state.json
+          if [ -f "$STATE_FILE" ]; then
+            WEEKS=$(python3 -c "
+          import json
+          with open('$STATE_FILE') as f:
+            d = json.load(f)
+          print(d.get('consecutive_zero_weeks', 0))
+            ")
+          else
+            WEEKS=0
+          fi
+          echo "consecutive_zero_weeks=$WEEKS" >> "$GITHUB_OUTPUT"
+
+      - name: Evaluate thresholds and auto-file tickets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COUNT: ${{ steps.count.outputs.count }}
+          ZERO_WEEKS: ${{ steps.state.outputs.consecutive_zero_weeks }}
+        run: |
+          python3 - << 'PYEOF'
+          import os, subprocess, json
+          from datetime import datetime, timezone
+
+          count = int(os.environ['COUNT'])
+          zero_weeks = int(os.environ['ZERO_WEEKS'])
+
+          if count == 0:
+              zero_weeks += 1
+          else:
+              zero_weeks = 0
+
+          state_file = '.github/antigravity-trend-state.json'
+          with open(state_file, 'w') as f:
+              json.dump({
+                  'consecutive_zero_weeks': zero_weeks,
+                  'last_checked': datetime.now(timezone.utc).isoformat(),
+                  'last_count': count
+              }, f)
+
+          gh_base = ['gh', 'issue', 'create',
+                     '--repo', 'chf3198/megingjord-harness',
+                     '--label', 'type:task,priority:P2,area:governance']
+
+          if zero_weeks >= 4:
+              subprocess.run(gh_base + [
+                  '--title',
+                  'feat: escalate antigravity-guard to blocking mode',
+                  '--body',
+                  (f'Auto-filed by antigravity-detection-trend.yml.\n\n'
+                   f'{zero_weeks} consecutive weeks of zero '
+                   f'antigravity-commit-on-main incidents.\n\n'
+                   f'Refs #2482 Epic #2362'),
+              ], check=False)
+              with open(state_file, 'w') as f:
+                  json.dump({
+                      'consecutive_zero_weeks': 0,
+                      'last_checked': datetime.now(timezone.utc).isoformat(),
+                      'last_count': count
+                  }, f)
+
+          if count > 5:
+              subprocess.run(gh_base + [
+                  '--title',
+                  'review antigravity-detection-pattern',
+                  '--body',
+                  (f'Auto-filed by antigravity-detection-trend.yml.\n\n'
+                   f'{count} antigravity-commit-on-main incidents '
+                   f'in the last 14 days (>5/week).\n\n'
+                   f'Refs #2482 Epic #2362'),
+              ], check=False)
+          PYEOF
+
+      - name: Persist state file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/antigravity-trend-state.json
+          git diff --cached --quiet || git commit -m "chore(it-ops): update antigravity trend state [skip ci]"
+          git push
