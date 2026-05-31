@@ -406,7 +406,6 @@ npm run deploy:both:apply
 
 > Formerly DevEnv Ops. Codex name rejected due product conflict; Aegis rejected due broad name reuse.
 
-
 ## /xteam — cross-runtime synthesis slash command
 
 Kick off cross-team R&D synthesis across all 4 AI runtimes with a single slash command. After [installing the MCP server per runtime](docs/howto/xteam-mcp-install.md), type `/xteam <epic-N>` or `/xteam-create <description>` in any team's chat.
