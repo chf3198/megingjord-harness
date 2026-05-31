@@ -110,7 +110,6 @@ export HAMR_TEAM=claude-code   # or codex, copilot, antigravity
 
 Once Moves 1-3 are steady-state for ≥2 weeks, file the memory anchor cleanup per #2461 — `feedback_state_store_dual_variants` and 7 related anchors are then provably obsolete and should be retired with `superseded-by-#2451` notes.
 
-
 ## Move 3 — Dual-mode merge-claim (HAMR + GitHub-label fallback) (#2479)
 
 `hooks/scripts/merge_claim_client.py` supports two backend modes:
