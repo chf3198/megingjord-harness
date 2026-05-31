@@ -1,89 +1,82 @@
-# How-to: Run a cross-team R&D synthesis
+# Cross-team R&D synthesis — operator howto
 
-Canonical pattern per `instructions/cross-team-rd-synthesis.instructions.md` (v3, shipped #2402).
+Coordinate a research question across multiple AI runtimes (Claude Code, Codex, Copilot, Antigravity, Gemini) on a single Epic, producing per-team perspectives that converge into a unified synthesis.
 
-## When to use
+## Recommended flow (post Epic #2486): /xteam slash command
 
-For an Epic whose scope spans multiple architectural surfaces or whose answers benefit from independent perspectives (security + performance + UX trade-offs). Example: #1105 (3-team R&D for harness convergence) where each team surfaced findings the others missed.
+After installing the megingjord-xteam-mcp server in each runtime (see [xteam-mcp-install.md](xteam-mcp-install.md)), kicking off a synthesis takes ~30 seconds.
 
-## Prerequisites
+### Existing Epic
 
-- The Epic ticket exists in GitHub with `type:epic` label
-- 3-4 AI agent orchestrator teams available (Claude Code, Codex, Copilot, Antigravity)
-- Operator has `~/devenv-ops/` checkout + GitHub credentials (Tier-1 baseline; HAMR R2 is Tier-2 optimization)
+In any team's chat, type:
 
-## Steps
+```
+/xteam <epic-N>
+```
 
-### 1. Scaffold the synthesis tree
+Response: the server claims a role (LEAD if first; PARTICIPANT otherwise) and returns the tailored prompt for that team's perspective. Repeat in 3 more team chats — each gets a different role + prompt automatically.
+
+### Brand-new question (no Epic yet)
+
+```
+/xteam-create <description text, 10+ chars>
+```
+
+The first team to invoke creates the Epic + research child + becomes LEAD. Subsequent teams discover the Epic + become PARTICIPANT.
+
+### Check progress
+
+```
+/xteam-status <epic-N>
+```
+
+Returns `{ticket, leadTeam, status}`.
+
+## How it works
+
+```
+Each /xteam invocation in a team session:
+
+  1. MCP server reads team identity from MEGINGJORD_XTEAM_TEAM env
+  2. Server calls gh CLI to atomic-claim leader label on the Epic
+  3. First claim wins LEAD; later claims yield PARTICIPANT
+  4. Server returns tailored prompt to the chat
+  5. Team agent reads prompt + works in its own context
+  6. Each team writes findings to artifacts/<team>-rd.md
+```
+
+Leader election is GitHub-label-based: `xteam-lead:<team>` on the Epic, with alphabetical tiebreaker on sub-1-second races.
+
+## Per-team perspective lens
+
+| Team | Lens |
+|---|---|
+| claude-code | Reasoning depth + multi-file refactor consequences |
+| codex | OpenAI-ecosystem compatibility + CLI ergonomics |
+| copilot | VS Code + GitHub-native developer experience |
+| antigravity | Gemini long-context + Google Cloud integrations |
+
+Source: `inventory/team-perspectives.json` (extend as new runtimes join).
+
+## Convergence
+
+Each team writes to `artifacts/<team>-rd.md` independently. The LEAD team is responsible for the final synthesis after all teams complete (per Epic #1112 protocol v3).
+
+## Fallback: manual process (legacy)
+
+If the MCP server is unavailable (Phase-1 not deployed yet, or runtime mismatch), the original manual process still works:
 
 ```bash
 npm run synthesis:init -- --epic <N>
+# generates planning/synthesis-<N>/*.md prompt files
+# copy each into the right team chat manually
 ```
 
-Creates `planning/synthesis-<N>/` with:
-- `artifacts/` (per-team Phase-R outputs)
-- `positions/{cc,cp,cx,ag}.md` (per-team append-only logs)
-- `decisions.md` (admin-curated D-IDs)
-- `pulse.json` (kickoff timestamp + admin team via `teams[N % len(teams)]`)
-- `status.md` (current phase + wave)
-- `stability.json` (K-S adaptive termination state)
+This path is preserved for resilience but is no longer the recommended flow.
 
-Override admin via `--admin-team <code>`. Default rotation per v3 §1 (#2394 conclusion).
+## Related
 
-### 2. Dispatch Phase-R prompts
-
-Render the three canonical prompts for each team:
-
-```bash
-node scripts/global/synthesis-prompt-render.js team-prep \
-  --epic_n <N> --team_code cc --team_alias "Orla Harper"
-```
-
-Operator-initiated kickoff per v3 §5 dispatcher (#2393 hybrid recommendation). Lead-team substrate determines lead team per v3 §1.
-
-### 3. Phase-D iterative debate
-
-After Phase-R artifacts land, admin facilitates iterative debate waves. The 6h cron job (`.github/workflows/cross-team-rd-snapshot.yml`) runs `npm run synthesis:snapshot -- --epic <N>` automatically; manual invocation also available.
-
-Each snapshot:
-- Reads wave decision distributions from `decisions.md`
-- Computes K-S 2-sample p-value vs prior wave
-- Appends p-value to `stability.json`
-- Returns `terminate=true` when 3 consecutive p-values < 0.05 OR 24h ceiling elapsed (#2396 conclusion)
-- Exit code 2 signals TERMINATE_SYNTHESIS to the workflow
-
-### 4. Check live status anytime
-
-```bash
-npm run synthesis:status -- --epic <N>
-```
-
-Emits JSON summary (admin, kickoff, phase, wave, elapsed/remaining hours, latest K-S p-value).
-
-### 5. Phase-C closeout
-
-When TERMINATE_SYNTHESIS triggers, lead-team Manager → Admin → Consultant per `instructions/role-baton-routing.instructions.md`. Implementation children for the parent Epic are filed by the lead-team Manager after Phase-C closes.
-
-## Tier-graceful behavior
-
-Per `instructions/harness-goals.instructions.md` Tier-graceful degradation pattern (#2400):
-- Tier 1 default: GitHub Actions schedule + `.gnap/dispatch/<team>/<ts>.json` git-board transport
-- Tier 2 optimization: HAMR R2 mailbox + HAMR cron when `MEGINGJORD_HAMR_DISABLED` is unset
-- The fallback IS the default; the optimization IS the upgrade
-
-## Troubleshooting
-
-| Symptom | Resolution |
-|---|---|
-| Phase-D never terminates | Check `stability.json`; if p-values are consistently > 0.05, decisions are diverging — admin facilitation needed |
-| 24h ceiling triggered before consensus | Re-scope Epic; multi-wave run may be unrealistic at the original complexity |
-| TEAM_RESPONSE signer-fidelity violation at CI | Verify signer alias derives from `inventory/team-model-signatures.json` per the #2370 validator |
-| Snapshot job fails on missing pulse.json | Re-run `npm run synthesis:init -- --epic <N>` |
-
-## References
-
-- `instructions/cross-team-rd-synthesis.instructions.md` — canonical v3 protocol
-- Epic #1112 — productization parent
-- #2393 dispatcher · #2394 admin rotation · #2395 fanout · #2396 termination
-- #2400 tier-graceful pattern · #2370 cross-team-response-fidelity validator
-- `wiki/wisdom/global/concepts/cross-team-rd-synthesis.md` — concept page
+- Epic #2486 (xteam MCP slash-command surface, Phase-1 shipped)
+- Epic #1112 (cross-team R&D protocol v3 — the underlying mechanism)
+- docs/howto/xteam-mcp-install.md (per-runtime install)
+- research/xteam-mcp-design-2026-05-31.md (Phase-0 design rationale)
