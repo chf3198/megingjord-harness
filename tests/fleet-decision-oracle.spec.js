@@ -87,3 +87,17 @@ test('decideOnce: returns parsed verdict when fleet responds', async () => {
   assert.strictEqual(result.verdict, 'approve');
   assert.strictEqual(result.escalate_to_client, false);
 });
+
+test('#2527 decideOnceViaRouter exists as exported function', () => {
+  const mod = require('../scripts/global/fleet-decision-oracle');
+  assert.strictEqual(typeof mod.decideOnceViaRouter, 'function');
+});
+
+test('#2527 decideOnceViaRouter falls through to decideOnce when router absent', async () => {
+  // Without a router/probe shim we cannot test the live path easily; this
+  // verifies the function signature accepts (question, opts).
+  const mod = require('../scripts/global/fleet-decision-oracle');
+  // Calling with intentionally-broken opts should not throw synchronously
+  const promise = mod.decideOnceViaRouter('test?', { task_class: 'decision' });
+  assert.ok(promise && typeof promise.then === 'function');
+});

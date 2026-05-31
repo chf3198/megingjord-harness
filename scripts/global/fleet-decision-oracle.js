@@ -94,3 +94,36 @@ module.exports = {
   decideOnce, parseVerdict, pickModel, timeoutFor, dispatchOllama,
   FAST_MODEL, SLOW_MODEL, DEFAULT_HOST,
 };
+
+// #2527 migration: thin wrapper that consults the router + probe for host/model
+// instead of hardcoded DEFAULT_HOST + FAST_MODEL. Backward-compat: existing
+// decideOnce(question, opts) unchanged; new decideOnceViaRouter(question, opts)
+// added.
+async function decideOnceViaRouter(question, opts = {}) {
+  let router, probe;
+  try {
+    router = require('./fleet-router');
+    probe = require('./fleet-probe');
+  } catch {
+    return decideOnce(question, opts);  // graceful: router not present
+  }
+  const route = await router.routeForTask(opts.task_class || 'decision', {
+    max_tier: opts.max_tier,
+    current_load_map: opts.current_load_map,
+  });
+  if (!route) return decideOnce(question, opts);  // no candidate, fall back
+  const probed = await probe.probeHostModel(route.host, route.model, { httpImpl: opts.httpImpl });
+  if (probed.decision === 'UNAVAILABLE' || probed.decision === 'ROUTE_ELSEWHERE') {
+    for (const fallback of (route.fallback_chain || [])) {
+      const altProbed = await probe.probeHostModel(fallback.host, fallback.model, { httpImpl: opts.httpImpl });
+      if (altProbed.decision === 'AVAILABLE' || altProbed.decision === 'WAIT') {
+        return decideOnce(question, { ...opts, host: fallback.host, tier: 'fast' });
+      }
+    }
+    return { verdict: 'inconclusive', rationale: 'all fleet candidates UNAVAILABLE',
+             model_used: 'none', escalate_to_client: true };
+  }
+  return decideOnce(question, { ...opts, host: route.host, tier: 'fast' });
+}
+
+module.exports.decideOnceViaRouter = decideOnceViaRouter;
