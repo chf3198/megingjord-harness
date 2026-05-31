@@ -3,8 +3,10 @@
 
 const { execFileSync } = require('node:child_process');
 
+const GH_CLI_TIMEOUT_MS = 10000;
+
 function shell(args) {
-  return execFileSync('gh', args, { encoding: 'utf8', timeout: 10000 });
+  return execFileSync('gh', args, { encoding: 'utf8', timeout: GH_CLI_TIMEOUT_MS });
 }
 
 async function viewLabels(ticket) {
