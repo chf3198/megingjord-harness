@@ -33,6 +33,8 @@ const IGNORE_FILES = [
   'orchestrator-governance-parity.json',
   // JSON schemas (standard third-party metadata)
   'claude-code-settings.schema.json',
+  // Governance policy catalog — grows by design as decision rules are added
+  'governance-decision-policy.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];
