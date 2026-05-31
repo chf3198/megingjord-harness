@@ -34,10 +34,10 @@ jobs:
               github.rest.search.issuesAndPullRequests,
               { q: `repo:${owner}/${repo} is:pr is:merged #${issue.number}`, per_page: 30 }
             );
-            const mergedPRRefs = results.map(r => ({ number: r.number, title: r.title }));
+            const mergedPRRefs = results.map(r => ({ number: r.number, title: r.title, body: r.body || '' }));
             const result = rule.validate({ state: 'closed', labels, mergedPRRefs });
-            if (result.ok) {
-              core.info(`pass: ${mergedPRRefs.length} merged PR(s) found`);
+            if (result.ok || reconciler.hasDeferredFinalEvidence(mergedPRRefs, issue.number)) {
+              core.info(`pass: ${mergedPRRefs.length} merged PR(s) found (or deferred-final evidence present)`);
               return;
             }
             // Check for existing advisory (idempotency)
