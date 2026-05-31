@@ -7,7 +7,7 @@ if str(SCRIPT_DIR) not in sys.path: sys.path.insert(0, str(SCRIPT_DIR))
 from admin_patterns import (  # noqa: E501
     DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE, RE_GIT_COMMIT,
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
-    RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_strings)
+    RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from governance_state import ensure_state
 from live_checks import ci_all_pass, linked_issue_has_collab_handoff
@@ -15,7 +15,10 @@ from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
 RE_BRANCH_CREATE = re.compile(r"git\s+(?:checkout\s+-b|switch\s+-c)\s+(\S+)")
-RE_BRANCH_SWITCH = re.compile(r"git\s+(?:switch|checkout)\s+(?!-[bcCq])([^\s-]\S*)")
+RE_BRANCH_SWITCH = re.compile(
+    r"(?:(?:^|;|&&|\|\|)\s*)git\s+(?:switch|checkout)\s+(?!-[bcCq])([^\s-]\S*)",
+    re.MULTILINE,
+)
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 IT_OPS_MARKERS_RE = re.compile(r"\[it-ops\]|chore\(it-ops\)\s*:", re.IGNORECASE)
@@ -132,10 +135,10 @@ def main() -> int:
     state = reset_on_branch_change(cwd, current_branch(cwd))
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit","write_to_file","replace_file_content","multi_replace_file_content"}:
         if is_main_checkout(cwd):
-            for value in values:
-                if not (value.startswith("/") or value.startswith("./") or "/" in value):
+            for path_val in iter_paths(payload.get("tool_input", {})):
+                if not (path_val.startswith("/") or path_val.startswith("./") or "/" in path_val):
                     continue
-                allowed, reason = evaluate_path(value, cwd)
+                allowed, reason = evaluate_path(path_val, cwd)
                 if not allowed:
                     return emit("deny", f"Canonical-main read-only (#2107): {reason}")
         if not state.get("active_ticket"):

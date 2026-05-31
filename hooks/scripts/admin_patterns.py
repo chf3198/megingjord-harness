@@ -18,6 +18,33 @@ def iter_strings(value: Any) -> Iterable[str]:
             yield from iter_strings(v)
 
 
+_PATH_PARAM_KEYS = frozenset({
+    "file_path", "filePath", "path", "target_file", "destination",
+    "notebook_path", "notebookPath",
+})
+_COLLECTION_KEYS = frozenset({"replacements", "items"})
+
+
+def iter_paths(tool_input: Any) -> Iterable[str]:
+    """Yield only path-type parameter values from tool input.
+
+    Reads known path-key names (file_path, filePath, etc.) but skips content
+    fields like new_string/old_string to prevent false-positive path denials
+    when content happens to contain path-like substrings. Refs #2371 AC1.
+    """
+    if not isinstance(tool_input, dict):
+        return
+    for k, v in tool_input.items():
+        if k in _PATH_PARAM_KEYS and isinstance(v, str):
+            yield v
+        elif k in _COLLECTION_KEYS and isinstance(v, list):
+            for item in v:
+                if isinstance(item, dict):
+                    for pk in _PATH_PARAM_KEYS:
+                        if pk in item and isinstance(item[pk], str):
+                            yield item[pk]
+
+
 SECRET_FILE_RE = re.compile(
     r"(^|/)(\.env(\..*)?|id_rsa|id_ed25519|.*\.pem|.*\.key)$"
 )
@@ -26,7 +53,7 @@ DANGEROUS_CMD_RE = re.compile(
     re.IGNORECASE,
 )
 
-RE_GIT_COMMIT = re.compile(r"\bgit\s+commit\b")
+RE_GIT_COMMIT = re.compile(r"\bgit\s+(?:-c\s+\S+\s+)*commit\b")
 RE_GIT_PUSH = re.compile(r"\bgit\s+push\b")
 RE_PR_CREATE = re.compile(r"\bgh\s+pr\s+create\b")
 RE_PR_CHECKS = re.compile(r"\bgh\s+pr\s+checks\b")
