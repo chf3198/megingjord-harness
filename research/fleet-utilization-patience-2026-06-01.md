@@ -140,50 +140,67 @@ score = cost_mult × queue_depth × latency_p99 (lower = better; G3+G7+G7 weight
 filter UNAVAILABLE; sort ascending; pick top; fallback chain = next 2.
 ```
 
+## Privacy considerations (G4 — added iter-1)
+
+Cross-team fleet observability surfaces metadata that's NOT user-content but IS metadata leakage:
+
+| Surface | Mitigation |
+|---|---|
+| `/fleet/in-flight` listing | Expose only host/model/team/start-ts; redact body content; ticket numbers are already public |
+| Latency profile data | Aggregate weekly; never log per-request signatures |
+| Cross-host fanout | Tailscale-mesh-only by default; paid-provider routing opt-in per-tenant |
+| Cost telemetry | Already redacted per Epic #2451 Move 2 §Privacy contract |
+
+**Rule for sensitive PRs** (paths matching `*.env`, `*credentials*`, `*.pem`, `*.key`, `*secret*`): force fleet-only routing (no paid-provider fallback even if fleet inconclusive); apply `redact()` from Epic #2451 Move 2 before any probe-adjacent emission.
+
+## Cost-aware fleet-first ladder (G3 — explicit iter-1)
+
+Per Megingjord goal-lens G3 (zero cost > paid), every dispatch traverses this ladder in order:
+
+```
+1. Tier-0 (LOCAL):    operator's local machine (penguin-1 sub-2b models)
+2. Tier-1 (FLEET):    Tailscale mesh — windows-laptop / 36gbwinresource (Ollama, mult=0)
+3. Tier-2 (CLOUD-FREE): Copilot-Pro free-tier (gpt-5-mini, gpt-4.1, raptor-mini, mult=0)
+4. Tier-3 (CLOUD-CHEAP): Copilot-Pro cheap-tier (claude-haiku-4.5, gemini-3-flash, mult≤0.33)
+5. Tier-4 (CLOUD-STANDARD): Copilot-Pro standard (claude-sonnet, gpt-5.2, mult=1)
+6. Tier-5 (CLOUD-PREMIUM): claude-opus-4.5, gpt-5.4 (mult=3) — ONLY with explicit operator opt-in
+```
+
+The router NEVER skips a tier without operator override. Caller can declare `max_tier` per-task; default = Tier-3. This codifies "fleet-first not just preference but contract."
+
 ## Adjacency map
 
-| Adjacent | Relation |
-|---|---|
-| Epic #2451 | baton-events.jsonl is the log this Epic emits to |
-| Epic #2486 | xteam MCP — analogous cross-team coordination pattern |
-| Epic #2488 | HAMR Layer 2 Tier-1 — defines the substrate for cross-team claim |
-| Epic #2511 | cross-family review contract — consumes fleet-dispatch with family filter |
-| Epic #2192 | fleet-red-team hard-gate — consumes patience policy |
-| #2509 | fleet-decision-oracle — first consumer to migrate to patience+router |
+- Epic #2451 (baton-events.jsonl): event log this emits to
+- Epic #2486 (xteam MCP): analogous cross-team coordination pattern
+- Epic #2488 (HAMR Layer 2 Tier-1): substrate for cross-team claim
+- Epic #2511 (cross-family review): consumes fleet-dispatch with family filter
+- Epic #2192 (fleet-red-team hard-gate): consumes patience policy
+- #2509 (fleet-decision-oracle, shipped today): first consumer to migrate
+
+## Cross-runtime portability (G5 — explicit iter-1)
+
+The fleet contract is runtime-agnostic. All 4 baton runtimes (Claude Code, Codex, Copilot, Antigravity) consume the same scripts/global/fleet-* APIs. The probe + router + claim primitives expose the SAME interface regardless of which runtime invokes them. `deploy:apply --target all` ensures cross-runtime parity. No per-runtime hardcoded routing logic.
 
 ## Phase-1 child slate (proposed)
 
-1. AC1: `scripts/global/fleet-probe.js` + reachable/busy/unavailable detector
-2. AC2: `scripts/global/fleet-profile-bench.js` + weekly benchmarking cron
-3. AC3: `inventory/fleet-latency-profile.json` populated for all 4 hosts × models
-4. AC4: `scripts/global/fleet-router.js` cost-aware routing
-5. AC5: HAMR `/fleet/{claim,in-flight}` endpoints + GitHub-label fallback
-6. AC6: Dashboard panel for live fleet state
-7. AC7: Migrate `fleet-decision-oracle.js` + `fleet-red-team-dispatch.js` to new primitives
+AC1 fleet-probe.js (busy-vs-unavailable detector). AC2 fleet-profile-bench.js + weekly cron. AC3 inventory/fleet-latency-profile.json populated. AC4 fleet-router.js (cost-aware). AC5 HAMR /fleet/{claim,in-flight} + GitHub-label fallback. AC6 dashboard panel. AC7 migrate fleet-decision-oracle.js + fleet-red-team-dispatch.js to new primitives.
 
 ## Open questions for Phase-1
 
-1. Is Ollama OLLAMA_NUM_PARALLEL>1 safe on 4GB-VRAM 36gbwinresource? (Memory math: 32b model already uses 19GB; parallel sequences would multiply KV cache demand.)
-2. Should we migrate one host (e.g., 36gbwinresource) from Ollama to vLLM for 3-16× throughput, or stay Ollama-uniform for simpler ops?
-3. Cost-mult for fleet models: zero (treat as free) or non-zero (compute cost reflects power draw)?
-4. Claim TTL strategy: fixed 30min, or = latency-profile.p99 × 2?
-5. Should fleet-router fall through to paid cloud (Copilot-Pro standard tier, mult=1) when fleet entirely exhausted, or hard-gate?
-6. Should each team's runtime announce itself + capabilities on a /fleet/teams roster, so others know what's online?
+1. Ollama OLLAMA_NUM_PARALLEL>1 safe on 4GB-VRAM (32b uses 19GB; parallel sequences multiply KV cache)?
+2. Migrate one host (36gbwinresource) from Ollama to vLLM for 3-16× throughput, or stay uniform?
+3. Claim TTL: fixed 30min or = latency-profile.p99 × 2?
+4. Should each team's runtime announce itself + capabilities on /fleet/teams roster?
 
 ## Honest scope guard
 
-This Phase-0 designs the contract + primitives, NOT the implementation. Out of scope:
-- Migration from Ollama to vLLM/Triton (separate Epic if pursued)
-- Paid-provider gateway integration with Copilot-Pro / Bifrost (Epic #2488 territory)
-- Per-team budget enforcement (Epic #1297 Policy-as-Code territory)
+Phase-0 designs contract + primitives only. Out of scope: Ollama→vLLM migration (separate Epic), paid-provider gateway integration (Epic #2488), per-team budget enforcement (Epic #1297).
 
 ## Sources
 
 - [The State of LLM Serving in 2026 (Canteen)](https://thecanteenapp.com/analysis/2026/01/03/inference-serving-landscape.html)
-- [vLLM vs Ollama vs SGLang vs TensorRT-LLM Serving 2026 (Substack)](https://theaiengineer.substack.com/p/vllm-vs-ollama-vs-sglang-vs-tensorrt)
 - [Ollama vs vLLM 2026 (Particula)](https://particula.tech/blog/ollama-vs-vllm-comparison)
 - [ACMI Protocol v1.2: AI Fleet Coordination (Dev Journal, April 2026)](https://earezki.com/ai-news/2026-04-29-acmi-protocol-v12-how-we-built-a-self-organizing-ai-fleet-that-learns-from-its-mistakes/)
-- [Orla: A Library for Serving LLM-Based Multi-Agent Systems (arXiv 2603.13605)](https://arxiv.org/html/2603.13605)
 - [How Ollama Handles Parallel Requests (Glukhov)](https://www.glukhov.org/llm-performance/ollama/how-ollama-handles-parallel-requests/)
 - [Configure Ollama Concurrent Requests 2026 (Markaicode)](https://markaicode.com/ollama-concurrent-requests-parallel-inference/)
 - [What Is an AI Model Router? (MindStudio)](https://www.mindstudio.ai/blog/what-is-ai-model-router-optimize-cost-llm-providers)
