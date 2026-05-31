@@ -12,6 +12,7 @@ const ENTRY_POINTS = [
   { path: 'CLAUDE.md', label: 'CLAUDE.md (Claude Code)' },
   { path: '.github/copilot-instructions.md', label: 'Copilot entry' },
   { path: '.codex/AGENTS.md', label: 'Codex project doc' },
+  { path: '.antigravity/instructions.md', label: 'Antigravity entry' },
 ];
 
 const INVARIANTS = [
