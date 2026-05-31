@@ -310,7 +310,6 @@ Manager: `role-manager-execution` | Collaborator: `role-collaborator-execution`
 Admin: `role-admin-execution` | Consultant: `role-consultant-critique`
 Orchestration: `role-baton-orchestrator`
 
-
 ## Operator decision routing (#2509)
 
 When the operator (the AI agent running the baton) faces a routine yes/no dev decision (file follow-on ticket Y/N? two-ticket-or-one? accept fleet-rater verdict?), the DEFAULT routing is:

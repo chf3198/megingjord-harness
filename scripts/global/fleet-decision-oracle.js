@@ -10,6 +10,10 @@ const FAST_MODEL = 'qwen2.5-coder:7b';
 const SLOW_MODEL = 'qwen2.5-coder:32b';
 const FAST_TIMEOUT_MS = 60_000;
 const SLOW_TIMEOUT_MS = 600_000;
+const SLOW_MODEL_LENGTH_THRESHOLD = 1500;
+const RATIONALE_SHORT_LEN = 200;
+const RATIONALE_FULL_LEN = 500;
+const DEFAULT_OLLAMA_PORT = 11434;
 
 const VERDICT_RE = /\b(yes|no|partial|approve|reject|revise)\b/i;
 
@@ -18,7 +22,7 @@ function pickModel(opts) {
   if (opts && opts.tier === 'fast') return FAST_MODEL;
   // Default by question length: longer → high-stakes
   const len = (opts && opts.question && opts.question.length) || 0;
-  return len > 1500 ? SLOW_MODEL : FAST_MODEL;
+  return len > SLOW_MODEL_LENGTH_THRESHOLD ? SLOW_MODEL : FAST_MODEL;
 }
 
 function timeoutFor(model) {
@@ -28,13 +32,13 @@ function timeoutFor(model) {
 function parseVerdict(text) {
   if (!text) return { verdict: 'inconclusive', rationale: 'empty response' };
   const match = text.match(VERDICT_RE);
-  if (!match) return { verdict: 'inconclusive', rationale: text.slice(0, 200) };
+  if (!match) return { verdict: 'inconclusive', rationale: text.slice(0, RATIONALE_SHORT_LEN) };
   const word = match[1].toLowerCase();
   const normalized = (word === 'yes' || word === 'approve') ? 'approve'
     : (word === 'no' || word === 'reject') ? 'reject'
     : (word === 'partial' || word === 'revise') ? 'partial'
     : 'inconclusive';
-  return { verdict: normalized, rationale: text.slice(0, 500) };
+  return { verdict: normalized, rationale: text.slice(0, RATIONALE_FULL_LEN) };
 }
 
 function dispatchOllama({ host, model, prompt, timeoutMs, httpImpl = http }) {
@@ -42,7 +46,7 @@ function dispatchOllama({ host, model, prompt, timeoutMs, httpImpl = http }) {
     const [hostname, portStr] = host.split(':');
     const body = JSON.stringify({ model, prompt, stream: false });
     const req = httpImpl.request({
-      hostname, port: parseInt(portStr, 10) || 11434,
+      hostname, port: parseInt(portStr, 10) || DEFAULT_OLLAMA_PORT,
       path: '/api/generate', method: 'POST',
       headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body) },
       timeout: timeoutMs,
