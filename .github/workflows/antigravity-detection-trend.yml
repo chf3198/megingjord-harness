@@ -7,7 +7,7 @@ on:
 
 permissions:
   issues: write
-  contents: read
+  contents: write
 
 jobs:
   check-trend:
@@ -18,7 +18,7 @@ jobs:
       - name: Count antigravity incidents (last 14 days)
         id: count
         run: |
-          python3 - << 'PYEOF_INNER'
+          python3 - << 'PYEOF'
           import json, os
           from datetime import datetime, timezone, timedelta
 
@@ -46,7 +46,7 @@ jobs:
               pass
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f'count={count}\n')
-          PYEOF_INNER
+          PYEOF
 
       - name: Load consecutive-zero state
         id: state
@@ -70,7 +70,7 @@ jobs:
           COUNT: ${{ steps.count.outputs.count }}
           ZERO_WEEKS: ${{ steps.state.outputs.consecutive_zero_weeks }}
         run: |
-          python3 - << 'PYEOF_INNER'
+          python3 - << 'PYEOF'
           import os, subprocess, json
           from datetime import datetime, timezone
 
@@ -121,4 +121,12 @@ jobs:
                    f'in the last 14 days (>5/week).\n\n'
                    f'Refs #2482 Epic #2362'),
               ], check=False)
-          PYEOF_INNER
+          PYEOF
+
+      - name: Persist state file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/antigravity-trend-state.json
+          git diff --cached --quiet || git commit -m "chore(it-ops): update antigravity trend state [skip ci]"
+          git push
