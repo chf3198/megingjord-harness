@@ -44,8 +44,8 @@ async function benchHostModel(host, model, opts = {}) {
   const httpImpl = opts.httpImpl || http;
   const durations = [];
   for (let i = 0; i < samples; i++) {
-    const r = await timeOne({ host, model, httpImpl, timeoutMs: opts.timeoutMs });
-    if (r.ok) durations.push(r.total_s);
+    const result = await timeOne({ host, model, httpImpl, timeoutMs: opts.timeoutMs });
+    if (result.ok) durations.push(result.total_s);
   }
   if (durations.length === 0) return null;
   return {
