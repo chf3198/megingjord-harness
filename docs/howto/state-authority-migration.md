@@ -110,6 +110,34 @@ export HAMR_TEAM=claude-code   # or codex, copilot, antigravity
 
 Once Moves 1-3 are steady-state for ≥2 weeks, file the memory anchor cleanup per #2461 — `feedback_state_store_dual_variants` and 7 related anchors are then provably obsolete and should be retired with `superseded-by-#2451` notes.
 
+
+## Move 3 — Dual-mode merge-claim (HAMR + GitHub-label fallback) (#2479)
+
+`hooks/scripts/merge_claim_client.py` supports two backend modes:
+
+| Mode | Activation | Lock primitive |
+|---|---|---|
+| HAMR (Tier-2) | Default when `MEGINGJORD_HAMR_DISABLED` unset | CloudFlare Worker |
+| GitHub-label (Tier-1) | `MEGINGJORD_HAMR_DISABLED=1` or HAMR unreachable | Issue label |
+
+**GitHub-label lock format**: `merge-claim:held:<team>` added to the target issue.
+**claim_id format in fallback mode**: `gh-label:<ticket_n>:<team>` — pass this to
+`release()` and it removes the label instead of calling HAMR.
+
+### TTL cleanup
+
+A scheduled GitHub Action (`merge-claim-gh-label-cleanup.yml`) runs every 5 min
+and removes `merge-claim:held:*` labels that have been present longer than the TTL
+(default 5 min). This enforces the same lock-expiry guarantee as HAMR's built-in TTL.
+
+### GITHUB_TOKEN requirement
+
+The GitHub-label fallback requires `GITHUB_TOKEN` and `GITHUB_REPOSITORY`
+environment variables. Both are available in all GitHub Actions contexts.
+For local hook execution, operators must set these or use a personal access token.
+If either is absent, `acquire()` / `status()` return `None` (degrade to race-prone
+legacy behavior, same as HAMR-unreachable path).
+
 ## Related
 
 - Epic #2451 — parent
