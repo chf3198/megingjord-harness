@@ -97,6 +97,30 @@ ADVISORY (warn, do not block):
   - Epic #1899 skill (advisory invocation pattern)
 ```
 
+## Privacy considerations (G4 — added iter-1)
+
+Cross-family review dispatches send the reviewed work's content to the rater model. This has privacy implications:
+
+| Scenario | Privacy posture | Mitigation |
+|---|---|---|
+| Fleet rater (qwen on Tailscale) | LOCAL — stays on user's mesh, no third-party transit | Default for all Tier-1 ops; G4 strong |
+| Paid-provider rater (Claude/GPT) | THIRD-PARTY transit — content leaves user network | Only when fleet inconclusive AND content is non-sensitive; explicit operator opt-in |
+| Sensitive PRs (credentials, security audits, secrets-related) | RAW REDACTION required before dispatch | Reuse `scripts/global/log-redaction.js` from Epic #2451 Move 2 — apply before sending to ANY rater |
+| Per-team registry | NO crypto-key material sent | Family-independence check uses registry metadata only, not credentials |
+
+**Rule:** for any PR matching sensitive-path regex (`*.env`, `*credentials*`, `*.pem`, `*.key`, `*secret*`), redact before fleet dispatch. Phase-1 to wire this redaction into the shared library (proposed AC1).
+
+## Interoperability (G9 — added iter-1)
+
+The contract is explicitly cross-runtime by design — it must work uniformly across all 4 baton runtimes (Claude Code, Codex, Copilot, Antigravity):
+
+- **Shared library** (`scripts/global/cross-family-review-contract.js`, proposed AC1): runtime-agnostic Node module; can be invoked from each runtime's hook scripts
+- **Registry-driven family identity** (proposed AC4): each team-model registry entry declares `family` field; no per-runtime hardcoding
+- **Skill alias** (proposed AC5): operator skill `xfam-review` works in all 4 runtimes via the canonical Epic #1899 invocation
+- **No runtime-specific gates**: hard-gates land in CI (universal) + pretool hooks (per-runtime via deploy:apply parity)
+
+The harness's `deploy:apply --target all` ensures cross-runtime parity for any validator that consumes this contract.
+
 ## Phase-1 child slate (proposed; NOT BINDING — iter-1+ may revise)
 
 1. **AC1**: Author `scripts/global/cross-family-review-contract.js` — shared library that all role-specific validators import for: family-independence check, rubric parse, verdict normalization
@@ -128,3 +152,14 @@ This Phase-0 deliberately DEFERS:
 - #2510 (Admin-phase verification, filed today)
 - memory: feedback-cross-family-review-model-choice
 - memory: feedback-route-decisions-to-fleet-not-client (just written today via #2509)
+
+
+## Throughput trade-off (G7 — acknowledged iter-1)
+
+Mandating cross-family review at each baton transition DOES add per-PR latency:
+- Collaborator: ~30s (qwen-7b on Tailscale)
+- Admin: ~5s (validator-only, no rater invocation)
+- Consultant: ~60-300s (qwen-7b for routine, qwen-32b for high-stakes)
+
+Net per-PR overhead: ~1-5 minutes. The trade-off is explicit: G2 (quality) + G1 (governance) > G7 (throughput) per the goal-lens. Operators with throughput concerns can opt into qwen-7b across all roles (faster but less rigorous on high-stakes work).
+
