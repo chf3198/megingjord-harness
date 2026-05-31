@@ -7,13 +7,14 @@ const http = require('node:http');
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const BUSY_THRESHOLD_S = 60;
+const DEFAULT_OLLAMA_PORT = 11434;
 const QUEUE_HIGH_DEPTH = 3;
 
 function dispatchGet({ host, path, timeoutMs = DEFAULT_TIMEOUT_MS, httpImpl = http }) {
   return new Promise((resolve) => {
     const [hostname, portStr] = host.split(':');
     const req = httpImpl.request({
-      hostname, port: parseInt(portStr, 10) || 11434,
+      hostname, port: parseInt(portStr, 10) || DEFAULT_OLLAMA_PORT,
       path, method: 'GET', timeout: timeoutMs,
     }, (res) => {
       let data = '';
