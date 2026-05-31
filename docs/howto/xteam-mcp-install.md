@@ -11,12 +11,14 @@ The `megingjord-xteam-mcp` server exposes 3 slash-commands (`/xteam`, `/xteam-cr
 
 ## 0. Install dependencies (one-time)
 
+The xteam MCP server is wired into the harness root via npm workspaces (per #2507). Running `npm install` at the harness root automatically installs the MCP server's dependencies under `scripts/xteam-mcp/node_modules/`:
+
 ```bash
-cd <megingjord-harness-checkout>/scripts/xteam-mcp
+cd <megingjord-harness-checkout>
 npm install
 ```
 
-Sets up `@modelcontextprotocol/sdk` and other dependencies.
+That single command sets up `@modelcontextprotocol/sdk` for the xteam server. No second install step needed.
 
 ## 1. Claude Code
 
