@@ -1,0 +1,24 @@
+name: fleet-profile-bench-weekly
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install --no-audit --no-fund
+      - name: Note
+        run: |
+          echo "Weekly fleet-profile-bench placeholder. Real bench runs locally on Tailscale operator host (cron via npm run hamr:install-cron); CI here only validates the script parses + tests pass."
+      - run: node --test tests/fleet-profile-bench.spec.js
