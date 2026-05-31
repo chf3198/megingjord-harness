@@ -45,13 +45,15 @@ This puts terminal + filesystem burden on the client (chf3198 = Client role, not
 
 Per 2026 MCP roadmap (blog.modelcontextprotocol.io/posts/2026-mcp-roadmap), MCP `prompts` surface natively as slash commands in every MCP-compatible client. Registration command per runtime:
 
-| Runtime | Install command | Config location |
-|---|---|---|
-| Claude Code | `claude mcp add megingjord-xteam` | `~/.claude/mcp_config.json` |
-| Codex CLI | `codex mcp add megingjord-xteam` | `~/.codex/mcp_config.json` |
-| VS Code Copilot | Settings UI: Add MCP Server (or `chat.mcp.discovery.enabled: true` auto-imports from Claude Desktop) | `.vscode/mcp.json` or workspace settings |
-| Antigravity | Agent pane > MCP Servers > Install | Antigravity-specific UI |
-| Gemini CLI | Edit `~/.gemini/settings.json` | Single shared file |
+| Runtime | Install command | Friction | Config location |
+|---|---|---|---|
+| Claude Code | `claude mcp add megingjord-xteam` | Low (CLI flag) | `~/.claude/mcp_config.json` |
+| Codex CLI | `codex mcp add megingjord-xteam` | Low (CLI flag) | `~/.codex/mcp_config.json` |
+| VS Code Copilot | Settings UI: Add MCP Server (or `chat.mcp.discovery.enabled: true` auto-imports from Claude Desktop) | Medium (UI clicks; auto-discovery helps) | `.vscode/mcp.json` or workspace settings |
+| Antigravity | Agent pane > MCP Servers > Install | Medium (UI clicks) | Antigravity-specific UI |
+| Gemini CLI | Edit `~/.gemini/settings.json` | Higher (manual JSON edit; no CLI helper) | Single shared file |
+
+**Honest portability note**: Gemini CLI has higher install friction than the other runtimes — manual JSON edit, no CLI installer. Phase-1 should ship an `install-xteam.sh` wrapper that automates the JSON edit for parity.
 
 One-time setup per runtime, then `/xteam` works identically in all.
 
@@ -61,16 +63,9 @@ Three candidate primitives evaluated. Recommended: **GitHub-label-based** (Tier 
 
 ### Recommended: GitHub label atomic acquire
 
-```
-On /xteam <epic-N> invocation in Team T:
-  1. Team T attempts: gh issue edit <epic-N> --add-label "xteam-lead:T"
-  2. GitHub returns 200 OK with new label set (atomic in GitHub API)
-  3. Team T reads back: gh issue view <epic-N> --json labels
-  4. If only label "xteam-lead:T" present → Team T is LEAD
-  5. If another "xteam-lead:X" already present → Team T is NON-LEAD; reads X
-```
+Uses #2479 GitHub-label-based primitive (atomic label-set semantics: first writer wins, later writers see existing label and yield to participant role).
 
-This uses GitHub's atomic label-set semantics. The first team's label add wins; subsequent teams see the prior label exists and gracefully take participant roles.
+Concrete API-call sequence is Phase-1 implementation detail (see Open questions §"Concrete acquire sequence").
 
 ### Tiebreaker for true-simultaneity (<1 second apart)
 
@@ -123,7 +118,37 @@ Perspective text comes from `inventory/team-perspectives.json` (new file to be a
 | Epic #2488 + #2489 | HAMR Layer 2 GitHub-native replacement; mailbox primitive reused by /xteam |
 | HAMR merge-claim (#2458) | Tier-2 opt-in primitive if GitHub-label approach insufficient |
 
+## Privacy considerations (G4)
+
+GitHub-label-based leader-election surfaces minimal information at the API layer:
+
+- **No PII in command args**: `/xteam <epic-N>` and `/xteam ? <description>` carry only Epic numbers and free-text description; no user credentials, no model state, no working-tree paths.
+- **GitHub token scope**: each runtime's `gh` CLI uses its own user PAT/OAuth token; the MCP server does NOT collect or store tokens. Tokens stay in the runtime's credential store.
+- **Label exposure**: `xteam-lead:<team>` labels are visible to anyone with read access to the Epic — which is the same audience that sees the Epic body anyway. No new exposure surface.
+- **Description text**: `/xteam ? <description>` writes the description into the Epic body. Operators MUST NOT include secrets or PII in the description. Phase-1 should add a secret-scanner pre-check.
+
+## Observability (G8)
+
+Every `/xteam` invocation emits one event to `~/.megingjord/baton-events.jsonl` per Epic #2451 Move 2 schema v3:
+
+```jsonl
+{"ts":"...","version":3,"service":"xteam","event":"invocation",
+ "team":"claude-code","ticket":2486,"role":"lead|participant",
+ "decision":"epic-created|epic-joined|status-query",
+ "duration_ms":<n>,"session_id":"..."}
+```
+
+This enables:
+- Dashboard panel: live view of in-flight xteam sessions across teams (Epic #2451 Move 2 dashboard already shipped)
+- Post-hoc audit: which team became LEAD on Epic #N, when, why
+- Trend analysis: convergence-time per Epic, role-distribution fairness
+- PII redaction at instrumentation site: description text passes through `redact()` per #2457 contract before logging
+
+Observability is NOT optional in this design — every invocation logs, regardless of feature flag. Operators cannot disable logging without disabling the MCP server entirely.
+
 ## Open questions for Phase-1
+
+0. Concrete acquire sequence (moved here per iter-1 Q6 scope-creep tighten): exact `gh issue edit` command, retry-on-race semantics, label namespace (`xteam-lead:<team>` vs alt schemas).
 
 1. Should `/xteam ? <description>` Epic-creation use a fixed lane (e.g., `lane:docs-research`) or infer from description?
 2. Should the MCP server respect workspace overrides (e.g., a workspace declares `xteam-tier: 2` for cross-workspace mode)?
