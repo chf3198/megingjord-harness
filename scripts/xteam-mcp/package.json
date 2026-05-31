@@ -1,0 +1,19 @@
+{
+  "name": "@megingjord/xteam-mcp",
+  "version": "0.1.0",
+  "description": "Cross-runtime /xteam MCP slash-command server for Megingjord harness (Epic #2486)",
+  "type": "commonjs",
+  "main": "index.js",
+  "bin": {
+    "megingjord-xteam-mcp": "./bin.js"
+  },
+  "scripts": {
+    "test": "node --test ../../tests/xteam-mcp/"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
