@@ -9,6 +9,7 @@ import { quota } from './routes/quota';
 import { cacheStats } from './routes/cache-stats';
 import { substrateHealth } from './routes/substrate-health';
 import { mergeClaimAcquire, mergeClaimRelease, mergeClaimStatus } from './routes/merge-claim';
+import { fleetClaimAcquire, fleetClaimRelease, fleetInFlight } from './routes/fleet';
 import { scheduled as scheduledHandler } from './scheduled';
 
 export interface Env {
@@ -49,6 +50,17 @@ export default {
       else if (url.pathname === '/mailbox/read' && m === 'GET') res = await mailboxRead(request, env);
       else if (url.pathname === '/mailbox/write' && m === 'POST') res = await mailboxWrite(request, env);
       else if (url.pathname === '/quota' && m === 'GET') res = await quota(env);
+      else if (url.pathname.startsWith('/fleet/acquire/') && m === 'POST') {
+        const hostModel = url.pathname.slice('/fleet/acquire/'.length);
+        res = await fleetClaimAcquire(hostModel, request, env);
+      }
+      else if (url.pathname.startsWith('/fleet/release/') && m === 'POST') {
+        const claimId = url.pathname.slice('/fleet/release/'.length);
+        res = await fleetClaimRelease(claimId, request, env);
+      }
+      else if (url.pathname === '/fleet/in-flight' && m === 'GET') {
+        res = await fleetInFlight(env);
+      }
       else if (url.pathname.startsWith('/merge-claim/acquire/') && m === 'POST') {
         const ticketN = url.pathname.slice('/merge-claim/acquire/'.length);
         res = await mergeClaimAcquire(ticketN, request, env);
