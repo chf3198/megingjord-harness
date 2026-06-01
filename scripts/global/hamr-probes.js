@@ -4,13 +4,13 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
-const T = 5000
-const _t = ms => new Promise((_, r) => setTimeout(() => r(new Error('timeout')), ms))
-async function _st(u, h) {
-  const c = new AbortController()
-  const t = setTimeout(() => c.abort(), T)
-  try { return (await fetch(u, { headers: h, signal: c.signal })).status } catch { return 0 }
-  finally { clearTimeout(t) }
+const TIMEOUT_MS = 5000
+const timeoutAfter = ms => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+async function statusOf(url, headers) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  try { return (await fetch(url, { headers, signal: controller.signal })).status } catch { return 0 }
+  finally { clearTimeout(timer) }
 }
 
 /**
@@ -19,12 +19,12 @@ async function _st(u, h) {
  */
 async function probeCloudflare() {
   try {
-    const s = await Promise.race([_st('https://api.cloudflare.com/client/v4/ips', {}), _t(T)])
-    const base = { reachable: s >= 200 && s < 400 }
+    const status = await Promise.race([statusOf('https://api.cloudflare.com/client/v4/ips', {}), timeoutAfter(TIMEOUT_MS)])
+    const base = { reachable: status >= 200 && status < 400 }
     const tok = process.env.CLOUDFLARE_API_TOKEN
     if (!tok) return { ...base, authenticated: false, reason: 'no-token' }
-    const a = await Promise.race([_st('https://api.cloudflare.com/client/v4/accounts', { Authorization: `Bearer ${tok}` }), _t(T)])
-    return { ...base, authenticated: a === 200 }
+    const acctStatus = await Promise.race([statusOf('https://api.cloudflare.com/client/v4/accounts', { Authorization: `Bearer ${tok}` }), timeoutAfter(TIMEOUT_MS)])
+    return { ...base, authenticated: acctStatus === 200 }
   } catch { return { reachable: false, authenticated: false, reason: 'error' } }
 }
 
@@ -37,11 +37,11 @@ async function probeR2() {
   const acct = process.env.CLOUDFLARE_ACCOUNT_ID
   if (!tok || !acct) return { available: false, reason: 'no-token' }
   try {
-    const s = await Promise.race([
-      _st(`https://api.cloudflare.com/client/v4/accounts/${acct}/r2/buckets`, { Authorization: `Bearer ${tok}` }),
-      _t(T),
+    const status = await Promise.race([
+      statusOf(`https://api.cloudflare.com/client/v4/accounts/${acct}/r2/buckets`, { Authorization: `Bearer ${tok}` }),
+      timeoutAfter(TIMEOUT_MS),
     ])
-    return { available: s === 200 }
+    return { available: status === 200 }
   } catch { return { available: false, reason: 'error' } }
 }
 
@@ -51,11 +51,11 @@ async function probeR2() {
  */
 function probeWrangler() {
   try {
-    const v = execSync('wrangler --version', { timeout: T, stdio: 'pipe' }).toString().trim()
-    const m = v.match(/(\d+)\./)
-    if (m && parseInt(m[1], 10) >= 4) return { available: true, version: v }
-    const w = execSync('wrangler whoami', { timeout: T, stdio: 'pipe' }).toString()
-    return { available: w.includes('You are logged in'), reason: 'version-lt-4' }
+    const versionOut = execSync('wrangler --version', { timeout: TIMEOUT_MS, stdio: 'pipe' }).toString().trim()
+    const major = versionOut.match(/(\d+)\./)
+    if (major && parseInt(major[1], 10) >= 4) return { available: true, version: versionOut }
+    const whoamiOut = execSync('wrangler whoami', { timeout: TIMEOUT_MS, stdio: 'pipe' }).toString()
+    return { available: whoamiOut.includes('You are logged in'), reason: 'version-lt-4' }
   } catch { return { available: false, reason: 'not-installed-or-unauthenticated' } }
 }
 
@@ -65,8 +65,8 @@ function probeWrangler() {
  */
 async function probeGithubOidc() {
   try {
-    const { nameWithOwner } = JSON.parse(execSync('gh repo view --json nameWithOwner', { timeout: T, stdio: 'pipe' }).toString())
-    const perms = JSON.parse(execSync(`gh api repos/${nameWithOwner} --jq '.permissions'`, { timeout: T, stdio: 'pipe' }).toString())
+    const { nameWithOwner } = JSON.parse(execSync('gh repo view --json nameWithOwner', { timeout: TIMEOUT_MS, stdio: 'pipe' }).toString())
+    const perms = JSON.parse(execSync(`gh api repos/${nameWithOwner} --jq '.permissions'`, { timeout: TIMEOUT_MS, stdio: 'pipe' }).toString())
     return { eligible: !!(perms && (perms.admin || perms.maintain)), caveat: 'heuristic-only' }
   } catch { return { eligible: false, reason: 'gh-unavailable-or-no-access' } }
 }
@@ -79,7 +79,7 @@ function probeMcp() {
   const sdk = path.join(process.cwd(), 'node_modules', '@modelcontextprotocol', 'sdk')
   if (fs.existsSync(sdk)) return { available: true, source: 'node_modules' }
   const cfgs = ['.claude/mcp.json', '.codex/mcp.json'].map(f => path.join(os.homedir(), f))
-  const found = cfgs.find(c => fs.existsSync(c))
+  const found = cfgs.find(cfg => fs.existsSync(cfg))
   return found ? { available: true, source: 'config-file' } : { available: false, reason: 'MCP SDK not installed' }
 }
 
@@ -88,7 +88,7 @@ function probeMcp() {
  * @returns {object} Result with eligible field.
  */
 function probeNpmTrustedPublishing() {
-  try { execSync('npm whoami', { timeout: T, stdio: 'pipe' }) } catch { return { eligible: false, reason: 'npm-not-authenticated' } }
+  try { execSync('npm whoami', { timeout: TIMEOUT_MS, stdio: 'pipe' }) } catch { return { eligible: false, reason: 'npm-not-authenticated' } }
   try {
     const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'))
     if (pkg.publishConfig?.provenance === true) return { eligible: true }
