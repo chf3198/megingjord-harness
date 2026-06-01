@@ -2,10 +2,12 @@
 // admin-handoff — validates ADMIN_HANDOFF signer + independence vs Collaborator.
 // Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
 // Updated to include lane:config-only and lane:research (were missing vs canonical set).
+// #2510: cross-family independence check using COLLABORATOR_HANDOFF fields.
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
+const { extractAIFamily } = require('./signer-fidelity.js');
 
 function findAdminHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?ADMIN_HANDOFF\b/;
@@ -48,12 +50,28 @@ function checkIndependence(adminBody, collaboratorHandoff) {
   return [];
 }
 
-function checkCrossFamily(body) {
-  if (!/reviewer_family_verified:/i.test(body)) {
-    return [{ rule: 'missing-reviewer-family-verified',
-      detail: 'ADMIN_HANDOFF missing reviewer_family_verified: field', severity: 'advisory' }];
+function checkCrossFamily(adminBody, collaboratorHandoff) {
+  const advisory = process.env.CROSS_FAMILY_ADMIN_GATE_ADVISORY === '1';
+  const violations = [];
+  if (!/reviewer_family_verified:/i.test(adminBody)) {
+    violations.push({ rule: 'missing-reviewer-family-verified',
+      detail: 'ADMIN_HANDOFF missing reviewer_family_verified: field', severity: 'advisory' });
   }
-  return [];
+  if (!collaboratorHandoff) return violations;
+  const cb = collaboratorHandoff.body || '';
+  const tmm = cb.match(/Team&Model\s*:\s*(\S+)/i);
+  const rvm = cb.match(/cross_family_reviewer\s*:\s*(\S+)/i);
+  if (tmm && rvm) {
+    const cf = extractAIFamily(tmm[1]);
+    const rf = extractAIFamily(rvm[1]);
+    if (cf !== 'unknown' && cf === rf) {
+      const v = { rule: 'cross-family-reviewer-same-family',
+        detail: `Reviewer family "${rf}" matches Collaborator Team&Model family` };
+      if (advisory) v.severity = 'advisory';
+      violations.push(v);
+    }
+  }
+  return violations;
 }
 
 function validate(input) {
@@ -66,15 +84,17 @@ function validate(input) {
     return { ok: false, violations: [{ rule: 'missing-admin-handoff',
       detail: 'ADMIN_HANDOFF comment not found on issue' }], found: false };
   }
+  const collabHandoff = findCollaboratorHandoff(comments);
   const violations = [
     ...checkSignerFields(handoff.body || ''),
-    ...checkIndependence(handoff.body, findCollaboratorHandoff(comments)),
+    ...checkIndependence(handoff.body, collabHandoff),
   ];
   if (input.lane === 'lane:code-change') {
-    violations.push(...checkCrossFamily(handoff.body || ''));
+    violations.push(...checkCrossFamily(handoff.body || '', collabHandoff));
   }
   const signer = roleIdentity({ body: handoff.body, author: handoff.user && handoff.user.login });
-  return { ok: violations.length === 0, violations, found: true, signer };
+  const blocking = violations.filter(v => v.severity !== 'advisory');
+  return { ok: blocking.length === 0, violations, found: true, signer };
 }
 
 module.exports = { validate, findAdminHandoff, LIGHTWEIGHT };
