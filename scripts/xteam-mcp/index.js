@@ -41,19 +41,32 @@ const PROMPTS = [
 
 async function main() {
   try {
-    const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
+    const { z } = require('zod');
+    const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
     const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
-    const server = new Server({ name: 'megingjord-xteam-mcp', version: '0.1.0' },
-      { capabilities: { prompts: {} } });
-    server.setRequestHandler('prompts/list', async () => ({
-      prompts: PROMPTS.map(p => ({ name: p.name, description: p.description, arguments: p.arguments })),
-    }));
-    server.setRequestHandler('prompts/get', async (req) => {
-      const prompt = PROMPTS.find(p => p.name === req.params.name);
-      if (!prompt) throw new Error(`unknown prompt: ${req.params.name}`);
-      const result = await prompt.handler(req.params.arguments || {});
-      return { messages: [{ role: 'user', content: { type: 'text', text: JSON.stringify(result, null, 2) } }] };
-    });
+    const server = new McpServer(
+      { name: 'megingjord-xteam-mcp', version: '0.1.0' },
+      { capabilities: { prompts: {} } },
+    );
+    for (const prompt of PROMPTS) {
+      const shape = {};
+      for (const arg of prompt.arguments || []) {
+        let field = z.string().describe(arg.description || arg.name);
+        if (!arg.required) field = field.optional();
+        shape[arg.name] = field;
+      }
+      const argsSchema = z.object(shape);
+      server.registerPrompt(
+        prompt.name,
+        { description: prompt.description, argsSchema },
+        async (args) => {
+          const result = await prompt.handler(args || {});
+          return {
+            messages: [{ role: 'user', content: { type: 'text', text: JSON.stringify(result, null, 2) } }],
+          };
+        },
+      );
+    }
     await server.connect(new StdioServerTransport());
   } catch (err) {
     process.stderr.write(`[xteam-mcp] startup failed: ${err.message}\n`);
@@ -64,4 +77,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { PROMPTS, PERSPECTIVES_PATH, TEAM };
+module.exports = { PROMPTS, PERSPECTIVES_PATH, TEAM, main };
