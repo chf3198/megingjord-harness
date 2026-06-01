@@ -48,6 +48,14 @@ function checkIndependence(adminBody, collaboratorHandoff) {
   return [];
 }
 
+function checkCrossFamily(body) {
+  if (!/reviewer_family_verified:/i.test(body)) {
+    return [{ rule: 'missing-reviewer-family-verified',
+      detail: 'ADMIN_HANDOFF missing reviewer_family_verified: field', severity: 'advisory' }];
+  }
+  return [];
+}
+
 function validate(input) {
   if (LIGHTWEIGHT.includes(input.lane) || laneSeverity(input.lane) === 'issue-only') {
     return { ok: true, violations: [], reason: 'lightweight-lane-skip' };
@@ -62,6 +70,9 @@ function validate(input) {
     ...checkSignerFields(handoff.body || ''),
     ...checkIndependence(handoff.body, findCollaboratorHandoff(comments)),
   ];
+  if (input.lane === 'lane:code-change') {
+    violations.push(...checkCrossFamily(handoff.body || ''));
+  }
   const signer = roleIdentity({ body: handoff.body, author: handoff.user && handoff.user.login });
   return { ok: violations.length === 0, violations, found: true, signer };
 }

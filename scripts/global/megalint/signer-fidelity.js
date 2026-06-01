@@ -91,5 +91,8 @@ function validate(input) {
   return { ok: unique.filter(v => v.severity !== 'advisory').length === 0, violations: unique };
 }
 
+const KNOWN_FAMILIES = ['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'unknown'];
+const normalizeFamily = s => { const n = (s || '').toLowerCase().trim(); return KNOWN_FAMILIES.includes(n) ? n : 'unknown'; };
+
 module.exports = { validate, isClientIdentity, findSignerField, extractAIFamily,
-  checkConsultantFamilyIndependence, CLIENT_IDENTITIES };
+  checkConsultantFamilyIndependence, CLIENT_IDENTITIES, KNOWN_FAMILIES, normalizeFamily };
