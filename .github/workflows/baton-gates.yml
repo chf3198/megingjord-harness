@@ -114,7 +114,10 @@ jobs:
     name: consultant-gate
     needs: [admin-gate]
     runs-on: ubuntu-latest
+    env:
+      GATE_ADVISORY_MODE: '1'
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
@@ -132,6 +135,21 @@ jobs:
                 `CONSULTANT_CLOSEOUT not found in issue #${linkedIssue} comments. ` +
                 'Post artifact as a comment on the linked issue — PR body does not satisfy this gate.'
               );
+              return;
+            }
+            const advisory = process.env.GATE_ADVISORY_MODE === '1';
+            const { checkConsultantFamilyIndependence } =
+              require('./scripts/global/megalint/signer-fidelity.js');
+            const { checkCrossFamilyVerdict } =
+              require('./scripts/global/megalint/consultant-closeout.js');
+            const allViols = [
+              ...checkConsultantFamilyIndependence(trail),
+              ...checkCrossFamilyVerdict(trail),
+            ];
+            if (allViols.length > 0) {
+              const msg = allViols.map(v => `${v.rule}${v.detail ? ': ' + v.detail : ''}`).join('; ');
+              if (advisory) { core.warning(`[advisory] cross-family gate: ${msg}`); }
+              else { core.setFailed(`cross-family gate: ${msg}`); }
             }
 
   changelog-fragment:
