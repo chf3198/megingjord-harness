@@ -10,9 +10,13 @@ const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-e
 const docCoverage = require('./doc-coverage.js');
 const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
 
+// #2562: accept string OR {body} comment elements so a caller passing bare
+// bodies (the baton-gates.yml regression) cannot silently false-fail the gate.
+const bodyOf = (c) => (typeof c === 'string' ? c : (c && c.body) || '');
+
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
-  return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
+  return [...(comments || [])].reverse().find(c => headerRe.test(bodyOf(c)));
 }
 
 function checkSignerFields(body) {
@@ -65,7 +69,7 @@ function validate(input) {
     return { ok: false, violations: [{ rule: 'missing-collaborator-handoff',
       detail: 'COLLABORATOR_HANDOFF comment not found on issue' }], found: false };
   }
-  const body = handoff.body || '';
+  const body = bodyOf(handoff);
   const violations = checkSignerFields(body);
   if (input.lane === 'lane:code-change' && process.env.DOC_COVERAGE_GATE_ADVISORY !== '1') {
     let matrix;

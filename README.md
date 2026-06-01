@@ -349,6 +349,7 @@ npm run deploy:both:apply
 | `synthesis:snapshot` | `node scripts/global/synthesis-snapshot.js` |
 | `synthesis:status` | `node scripts/global/broker-synthesis-status.js` |
 | `test` | `npx playwright test` |
+| `test:collaborator-input-shape` | `node --test tests/collaborator-handoff-input-shape.spec.js` |
 | `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
 | `test:headed` | `npx playwright test --headed` |
 | `test:post-merge-sweep` | `node --test tests/post-merge-sweep.spec.js` |
