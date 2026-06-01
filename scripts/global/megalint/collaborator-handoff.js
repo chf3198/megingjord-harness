@@ -2,12 +2,13 @@
 // collaborator-handoff — validates COLLABORATOR_HANDOFF signer + content.
 // Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
 // #2424: doc-coverage block now blocking (not advisory).
+// #2439: cross_family_reviewer/rating/findings blocking; family independence check.
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const docCoverage = require('./doc-coverage.js');
-const { KNOWN_FAMILIES } = require('./signer-fidelity.js');
+const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
 
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
@@ -32,16 +33,25 @@ function checkSignerFields(body) {
 }
 
 function checkCrossFamily(body) {
-  const advisory = s => ({ rule: s, detail: `COLLABORATOR_HANDOFF missing ${s.replace('missing-', '').replace(/-/g, '_')}: field`, severity: 'advisory' });
-  const violations = [
-    /cross_family_reviewer:/i.test(body) ? null : advisory('missing-cross-family-reviewer'),
-    /cross_family_rating:/i.test(body) ? null : advisory('missing-cross-family-rating'),
-    /reviewer_family:/i.test(body) ? null : advisory('missing-reviewer-family'),
-  ].filter(Boolean);
+  const violations = [];
+  const block = s => ({ rule: `missing-${s}`, detail: `COLLABORATOR_HANDOFF missing ${s}: field` });
+  if (!/cross_family_reviewer:/i.test(body)) violations.push(block('cross-family-reviewer'));
+  if (!/cross_family_rating:/i.test(body)) violations.push(block('cross-family-rating'));
+  if (!/cross_family_findings:/i.test(body)) violations.push(block('cross-family-findings'));
   const fm = (body || '').match(/reviewer_family\s*:\s*(\S+)/i);
   if (fm && !KNOWN_FAMILIES.includes(fm[1].toLowerCase())) {
     violations.push({ rule: 'unknown-reviewer-family',
       detail: `reviewer_family "${fm[1]}" not in KNOWN_FAMILIES`, severity: 'advisory' });
+  }
+  const tmm = (body || '').match(/Team&Model\s*:\s*(\S+)/i);
+  const rvm = (body || '').match(/cross_family_reviewer\s*:\s*(\S+)/i);
+  if (tmm && rvm) {
+    const cf = extractAIFamily(tmm[1]);
+    const rf = extractAIFamily(rvm[1]);
+    if (cf !== 'unknown' && cf === rf) {
+      violations.push({ rule: 'cross-family-reviewer-same-family',
+        detail: `Reviewer family "${rf}" matches Collaborator Team&Model family` });
+    }
   }
   return violations;
 }

@@ -212,6 +212,8 @@ Conditional required fields:
 
 `test_strategy` selected per `instructions/test-methodology-matrix.instructions.md`; missing on legacy tickets defaults to `none` (advisory). New tickets with `none` on non-permitted lane fail `test-evidence`.
 
+**Cross-family preflight requirement** (lane:code-change, Refs #2439): Before posting `COLLABORATOR_HANDOFF`, run `npm run collaborator:preflight --ticket=N`. The handoff MUST include `cross_family_rating:`, `cross_family_reviewer:`, and `cross_family_findings:` from the preflight output. The reviewer model family MUST differ from the Collaborator's `Team&Model` family.
+
 ## Parent/child relationships (Sub-issues primitive)
 
 The canonical parent/child relationship uses GitHub's native **Sub-issues**
