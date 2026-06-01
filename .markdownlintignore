@@ -6,3 +6,4 @@ CHANGELOG-archive.md
 .dashboard/
 generated/
 tests/fixtures/governance/golden/
+scripts/xteam-mcp/node_modules/
