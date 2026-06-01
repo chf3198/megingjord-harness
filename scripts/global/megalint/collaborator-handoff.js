@@ -7,6 +7,7 @@ const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const docCoverage = require('./doc-coverage.js');
+const { KNOWN_FAMILIES } = require('./signer-fidelity.js');
 
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
@@ -32,11 +33,17 @@ function checkSignerFields(body) {
 
 function checkCrossFamily(body) {
   const advisory = s => ({ rule: s, detail: `COLLABORATOR_HANDOFF missing ${s.replace('missing-', '').replace(/-/g, '_')}: field`, severity: 'advisory' });
-  return [
+  const violations = [
     /cross_family_reviewer:/i.test(body) ? null : advisory('missing-cross-family-reviewer'),
     /cross_family_rating:/i.test(body) ? null : advisory('missing-cross-family-rating'),
     /reviewer_family:/i.test(body) ? null : advisory('missing-reviewer-family'),
   ].filter(Boolean);
+  const fm = (body || '').match(/reviewer_family\s*:\s*(\S+)/i);
+  if (fm && !KNOWN_FAMILIES.includes(fm[1].toLowerCase())) {
+    violations.push({ rule: 'unknown-reviewer-family',
+      detail: `reviewer_family "${fm[1]}" not in KNOWN_FAMILIES`, severity: 'advisory' });
+  }
+  return violations;
 }
 
 function validate(input) {
