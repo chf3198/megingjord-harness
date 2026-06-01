@@ -92,4 +92,4 @@ function validate(input) {
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
 
-module.exports = { validate, findConsultantCloseout };
+module.exports = { validate, findConsultantCloseout, checkCrossFamilyVerdict };
