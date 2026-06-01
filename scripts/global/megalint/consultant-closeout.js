@@ -61,28 +61,17 @@ function checkGovTokenResolution(body, input) {
   return unresolved.map(t => ({ rule: 'unresolved-governance-token', detail: `Token ${t} has no catalog source in instructions/governance-controls.instructions.md` }));
 }
 
-function hasChildRef(body) {
-  const matches = (body || '').match(/(?:^|[\s(\[,;])#(\d{2,5})\b/g) || [];
-  return matches.length > 0;
-}
-
-function hasPrRef(body) {
-  return /\b(?:PR|pull[\/\\]|pull\s+request)\s*#?\d+|pull\/\d+/i.test(body || '');
-}
-
-function hasResearchRef(body) {
-  return /research\/[\w-]+\.md/i.test(body || '');
-}
-
 function checkSubstantiveContent(body, isEpic) {
   if (!isEpic) return [];
-  if (hasChildRef(body) || hasPrRef(body) || hasResearchRef(body)) return [];
-  return [{
-    rule: 'epic-closeout-no-substantive-evidence',
-    detail: 'CONSULTANT_CLOSEOUT on an Epic must reference substantive evidence: at least one of '
-      + '(a) #N child issue ref, (b) PR ref (PR #N or pull/N), (c) research/*.md path. '
-      + 'Schema-fields-only closeouts (rubric + verdict + timestamp + signer) are insufficient — see #1453.',
-  }];
+  const b = body || '';
+  if (/(?:^|[\s(\[,;])#\d{2,5}\b/.test(b) || /\b(?:PR|pull[\/\\]|pull\s+request)\s*#?\d+|pull\/\d+/i.test(b) || /research\/[\w-]+\.md/i.test(b)) return [];
+  return [{ rule: 'epic-closeout-no-substantive-evidence', detail: 'CONSULTANT_CLOSEOUT on an Epic must reference: (a) #N child ref, (b) PR ref, (c) research/*.md — see #1453.' }];
+}
+
+function checkCrossFamilyVerdict(body) {
+  if (!/cross_family_verdict:/i.test(body)) return [{ rule: 'cross-family-verdict-missing', severity: 'advisory', detail: 'CONSULTANT_CLOSEOUT: cross_family_verdict field missing (advisory; #2537)' }];
+  if (!/cross_family_verdict:\s*(ACCEPT|PARTIAL|REJECT)\s*[—–-]+\s*\S+@\S+\s*[—–-]+\s*.+/i.test(body)) return [{ rule: 'cross-family-verdict-malformed', detail: 'cross_family_verdict must be: ACCEPT|PARTIAL|REJECT — <model@host> — <rationale>' }];
+  return [];
 }
 
 function validate(input) {
@@ -98,8 +87,9 @@ function validate(input) {
     ...checkTier3Emission(body, input),
     ...checkGovTokenResolution(body, input),
     ...checkSubstantiveContent(body, input.isEpic === true),
+    ...checkCrossFamilyVerdict(body),
   ];
-  return { ok: violations.length === 0, violations, found: true };
+  return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
 
 module.exports = { validate, findConsultantCloseout };
