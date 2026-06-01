@@ -49,7 +49,9 @@ jobs:
               return;
             }
             const { validate } = require('./scripts/global/megalint/collaborator-handoff.js');
-            const result = validate({ comments: comments.map(c => c.body), labels });
+            // #2562: pass full comment objects (validator reads .body + .user); mapping
+            // to bare .body strings false-failed the gate on every PR.
+            const result = validate({ comments, labels });
             if (!result.ok) {
               const detail = (result.violations || []).map(v => v.rule + (v.detail ? ': ' + v.detail : '')).join('; ');
               core.setFailed(`collaborator-handoff violations in #${linkedIssue}: ${detail}`);

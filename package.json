@@ -261,6 +261,7 @@
     "gov:parity": "node scripts/global/megalint/parity-validator.js",
     "routing:fallback-report": "node scripts/global/routing-fallback-report.js",
     "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js",
+    "test:collaborator-input-shape": "node --test tests/collaborator-handoff-input-shape.spec.js",
     "test:compatibility": "node --test tests/orchestrator-compatibility.spec.js",
     "test:post-merge-sweep": "node --test tests/post-merge-sweep.spec.js",
     "synthesis:init": "node scripts/global/synthesis-init.js",
