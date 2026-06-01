@@ -78,6 +78,17 @@ test('AC6: advisory mode -> would-force-close, never closes', async () => {
   assert.strictEqual(gh.calls.update.length, 0);
 });
 
+test('L4-fleet#3: idempotent — a re-run after force-close is a no-op', async () => {
+  const gh1 = mockGithub({ 2: 'open' });           // run 1: open -> force-closed
+  const r1 = await sweep.sweep({ github: gh1, owner: 'o', repo: 'r', prNumber: 5, prBody: 'Closes #2', ...fast });
+  assert.strictEqual(r1.records[0].action, 'force-closed');
+  const gh2 = mockGithub({ 2: 'closed' });          // run 2: now closed -> already-closed, no side effects
+  const r2 = await sweep.sweep({ github: gh2, owner: 'o', repo: 'r', prNumber: 5, prBody: 'Closes #2', ...fast });
+  assert.strictEqual(r2.records[0].action, 'already-closed');
+  assert.strictEqual(gh2.calls.update.length, 0);
+  assert.strictEqual(gh2.calls.comment.length, 0);
+});
+
 test('AC5: audit events emitted only for drift actions', () => {
   const result = { prNumber: 9, records: [
     { number: 1, action: 'already-closed' },
