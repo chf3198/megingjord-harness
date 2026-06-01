@@ -25,7 +25,7 @@ function parseCloseKeywords(text) {
 // AC2: de-duplicated union of citations from PR body AND every commit message.
 function collectCitations({ prBody = '', commitMessages = [] } = {}) {
   const nums = new Set(parseCloseKeywords(prBody));
-  for (const msg of commitMessages) for (const n of parseCloseKeywords(msg)) nums.add(n);
+  for (const msg of commitMessages) for (const num of parseCloseKeywords(msg)) nums.add(num);
   return [...nums];
 }
 
