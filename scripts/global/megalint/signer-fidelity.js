@@ -49,21 +49,47 @@ function checkRegistryAlias(body, opts) {
   return [result.violation];
 }
 
+function extractAIFamily(teamModel) {
+  if (!teamModel) return 'unknown';
+  const m = (teamModel.match(/[^:]+:([^@]+)@/) || [])[1] || teamModel;
+  const s = m.toLowerCase();
+  if (s.includes('claude')) return 'anthropic';
+  if (/^gpt-|^o[0-9]/.test(s)) return 'openai';
+  if (s.includes('qwen')) return 'qwen';
+  if (s.includes('deepseek')) return 'deepseek';
+  if (s.includes('granite')) return 'granite';
+  return 'unknown';
+}
+
+function checkConsultantFamilyIndependence(body) {
+  if (!body) return [];
+  const blocks = [];
+  const pat = /Team&Model\s*:\s*([^\n]+)[\s\S]{0,120}?Role\s*:\s*(\w[\w-]*)/gi;
+  let match;
+  while ((match = pat.exec(body)) !== null) {
+    blocks.push({ teamModel: match[1].trim(), role: match[2].toLowerCase() });
+  }
+  const consult = blocks.find(b => b.role === 'consultant');
+  const collab = blocks.find(b => b.role === 'collaborator');
+  if (!consult || !collab) return [];
+  const cf = extractAIFamily(consult.teamModel);
+  const cc = extractAIFamily(collab.teamModel);
+  if (cf === 'unknown' || cc === 'unknown' || cf !== cc) return [];
+  return [{ rule: 'cross-family-mismatch', severity: 'advisory',
+    detail: `Consultant+Collaborator same AI family (${cf}); cross-family review required (#2511)` }];
+}
+
 function validate(input) {
   const body = input.body || '';
   const violations = checkSignedBy(body);
   const aiSig = findSignerField(body, 'AI-Signature');
-  if (isClientIdentity(aiSig)) {
-    violations.push({
-      rule: 'client-identity-as-ai-signature',
-      detail: `Issue body uses client identity "${aiSig}" as AI-Signature trailer`,
-    });
-  }
-  violations.push(...checkRegistryAlias(body, {
-    device: input.device, registryOverride: input.registryOverride,
-  }));
+  if (isClientIdentity(aiSig)) violations.push({ rule: 'client-identity-as-ai-signature',
+    detail: `Issue body uses client identity "${aiSig}" as AI-Signature trailer` });
+  violations.push(...checkRegistryAlias(body, { device: input.device, registryOverride: input.registryOverride }));
+  violations.push(...checkConsultantFamilyIndependence(body));
   const unique = dedupe(violations);
-  return { ok: unique.length === 0, violations: unique };
+  return { ok: unique.filter(v => v.severity !== 'advisory').length === 0, violations: unique };
 }
 
-module.exports = { validate, isClientIdentity, findSignerField, CLIENT_IDENTITIES };
+module.exports = { validate, isClientIdentity, findSignerField, extractAIFamily,
+  checkConsultantFamilyIndependence, CLIENT_IDENTITIES };
