@@ -75,5 +75,5 @@ Add a new model family via a single child ticket under Epic #2511. Update this
 file + `scripts/global/megalint/signer-fidelity.js` family map in the same PR.
 
 ## Related Tickets
-#2438 (collaborator-preflight.js), #2439 (collaborator-handoff.js schema),
-#2510 (admin-handoff.js family check), Epic #2192 (consultant gate research)
+- #2438 (collaborator-preflight.js), #2439 (collaborator-handoff.js schema),
+  #2510 (admin-handoff.js family check), Epic #2192 (consultant gate research)

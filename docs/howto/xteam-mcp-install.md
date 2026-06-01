@@ -1,46 +1,56 @@
-# /xteam MCP server — per-runtime install
+# /xteam MCP server — install and verify
 
-The `megingjord-xteam-mcp` server exposes 3 slash-commands (`/xteam`, `/xteam-create`, `/xteam-status`) in any MCP-compatible AI runtime. Install it once per runtime; then the slash commands appear in every chat.
+`megingjord-xteam` exposes `/xteam`, `/xteam-create`, and `/xteam-status` through MCP.
 
-## Prerequisites (all runtimes)
+## Recommended path (automated)
 
-- Node.js ≥ 18
-- `gh` CLI authenticated: `gh auth status` returns OK
-- Read+write access to the workspace repo (Issues + Labels)
-- This repo (megingjord-harness) checked out somewhere — the server lives under `scripts/xteam-mcp/`
-
-## 0. Install dependencies (one-time)
-
-The xteam MCP server is wired into the harness root via npm workspaces (per #2507). Running `npm install` at the harness root automatically installs the MCP server's dependencies under `scripts/xteam-mcp/node_modules/`:
+From repo root, registration is handled automatically by deploy apply scripts.
+Use `deploy:all:apply` to register all four runtimes:
 
 ```bash
-cd <megingjord-harness-checkout>
-npm install
+npm run deploy:all:apply
 ```
 
-That single command sets up `@modelcontextprotocol/sdk` for the xteam server. No second install step needed.
+`npm run deploy:apply` updates Copilot runtime assets and only registers Copilot MCP.
 
-## 1. Claude Code
-
-Run from anywhere:
+You can also run registration directly:
 
 ```bash
-claude mcp add megingjord-xteam --command="node /absolute/path/to/scripts/xteam-mcp/bin.js" --env MEGINGJORD_XTEAM_TEAM=claude-code
+npm run mcp:register
 ```
 
-Config lands in `~/.claude/mcp_config.json`. Restart Claude Code to pick up the new server.
+## Runtime matrix (authoritative)
 
-## 2. Codex CLI
+| Runtime | Config file | Key / method | Scope |
+|---|---|---|---|
+| Claude Code | `~/.claude.json` | root `mcpServers` JSON merge | user (cross-project) |
+| VS Code Copilot | `~/.config/Code/User/mcp.json` | `servers` JSON merge | default profile in this epic |
+| Codex | `~/.codex/config.toml` | `[mcp_servers.megingjord-xteam]` TOML block | global |
+| Antigravity | `~/.config/Antigravity/User/mcp.json` | `servers` JSON merge | default profile |
+
+## Fallback / advanced manual registration
+
+Use these only if automation is unavailable.
+
+### 1. Claude Code
 
 ```bash
-codex mcp add megingjord-xteam --command="node /absolute/path/to/scripts/xteam-mcp/bin.js" --env MEGINGJORD_XTEAM_TEAM=codex
+claude mcp add megingjord-xteam -- node /absolute/path/to/scripts/xteam-mcp/bin.js
 ```
 
-Config lands in `~/.codex/mcp_config.json`.
+Stored in `~/.claude.json`.
 
-## 3. VS Code Copilot
+### 2. Codex CLI
 
-Open Settings UI: Search "MCP Servers" -> Add MCP Server. Or edit `.vscode/mcp.json`:
+```bash
+codex mcp add megingjord-xteam --env MEGINGJORD_XTEAM_TEAM=codex -- node /absolute/path/to/scripts/xteam-mcp/bin.js
+```
+
+Stored in `~/.codex/config.toml`.
+
+### 3. VS Code Copilot
+
+Edit MCP user config (`MCP: Open User Configuration`) and add under `servers`:
 
 ```json
 {
@@ -54,59 +64,27 @@ Open Settings UI: Search "MCP Servers" -> Add MCP Server. Or edit `.vscode/mcp.j
 }
 ```
 
-Set `chat.mcp.discovery.enabled: true` in user settings to auto-discover from Claude Desktop instead.
+This epic targets the default profile path `~/.config/Code/User/mcp.json`. For non-default profiles, open that profile's MCP user config via command palette.
 
-## 4. Antigravity
+### 4. Antigravity
 
-Open the Agent pane > MCP Servers > Install Custom Server:
-- Name: `megingjord-xteam`
-- Command: `node /absolute/path/to/scripts/xteam-mcp/bin.js`
-- Env: `MEGINGJORD_XTEAM_TEAM=antigravity`
+Use CLI add-mcp JSON (or UI equivalent):
 
-## 5. Gemini CLI
-
-Edit `~/.gemini/settings.json` (higher friction; Phase-1 follow-on `install-xteam.sh` will automate):
-
-```json
-{
-  "mcpServers": {
-    "megingjord-xteam": {
-      "command": "node",
-      "args": ["/absolute/path/to/scripts/xteam-mcp/bin.js"],
-      "env": { "MEGINGJORD_XTEAM_TEAM": "gemini" }
-    }
-  }
-}
+```bash
+antigravity --add-mcp '{"name":"megingjord-xteam","command":"node","args":["/absolute/path/to/scripts/xteam-mcp/bin.js"],"env":{"MEGINGJORD_XTEAM_TEAM":"antigravity"}}'
 ```
 
 ## Verification
 
-After install + restart, in any chat:
+After runtime reload/restart, run:
 
-```
+```text
 /xteam-status 1
 ```
 
-Expect a structured response with `{ticket: 1, leadTeam: ..., status: ...}`.
+Expected: structured status response (ticket, lead team, role/status context).
 
-## Troubleshooting
+## Notes
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| Slash command not visible | Server not registered, or runtime not restarted | Re-run install + restart the runtime |
-| "gh: command not found" | gh CLI missing | Install gh: https://cli.github.com |
-| 404 on label-add | Ticket number wrong or no write access | Confirm `gh issue view <N>` works |
-| Server crashes on startup | Missing `@modelcontextprotocol/sdk` | `cd scripts/xteam-mcp && npm install` |
-
-## Per-runtime env tuning
-
-| Env var | Default | Purpose |
-|---|---|---|
-| `MEGINGJORD_XTEAM_TEAM` | `claude-code` | Identifies which team this session represents |
-| `MEGINGJORD_XTEAM_PERSPECTIVES` | `inventory/team-perspectives.json` | Override path to perspective lens config |
-
-## Related
-
-- Epic #2486 (parent)
-- docs/howto/cross-team-rd-synthesis.md (now uses /xteam by default)
-- research/xteam-mcp-design-2026-05-31.md (Phase-0 design)
+- Registration verifies config presence; prompt visibility validation is tracked by #2565 and consumed by #2559.
+- Non-default VS Code profile discovery is tracked by #2567.

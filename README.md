@@ -128,18 +128,18 @@ npm run deploy:both:apply
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
-| `deploy` | `bash scripts/deploy.sh` |
-| `deploy:all` | `bash scripts/deploy.sh --target all` |
-| `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all` |
-| `deploy:antigravity` | `bash scripts/deploy.sh --target antigravity` |
-| `deploy:antigravity:apply` | `bash scripts/deploy.sh --apply --target antigravity` |
-| `deploy:apply` | `bash scripts/deploy.sh --apply` |
-| `deploy:both` | `bash scripts/deploy.sh --target both` |
-| `deploy:both:apply` | `bash scripts/deploy.sh --apply --target both` |
-| `deploy:claude` | `bash scripts/deploy.sh --target claude` |
-| `deploy:claude:apply` | `bash scripts/deploy.sh --apply --target claude` |
-| `deploy:codex` | `bash scripts/deploy.sh --target codex` |
-| `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex` |
+| `deploy` | `bash scripts/deploy.sh && node scripts/global/xteam-mcp-register.js --target copilot --root .` |
+| `deploy:all` | `bash scripts/deploy.sh --target all && node scripts/global/xteam-mcp-register.js --target all --root .` |
+| `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all && node scripts/global/xteam-mcp-register.js --target all --root . --apply` |
+| `deploy:antigravity` | `bash scripts/deploy.sh --target antigravity && node scripts/global/xteam-mcp-register.js --target antigravity --root .` |
+| `deploy:antigravity:apply` | `bash scripts/deploy.sh --apply --target antigravity && node scripts/global/xteam-mcp-register.js --target antigravity --root . --apply` |
+| `deploy:apply` | `bash scripts/deploy.sh --apply && node scripts/global/xteam-mcp-register.js --target copilot --root . --apply` |
+| `deploy:both` | `bash scripts/deploy.sh --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . && node scripts/global/xteam-mcp-register.js --target codex --root .` |
+| `deploy:both:apply` | `bash scripts/deploy.sh --apply --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . --apply && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
+| `deploy:claude` | `bash scripts/deploy.sh --target claude && node scripts/global/xteam-mcp-register.js --target claude --root .` |
+| `deploy:claude:apply` | `bash scripts/deploy.sh --apply --target claude && node scripts/global/xteam-mcp-register.js --target claude --root . --apply` |
+| `deploy:codex` | `bash scripts/deploy.sh --target codex && node scripts/global/xteam-mcp-register.js --target codex --root .` |
+| `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
 | `deps:aggregate` | `node scripts/global/dep-graph-aggregate.js` |
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
@@ -296,6 +296,7 @@ npm run deploy:both:apply
 | `mailbox:poll` | `node scripts/global/mailbox-client.js poll` |
 | `mailbox:send` | `node scripts/global/mailbox-client.js send` |
 | `mcp:project-state` | `node scripts/global/mcp-project-state.js` |
+| `mcp:register` | `node scripts/global/xteam-mcp-register.js --target all --root . --apply` |
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
