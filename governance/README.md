@@ -32,6 +32,19 @@ All four entry-point files MUST mention each invariant. `cross-team-contract-che
 3. **Ticket-first workflow** — no governed work without a linked GitHub issue per `instructions/ticket-driven-work.instructions.md`.
 4. **Dedicated-worktree protocol** — one live worktree per agent per `research/concurrent-agent-worktrees-2026-04-24.md`.
 
+## Client-Arbitration Prohibition (#2578)
+
+Internal conflicts are operator-owned and must never be delegated to the client:
+
+- sync residue / reverse-sync drift,
+- cross-team lease collisions,
+- worktree branch drift or baton-role collisions.
+
+Client input remains limited to design direction and UAT confirmation.
+
+Enforcement: `hooks/scripts/client_arbitration_guard.py` + `hooks/scripts/stop_reminder.py`.
+The Stop hook blocks leakage patterns and emits incidents for anneal follow-up.
+
 ## State taxonomy (Epic #1828)
 
 The harness uses an 11-state status taxonomy enforcing **single-status cardinality**:
