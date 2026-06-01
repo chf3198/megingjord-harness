@@ -7,7 +7,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const sweep = require('../scripts/global/post-merge-sweep.js');
 
-function mockGithub(states) {
+function mockGithub(states, comments = {}) {
   const calls = { update: [], comment: [] };
   const seq = {};
   return {
@@ -22,6 +22,7 @@ function mockGithub(states) {
       },
       async update(a) { calls.update.push(a); },
       async createComment(a) { calls.comment.push(a); },
+      async listComments({ issue_number }) { return { data: comments[issue_number] || [] }; },
     },
   };
 }
@@ -66,6 +67,37 @@ test('AC2: citations unioned from body + commit messages, de-duped', () => {
   assert.deepStrictEqual(cites.sort((a, b) => a - b), [1, 2]);
 });
 
+test('AC2: deferred-final citation requires consultant closeout before close', async () => {
+  const gh = mockGithub(
+    { 11: 'open' },
+    { 11: [{ body: '## CONSULTANT_CLOSEOUT\nverdict: approve_for_merge' }] },
+  );
+  const r = await sweep.sweep({
+    github: gh,
+    owner: 'o',
+    repo: 'r',
+    prNumber: 9,
+    prBody: 'merge-evidence-deferred-final: #11',
+    ...fast,
+  });
+  assert.strictEqual(r.records[0].action, 'force-closed');
+  assert.strictEqual(gh.calls.update.length, 1);
+});
+
+test('AC2: deferred-final without consultant closeout -> no close', async () => {
+  const gh = mockGithub({ 12: 'open' }, { 12: [{ body: 'status update only' }] });
+  const r = await sweep.sweep({
+    github: gh,
+    owner: 'o',
+    repo: 'r',
+    prNumber: 9,
+    prBody: 'merge-evidence-deferred-final: #12',
+    ...fast,
+  });
+  assert.strictEqual(r.records[0].action, 'deferred-no-closeout');
+  assert.strictEqual(gh.calls.update.length, 0);
+});
+
 test('L2-fleet#1: optional-colon form parses; bare "closes#N" (no space) does not', () => {
   assert.deepStrictEqual(sweep.parseCloseKeywords('Closes: #5 fixes: #6'), [5, 6]);
   assert.deepStrictEqual(sweep.parseCloseKeywords('closes#7 see #8'), []); // neither is a valid GitHub close-link
@@ -94,8 +126,9 @@ test('AC5: audit events emitted only for drift actions', () => {
     { number: 1, action: 'already-closed' },
     { number: 2, action: 'force-closed' },
     { number: 3, action: 'skipped-errored', error: 'x' },
+    { number: 4, action: 'deferred-no-closeout' },
   ] };
   const evs = sweep.toAuditEvents(result);
-  assert.strictEqual(evs.length, 2);
+  assert.strictEqual(evs.length, 3);
   assert.ok(evs.every((e) => e.ts && e.service === 'post-merge-sweep'));
 });
