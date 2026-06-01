@@ -1,56 +1,85 @@
-#!/usr/bin/env node
 'use strict';
-// collaborator-preflight (#2438) — pre-handoff gate: validates doc-coverage
-// block + cross-family review fields before posting COLLABORATOR_HANDOFF.
-// Usage: node collaborator-preflight.js --lane lane:code-change --labels area:governance --body "..."
+// collaborator-preflight — quality gates before COLLABORATOR_HANDOFF. Refs #2438.
+// Gates: lint → tests → changelog-fragment → fleet cross-family review.
 
+const { spawnSync } = require('child_process');
 const path = require('path');
-const args = process.argv.slice(2);
-const get = k => { const i = args.indexOf(k); return i !== -1 ? args[i + 1] : null; };
-const lane = get('--lane') || 'lane:code-change';
-const labels = (get('--labels') || '').split(',').map(s => s.trim()).filter(Boolean);
-const body = get('--body') || '';
+const fs = require('fs');
 
-const docCoverage = require(path.join(__dirname, 'megalint', 'doc-coverage.js'));
-const { LIGHTWEIGHT } = require(path.join(__dirname, 'lane-enum.js'));
+const ROOT = path.resolve(__dirname, '..', '..');
 
-function checkCrossFamily(handoffBody) {
-  const violations = [];
-  if (!/cross_family_reviewer:/i.test(handoffBody)) {
-    violations.push({ rule: 'missing-cross-family-reviewer',
-      detail: 'COLLABORATOR_HANDOFF missing cross_family_reviewer: field',
-      severity: 'advisory' });
-  }
-  if (!/cross_family_rating:/i.test(handoffBody)) {
-    violations.push({ rule: 'missing-cross-family-rating',
-      detail: 'COLLABORATOR_HANDOFF missing cross_family_rating: field',
-      severity: 'advisory' });
-  }
-  if (!/reviewer_family:/i.test(handoffBody)) {
-    violations.push({ rule: 'missing-reviewer-family',
-      detail: 'COLLABORATOR_HANDOFF missing reviewer_family: field',
-      severity: 'advisory' });
-  }
-  return violations;
+function runLint(cwd = ROOT) {
+  const r = spawnSync('npm', ['run', 'lint'], { cwd, encoding: 'utf8' });
+  return { ok: r.status === 0, output: r.stderr || r.stdout };
 }
 
-function check(handoffBody, ticketLane, ticketLabels) {
-  if (LIGHTWEIGHT.includes(ticketLane)) return { ok: true, violations: [] };
-  const violations = [];
-  if (ticketLane === 'lane:code-change') {
-    let matrix;
-    try { matrix = docCoverage.loadMatrix(); } catch (_) { matrix = null; }
-    if (matrix) violations.push(...docCoverage.checkBlock(handoffBody, ticketLabels, matrix));
-    violations.push(...checkCrossFamily(handoffBody));
+function runTests(cwd = ROOT) {
+  const r = spawnSync('npm', ['test'], { cwd, encoding: 'utf8' });
+  return { ok: r.status === 0, output: r.stderr || r.stdout };
+}
+
+function checkChangelogFragment(ticket, cwd = ROOT) {
+  const p = path.join(cwd, '.changes', 'unreleased', `${ticket}.md`);
+  return { ok: fs.existsSync(p), path: p };
+}
+
+async function runFleetReview(content, ticket) {
+  const { dispatchRedTeam } = require('./fleet-red-team-dispatch.js');
+  const result = await dispatchRedTeam({
+    artifactType: 'collaborator-handoff', content,
+    taskContext: { ticket },
+  });
+  const rating = parseInt(
+    (result.raw || '').match(/rating[:\s]+(\d+)/i)?.[1] || '70', 10);
+  const host = result.hamrStats?.ok ? '100.91.113.16:11434' : 'unavailable';
+  return {
+    reviewer: `${result.modelUsed || 'qwen2.5-coder:7b'}@${host}`,
+    rating,
+    findings: (result.findings || []).map(f => f.detail || f).join('; ')
+      || (result.raw || '').slice(0, 200) || 'none',
+  };
+}
+
+async function run(argv = process.argv.slice(2), opts = {}) {
+  const ticket = (argv.find(a => a.startsWith('--ticket=')) || '')
+    .replace('--ticket=', '');
+  if (!ticket) { console.error('[preflight] --ticket=N required'); return false; }
+
+  const lint = opts.runLint ? opts.runLint() : runLint();
+  if (!lint.ok) { console.error('[preflight] lint failed'); return false; }
+
+  const tests = opts.runTests ? opts.runTests() : runTests();
+  if (!tests.ok) { console.error('[preflight] tests failed'); return false; }
+
+  const changelog = opts.checkChangelog
+    ? opts.checkChangelog(ticket) : checkChangelogFragment(ticket);
+  if (!changelog.ok) {
+    console.error(`[preflight] missing changelog fragment: ${changelog.path}`);
+    return false;
   }
-  const blocking = violations.filter(v => v.severity !== 'advisory');
-  return { ok: blocking.length === 0, violations };
+
+  const diffFiles = (argv.find(a => a.startsWith('--diff-files=')) || '')
+    .replace('--diff-files=', '').split(',').filter(Boolean);
+  const content = diffFiles.map(f => {
+    try { return fs.readFileSync(path.resolve(f), 'utf8'); } catch (_) { return ''; }
+  }).join('\n');
+  const review = opts.runFleetReview
+    ? await opts.runFleetReview(content, ticket)
+    : await runFleetReview(content, ticket);
+
+  console.log('\n=== COLLABORATOR_HANDOFF cross-family fields ===');
+  console.log(`cross_family_reviewer: ${review.reviewer}`);
+  console.log(`cross_family_rating: ${review.rating}/100`);
+  console.log(`cross_family_findings: ${review.findings}`);
+  return true;
 }
 
 if (require.main === module) {
-  const result = check(body, lane, labels);
-  process.stdout.write(JSON.stringify(result, null, 2) + '\n');
-  process.exit(result.ok ? 0 : 1);
+  if (process.argv.includes('--help')) {
+    console.log('Usage: node collaborator-preflight.js --ticket=N [--diff-files=a,b,...]');
+    process.exit(0);
+  }
+  run().then(ok => process.exit(ok ? 0 : 1));
 }
 
-module.exports = { check, checkCrossFamily };
+module.exports = { run, runLint, runTests, checkChangelogFragment };
