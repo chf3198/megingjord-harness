@@ -80,3 +80,6 @@ tmp/
 
 # Refs #2153 — doc-graph artifact (rebuilt on demand)
 generated/doc-graph.json
+
+# Refs #2560 — hook-generated transient baton state (never committed)
+.megingjord-state.json
