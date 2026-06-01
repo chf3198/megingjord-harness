@@ -18,6 +18,12 @@ from governance_state import ensure_state, reset_on_branch_change, save_state
 from stop_checks import (
     check_admin_ops, check_uncommitted, post_merge_messages, wiki_pending_message,
 )
+from client_arbitration_guard import (
+    classify_internal_conflict,
+    detect_client_arbitration,
+    emit_incident,
+    extract_assistant_text,
+)
 
 
 def main() -> int:
@@ -48,9 +54,36 @@ def main() -> int:
     messages = []
     block_reason = None
 
-    block_reason, msg = check_uncommitted(uncommitted, roles)
+    assistant_text = extract_assistant_text(payload)
+    violations = detect_client_arbitration(assistant_text)
+    if violations:
+        emit_incident("client-arbitration-output-leak", evidence=violations)
+        block_reason = "Stop blocked: client-arbitration leakage detected."
+        messages.append(
+            "CLIENT-ARBITRATION GUARDRAIL BLOCK — internal governance/worktree/team "
+            "conflicts must be resolved by the operator, not delegated to the client."
+        )
+
+    if not block_reason:
+        block_reason, msg = check_uncommitted(uncommitted, roles)
+    else:
+        msg = None
     if msg:
         messages.append(msg)
+
+    conflict = classify_internal_conflict(uncommitted)
+    if conflict.get("type") != "none":
+        emit_incident(
+            "internal-conflict-auto-resolution-required",
+            evidence=[conflict["type"], *conflict.get("files", [])[:5]],
+            severity="medium",
+        )
+        if not block_reason:
+            block_reason = "Stop blocked: unresolved internal conflict requires deterministic operator resolution."
+        policy = " | ".join(conflict.get("policy", []))
+        messages.append(
+            f"INTERNAL-CONFLICT POLICY ({conflict['type']}): {policy}"
+        )
 
     if not block_reason:
         block_reason, msg = check_admin_ops(flags, ops, roles, repo_type, uncommitted)
