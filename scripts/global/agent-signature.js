@@ -9,8 +9,11 @@ const opt = {};
 for (let i = 0; i < args.length; i += 2) if (args[i]?.startsWith('--')) opt[args[i].slice(2)] = args[i + 1] || '';
 
 const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'inventory', 'team-model-signatures.json'), 'utf8'));
-const team = (opt.team || 'codex').toLowerCase();
-const model = (opt.model || 'gpt-5.4').toLowerCase();
+// Identity is settings/substrate-derived, never hard-coded to one team (G5).
+// Resolve from explicit flag, then the established HAMR_TEAM/HAMR_MODEL env
+// signals; if unresolved we fail loud below rather than mis-attribute provenance.
+const team = (opt.team || process.env.HAMR_TEAM || process.env.MEGINGJORD_TEAM || '').toLowerCase();
+const model = (opt.model || process.env.HAMR_MODEL || process.env.MEGINGJORD_MODEL || '').toLowerCase();
 const role = (opt.role || 'collaborator').toLowerCase();
 const substrate = (opt.substrate || 'local').toLowerCase();
 const deviceName = (opt.device || '').toLowerCase();
@@ -18,6 +21,15 @@ const format = opt.format || 'json';
 const withCrypto = String(opt['include-crypto'] || '').toLowerCase() === 'true';
 const keyFile = opt['private-key-file'] ? path.resolve(opt['private-key-file']) : '';
 const device = deviceName ? `/${deviceName}` : '';
+
+if (!team || !model) {
+  process.stderr.write(
+    'agent-signature: unresolved identity. Pass --team and --model, or set '
+    + 'HAMR_TEAM and HAMR_MODEL. Refusing to emit a default signature so the '
+    + 'signer team/model is never silently mis-attributed (provenance integrity).\n'
+  );
+  process.exit(2);
+}
 
 function match(entry) {
   return (entry.team === '*' || entry.team === team)
