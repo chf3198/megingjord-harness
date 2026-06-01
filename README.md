@@ -124,6 +124,7 @@ npm run deploy:both:apply
 | `capability:show` | `node scripts/global/capability-show.js` |
 | `catch-empty` | `bash scripts/global/catch-empty-lint.sh .github/workflows` |
 | `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |
+| `collaborator:preflight` | `node scripts/global/collaborator-preflight.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
@@ -325,6 +326,7 @@ npm run deploy:both:apply
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
 | `stress:evidence-check:test` | `node --test tests/stress-evidence-check.spec.js` |
 | `stress:full` | `MEGINGJORD_STRESS_TIER=D node scripts/global/stress-orchestrator.js` |
+| `stress:post-merge-sweep` | `node --test tests/stress-post-merge-sweep.spec.js` |
 | `stress:realism` | `MEGINGJORD_STRESS_TIER=B node scripts/global/stress-orchestrator.js` |
 | `stress:rebase` | `node --test tests/stress-rebase-discipline.spec.js` |
 | `stress:role-baton` | `node --test tests/stress-role-baton-linter.spec.js` |
@@ -349,6 +351,7 @@ npm run deploy:both:apply
 | `test` | `npx playwright test` |
 | `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
 | `test:headed` | `npx playwright test --headed` |
+| `test:post-merge-sweep` | `node --test tests/post-merge-sweep.spec.js` |
 | `test:quality` | `npx playwright test tests/google-quality.spec.js` |
 | `test:sse-load` | `node scripts/tools/sse-load-test.js` |
 | `ticket:create` | `node scripts/global/ticket-create.js` |

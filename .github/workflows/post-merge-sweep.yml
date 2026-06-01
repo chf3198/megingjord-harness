@@ -1,0 +1,53 @@
+name: Post-Merge Sweep
+# #1911 (Epic #1894): force-close ticket drifters when GitHub auto-close-via-keyword
+# misfires (selective-miss or commit-vs-body). Advisory by default (reports
+# would-force-close); set repo variable POST_MERGE_SWEEP_ENFORCE=1 to enforce.
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      enforce:
+        description: 'Force-close drifters (1) vs advisory dry-run (0)'
+        default: '0'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: post-merge-sweep-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          SWEEP_ENFORCE: ${{ github.event.inputs.enforce || vars.POST_MERGE_SWEEP_ENFORCE || '0' }}
+        with:
+          script: |
+            const sweep = require('./scripts/global/post-merge-sweep.js');
+            const pr = context.payload.pull_request;
+            const advisory = (process.env.SWEEP_ENFORCE || '0') !== '1';
+            const { owner, repo } = context.repo;
+            let prBody = '', prNumber = context.runId, commitMessages = [];
+            if (pr) {
+              prBody = pr.body || ''; prNumber = pr.number;
+              const commits = await github.rest.pulls.listCommits({ owner, repo, pull_number: pr.number, per_page: 100 });
+              commitMessages = commits.data.map((c) => c.commit.message);
+            }
+            const result = await sweep.sweep({
+              github: { issues: github.rest.issues }, owner, repo,
+              prNumber, prBody, commitMessages, advisoryClose: advisory,
+            });
+            const audited = sweep.appendAudit(result);
+            const drift = result.records.filter((r) => r.action !== 'already-closed' && r.action !== 'closed-after-poll');
+            core.summary.addRaw(`Post-merge-sweep (${advisory ? 'advisory' : 'enforce'}): `
+              + `${result.citations.length} citation(s), ${drift.length} drift, ${audited} audited.\n`);
+            for (const d of drift) core.summary.addRaw(`- #${d.number}: ${d.action}\n`);
+            await core.summary.write();
