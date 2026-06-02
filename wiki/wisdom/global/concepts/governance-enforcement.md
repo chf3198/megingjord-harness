@@ -2,7 +2,7 @@
 title: "Governance Enforcement"
 type: concept
 created: 2026-04-14
-updated: 2026-04-14
+updated: 2026-06-02
 tags: [governance, architecture, copilot]
 sources: []
 related: ["[[baton-protocol]]", "[[agent-drift]]", "[[self-annealing]]", "[[linting-governance]]"]
@@ -31,7 +31,7 @@ status: draft
 - Branch name validation (pre-commit)
 - Event emission (mandatory per Admin skill)
 - Drift detection (Consultant CLOSEOUT)
-- Ticket lifecycle enforcement (Manager gates)
+- Ticket lifecycle enforcement (Manager gates, including overlap-boundary fields related_tickets + overlap_decision)
 
 See: [[workflow-design]], [[copilot-governance-actions]]
 

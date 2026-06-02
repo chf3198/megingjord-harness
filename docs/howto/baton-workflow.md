@@ -30,7 +30,14 @@ gh issue create \
 
 Title rules: plain imperative ≤72 chars. No `feat(scope):` prefix on issue titles.
 
-**Post scope comment** with objective, ACs, and constraints. End it with:
+**Post scope comment** with objective, ACs, constraints, and overlap boundary references. Include these required fields before the signature block:
+
+```
+related_tickets: [#N, #N, ...]
+overlap_decision: <boundary decision>
+```
+
+End it with:
 
 ```
 MANAGER_HANDOFF

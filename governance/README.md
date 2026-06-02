@@ -29,7 +29,7 @@ All four entry-point files MUST mention each invariant. `cross-team-contract-che
 
 1. **Team&Model signing** — every governed artifact carries `Signed-by:` + `Team&Model:` + `Role:` per `instructions/team-model-signing.instructions.md`.
 2. **Baton order** — Manager → Collaborator → Admin → Consultant single-thread per `instructions/role-baton-routing.instructions.md`.
-3. **Ticket-first workflow** — no governed work without a linked GitHub issue per `instructions/ticket-driven-work.instructions.md`.
+3. **Ticket-first workflow** — no governed work without a linked GitHub issue, and manager handoffs must carry overlap-boundary fields for related tickets and decisions per `instructions/ticket-driven-work.instructions.md`.
 4. **Dedicated-worktree protocol** — one live worktree per agent per `research/concurrent-agent-worktrees-2026-04-24.md`.
 
 ## Client-Arbitration Prohibition (#2578)
