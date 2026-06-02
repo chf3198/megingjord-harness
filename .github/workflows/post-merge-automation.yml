@@ -46,7 +46,7 @@ jobs:
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: linkedNum, name: l,
-              }).catch(() => {});
+              }).catch(() => {}); // catch-empty: removeLabel may return 404 when label is already absent.
             }
             await github.rest.issues.addLabels({
               owner: context.repo.owner, repo: context.repo.repo,
