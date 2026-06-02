@@ -21,6 +21,7 @@ def iter_strings(value: Any) -> Iterable[str]:
 _PATH_PARAM_KEYS = frozenset({
     "file_path", "filePath", "path", "target_file", "destination",
     "notebook_path", "notebookPath",
+    "TargetFile", "targetFile",  # Antigravity write_to_file/replace_file_content (#2585)
 })
 _COLLECTION_KEYS = frozenset({"replacements", "items"})
 
