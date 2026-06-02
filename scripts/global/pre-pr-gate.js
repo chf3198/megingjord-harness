@@ -6,7 +6,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 
-const PREDATE_WINDOW_SECONDS = 60;
 const ARTIFACTS = ['MANAGER_HANDOFF', 'COLLABORATOR_HANDOFF', 'ADMIN_HANDOFF', 'CONSULTANT_CLOSEOUT'];
 
 const gh = args => { try { return execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); } catch (e) { return e.stdout?.toString('utf8') || ''; } };
@@ -23,8 +22,13 @@ const checkBatonCompleteness = comments => {
 function checkPredateWindow(comments, nowMs) {
   const collab = findArtifact(comments, 'COLLABORATOR_HANDOFF');
   if (!collab) return null;
+  // #1433: anti-retroactive-planting is an ORDERING property, not a calendar
+  // window. The handoff must PREDATE the PR (proxied here by push time). A
+  // handoff posted any time before the PR is legitimate, regardless of how few
+  // seconds — machine-speed AI operators post-then-push in <60s routinely.
+  // Fail only when the handoff is timestamped AFTER push (planted / clock anomaly).
   const age = (nowMs - new Date(collab.createdAt).getTime()) / 1000;
-  return age >= PREDATE_WINDOW_SECONDS ? null : { rule: 'predate-window-not-elapsed', detail: `COLLAB posted ${age.toFixed(1)}s ago; need >=${PREDATE_WINDOW_SECONDS}s. Wait ${(PREDATE_WINDOW_SECONDS - age).toFixed(1)}s.` };
+  return age >= 0 ? null : { rule: 'handoff-not-predating', detail: `COLLABORATOR_HANDOFF is timestamped ${(-age).toFixed(1)}s after push — it must predate the PR.` };
 }
 
 function checkClosesKeyword(prBodyDraft, leadTicket) {
@@ -90,4 +94,4 @@ if (require.main === module) {
   process.exit(result.ok ? 0 : 1);
 }
 
-module.exports = { check, checkBatonCompleteness, checkPredateWindow, checkClosesKeyword, extractLeadTicket, ARTIFACTS, PREDATE_WINDOW_SECONDS };
+module.exports = { check, checkBatonCompleteness, checkPredateWindow, checkClosesKeyword, extractLeadTicket, ARTIFACTS };

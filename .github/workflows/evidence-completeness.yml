@@ -75,7 +75,10 @@ jobs:
               violations.push(`Branch #${branchMatch[1]} ≠ Refs #${linkedNum} — branch must be for the linked issue`);
             }
 
-            // 4. COLLABORATOR_HANDOFF must predate PR creation by ≥60s
+            // 4. COLLABORATOR_HANDOFF must predate PR creation (ordering, not a
+            //    calendar window) — #1433. Retroactive planting = handoff posted
+            //    AFTER the PR (negative lag). PR.created_at and comment.created_at
+            //    share one server clock, so ordering is exact; no 60s buffer needed.
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: linkedNum, per_page: 100,
@@ -87,10 +90,10 @@ jobs:
               violations.push(`COLLABORATOR_HANDOFF not found on issue #${linkedNum}`);
             } else {
               const lagMs = prCreatedAt - new Date(handoff.created_at);
-              if (lagMs < 60_000) {
+              if (lagMs < 0) {
                 violations.push(
-                  `COLLABORATOR_HANDOFF posted ${Math.round(lagMs / 1000)}s before PR — ` +
-                  'must predate PR creation by ≥60s (retroactive planting check)'
+                  `COLLABORATOR_HANDOFF posted ${Math.round(-lagMs / 1000)}s AFTER PR creation — ` +
+                  'it must predate the PR (retroactive planting check)'
                 );
               }
             }
