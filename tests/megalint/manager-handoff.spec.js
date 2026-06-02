@@ -9,9 +9,9 @@ const fullHandoff = `**MANAGER_HANDOFF — Cole Mason**
 - test_strategy: tdd-pyramid
 - acceptance: AC1-5
 - gates: lint, test-evidence
-
+- related_tickets: [#2623, #2574, #2091, #2071]
+- overlap_decision: boundary-confirmed-no-redundancy
 Signed-by: Cole Mason · Team&Model: claude-code:opus-4-7@anthropic · Role: manager`;
-
 test('validate: full MANAGER_HANDOFF passes with all 5 fields', () => {
   const r = V.validate({ comments: [{ body: fullHandoff }] });
   expect(r.ok).toBe(true);
@@ -56,9 +56,28 @@ test('extractField: pulls value with various prefix formats', () => {
 });
 
 test('REQUIRED_FIELDS exposes 5 fields', () => {
-  expect(V.REQUIRED_FIELDS.length).toBe(5);
+  expect(V.REQUIRED_FIELDS.length).toBe(7);
   expect(V.REQUIRED_FIELDS).toContain('scope');
   expect(V.REQUIRED_FIELDS).toContain('test_strategy');
+  expect(V.REQUIRED_FIELDS).toContain('related_tickets');
+  expect(V.REQUIRED_FIELDS).toContain('overlap_decision');
+});
+
+test('validate: missing overlap fields reports violations', () => {
+  const body = fullHandoff
+    .replace(/related_tickets:.+\n/, '')
+    .replace(/overlap_decision:.+\n/, '');
+  const r = V.validate({ comments: [{ body }] });
+  expect(r.ok).toBe(false);
+  expect(r.violations.some(v => v.rule === 'missing-related_tickets')).toBe(true);
+  expect(r.violations.some(v => v.rule === 'missing-overlap_decision')).toBe(true);
+});
+
+test('validate: related_tickets must include issue references', () => {
+  const body = fullHandoff.replace(/- related_tickets:.+\n/, '- related_tickets: [none]\n');
+  const r = V.validate({ comments: [{ body }] });
+  expect(r.ok).toBe(false);
+  expect(r.violations.some(v => v.rule === 'invalid-related_tickets')).toBe(true);
 });
 
 test('phase-1: requires phase_gate_satisfied and phase_0_sources', () => {
