@@ -107,6 +107,9 @@ function resolveKeepAlive(raw = process.env.FLEET_KEEP_ALIVE) {
   return DEFAULT_KEEP_ALIVE;
 }
 
+// Backward-compatible alias used by existing callers/tests.
+function keepAliveValue() { return resolveKeepAlive(); }
+
 async function callOllamaOnce({ host, model, prompt, num_predict }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -188,5 +191,8 @@ async function dispatchRedTeam({
 module.exports = {
   dispatchRedTeam, selectModel, loadMatrix, loadTemplate, buildPrompt,
   callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
-  resolveKeepAlive, TIER, RETRY_DELAYS_MS, MATRIX_PATH,
+  callWithRetry, callOllamaOnce, keepAliveValue, parseFindings,
+  stripArxivHallucinations, detectRefusal,
+  resolveKeepAlive,
+  TIER, RETRY_DELAYS_MS, MATRIX_PATH,
 };
