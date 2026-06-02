@@ -9,6 +9,8 @@ let wrapProviderCall;
 try { ({ wrapProviderCall } = require('./hamr-provider-wrapper')); }
 catch { wrapProviderCall = async (_p, fn) => ({ ok: true, value: await fn({}) }); }
 
+const DEFAULT_TIMEOUT_MS = 30000; // per-provider abort budget
+
 // provider -> { envKey, url(key), body(prompt), headers(key), parse(json) }. OpenAI-compatible or REST.
 const PROVIDERS = {
   gemini: {
@@ -58,12 +60,12 @@ async function callProvider(name, prompt, opts = {}) {
   const wrapProvider = name === 'gemini' ? 'gemini' : 'openai-compatible';
   const wrapped = await wrapProviderCall(wrapProvider, async () => {
     const ac = new AbortController();
-    const t = setTimeout(() => ac.abort(), opts.timeoutMs || 30000);
+    const timer = setTimeout(() => ac.abort(), opts.timeoutMs || DEFAULT_TIMEOUT_MS);
     try {
       const res = await fetchImpl(spec.url(key), { method: 'POST', headers: spec.headers(key),
         body: JSON.stringify(spec.body(prompt)), signal: ac.signal });
       return await res.json();
-    } finally { clearTimeout(t); }
+    } finally { clearTimeout(timer); }
   }, { tier: 'free-cloud' });
   if (!wrapped.ok) return { ok: false, reason: wrapped.meta?.error || 'provider_error' };
   const content = spec.parse(wrapped.value);
@@ -75,9 +77,9 @@ async function dispatchFreeCloud(prompt, opts = {}) {
   if (!prompt) return { ok: false, reason: 'no_prompt' };
   const tried = [];
   for (const name of providerOrder()) {
-    const r = await callProvider(name, prompt, opts);
-    if (r.ok) return r;
-    tried.push(`${name}:${r.reason}`);
+    const attempt = await callProvider(name, prompt, opts);
+    if (attempt.ok) return attempt;
+    tried.push(`${name}:${attempt.reason}`);
   }
   return { ok: false, reason: 'no_free_cloud_available', tried };
 }
