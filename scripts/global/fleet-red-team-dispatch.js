@@ -15,6 +15,7 @@ const DEFAULT_MODEL = 'qwen2.5-coder:32b';
 const TIER = 'fleet-local';
 const RETRY_DELAYS_MS = [1000, 4000];
 const REQUEST_TIMEOUT_MS = 600_000;
+const DEFAULT_KEEP_ALIVE = '30m';
 const TEMPLATES_PATH = path.join(__dirname, '..', '..', 'config', 'fleet-red-team-prompts.json');
 const MATRIX_PATH = path.join(__dirname, '..', '..', 'config', 'red-team-model-matrix.yml');
 const TOKEN_BUDGET_HEADROOM = 200;
@@ -100,25 +101,29 @@ function detectRefusal(text) {
   return REFUSAL_PATTERNS.some((re) => re.test(trimmed));
 }
 
-// #2601 (G3): keep the review model resident between back-to-back baton
-// reviews so resident-preference (#2599) keeps finding a warm model and review
-// work stays on the free fleet instead of cold-loading and falling to paid
-// cloud. Settings-driven (G5); default 30m balances warmth vs. shared-host VRAM.
-function keepAliveValue() {
-  const v = String(process.env.FLEET_KEEP_ALIVE || '').trim();
-  return v || '30m';
+function resolveKeepAlive(raw = process.env.FLEET_KEEP_ALIVE) {
+  const value = String(raw || '').trim();
+  if (/^\d+[smhd]$/i.test(value)) return value.toLowerCase();
+  return DEFAULT_KEEP_ALIVE;
 }
+
+// Backward-compatible alias used by existing callers/tests.
+function keepAliveValue() { return resolveKeepAlive(); }
 
 async function callOllamaOnce({ host, model, prompt, num_predict }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  // Keep model warm between baton reviews to reduce cold-load paid fallbacks.
+  const keepAlive = resolveKeepAlive();
   try {
     const response = await fetch(`${host}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model, prompt, stream: false,
-        keep_alive: keepAliveValue(),
+        model,
+        prompt,
+        stream: false,
+        keep_alive: keepAlive,
         options: { temperature: 0.3, num_predict },
       }),
       signal: controller.signal,
@@ -185,7 +190,9 @@ async function dispatchRedTeam({
 
 module.exports = {
   dispatchRedTeam, selectModel, loadMatrix, loadTemplate, buildPrompt,
+  callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
   callWithRetry, callOllamaOnce, keepAliveValue, parseFindings,
   stripArxivHallucinations, detectRefusal,
+  resolveKeepAlive,
   TIER, RETRY_DELAYS_MS, MATRIX_PATH,
 };
