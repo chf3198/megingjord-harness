@@ -313,6 +313,7 @@ npm run deploy:both:apply
 | `routing:baseline` | `node scripts/global/routing-baseline-report.js` |
 | `routing:calibrate` | `node scripts/global/cascade-calibrate.js` |
 | `routing:fallback-report` | `node scripts/global/routing-fallback-report.js` |
+| `routing:free-cloud-report` | `node scripts/global/free-cloud-usage-report.js` |
 | `routing:freshness` | `node scripts/global/matrix-freshness.js` |
 | `routing:reconcile` | `node scripts/global/token-telemetry-reconcile.js --json` |
 | `routing:refresh` | `node scripts/global/routing-refresh.js --update-matrix` |

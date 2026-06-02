@@ -63,4 +63,5 @@ jobs:
           tests/wrapper-result-contract.spec.js
           tests/cascade-free-cloud-failover.spec.js
           tests/free-cloud-dispatch.spec.js
+          tests/free-cloud-usage-report.spec.js
           --reporter=line
