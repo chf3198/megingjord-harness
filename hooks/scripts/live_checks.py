@@ -38,6 +38,22 @@ def classify_merge_flow_state(checks: list[dict], merge_policy_blocked: bool = F
     return ci_state
 
 
+# gh exit codes for `gh pr checks`: 0 = all pass, 8 = pending, 1 = failing.
+GH_CHECKS_EXIT = {0: "green", 8: "pending-only", 1: "failing"}
+
+
+def _exit_code_status(pr_ref: str, cwd: str) -> str:
+    """Fallback classifier using gh's plain exit code (no --json)."""
+    try:
+        r = subprocess.run(
+            ["gh", "pr", "checks", pr_ref],
+            capture_output=True, text=True, cwd=cwd, timeout=20,
+        )
+        return GH_CHECKS_EXIT.get(r.returncode, "unknown")
+    except Exception:
+        return "unknown"
+
+
 def ci_gate_status(pr_ref: str, cwd: str) -> str:
     """Fetch and classify PR check status for merge gating."""
     try:
@@ -45,10 +61,18 @@ def ci_gate_status(pr_ref: str, cwd: str) -> str:
             ["gh", "pr", "checks", pr_ref, "--json", "name,state,conclusion"],
             capture_output=True, text=True, cwd=cwd, timeout=20,
         )
-        checks = json.loads(r.stdout or "[]")
-        return classify_ci_checks(checks)
     except Exception:
         return "unknown"
+    try:
+        checks = json.loads(r.stdout or "[]")
+    except (ValueError, TypeError):
+        checks = []
+    # `gh pr checks --json` can exit non-zero with empty stdout for an all-green
+    # PR (observed #2595). An empty list would classify "unknown" and false-block
+    # the merge — fall back to gh's plain exit code instead.
+    if checks:
+        return classify_ci_checks(checks)
+    return _exit_code_status(pr_ref, cwd)
 
 
 def ci_all_pass(pr_ref: str, cwd: str) -> bool:

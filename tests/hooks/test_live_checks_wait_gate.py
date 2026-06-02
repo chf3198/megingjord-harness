@@ -50,5 +50,40 @@ class PretToolMergeGate(unittest.TestCase):
         self.assertIn("not fully green", result[1])
 
 
+class CiGateStatusJsonFallback(unittest.TestCase):
+    """#2596 — empty `gh pr checks --json` must fall back to the plain exit code."""
+
+    def _status(self, json_stdout, plain_rc):
+        from unittest.mock import patch, MagicMock
+
+        def side_effect(cmd, **kw):
+            m = MagicMock()
+            if "--json" in cmd:
+                m.stdout = json_stdout
+                m.returncode = 0 if json_stdout.strip() not in ("", "[]") else 1
+            else:  # plain `gh pr checks <pr>` fallback
+                m.stdout = ""
+                m.returncode = plain_rc
+            return m
+
+        with patch("live_checks.subprocess.run", side_effect=side_effect):
+            return live_checks.ci_gate_status("99", ".")
+
+    def test_nonempty_json_unchanged(self):
+        self.assertEqual(self._status('[{"state": "COMPLETED", "conclusion": "success"}]', 1), "green")
+
+    def test_empty_json_exit0_green(self):
+        self.assertEqual(self._status("", 0), "green")
+
+    def test_empty_json_exit8_pending(self):
+        self.assertEqual(self._status("", 8), "pending-only")
+
+    def test_empty_json_exit1_failing(self):
+        self.assertEqual(self._status("", 1), "failing")
+
+    def test_empty_json_exit2_unknown(self):
+        self.assertEqual(self._status("", 2), "unknown")
+
+
 if __name__ == "__main__":
     unittest.main()

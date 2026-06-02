@@ -54,4 +54,5 @@ jobs:
           tests/api-smoke-load.spec.js
           tests/agent-signature-cli.spec.js
           tests/pretool-guard-worktree-gate.spec.js
+          tests/ci-gate-status-fallback.spec.js
           --reporter=line
