@@ -1,0 +1,72 @@
+name: Epic Staleness Detector
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  detect-stale-epics:
+    name: detect-stale-epics
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // Fetch all open epics
+            const epics = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, state: 'open', labels: 'type:epic', per_page: 100 }
+            );
+
+            for (const epic of epics) {
+              const epicLabels = epic.labels.map(l => l.name);
+              const epicStatus = epicLabels.find(l => l.startsWith('status:'));
+
+              // Fetch sub-issues via native sub-issues API (GA Dec 2024)
+              let subIssues = [];
+              try {
+                const res = await github.request(
+                  'GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues',
+                  { owner, repo, issue_number: epic.number }
+                );
+                subIssues = res.data;
+              } catch (e) {
+                core.info(`Epic #${epic.number}: sub-issues API error — ${e.message}`);
+                continue;
+              }
+
+              if (subIssues.length === 0) continue;
+
+              const allClosed = subIssues.every(si => si.state === 'closed');
+              const anyStarted = subIssues.some(si => {
+                const siLabels = (si.labels || []).map(l => l.name);
+                return siLabels.includes('status:in-progress') ||
+                  siLabels.includes('status:testing') ||
+                  siLabels.includes('status:review') ||
+                  si.state === 'closed';
+              });
+
+              let staleMsg = null;
+
+              if (allClosed && epicStatus !== 'status:review' && epicStatus !== 'status:done') {
+                staleMsg = `All ${subIssues.length} child tickets are closed but Epic is at \`${epicStatus}\`. ` +
+                  'Manager should advance to `status:review` and initiate Consultant closeout.';
+              } else if (anyStarted && epicStatus === 'status:backlog') {
+                staleMsg = `Child tickets are active but Epic remains at \`status:backlog\`. ` +
+                  'Manager should advance to `status:in-progress`.';
+              }
+
+              if (staleMsg) {
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: epic.number,
+                  body: `📊 **Epic Status Staleness Detected**\n\n${staleMsg}\n\n` +
+                    'This is an advisory notice — Manager retains authority to advance Epic status.'
+                });
+              }
+            }
