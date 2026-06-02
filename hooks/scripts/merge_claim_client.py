@@ -79,8 +79,8 @@ def _gh_status(ticket_n: int) -> Optional[dict]:
     result = _gh_api("GET", f"/issues/{ticket_n}/labels")
     if result is None:
         return None
-    labels = [l["name"] for l in (result if isinstance(result, list) else [])
-              if l.get("name", "").startswith(GH_LABEL_PREFIX)]
+    labels = [lbl["name"] for lbl in (result if isinstance(result, list) else [])
+              if lbl.get("name", "").startswith(GH_LABEL_PREFIX)]
     return {"held": bool(labels), "labels": labels, "mode": "gh-label"}
 
 

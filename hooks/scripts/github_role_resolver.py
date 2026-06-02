@@ -65,7 +65,7 @@ def _gh_view(ticket_n: int, timeout: float = 10.0) -> Optional[dict]:
 def _parse_roles(issue: dict) -> dict:
     """Project issue labels to canonical role-state dict."""
     roles = _empty_roles()
-    labels = {l.get("name", "") for l in issue.get("labels", [])}
+    labels = {lbl.get("name", "") for lbl in issue.get("labels", [])}
     for label, key in ROLE_LABELS.items():
         if label in labels:
             roles[key] = True

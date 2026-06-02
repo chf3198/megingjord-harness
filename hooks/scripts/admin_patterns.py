@@ -71,7 +71,8 @@ RE_GIT_TAG = re.compile(r"\bgit\s+tag\b")
 
 def required_admin_ops(flags: dict, repo_type: str) -> list[str]:
     """Admin op keys required for completion. Stays in sync with
-    stop_checks.check_admin_ops base/ext logic (#2444)."""
+    stop_checks.check_admin_ops base/ext logic (#2444).
+    """
     base = (["commit", "push", "pr_create", "ci_green", "merge"]
             if flags.get("code_touched") else [])
     ext: list[str] = []
