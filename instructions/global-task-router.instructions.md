@@ -17,6 +17,15 @@ Policy source: `scripts/global/model-routing-policy.json` (capability_matrix fie
 4. **Premium** — `frontier-reasoning`. Multi-file architecture, security,
    ambiguous debugging.
 
+**Fleet-unavailable failover (#2619)**: when Fleet is **unreachable** (an
+*availability* failure — no answer produced), `cascade-dispatch` fails over to
+the `free-cloud` tier (`$0` ordered providers: openrouter-free, gemini, groq,
+cerebras) **before** any paid tier. Only a *capability* failure (Fleet answered
+but quality/judge inadequate) steps up to paid Haiku. This preserves the
+cost-ascending mandate when the local fleet host is down — do not escalate
+straight to Haiku on a fleet outage. Free-cloud chain detail:
+`skills/openrouter-free-failover`.
+
 Codex, Copilot, and Claude Code sessions all use the same lane policy. A lane
 selects required capability and cost tier. Runtime, provider, model family, and
 lane are separate concepts:
