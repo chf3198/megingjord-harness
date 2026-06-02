@@ -19,6 +19,13 @@ Completion intent semantics are strict:
 - Do not end a session while recoverable terminal-finalize work remains (for example, merged deferred-final evidence with closeout but issue still open).
 - When deferred-final evidence and CONSULTANT_CLOSEOUT coexist, perform or verify explicit issue closure before claiming completion.
 
+## Wait-For-Green Discipline
+
+- If required checks are pending and none are failing, do not run merge/branch-modifying commands.
+- In pending-only state, allowed actions are read-only check polling and evidence updates.
+- Attempt merge only when required checks are fully green.
+- If checks are green but merge is blocked by policy, use one explicit escalation path and capture the block reason in `ADMIN_HANDOFF` (for example under `merge_block_reason:`).
+
 ## Admin completion contract (required before claiming done)
 
 - Version collision check (Marketplace/tag/package alignment)
