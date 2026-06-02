@@ -10,7 +10,7 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from governance_state import ensure_state
-from live_checks import ci_gate_status, linked_issue_has_collab_handoff
+from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -124,7 +124,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
         pr_m = RE_PR_REF.search(joined)
         if pr_m:
-            ci_state = ci_gate_status(pr_m.group(1), cwd)
+            ci_state = ci_gate_status_stable(pr_m.group(1), cwd)
             if ci_state == "pending-only":
                 return emit("deny", "Merge blocked: required CI checks are still pending. Wait and re-check status only.")
             if ci_state in {"failing", "unknown"}:

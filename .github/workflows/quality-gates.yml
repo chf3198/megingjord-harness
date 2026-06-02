@@ -57,4 +57,5 @@ jobs:
           tests/ci-gate-status-fallback.spec.js
           tests/fleet-resident-pref.spec.js
           tests/fleet-keepalive.spec.js
+          tests/merge-gate-unknown-retry.spec.js
           --reporter=line

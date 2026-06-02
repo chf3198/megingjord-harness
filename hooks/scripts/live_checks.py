@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Live GitHub API checks for pretool_guard hooks."""
-import json, re, subprocess
+import json, re, subprocess, time
 
 RE_BRANCH_ISSUE = re.compile(r"(?:feat|fix|hotfix)/(\d+)-")
 PENDING_STATES = {"PENDING", "IN_PROGRESS", "QUEUED", "REQUESTED", "WAITING"}
@@ -73,6 +73,27 @@ def ci_gate_status(pr_ref: str, cwd: str) -> str:
     if checks:
         return classify_ci_checks(checks)
     return _exit_code_status(pr_ref, cwd)
+
+
+_STABLE_RETRY_DELAYS = (1.5, 3.0)
+
+
+def ci_gate_status_stable(pr_ref: str, cwd: str, attempts: int = 3, sleep_fn=None) -> str:
+    """ci_gate_status with bounded retry on the INDETERMINATE 'unknown' state.
+
+    'unknown' means the status could not be determined (empty/flaky gh query),
+    not that CI is failing — conflating them false-blocks a green merge (#2603).
+    Re-query a few times; return the first definitive state (green/failing/
+    pending-only), or 'unknown' if it persists (then the gate still blocks).
+    """
+    sleep = sleep_fn or time.sleep
+    state = ci_gate_status(pr_ref, cwd)
+    for i in range(max(0, attempts - 1)):
+        if state != "unknown":
+            return state
+        sleep(_STABLE_RETRY_DELAYS[min(i, len(_STABLE_RETRY_DELAYS) - 1)])
+        state = ci_gate_status(pr_ref, cwd)
+    return state
 
 
 def ci_all_pass(pr_ref: str, cwd: str) -> bool:
