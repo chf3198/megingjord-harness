@@ -52,3 +52,31 @@ test('source-fixable role mismatch carries source-edit-first guidance', () => {
   expect(v.remediation.mode).toBe('source-edit-first');
   expect(v.remediation.suggestedFix).toContain('Edit the offending issue comment');
 });
+
+// #2564 — entries() classifies by line-anchored header, not bare substring.
+// A valid artifact that merely mentions sibling tokens in prose must NOT be
+// misclassified as those siblings (which would trip a false artifact-role-mismatch).
+test('prose mention of sibling artifact tokens does not misclassify (#2564)', () => {
+  const comments = [{
+    body: buildBatonComment({
+      artifact: 'MANAGER_HANDOFF', role: 'manager', teamModel: 'codex:gpt-5.4@codex-cli', ticket: 2564,
+      summary: 'Note: the COLLABORATOR_HANDOFF and ADMIN_HANDOFF will follow once work starts.',
+    }),
+  }];
+  const r = G.analyzeComments(comments);
+  expect(r.count).toBe(1); // only MANAGER_HANDOFF, not the two prose-mentioned siblings
+  expect(r.ok).toBe(true);
+  expect(r.violations.some(v => v.rule === 'artifact-role-mismatch')).toBe(false);
+});
+
+test('real ## header is still classified — no false negative (#2564)', () => {
+  const comments = [{
+    body: buildBatonComment({
+      artifact: 'CONSULTANT_CLOSEOUT', role: 'consultant', teamModel: 'codex:gpt-5.4@codex-cli', ticket: 2564,
+      summary: 'Verified; the COLLABORATOR_HANDOFF was posted earlier in the thread.',
+    }),
+  }];
+  const r = G.analyzeComments(comments);
+  expect(r.count).toBe(1); // CONSULTANT_CLOSEOUT header classified; prose mention ignored
+  expect(r.ok).toBe(true);
+});

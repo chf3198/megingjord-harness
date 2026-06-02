@@ -23,12 +23,20 @@ function roleFromBody(body) {
   return extractArtifactFields(body).role;
 }
 
+// Line-anchored header match, mirroring the canonical per-validator finders
+// (megalint/manager-handoff.js, collaborator-handoff.js). A bare body.includes()
+// over-matches when one artifact mentions a sibling token in prose (#2564),
+// misclassifying it and tripping a false artifact-role-mismatch.
+function artifactHeaderRe(artifact) {
+  return new RegExp(`(^|\\n)\\s*(?:\\*\\*|##\\s+)?${artifact}\\b`);
+}
+
 function entries(comments) {
   const out = [];
   for (const c of comments || []) {
     const body = String((c && c.body) || c || '');
     for (const [artifact, role] of Object.entries(ARTIFACT_ROLE)) {
-      if (body.includes(artifact)) out.push({ artifact, role, body });
+      if (artifactHeaderRe(artifact).test(body)) out.push({ artifact, role, body });
     }
   }
   return out;
