@@ -61,4 +61,5 @@ jobs:
           tests/governance-bundle.spec.js
           tests/governance-bundle-push.spec.js
           tests/wrapper-result-contract.spec.js
+          tests/cascade-free-cloud-failover.spec.js
           --reporter=line

@@ -66,6 +66,14 @@
       "costPer1kTokens": 0,
       "endpoint": "ollama"
     },
+    "free-cloud": {
+      "id": "free-cloud-failover",
+      "mult": 0,
+      "costPer1kTokens": 0,
+      "endpoint": "openai-compatible",
+      "_doc": "#2619: $0 cloud failover used when fleet is UNREACHABLE (availability failure), before any paid tier. Ordered free providers; see skills/openrouter-free-failover.",
+      "providers": ["openrouter-free", "gemini", "groq", "cerebras"]
+    },
     "haiku": {
       "id": "balanced-cloud",
       "mult": 0.08,
@@ -148,6 +156,7 @@
     "enabled": true,
     "tiers": [
       "fleet",
+      "free-cloud",
       "haiku",
       "premium"
     ],

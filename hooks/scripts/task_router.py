@@ -51,10 +51,12 @@ def execute_cascade(prompt: str, model: str | None = None) -> dict:
             if isinstance(data, dict):
                 return data
         except Exception as exc:
+            # #2619: availability failure (cascade subprocess errored) -> free $0 cloud, not paid haiku.
             return {"ok": False, "tier": "local", "escalation_needed": True,
-                    "suggested_tier": "haiku", "reason": str(exc)}
+                    "suggested_tier": "free-cloud", "reason": str(exc)}
+    # #2619: availability failure (no cascade script) -> free $0 cloud, not paid haiku.
     return {"ok": False, "tier": "local", "escalation_needed": True,
-            "suggested_tier": "haiku", "reason": "cascade_script_not_found"}
+            "suggested_tier": "free-cloud", "reason": "cascade_script_not_found"}
 
 
 def apply_route(state: dict, route: dict | None) -> dict:

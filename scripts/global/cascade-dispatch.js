@@ -9,6 +9,18 @@ const { judgeResponse } = require('./local-judge');
 const policy = require('./model-routing-policy.json');
 const { backoff, isRateLimitError } = require('./backoff');
 
+// #2619: G3 lane-order. Availability failures (fleet down -> no answer) fail over to a
+// free $0 cloud tier BEFORE any paid tier; capability failures (fleet answered but
+// quality/judge inadequate) step up to paid haiku. suggested_tier is an advisory signal.
+const AVAILABILITY_REASONS = new Set(['ollama_unreachable', 'fleet_unavailable', 'cascade_script_not_found']);
+function escalationTier(reason) {
+  if (!reason) return 'haiku';
+  if (AVAILABILITY_REASONS.has(reason)) return 'free-cloud';
+  // connection-style provider errors are availability failures too (no usable answer produced).
+  if (/econnrefused|fetch failed|timeout|network|enotfound|socket hang|connect/i.test(String(reason))) return 'free-cloud';
+  return 'haiku'; // quality_reason / judge_low_score / unknown -> capability step-up
+}
+
 function hints(prompt) {
   const t = prompt.toLowerCase();
   return {
@@ -50,31 +62,34 @@ async function cascade(prompt, opts = {}) {
   const latency = Date.now() - start;
 
   if (!local.ok) {
-    recordTelemetry({ lane: 'fleet', model, outcome: 'fail', escalation: 'haiku',
+    const esc = escalationTier(local.reason); // #2619: fleet-down -> free-cloud, not paid haiku
+    recordTelemetry({ lane: 'fleet', model, outcome: 'fail', escalation: esc,
       escalation_reason: local.reason, latency_ms: latency, execute: true });
     return { ok: false, tier: 'local', escalation_needed: true,
-      suggested_tier: 'haiku', reason: local.reason };
+      suggested_tier: esc, reason: local.reason };
   }
 
   const quality = assessQuality(local.content, h);
   if (!quality.pass) {
-    recordTelemetry({ lane: 'fleet', model, outcome: 'escalate', escalation: 'haiku',
+    const esc = escalationTier(quality.reason); // capability failure -> haiku
+    recordTelemetry({ lane: 'fleet', model, outcome: 'escalate', escalation: esc,
       quality_reason: quality.reason, response_length: local.content.length, latency_ms: latency, execute: true });
     return { ok: true, content: local.content, tier: 'local', confidence: 'low',
-      escalation_needed: true, suggested_tier: 'haiku', quality_reason: quality.reason };
+      escalation_needed: true, suggested_tier: esc, quality_reason: quality.reason };
   }
 
   const jcfg = policy.judge; // Layer 2: judge gate (semantic quality, independent model)
   const j = jcfg?.enabled ? await judgeResponse(prompt, local.content, { threshold: jcfg.threshold, judgeModel: jcfg.model }) : null;
   const judgePass = !j || !j.ok || j.decision === 'return';
+  const judgeEsc = escalationTier('judge_low_score'); // capability failure -> haiku
   recordTelemetry({ lane: 'fleet', model, outcome: judgePass ? 'ok' : 'escalate',
-    escalation: judgePass ? null : 'haiku', quality_reason: quality.reason,
+    escalation: judgePass ? null : judgeEsc, quality_reason: quality.reason,
     ...(j?.ok && { judge_model: j.judge_model, judge_score: j.judge_score,
       judge_decision: j.decision, judge_latency_ms: j.latency_ms }),
     response_length: local.content.length, latency_ms: latency, execute: true });
   if (!judgePass)
     return { ok: true, content: local.content, tier: 'local', confidence: 'low',
-      escalation_needed: true, suggested_tier: 'haiku', quality_reason: 'judge_low_score' };
+      escalation_needed: true, suggested_tier: judgeEsc, quality_reason: 'judge_low_score' };
   return { ok: true, content: local.content, tier: 'local', confidence: 'high',
     escalation_needed: false, model };
 }
@@ -86,8 +101,8 @@ async function main() {
   const json = args.includes('--json');
   if (!prompt) { console.error('--prompt required'); process.exit(1); }
   if (getProfile().mode === 'solo') {
-    const r = { ok: false, tier: 'local', escalation_needed: true, suggested_tier: 'haiku', reason: 'fleet_unavailable' };
-    console.log(json ? JSON.stringify(r) : `escalation_needed=true reason=fleet_unavailable`);
+    const r = { ok: false, tier: 'local', escalation_needed: true, suggested_tier: escalationTier('fleet_unavailable'), reason: 'fleet_unavailable' };
+    console.log(json ? JSON.stringify(r) : `escalation_needed=true reason=fleet_unavailable suggested_tier=${r.suggested_tier}`);
     return;
   }
   const result = await cascade(prompt, { model });
@@ -97,4 +112,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch(e => { console.error(e.message); process.exit(1); });
-module.exports = { cascade, assessQuality, hints };
+module.exports = { cascade, assessQuality, hints, escalationTier };
