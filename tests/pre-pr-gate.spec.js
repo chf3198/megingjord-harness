@@ -1,4 +1,5 @@
 'use strict';
+// @megalint:test-discoverability:opt-out -- node:test CLI suite (run via `node --test`)
 process.env.NODE_ENV = 'test';
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -39,11 +40,18 @@ test('checkPredateWindow: COLLAB >60s ago passes', () => {
   assert.equal(G.checkPredateWindow(comments, Date.now()), null);
 });
 
-test('checkPredateWindow: COLLAB <60s ago fails with wait time', () => {
-  const comments = [mkComment('COLLABORATOR_HANDOFF', 30)];
+test('checkPredateWindow: COLLAB 40s before PR passes (#1433 — no 60s window)', () => {
+  // The exact recurrence: handoff posted 40s before the PR was a false-positive
+  // under the old >=60s rule (forced PR close/recreate). Predate-ordering passes.
+  const comments = [mkComment('COLLABORATOR_HANDOFF', 40)];
+  assert.equal(G.checkPredateWindow(comments, Date.now()), null);
+});
+
+test('checkPredateWindow: COLLAB timestamped AFTER push fails (#1433 planting)', () => {
+  const comments = [mkComment('COLLABORATOR_HANDOFF', -30)]; // 30s in the future
   const result = G.checkPredateWindow(comments, Date.now());
-  assert.equal(result.rule, 'predate-window-not-elapsed');
-  assert.match(result.detail, /Wait/);
+  assert.equal(result.rule, 'handoff-not-predating');
+  assert.match(result.detail, /must predate/);
 });
 
 test('checkPredateWindow: no COLLAB returns null (covered by baton check)', () => {
@@ -86,14 +94,13 @@ test('check: feat branch + all 4 baton + COLLAB old + body OK = PASS', () => {
   assert.deepEqual(result.violations, []);
 });
 
-test('check: missing artifacts AND short predate AND missing Closes = 3 violations', () => {
+test('check: missing artifacts AND missing Closes = 2 violations (#1433: 30s predate is NOT a violation)', () => {
   const comments = [mkComment('MANAGER_HANDOFF'), mkComment('COLLABORATOR_HANDOFF', 30)];
   const result = G.check({ branch: 'feat/1234-x', comments, prBodyDraft: 'Refs #1234' });
   assert.equal(result.ok, false);
-  assert.equal(result.violations.length, 3);
+  assert.equal(result.violations.length, 2);
 });
 
 test('constants are sane', () => {
-  assert.equal(G.PREDATE_WINDOW_SECONDS, 60);
   assert.deepEqual(G.ARTIFACTS, ['MANAGER_HANDOFF', 'COLLABORATOR_HANDOFF', 'ADMIN_HANDOFF', 'CONSULTANT_CLOSEOUT']);
 });
