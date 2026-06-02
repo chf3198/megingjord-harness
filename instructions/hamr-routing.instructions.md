@@ -76,6 +76,8 @@ requires (`checks_run`, `checks_failed`, `drift_score`, `fleet_utilization`,
 `rubric_rating`, `wiki_health`) and pushes it to KV at `governance-bundle:<issue>`.
 `POST /mcp {capability:"tool:governance-bundle", params:{issue:N}}` returns it.
 
+**Producer (#2613):** `npm run hamr:governance-bundle-push -- --issue N` (=`scripts/global/governance-bundle-push.js`) reads the per-issue fields snapshot at `~/.megingjord/governance-fields-<issue>.json`, builds + Ed25519-signs the bundle, and POSTs it to the HAMR `/governance-bundle` write route (DPoP + signed, mirrors `/substrate-health`), which stores `governance-bundle:<issue>` in KV. Run it before dispatching a fleet consultant for that issue.
+
 **Freshness contract:** the bundle carries `generated_at` + `content_hash`.
 A fleet-authored CLOSEOUT cites `governance-bundle-hash: <hash>`; `closeout-schema`
 parity (`governance-bundle.js#fleetCloseoutParity`) requires the hash to match a

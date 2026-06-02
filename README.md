@@ -258,6 +258,7 @@ npm run deploy:both:apply
 | `hamr:doctor` | `node scripts/global/hamr-doctor.js` |
 | `hamr:fleet-cascade-gate` | `node scripts/global/fleet-cascade-gate.js` |
 | `hamr:fleet-cascade-gate:test` | `node --test tests/fleet-cascade-gate.spec.js` |
+| `hamr:governance-bundle-push` | `node scripts/global/governance-bundle-push.js` |
 | `hamr:health` | `node scripts/global/substrate-health.js` |
 | `hamr:health-push` | `node scripts/global/substrate-health-push.js` |
 | `hamr:install-cron` | `bash scripts/global/install-cron.sh` |
