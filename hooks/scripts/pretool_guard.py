@@ -142,7 +142,15 @@ def main() -> int:
                 if not allowed:
                     return emit("deny", f"Canonical-main read-only (#2107): {reason}")
         if not state.get("active_ticket"):
-            return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
+            from worktree_ticket import resolve_ticket_from_paths, any_path_in_governed_repo
+            edit_paths = list(iter_paths(payload.get("tool_input", {})))
+            # #2586: the gate keys on session cwd (main checkout); derive the real
+            # active ticket from the edited file's worktree branch instead.
+            # #2587: only gate paths that live inside a governed repo.
+            derived = resolve_ticket_from_paths(edit_paths)
+            gated = (not edit_paths) or any_path_in_governed_repo(edit_paths)
+            if not derived and gated:
+                return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash","run_command","send_command_input"}:
         # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
         # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.
