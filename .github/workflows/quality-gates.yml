@@ -55,4 +55,5 @@ jobs:
           tests/agent-signature-cli.spec.js
           tests/pretool-guard-worktree-gate.spec.js
           tests/ci-gate-status-fallback.spec.js
+          tests/fleet-resident-pref.spec.js
           --reporter=line

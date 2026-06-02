@@ -8,6 +8,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { wrapProviderCall } = require('/home/curtisfranks/devenv-ops/scripts/global/hamr-provider-wrapper');
+const { residentModels } = require('./fleet-resident');
 
 const DEFAULT_HOST = 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5-coder:32b';
@@ -56,6 +57,13 @@ function selectModel(taskContext = {}, opts = {}) {
   const { models, fallbackChain } = loadMatrix(opts.matrixPath);
   const stakes = (taskContext.stakes || 'low').toLowerCase();
   const candidates = models.filter((m) => !m.blocked && m.cross_family_ok !== false);
+  // #2599 (G3): for non-high stakes, prefer an already-resident cross-family
+  // model so the review stays on the free fleet instead of cold-loading and
+  // falling back to a paid cloud reviewer. High stakes keeps the best model.
+  if (stakes !== 'high' && Array.isArray(opts.residentModels) && opts.residentModels.length) {
+    const resident = candidates.find((m) => opts.residentModels.includes(m.id));
+    if (resident) return { modelId: resident.id, rationale: `resident-preferred-${stakes}` };
+  }
   const match = candidates.find(
     (m) => Array.isArray(m.default_for_stakes) && m.default_for_stakes.includes(stakes),
   );
@@ -135,7 +143,12 @@ async function dispatchRedTeam({
   artifactType, content, model, host = DEFAULT_HOST,
   templatesPath = TEMPLATES_PATH, taskContext = {}, matrixPath,
 } = {}) {
-  const resolved = model ? { modelId: model, rationale: 'caller-arg' } : selectModel(taskContext, { matrixPath });
+  // #2599 (G3): tell selectModel which models are already resident on the host
+  // so non-high-stakes reviews prefer the free-fleet resident over a cold-load.
+  const resident = model ? [] : await residentModels(host);
+  const resolved = model
+    ? { modelId: model, rationale: 'caller-arg' }
+    : selectModel(taskContext, { matrixPath, residentModels: resident });
   const activeModel = resolved.modelId;
   const template = loadTemplate(artifactType, templatesPath);
   const prompt = buildPrompt(template, content);
