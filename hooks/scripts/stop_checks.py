@@ -43,7 +43,8 @@ def ticket_from_branch(branch: str | None) -> int | None:
 
 def effective_roles(state_roles: dict, branch: str | None) -> dict:
     """Resolve effective roles. When feature flag set, GitHub-derived overrides
-    local-state. Falls back to local-state on offline or feature-off (#2456)."""
+    local-state. Falls back to local-state on offline or feature-off (#2456).
+    """
     if not _resolver_enabled():
         return state_roles
     ticket_n = ticket_from_branch(branch)

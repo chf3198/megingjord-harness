@@ -66,7 +66,8 @@ def emit_incident(pattern_id: str, evidence: dict) -> bool:
 
 def check_commit_message(message: str, branch: str = "") -> dict:
     """Return decision dict. 'allow' always True (advisory mode).
-    If detection fires AND branch == 'main', incident is logged."""
+    If detection fires AND branch == 'main', incident is logged.
+    """
     if not feature_enabled():
         return {"allow": True, "advisory": False, "reason": "guard-disabled"}
     if not is_antigravity_signed(message):
