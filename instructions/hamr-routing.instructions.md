@@ -190,3 +190,21 @@ npm run it-ops:usage-report
 
 Tier-2 anneal is emitted when any marker's usage exceeds 5 events per week.
 Override threshold with env var `IT_BYPASS_THRESHOLD=10` (integer, default 5).
+
+### Free-cloud usage telemetry (#2624)
+
+When the fleet is unreachable and `cascade-dispatch` executes a free $0 cloud
+provider (#2621), it records a `lane:free-cloud` row to
+`logs/model-routing-telemetry.jsonl`. The aggregator surfaces the G3 savings —
+execution count (= paid-Haiku calls avoided), per-provider breakdown, average
+latency, and an estimated paid-$ avoided — so the failover is auditable against
+the premium-share governor:
+
+```bash
+npm run routing:free-cloud-report          # last 7 days, human-readable
+npm run routing:free-cloud-report -- --days 30 --json
+```
+
+No anneal threshold: high free-cloud usage is a G3 win, not a fault. The $-avoided
+estimate uses `policy.models.haiku.costPer1kTokens` and a documented assumed
+~1500 tokens/call (see `scripts/global/free-cloud-usage-report.js`).
