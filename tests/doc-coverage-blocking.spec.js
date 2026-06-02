@@ -18,8 +18,8 @@ for (const label of Object.keys(matrix)) {
   if (!req || req.length === 0) continue;
   test(`checkBlock: violation on absent block for ${label}`, () => {
     const v = checkBlock('', [label], matrix);
-    assert.ok(v.some(x => x.rule === 'doc-coverage-missing-block'),
-      `expected missing-block violation for ${label}: ${JSON.stringify(v)}`);
+    assert.ok(v.some(x => x.rule === 'doc-coverage-missing'),
+      `expected blocking violation for ${label}: ${JSON.stringify(v)}`);
   });
   test(`checkBlock: passes with complete block for ${label}`, () => {
     const entries = Object.fromEntries(req.map(s => [s, 'DONE — test']));
@@ -33,6 +33,11 @@ test('surfacesForLabels: unions required from multiple labels', () => {
   const s = surfacesForLabels(['area:governance', 'area:hooks'], matrix);
   assert.ok(s.required.includes('.changes/unreleased/'));
   assert.ok(s.required.includes('docs/howto/hooks.md'));
+});
+
+test('checkBlock: bare N/A without reason is blocking', () => {
+  const v = checkBlock('doc-coverage:\n  .changes/unreleased/: N/A\n', ['area:governance'], matrix);
+  assert.ok(v.some(x => x.rule === 'doc-coverage-missing'));
 });
 
 // changelog-fragment-presence wired in megalint VALIDATORS

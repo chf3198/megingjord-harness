@@ -5,7 +5,7 @@ const { validate } = require('../scripts/global/megalint/collaborator-handoff.js
 const { checkBlock, parseDocBlock, loadMatrix } = require('../scripts/global/megalint/doc-coverage.js');
 
 const HANDOFF_SIGNED = (extra) =>
-  `## COLLABORATOR_HANDOFF\n${extra}\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
+  `## COLLABORATOR_HANDOFF\n${extra}\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
 
 test('validate: blocking when doc-coverage: block missing on lane:code-change with governance label', () => {
   const matrix = loadMatrix();
@@ -15,7 +15,7 @@ test('validate: blocking when doc-coverage: block missing on lane:code-change wi
     comments: [{ body, user: { login: 'alex' } }],
   });
   assert.equal(result.ok, false);
-  assert.ok(result.violations.some(v => v.rule === 'doc-coverage-missing-block'), JSON.stringify(result.violations));
+  assert.ok(result.violations.some(v => v.rule === 'doc-coverage-missing'), JSON.stringify(result.violations));
 });
 
 test('validate: passes when doc-coverage: block has required surfaces', () => {
@@ -62,7 +62,13 @@ test('parseDocBlock: parses entries from indented block', () => {
 test('checkBlock: returns violation for missing required surface', () => {
   const matrix = loadMatrix();
   const violations = checkBlock('doc-coverage:\n  README.md: DONE\n', ['area:governance'], matrix);
-  assert.ok(violations.some(v => v.rule === 'doc-coverage-surface-missing'));
+  assert.ok(violations.some(v => v.rule === 'doc-coverage-missing'));
+});
+
+test('checkBlock: bare N/A without reason is blocking', () => {
+  const matrix = loadMatrix();
+  const violations = checkBlock('doc-coverage:\n  .changes/unreleased/: N/A\n', ['area:governance'], matrix);
+  assert.ok(violations.some(v => v.rule === 'doc-coverage-missing'));
 });
 
 test('checkBlock: passes when no required surfaces for given labels', () => {
