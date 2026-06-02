@@ -47,6 +47,7 @@ function fixable(rule) {
     'artifact-role-mismatch',
     'signer-alias-not-registry-derived',
     'signer-fields-invalid',
+    'mixed-semantic-role-fields',
   ].includes(rule);
 }
 

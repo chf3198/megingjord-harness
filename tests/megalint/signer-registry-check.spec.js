@@ -74,6 +74,28 @@ test('extractArtifactFields: ignores prose lowercase role before signature', () 
   ].join('\n');
   const fields = R.extractArtifactFields(body);
   expect(fields.role).toBe('manager');
+  expect(fields.roleMatches).toEqual(['manager']);
+});
+
+test('validateArtifactAlias: duplicate Role fields are rejected as mixed semantic-role misuse', () => {
+  const file = makeRegistry();
+  const body = [
+    'Signed-by: Orla Mason',
+    'Team&Model: claude-code:opus-4-7@anthropic',
+    'Role: manager',
+    'Role: collaborator',
+  ].join('\n');
+  const result = R.validateArtifactAlias(body, { registryOverride: file });
+  expect(result.ok).toBe(false);
+  expect(result.violation.rule).toBe('mixed-semantic-role-fields');
+  expect(result.violation.detail).toContain('Multiple Role: fields found');
+  fs.unlinkSync(file);
+});
+
+test('validateArtifactAlias: duplicate Role fields without signer metadata still reject', () => {
+  const result = R.validateArtifactAlias('Role: manager\nRole: collaborator');
+  expect(result.ok).toBe(false);
+  expect(result.violation.rule).toBe('mixed-semantic-role-fields');
 });
 
 test('validateArtifactAlias: drift "Cole Mason" on claude-code:opus → violation with expected="Orla Mason"', () => {

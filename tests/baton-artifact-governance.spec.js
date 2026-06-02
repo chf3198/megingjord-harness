@@ -37,6 +37,28 @@ test('fails on artifact-role mismatch', () => {
   expect(r.violations.some(v => v.rule === 'artifact-role-mismatch')).toBe(true);
 });
 
+test('fails on duplicate Role fields as mixed semantic-role misuse', () => {
+  const comments = [{
+    body: [
+      '## MANAGER_HANDOFF',
+      'Signed-by: Orla Mason',
+      'Team&Model: codex:gpt-5.4@codex-cli',
+      'Role: manager',
+      'Role: collaborator',
+    ].join('\n'),
+  }];
+  const r = G.analyzeComments(comments);
+  expect(r.ok).toBe(false);
+  expect(r.violations.some(v => v.rule === 'mixed-semantic-role-fields')).toBe(true);
+});
+
+test('fails on duplicate Role fields without signer metadata', () => {
+  const comments = [{ body: '## MANAGER_HANDOFF\nRole: manager\nRole: collaborator' }];
+  const r = G.analyzeComments(comments);
+  expect(r.ok).toBe(false);
+  expect(r.violations.some(v => v.rule === 'mixed-semantic-role-fields')).toBe(true);
+});
+
 test('source-fixable role mismatch carries source-edit-first guidance', () => {
   const comments = [{
     body: [
