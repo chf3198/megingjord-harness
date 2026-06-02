@@ -100,6 +100,15 @@ function detectRefusal(text) {
   return REFUSAL_PATTERNS.some((re) => re.test(trimmed));
 }
 
+// #2601 (G3): keep the review model resident between back-to-back baton
+// reviews so resident-preference (#2599) keeps finding a warm model and review
+// work stays on the free fleet instead of cold-loading and falling to paid
+// cloud. Settings-driven (G5); default 30m balances warmth vs. shared-host VRAM.
+function keepAliveValue() {
+  const v = String(process.env.FLEET_KEEP_ALIVE || '').trim();
+  return v || '30m';
+}
+
 async function callOllamaOnce({ host, model, prompt, num_predict }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -107,7 +116,11 @@ async function callOllamaOnce({ host, model, prompt, num_predict }) {
     const response = await fetch(`${host}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, prompt, stream: false, options: { temperature: 0.3, num_predict } }),
+      body: JSON.stringify({
+        model, prompt, stream: false,
+        keep_alive: keepAliveValue(),
+        options: { temperature: 0.3, num_predict },
+      }),
       signal: controller.signal,
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -172,6 +185,7 @@ async function dispatchRedTeam({
 
 module.exports = {
   dispatchRedTeam, selectModel, loadMatrix, loadTemplate, buildPrompt,
-  callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
+  callWithRetry, callOllamaOnce, keepAliveValue, parseFindings,
+  stripArxivHallucinations, detectRefusal,
   TIER, RETRY_DELAYS_MS, MATRIX_PATH,
 };
