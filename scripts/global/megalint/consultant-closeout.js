@@ -5,6 +5,22 @@ const path = require('path');
 const fs = require('fs');
 const sig = require(path.join(__dirname, '..', 'governance-artifact-signature.js'));
 const { enforceTier3Emission } = require(path.join(__dirname, 'goal-failure-emission.js'));
+const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-bundle.js'));
+
+// #2094 AC-4: parity for a fleet-authored CLOSEOUT. Same standard as non-fleet
+// — a CLOSEOUT that cites a governance-bundle-hash must trace to a hash-valid,
+// fast-TTL-fresh bundle (provided via input.governanceBundle). Absent the
+// marker this is a no-op, so non-fleet CLOSEOUTs are unchanged.
+function checkFleetBundleProvenance(body, input) {
+  const cited = ((body || '').match(/governance-bundle-hash:\s*([0-9a-f]{64})/i) || [])[1];
+  if (!cited) return [];
+  if (!input || !input.governanceBundle) {
+    return [{ rule: 'fleet-bundle-unverifiable', severity: 'advisory',
+      detail: 'CLOSEOUT cites governance-bundle-hash but no bundle was supplied to verify provenance.' }];
+  }
+  const r = fleetCloseoutParity(body, input.governanceBundle, input.nowMs || Date.now());
+  return r.ok ? [] : [{ rule: 'fleet-bundle-parity-failed', detail: `fleet CLOSEOUT bundle parity: ${r.reason}` }];
+}
 
 function findConsultantCloseout(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?CONSULTANT_CLOSEOUT(?:_EPIC_CLOSEOUT)?\b/;
@@ -88,8 +104,9 @@ function validate(input) {
     ...checkGovTokenResolution(body, input),
     ...checkSubstantiveContent(body, input.isEpic === true),
     ...checkCrossFamilyVerdict(body),
+    ...checkFleetBundleProvenance(body, input),
   ];
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
 
-module.exports = { validate, findConsultantCloseout, checkCrossFamilyVerdict };
+module.exports = { validate, findConsultantCloseout, checkCrossFamilyVerdict, checkFleetBundleProvenance };

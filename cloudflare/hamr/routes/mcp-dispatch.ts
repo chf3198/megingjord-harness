@@ -45,6 +45,19 @@ async function mailboxRead(env: Env, params: Record<string, unknown>): Promise<R
   return jsonResponse(200, { count: envelopes.length, envelopes });
 }
 
+// #2094 Phase-1 (Option C): serve the precomputed governance bundle the
+// orchestrator pushed to KV (key `governance-bundle:<issue>`), so a fleet
+// consultant can populate a compliant CLOSEOUT without live local tool access.
+// Read-only; integrity is the bundle's content_hash; auth is the /mcp DPoP+SLSA gate.
+const GOVERNANCE_BUNDLE_KV_PREFIX = 'governance-bundle:';
+async function governanceBundleFetch(env: Env, params: Record<string, unknown>): Promise<Response> {
+  const issue = String(params?.issue ?? '').replace(/[^0-9]/g, '');
+  if (!issue) return jsonResponse(400, { error: 'missing_issue', hint: 'params.issue required' });
+  const raw = await env.HAMR_KV.get(`${GOVERNANCE_BUNDLE_KV_PREFIX}${issue}`);
+  if (!raw) return jsonResponse(200, { source: 'kv', present: false, hint: 'no governance bundle in KV; run governance-bundle.js locally + push' });
+  return new Response(raw, { status: 200, headers: { 'content-type': 'application/json', 'x-hamr-governance-bundle': '1' } });
+}
+
 export async function dispatch(request: Request, env: Env, keyId: string, slsaState: string): Promise<Response> {
   let body: { capability?: string; params?: Record<string, unknown> };
   try { body = await request.json(); } catch { return jsonResponse(400, { error: 'invalid_json' }); }
@@ -71,7 +84,12 @@ export async function dispatch(request: Request, env: Env, keyId: string, slsaSt
       r.headers.set('x-hamr-meta', JSON.stringify(meta));
       return r;
     }
+    case 'tool:governance-bundle': {
+      const r = await governanceBundleFetch(env, params);
+      r.headers.set('x-hamr-meta', JSON.stringify(meta));
+      return r;
+    }
     case '': return jsonResponse(200, { accepted: true, ...meta, hint: 'POST capability + params to invoke' });
-    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read', 'rotation:check', 'review:run'] });
+    default: return jsonResponse(400, { error: 'unknown_capability', capability, supported: ['bundle:fetch', 'doctor:probe', 'mailbox:read', 'rotation:check', 'review:run', 'tool:governance-bundle'] });
   }
 }
