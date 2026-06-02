@@ -33,6 +33,12 @@ test('collaborator: lightweight lane skips check', () => {
   expect(r.reason).toBe('lightweight-lane-skip');
 });
 
+test('collaborator: no-code-remediation lane skips collaborator handoff', () => {
+  const r = Coll.validate({ comments: [], lane: 'lane:no-code-remediation' });
+  expect(r.ok).toBe(true);
+  expect(r.reason).toBe('lightweight-lane-skip');
+});
+
 test('admin: no-code-remediation lane skips admin handoff requirement', () => {
   const r = Adm.validate({ comments: [], lane: 'lane:no-code-remediation' });
   expect(r.ok).toBe(true);

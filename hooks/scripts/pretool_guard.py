@@ -22,6 +22,12 @@ RE_BRANCH_SWITCH = re.compile(
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 IT_OPS_MARKERS_RE = re.compile(r"\[it-ops\]|chore\(it-ops\)\s*:", re.IGNORECASE)
+NO_CODE_ADMIN_RE = re.compile(
+    r"\bgit\s+add\b|\bgit\s+commit\b|\bgit\s+push\b|"
+    r"\bgh\s+pr\s+(?:create|merge)\b|\bnpm\s+run\s+deploy(?:[:\w-]*)?\b|"
+    r"\bnpx\s+vsce\s+publish\b|\bgh\s+release\s+create\b",
+    re.IGNORECASE,
+)
 
 def detect_it_ops_bypass(joined: str, env: dict | None = None) -> tuple[bool, str | None]:
     """#2142: IT-ops commit-gate bypass detector.
@@ -63,9 +69,28 @@ def _emit_it_bypass_telemetry(marker: str, cwd: str) -> None:
     except Exception:
         pass  # telemetry failure must not affect hook decision
 
+def _active_ticket_labels(state: dict, cwd: str) -> set[str]:
+    ticket = state.get("active_ticket")
+    if not ticket:
+        return set()
+    try:
+        res = subprocess.run(
+            ["gh", "issue", "view", str(ticket), "--json", "labels", "-q", ".labels[].name"],
+            cwd=cwd, check=False, capture_output=True, text=True, timeout=20,
+        )
+        return {line.strip() for line in (res.stdout or "").splitlines() if line.strip()}
+    except Exception:
+        return set()
+
+def active_ticket_is_no_code_lane(state: dict, cwd: str) -> bool:
+    return "lane:no-code-remediation" in _active_ticket_labels(state, cwd)
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
+    no_code_lane = active_ticket_is_no_code_lane(state, cwd)
+    if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
+        return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     if is_main_checkout(cwd):
         sw = RE_BRANCH_SWITCH.search(joined)
@@ -111,6 +136,13 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     if RE_GH_RELEASE_CREATE.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("publish"): return emit("deny","Release blocked: publish not recorded.")
     if RE_GH_ISSUE_CLOSE.search(joined):
+        if no_code_lane:
+            dirty = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=cwd, check=False, capture_output=True, text=True,
+            ).stdout.strip()
+            if dirty:
+                return emit("deny", "No-code remediation lane invalid: repository diff detected. Move ticket to lane:code-change before closeout.")
         if flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
@@ -138,6 +170,8 @@ def main() -> int:
     from state_store import reset_on_branch_change
     state = reset_on_branch_change(cwd, current_branch(cwd))
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit","write_to_file","replace_file_content","multi_replace_file_content"}:
+        if active_ticket_is_no_code_lane(state, cwd):
+            return emit("deny", "File edit blocked: lane:no-code-remediation is issue-only. Re-route ticket to lane:code-change.")
         if is_main_checkout(cwd):
             for path_val in iter_paths(payload.get("tool_input", {})):
                 if not (path_val.startswith("/") or path_val.startswith("./") or "/" in path_val):
