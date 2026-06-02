@@ -47,23 +47,39 @@ function expectedAliasFor({ team, model, role, device, registryOverride }) {
 
 function extractArtifactFields(body) {
   const text = body || '';
-  const field = (label, value) => {
-    const pattern = new RegExp(`(?:^|[·,\\n])\\s*${label}\\s*:\\s*(${value})`, 'gm');
-    const matches = [...text.matchAll(pattern)];
-    return matches.length ? matches[matches.length - 1][1] : null;
-  };
-  const signedBy = field('Signed-by', '[^·,\\n]+');
-  const teamModel = field('Team&Model', '\\S+');
-  const role = field('Role', '\\w+');
+  const signedByMatches = [...text.matchAll(/(?:^|[·,\n])\s*Signed-by\s*:\s*([^·,\n]+)/gm)].map(match => match[1].trim());
+  const teamModelMatches = [...text.matchAll(/(?:^|[·,\n])\s*Team&Model\s*:\s*([^·,\n]+)/gm)].map(match => match[1].trim());
+  const roleMatches = [...text.matchAll(/(?:^|[·,\n])\s*Role\s*:\s*(\w+)/gm)].map(match => match[1].trim().toLowerCase());
   return {
-    signedBy: signedBy ? signedBy.trim() : null,
-    teamModel,
-    role: role ? role.toLowerCase() : null,
+    signedBy: signedByMatches.length ? signedByMatches[signedByMatches.length - 1] : null,
+    teamModel: teamModelMatches.length ? teamModelMatches[teamModelMatches.length - 1] : null,
+    role: roleMatches.length ? roleMatches[roleMatches.length - 1] : null,
+    roleMatches,
   };
 }
 
 function validateArtifactAlias(body, opts = {}) {
   const fields = extractArtifactFields(body);
+  if (fields.roleMatches.length > 1) {
+    return {
+      ok: false,
+      fields,
+      violation: {
+        rule: 'mixed-semantic-role-fields',
+        detail: `Multiple Role: fields found (${fields.roleMatches.join(', ')}) — keep one execution role per baton artifact.`,
+      },
+    };
+  }
+  if (fields.roleMatches.length > 1) {
+    return {
+      ok: false,
+      fields,
+      violation: {
+        rule: 'mixed-semantic-role-fields',
+        detail: `Multiple Role: fields found (${fields.roleMatches.join(', ')}) — keep one execution role per baton artifact.`,
+      },
+    };
+  }
   if (!fields.signedBy || !fields.teamModel || !fields.role) {
     return { ok: true, skipped: 'missing-required-fields', fields };
   }
