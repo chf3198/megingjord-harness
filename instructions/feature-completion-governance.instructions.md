@@ -16,6 +16,8 @@ Completion intent semantics are strict:
 - "complete", "finish", or "ship" means terminal workflow delivery in one session when feasible once the active role identifies that intent in task scope.
 - Do not pause after implementation to wait for another user nudge to run Admin or Consultant phases.
 - Escalate only for blockers, missing evidence, or explicit design/UAT decisions.
+- Do not end a session while recoverable terminal-finalize work remains (for example, merged deferred-final evidence with closeout but issue still open).
+- When deferred-final evidence and CONSULTANT_CLOSEOUT coexist, perform or verify explicit issue closure before claiming completion.
 
 ## Admin completion contract (required before claiming done)
 
