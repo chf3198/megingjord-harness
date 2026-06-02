@@ -8,6 +8,7 @@ const { getProfile } = require('./fleet-config');
 const { judgeResponse } = require('./local-judge');
 const policy = require('./model-routing-policy.json');
 const { backoff, isRateLimitError } = require('./backoff');
+const { dispatchFreeCloud } = require('./free-cloud-dispatch'); // execute free $0 cloud on fleet-down
 
 // #2619: G3 lane-order. Availability failures (fleet down -> no answer) fail over to a
 // free $0 cloud tier BEFORE any paid tier; capability failures (fleet answered but
@@ -63,6 +64,16 @@ async function cascade(prompt, opts = {}) {
 
   if (!local.ok) {
     const esc = escalationTier(local.reason); // #2619: fleet-down -> free-cloud, not paid haiku
+    if (esc === 'free-cloud' && opts.executeFreeCloud !== false) {
+      // #2621: actually execute a $0 cloud provider; graceful fall-through to advisory signal.
+      const fc = await dispatchFreeCloud(prompt, opts.freeCloud || {});
+      if (fc.ok) {
+        recordTelemetry({ lane: 'free-cloud', model: fc.provider, outcome: 'ok', escalation: null,
+          escalation_reason: local.reason, latency_ms: Date.now() - start, execute: true });
+        return { ok: true, content: fc.content, tier: 'free-cloud', confidence: 'medium',
+          escalation_needed: false, provider: fc.provider };
+      }
+    }
     recordTelemetry({ lane: 'fleet', model, outcome: 'fail', escalation: esc,
       escalation_reason: local.reason, latency_ms: latency, execute: true });
     return { ok: false, tier: 'local', escalation_needed: true,
@@ -101,8 +112,8 @@ async function main() {
   const json = args.includes('--json');
   if (!prompt) { console.error('--prompt required'); process.exit(1); }
   if (getProfile().mode === 'solo') {
-    const r = { ok: false, tier: 'local', escalation_needed: true, suggested_tier: escalationTier('fleet_unavailable'), reason: 'fleet_unavailable' };
-    console.log(json ? JSON.stringify(r) : `escalation_needed=true reason=fleet_unavailable suggested_tier=${r.suggested_tier}`);
+    const soloResult = { ok: false, tier: 'local', escalation_needed: true, suggested_tier: escalationTier('fleet_unavailable'), reason: 'fleet_unavailable' };
+    console.log(json ? JSON.stringify(soloResult) : `escalation_needed=true reason=fleet_unavailable suggested_tier=${soloResult.suggested_tier}`);
     return;
   }
   const result = await cascade(prompt, { model });

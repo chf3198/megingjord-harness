@@ -23,7 +23,12 @@ the `free-cloud` tier (`$0` ordered providers: openrouter-free, gemini, groq,
 cerebras) **before** any paid tier. Only a *capability* failure (Fleet answered
 but quality/judge inadequate) steps up to paid Haiku. This preserves the
 cost-ascending mandate when the local fleet host is down — do not escalate
-straight to Haiku on a fleet outage. Free-cloud chain detail:
+straight to Haiku on a fleet outage. As of #2621 this failover is **executed**,
+not merely signalled: `cascade-dispatch` calls `free-cloud-dispatch.js`, which
+tries the policy `free-cloud` providers in order (via `wrapProviderCall`) and
+returns the answer directly (`tier: free-cloud`). If no free-cloud key is
+configured or all providers fail, it degrades gracefully to the advisory
+`suggested_tier: free-cloud` signal. Free-cloud chain detail:
 `skills/openrouter-free-failover`.
 
 Codex, Copilot, and Claude Code sessions all use the same lane policy. A lane
