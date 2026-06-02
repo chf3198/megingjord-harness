@@ -3,12 +3,14 @@ on:
   pull_request:
     branches: [main]
     types: [closed]
+  issue_comment:
+    types: [created]
   schedule:
     - cron: '30 8 * * *'
   workflow_dispatch:
 
 concurrency:
-  group: post-merge-${{ github.event.pull_request.number || github.run_id }}
+  group: post-merge-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -28,14 +30,10 @@ jobs:
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) return;
             const linkedNum = parseInt(refsMatch[1]);
-
             const { data: issue } = await github.rest.issues.get({
               owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
             });
             const labels = issue.labels.map(l => l.name);
-            // #1541: fetch comments + apply pure decision to avoid racing
-            // label-lint's auto-transition. Skip when issue is already
-            // terminal OR CONSULTANT_CLOSEOUT exists in trail.
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: linkedNum, per_page: 100,
@@ -43,13 +41,12 @@ jobs:
             const result = decision.decide({ state: issue.state, labels, comments });
             console.log(`#${linkedNum}: consultant-activation decision=${result.action} reason=${result.reason}`);
             if (result.action !== 'activate') return;
-
             const remove = labels.filter(l => result.removeLabelsMatching.test(l));
             for (const l of remove) {
               await github.rest.issues.removeLabel({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: linkedNum, name: l,
-              }).catch(() => {}); // catch-empty: removeLabel throws 404 if label absent
+              }).catch(() => {}); // catch-empty: removeLabel may return 404 when label is already absent.
             }
             await github.rest.issues.addLabels({
               owner: context.repo.owner, repo: context.repo.repo,
@@ -59,8 +56,30 @@ jobs:
             const prUrl = context.payload.pull_request.html_url;
             await github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
-              body: `**Consultant action required** — PR merged (${sha}, ${prUrl})\n\nIssue is now \`status:review\`. Consultant must:\n1. Independently critique the implementation\n2. Post \`CONSULTANT_CLOSEOUT\` as a comment on this issue\n3. Run \`gh issue close ${linkedNum}\` after closeout\n\nTimestamp: ${new Date().toISOString()}`,
+              body: `**Consultant action required** — PR merged (${sha}, ${prUrl})\n\nIssue is now \`status:review\`. Consultant must:\n1. Independently critique the implementation\n2. Post \`CONSULTANT_CLOSEOUT\` as a comment on this issue\n3. Ensure terminal issue closure after closeout\n\nTimestamp: ${new Date().toISOString()}`,
             });
+
+  deferred-final-terminal-close:
+    name: deferred-final-terminal-close
+    if: github.event_name == 'issue_comment' && contains(github.event.comment.body, 'CONSULTANT_CLOSEOUT')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const mod = require('./scripts/global/deferred-final-terminal-close.js');
+            const result = await mod.reconcile({
+              github: { issues: github.rest.issues, search: github.rest.search },
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issueNumber: context.payload.issue.number,
+              commentBody: context.payload.comment.body || '',
+            });
+            core.info(`deferred-final-terminal-close: #${context.payload.issue.number} => ${result.action}`);
 
   stale-review-check:
     name: stale-review-check
