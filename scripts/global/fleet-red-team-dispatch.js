@@ -180,7 +180,7 @@ async function dispatchRedTeam({
   const elapsed = Date.now() - start;
   if (!envelope.ok) {
     return { findings: [], raw: null, modelUsed: activeModel,
-      hamrStats: { ok: false, elapsed, error: envelope.error } };
+      hamrStats: { ok: false, elapsed, error: envelope.meta?.error ?? envelope.error } }; // #1160 canonical
   }
   const { findings, warning } = parseFindings(envelope.value);
   return { findings, raw: envelope.value, modelUsed: activeModel,

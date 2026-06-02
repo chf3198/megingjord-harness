@@ -10,7 +10,7 @@ const DEFAULT_THRESHOLDS = { drift_pct: 0.15, drift_pct_fail: 0.35, min_samples:
 const HAMR = (() => { try { return require('./hamr-provider-wrapper'); } catch { return null; } })();
 async function viaHamr(p, fn) {
   if (!HAMR?.wrapProviderCall || process.env.MEGINGJORD_HAMR_DISABLED === '1') return fn();
-  const r = await HAMR.wrapProviderCall(p, fn, { tier: 'observability' }); return r.response ?? r;
+  const r = await HAMR.wrapProviderCall(p, fn, { tier: 'observability' }); return r.value ?? r; // #1160 canonical (alias: r.response)
 }
 function loadEnv() { try { require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') }); } catch {} }
 const EXACT = new Set(['exact_request', 'exact_aggregate']);

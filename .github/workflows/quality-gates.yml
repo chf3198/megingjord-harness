@@ -60,4 +60,5 @@ jobs:
           tests/merge-gate-unknown-retry.spec.js
           tests/governance-bundle.spec.js
           tests/governance-bundle-push.spec.js
+          tests/wrapper-result-contract.spec.js
           --reporter=line

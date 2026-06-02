@@ -60,16 +60,41 @@ function emitStatSafe(provider, payload, opts = {}) {
   } catch { /* never let stats break the call */ }
 }
 
+/** Build the canonical wrapProviderCall result envelope (#1160).
+ * Canonical shape: `{ ok, value, sticky, spillover, meta }`.
+ * `meta` carries provider-choice telemetry: `{ provider, tier, hamrDisabled, goalContextInjected, error }`.
+ * Back-compat aliases (transition period, deprecated): `response` (= value), top-level `error`
+ * (= meta.error), `hamr_disabled` (= meta.hamrDisabled) — so any un-migrated reader keeps working.
+ * @param {{ok: boolean, value?: *, sticky?: object, spillover?: object, meta?: object}} parts
+ * @returns {{ok, value, sticky, spillover, meta, response, error, hamr_disabled}} Canonical envelope.
+ */
+function makeResult({ ok, value = null, sticky = null, spillover = null, meta = {} }) {
+  const m = {
+    provider: meta.provider ?? null,
+    tier: meta.tier ?? null,
+    hamrDisabled: meta.hamrDisabled ?? false,
+    goalContextInjected: meta.goalContextInjected ?? false,
+    error: meta.error ?? null,
+  };
+  return {
+    ok, value, sticky, spillover, meta: m,
+    // back-compat aliases (#1160 AC2) — prefer canonical fields above; these are transitional.
+    response: value,
+    error: m.error,
+    hamr_disabled: m.hamrDisabled,
+  };
+}
+
 /** Wrap any provider call with HAMR cost levers + observability.
  * @param {string} provider - 'anthropic'|'openai'|'gemini'|'groq'|'cerebras'|'openrouter'|'ollama'.
  * @param {Function} callFn - async fn that performs the provider call; receives `{headers, bodyExtras}`.
  * @param {object} [opts] - { tier, previousProvider, ttlSeconds, cacheKey, request }.
- * @returns {Promise<{ok: boolean, value?: object, sticky?: object, spillover?: object, error?: string}>} Wrapped result.
+ * @returns {Promise<{ok: boolean, value: *, sticky: object, spillover: object, meta: object}>} Canonical envelope (#1160) with back-compat aliases.
  */
 async function wrapProviderCall(provider, callFn, opts = {}) {
   if (isDisabled()) {
     const value = await callFn({ headers: {}, bodyExtras: {} });
-    return { ok: true, value, sticky: null, spillover: null, hamr_disabled: true };
+    return makeResult({ ok: true, value, meta: { provider, tier: opts.tier ?? null, hamrDisabled: true } });
   }
   const sticky = (opts.tier && opts.tier !== 'diagnostic')
     ? pickStickyProvider(opts.tier, { previousProvider: opts.previousProvider })
@@ -85,17 +110,20 @@ async function wrapProviderCall(provider, callFn, opts = {}) {
   if (goalCtx.injected && goalCtx.systemPrefix) {
     hints.bodyExtras = Object.assign({}, hints.bodyExtras || {}, { systemPrefix: goalCtx.systemPrefix });
   }
+  const metaBase = { provider: effectiveProvider, tier: opts.tier ?? null, goalContextInjected: !!goalCtx.injected };
   let response;
   try { response = await callFn(hints); }
-  catch (err) { return { ok: false, error: err?.message || 'provider_call_failed', sticky, spillover: null }; }
+  catch (err) {
+    return makeResult({ ok: false, sticky, meta: { ...metaBase, error: err?.message || 'provider_call_failed' } });
+  }
   emitStatSafe(effectiveProvider, response, opts);
   const respShape = { status: response?.status ?? response?.response?.status ?? HTTP_OK_DEFAULT, headers: response?.headers ?? new Map() };
   const spillover = maybeSpillover(effectiveProvider, respShape);
-  return { ok: true, value: response, sticky, spillover };
+  return makeResult({ ok: true, value: response, sticky, spillover, meta: metaBase });
 }
 
 if (require.main === module) {
   console.log(JSON.stringify({ exports: ['wrapProviderCall'], hamr_disabled: isDisabled() }));
 }
 
-module.exports = { wrapProviderCall, isDisabled, readTeamConfig, TEAM_CONFIG_PATHS };
+module.exports = { wrapProviderCall, makeResult, isDisabled, readTeamConfig, TEAM_CONFIG_PATHS };
