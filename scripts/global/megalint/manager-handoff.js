@@ -3,7 +3,7 @@
 
 const sig = require('../governance-artifact-signature');
 const { isValidStrategy } = require('../test-strategy-enum');
-const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates'];
+const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates', 'related_tickets', 'overlap_decision'];
 const PHASE_ONE_LABEL = process.env.PHASE_ONE_LABEL || 'phase-gate:phase-1';
 
 function findManagerHandoff(comments) {
@@ -22,6 +22,8 @@ function checkRequiredFields(body) {
         detail: `MANAGER_HANDOFF missing required field '${field}:' per role-baton-routing schema` });
     }
   }
+  if (extractField(body, 'related_tickets') && !/#\d+/.test(extractField(body, 'related_tickets'))) {
+    violations.push({ rule: 'invalid-related_tickets', detail: "MANAGER_HANDOFF related_tickets must include one or more issue refs like '#123'" }); }
   if (!/Signed-by:/i.test(body)) violations.push({ rule: 'missing-signer', detail: 'MANAGER_HANDOFF missing Signed-by field' });
   if (!/Team&Model:/i.test(body)) violations.push({ rule: 'missing-team-model', detail: 'MANAGER_HANDOFF missing Team&Model field' });
   if (!/Role:\s*manager/i.test(body)) violations.push({ rule: 'missing-role-manager', detail: 'MANAGER_HANDOFF missing Role: manager field' });
