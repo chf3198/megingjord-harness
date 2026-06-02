@@ -64,8 +64,25 @@ For diagnostic calls, integration test probes, or health checks that must be exc
 ## /mcp capability dispatch
 
 POST to `/mcp` with Ed25519 DPoP auth (use `baton-signing.js` #894) and body
-`{capability, params}`. Capabilities: `bundle:fetch`, `doctor:probe`, `mailbox:read`.
+`{capability, params}`. Capabilities: `bundle:fetch`, `doctor:probe`, `mailbox:read`,
+`rotation:check`, `review:run`, `tool:governance-bundle`.
 Bundle SHA may be advertised via `x-hamr-bundle-sha` for SLSA gate verification.
+
+### tool:governance-bundle — fleet-consultant parity (#2094, Option C bundle-first)
+Fleet models cannot reach the orchestrator's local consultant tools, so the
+orchestrator precomputes a redacted, content-hashed **governance bundle** (via
+`scripts/global/governance-bundle.js`) of the fields a Consultant CLOSEOUT
+requires (`checks_run`, `checks_failed`, `drift_score`, `fleet_utilization`,
+`rubric_rating`, `wiki_health`) and pushes it to KV at `governance-bundle:<issue>`.
+`POST /mcp {capability:"tool:governance-bundle", params:{issue:N}}` returns it.
+
+**Freshness contract:** the bundle carries `generated_at` + `content_hash`.
+A fleet-authored CLOSEOUT cites `governance-bundle-hash: <hash>`; `closeout-schema`
+parity (`governance-bundle.js#fleetCloseoutParity`) requires the hash to match a
+hash-valid bundle that is within `GOVERNANCE_BUNDLE_FAST_TTL_MS` (default 300s)
+for the fast/volatile fields — **stale fast fields BLOCK** (not advisory); slow
+fields (wiki/fleet inventory) are `STALE:`-advisory only. Privacy (G4): only the
+positive field allow-list is emitted, after `log-redaction`; no raw diffs/tokens.
 
 ## Cost levers (covered here, do NOT redefine in team docs)
 

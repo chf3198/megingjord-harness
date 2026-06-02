@@ -58,4 +58,5 @@ jobs:
           tests/fleet-resident-pref.spec.js
           tests/fleet-keepalive.spec.js
           tests/merge-gate-unknown-retry.spec.js
+          tests/governance-bundle.spec.js
           --reporter=line
