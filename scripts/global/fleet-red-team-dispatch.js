@@ -7,7 +7,7 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
-const { wrapProviderCall } = require('/home/curtisfranks/devenv-ops/scripts/global/hamr-provider-wrapper');
+const { wrapProviderCall } = require('./hamr-provider-wrapper');
 const { residentModels } = require('./fleet-resident');
 
 const DEFAULT_HOST = 'http://100.91.113.16:11434';
