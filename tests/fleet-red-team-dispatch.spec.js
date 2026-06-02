@@ -1,10 +1,18 @@
 // Refs #2175 - tests for fleet-red-team-dispatch
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const { loadTemplate, buildPrompt, parseFindings, stripArxivHallucinations, detectRefusal, RETRY_DELAYS_MS, TIER } = require('../scripts/global/fleet-red-team-dispatch.js');
+const {
+  loadTemplate,
+  buildPrompt,
+  parseFindings,
+  stripArxivHallucinations,
+  detectRefusal,
+  callWithRetry,
+  resolveKeepAlive,
+  RETRY_DELAYS_MS,
+  TIER,
+} = require('../scripts/global/fleet-red-team-dispatch.js');
 
 const TEMPLATES_PATH = path.join(__dirname, '..', 'config', 'fleet-red-team-prompts.json');
 
@@ -68,4 +76,46 @@ test('TIER constant is "fleet-local" (per P1-7 #2178)', () => {
 
 test('RETRY_DELAYS_MS is [1000, 4000] per Phase-0 finding', () => {
   assert.deepEqual(RETRY_DELAYS_MS, [1000, 4000]);
+});
+
+test('resolveKeepAlive: defaults to 30m when env is unset/invalid', () => {
+  assert.equal(resolveKeepAlive(undefined), '30m');
+  assert.equal(resolveKeepAlive(''), '30m');
+  assert.equal(resolveKeepAlive('abc'), '30m');
+  assert.equal(resolveKeepAlive('12x'), '30m');
+});
+
+test('resolveKeepAlive: accepts valid env format', () => {
+  assert.equal(resolveKeepAlive('45m'), '45m');
+  assert.equal(resolveKeepAlive('2H'), '2h');
+  assert.equal(resolveKeepAlive('7d'), '7d');
+});
+
+test('callWithRetry: request body includes resolved keep_alive', async () => {
+  const oldFetch = global.fetch;
+  const oldKeepAlive = process.env.FLEET_KEEP_ALIVE;
+  try {
+    let seenPayload = null;
+    global.fetch = async (_url, init) => {
+      seenPayload = JSON.parse(String(init.body));
+      return { ok: true, json: async () => ({ response: 'ACCEPT: ok' }) };
+    };
+
+    delete process.env.FLEET_KEEP_ALIVE;
+    await callWithRetry({ host: 'http://x', model: 'm', prompt: 'p', num_predict: 123 });
+    assert.equal(seenPayload.keep_alive, '30m');
+
+    process.env.FLEET_KEEP_ALIVE = '55m';
+    await callWithRetry({ host: 'http://x', model: 'm', prompt: 'p', num_predict: 123 });
+    assert.equal(seenPayload.keep_alive, '55m');
+
+    process.env.FLEET_KEEP_ALIVE = 'not-valid';
+    await callWithRetry({ host: 'http://x', model: 'm', prompt: 'p', num_predict: 123 });
+    assert.equal(seenPayload.keep_alive, '30m');
+  } finally {
+    if (oldFetch) global.fetch = oldFetch;
+    else delete global.fetch;
+    if (typeof oldKeepAlive === 'undefined') delete process.env.FLEET_KEEP_ALIVE;
+    else process.env.FLEET_KEEP_ALIVE = oldKeepAlive;
+  }
 });
