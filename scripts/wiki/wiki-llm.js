@@ -45,7 +45,7 @@ async function tryEndpoint(endpoint, prompt) {
   const useHamr = HAMR?.wrapProviderCall && process.env.MEGINGJORD_HAMR_DISABLED !== '1';
   return useHamr
     ? (await HAMR.wrapProviderCall(endpoint.name.toLowerCase(), callFn,
-        { tier: PROVIDER_TIER[endpoint.name] || 'fleet-fast' })).response
+        { tier: PROVIDER_TIER[endpoint.name] || 'fleet-fast' })).value // #1160 canonical (alias: .response)
     : await callFn();
 }
 
