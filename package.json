@@ -152,6 +152,7 @@
     "hamr:fleet-cascade-gate:test": "node --test tests/fleet-cascade-gate.spec.js",
     "hamr:health": "node scripts/global/substrate-health.js",
     "hamr:health-push": "node scripts/global/substrate-health-push.js",
+    "hamr:governance-bundle-push": "node scripts/global/governance-bundle-push.js",
     "hamr:install-cron": "bash scripts/global/install-cron.sh",
     "hamr:log-rotate": "node scripts/global/log-rotate.js",
     "hamr:multi-judge:test": "node --test tests/multi-judge-prompts.spec.js tests/multi-judge-variance.spec.js tests/multi-judge-orchestrator.spec.js",

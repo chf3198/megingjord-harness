@@ -8,6 +8,7 @@ import { mailboxRead, mailboxWrite } from './routes/mailbox';
 import { quota } from './routes/quota';
 import { cacheStats } from './routes/cache-stats';
 import { substrateHealth } from './routes/substrate-health';
+import { governanceBundleWrite } from './routes/governance-bundle';
 import { mergeClaimAcquire, mergeClaimRelease, mergeClaimStatus } from './routes/merge-claim';
 import { fleetClaimAcquire, fleetClaimRelease, fleetInFlight } from './routes/fleet';
 import { scheduled as scheduledHandler } from './scheduled';
@@ -75,6 +76,7 @@ export default {
       }
       else if (url.pathname === '/cache-stats' && m === 'POST') res = await cacheStats(request, env);
       else if (url.pathname === '/substrate-health' && m === 'POST') res = await substrateHealth(request, env);
+      else if (url.pathname === '/governance-bundle' && m === 'POST') res = await governanceBundleWrite(request, env);
       else res = notFound();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'internal_error';
