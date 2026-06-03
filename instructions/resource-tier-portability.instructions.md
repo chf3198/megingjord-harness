@@ -27,6 +27,10 @@ surface) independently of the HAMR opt-out.
 - **Tier 1 is the harness baseline.** Phase-0 found 95.1% of `scripts/global/*.js`
   are Tier-0/1; only 16 scripts sit above baseline, and all carry a documented
   opt-out or graceful fallback (no G5 violations).
+- **Tiers map directly onto G5.** Every tier above the operator's baseline is a G5
+  "baseline-absent resource"; a feature's declared tier is precisely the input the
+  G5 opt-in-or-fallback requirement gates on. This taxonomy is the vocabulary for
+  that contract — it does not change it.
 - A feature that uses a Tier-2-or-higher resource MUST, in the same change, ship a
   fallback to the lowest available tier (the tier-graceful rule in
   `harness-goals.instructions.md`). The fallback is the default; the higher tier is
