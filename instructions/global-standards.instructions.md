@@ -42,6 +42,16 @@ Carve-out rationale: the deferred-finalize form resolves the PR-template vs merg
 conflict (template says "use Refs, not Closes"; gate previously required Closes). Registry entry:
 `governance-carve-outs/index.md` entry `closes-vs-refs-deferred-final-carveout`.
 
+## Admin-merge bypass exception (Epic #2517)
+
+An `--admin` / branch-protection-bypass merge (a PR merged without all required checks green or
+required review met) MUST carry a formal exception, else it is a G1 governance violation:
+a `merge-bypass:admin-exception` label on the linked issue, OR a `BLOCKER_NOTE` in the PR body
+with `bypass_reason:` and `approver:` fields. Enforced post-merge by `merge-bypass-gates.yml`
+(`scripts/global/megalint/admin-merge-exception.js`). Relatedly, a multi-close PR that closes
+any issue **as cancelled** requires a per-issue `CANCELLATION: <reason>` comment
+(`batch-cancel-evidence.js`); batch completions keep the `resolved as part of batch with #N` form.
+
 ## Goal-lens decision lint (required)
 
 - Apply this priority order to all governed decisions:
