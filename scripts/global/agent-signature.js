@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const sig = require('./governance-artifact-signature');
+const { detectRuntime } = require('./detect-runtime');
 
 const args = process.argv.slice(2);
 const opt = {};
@@ -10,9 +11,14 @@ for (let i = 0; i < args.length; i += 2) if (args[i]?.startsWith('--')) opt[args
 
 const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'inventory', 'team-model-signatures.json'), 'utf8'));
 // Identity is settings/substrate-derived, never hard-coded to one team (G5).
-// Resolve from explicit flag, then the established HAMR_TEAM/HAMR_MODEL env
-// signals; if unresolved we fail loud below rather than mis-attribute provenance.
-const team = (opt.team || process.env.HAMR_TEAM || process.env.MEGINGJORD_TEAM || '').toLowerCase();
+// Resolve from explicit flag, then HAMR_TEAM/MEGINGJORD_TEAM env, then a HIGH-CONFIDENCE
+// runtime detection (#2659) — so each runtime auto-attributes its team even when HAMR_TEAM
+// is unset; 'unknown' detection still falls through to the fail-loud below (no guessing).
+let team = (opt.team || process.env.HAMR_TEAM || process.env.MEGINGJORD_TEAM || '').toLowerCase();
+if (!team) {
+  const detected = detectRuntime();
+  if (detected.confidence === 'high') team = detected.runtime;
+}
 const model = (opt.model || process.env.HAMR_MODEL || process.env.MEGINGJORD_MODEL || '').toLowerCase();
 const role = (opt.role || 'collaborator').toLowerCase();
 const substrate = (opt.substrate || 'local').toLowerCase();
