@@ -1,3 +1,4 @@
+// tier: 2
 // Phase 3 / #785 — per-turn state offload client
 // Reads .dashboard/capabilities.json; uses Cloudflare Worker if available,
 // falls back to direct GitHub `gh` CLI on cache miss / no-substrate / error.

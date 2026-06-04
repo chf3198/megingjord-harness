@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // OpenClaw Chat — OpenAI-compatible dispatch to LiteLLM fleet gateway
 // Direct Tailscale HTTP, no SSH tunnel required
 

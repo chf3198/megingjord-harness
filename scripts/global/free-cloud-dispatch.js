@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 4
 // free-cloud-dispatch.js (#2621): execute a $0 cloud provider when the fleet is unreachable.
 // Tries the policy free-cloud providers in order; routes through wrapProviderCall (#1160) for
 // HAMR cost/observability; gracefully no-ops (no_key / all-fail) so callers fall back to the

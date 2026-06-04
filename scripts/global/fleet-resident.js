@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Resident-model preference for fleet review dispatch (#2599, G3). Prefer a
 // model already loaded on the Ollama host (/api/ps) so cross-family reviews
 // stay on the FREE fleet instead of cold-loading a different model, timing

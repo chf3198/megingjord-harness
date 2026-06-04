@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // it-bypass-usage-report.js — Aggregates it-bypass-usage.jsonl per marker per week.
 // Emits Tier-2 anneal when any marker's usage > IT_BYPASS_THRESHOLD per week. Refs #2351.
 'use strict';

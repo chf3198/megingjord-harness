@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // multi-judge-smoke (#1814) — live smoke test against fleet judges.
 // Default: qwen2.5-coder:32b on 36gbwinresource. Reads artifact from stdin/file.
 // Exit 0 on aggregate produced; 1 on any judge failure.

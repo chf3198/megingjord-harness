@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // adversarial-fixture-gen (#1771 Child 3.2) — generates synthetic adversarial
 // fixtures for replay-based eval gates. Each fixture exercises a specific
 // rotation rule or pre-merge-review trigger with known-expected outcome.

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // mailbox-client.js — operator-side R2 mailbox client (#918).
 // Per HAMR v3.2 §R2: signed Google A2A envelopes; reuses baton-signing.js (#894).
 'use strict';

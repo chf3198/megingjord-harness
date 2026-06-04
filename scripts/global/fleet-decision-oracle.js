@@ -1,3 +1,4 @@
+// tier: 3
 // fleet-decision-oracle.js — route routine dev decisions to fleet rater (#2509)
 // Wraps qwen-7b (fast) and qwen-32b (high-stakes) on Tailscale fleet for
 // operator-internal yes/no decisions; client-escalation only on inconclusive.

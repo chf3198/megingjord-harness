@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // rule-card-extractor.js — 8 typological adapters for governance rule-card
 // extraction. Refs #2301 (Epic #2295 Phase-1 child P1.2).
 // CommonJS for max cross-runtime portability (Claude Code/Codex/Copilot).

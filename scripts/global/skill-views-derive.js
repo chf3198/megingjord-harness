@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // skill-views-derive.js — Wave 8 child 4 (#979).
 // Read-only on SKILL.md (per Round-4 D4.1 scope cap). Scans skills/<name>/SKILL.md;
 // writes derived views to docs/skills-{agents,copilot}.md. Parent files reference these.

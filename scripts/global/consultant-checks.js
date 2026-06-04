@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');

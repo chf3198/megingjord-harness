@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 2
 // test-evidence-validator (#1214) — pure function consumed by .github/workflows/test-evidence.yml.
 // Per instructions/test-methodology-matrix.instructions.md.
 // Enum constants sourced from test-strategy-enum.js (#1236).

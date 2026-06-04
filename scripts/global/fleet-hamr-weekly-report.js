@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // fleet-hamr-weekly-report — aggregate cache-stats.jsonl + override-events into weekly compliance report.
 // Refs Epic #2150 #2202 AC6. Consumes ~/.megingjord/cache-stats.jsonl (#1339).
 

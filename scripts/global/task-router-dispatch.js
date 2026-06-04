@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Fleet dispatch — always executes against Ollama when lane=fleet. [Refs #574]
 const { classifyPrompt } = require('./task-router');
 const { chatComplete: ollamaChat } = require('./ollama-direct');

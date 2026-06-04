@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 4
 // batch-validator.js — HAMR Wave 6 child 4 (#944).
 // Dry-run + opt-in live mode for Anthropic Batch API submission.
 // Default: dry-run = $0 operator cost. Live mode requires --live --operator-approved.

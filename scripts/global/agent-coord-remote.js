@@ -1,3 +1,4 @@
+// tier: 2
 // Layer 3 client wrapper — Cloudflare Worker if CLOUDFLARE_WORKER_URL set,
 // else falls through to Layer 4 SQLite (#739 / #740). Same API surface.
 let local;

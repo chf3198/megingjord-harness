@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // baton-fleet-review-comment — canonical red-team comment formatter
 // Refs #2179 (Phase-1 P1-2 of Epic #2041). Consumes dispatchRedTeam output (#2175 P1-1).
 // Per Phase-0 dog-food finding: per-iteration table = aggregation primitive.

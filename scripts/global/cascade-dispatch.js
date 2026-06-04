@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Cascade dispatch: Ollama → heuristic gate → judge gate → escalation signal.
 
 const { chatComplete: ollamaChat, healthCheck } = require('./litellm-client');

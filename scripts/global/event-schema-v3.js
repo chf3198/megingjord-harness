@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // event-schema-v3.js — Unified event schema v3 for all *.jsonl logging surfaces.
 // Epic #1339 / #1353. Foundation for harness + HAMR observability.
 //

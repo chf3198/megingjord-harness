@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // hamr-provider-wrapper.js — HAMR Wave 7 child B (#952).
 // Opt-in shim: any provider call routes through cacheHeaders + appendCacheStat + spillover.
 // Pure library — does NOT modify provider call sites (Copilot Team boundary preserved).

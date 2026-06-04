@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 4
 
 require('dotenv').config();
 

@@ -1,3 +1,4 @@
+// tier: 4
 // Phase 0 capability probe — read-only substrate detection (#788, #877)
 // Writes .dashboard/capabilities.json. Never charges tokens. Idempotent.
 const fs = require('fs');
