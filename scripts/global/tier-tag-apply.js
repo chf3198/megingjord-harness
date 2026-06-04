@@ -23,14 +23,14 @@ function apply(root) {
   const dir = path.join(root, 'scripts', 'global');
   const files = fs.readdirSync(dir).filter((f) => f.endsWith('.js'));
   const tagged = [];
-  for (const f of files) {
-    const p = path.join(dir, f);
-    const content = fs.readFileSync(p, 'utf8');
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const content = fs.readFileSync(filePath, 'utf8');
     if (TAG_RE.test(content)) continue;
     const tier = impliedTier(content);
     if (tier < 2) continue; // tier-0/1 baseline stays untagged
-    fs.writeFileSync(p, insertTag(content, tier), 'utf8');
-    tagged.push({ file: f, tier });
+    fs.writeFileSync(filePath, insertTag(content, tier), 'utf8');
+    tagged.push({ file, tier });
   }
   return tagged;
 }
@@ -39,7 +39,7 @@ if (require.main === module) {
   const root = path.resolve(__dirname, '..', '..');
   const tagged = apply(root);
   console.log(`tier-tag-apply: tagged ${tagged.length} script(s).`);
-  for (const t of tagged) console.log(`  ${t.file} → tier ${t.tier}`);
+  for (const tag of tagged) console.log(`  ${tag.file} → tier ${tag.tier}`);
 }
 
 module.exports = { apply, insertTag };

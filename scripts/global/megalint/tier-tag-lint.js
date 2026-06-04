@@ -41,8 +41,8 @@ function lintFile(file, content) {
 
 function lintTierTags(files) {
   const violations = [];
-  for (const f of files) {
-    try { violations.push(...lintFile(f, fs.readFileSync(f, 'utf8'))); }
+  for (const file of files) {
+    try { violations.push(...lintFile(file, fs.readFileSync(file, 'utf8'))); }
     catch { /* unreadable file: skip (other gates cover existence) */ }
   }
   return { ok: violations.length === 0, violations };
@@ -58,7 +58,7 @@ if (require.main === module) {
   const res = lintTierTags(globScripts(root));
   if (!res.ok) {
     console.error(`tier-tag-lint: FAIL (${res.violations.length})`);
-    for (const v of res.violations) console.error(`  - ${v.rule}: ${path.basename(v.file)} — ${v.detail}`);
+    for (const violation of res.violations) console.error(`  - ${violation.rule}: ${path.basename(violation.file)} — ${violation.detail}`);
     process.exit(1);
   }
   console.log('tier-tag-lint: PASS');

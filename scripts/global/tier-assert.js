@@ -12,9 +12,9 @@ const MAX_TIER = 5;
 function readMinimumTier(env = process.env) {
   const raw = (env.MEGINGJORD_MINIMUM_TIER || '').trim();
   if (raw === '') return null; // unset → advisory mode
-  const n = Number(raw);
-  if (!Number.isInteger(n) || n < MIN_TIER || n > MAX_TIER) return null;
-  return n;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < MIN_TIER || parsed > MAX_TIER) return null;
+  return parsed;
 }
 
 function inRange(tier) {
@@ -44,10 +44,10 @@ function assertTier(requiredTier, opts = {}) {
 }
 
 if (require.main === module) {
-  const t = Number(process.argv[2]);
-  const r = assertTier(Number.isFinite(t) ? t : 0, { feature: process.argv[3] || 'cli' });
-  console.log(JSON.stringify(r));
-  process.exit(r.ok ? 0 : 3);
+  const tierArg = Number(process.argv[2]);
+  const result = assertTier(Number.isFinite(tierArg) ? tierArg : 0, { feature: process.argv[3] || 'cli' });
+  console.log(JSON.stringify(result));
+  process.exit(result.ok ? 0 : 3);
 }
 
 module.exports = { readMinimumTier, assertTier, MIN_TIER, MAX_TIER };
