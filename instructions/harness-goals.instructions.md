@@ -32,7 +32,7 @@ G10 Maintainability.
   pattern that bridges G5 and G6. The resource tiers (0–5) this baseline is
   measured against are defined in
   `instructions/resource-tier-portability.instructions.md`; the per-feature tier
-  + fallback catalogue is `docs/howto/resource-tier-feature-matrix.md`.
+  and fallback catalogue is `docs/howto/resource-tier-feature-matrix.md`.
 - G6 Resilience: graceful degradation and fallback paths for partial outages.
   See "Tier-graceful degradation" below for the cross-cutting pattern that
   ties G5 baseline-absent and G6 transiently-unreachable into a single
