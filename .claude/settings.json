@@ -44,6 +44,11 @@
             "type": "command",
             "command": "python3 ~/.copilot/hooks/scripts/prune_file_history.py",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "python3 ~/.copilot/hooks/scripts/canonical_main_wip_check.py",
+            "timeout": 10
           }
         ]
       }
