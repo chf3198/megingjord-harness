@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // hamr-bypass-detector — detect direct curls to known provider endpoints that bypass HAMR.
 // Refs Epic #2029 #2220. Pure function; consumed by pretool_guard.py via subprocess or directly.
 

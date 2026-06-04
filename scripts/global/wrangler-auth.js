@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // wrangler-auth.js — Isolated wrangler executor for D1 (#1564).
 // Sources CLOUDFLARE_API_TOKEN from .env into a child process only.
 // Token never appears in shell history or command-line arguments.

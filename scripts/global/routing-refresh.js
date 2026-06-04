@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 4
 // scripts/global/routing-refresh.js — fleet + cloud model probe, matrix updater (#833)
 // Usage:
 //   node scripts/global/routing-refresh.js                # probe + write snapshot

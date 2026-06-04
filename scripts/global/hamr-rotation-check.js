@@ -1,4 +1,5 @@
 'use strict';
+// tier: 2
 // hamr-rotation-check (#1724) — HAMR-side rotation validator adapter.
 // Consumes baton-team-model-v2 helper (#1723); shapes output to match
 // the /mcp rotation:check response format per Phase 2.2 (#1720) design.

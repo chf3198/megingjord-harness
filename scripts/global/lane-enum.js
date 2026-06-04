@@ -1,4 +1,5 @@
 'use strict';
+// tier: 2
 // lane-enum.js — single source-of-truth for canonical lane labels.
 // Refs #2302 / Epic #2295 P1.1 — reconciles inter-validator LIGHTWEIGHT drift.
 // CommonJS exports for cross-runtime portability (Node 14+, Cloudflare Workers).

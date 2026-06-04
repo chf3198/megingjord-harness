@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // collaborator-preflight — quality gates before COLLABORATOR_HANDOFF. Refs #2438.
 // Gates: lint → tests → changelog-fragment → fleet cross-family review.
 

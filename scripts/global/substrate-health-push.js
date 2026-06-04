@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // substrate-health-push.js — HAMR Wave 6 child 3 (#943).
 // Runs substrate-health.js (#911) locally; signs canonical JSON; POSTs to HAMR /substrate-health.
 'use strict';

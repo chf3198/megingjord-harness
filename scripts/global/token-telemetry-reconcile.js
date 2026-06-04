@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 4
 /** Token telemetry reconciliation + drift alerting. */
 const path = require('path');
 const fs = require('fs');

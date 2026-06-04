@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 /* lint-hamr-bypass — detect HAMR-bypass patterns across the repo.
  *
  * Per #1150 / Epic #1130 / D-1148-003. Advisory-first; promote to

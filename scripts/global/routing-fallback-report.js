@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // routing-fallback-report.js — Aggregates routing-fallback.jsonl per role per week.
 // Emits Tier-2 anneal when any role's fallback-rate > FALLBACK_THRESHOLD. Refs #2351.
 'use strict';

@@ -1,3 +1,4 @@
+// tier: 2
 // Layer 4: Local SQLite WAL coordination primitive (#739)
 // API surface mirrors what Layer 3 (Cloudflare DO, #740) will implement.
 const path = require('path');

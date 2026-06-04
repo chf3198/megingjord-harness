@@ -1,3 +1,4 @@
+// tier: 3
 // Phase 0 capability-show — pretty-print the manifest with per-tier feature availability (#788)
 const fs = require('fs');
 const path = require('path');

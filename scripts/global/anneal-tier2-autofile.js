@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 2
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');

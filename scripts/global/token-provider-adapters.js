@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 
 const { normalizeTokenRecord } = require('./token-ledger-schema');
 

@@ -1,3 +1,4 @@
+// tier: 2
 // HAMR substrate probes — S2 spike (#877). Non-destructive, fail-soft, 5s timeout.
 const { execSync } = require('child_process')
 const fs = require('fs')

@@ -1,3 +1,4 @@
+// tier: 3
 // fleet-probe.js — busy-vs-unavailable detector for fleet models (#2521)
 // Phase-1 AC1 of Epic #2518 per Phase-0 design §3.
 // Pure functions; HTTP impl injected for testability.

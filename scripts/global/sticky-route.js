@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // sticky-route.js — HAMR Wave 4 child 3 (#926).
 // Maps tier → preferred provider with substrate-health.json fallback.
 // Sticky = same provider across multi-turn conversations to maximize cache hits.

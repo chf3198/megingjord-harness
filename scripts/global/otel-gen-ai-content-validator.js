@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // otel-gen-ai-content-validator — assert that emitted gen_ai.* attributes
 // MATCH the wrapper-declared provider/model/operation per #2028.
 // Mitigates red-team Attack #2 from Epic #1962: an agent emitting

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 /* fleet-via-hamr — HAMR-wrapped fleet (Ollama) call shim.
  *
  * Per #1149 / Epic #1130 / consensus extract D-1148-001. Closes the 0%

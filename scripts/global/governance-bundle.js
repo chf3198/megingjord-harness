@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Governance bundle for fleet-model consultant parity (Epic #2094 Phase-1,
 // Option C bundle-first). The orchestrator precomputes a redacted, content-
 // hashed bundle of the governance fields a Consultant CLOSEOUT requires, so a

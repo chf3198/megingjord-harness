@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // router-enforcement — deterministic gate: fail governed runs that bypass fleet/HAMR
 // without an approved override artifact. Refs Epic #2150 #2205.
 // Coordinates API surface with Epic #2192 router-bypass detection.

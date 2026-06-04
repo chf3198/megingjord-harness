@@ -1,3 +1,4 @@
+// tier: 3
 // fleet-profile-bench.js — populates fleet-latency-profile.json (#2522)
 // Phase-1 AC2 of Epic #2518. Sends canonical prompt to each host/model;
 // records p50/p99 from N samples; writes back into profile JSON.

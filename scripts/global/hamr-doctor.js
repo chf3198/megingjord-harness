@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // hamr-doctor.js — HAMR Wave 1 operator CLI: capability + tier + remediation (#896)
 // Pure read-only; no paid resource deployment; no live API calls.
 'use strict';

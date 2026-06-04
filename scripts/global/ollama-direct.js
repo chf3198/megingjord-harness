@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Direct Ollama native-API client — fallback when OpenClaw/LiteLLM is unavailable.
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.91.113.16:11434';

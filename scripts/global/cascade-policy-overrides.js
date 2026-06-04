@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // cascade-policy-overrides.js — Wave 8 child 1 (#976).
 // Reads HAMR /quota for hit_rate_7d + provider state; writes
 // ~/.megingjord/cascade-policy-overrides.json for model-routing-engine consumption.

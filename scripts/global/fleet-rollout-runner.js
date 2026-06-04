@@ -1,3 +1,4 @@
+// tier: 3
 const fs = require('fs');
 const path = require('path');
 

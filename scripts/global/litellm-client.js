@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Unified fleet client: LiteLLM gateway (preferred) → direct Ollama (fallback).
 // Activates when LITELLM_URL env var or fleet-config OpenClaw URL resolves.
 // Uses named LiteLLM route groups to trigger fallback chain from litellm-config.yaml.

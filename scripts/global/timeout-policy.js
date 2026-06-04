@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // timeout-policy — adaptive timeout per lane/model/workload class.
 // Refs Epic #2150 #2201. Addresses Phase-0 #2174 observation: 600s hardcoded
 // bound was insufficient for qwen2.5-coder:32b (907s p99 actual).

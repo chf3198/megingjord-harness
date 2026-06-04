@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // second-opinion-runner (#1612 AC4) — runs a cross-family fleet rater
 // (qwen2.5-coder via HAMR-wrapped Ollama) against a CONSULTANT_CLOSEOUT
 // rubric and produces a SECOND_OPINION block. Closes the 0%-adoption gap

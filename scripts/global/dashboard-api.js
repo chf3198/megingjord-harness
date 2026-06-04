@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // Dashboard API handler — resolves all paths from COPILOT_HOME
 const http = require('http');
 const fs = require('fs');

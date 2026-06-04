@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // cache-stats-push.js — HAMR Wave 5 child 2 (#933).
 // Computes rolling 7d hit-rate locally and POSTs Ed25519-signed payload to HAMR /cache-stats.
 'use strict';

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 3
 // fleet-red-team-dispatch — HAMR-wrapped Ollama dispatcher for adversarial review.
 // Refs #2175 (Phase-1 P1-1 of Epic #2041). Consumes templates from #2181 P1-3.
 // Uses tier='fleet-local' (per #2178 P1-7) so cache-stats records ollama provider correctly.

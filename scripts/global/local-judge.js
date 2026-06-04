@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+// tier: 3
 // Layer 2 judge gate — semantic quality assessment using an independent local model.
 // Uses phi3:mini (Phi-3 family, architecturally independent from qwen2.5 generator).
 

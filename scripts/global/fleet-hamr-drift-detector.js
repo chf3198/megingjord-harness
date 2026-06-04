@@ -1,4 +1,5 @@
 'use strict';
+// tier: 3
 // fleet-hamr-drift-detector — detect AC-threshold breaches in fleet/HAMR observability
 // data; auto-file Tier-2 anneal tickets. Refs Epic #2150 #2206 AC7.
 

@@ -1,3 +1,4 @@
+// tier: 2
 // HAMR Wave 2 child 2: substrate-health probe (#911) — runtime tier sensor.
 // Per HAMR v3.2 §R7 + v3.2.1 §R9.3. Writes ~/.megingjord/substrate-health.json.
 'use strict';

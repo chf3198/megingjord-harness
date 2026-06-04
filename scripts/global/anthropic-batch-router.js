@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 4
 // anthropic-batch-router.js — HAMR Wave 4 child 9 (#927).
 // Routes non-time-critical work (research, wiki anneal) to Anthropic Batch API
 // (50% off + bypasses online quotas) per v3.2 §R5 + v3.2.1.

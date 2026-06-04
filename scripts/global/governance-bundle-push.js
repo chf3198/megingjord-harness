@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// tier: 2
 // governance-bundle-push.js — operationalizes Epic #2094. Reads a precomputed
 // per-issue governance-fields snapshot, builds the redacted + content-hashed
 // bundle (governance-bundle.js), signs it with the operator Ed25519 key, and

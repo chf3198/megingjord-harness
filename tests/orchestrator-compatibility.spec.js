@@ -50,6 +50,17 @@ const SURFACES = {
     const present = (inv.runtimes || []).includes(orch);
     return { recognized: present, evidence: `runtimes=${JSON.stringify(inv.runtimes)}` };
   },
+  // Epic #2398 AC10: each orchestrator must honor the asserted MEGINGJORD_MINIMUM_TIER —
+  // a feature above the asserted tier is gated to a fallback; one at/below is allowed.
+  'tier-assert-minimum': (orch) => {
+    const { assertTier } = require('../scripts/global/tier-assert');
+    const env = { MEGINGJORD_MINIMUM_TIER: '1' };
+    const gated = assertTier(2, { env, feature: `${orch}:tier2` });
+    const allowed = assertTier(1, { env, feature: `${orch}:tier1` });
+    const ok = gated.ok === false && gated.action === 'fallback' && allowed.ok === true;
+    return { recognized: ok,
+      evidence: `MINIMUM_TIER=1 → tier2 ${gated.action}(ok=${gated.ok}), tier1 ${allowed.action}(ok=${allowed.ok})` };
+  },
 };
 
 const report = {};
