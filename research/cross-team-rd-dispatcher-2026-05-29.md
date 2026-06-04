@@ -60,4 +60,17 @@ The Tier-2 upgrade is invisible to the operator — `MEGINGJORD_HAMR_DISABLED=1`
 - For runtimes without a session-start hook (Antigravity CLI? Codex?), how does the team's session "pull" its prompt — operator-action or a session-init wrapper script?
 - Should wave-N dispatch wait for prior-wave team-response artifacts (synchronous) or proceed on stability detection (asynchronous; see AC-R4 #2396)?
 
-Refs Epic #1112 · Refs #2397 umbrella synthesis · Refs #2400 tier-graceful pattern
+## Tier-1 fallback addendum (Epic #2398 AC8)
+
+The dispatcher's HAMR-dependent surfaces are Tier-2 (Cloudflare Workers). Per the
+resource-tier model (`instructions/resource-tier-portability.instructions.md`),
+each ships a Tier-1 (GitHub-only) fallback so an operator without HAMR is not blocked:
+
+- **mailbox** → `.gnap/messages/<team>/*.json` committed on the issue branch (#2400).
+- **cron / wave-stability detection** → GitHub Actions `schedule:` trigger or an
+  operator-run `npm run` invocation; no Cloudflare cron required.
+- **mcp dispatch** → `gh` CLI fallback (`MEGINGJORD_MCP_DISABLED=1`).
+
+Full per-feature tier + fallback catalogue: `docs/howto/resource-tier-feature-matrix.md`.
+
+Refs Epic #1112 · Refs #2397 umbrella synthesis · Refs #2400 tier-graceful pattern · Refs #2398 AC8
