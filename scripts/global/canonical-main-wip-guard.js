@@ -11,6 +11,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
+const { detectRuntime } = require('./detect-runtime');
+const { attributeForeignWriter } = require('./runtime-session-registry');
 
 const GIT_OP_MARKERS = ['index.lock', 'MERGE_HEAD', 'REBASE_HEAD', 'CHERRY_PICK_HEAD'];
 
@@ -49,7 +51,8 @@ function quarantineWip(cwd, wip, opts = {}) {
     for (const file of wip.untracked) fs.rmSync(path.join(cwd, file), { force: true });
   }
   const manifest = {
-    ts: stamp, modified: wip.modified, untracked: wip.untracked, enforced: Boolean(opts.enforce),
+    ts: stamp, writer: opts.writer || 'undetermined',
+    modified: wip.modified, untracked: wip.untracked, enforced: Boolean(opts.enforce),
     recover: `git worktree add ~/devenv-ops-recover -b recover/canonical-main-wip; git -C ~/devenv-ops-recover apply ${patch}; tar xzf ${tgz} -C ~/devenv-ops-recover`,
   };
   const manifestPath = path.join(dir, `canonical-main-quarantine-${stamp}.json`);
@@ -66,8 +69,10 @@ function guard(cwd, opts = {}) {
   const wip = detectStrandedWip(porcelain);
   if (!wip.modified.length && !wip.untracked.length) return { action: 'clean' };
   const enforce = opts.enforce ?? process.env.MEGINGJORD_CANONICAL_MAIN_ENFORCE === '1';
-  const backup = quarantineWip(cwd, wip, { ...opts, enforce });
-  return { action: enforce ? 'quarantined' : 'advisory', wip, backup };
+  const writer = opts.writer !== undefined ? opts.writer
+    : attributeForeignWriter(detectRuntime().runtime, {});
+  const backup = quarantineWip(cwd, wip, { ...opts, enforce, writer });
+  return { action: enforce ? 'quarantined' : 'advisory', wip, writer, backup };
 }
 
 if (require.main === module) {
@@ -75,7 +80,7 @@ if (require.main === module) {
   try {
     const result = guard(target, {});
     if (result.action === 'advisory') {
-      console.warn(`[canonical-main-wip-guard] foreign stranded WIP in canonical main `
+      console.warn(`[canonical-main-wip-guard] stranded WIP in canonical main from runtime '${result.writer}' `
         + `(${result.wip.modified.length} modified, ${result.wip.untracked.length} untracked) — `
         + `backed up: ${result.backup.manifestPath}. Set MEGINGJORD_CANONICAL_MAIN_ENFORCE=1 to auto-quarantine.`);
     } else if (result.action === 'quarantined') {
