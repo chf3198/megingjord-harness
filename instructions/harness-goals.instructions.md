@@ -29,7 +29,10 @@ G10 Maintainability.
   portability dimension distinct from G6: G6 covers temporary outages of normally-
   available resources, G5 covers baseline-absent resources for a given operator.
   See "Tier-graceful degradation" below for the optimal-with-fallback
-  pattern that bridges G5 and G6.
+  pattern that bridges G5 and G6. The resource tiers (0–5) this baseline is
+  measured against are defined in
+  `instructions/resource-tier-portability.instructions.md`; the per-feature tier
+  and fallback catalogue is `docs/howto/resource-tier-feature-matrix.md`.
 - G6 Resilience: graceful degradation and fallback paths for partial outages.
   See "Tier-graceful degradation" below for the cross-cutting pattern that
   ties G5 baseline-absent and G6 transiently-unreachable into a single
