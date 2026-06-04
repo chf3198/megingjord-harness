@@ -1,0 +1,13 @@
+{
+  "_doc": "Epic #2091 C8 pollution corpus. Each entry = a cross-session/worktree state-POLLUTION scenario observed (or representative of) the ~20 false 'Admin baton incomplete' alarms from the 2026-05-21/22 sessions, where >=2 sessions shared one cwd-keyed state file. a_left_residue = session_a wrote admin_ops/flags that no longer apply to session_b. Tracker-accuracy (code_touched-source) FPs are EXCLUDED here (owned by #2647).",
+  "corpus": [
+    {"scenario": "two-team-shared-main-checkout", "cwd": "/home/op/devenv-ops", "session_a": "codexAAAA1111", "session_b": "claudeBBBB2222", "a_left_residue": true},
+    {"scenario": "copilot-then-claude-same-cwd", "cwd": "/home/op/devenv-ops", "session_a": "copilotCCCC33", "session_b": "claudeDDDD4444", "a_left_residue": true},
+    {"scenario": "worktree-cwd-inherited-by-shell", "cwd": "/home/op/devenv-ops-2037", "session_a": "codexEEEE5555", "session_b": "claudeFFFF6666", "a_left_residue": true},
+    {"scenario": "residue-after-merge-prior-session", "cwd": "/home/op/devenv-ops", "session_a": "claudeGGGG7777", "session_b": "claudeHHHH8888", "a_left_residue": true},
+    {"scenario": "admin_ops-merge-set-by-foreign", "cwd": "/home/op/devenv-ops", "session_a": "codexIIII9999", "session_b": "copilotJJJJ000", "a_left_residue": true},
+    {"scenario": "three-team-rotation-same-day", "cwd": "/home/op/devenv-ops", "session_a": "codexKKKK1212", "session_b": "claudeLLLL3434", "a_left_residue": true},
+    {"scenario": "stale-active_ticket-cross-session", "cwd": "/home/op/devenv-ops", "session_a": "copilotMMMM56", "session_b": "claudeNNNN7878", "a_left_residue": true},
+    {"scenario": "code_touched-residue-foreign-session", "cwd": "/home/op/devenv-ops", "session_a": "codexOOOO9090", "session_b": "claudePPPP1313", "a_left_residue": true}
+  ]
+}
