@@ -23,6 +23,8 @@ const researchFirstPhaseGate = require('./research-first-phase-gate.js');
 const parityValidator = require('./parity-validator.js');
 const crossTeamResponseFidelity = require('./cross-team-response-fidelity.js');
 const changelogFragmentPresence = require('./changelog-fragment-presence.js');
+const adminMergeException = require('./admin-merge-exception.js');
+const batchCancelEvidence = require('./batch-cancel-evidence.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -57,6 +59,8 @@ const VALIDATORS = {
   'parity-validator': parityValidatorAdapter,
   'cross-team-response-fidelity': crossTeamResponseFidelity,
   'changelog-fragment-presence': changelogFragmentPresence,
+  'admin-merge-exception': adminMergeException,
+  'batch-cancel-evidence': batchCancelEvidence,
 };
 
 function runAll(input) {

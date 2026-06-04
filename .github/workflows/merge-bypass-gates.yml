@@ -1,0 +1,65 @@
+name: Merge Bypass Gates
+# Epic #2517: AC1 admin-merge-exception + AC2 batch-cancel-evidence. Runs POST-merge so it
+# never false-positives on in-progress PRs. Fail-on-violation; promotion to a required
+# branch-protection context is a documented sign-off-gated step (advisory→blocking pattern).
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  merge-bypass-gates:
+    name: merge-bypass-gates
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const ame = require('./scripts/global/megalint/admin-merge-exception');
+            const bce = require('./scripts/global/megalint/batch-cancel-evidence');
+            const pr = context.payload.pull_request;
+            const { owner, repo } = context.repo;
+            const violations = [];
+
+            // ---- AC1: admin-bypass merge requires an exception marker ----
+            const checks = await github.rest.checks.listForRef({ owner, repo, ref: pr.merge_commit_sha || pr.head.sha });
+            const requiredChecksAllGreen = checks.data.check_runs.every(c => c.conclusion === 'success' || c.conclusion === 'skipped' || c.conclusion === 'neutral');
+            const reviews = await github.rest.pulls.listReviews({ owner, repo, pull_number: pr.number });
+            const reviewApproved = reviews.data.some(r => r.state === 'APPROVED');
+            const refMatch = (pr.body || '').match(/Refs\s+#(\d+)/i);
+            let labels = [];
+            if (refMatch) {
+              const issue = await github.rest.issues.get({ owner, repo, issue_number: Number(refMatch[1]) });
+              labels = issue.data.labels.map(l => (typeof l === 'string' ? l : l.name));
+            }
+            const bypassDetected = ame.detectAdminBypass({ merged: true, requiredChecksAllGreen, reviewApproved });
+            violations.push(...ame.adminMergeExceptionCheck({ bypassDetected, labels, prBody: pr.body || '' }).violations);
+
+            // ---- AC2: batch-cancel requires per-issue CANCELLATION ----
+            const closing = bce.parseCloses(pr.body || '');
+            if (closing.length > 1) {
+              const closingIssues = [];
+              for (const number of closing) {
+                const issue = await github.rest.issues.get({ owner, repo, issue_number: number });
+                const comments = await github.rest.issues.listComments({ owner, repo, issue_number: number, per_page: 100 });
+                closingIssues.push({
+                  number, state_reason: issue.data.state_reason,
+                  labels: issue.data.labels.map(l => (typeof l === 'string' ? l : l.name)),
+                  comments: comments.data.map(c => ({ body: c.body || '' })),
+                });
+              }
+              violations.push(...bce.batchCancelCheck(closingIssues).violations);
+            }
+
+            if (violations.length) {
+              core.setFailed('merge-bypass-gates:\n' + violations.map(v => `- ${v.rule}: ${v.detail}`).join('\n'));
+            } else {
+              core.info('merge-bypass-gates: PASS');
+            }
