@@ -10,6 +10,8 @@ const { deriveSigner } = require('./baton-artifact-builder');
 const MAX_SUBJECT = 60; // pr-title.yml subjectPattern ^.{1,60}$ (subject after CC prefix)
 const CC_PREFIX = /^[a-z]+(?:\([^)]+\))?!?:\s+/; // conventional-commit type(scope):
 const CHANGELOG_SECTIONS = ['Added', 'Changed', 'Deprecated', 'Removed', 'Fixed', 'Security'];
+// Back-compat auto-close form (global-standards merge-evidence contract): Closes/Fixes/Resolves #N.
+const CLOSE_FORM = /^(?:Closes|Fixes|Resolves) #\d+$/;
 
 function ticketNum(ticket) {
   const n = String(ticket === null || ticket === undefined ? '' : ticket).replace(/^#/, '');
@@ -55,7 +57,12 @@ function buildPrBody({
   validatePrTitle(title);
   const lines = [`Refs #${n}`];
   if (mergeEvidence === 'deferred-final') lines.push(`merge-evidence-deferred-final: #${n}`);
-  else if (mergeEvidence) lines.push(mergeEvidence); // e.g. "Closes #N"
+  else if (mergeEvidence) { // back-compat auto-close form — reject anything that isn't a known gate form
+    if (!CLOSE_FORM.test(mergeEvidence)) {
+      throw new Error(`mergeEvidence must be 'deferred-final' or a Closes/Fixes/Resolves #N line: "${mergeEvidence}"`);
+    }
+    lines.push(mergeEvidence);
+  }
   lines.push('', '## Summary', String(summary || '').trim(), '', `lane: ${lane}`, `test_strategy: ${testStrategy}`);
   if (siblings.length) lines.push(`siblings: ${siblings.map((s) => `#${ticketNum(s)}`).join(', ')}`);
   lines.push('');

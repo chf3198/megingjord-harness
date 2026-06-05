@@ -43,6 +43,11 @@ test('siblings render and backward-compat Closes form is honored', () => {
   expect(body).not.toContain('merge-evidence-deferred-final');
 });
 
+test('PR body rejects a malformed mergeEvidence value', () => {
+  expect(() => buildPrBody({ ...prInput(), mergeEvidence: 'whatever #2672' })).toThrow(/mergeEvidence must be/);
+  expect(() => buildPrBody({ ...prInput(), mergeEvidence: 'Fixes #2672' })).not.toThrow();
+});
+
 test('validatePrTitle rejects an over-60-char subject', () => {
   const longSubject = 'x'.repeat(MAX_SUBJECT + 1);
   expect(() => validatePrTitle(`feat(x): ${longSubject}`)).toThrow(/subject must be 1-60/);
