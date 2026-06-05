@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const { canonicalSignerAlias } = require('./signer-alias');
+const { buildArtifact } = require('./baton-artifact-builder');
 
 function arg(name, fallback = '') {
   const i = process.argv.indexOf(`--${name}`);
@@ -26,15 +27,24 @@ function main() {
   const role = arg('role', 'manager').toLowerCase();
   const teamModel = arg('team-model', process.env.TEAM_MODEL || '');
   const ticket = arg('ticket', '');
-  const summary = arg('summary', '');
-  const relatedTickets = arg('related-tickets', '');
-  const overlapDecision = arg('overlap-decision', '');
   if (!teamModel) {
     process.stderr.write('Missing --team-model (or TEAM_MODEL env).\n');
     process.exit(1);
   }
+  // Structured path (P1.1 #2671): `--fields-json <file>` delegates to the
+  // schema-validated deterministic builder. Default path stays the legacy
+  // free-form renderer for back-compat (AC5).
+  const fieldsJson = arg('fields-json', '');
+  if (fieldsJson) {
+    const fields = JSON.parse(require('fs').readFileSync(fieldsJson, 'utf8'));
+    console.log(buildArtifact({ artifact, role, teamModel, ticket, fields }));
+    return;
+  }
+  const summary = arg('summary', '');
+  const relatedTickets = arg('related-tickets', '');
+  const overlapDecision = arg('overlap-decision', '');
   console.log(buildBatonComment({ artifact, ticket, role, teamModel, summary, relatedTickets, overlapDecision }));
 }
 
 if (require.main === module) main();
-module.exports = { buildBatonComment };
+module.exports = { buildBatonComment, buildArtifact };
