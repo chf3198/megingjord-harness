@@ -65,4 +65,6 @@ jobs:
           tests/free-cloud-dispatch.spec.js
           tests/free-cloud-usage-report.spec.js
           tests/baton-artifact-builder.spec.js
+          tests/baton-pr-builders.spec.js
+          tests/baton-slot-contract.spec.js
           --reporter=line
