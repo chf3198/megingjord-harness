@@ -16,6 +16,7 @@ function managerInput() {
     fields: {
       scope: 'do the thing', lane: 'lane:code-change', test_strategy: 'tdd-pyramid',
       acceptance: '- AC1 works', gates: 'lint, test',
+      related_tickets: 'none', overlap_decision: 'no-overlap',
     },
   };
 }
@@ -61,6 +62,13 @@ test('missing required field throws', () => {
   const bad = managerInput();
   delete bad.fields.gates;
   expect(() => buildArtifact(bad)).toThrow(/missing required field 'gates'/);
+});
+
+test('MANAGER_HANDOFF enforces the #2617 overlap-handoff fields', () => {
+  const bad = managerInput();
+  delete bad.fields.overlap_decision;
+  expect(() => buildArtifact(bad)).toThrow(/missing required field 'overlap_decision'/);
+  expect(buildArtifact(managerInput())).toMatch(/\nrelated_tickets: none\noverlap_decision: no-overlap\n/);
 });
 
 test('unknown artifact / missing role / missing teamModel throw', () => {

@@ -12,13 +12,17 @@ function f(k, opts = {}) {
   return { k, req: !!opts.req, block: !!opts.block };
 }
 
-// MANAGER_HANDOFF — scope + lane + strategy + gates; phase-gate fields optional.
+// MANAGER_HANDOFF — scope + lane + strategy + gates + overlap-handoff declaration
+// (related_tickets + overlap_decision are required by the #2617 overlap gate);
+// phase-gate fields optional.
 const MANAGER = [
   f('scope', { req: true }),
   f('lane', { req: true }),
   f('test_strategy', { req: true }),
   f('acceptance', { req: true, block: true }),
   f('gates', { req: true }),
+  f('related_tickets', { req: true }),
+  f('overlap_decision', { req: true }),
   f('anneal_tier'),
   f('phase_gate_satisfied'),
   f('phase_0_sources'),
