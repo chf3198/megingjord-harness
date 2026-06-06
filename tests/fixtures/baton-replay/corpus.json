@@ -1,0 +1,71 @@
+[
+  {
+    "name": "manager-2671-clean",
+    "kind": "comment",
+    "input": {
+      "artifact": "MANAGER_HANDOFF",
+      "role": "manager",
+      "teamModel": "claude-code:opus@anthropic",
+      "ticket": 2671,
+      "fields": {
+        "scope": "render artifacts",
+        "lane": "lane:code-change",
+        "test_strategy": "tdd-pyramid",
+        "acceptance": "- AC1",
+        "gates": "lint",
+        "related_tickets": "none",
+        "overlap_decision": "no-overlap"
+      }
+    },
+    "expected": "## MANAGER_HANDOFF\n\nscope: render artifacts\nlane: lane:code-change\ntest_strategy: tdd-pyramid\nacceptance:\n- AC1\n\ngates: lint\nrelated_tickets: none\noverlap_decision: no-overlap\n\nSigned-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager"
+  },
+  {
+    "name": "admin-2672-clean",
+    "kind": "comment",
+    "input": {
+      "artifact": "ADMIN_HANDOFF",
+      "role": "admin",
+      "teamModel": "claude-code:opus@anthropic",
+      "ticket": 2672,
+      "fields": {
+        "branch": "feat/2672-x",
+        "commit": "abc1234",
+        "signer-independence-check": "PASS",
+        "deploy-runtime-impact": "none"
+      }
+    },
+    "expected": "## ADMIN_HANDOFF\n\nticket: #2672\n\nbranch: feat/2672-x\ncommit: abc1234\nsigner-independence-check: PASS\ndeploy-runtime-impact: none\n\nSigned-by: Orla Reyes\nTeam&Model: claude-code:opus@anthropic\nRole: admin"
+  },
+  {
+    "name": "prbody-2673-clean",
+    "kind": "pr-body",
+    "input": {
+      "ticket": 2673,
+      "title": "feat(x): y",
+      "lane": "lane:code-change",
+      "testStrategy": "tdd-pyramid",
+      "summary": "sum"
+    },
+    "expected": "Refs #2673\nmerge-evidence-deferred-final: #2673\n\n## Summary\nsum\n\nlane: lane:code-change\ntest_strategy: tdd-pyramid\n"
+  },
+  {
+    "name": "manager-historical-variant",
+    "kind": "comment",
+    "input": {
+      "artifact": "MANAGER_HANDOFF",
+      "role": "manager",
+      "teamModel": "claude-code:opus@anthropic",
+      "ticket": 2600,
+      "fields": {
+        "scope": "legacy",
+        "lane": "lane:code-change",
+        "test_strategy": "none",
+        "acceptance": "- AC1",
+        "gates": "lint",
+        "related_tickets": "none",
+        "overlap_decision": "no-overlap"
+      }
+    },
+    "expected": "## MANAGER_HANDOFF\n\nscope: legacy\nlane: lane:code-change\ntest_strategy: none\nacceptance:\n- AC1\n\ngates: lint\nrelated_tickets: none\noverlap_decision: no-overlap\n\nSigned-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager\n\n"
+  }
+]
