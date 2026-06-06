@@ -24,6 +24,14 @@ const promote = meetsGate(result.rate);       // rate >= 0.85
   that the builder intentionally normalizes. They are the signal of *how much*
   historical practice diverged from the canonical form, not bugs in the builder.
 
+**Definition — "canonical-form artifact":** a posted artifact whose parsed structured
+input `buildArtifact` accepts (all required fields present) AND re-renders byte-identical.
+The committed corpus is the *valid* canonical artifacts; the gate measures the builder's
+forward-consistency (does it deterministically reproduce well-formed artifacts), NOT
+reproduction of pre-canonical or schema-invalid history. A parse that yields a fields-less
+or required-field-missing input is therefore a non-canonical artifact (a defect signal),
+not a builder reproduction failure.
+
 **No calendar threshold.** Do not promote "after N days". Promote when the
 full-corpus `rate` crosses the gate. Expand the seed corpus
 (`tests/fixtures/baton-replay/corpus.json`) with mined real artifacts before
