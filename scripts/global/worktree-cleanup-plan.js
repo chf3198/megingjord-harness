@@ -15,27 +15,42 @@ function leaseFor(entry, leases) {
   return leases.find(lease => lease.branch === entry.branch || lease.ticket === ticket) || null;
 }
 
+// Five-state taxonomy per #2249 research. #2552 needed for squash-merge detection (AC5).
 function classify(entry, lease) {
-  const ticket = ticketFrom(entry.branch);
-  if (lease) return 'active-lease';
-  if (entry.locked) return 'keep-locked';
-  if ((entry.branch || '').startsWith('sandbox/')) return 'keep-launcher';
-  if (entry.branch && entry.branch !== 'main' && ticket === null) return 'keep-review';
-  if (entry.dirtyCount > 0 || entry.untrackedCount > 0 || entry.ahead > 0) return 'preserve-dirty';
-  if (entry.openPr) return 'stale-open-pr';
-  if (entry.mergedToMain) return 'merged-clean';
+  if (lease) return 'preserve';
+  if (entry.locked) return 'preserve';
+  if ((entry.branch || '').startsWith('sandbox/')) return 'preserve';
+  if (entry.branch && entry.branch !== 'main' && !ticketFrom(entry.branch)) return 'needs-review';
+  if (entry.dirtyCount > 0 || entry.untrackedCount > 0) return 'quarantine';
+  if (!entry.branch) return 'quarantine'; // detached HEAD: no branch to delete
+  const aheadOfMain = entry.mainAhead ?? entry.ahead ?? 0;
+  if (aheadOfMain > 0) return 'quarantine';
   if (entry.prunable) return 'prune-metadata';
-  return 'keep-review';
+  if (entry.mergedToMain) return 'remove';
+  return 'needs-review'; // mergedToMain===false + aheadOfMain===0: ambiguous (#2552)
+}
+
+function reason(entry, state, lease) {
+  if (state === 'preserve' && lease) return `active-lease: ticket #${lease.ticket}`;
+  if (state === 'preserve' && entry.locked) return 'locked';
+  if (state === 'preserve') return 'sandbox/launcher branch';
+  if (state === 'quarantine' && (entry.dirtyCount > 0 || entry.untrackedCount > 0))
+    return `dirty: ${entry.dirtyCount || 0} modified, ${entry.untrackedCount || 0} untracked`;
+  if (state === 'quarantine')
+    return `unpushed: ${entry.mainAhead ?? entry.ahead ?? 0} commits ahead of main`;
+  if (state === 'remove') return 'merged: confirmed ancestor of origin/main';
+  if (state === 'prune-metadata') return 'prunable-metadata: no working tree';
+  if (!ticketFrom(entry.branch)) return 'missing-ticket: no ticket number in branch name';
+  return 'unverified-merge-status: may be squash-merged (pending #2552)';
 }
 
 function commands(entry, state) {
-  if (state === 'merged-clean') return [`git worktree remove ${entry.path}`, `git branch -d ${entry.branch}`];
+  if (state === 'remove') return [`git worktree remove ${entry.path}`, `git branch -d ${entry.branch}`];
   if (state === 'prune-metadata') return ['git worktree prune'];
-  if (state === 'preserve-dirty') return [
+  if (state === 'quarantine') return [
     `git switch -c rescue/${ticketFrom(entry.branch) || 'unknown'}-preserve`,
     'gh pr create --draft --fill',
   ];
-  if (state === 'stale-open-pr') return [`gh pr view ${entry.openPr}`, `gh pr comment ${entry.openPr} --body "cleanup review requested"`];
   return [];
 }
 
@@ -47,14 +62,14 @@ function plan(input = {}) {
     const lease = leaseFor(entry, leases);
     const state = classify(entry, lease);
     return { ...entry, ticket: ticketFrom(entry.branch), lease: lease?.ticket || null,
-      cleanupState: state, commands: commands(entry, state) };
+      cleanupState: state, reason: reason(entry, state, lease), commands: commands(entry, state) };
   });
   return { generatedAt: new Date().toISOString(), mode: 'plan-only', worktrees };
 }
 
 function workspace(report) {
   return {
-    folders: report.worktrees.filter(w => w.cleanupState === 'active-lease')
+    folders: report.worktrees.filter(w => w.cleanupState === 'preserve' && w.lease)
       .map(w => ({ name: w.branch || w.path, path: w.path })),
     settings: { 'git.autoRepositoryDetection': 'subFolders' },
   };
@@ -62,11 +77,12 @@ function workspace(report) {
 
 function run(argv = process.argv.slice(2)) {
   const json = argv.includes('--json');
+  const dryRun = argv.includes('--dry-run');
   const workspaceIndex = argv.indexOf('--workspace');
   const workspacePath = workspaceIndex >= 0 ? argv[workspaceIndex + 1] : null;
   const report = plan();
   if (workspacePath) fs.writeFileSync(workspacePath, `${JSON.stringify(workspace(report), null, 2)}\n`);
-  if (json || workspacePath) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  if (json || workspacePath || dryRun) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   else for (const worktree of report.worktrees) {
     console.log(`${worktree.cleanupState.padEnd(15)} ${worktree.branch || 'DETACHED'} ${worktree.path}`);
   }
