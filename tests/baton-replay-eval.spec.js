@@ -53,17 +53,18 @@ test('unknown render kind throws', () => {
   expect(() => renderCase({ kind: 'bogus', input: {} })).toThrow(/unknown replay kind/);
 });
 
-test('committed seed corpus is below the gate (default stays opt-in)', () => {
+test('committed corpus meets the gate (real mined artifacts, promoted #2692)', () => {
   const result = replayEval(seedCorpus);
   expect(result.total).toBeGreaterThan(0);
-  expect(meetsGate(result.rate)).toBe(false); // advisory: seed < 0.85 by design
+  expect(meetsGate(result.rate)).toBe(true); // real mined corpus reproduces >= 0.85
 });
 
-test('builder mode is opt-in by default and toggles via the env flag', () => {
+test('builder mode is the DEFAULT post-promotion; env flag is the rollback switch', () => {
   expect(DEFAULT_ENV).toBe('MEGINGJORD_BATON_BUILDER_DEFAULT');
-  expect(isBuilderDefault({})).toBe(false);
+  expect(isBuilderDefault({})).toBe(true); // promoted (#2692): builder is the default
+  expect(isBuilderDefault({ [DEFAULT_ENV]: '0' })).toBe(false); // explicit rollback
+  expect(isBuilderDefault({ [DEFAULT_ENV]: 'false' })).toBe(false);
+  expect(isBuilderDefault({ [DEFAULT_ENV]: 'off' })).toBe(false);
   expect(isBuilderDefault({ [DEFAULT_ENV]: '1' })).toBe(true);
-  expect(isBuilderDefault({ [DEFAULT_ENV]: 'true' })).toBe(true);
-  expect(isBuilderDefault({ [DEFAULT_ENV]: '0' })).toBe(false);
-  expect(promotionState({ [DEFAULT_ENV]: 'on' }).builderDefault).toBe(true);
+  expect(promotionState({}).promoted).toBe(true);
 });

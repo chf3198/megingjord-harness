@@ -69,4 +69,5 @@ jobs:
           tests/baton-slot-contract.spec.js
           tests/baton-artifact-cross-runtime.spec.js
           tests/baton-replay-eval.spec.js
+          tests/baton-replay-mine.spec.js
           --reporter=line
