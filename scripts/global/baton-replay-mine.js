@@ -8,19 +8,9 @@ const { ARTIFACT_SPECS } = require('./baton-artifact-schema');
 
 function escapeRe(text) { return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
-// Parse one artifact comment body into { artifact, role, teamModel, ticket, fields },
-// or null if it is not a recognized signed baton artifact. The inverse of the builder's
-// renderField: inline `k: value`, block `k:\n<value>`, bounded by the next field marker.
-function parseArtifact(text) {
-  const src = String(text || '').replace(/\r\n/g, '\n');
-  const nameMatch = src.match(/^##\s+([A-Z_]+)\s*$/m);
-  if (!nameMatch) return null;
-  const spec = ARTIFACT_SPECS[nameMatch[1]];
-  if (!spec) return null;
-  const footer = src.match(/\nSigned-by:\s*(.+)\nTeam&Model:\s*(.+)\nRole:\s*([\w-]+)\s*$/);
-  if (!footer) return null;
-  const ticketMatch = src.match(/^ticket:\s*#(\d+)\s*$/m);
-  const body = src.slice(nameMatch.index + nameMatch[0].length, footer.index);
+// Extract each field value from the artifact body, bounded by the next field marker,
+// so block values with internal blank lines round-trip exactly. Inverse of renderField.
+function extractFields(body, spec) {
   const markers = [];
   for (const field of spec.fields) {
     const found = body.match(new RegExp(`^${escapeRe(field.k)}:`, 'm'));
@@ -35,12 +25,27 @@ function parseArtifact(text) {
     raw = current.field.block ? raw.replace(/^\n/, '').replace(/\n\n$/, '') : raw.replace(/^ /, '').replace(/\n+$/, '');
     fields[current.field.k] = raw;
   }
+  return fields;
+}
+
+// Parse one artifact comment body into { artifact, role, teamModel, ticket, fields },
+// or null if it is not a recognized signed baton artifact.
+function parseArtifact(text) {
+  const src = String(text || '').replace(/\r\n/g, '\n');
+  const nameMatch = src.match(/^##\s+([A-Z_]+)\s*$/m);
+  if (!nameMatch) return null;
+  const spec = ARTIFACT_SPECS[nameMatch[1]];
+  if (!spec) return null;
+  const footer = src.match(/\nSigned-by:\s*(.+)\nTeam&Model:\s*(.+)\nRole:\s*([\w-]+)\s*$/);
+  if (!footer) return null;
+  const ticketMatch = src.match(/^ticket:\s*#(\d+)\s*$/m);
+  const body = src.slice(nameMatch.index + nameMatch[0].length, footer.index);
   return {
     artifact: nameMatch[1],
     role: footer[3].trim(),
     teamModel: footer[2].trim(),
     ticket: ticketMatch ? Number(ticketMatch[1]) : undefined,
-    fields,
+    fields: extractFields(body, spec),
   };
 }
 
