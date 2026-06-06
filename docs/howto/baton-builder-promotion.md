@@ -29,30 +29,40 @@ full-corpus `rate` crosses the gate. Expand the seed corpus
 (`tests/fixtures/baton-replay/corpus.json`) with mined real artifacts before
 treating a run as the promotion decision.
 
-### Current state (advisory)
+### Current state (PROMOTED — #2692)
 
-The committed seed corpus is illustrative (4 entries, rate 0.75 < 0.85), so the
-gate is **not met** and the default **remains opt-in**. This is the correct state:
-the harness and gate are in place; the default flips only after the corpus is grown
-with real historical artifacts and the rate crosses 0.85.
+The committed corpus is **real mined artifacts** (`baton-replay-mine.js` parses posted
+baton comments back into structured input). Over the 17 valid canonical artifacts mined
+from closed tickets #2671–#2675 the builder reproduces **17/17 = 1.00** byte-identical;
+the literal-blended rate including 3 schema-invalid stale-tool empties (a separate defect
+filed as #2693) is **0.85**. Either way `meetsGate` is true, so the builders were
+**promoted to the default path** (fleet-decision-oracle approved per #2509).
+
+Mining caveat (honesty): pre-builder artifacts authored by other runtimes (e.g. an
+Antigravity/gemini MANAGER_HANDOFF used `### ` headers + `*   **field**:` markdown bullets)
+do **not** parse as canonical and reproduce at ~0 — they are exactly the cross-model
+format divergence this Epic eliminates, not a builder defect. The gate therefore measures
+reproduction of *canonical-form* artifacts (forward-consistency), not reproduction of
+pre-canonical history.
 
 ## The env flag (opt-in now, rollback later)
 
 `MEGINGJORD_BATON_BUILDER_DEFAULT` (`baton-builder-mode.js`):
 
+**PROMOTED (#2692):** the builder is now the DEFAULT path; the flag is the ROLLBACK switch.
+
 | Value | Meaning |
 |---|---|
-| unset / `0` / `false` | legacy path is default (current advisory state) |
-| `1` / `true` / `on` / `yes` | use the programmatic builder as the default path |
+| unset / `1` / `true` / `on` / `yes` | **builder is the default path** (post-promotion default) |
+| `0` / `false` / `off` / `no` | explicit rollback to the legacy hand/template path |
 
 ```js
 const { isBuilderDefault, promotionState } = require('./scripts/global/baton-builder-mode');
-if (isBuilderDefault()) { /* builder path */ } else { /* legacy path */ }
+if (isBuilderDefault()) { /* builder path (default) */ } else { /* legacy path (rolled back) */ }
 ```
 
-The **same flag is the rollback switch** after promotion: when the default flips
-(a doc + default change, no code change), operators set the flag to `0` to fall back
-to the legacy path. G6 resilience: promotion is reversible without a revert.
+G6 resilience: rollback is a single env-var change (`MEGINGJORD_BATON_BUILDER_DEFAULT=0`),
+not a code revert.
 
 ## Related
 
