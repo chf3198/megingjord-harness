@@ -45,11 +45,11 @@ const RESCUE_CONFIGS = {
     nextAction: 'commit or stash changes, then re-evaluate',
     requiresUAT: false,
     preserve: (entry) => {
-      const t = ticketFrom(entry.branch) || 'unknown';
+      const ticket = ticketFrom(entry.branch) || 'unknown';
       return [
-        `git -C "${entry.path}" switch -c rescue/${t}-preserve`,
-        `git -C "${entry.path}" add -A && git -C "${entry.path}" commit -m "rescue: preserve dirty state for #${t}"`,
-        `git -C "${entry.path}" push origin rescue/${t}-preserve`,
+        `git -C "${entry.path}" switch -c rescue/${ticket}-preserve`,
+        `git -C "${entry.path}" add -A && git -C "${entry.path}" commit -m "rescue: preserve dirty state for #${ticket}"`,
+        `git -C "${entry.path}" push origin rescue/${ticket}-preserve`,
       ];
     },
   },
@@ -58,10 +58,10 @@ const RESCUE_CONFIGS = {
     nextAction: 'add and commit untracked files or archive them before cleanup',
     requiresUAT: false,
     preserve: (entry) => {
-      const t = ticketFrom(entry.branch) || 'unknown';
+      const ticket = ticketFrom(entry.branch) || 'unknown';
       return [
-        `git -C "${entry.path}" switch -c rescue/${t}-preserve`,
-        `tar -czf /tmp/rescue-${t}-untracked-$(date +%s).tar.gz -C "${entry.path}" .`,
+        `git -C "${entry.path}" switch -c rescue/${ticket}-preserve`,
+        `tar -czf /tmp/rescue-${ticket}-untracked-$(date +%s).tar.gz -C "${entry.path}" .`,
       ];
     },
   },
@@ -70,9 +70,9 @@ const RESCUE_CONFIGS = {
     nextAction: 'push to a rescue branch or open a draft PR to preserve commits',
     requiresUAT: false,
     preserve: (entry) => {
-      const t = ticketFrom(entry.branch) || 'unknown';
+      const ticket = ticketFrom(entry.branch) || 'unknown';
       return [
-        `git -C "${entry.path}" push origin HEAD:refs/heads/rescue/${t}-preserve --force-with-lease`,
+        `git -C "${entry.path}" push origin HEAD:refs/heads/rescue/${ticket}-preserve --force-with-lease`,
       ];
     },
   },
@@ -81,9 +81,9 @@ const RESCUE_CONFIGS = {
     nextAction: 'run worktree-cleanup-plan with --json for full analysis; escalate to Manager',
     requiresUAT: true,
     preserve: (entry) => {
-      const t = ticketFrom(entry.branch) || 'unknown';
+      const ticket = ticketFrom(entry.branch) || 'unknown';
       return [
-        `git -C "${entry.path}" push origin HEAD:refs/heads/rescue/${t}-preserve --force-with-lease`,
+        `git -C "${entry.path}" push origin HEAD:refs/heads/rescue/${ticket}-preserve --force-with-lease`,
       ];
     },
   },
