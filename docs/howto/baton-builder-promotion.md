@@ -47,7 +47,7 @@ filed as #2693) is **0.85**. Either way `meetsGate` is true, so the builders wer
 **promoted to the default path** (fleet-decision-oracle approved per #2509).
 
 Mining caveat (honesty): pre-builder artifacts authored by other runtimes (e.g. an
-Antigravity/gemini MANAGER_HANDOFF used `### ` headers + `*   **field**:` markdown bullets)
+Antigravity/gemini MANAGER_HANDOFF used `###` h3 headers + `**field**:` markdown bullets)
 do **not** parse as canonical and reproduce at ~0 — they are exactly the cross-model
 format divergence this Epic eliminates, not a builder defect. The gate therefore measures
 reproduction of *canonical-form* artifacts (forward-consistency), not reproduction of
