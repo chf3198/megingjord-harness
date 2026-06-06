@@ -67,4 +67,5 @@ jobs:
           tests/baton-artifact-builder.spec.js
           tests/baton-pr-builders.spec.js
           tests/baton-slot-contract.spec.js
+          tests/baton-artifact-cross-runtime.spec.js
           --reporter=line
