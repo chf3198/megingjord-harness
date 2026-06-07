@@ -12,6 +12,9 @@ const { appendCacheStat } = require('./cache-stats-emit');
 const ADAPTERS = require('./token-provider-adapters');
 const { maybeSpillover } = require('./header-spillover');
 const { pickStickyProvider } = require('./sticky-route');
+// (#2645) shared .env hydration shim (G3); hydrate once at load so wrapped calls find provider keys
+const { loadLocalEnvOnce } = require('./load-local-env');
+loadLocalEnvOnce();
 // Refs #2234 — wire governance-context injection per Epic #2029 P1-1 #2221.
 let injectGoalContext;
 try { ({ injectGoalContext } = require('./governance-context')); }

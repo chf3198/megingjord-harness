@@ -6,6 +6,8 @@
 // HAMR cost/observability; gracefully no-ops (no_key / all-fail) so callers fall back to the
 // advisory escalation signal (#2619). All providers below are free-tier; never a paid model.
 const policy = require('./model-routing-policy.json');
+// (#2645) shared .env hydration shim (G3)
+const { loadLocalEnvOnce } = require('./load-local-env');
 let wrapProviderCall;
 try { ({ wrapProviderCall } = require('./hamr-provider-wrapper')); }
 catch { wrapProviderCall = async (_p, fn) => ({ ok: true, value: await fn({}) }); }
@@ -54,7 +56,9 @@ function providerOrder() {
 async function callProvider(name, prompt, opts = {}) {
   const spec = PROVIDERS[name];
   if (!spec) return { ok: false, reason: `unknown_provider:${name}` };
-  const key = (opts.env || process.env)[spec.envKey];
+  let key = (opts.env || process.env)[spec.envKey];
+  // (#2645) G3: hydrate .env when a real-session key is absent (tests inject opts.env, so skip then)
+  if (!key && !opts.env) { loadLocalEnvOnce(); key = process.env[spec.envKey]; }
   if (!key) return { ok: false, reason: 'no_key' };
   const fetchImpl = opts.fetchImpl || (typeof fetch === 'function' ? fetch : null);
   if (!fetchImpl) return { ok: false, reason: 'no_fetch' };

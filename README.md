@@ -198,6 +198,7 @@ npm run deploy:both:apply
 | `governance:lease-heartbeat:test` | `node --test tests/worktree-lease-heartbeat.spec.js` |
 | `governance:list-tickets` | `node scripts/global/ticket-presenter.js` |
 | `governance:list-tickets:test` | `node --test tests/ticket-presenter.spec.js` |
+| `governance:load-local-env:test` | `npx playwright test tests/load-local-env.spec.js` |
 | `governance:manifest:test` | `node scripts/global/governance-manifest-validate.spec.js` |
 | `governance:manifest:validate` | `node scripts/global/governance-manifest-validate.js` |
 | `governance:model-diversity-replay` | `node scripts/global/model-diversity-replay-eval.js` |
@@ -329,6 +330,7 @@ npm run deploy:both:apply
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
 | `stress:evidence-check:test` | `node --test tests/stress-evidence-check.spec.js` |
 | `stress:full` | `MEGINGJORD_STRESS_TIER=D node scripts/global/stress-orchestrator.js` |
+| `stress:load-local-env` | `node --test tests/stress-load-local-env.spec.js` |
 | `stress:post-merge-sweep` | `node --test tests/stress-post-merge-sweep.spec.js` |
 | `stress:realism` | `MEGINGJORD_STRESS_TIER=B node scripts/global/stress-orchestrator.js` |
 | `stress:rebase` | `node --test tests/stress-rebase-discipline.spec.js` |
