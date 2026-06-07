@@ -29,6 +29,7 @@ plain globals consumed by `app.js` (the Alpine root component).
 | `health-check.js` | Ollama/OpenClaw liveness probes |
 | `live-stats.js` | Ollama telemetry fetch + formatBytes |
 | `quota-tracker.js` | Free-tier API quota display |
+| `hamr-panel.js` | HAMR cost-coverage panel (#1159): cache-hit-7d, per-provider mix, premium-share governor flag, tier-mix — from `/api/hamr-coverage`. Owns the G3 cost-coverage signals; defers quota display to `quota-tracker.js` |
 | `render-panels.js` | Panel HTML rendering helpers |
 | `wiki-panel.js` | Wiki health and metrics panel |
 
