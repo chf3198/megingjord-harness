@@ -91,3 +91,48 @@ test('readEvents: mixed v1/v2/v3 feed normalizes all to v3', () => {
 test('emitV3: invalid event throws', () => {
   expect(() => S.emitV3({ version: 3, ts: 't' }, tmpfile('inv'))).toThrow(/Invalid v3/);
 });
+
+// --- OTel GenAI conformance tests (AC5, #1375) ---
+
+test('isValidGenAI: valid Anthropic event passes', () => {
+  const ev = { 'gen_ai.system': 'anthropic', 'gen_ai.request.model': 'claude-3-haiku', 'gen_ai.usage.input_tokens': 100, 'gen_ai.usage.output_tokens': 50 };
+  const r = S.isValidGenAI(ev);
+  expect(r.ok).toBe(true);
+  expect(r.errors).toHaveLength(0);
+});
+
+test('isValidGenAI: valid OpenAI event passes', () => {
+  const ev = { 'gen_ai.system': 'openai', 'gen_ai.request.model': 'gpt-4o', 'gen_ai.usage.input_tokens': 200 };
+  expect(S.isValidGenAI(ev).ok).toBe(true);
+});
+
+test('isValidGenAI: invalid system enum fails with error', () => {
+  const r = S.isValidGenAI({ 'gen_ai.system': 'wrong-format' });
+  expect(r.ok).toBe(false);
+  expect(r.errors[0]).toMatch(/unrecognized value/);
+});
+
+test('isValidGenAI: non-integer usage.input_tokens fails', () => {
+  const r = S.isValidGenAI({ 'gen_ai.system': 'anthropic', 'gen_ai.usage.input_tokens': '100' });
+  expect(r.ok).toBe(false);
+  expect(r.errors[0]).toMatch(/non-negative integer/);
+});
+
+test('isValidGenAI: missing model field is OK (optional)', () => {
+  const r = S.isValidGenAI({ 'gen_ai.system': 'ollama' });
+  expect(r.ok).toBe(true);
+  expect(r.errors).toHaveLength(0);
+});
+
+test('isValidGenAI: no gen_ai.* fields returns ok with warning', () => {
+  const r = S.isValidGenAI({ event: 'test', version: 3 });
+  expect(r.ok).toBe(true);
+  expect(r.warnings[0]).toMatch(/no gen_ai/);
+});
+
+test('isValidGenAI: null input returns graceful ok+warning', () => {
+  const r = S.isValidGenAI(null);
+  expect(r.ok).toBe(true);
+  expect(r.warnings.length).toBeGreaterThan(0);
+});
+

@@ -72,4 +72,5 @@ jobs:
           tests/baton-artifact-cross-runtime.spec.js
           tests/baton-replay-eval.spec.js
           tests/baton-replay-mine.spec.js
+          tests/event-schema-v3.spec.js
           --reporter=line
