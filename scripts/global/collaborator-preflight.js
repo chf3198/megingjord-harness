@@ -32,7 +32,10 @@ async function runFleetReview(content, ticket) {
   });
   const rating = parseInt(
     (result.raw || '').match(/rating[:\s]+(\d+)/i)?.[1] || '70', 10);
-  const host = result.hamrStats?.ok ? '100.91.113.16:11434' : 'unavailable';
+  // #2646: when the fleet was unreachable and the review failed over to the $0
+  // free-cloud tier, surface that substituted reviewer (not the fleet host).
+  const host = result.hamrStats?.substituted ? 'free-cloud'
+    : result.hamrStats?.ok ? '100.91.113.16:11434' : 'unavailable';
   return {
     reviewer: `${result.modelUsed || 'qwen2.5-coder:7b'}@${host}`,
     rating,

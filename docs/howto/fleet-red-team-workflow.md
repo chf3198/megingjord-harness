@@ -75,6 +75,25 @@ Ollama on Tailscale fleet host is `$0/call` — budget enforces fleet-host load 
 
 ## See also
 
+## Free-cloud failover when the fleet is down (#2646)
+
+If the fleet (Ollama) is **unreachable**, `dispatchRedTeam` and `collaborator-preflight`
+now fail over to the `$0` free-cloud tier via `scripts/global/review-dispatch-failover.js`
+(`onFleetUnavailable` / `freeCloudReviewFailover`) — a real cross-family verdict at no
+cost, no manual `free-cloud-dispatch.js` call needed (the old workaround). Notes:
+
+- **Availability only:** failover triggers on an availability failure (Ollama down /
+  timeout / 5xx). A *capability* failure (fleet answered, judge inadequate) does NOT
+  fail over — preserves the #2619 distinction.
+- **Tagging:** the substituted reviewer is recorded as `free-cloud:<provider>` with
+  `substitution_reason: fleet-unreachable`; a `lane:free-cloud` row is emitted to
+  `logs/model-routing-telemetry.jsonl` (audit via `npm run routing:free-cloud-report`).
+- **Graceful degrade:** if free-cloud is also unavailable, an advisory
+  `{ok:false, suggested_tier:'free-cloud', degraded_reason}` envelope is returned — no
+  crash, no paid escalation. Supersedes the manual workaround in operator memory
+  `feedback-review-dispatch-env-and-freecloud-failover`. See the #2619/#2621/#2624 contract.
+
+## References
 - Epic #2041 + Phase-0 #2174 (research foundation)
 - `instructions/hamr-routing.instructions.md` (HAMR contract)
 - `wiki/wisdom/global/concepts/cache-adapters.md` (cost-tracking pattern)
