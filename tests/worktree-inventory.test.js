@@ -83,3 +83,74 @@ branch refs/heads/feat/2250-x`, { runGit: runner({
   assert.strictEqual(report.worktrees[0].untracked, true);
   assert.strictEqual(report.worktrees[0].lifecycleState, 'stale-risky');
 });
+
+// --- #2552 squash-merge probe tests (AC1, AC2, AC6, AC9a,b,e) ---
+function mockRunner(map = {}) {
+  return (args) => map[args.join(' ')] || '';
+}
+
+test('#2552 squash probe: runGh finds merged PR → mergedToMain true for clean branch', () => {
+  const report = inventory(`worktree /tmp\nHEAD abc\nbranch refs/heads/feat/2552-fix`, {
+    runGit: mockRunner({
+      'status --porcelain --untracked-files=all': '',
+      'rev-parse --abbrev-ref --symbolic-full-name @{u}': 'origin/feat/2552-fix',
+      'rev-list --left-right --count origin/feat/2552-fix...HEAD': '0 0',
+      'rev-list --left-right --count origin/main...HEAD': '5 0',
+      'log -1 --format=%cI': '2026-06-05T00:00:00Z',
+    }),
+    runGh: () => '[{"number":2552}]',
+  });
+  assert.strictEqual(report.worktrees[0].mergedToMain, true);
+  assert.strictEqual(report.worktrees[0].squashMerged, true);
+  assert.strictEqual(report.worktrees[0].lifecycleState, 'stale-safe');
+});
+
+test('#2552 squash probe: runGh throws → mergedToMain false (safe fallback, no crash)', () => {
+  const report = inventory(`worktree /tmp\nHEAD abc\nbranch refs/heads/feat/2552-fix`, {
+    runGit: mockRunner({
+      'status --porcelain --untracked-files=all': '',
+      'rev-parse --abbrev-ref --symbolic-full-name @{u}': 'origin/feat/2552-fix',
+      'rev-list --left-right --count origin/feat/2552-fix...HEAD': '0 0',
+      'rev-list --left-right --count origin/main...HEAD': '5 0',
+      'log -1 --format=%cI': '2026-06-05T00:00:00Z',
+    }),
+    runGh: () => { throw new Error('gh: offline'); },
+  });
+  assert.strictEqual(report.worktrees[0].mergedToMain, false);
+  assert.strictEqual(report.worktrees[0].squashMerged, false);
+});
+
+test('#2552 squash probe: squash-merged + dirty → mergedToMain false (quarantine safety)', () => {
+  const report = inventory(`worktree /tmp\nHEAD abc\nbranch refs/heads/feat/2552-fix`, {
+    runGit: mockRunner({
+      'status --porcelain --untracked-files=all': ' M dirty-file.js',
+      'rev-parse --abbrev-ref --symbolic-full-name @{u}': 'origin/feat/2552-fix',
+      'rev-list --left-right --count origin/feat/2552-fix...HEAD': '0 0',
+      'rev-list --left-right --count origin/main...HEAD': '5 0',
+      'log -1 --format=%cI': '2026-06-05T00:00:00Z',
+    }),
+    runGh: () => '[{"number":2552}]',
+  });
+  assert.strictEqual(report.worktrees[0].mergedToMain, false, 'dirty squash-merged must not set mergedToMain');
+  assert.strictEqual(report.worktrees[0].lifecycleState, 'stale-risky');
+});
+
+test('#2552 squash probe: in-memory cache — same branch probed at most once', () => {
+  let callCount = 0;
+  const runGh = () => { callCount++; return '[{"number":2552}]'; };
+  // Use /tmp (guaranteed to exist) so parsePorcelain does not set missing:true
+  const raw = [
+    'worktree /tmp\nHEAD abc\nbranch refs/heads/feat/2552-fix',
+    'worktree /tmp\nHEAD def\nbranch refs/heads/feat/2552-fix',
+  ].join('\n\n');
+  inventory(raw, {
+    runGit: mockRunner({
+      'status --porcelain --untracked-files=all': '',
+      'rev-parse --abbrev-ref --symbolic-full-name @{u}': '',
+      'rev-list --left-right --count origin/main...HEAD': '5 0',
+      'log -1 --format=%cI': '2026-06-05T00:00:00Z',
+    }),
+    runGh,
+  });
+  assert.strictEqual(callCount, 1, 'same branch should be probed exactly once (cache hit on 2nd)');
+});

@@ -150,3 +150,57 @@ test('builds VS Code workspace from active-lease preserve entries only', () => {
   };
   expect(planner.workspace(report).folders).toEqual([{ name: 'feat/1-a', path: '/tmp/a' }]);
 });
+
+// --- #2552 AC3 + AC4 + AC7 tests ---
+
+// AC9(a): squash-merged clean worktree → remove (AC3: mergedToMain check before aheadOfMain)
+test('AC9(a): squash-merged clean worktree classifies remove despite mainAhead>0', () => {
+  const state = planner.classify(entry({ mergedToMain: true, mainAhead: 3, dirtyCount: 0, untrackedCount: 0 }), null);
+  expect(state).toBe('remove');
+});
+
+// AC9(b): squash-merged + dirty → quarantine (dirty check precedes mergedToMain)
+test('AC9(b): squash-merged with dirty files classifies quarantine not remove', () => {
+  const state = planner.classify(entry({ mergedToMain: true, dirtyCount: 2, mainAhead: 3 }), null);
+  expect(state).toBe('quarantine');
+});
+
+// AC9(c): unmerged + unpushed → quarantine
+test('AC9(c): unmerged branch with unpushed commits classifies quarantine', () => {
+  const state = planner.classify(entry({ mainAhead: 2, mergedToMain: false }), null);
+  expect(state).toBe('quarantine');
+});
+
+// AC9(d): open-PR branch → needs-review
+test('AC9(d): open-PR branch classifies needs-review', () => {
+  const state = planner.classify(entry({ openPr: 99, mergedToMain: false, mainAhead: 0 }), null);
+  expect(state).toBe('needs-review');
+});
+
+// AC9(e): gh-offline fallback → no remove, no crash
+test('AC9(e): gh-offline (mergedToMain:false + mainAhead:0) classifies needs-review', () => {
+  // When gh is unavailable, mergedToMain stays false; clean branch with mainAhead:0 is ambiguous → needs-review
+  const state = planner.classify(entry({ mergedToMain: false, mainAhead: 0 }), null);
+  expect(state).toBe('needs-review');
+  expect(() => planner.classify(entry({ mergedToMain: false, mainAhead: 5 }), null)).not.toThrow();
+});
+
+// AC7: squashMerged field propagated through plan() output
+test('AC7: plan output includes squashMerged field per worktree entry', () => {
+  const report = planner.plan({
+    inventory: { worktrees: [
+      { ...entry({ mergedToMain: true }), squashMerged: true },
+      { ...entry({ mergedToMain: false }), squashMerged: false },
+    ] },
+    registry: { version: 1, leases: [] },
+  });
+  expect(typeof report.worktrees[0].squashMerged).toBe('boolean');
+  expect(typeof report.worktrees[1].squashMerged).toBe('boolean');
+});
+
+// AC3 regression: mergedToMain check must precede aheadOfMain check
+test('AC3: mergedToMain:true + mainAhead:10 still classifies remove (not quarantine)', () => {
+  const state = planner.classify(entry({ mergedToMain: true, mainAhead: 10, dirtyCount: 0 }), null);
+  expect(state).toBe('remove');
+  expect(state).not.toBe('quarantine');
+});
