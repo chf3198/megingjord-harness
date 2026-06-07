@@ -23,11 +23,11 @@ function classify(entry, lease) {
   if (entry.branch && entry.branch !== 'main' && !ticketFrom(entry.branch)) return 'needs-review';
   if (entry.dirtyCount > 0 || entry.untrackedCount > 0) return 'quarantine';
   if (!entry.branch) return 'quarantine'; // detached HEAD: no branch to delete
+  if (entry.mergedToMain) return 'remove'; // check before aheadOfMain: squash-merged branches have mainAhead > 0
   const aheadOfMain = entry.mainAhead ?? entry.ahead ?? 0;
   if (aheadOfMain > 0) return 'quarantine';
   if (entry.prunable) return 'prune-metadata';
-  if (entry.mergedToMain) return 'remove';
-  return 'needs-review'; // mergedToMain===false + aheadOfMain===0: ambiguous (#2552)
+  return 'needs-review';
 }
 
 function reason(entry, state, lease) {
@@ -38,7 +38,9 @@ function reason(entry, state, lease) {
     return `dirty: ${entry.dirtyCount || 0} modified, ${entry.untrackedCount || 0} untracked`;
   if (state === 'quarantine')
     return `unpushed: ${entry.mainAhead ?? entry.ahead ?? 0} commits ahead of main`;
-  if (state === 'remove') return 'merged: confirmed ancestor of origin/main';
+  if (state === 'remove') return entry.squashMerged
+    ? 'merged: squash-detected via gh pr list'
+    : 'merged: confirmed ancestor of origin/main';
   if (state === 'prune-metadata') return 'prunable-metadata: no working tree';
   if (!ticketFrom(entry.branch)) return 'missing-ticket: no ticket number in branch name';
   return 'unverified-merge-status: may be squash-merged (pending #2552)';
@@ -55,7 +57,7 @@ function commands(entry, state) {
 }
 
 function plan(input = {}) {
-  const inventory = input.inventory || worktreeInventory.inventory();
+  const inventory = input.inventory || worktreeInventory.inventory(undefined, { runGh: worktreeInventory.gh });
   const registry = input.registry || leaseRegistry.read(input.leaseFile || leaseRegistry.DEFAULT_PATH);
   const leases = leaseRegistry.active(registry);
   const worktrees = inventory.worktrees.map(entry => {

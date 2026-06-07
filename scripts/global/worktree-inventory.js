@@ -5,19 +5,13 @@ const fs = require('fs');
 const { execFileSync } = require('child_process');
 const TICKET_RE = /(?:^|\/)(?:feat|fix|chore|docs|refactor|hotfix)\/(\d+)-/;
 function git(args, cwd) {
-  try {
-    return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  } catch { return ''; }
+  try { return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; }
 }
 function gitOk(args, cwd) {
-  try {
-    execFileSync('git', args, { cwd, stdio: ['ignore', 'ignore', 'ignore'] });
-    return true;
-  } catch { return false; }
+  try { execFileSync('git', args, { cwd, stdio: ['ignore', 'ignore', 'ignore'] }); return true; } catch { return false; }
 }
-function base(entry) {
-  return { ...entry, ticket: ticketFrom(entry.branch || ''), dirty: false,
-    untracked: false, ahead: null, behind: null };
+function gh(args) {
+  try { return execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim(); } catch { return null; }
 }
 function parsePorcelain(raw) {
   return raw.split('\n\n').filter(Boolean).map(block => {
@@ -35,14 +29,10 @@ function parsePorcelain(raw) {
     return item;
   });
 }
-function ticketFrom(branch = '') {
-  const hit = branch.match(TICKET_RE);
-  return hit ? Number(hit[1]) : null;
-}
+function ticketFrom(branch = '') { const hit = branch.match(TICKET_RE); return hit ? Number(hit[1]) : null; }
 function splitStatus(raw) {
   const lines = raw ? raw.split('\n').filter(Boolean) : [];
-  return { dirtyCount: lines.filter(l => !l.startsWith('??')).length,
-    untrackedCount: lines.filter(l => l.startsWith('??')).length };
+  return { dirtyCount: lines.filter(l => !l.startsWith('??')).length, untrackedCount: lines.filter(l => l.startsWith('??')).length };
 }
 function classify(entry) {
   if (entry.prunable || entry.missing) return 'prunable-metadata';
@@ -60,14 +50,17 @@ function classify(entry) {
   if ((entry.behind || 0) >= 50) return 'stale-warning';
   return 'ready/parked';
 }
-function mergedToMain(entry, runGit) {
+function mergedToMain(entry, runGit, runGh, cache) {
   if (!entry.branch || entry.branch === 'main') return false;
-  if (runGit === git) return gitOk(['merge-base', '--is-ancestor', entry.head, 'origin/main'], entry.path);
-  return runGit(['merge-base', '--is-ancestor', entry.head, 'origin/main'], entry.path) === 'yes';
+  const byAncestry = runGit === git ? gitOk(['merge-base', '--is-ancestor', entry.head, 'origin/main'], entry.path) : runGit(['merge-base', '--is-ancestor', entry.head, 'origin/main'], entry.path) === 'yes';
+  if (byAncestry || !runGh || !cache) return byAncestry;
+  if (cache[entry.branch] === undefined) try { const out = runGh(['pr', 'list', '--head', entry.branch, '--state', 'merged', '--json', 'number']); cache[entry.branch] = out !== null && JSON.parse(out).length > 0; } catch { cache[entry.branch] = false; }
+  return cache[entry.branch];
 }
-function enrich(entry, runGit = git) {
+function enrich(entry, runGit = git, runGh = null, squashCache = null) {
   if (entry.missing || entry.prunable) {
-    const enriched = base(entry);
+    const enriched = { ...entry, ticket: ticketFrom(entry.branch || ''), dirty: false,
+      untracked: false, ahead: null, behind: null };
     return { ...enriched, lifecycleState: classify(enriched), removalSafe: false };
   }
   const status = splitStatus(runGit(['status', '--porcelain', '--untracked-files=all'], entry.path));
@@ -77,25 +70,26 @@ function enrich(entry, runGit = git) {
   const [upstreamBehind, upstreamAhead] = upstreamDiv ? upstreamDiv.split(/\s+/).map(Number) : [null, null];
   const [behind, mainAhead] = mainDiv ? mainDiv.split(/\s+/).map(Number) : [null, null];
   const lastActivity = runGit(['log', '-1', '--format=%cI'], entry.path) || null;
+  const squashMerged = (status.dirtyCount === 0 && status.untrackedCount === 0)
+    ? mergedToMain(entry, runGit, runGh, squashCache) : false;
   const enriched = { ...entry, ticket: ticketFrom(entry.branch || ''), upstream: upstream || null,
     ahead: upstreamAhead, behind, mainAhead, upstreamBehind,
     dirtyCount: status.dirtyCount, untrackedCount: status.untrackedCount,
     dirty: status.dirtyCount > 0, untracked: status.untrackedCount > 0,
-    mergedToMain: mergedToMain(entry, runGit), lastActivity };
+    mergedToMain: squashMerged, squashMerged, lastActivity };
   const lifecycleState = classify(enriched);
   return { ...enriched, lifecycleState, action: lifecycleState, removalSafe: lifecycleState === 'stale-safe' };
 }
 function inventory(raw = git(['worktree', 'list', '--porcelain']), opts = {}) {
   const runGit = opts.runGit || git;
+  const runGh = opts.runGh !== undefined ? opts.runGh : null;
+  const squashCache = runGh ? {} : null;
   return { generatedAt: new Date().toISOString(), mode: 'read-only',
-    worktrees: parsePorcelain(raw).map(entry => enrich(entry, runGit)) };
+    worktrees: parsePorcelain(raw).map(entry => enrich(entry, runGit, runGh, squashCache)) };
 }
 function print(report, json) {
   if (json) return console.log(JSON.stringify(report, null, 2));
-  for (const worktree of report.worktrees) {
-    const ref = worktree.branch || 'DETACHED';
-    console.log(`${worktree.lifecycleState.padEnd(18)} ${String(worktree.ticket || '-').padEnd(6)} ${ref} ${worktree.path}`);
-  }
+  for (const w of report.worktrees) console.log(`${w.lifecycleState.padEnd(18)} ${String(w.ticket || '-').padEnd(6)} ${w.branch || 'DETACHED'} ${w.path}`);
 }
 if (require.main === module) print(inventory(), process.argv.includes('--json'));
-module.exports = { classify, enrich, inventory, parsePorcelain, ticketFrom };
+module.exports = { classify, enrich, gh, inventory, parsePorcelain, ticketFrom };
