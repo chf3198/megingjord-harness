@@ -3,6 +3,34 @@
 const { canonicalSignerAlias } = require('./signer-alias');
 const { buildArtifact } = require('./baton-artifact-builder');
 
+// AC1 (#2693): fail loud on unrecognized flags so stale callers surface errors.
+const KNOWN_FLAGS = new Set([
+  'artifact', 'role', 'team-model', 'ticket', 'fields-json',
+  'summary', 'related-tickets', 'overlap-decision',
+]);
+function checkUnknownFlags() {
+  for (const token of process.argv.slice(2)) {
+    const m = token.match(/^--(.+)/);
+    if (m && !KNOWN_FLAGS.has(m[1])) {
+      const known = [...KNOWN_FLAGS].map((f) => `--${f}`).join(', ');
+      process.stderr.write(`error: unknown flag '--${m[1]}'. Recognized: ${known}\n`);
+      process.exit(1);
+    }
+  }
+}
+
+// AC2 (#2693): MANAGER_HANDOFF legacy output must contain all routing fields.
+const MH_REQUIRED = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates'];
+function checkLegacyOutput(artifact, output) {
+  if (artifact !== 'MANAGER_HANDOFF') return;
+  for (const field of MH_REQUIRED) {
+    if (!new RegExp(`(?:^|\\n)${field}\\s*:`).test(output)) {
+      process.stderr.write(`error: MANAGER_HANDOFF missing required field '${field}' in legacy output\n`);
+      process.exit(1);
+    }
+  }
+}
+
 function arg(name, fallback = '') {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 ? (process.argv[i + 1] || '') : fallback;
@@ -23,6 +51,7 @@ function buildBatonComment({ artifact, ticket, role, teamModel, summary = '', re
 }
 
 function main() {
+  checkUnknownFlags();
   const artifact = arg('artifact', 'MANAGER_HANDOFF').toUpperCase();
   const role = arg('role', 'manager').toLowerCase();
   const teamModel = arg('team-model', process.env.TEAM_MODEL || '');
@@ -43,7 +72,9 @@ function main() {
   const summary = arg('summary', '');
   const relatedTickets = arg('related-tickets', '');
   const overlapDecision = arg('overlap-decision', '');
-  console.log(buildBatonComment({ artifact, ticket, role, teamModel, summary, relatedTickets, overlapDecision }));
+  const out = buildBatonComment({ artifact, ticket, role, teamModel, summary, relatedTickets, overlapDecision });
+  checkLegacyOutput(artifact, out);
+  console.log(out);
 }
 
 if (require.main === module) main();
