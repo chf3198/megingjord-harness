@@ -25,6 +25,7 @@ const crossTeamResponseFidelity = require('./cross-team-response-fidelity.js');
 const changelogFragmentPresence = require('./changelog-fragment-presence.js');
 const adminMergeException = require('./admin-merge-exception.js');
 const batchCancelEvidence = require('./batch-cancel-evidence.js');
+const fleetCallLint = require('./fleet-call-lint.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -61,6 +62,7 @@ const VALIDATORS = {
   'changelog-fragment-presence': changelogFragmentPresence,
   'admin-merge-exception': adminMergeException,
   'batch-cancel-evidence': batchCancelEvidence,
+  'fleet-call-lint': fleetCallLint,
 };
 
 function runAll(input) {
