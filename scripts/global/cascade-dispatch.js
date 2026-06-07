@@ -10,6 +10,8 @@ const { judgeResponse } = require('./local-judge');
 const policy = require('./model-routing-policy.json');
 const { backoff, isRateLimitError } = require('./backoff');
 const { dispatchFreeCloud } = require('./free-cloud-dispatch'); // execute free $0 cloud on fleet-down
+// (#2645) shared .env hydration shim — make provider keys visible for the free-cloud fallback (G3)
+const { loadLocalEnvOnce } = require('./load-local-env');
 
 // #2619: G3 lane-order. Availability failures (fleet down -> no answer) fail over to a
 // free $0 cloud tier BEFORE any paid tier; capability failures (fleet answered but
@@ -58,6 +60,8 @@ async function tryOllama(prompt, model, attempt = 0) {
 }
 
 async function cascade(prompt, opts = {}) {
+  // (#2645) G3: hydrate provider keys for the free-cloud fallback
+  if (!opts.env) loadLocalEnvOnce();
   const model = opts.model || 'qwen2.5:7b-instruct';
   const h = hints(prompt); const start = Date.now();
   const local = await tryOllama(prompt, model);

@@ -93,6 +93,23 @@ positive field allow-list is emitted, after `log-redaction`; no raw diffs/tokens
 - Sticky-route per tier — `scripts/global/sticky-route.js` (#926).
 - Anthropic Batch routing for time-elastic work (`isBatchEligible`, #927).
 
+## Local `.env` auto-hydration (#2645 — promoted from operator-memory)
+
+Provider keys live in the gitignored repo-root `.env`, but scripts read `process.env`, so a fresh
+session that never ran `set -a; . ./.env; set +a` sees **zero keys** and wrongly concludes "no review
+substrate" — defeating G3 (the fleet + free-cloud zero-cost lanes become unreachable). The dispatch
+scripts (`free-cloud-dispatch.js`, `cascade-dispatch.js`, `hamr-provider-wrapper.js`) therefore call
+the shared shim `scripts/global/load-local-env.js#loadLocalEnvOnce()` to hydrate `.env` automatically:
+
+- **Fill-don't-override** — an already-set `process.env` var (CI secret, explicit export) always wins.
+- **Secret-safe (G4)** — never logs values; the single audit line lists NAMES only, routed through
+  `log-redaction.js`. Disable with `MEGINGJORD_NO_DOTENV=1`; relocate via `MEGINGJORD_DOTENV_PATH`.
+- **Graceful (G5/G6)** — a missing or malformed `.env` is a no-op pass-through, never a throw.
+
+Do NOT hand-curl Ollama or ask the client to restate a key already present in the approved local
+`.env`; the shim makes it visible. Scope boundary: global cross-entrypoint hydration + secret-storage
+strategy is owned by Epic #2291 (this is the dispatch-local slice).
+
 ## Boundaries
 
 - HAMR scripts live in `scripts/global/` only. Do NOT duplicate logic in team-specific paths.
