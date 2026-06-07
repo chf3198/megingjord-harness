@@ -160,8 +160,9 @@ function parseFindings(raw) {
 
 async function dispatchRedTeam({
   artifactType, content, model, host = DEFAULT_HOST,
-  templatesPath = TEMPLATES_PATH, taskContext = {}, matrixPath,
+  templatesPath = TEMPLATES_PATH, taskContext = {}, matrixPath, deps = {},
 } = {}) {
+  const wrap = deps.wrapProviderCall || wrapProviderCall;
   // #2599 (G3): tell selectModel which models are already resident on the host
   // so non-high-stakes reviews prefer the free-fleet resident over a cold-load.
   const resident = model ? [] : await residentModels(host);
@@ -173,15 +174,18 @@ async function dispatchRedTeam({
   const prompt = buildPrompt(template, content);
   const numPredict = Math.min(template.expected_token_range[1] + TOKEN_BUDGET_HEADROOM, MAX_NUM_PREDICT);
   const start = Date.now();
-  const envelope = await wrapProviderCall(
+  const envelope = await wrap(
     'ollama',
     () => callWithRetry({ host, model: activeModel, prompt, num_predict: numPredict }),
     { tier: TIER },
   );
   const elapsed = Date.now() - start;
   if (!envelope.ok) {
-    return { findings: [], raw: null, modelUsed: activeModel,
-      hamrStats: { ok: false, elapsed, error: envelope.meta?.error ?? envelope.error } }; // #1160 canonical
+    // #2646 (G3): fleet AVAILABILITY failure → fail over to the $0 free-cloud tier
+    // rather than return empty (which forces a review-skip or a paid escalation).
+    const { onFleetUnavailable } = require('./review-dispatch-failover');
+    return onFleetUnavailable({ prompt, parseFindings, deps: deps.freeCloud,
+      fallbackModel: activeModel, elapsed, error: envelope.meta?.error ?? envelope.error });
   }
   const { findings, warning } = parseFindings(envelope.value);
   return { findings, raw: envelope.value, modelUsed: activeModel,
