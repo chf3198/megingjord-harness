@@ -102,9 +102,12 @@ function readEvents(file, surfaceContext = {}) {
     .map(ev => normalize(ev, surfaceContext));
 }
 
+const { isValidGenAI, OTEL_GENAI_SYSTEMS } = require('./event-schema-otel-genai');
+
 module.exports = {
   V3, V3_REQUIRED, V3_RECOMMENDED, VALID_ENVS, SUMMARY_MAX, OTEL_GENAI_PREFIX,
   V2_ANNEAL_FIELDS,
   detectVersion, isValidV3, upgradeToV3, normalize, isOtelGenAI,
+  isValidGenAI, OTEL_GENAI_SYSTEMS,
   emitV3, readEvents,
 };
