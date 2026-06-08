@@ -39,3 +39,9 @@ chains:
     - link: cross-family-review-required-at-consultant-phase
       guarantee: enforced
       enforcement_point: scripts/global/megalint/fleet-review-required.js
+    - link: fleet-tier-in-canonical-vocabulary
+      guarantee: enforced
+      enforcement_point: scripts/global/tier-vocabulary-validator.js
+    - link: raw-fleet-curl-routed-through-dispatch
+      guarantee: enforced
+      enforcement_point: hooks/scripts/pretool_guard.py
