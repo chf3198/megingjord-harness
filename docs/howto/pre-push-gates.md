@@ -71,3 +71,41 @@ backstop to a pre-flight control — the "prevention over reaction" mandate.
 Companion: `scripts/global/gate-failure-tier1.js` auto-emits the Tier-1 incident on an
 operator-caused gate failure, so self-anneal escalation no longer depends on the
 operator remembering to log it (the gap behind #2703).
+
+## Fleet-review hard-gate (Epic #2192)
+
+The fleet/cross-family red-team review was promoted from an opt-in tool to a hard gate.
+Three enforcement surfaces, all registered as `enforced` links in
+`config/governance-chains.yml` (`chain-integrity.js` verifies they resolve):
+
+- **fleet-review-required** (`scripts/global/megalint/fleet-review-required.js`, #2738) — a
+  `COLLABORATOR_HANDOFF` on a `lane:code-change` ticket must carry a cross-family review
+  verdict whose reviewer model family differs from the author's; a 3-fact anti-forgery
+  check binds the verdict to the reviewed diff.
+- **raw-fleet-curl intercept** (`hooks/scripts/pretool_guard.py` `is_raw_fleet_curl`, #2739) —
+  a raw `curl` to a fleet/ollama host (`:11434`, `/api/{generate,tags,chat}`) that bypasses
+  the HAMR dispatch wrappers is intercepted at tool-call time: an `ask` plus a Tier-1
+  `incidents.jsonl` event. Honors the `# hamr-bypass-ok: <reason>` carve-out; fail-open on
+  any internal error (a guard bug never bricks a session).
+- **tier-vocabulary validator** (`scripts/global/tier-vocabulary-validator.js`, #2739) — a
+  `wrapProviderCall('ollama'|'fleet', …)` whose `tier` is absent from the canonical
+  `model-routing-policy.json` vocabulary is rejected, preventing local tier-label drift.
+
+### G4 privacy note — fleet-review data handling
+
+Fleet/free-cloud review sends the **diff under review** to an off-box model endpoint
+(local Ollama on the Tailscale mesh, or a free-cloud provider such as
+gemini-2.5-flash@google-ai-studio when the fleet host is unreachable — the G3 lane). Treat
+this as an egress surface: never dispatch a diff that contains secrets or live credentials
+for review. The `log-redaction.js` patterns apply to any review content echoed into
+`incidents.jsonl` or baton artifacts. Local fleet (Tailscale-private) keeps the diff on
+owned infrastructure (G4-preferred); the free-cloud failover trades a marginal privacy
+surface for G3 zero-cost when the fleet is down — an explicit, documented degradation, not
+a silent one.
+
+### Cross-runtime parity (deferred — AC-E6)
+
+Claude-Code is the **reference implementation** of the fleet-review hard-gate. Codex and
+Copilot runtime parity (V5 wrapper-conformance) is **deferred** and tracked via a
+cross-team `TEAM_QUESTION` on #2740 — it is a cross-team sign-off request, not a client gate.
+Until those teams sign off, the gate enforces on the Claude-Code surface only.
