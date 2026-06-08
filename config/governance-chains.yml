@@ -1,0 +1,37 @@
+# Governance-chain registry (Epic #2709 / Phase-1 #2721).
+# The machine-checkable source of truth for the meta-invariant:
+#   "No governance-critical link may depend on operator discretion."
+# Every link MUST declare guarantee: enforced | auto-emitted.
+# `operator-discretionary` is NOT a legal value — chain-integrity.js rejects it.
+#
+# governance_surface: globs whose changes REQUIRE a registry delta (no new
+# enforcement may land without declaring its link). The registry self-protects
+# by listing itself as a governed surface.
+governance_surface:
+  - "hooks/scripts/**"
+  - "scripts/global/megalint/**"
+  - ".github/workflows/*gate*.yml"
+  - "scripts/global/*-gate.js"
+  - "scripts/global/*-check.js"
+  - "config/governance-chains.yml"
+
+chains:
+  baton:
+    - link: artifact-posting-before-transition
+      guarantee: enforced
+      enforcement_point: scripts/global/closeout-preflight.js
+    - link: signer-independence
+      guarantee: enforced
+      enforcement_point: scripts/global/megalint/signer-fidelity.js
+  bypass-exception:
+    - link: exception-recorded-before-admin-override
+      guarantee: enforced
+      enforcement_point: scripts/global/megalint/admin-merge-exception.js
+  self-anneal:
+    - link: tier1-on-operator-caused-gate-failure
+      guarantee: auto-emitted
+      enforcement_point: scripts/global/megalint/goal-failure-emission.js
+  registry-self-protection:
+    - link: chain-registry-is-governed
+      guarantee: enforced
+      enforcement_point: scripts/global/megalint/chain-integrity.js
