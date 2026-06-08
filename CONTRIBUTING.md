@@ -4,11 +4,21 @@ Welcome! Detailed guides are linked below.
 
 ## Guide index
 
-| Topic                                           | Guide                                                              |
-| ----------------------------------------------- | ------------------------------------------------------------------ |
-| Skill development — add, modify, test skills    | [`docs/contributing-skills.md`](docs/contributing-skills.md)       |
-| PR process — baton gates, doc coverage, signing | [`docs/contributing-workflow.md`](docs/contributing-workflow.md)   |
-| Dev environment — setup, commands, code style   | [`docs/contributing-dev-setup.md`](docs/contributing-dev-setup.md) |
+| Topic                                            | Guide                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Skill development — add, modify, test skills     | [`docs/contributing-skills.md`](docs/contributing-skills.md)                       |
+| PR process — baton gates, doc coverage, signing  | [`docs/contributing-workflow.md`](docs/contributing-workflow.md)                   |
+| Dev environment — setup, commands, code style    | [`docs/contributing-dev-setup.md`](docs/contributing-dev-setup.md)                 |
+| 100-line design contract — split, never compress | [`docs/howto/100-line-design-contract.md`](docs/howto/100-line-design-contract.md) |
+
+## 100-line design contract
+
+Every file in this repo must be **≤100 lines**. This is a design rule, not a
+content budget. When a file needs more space, split it into linked companion
+files — never compress or remove content to make the count fit.
+
+See [`docs/howto/100-line-design-contract.md`](docs/howto/100-line-design-contract.md)
+for split patterns by file type (markdown, JS/TS, CSS, HTML, shell).
 
 ## Types of contribution
 

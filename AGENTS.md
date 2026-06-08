@@ -33,7 +33,8 @@ Development workbench for the DevEnv Ops Harness:
 
 ## Edit discipline
 
-- Less than or equal to 100 lines per file (lint-enforced); split into linked files
+- Less than or equal to 100 lines per file (lint-enforced); split into linked
+  files — never compress content. See `docs/howto/100-line-design-contract.md`.
 - **Branch before editing**: create a feat/N-slug or fix/N-slug branch (one ticket per branch)
 - **Ticket first**: open an issue before any file edits — governance rule number 1
 - JSON for structured data; Markdown for prose

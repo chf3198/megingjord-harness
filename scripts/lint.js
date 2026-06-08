@@ -1,5 +1,18 @@
 #!/usr/bin/env node
-// Lint — enforce ≤100 lines per file
+// Lint — enforce the 100-line design contract
+//
+// The 100-line limit is a DESIGN RULE, not a content budget.
+// The correct response to hitting the limit is to SPLIT into linked files,
+// never to compress or omit content.
+//
+// Split-and-link pattern (by file type):
+//   Markdown doc  → nav/overview file + companion detail files
+//   JS/TS module  → extract functions into util/helper modules
+//   CSS file      → extract component rules into scoped stylesheets
+//   HTML file     → extract repeated sections into partials/includes
+//   Shell script  → extract subroutines into sourced lib scripts
+//
+// Canonical guide: docs/howto/100-line-design-contract.md
 // Usage: node scripts/lint.js
 
 const fs = require('fs');
@@ -66,6 +79,8 @@ for (const file of walk(ROOT)) {
   total++;
   if (lines > LIMIT) {
     console.error(`❌ ${rel}: ${lines} lines (limit ${LIMIT})`);
+    console.error(`   → Split into linked files — do not compress content.`);
+    console.error(`   → Guide: docs/howto/100-line-design-contract.md`);
     violations++;
   }
 }
