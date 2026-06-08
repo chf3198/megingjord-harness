@@ -48,7 +48,7 @@ const MATRIX_FILES = ['doc-coverage-matrix-core.yml', 'doc-coverage-matrix-exten
 
 function loadMatrix(matrixDir) {
   const dir = matrixDir || CFG; const merged = {};
-  for (const f of MATRIX_FILES) { const fp = path.join(dir, f); if (fs.existsSync(fp)) Object.assign(merged, parseYamlSurfaces(fs.readFileSync(fp, 'utf8'))); }
+  for (const file of MATRIX_FILES) { const fp = path.join(dir, file); if (fs.existsSync(fp)) Object.assign(merged, parseYamlSurfaces(fs.readFileSync(fp, 'utf8'))); }
   return merged;
 }
 
@@ -64,8 +64,8 @@ function surfacesForLabels(labels, matrix, changeType) {
     const types = loadChangeTypes();
     const ct = types[changeType];
     if (ct) {
-      for (const s of ct.require_additional || []) required.add(s);
-      for (const s of ct.demote_to_suggested || []) { required.delete(s); suggested.add(s); }
+      for (const surface of ct.require_additional || []) required.add(surface);
+      for (const surface of ct.demote_to_suggested || []) { required.delete(surface); suggested.add(surface); }
     }
   }
   return { required: [...required].sort(), suggested: [...suggested].sort() };

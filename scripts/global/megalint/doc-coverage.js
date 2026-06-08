@@ -34,8 +34,8 @@ function checkBlock(body, labels, matrix, changeType) {
     const value = findSurfaceValue(block, surface);
     if (!value) return [{ rule: 'doc-coverage-missing', severity: 'error',
       detail: `required surface "${surface}" not found in doc-coverage block` }];
-    const v = valueViolation(surface, value);
-    return v ? [v] : [];
+    const violation = valueViolation(surface, value);
+    return violation ? [violation] : [];
   });
 }
 

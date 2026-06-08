@@ -13,6 +13,7 @@ const INCIDENTS_PATH = path.join(os.homedir(), '.megingjord', 'incidents.jsonl')
 const STATE_PATH = path.join(os.homedir(), '.megingjord', 'doc-gate-bypass-seen.json');
 const BYPASS_RE = /\[skip-doc-gate\]/i;
 const NA_INCIDENT_RE = /doc-coverage:\s*\n(?:.*\n)*?.*\bN\/A\b.*\s+([\w-]+)/gi;
+const GH_TIMEOUT_MS = 20000;
 
 function loadSeen() { try { return new Set(JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'))); } catch (_) { return new Set(); } }
 function saveSeen(seen) { fs.mkdirSync(path.dirname(STATE_PATH), { recursive: true }); fs.writeFileSync(STATE_PATH, JSON.stringify([...seen])); }
@@ -24,17 +25,17 @@ function fetchMergedPRs(repo, limit) {
   // Paginated fetch — avoids --limit 20 silent drop (#2718 AC)
   const perPage = Math.min(limit || 50, 50); let page = 1; const all = [];
   while (true) {
-    const r = spawnSync('gh', ['pr', 'list', '--state', 'merged', '--search',
+    const spawnResult = spawnSync('gh', ['pr', 'list', '--state', 'merged', '--search',
       'skip-doc-gate in:body', '--json', 'number,body,headRefName,mergedAt',
       '--limit', String(perPage), '--skip-header',
-      ...(repo ? ['--repo', repo] : [])], { timeout: 20000, encoding: 'utf8' });
-    if (r.status !== 0) {
-      process.stderr.write(`[doc-gate-bypass-scanner] gh error: ${r.stderr || r.error}\n`);
+      ...(repo ? ['--repo', repo] : [])], { timeout: GH_TIMEOUT_MS, encoding: 'utf8' });
+    if (spawnResult.status !== 0) {
+      process.stderr.write(`[doc-gate-bypass-scanner] gh error: ${spawnResult.stderr || spawnResult.error}\n`);
       return null; // warn-and-exit contract: return null → caller skips silently
     }
-    let prs; try { prs = JSON.parse(r.stdout || '[]'); } catch (_) { prs = []; }
+    let prs; try { prs = JSON.parse(spawnResult.stdout || '[]'); } catch (_) { prs = []; }
     all.push(...prs); if (prs.length < perPage) break; page++;
-    if (page > 10) break; // safety cap: max 500 PRs
+    if (page > 10) break; // safety cap: max PR_FETCH_CAP
   }
   return all;
 }
@@ -49,7 +50,7 @@ function scan(opts = {}) {
   let emitted = 0; let skipped = 0;
   for (const pr of prs) {
     const key = String(pr.number);
-    if (seen.has(key)) { skipped++; continue; } // dedup guard (#2718 AC)
+    if (seen.has(key)) { skipped++; continue; } // dedup guard (Refs C7)
     const body = pr.body || '';
     if (!BYPASS_RE.test(body)) { seen.add(key); continue; }
     const ev = makeEvent('doc-gate-skip-doc-gate',
