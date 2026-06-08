@@ -93,15 +93,27 @@ Three enforcement surfaces, all registered as `enforced` links in
 
 ### G4 privacy note — fleet-review data handling
 
-Fleet/free-cloud review sends the **diff under review** to an off-box model endpoint
-(local Ollama on the Tailscale mesh, or a free-cloud provider such as
-gemini-2.5-flash@google-ai-studio when the fleet host is unreachable — the G3 lane). Treat
-this as an egress surface: never dispatch a diff that contains secrets or live credentials
-for review. The `log-redaction.js` patterns apply to any review content echoed into
-`incidents.jsonl` or baton artifacts. Local fleet (Tailscale-private) keeps the diff on
-owned infrastructure (G4-preferred); the free-cloud failover trades a marginal privacy
-surface for G3 zero-cost when the fleet is down — an explicit, documented degradation, not
-a silent one.
+Fleet/free-cloud review sends the **diff under review** to an off-box model endpoint.
+Two tiers, with materially different privacy postures:
+
+- **Local fleet** (Ollama on the Tailscale-private mesh) — the diff stays on
+  operator-controlled hardware and never leaves the private mesh. This is G4-preferred.
+  Caveat: "operator-controlled" is only as strong as the host — a fleet node on an
+  unmanaged personal machine is weaker than a hardened server; treat the fleet host's
+  trust level as part of the review's privacy boundary.
+- **Free-cloud failover** (a managed third-party provider on its free tier, e.g.
+  gemini-2.5-flash@google-ai-studio) — used only when the fleet host is unreachable. Here
+  the diff **leaves owned infrastructure entirely** and is processed under the provider's
+  terms. "Free-cloud / G3 lane" denotes zero marginal **cost**, not zero privacy cost: it
+  is a real, explicit privacy step-down accepted to keep review available when the fleet is
+  down (G6), never a silent default.
+
+Treat both as egress surfaces: never dispatch a diff containing secrets or live credentials
+for review. The `log-redaction.js` patterns (Anthropic/OpenAI keys, GitHub PAT, AWS, JWT,
+Bearer, email, IPv4 — see `config/redaction-patterns.json`) apply to any review content
+echoed into `incidents.jsonl` or baton artifacts, but redaction is a backstop, not a licence
+to send sensitive diffs. The `fleet-review-required` verdict-to-diff binding (the 3-fact
+anti-forgery check) is specified in #2738.
 
 ### Cross-runtime parity (deferred — AC-E6)
 
