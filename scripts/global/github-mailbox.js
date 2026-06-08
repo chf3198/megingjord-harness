@@ -8,6 +8,7 @@ const { execSync } = require('node:child_process');
 
 const STATE_PATH = path.join(process.cwd(), '.dashboard', 'mailbox-etag.json');
 const LABEL = 'coordination-mailbox';
+const HTTP_NOT_MODIFIED = 304; const HTTP_ERROR_MIN = 400;
 
 function getToken() {
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
@@ -73,7 +74,7 @@ async function writeMessage(owner, repo, body) {
       'content-type': 'application/json', 'content-length': Buffer.byteLength(payload),
     },
   }, payload);
-  if (res.status >= 400) throw new Error(`mailbox write failed: ${res.status} ${res.body}`);
+  if (res.status >= HTTP_ERROR_MIN) throw new Error(`mailbox write failed: ${res.status} ${res.body}`);
 }
 
 async function readMessages(owner, repo, since) {
@@ -90,11 +91,10 @@ async function readMessages(owner, repo, since) {
       path: `/repos/${owner}/${repo}/issues/${state.issue_number}/comments`,
       headers,
     });
-    if (res.status === 304) return [];
+    if (res.status === HTTP_NOT_MODIFIED) return [];
     const comments = JSON.parse(res.body);
     if (res.etag) { state.etag = res.etag; saveState(state); }
     return since ? comments.filter((c) => c.id > since) : comments;
   } catch { return []; }
 }
-
 module.exports = { writeMessage, readMessages };
