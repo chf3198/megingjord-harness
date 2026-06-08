@@ -98,4 +98,4 @@ npm run sync:claude            # ~/.claude/ → repo .claude/ (pull back)
 ## File size constraint
 
 All skill files must be **≤100 lines** (lint-enforced). If instructions exceed
-this, split into `SKILL.md` (nav) + `SKILL-detail.md` and link from `§ Instructions`.
+this, split into `SKILL.md` (nav) + `SKILL-detail.md` and link.
