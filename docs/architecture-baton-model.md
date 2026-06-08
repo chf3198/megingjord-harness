@@ -15,23 +15,27 @@ Manager → Collaborator → Admin → Consultant
 ## Role responsibilities
 
 ### Manager
+
 - Files the GitHub issue with `scope:`, `lane:`, `test_strategy:`, and ACs
 - Posts `MANAGER_HANDOFF` comment on the issue **before** any file edits
 - Sets direction and constraints only; never modifies source files
 
 ### Collaborator
+
 - Creates the feature branch (`feat/<N>-slug`) and implements all ACs
 - Posts `COLLABORATOR_HANDOFF` after pushing; includes `doc-coverage:` block
 - Runs `npm run lint && npm test` before handing off
 - Must carry a different `Signed-by` alias than Admin (CI enforces this)
 
 ### Admin
+
 - Runs CI checks; verifies test results; opens the PR
 - Posts `ADMIN_HANDOFF` confirming signer independence and deploy impact
 - Handles environment: credentials, deploy targeting, runtime state
 - Does not merge; merge is the Consultant's terminal gate
 
 ### Consultant
+
 - Adversarial review: edge cases, risks, doc gaps, goal-constitution alignment
 - Posts `CONSULTANT_CLOSEOUT` with `rubric_rating: N/10` (≥7 required to pass)
 - Identifies post-merge follow-up tickets for non-trivial residual risk
@@ -39,24 +43,25 @@ Manager → Collaborator → Admin → Consultant
 
 ## Artifact format
 
-| Artifact | Required fields |
-|---|---|
-| `MANAGER_HANDOFF` | `scope:` `lane:` `test_strategy:` `acceptance:` `Signed-by:` `Team&Model:` `Role: manager` |
+| Artifact               | Required fields                                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `MANAGER_HANDOFF`      | `scope:` `lane:` `test_strategy:` `acceptance:` `Signed-by:` `Team&Model:` `Role: manager`           |
 | `COLLABORATOR_HANDOFF` | `branch:` `commit:` per-AC checklist `doc-coverage:` `Signed-by:` `Team&Model:` `Role: collaborator` |
-| `ADMIN_HANDOFF` | `branch:` `commit:` `signer-independence-check:` `Signed-by:` `Team&Model:` `Role: admin` |
-| `CONSULTANT_CLOSEOUT` | `ticket:` `verdict:` `rubric_rating:` `Signed-by:` `Team&Model:` `Role: consultant` |
+| `ADMIN_HANDOFF`        | `branch:` `commit:` `signer-independence-check:` `Signed-by:` `Team&Model:` `Role: admin`            |
+| `CONSULTANT_CLOSEOUT`  | `ticket:` `verdict:` `rubric_rating:` `Signed-by:` `Team&Model:` `Role: consultant`                  |
 
 ## Team & Model signing
 
 Every baton artifact carries structured AI-authorship provenance:
 
 ```yaml
-Signed-by: Soren Mason           # human alias from agents/roster.json
+Signed-by: Soren Mason # human alias from agents/roster.json
 Team&Model: copilot:claude-sonnet-4-6@github
-Role: manager                    # must match the artifact type
+Role: manager # must match the artifact type
 ```
 
 `scripts/global/baton-artifact-governance.js` validates:
+
 1. All required fields are present and non-empty
 2. The `Role:` field matches the artifact name (`MANAGER_HANDOFF` → `manager`)
 3. Admin and Collaborator carry different `Signed-by` values
@@ -73,8 +78,8 @@ Role: manager                    # must match the artifact type
 
 ## Lane model
 
-| Lane label | Baton required | Typical use |
-|---|---|---|
-| `lane:code-change` | Full baton (all 4 roles) | Feature branches, bug fixes |
-| `lane:docs-research` | Manager + Consultant | Wiki pages, research notes |
-| `lane:config-only` | Admin + Consultant | Configuration-only changes |
+| Lane label           | Baton required           | Typical use                 |
+| -------------------- | ------------------------ | --------------------------- |
+| `lane:code-change`   | Full baton (all 4 roles) | Feature branches, bug fixes |
+| `lane:docs-research` | Manager + Consultant     | Wiki pages, research notes  |
+| `lane:config-only`   | Admin + Consultant       | Configuration-only changes  |

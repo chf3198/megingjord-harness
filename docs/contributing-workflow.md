@@ -15,22 +15,22 @@ Manager → Collaborator → Admin → Consultant
 
 PR body **must** include all four artifacts:
 
-| Artifact | Required fields |
-|---|---|
-| `MANAGER_HANDOFF` | `scope:` `lane:` `test_strategy:` `acceptance:` `Signed-by:` `Team&Model:` `Role: manager` |
+| Artifact               | Required fields                                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `MANAGER_HANDOFF`      | `scope:` `lane:` `test_strategy:` `acceptance:` `Signed-by:` `Team&Model:` `Role: manager`           |
 | `COLLABORATOR_HANDOFF` | `branch:` `commit:` per-AC checklist `doc-coverage:` `Signed-by:` `Team&Model:` `Role: collaborator` |
-| `ADMIN_HANDOFF` | `branch:` `commit:` `signer-independence-check:` `Signed-by:` `Team&Model:` `Role: admin` |
-| `CONSULTANT_CLOSEOUT` | `ticket:` `verdict:` `rubric_rating: N/10` (≥7) `Signed-by:` `Team&Model:` `Role: consultant` |
+| `ADMIN_HANDOFF`        | `branch:` `commit:` `signer-independence-check:` `Signed-by:` `Team&Model:` `Role: admin`            |
+| `CONSULTANT_CLOSEOUT`  | `ticket:` `verdict:` `rubric_rating: N/10` (≥7) `Signed-by:` `Team&Model:` `Role: consultant`        |
 
 > Admin and Collaborator must carry **different** `Signed-by` values — CI enforces this.
 
 ## Lane model
 
-| Lane label | Baton required | Typical use |
-|---|---|---|
-| `lane:code-change` | Full baton (all 4 roles) | Feature branches, bug fixes |
-| `lane:docs-research` | Manager + Consultant | Wiki pages, research notes |
-| `lane:config-only` | Admin + Consultant | Config-only changes |
+| Lane label           | Baton required           | Typical use                 |
+| -------------------- | ------------------------ | --------------------------- |
+| `lane:code-change`   | Full baton (all 4 roles) | Feature branches, bug fixes |
+| `lane:docs-research` | Manager + Consultant     | Wiki pages, research notes  |
+| `lane:config-only`   | Admin + Consultant       | Config-only changes         |
 
 Label your issue before creating the branch; `baton-gates.yml` reads the label.
 
@@ -71,11 +71,11 @@ Allowed types: `feat` `fix` `chore` `docs` `content` `perf` `refactor` `style`
 
 `test_strategy:` in `MANAGER_HANDOFF` drives the `test-evidence` CI check:
 
-| Strategy | CI requirement |
-|---|---|
+| Strategy      | CI requirement                                                    |
+| ------------- | ----------------------------------------------------------------- |
 | `tdd-pyramid` | Unit + integration + E2E tests present, or N/A with justification |
-| `peer-review` | `CONSULTANT_CLOSEOUT` with `rubric_rating: ≥7/10` |
-| `drift-lint` | `docs-drift-maintenance` text appears in issue comment trail |
+| `peer-review` | `CONSULTANT_CLOSEOUT` with `rubric_rating: ≥7/10`                 |
+| `drift-lint`  | `docs-drift-maintenance` text appears in issue comment trail      |
 
 ## Large PRs (>10 files or >500 LOC)
 

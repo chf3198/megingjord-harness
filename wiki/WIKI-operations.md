@@ -11,6 +11,7 @@ raw/<source>.md  →  wiki/sources/<slug>.md  →  entity/concept pages  →  in
 ```
 
 Procedure:
+
 1. Human places source in `raw/` with frontmatter (`status: pending`)
 2. LLM reads the source and discusses key takeaways with the operator
 3. LLM writes `wiki/sources/<slug>.md` — a ≤100-line digest
@@ -54,11 +55,11 @@ Run: `node scripts/wiki/lint.js`
 
 ## Content trust scoring
 
-| Score | Meaning | Trigger to change |
-|---|---|---|
-| `confidence: high` | ≥3 independent sources agree | Contradicting source → drop to `medium` |
+| Score                | Meaning                        | Trigger to change                       |
+| -------------------- | ------------------------------ | --------------------------------------- |
+| `confidence: high`   | ≥3 independent sources agree   | Contradicting source → drop to `medium` |
 | `confidence: medium` | 1–2 sources; no contradictions | Confirming 3rd source → raise to `high` |
-| `confidence: low` | Single source or inferred | Never raise without additional source |
+| `confidence: low`    | Single source or inferred      | Never raise without additional source   |
 
 Contradicting a `high` confidence claim requires filing a research ticket, not
 just editing the page in place. Log the conflict first.

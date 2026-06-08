@@ -20,28 +20,29 @@
 
 ## Deploy commands
 
-| Command | Effect |
-|---|---|
-| `npm run deploy:apply` | Repo → `~/.copilot/` |
-| `npm run deploy:codex:apply` | Repo → `~/.codex/` |
-| `npm run deploy:claude:apply` | Repo → `~/.claude/` |
-| `npm run deploy:both:apply` | Repo → Copilot + Codex |
-| `npm run sync` | `~/.copilot/` → repo (pull back) |
-| `npm run sync:codex` | `~/.codex/` → repo (pull back) |
-| `npm run sync:claude` | `~/.claude/` → repo (pull back) |
+| Command                       | Effect                           |
+| ----------------------------- | -------------------------------- |
+| `npm run deploy:apply`        | Repo → `~/.copilot/`             |
+| `npm run deploy:codex:apply`  | Repo → `~/.codex/`               |
+| `npm run deploy:claude:apply` | Repo → `~/.claude/`              |
+| `npm run deploy:both:apply`   | Repo → Copilot + Codex           |
+| `npm run sync`                | `~/.copilot/` → repo (pull back) |
+| `npm run sync:codex`          | `~/.codex/` → repo (pull back)   |
+| `npm run sync:claude`         | `~/.claude/` → repo (pull back)  |
 
 ## Layer-2 routing
 
 Two coordination backends; selected by `MEGINGJORD_HAMR_ENABLED`:
 
-| Value | Backend | Auth needed |
-|---|---|---|
-| unset / `0` | GitHub-native (zero infra required) | GitHub token only |
-| `1` | HAMR Cloudflare Worker | Cloudflare + `OPERATOR_KEY_SEED_B64` |
+| Value       | Backend                             | Auth needed                          |
+| ----------- | ----------------------------------- | ------------------------------------ |
+| unset / `0` | GitHub-native (zero infra required) | GitHub token only                    |
+| `1`         | HAMR Cloudflare Worker              | Cloudflare + `OPERATOR_KEY_SEED_B64` |
 
 GitHub-native unified client: `scripts/global/github-native-client.js`
 
 HAMR activation:
+
 ```bash
 npm run hamr:activate        # writes HAMR config to local runtime
 npm run hamr:sync-verify     # confirms routing through Worker
@@ -61,6 +62,7 @@ node scripts/global/skill-views-derive.js
 ## Dashboard conventions
 
 The monitoring dashboard at `:8090` is a zero-build-step static web app:
+
 - **Alpine.js** for reactive state; **vanilla JS** for all logic
 - No build step; no bundler; all assets served as static files from `dashboard/`
 - Panels declared as `<template>` elements in `dashboard/index.html`
@@ -68,6 +70,7 @@ The monitoring dashboard at `:8090` is a zero-build-step static web app:
 - **Cloudflare Pages** for production deployment
 
 When modifying the dashboard:
+
 1. Test locally with `npm start` → `http://localhost:8090`
 2. Verify SSE events appear in the event panel
 3. Run `npm test` to validate E2E panel rendering
@@ -75,6 +78,7 @@ When modifying the dashboard:
 ## Fleet auto-detection
 
 Fleet topology auto-detected at runtime:
+
 - `scripts/global/fleet-config.js` reads `inventory/devices.json`
 - IPs resolve from `.env` overrides first, then Tailscale DNS discovery
 - `scripts/health-check.js` pings all hosts; writes `.dashboard/state/fleet-health.json`

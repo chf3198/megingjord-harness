@@ -25,12 +25,12 @@ identically for all governed operations. No runtime is second-class.
 `npm run governance:adapters:emit` reads `inventory/governance-manifest.json`
 and emits runtime-specific shims for each engine:
 
-| Output | Target runtime | Mechanism |
-|---|---|---|
+| Output                            | Target runtime      | Mechanism              |
+| --------------------------------- | ------------------- | ---------------------- |
 | `.github/copilot-instructions.md` | GitHub Copilot Chat | Workspace instructions |
-| `CLAUDE.md` | Claude Code | Startup context file |
-| `AGENTS.md` | OpenAI Codex | AGENTS.md protocol |
-| `generated/governance-adapters/` | All (audit trail) | Timestamped snapshots |
+| `CLAUDE.md`                       | Claude Code         | Startup context file   |
+| `AGENTS.md`                       | OpenAI Codex        | AGENTS.md protocol     |
+| `generated/governance-adapters/`  | All (audit trail)   | Timestamped snapshots  |
 
 Adapters are rebuilt on every governance manifest change. The
 `orchestrator-governance-parity.json` registry tracks which features are active
@@ -38,20 +38,21 @@ per runtime and is checked by `quality-required` CI.
 
 ## Parity coverage matrix
 
-| Feature | Copilot | Claude Code | Codex |
-|---|---|---|---|
+| Feature               | Copilot          | Claude Code          | Codex                |
+| --------------------- | ---------------- | -------------------- | -------------------- |
 | Skills / capabilities | ✅ `plugin.json` | ✅ `.claude-plugin/` | ⚠️ `AGENTS.md` tools |
-| Instructions | ✅ | ✅ | ✅ |
-| Hooks | ✅ | ✅ | ✅ |
-| Baton governance | ✅ | ✅ | ✅ |
-| Wiki access | ✅ | ✅ | ✅ |
-| Layer-2 routing | ✅ | ✅ | ✅ |
+| Instructions          | ✅               | ✅                   | ✅                   |
+| Hooks                 | ✅               | ✅                   | ✅                   |
+| Baton governance      | ✅               | ✅                   | ✅                   |
+| Wiki access           | ✅               | ✅                   | ✅                   |
+| Layer-2 routing       | ✅               | ✅                   | ✅                   |
 
 ⚠️ = partial; Codex tool support depends on the OpenAI Codex API version in use.
 
 ## Cross-runtime review discipline
 
 When Copilot and Claude Code or Codex disagree on behaviour:
+
 1. Consult the **official docs** for the uncertain runtime — never infer from another
 2. File a parity issue with labels `type:bug,area:parity`
 3. The adapter generator is the correct fix path; never patch one runtime's file manually

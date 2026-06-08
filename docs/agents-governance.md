@@ -9,19 +9,19 @@ All AI-authored governed artifacts (baton handoffs, PR evidence, governance
 docs) must carry structured provenance:
 
 ```yaml
-Signed-by: Soren Mason           # human alias from agents/roster.json
+Signed-by: Soren Mason # human alias from agents/roster.json
 Team&Model: copilot:claude-sonnet-4-6@github
-Role: manager                    # must match the artifact type
+Role: manager # must match the artifact type
 ```
 
 Signing aliases for this repo (copilot:claude-sonnet-4-6@github):
 
-| Role | Alias |
-|---|---|
-| Manager | Soren Mason |
+| Role         | Alias        |
+| ------------ | ------------ |
+| Manager      | Soren Mason  |
 | Collaborator | Soren Harper |
-| Admin | Soren Reyes |
-| Consultant | Soren Vale |
+| Admin        | Soren Reyes  |
+| Consultant   | Soren Vale   |
 
 Repo-local overrides may tighten the format but must **not** remove provenance.
 See `instructions/team-model-signing.instructions.md`.
@@ -29,6 +29,7 @@ See `instructions/team-model-signing.instructions.md`.
 ## Review guidelines
 
 When reviewing a Codex PR, treat these as **release-blocking governance risks**:
+
 - Ticket lifecycle violations (MH posted after file edits; wrong baton order)
 - Signer fidelity failures (wrong alias or wrong `Role:` field in an artifact)
 - Isolated worktree violations (shared checkout between concurrent agents)
@@ -40,15 +41,15 @@ never infer from Claude or Copilot compatibility. APIs differ.
 
 ## Role taxonomy (7-role canonical set)
 
-| Role | Responsibilities |
-|---|---|
-| **Manager** | Research, scope, ticket, acceptance criteria; no file edits |
-| **Collaborator** | Implementation, branch, tests, doc-coverage handoff |
-| **Admin** | CI, credentials, PR staging, deployment; signer ≠ Collaborator |
-| **Consultant** | Adversarial review, risk assessment, rubric rating, terminal approval |
-| **IT** | Infrastructure, secrets, Tailscale fleet management |
-| **Red-Team** | Security assessment, prompt injection testing |
-| **Client** | External stakeholder; informs UX and requirements |
+| Role             | Responsibilities                                                      |
+| ---------------- | --------------------------------------------------------------------- |
+| **Manager**      | Research, scope, ticket, acceptance criteria; no file edits           |
+| **Collaborator** | Implementation, branch, tests, doc-coverage handoff                   |
+| **Admin**        | CI, credentials, PR staging, deployment; signer ≠ Collaborator        |
+| **Consultant**   | Adversarial review, risk assessment, rubric rating, terminal approval |
+| **IT**           | Infrastructure, secrets, Tailscale fleet management                   |
+| **Red-Team**     | Security assessment, prompt injection testing                         |
+| **Client**       | External stakeholder; informs UX and requirements                     |
 
 `Guest-Collaborator` is reserved but not active. `Operator` is a meta-term for
 the AI agent — not a distinct role in the baton chain.
@@ -68,15 +69,15 @@ See `docs/agents-workflow.md § Layer-2 routing`.
 
 ## 2026-H1 key contracts
 
-| Contract | Detail |
-|---|---|
-| **Doc-coverage gate** | `COLLABORATOR_HANDOFF` must include `doc-coverage:` block on `lane:code-change` |
-| **Baton builders** | Use `baton-comment-build.js`, `pr-comment-build.js`, `changelog-fragment-build.js` |
-| **Governance chains** | Run `npm run governance:chains:check` on governance path changes |
-| **OTel GenAI** | `isValidGenAI()` from `otel-genai-conformance.js` before any telemetry emit |
-| **Fleet-call-guard** | All fleet calls must use bounded timeout; see `docs/howto/fleet-call-guard.md` |
-| **Credential guard** | Check `credential-availability.js` before prompting user for any secret |
-| **Admin-merge-exception** | Override merges require `merge-bypass:admin-exception` label per Epic #2517 |
+| Contract                  | Detail                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| **Doc-coverage gate**     | `COLLABORATOR_HANDOFF` must include `doc-coverage:` block on `lane:code-change`    |
+| **Baton builders**        | Use `baton-comment-build.js`, `pr-comment-build.js`, `changelog-fragment-build.js` |
+| **Governance chains**     | Run `npm run governance:chains:check` on governance path changes                   |
+| **OTel GenAI**            | `isValidGenAI()` from `otel-genai-conformance.js` before any telemetry emit        |
+| **Fleet-call-guard**      | All fleet calls must use bounded timeout; see `docs/howto/fleet-call-guard.md`     |
+| **Credential guard**      | Check `credential-availability.js` before prompting user for any secret            |
+| **Admin-merge-exception** | Override merges require `merge-bypass:admin-exception` label per Epic #2517        |
 
 ## Merge evidence convention
 

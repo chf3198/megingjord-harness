@@ -21,6 +21,7 @@
 ## Repo purpose
 
 Development workbench for the DevEnv Ops Harness:
+
 - `skills/` → deploy to `~/.copilot/skills/` and `~/.agents/skills/`
 - `instructions/` → deploy to `~/.copilot/instructions/`
 - `hooks/` → deploy to `~/.copilot/hooks/` and `~/.codex/devenv-ops/hooks/`
@@ -47,9 +48,9 @@ Development workbench for the DevEnv Ops Harness:
 
 ## Quick reference
 
-| Topic | File |
-|---|---|
-| Team&Model signing, role taxonomy, key contracts | [`docs/agents-governance.md`](docs/agents-governance.md) |
-| Dev to deploy workflow, Layer-2, skill index, dashboard | [`docs/agents-workflow.md`](docs/agents-workflow.md) |
-| Baton model (roles, artifacts, CI gates) | [`docs/architecture-baton-model.md`](docs/architecture-baton-model.md) |
-| Contributing guide | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| Topic                                                   | File                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Team&Model signing, role taxonomy, key contracts        | [`docs/agents-governance.md`](docs/agents-governance.md)               |
+| Dev to deploy workflow, Layer-2, skill index, dashboard | [`docs/agents-workflow.md`](docs/agents-workflow.md)                   |
+| Baton model (roles, artifacts, CI gates)                | [`docs/architecture-baton-model.md`](docs/architecture-baton-model.md) |
+| Contributing guide                                      | [`CONTRIBUTING.md`](CONTRIBUTING.md)                                   |

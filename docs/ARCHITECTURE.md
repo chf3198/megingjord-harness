@@ -4,15 +4,15 @@ Navigation hub for architecture documentation, structured after arc42 sections.
 
 ## Document map
 
-| Section | File | arc42 ref |
-|---|---|---|
-| Executive overview, goal constitution | [`ARCHITECTURE.md`](../ARCHITECTURE.md) | §1 Intro & Goals |
-| Two-tier layer model detail | [`docs/architecture-layer-model.md`](architecture-layer-model.md) | §7 Deployment |
-| Baton governance model | [`docs/architecture-baton-model.md`](architecture-baton-model.md) | §8 Crosscutting |
-| Multi-runtime parity | [`docs/architecture-runtime-parity.md`](architecture-runtime-parity.md) | §5 Building Blocks |
-| Routing, fleet, cascade dispatch | [`docs/architecture-routing.md`](architecture-routing.md) | §6 Runtime View |
-| Deployment model, Layer-2, sync | [`docs/architecture-deployment.md`](architecture-deployment.md) | §7 Deployment |
-| Governance CI, wiki, dashboard | [`docs/architecture-governance.md`](architecture-governance.md) | §8 Crosscutting |
+| Section                               | File                                                                    | arc42 ref          |
+| ------------------------------------- | ----------------------------------------------------------------------- | ------------------ |
+| Executive overview, goal constitution | [`ARCHITECTURE.md`](../ARCHITECTURE.md)                                 | §1 Intro & Goals   |
+| Two-tier layer model detail           | [`docs/architecture-layer-model.md`](architecture-layer-model.md)       | §7 Deployment      |
+| Baton governance model                | [`docs/architecture-baton-model.md`](architecture-baton-model.md)       | §8 Crosscutting    |
+| Multi-runtime parity                  | [`docs/architecture-runtime-parity.md`](architecture-runtime-parity.md) | §5 Building Blocks |
+| Routing, fleet, cascade dispatch      | [`docs/architecture-routing.md`](architecture-routing.md)               | §6 Runtime View    |
+| Deployment model, Layer-2, sync       | [`docs/architecture-deployment.md`](architecture-deployment.md)         | §7 Deployment      |
+| Governance CI, wiki, dashboard        | [`docs/architecture-governance.md`](architecture-governance.md)         | §8 Crosscutting    |
 
 ## High-level data flow (C4 — Context)
 
@@ -34,15 +34,15 @@ Codex                          policy.json          OR Cloud (Claude /       + s
 
 ## Subsystem index
 
-| Subsystem | Entry point | Detail |
-|---|---|---|
-| **Routing** | `scripts/global/cascade-dispatch.js` | [architecture-routing.md](architecture-routing.md) |
-| **Capability detection** | `scripts/global/capability-probe.js` | [architecture-routing.md](architecture-routing.md) |
-| **Governance CI** | `.github/workflows/baton-gates.yml` | [architecture-governance.md](architecture-governance.md) |
-| **Wiki system** | `wiki/` + `scripts/wiki/ingest.js` | [architecture-governance.md](architecture-governance.md) |
-| **Dashboard** | `dashboard/index.html` | [architecture-governance.md](architecture-governance.md) |
-| **Fleet** | `inventory/devices.json` | [architecture-routing.md](architecture-routing.md) |
-| **Deployment** | `scripts/deploy.sh` | [architecture-deployment.md](architecture-deployment.md) |
+| Subsystem                | Entry point                          | Detail                                                   |
+| ------------------------ | ------------------------------------ | -------------------------------------------------------- |
+| **Routing**              | `scripts/global/cascade-dispatch.js` | [architecture-routing.md](architecture-routing.md)       |
+| **Capability detection** | `scripts/global/capability-probe.js` | [architecture-routing.md](architecture-routing.md)       |
+| **Governance CI**        | `.github/workflows/baton-gates.yml`  | [architecture-governance.md](architecture-governance.md) |
+| **Wiki system**          | `wiki/` + `scripts/wiki/ingest.js`   | [architecture-governance.md](architecture-governance.md) |
+| **Dashboard**            | `dashboard/index.html`               | [architecture-governance.md](architecture-governance.md) |
+| **Fleet**                | `inventory/devices.json`             | [architecture-routing.md](architecture-routing.md)       |
+| **Deployment**           | `scripts/deploy.sh`                  | [architecture-deployment.md](architecture-deployment.md) |
 
 ## Key quality attributes
 

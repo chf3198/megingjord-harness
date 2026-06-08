@@ -7,45 +7,45 @@
 
 ## Three-wiki typology
 
-| Sub-wiki | Path | Purpose |
-|---|---|---|
-| **Code wiki** | `wiki/code/` | Annotated code understanding |
-| **Work-log wiki** | `wiki/work-log/` | Session and ticket audit trail (append-only) |
-| **Wisdom wiki** | `wiki/wisdom/` | Distilled knowledge, research, and fleet entity pages |
+| Sub-wiki          | Path             | Purpose                                               |
+| ----------------- | ---------------- | ----------------------------------------------------- |
+| **Code wiki**     | `wiki/code/`     | Annotated code understanding                          |
+| **Work-log wiki** | `wiki/work-log/` | Session and ticket audit trail (append-only)          |
+| **Wisdom wiki**   | `wiki/wisdom/`   | Distilled knowledge, research, and fleet entity pages |
 
 ## Three-layer architecture
 
-| Layer | Path | Owner | Mutability |
-|---|---|---|---|
-| Raw sources | `raw/` | Human curates | Immutable after placement |
-| Wiki pages | `wiki/` | LLM writes | LLM updates freely |
-| Schema | `WIKI.md` | Co-owned | Changed by agreement |
+| Layer       | Path      | Owner         | Mutability                |
+| ----------- | --------- | ------------- | ------------------------- |
+| Raw sources | `raw/`    | Human curates | Immutable after placement |
+| Wiki pages  | `wiki/`   | LLM writes    | LLM updates freely        |
+| Schema      | `WIKI.md` | Co-owned      | Changed by agreement      |
 
 ## Page types
 
-| Type | Directory | Purpose |
-|---|---|---|
-| Entity | `wiki/*/entities/` | Person, device, service, tool |
-| Concept | `wiki/*/concepts/` | Idea, pattern, technique, decision |
-| Source summary | `wiki/*/sources/` | Digest of one raw source |
-| Synthesis | `wiki/*/syntheses/` | Cross-cutting analysis, comparisons |
+| Type           | Directory           | Purpose                             |
+| -------------- | ------------------- | ----------------------------------- |
+| Entity         | `wiki/*/entities/`  | Person, device, service, tool       |
+| Concept        | `wiki/*/concepts/`  | Idea, pattern, technique, decision  |
+| Source summary | `wiki/*/sources/`   | Digest of one raw source            |
+| Synthesis      | `wiki/*/syntheses/` | Cross-cutting analysis, comparisons |
 
 ## Frontmatter (required on every wiki page)
 
 ```yaml
 ---
-title: "Page Title"
+title: 'Page Title'
 type: entity | concept | source | synthesis
 created: 2026-04-13
 updated: 2026-04-13
 tags: [tag1, tag2]
 sources: [raw/articles/filename.md]
-related: ["[[Other Page]]"]
+related: ['[[Other Page]]']
 status: stub | draft | active | deprecated
 confidence: high | medium | low
 last_verified: 2026-04-30
 sources_count: N
-superseded_by: "[[newer-page]]"   # optional
+superseded_by: '[[newer-page]]' # optional
 ---
 ```
 

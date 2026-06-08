@@ -6,15 +6,15 @@ workflows across GitHub Copilot, Claude Code, and Codex.
 
 ## Document map
 
-| Topic | Detail |
-|---|---|
-| Two-tier layer model (global / workspace) | [`docs/architecture-layer-model.md`](docs/architecture-layer-model.md) |
-| Baton governance (Manager→Collaborator→Admin→Consultant) | [`docs/architecture-baton-model.md`](docs/architecture-baton-model.md) |
-| Multi-runtime parity (Copilot / Claude Code / Codex) | [`docs/architecture-runtime-parity.md`](docs/architecture-runtime-parity.md) |
-| Routing, fleet, cascade dispatch | [`docs/architecture-routing.md`](docs/architecture-routing.md) |
-| Deployment, Layer-2 coordination, sync commands | [`docs/architecture-deployment.md`](docs/architecture-deployment.md) |
-| Governance CI, wiki system, dashboard | [`docs/architecture-governance.md`](docs/architecture-governance.md) |
-| Contributor-facing subsystem index | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Topic                                                    | Detail                                                                       |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Two-tier layer model (global / workspace)                | [`docs/architecture-layer-model.md`](docs/architecture-layer-model.md)       |
+| Baton governance (Manager→Collaborator→Admin→Consultant) | [`docs/architecture-baton-model.md`](docs/architecture-baton-model.md)       |
+| Multi-runtime parity (Copilot / Claude Code / Codex)     | [`docs/architecture-runtime-parity.md`](docs/architecture-runtime-parity.md) |
+| Routing, fleet, cascade dispatch                         | [`docs/architecture-routing.md`](docs/architecture-routing.md)               |
+| Deployment, Layer-2 coordination, sync commands          | [`docs/architecture-deployment.md`](docs/architecture-deployment.md)         |
+| Governance CI, wiki system, dashboard                    | [`docs/architecture-governance.md`](docs/architecture-governance.md)         |
+| Contributor-facing subsystem index                       | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)                               |
 
 ## Core architectural principles
 

@@ -4,11 +4,11 @@ Welcome! Detailed guides are linked below.
 
 ## Guide index
 
-| Topic | Guide |
-|---|---|
-| Skill development — add, modify, test skills | [`docs/contributing-skills.md`](docs/contributing-skills.md) |
-| PR process — baton gates, doc coverage, signing | [`docs/contributing-workflow.md`](docs/contributing-workflow.md) |
-| Dev environment — setup, commands, code style | [`docs/contributing-dev-setup.md`](docs/contributing-dev-setup.md) |
+| Topic                                           | Guide                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| Skill development — add, modify, test skills    | [`docs/contributing-skills.md`](docs/contributing-skills.md)       |
+| PR process — baton gates, doc coverage, signing | [`docs/contributing-workflow.md`](docs/contributing-workflow.md)   |
+| Dev environment — setup, commands, code style   | [`docs/contributing-dev-setup.md`](docs/contributing-dev-setup.md) |
 
 ## Types of contribution
 
@@ -43,6 +43,7 @@ gh pr create --title "feat(scope): description #123"
 ## Reporting a bug
 
 Open an issue with label `type:bug`. Include:
+
 1. Runtime (`copilot` | `claude-code` | `codex`)
 2. Reproduction steps
 3. Observed vs expected behaviour

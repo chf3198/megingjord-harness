@@ -34,12 +34,12 @@ Installed once per machine via `npm run deploy:apply`. Shared across all repos.
 Committed into each target project. Provides project-specific context and
 optional overrides of the global layer.
 
-| File | Runtime | Role |
-|---|---|---|
-| `.github/copilot-instructions.md` | GitHub Copilot | Project adapter; extends global |
-| `CLAUDE.md` | Claude Code | Project adapter; extends global |
-| `AGENTS.md` | Codex | Project adapter; extends global |
-| `.claude/settings.json` | Claude Code | Tool permissions; merged with `~/.claude/settings.json` |
+| File                              | Runtime        | Role                                                    |
+| --------------------------------- | -------------- | ------------------------------------------------------- |
+| `.github/copilot-instructions.md` | GitHub Copilot | Project adapter; extends global                         |
+| `CLAUDE.md`                       | Claude Code    | Project adapter; extends global                         |
+| `AGENTS.md`                       | Codex          | Project adapter; extends global                         |
+| `.claude/settings.json`           | Claude Code    | Tool permissions; merged with `~/.claude/settings.json` |
 
 **Conflict resolution**: global security and governance rules always take
 precedence over workspace overrides, unless a governance baton explicitly
@@ -89,9 +89,9 @@ graph TD
 4. NEVER edit ~/.copilot/ or ~/.codex/ or ~/.claude/ directly
 ```
 
-| Scenario | Result |
-|---|---|
-| Workspace adds skill not in global | Active for that project only |
-| Workspace overrides global instruction | Workspace value wins |
-| Global security rule conflicts with workspace | Global wins always |
-| Both workspace and global define the same hook | Both run; global first |
+| Scenario                                       | Result                       |
+| ---------------------------------------------- | ---------------------------- |
+| Workspace adds skill not in global             | Active for that project only |
+| Workspace overrides global instruction         | Workspace value wins         |
+| Global security rule conflicts with workspace  | Global wins always           |
+| Both workspace and global define the same hook | Both run; global first       |

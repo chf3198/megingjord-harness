@@ -7,10 +7,10 @@ and, where needed, a supporting script in `scripts/global/`.
 
 Skills are categorised in `skills/.plugin-triage.json`:
 
-| Category | Ships via | Runtime target |
-|---|---|---|
-| **Universal** | `plugin.json` | All consumers (deployed globally) |
-| **Personal** | `deploy.sh` | `~/.copilot/` on this machine only |
+| Category      | Ships via     | Runtime target                     |
+| ------------- | ------------- | ---------------------------------- |
+| **Universal** | `plugin.json` | All consumers (deployed globally)  |
+| **Personal**  | `deploy.sh`   | `~/.copilot/` on this machine only |
 
 ## Skill directory layout
 
@@ -34,18 +34,23 @@ category: governance | routing | wiki | fleet | utility
 # skill-name — Title
 
 ## Purpose
+
 What problem this skill solves and for whom.
 
 ## Scope
+
 Which files, subsystems, or operations it touches.
 
 ## Constraints
+
 Edge cases, limitations, incompatibilities.
 
 ## Instructions
+
 Step-by-step guidance the LLM follows when invoking this skill.
 
 ## Verification
+
 How to confirm the skill works after deployment.
 ```
 
@@ -75,11 +80,11 @@ How to confirm the skill works after deployment.
 
 ## Cross-tool compatibility
 
-| Runtime | Detection path | Install mechanism |
-|---|---|---|
-| VS Code Copilot | `plugin.json` (root) | Plugin reload (`Chat: Refresh Skills`) |
-| Claude Code | `.claude-plugin/plugin.json` (symlink) | `npm run deploy:claude:apply` |
-| GitHub Copilot | `.github/plugin/plugin.json` (symlink) | Plugin install |
+| Runtime         | Detection path                         | Install mechanism                      |
+| --------------- | -------------------------------------- | -------------------------------------- |
+| VS Code Copilot | `plugin.json` (root)                   | Plugin reload (`Chat: Refresh Skills`) |
+| Claude Code     | `.claude-plugin/plugin.json` (symlink) | `npm run deploy:claude:apply`          |
+| GitHub Copilot  | `.github/plugin/plugin.json` (symlink) | Plugin install                         |
 
 All three symlinks resolve to the root `plugin.json` automatically.
 

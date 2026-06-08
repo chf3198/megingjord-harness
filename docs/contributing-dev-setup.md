@@ -2,12 +2,12 @@
 
 ## Prerequisites
 
-| Tool | Minimum version | Purpose |
-|---|---|---|
-| Node.js | 18 | All scripts; `nvm` recommended for version management |
-| Git | 2.35 | Worktree support required for concurrent agents |
-| GitHub CLI (`gh`) | 2.x | Issue, PR, and CI management |
-| Tailscale | any | Fleet routing to Ollama hosts (optional) |
+| Tool              | Minimum version | Purpose                                               |
+| ----------------- | --------------- | ----------------------------------------------------- |
+| Node.js           | 18              | All scripts; `nvm` recommended for version management |
+| Git               | 2.35            | Worktree support required for concurrent agents       |
+| GitHub CLI (`gh`) | 2.x             | Issue, PR, and CI management                          |
+| Tailscale         | any             | Fleet routing to Ollama hosts (optional)              |
 
 ## Install and verify
 
@@ -25,20 +25,20 @@ npm run validate:compat # Plugin.json compatibility
 
 ## Key commands
 
-| Command | Purpose |
-|---|---|
-| `npm start` | Dashboard on `:8090` |
-| `npm run lint` | 100-line file limit check |
-| `npm run format:check` | Prettier check (read-only, no writes) |
-| `npm run format` | Prettier write (auto-fix) |
-| `npm test` | Full E2E + unit test suite |
-| `npm run validate:triage` | Skill triage JSON sync check |
-| `npm run validate:compat` | `plugin.json` compatibility check |
-| `npm run sync` | Pull Copilot runtime → repo |
-| `npm run sync:codex` | Pull Codex runtime → repo |
-| `npm run deploy:apply` | Deploy repo → Copilot runtime |
-| `npm run deploy:codex:apply` | Deploy repo → Codex runtime |
-| `npm run deploy:both:apply` | Deploy repo → Copilot + Codex |
+| Command                      | Purpose                               |
+| ---------------------------- | ------------------------------------- |
+| `npm start`                  | Dashboard on `:8090`                  |
+| `npm run lint`               | 100-line file limit check             |
+| `npm run format:check`       | Prettier check (read-only, no writes) |
+| `npm run format`             | Prettier write (auto-fix)             |
+| `npm test`                   | Full E2E + unit test suite            |
+| `npm run validate:triage`    | Skill triage JSON sync check          |
+| `npm run validate:compat`    | `plugin.json` compatibility check     |
+| `npm run sync`               | Pull Copilot runtime → repo           |
+| `npm run sync:codex`         | Pull Codex runtime → repo             |
+| `npm run deploy:apply`       | Deploy repo → Copilot runtime         |
+| `npm run deploy:codex:apply` | Deploy repo → Codex runtime           |
+| `npm run deploy:both:apply`  | Deploy repo → Copilot + Codex         |
 
 ## Code style
 
@@ -52,11 +52,11 @@ npm run validate:compat # Plugin.json compatibility
 
 Copy `.env.example` → `.env` and populate as needed:
 
-| Variable | Purpose |
-|---|---|
-| `GOOGLE_AI_STUDIO_API_KEY` | Free-cloud dispatch via Gemini |
-| `MEGINGJORD_HAMR_ENABLED` | Set to `1` to use HAMR Cloudflare Worker for Layer-2 |
-| `OPERATOR_KEY_SEED_B64` | 32-byte base64 seed for stable HAMR mailbox auth |
+| Variable                   | Purpose                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `GOOGLE_AI_STUDIO_API_KEY` | Free-cloud dispatch via Gemini                       |
+| `MEGINGJORD_HAMR_ENABLED`  | Set to `1` to use HAMR Cloudflare Worker for Layer-2 |
+| `OPERATOR_KEY_SEED_B64`    | 32-byte base64 seed for stable HAMR mailbox auth     |
 
 Check `scripts/global/credential-availability.js` before prompting for any secret —
 the value may already exist in `.env` or another approved hydration source.

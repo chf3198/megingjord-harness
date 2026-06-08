@@ -27,15 +27,15 @@ and override/extend the global layer for that project only.
 
 ## Deploy commands
 
-| Command | Effect |
-|---|---|
-| `npm run deploy:apply` | Repo → `~/.copilot/` |
-| `npm run deploy:codex:apply` | Repo → `~/.codex/` |
-| `npm run deploy:claude:apply` | Repo → `~/.claude/` |
-| `npm run deploy:both:apply` | Repo → Copilot + Codex |
-| `npm run sync` | `~/.copilot/` → repo (pull back) |
-| `npm run sync:codex` | `~/.codex/` → repo (pull back) |
-| `npm run sync:claude` | `~/.claude/` → repo (pull back) |
+| Command                       | Effect                           |
+| ----------------------------- | -------------------------------- |
+| `npm run deploy:apply`        | Repo → `~/.copilot/`             |
+| `npm run deploy:codex:apply`  | Repo → `~/.codex/`               |
+| `npm run deploy:claude:apply` | Repo → `~/.claude/`              |
+| `npm run deploy:both:apply`   | Repo → Copilot + Codex           |
+| `npm run sync`                | `~/.copilot/` → repo (pull back) |
+| `npm run sync:codex`          | `~/.codex/` → repo (pull back)   |
+| `npm run sync:claude`         | `~/.claude/` → repo (pull back)  |
 
 **Invariant**: never edit `~/.copilot/`, `~/.codex/`, or `~/.claude/` directly.
 All changes flow through this repo. Direct edits are silently overwritten on the
@@ -45,20 +45,20 @@ next `deploy:apply` run.
 
 Two backends for cross-agent coordination; selected by `MEGINGJORD_HAMR_ENABLED`:
 
-| `MEGINGJORD_HAMR_ENABLED` | Backend | External infra required |
-|---|---|---|
-| unset / `0` (default) | GitHub-native client | GitHub repo access only |
-| `1` | HAMR Cloudflare Worker | Cloudflare account + secrets |
+| `MEGINGJORD_HAMR_ENABLED` | Backend                | External infra required      |
+| ------------------------- | ---------------------- | ---------------------------- |
+| unset / `0` (default)     | GitHub-native client   | GitHub repo access only      |
+| `1`                       | HAMR Cloudflare Worker | Cloudflare account + secrets |
 
 GitHub-native primitives (default — zero external infrastructure):
 
-| Primitive | Script | Mechanism |
-|---|---|---|
-| Mailbox | `github-mailbox.js` | GitHub Issues comment thread + ETag polling |
-| Bundle distribution | `github-bundle-client.js` | GitHub Releases assets |
-| MCP dispatch | `github-mcp-dispatch.js` | `repository_dispatch` event |
-| Telemetry | `github-telemetry-read.js` | Actions artifact (6h scheduled upload) |
-| Substrate health | `github-substrate-health-read.js` | Actions artifact upload |
+| Primitive           | Script                            | Mechanism                                   |
+| ------------------- | --------------------------------- | ------------------------------------------- |
+| Mailbox             | `github-mailbox.js`               | GitHub Issues comment thread + ETag polling |
+| Bundle distribution | `github-bundle-client.js`         | GitHub Releases assets                      |
+| MCP dispatch        | `github-mcp-dispatch.js`          | `repository_dispatch` event                 |
+| Telemetry           | `github-telemetry-read.js`        | Actions artifact (6h scheduled upload)      |
+| Substrate health    | `github-substrate-health-read.js` | Actions artifact upload                     |
 
 The unified client `scripts/global/github-native-client.js` auto-selects backend
 based on the env var. See [`docs/howto/github-native-layer2.md`](howto/github-native-layer2.md).
