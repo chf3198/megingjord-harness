@@ -1,5 +1,5 @@
 'use strict';
-// Stress (Epic #2709 / #2721): adversarial-input parser → fault-injection + p99 budget.
+// Stress (Epic #2709 / #2721): adversarial-input parser -> fault-injection + p99 budget.
 const { test } = require('node:test');
 const assert = require('node:assert');
 const path = require('path');

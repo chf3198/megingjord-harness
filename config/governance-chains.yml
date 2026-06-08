@@ -2,7 +2,7 @@
 # The machine-checkable source of truth for the meta-invariant:
 #   "No governance-critical link may depend on operator discretion."
 # Every link MUST declare guarantee: enforced | auto-emitted.
-# `operator-discretionary` is NOT a legal value — chain-integrity.js rejects it.
+# `operator-discretionary` is NOT a legal value -- chain-integrity.js rejects it.
 #
 # governance_surface: globs whose changes REQUIRE a registry delta (no new
 # enforcement may land without declaring its link). The registry self-protects
