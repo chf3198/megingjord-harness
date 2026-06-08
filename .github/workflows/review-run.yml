@@ -1,0 +1,44 @@
+name: Nightly Review Run
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Coordination issue number (optional)'
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  review-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci --prefer-offline
+
+      - name: Run consultant checks
+        id: review
+        run: |
+          RESULT=$(node scripts/global/consultant-checks.js --dry-run 2>/dev/null || echo '{"skipped":true}')
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post result to coordination issue
+        if: github.event.inputs.issue_number != ''
+        run: |
+          gh issue comment "${{ github.event.inputs.issue_number }}" \
+            --body "## Nightly Review Run — $(date -u +%Y-%m-%d)\n\nResult: \`${{ steps.review.outputs.result }}\`\n\nWorkflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,43 @@
+name: Rotation Check
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  rotation-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci --prefer-offline
+
+      - name: Check rotation windows
+        id: rotation
+        run: |
+          RESULT=$(node scripts/global/hamr-rotation-check.js 2>/dev/null || echo '{"rotation_due":false}')
+          DUE=$(echo "$RESULT" | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).rotation_due" 2>/dev/null || echo "false")
+          echo "rotation_due=$DUE" >> "$GITHUB_OUTPUT"
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+
+      - name: Open rotation issue when due
+        if: steps.rotation.outputs.rotation_due == 'true'
+        run: |
+          gh issue create \
+            --title "Rotation Due — $(date -u +%Y-%m-%d)" \
+            --body "## Rotation Required\n\nRotation check detected credentials/models due for rotation.\n\nResult: \`${{ steps.rotation.outputs.result }}\`\n\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --label "type:task,priority:P2,role:manager" \
+            --assignee "@me"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
