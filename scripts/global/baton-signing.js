@@ -1,6 +1,6 @@
 // baton-signing.js — HAMR Wave 1 Ed25519 sign/verify for baton handoff artifacts (#894)
 // node:crypto only. Wave 1: T4 ephemeral keying; T1/T2/T3 probed (presence-only) for hamr:doctor #896.
-require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 'use strict';
 const { createHash, generateKeyPairSync, sign: cSign, verify: cVerify } = require('node:crypto');
 const { execSync } = require('node:child_process');

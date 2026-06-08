@@ -2,7 +2,7 @@
 // ide-proxy-quality-parity.js — Epic #1020 AC: completion satisfaction parity.
 // Measures routed-lane vs baseline-lane response similarity for each corpus turn.
 // Default mode is DRY-RUN (canned responses) for $0 cost. Live mode opt-in.
-require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 'use strict';
 const path = require('node:path');
 const fs = require('node:fs');

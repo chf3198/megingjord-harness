@@ -1,6 +1,6 @@
 // tier: 2
 // HAMR substrate probes — S2 spike (#877). Non-destructive, fail-soft, 5s timeout.
-require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 const { execSync } = require('child_process')
 const fs = require('fs')
 const os = require('os')
