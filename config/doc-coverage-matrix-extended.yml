@@ -1,0 +1,70 @@
+# Refs #2713 — doc-coverage matrix extended
+# Consumed by scripts/global/megalint/doc-coverage.js alongside matrix-core.yml
+# Contains: agents/skills/infra/knowledge + 4 new area labels (tests/config/ci/research)
+
+version: 1
+surfaces:
+  area:agents:
+    required:
+      - docs/skills-agents.md
+      - AGENTS.md
+      - .changes/unreleased/
+    suggested:
+      - wiki/code/agents.md
+      - .claude/agents/
+
+  area:skills:
+    required:
+      - docs/skills-copilot.md
+      - docs/skills-agents.md
+      - skills/
+      - .changes/unreleased/
+    suggested:
+      - wiki/code/skills.md
+
+  area:infra:
+    required:
+      - ARCHITECTURE.md
+      - docs/ARCHITECTURE.md
+      - .changes/unreleased/
+    suggested:
+      - README.md
+      - docs/provider-capability-registry.md
+      - docs/provider-neutral-routing.md
+      - wiki/code/infra.md
+
+  area:knowledge:
+    required:
+      - wiki/wisdom/global/
+      - WIKI.md
+    suggested:
+      - docs/howto/contribute-to-wiki.md
+
+  area:tests:
+    required:
+      - docs/workflow/learnings.md
+    suggested:
+      - .changes/unreleased/
+      - wiki/code/tests.md
+
+  area:config:
+    required:
+      - .changes/unreleased/
+      - README.md
+    suggested:
+      - docs/howto/
+      - wiki/code/config.md
+
+  area:ci:
+    required:
+      - .changes/unreleased/
+      - docs/howto/
+    suggested:
+      - wiki/code/ci.md
+
+  area:research:
+    required:
+      - docs/workflow/learnings.md
+    suggested:
+      - wiki/wisdom/project/
+      - wiki/wisdom/global/

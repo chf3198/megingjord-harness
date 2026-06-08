@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "refs": "#2714",
+  "description": "Canonical 9-reason enum for doc-coverage N/A declarations. Validator rejects unknown reasons.",
+  "reasons": {
+    "out-of-scope": {
+      "description": "This ticket's change does not touch the area this surface covers",
+      "evidence_implied": "Change diff contains no files in the surface's directory",
+      "abuse_prevention": "Reviewer must verify diff has zero overlap with surface path",
+      "validator_check": "warn if diff contains path matching surface pattern"
+    },
+    "covered-by-sibling-pr": {
+      "description": "A concurrent PR (cite #N) updates this surface as part of the same feature",
+      "evidence_implied": "Sibling PR number must appear in the reason string: covered-by-sibling-pr:#N",
+      "abuse_prevention": "Sibling PR must be open or merged at close time; validator checks format",
+      "validator_check": "regex: covered-by-sibling-pr:#\\d+"
+    },
+    "docs-only-no-functional-change": {
+      "description": "This PR updates documentation only; the surface tracks behavior not docs",
+      "evidence_implied": "All changed files are .md, .txt, or docs/",
+      "abuse_prevention": "Reject if any changed file is .js, .ts, .py, .sh, .yml workflow",
+      "validator_check": "check diff for non-doc file types"
+    },
+    "no-user-visible-change": {
+      "description": "Internal refactor with no externally observable behavior change",
+      "evidence_implied": "No public API, CLI flag, config key, or UX change",
+      "abuse_prevention": "Cannot be combined with area:governance or area:instructions",
+      "validator_check": "reject if labels include area:governance or area:instructions"
+    },
+    "covered-by-parent-epic": {
+      "description": "The parent Epic's doc PR or a sibling child ticket covers this surface",
+      "evidence_implied": "Epic must have an open doc-update child ticket or closed one",
+      "abuse_prevention": "Epic number or ticket number must be cited",
+      "validator_check": "warn if no epic or ticket reference found in reason"
+    },
+    "test-only-change": {
+      "description": "This PR adds or modifies tests only; surface is not a test file",
+      "evidence_implied": "All changed files are in tests/ or *.spec.js / *.test.js",
+      "abuse_prevention": "Reject if any changed file is outside tests/ and not a fixture",
+      "validator_check": "check diff for non-test file types"
+    },
+    "config-only-no-behavior-change": {
+      "description": "Config value adjustment with no behavior change (e.g., timeout tweak)",
+      "evidence_implied": "Changed file is in config/ and no code or doc depends on the changed key",
+      "abuse_prevention": "Cannot be used for new config keys or key removals",
+      "validator_check": "advisory: confirm change is value-only, not key addition/removal"
+    },
+    "trivial-rename": {
+      "description": "File or symbol rename with no semantic change; surface will be updated by rename automation",
+      "evidence_implied": "git log shows rename only (R100); no content change",
+      "abuse_prevention": "Reject if diff shows content lines added/removed beyond path strings",
+      "validator_check": "advisory: confirm rename-only in diff"
+    },
+    "external-dependency-update": {
+      "description": "Dependency version bump only (package.json, requirements.txt, etc.)",
+      "evidence_implied": "Only package.json / lock files changed",
+      "abuse_prevention": "Cannot be used if the dependency update changes a public interface",
+      "validator_check": "warn if diff includes non-lockfile changes"
+    }
+  }
+}
