@@ -39,6 +39,21 @@ Runtime records describe agent surfaces. Provider records describe serving
 paths. Keep those ownership boundaries separate when comparing Codex, Copilot,
 Claude Code, HAMR, OpenClaw, OpenRouter, Ollama, LiteLLM, or vendor APIs.
 
+## Layer-2 Coordination Routing
+
+Cross-agent coordination (mailbox, bundles, telemetry) is separate from the
+LLM inference lane above. It uses `github-native-client.js` for routing:
+
+| Path | Default (Tier-1) | Opt-in (Tier-2) |
+|---|---|---|
+| Mailbox | `github-mailbox.js` via GitHub Issues | HAMR `/mailbox/*` |
+| Bundles | `github-bundle-client.js` via Releases | HAMR `/bundle/*` |
+| Telemetry | `github-telemetry-read.js` via Actions artifact | HAMR `/quota` |
+| Async dispatch | `github-mcp-dispatch.js` via `repository_dispatch` | HAMR MCP |
+
+Toggle: `MEGINGJORD_HAMR_ENABLED=1` activates Tier-2. Default is Tier-1
+(GitHub-native, zero paid infrastructure). See `docs/howto/github-native-layer2.md`.
+
 ## Validation
 
 Routing changes should include:
