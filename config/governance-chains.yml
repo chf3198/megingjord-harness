@@ -35,3 +35,7 @@ chains:
     - link: chain-registry-is-governed
       guarantee: enforced
       enforcement_point: scripts/global/megalint/chain-integrity.js
+  fleet-review:
+    - link: cross-family-review-required-at-consultant-phase
+      guarantee: enforced
+      enforcement_point: scripts/global/megalint/fleet-review-required.js
