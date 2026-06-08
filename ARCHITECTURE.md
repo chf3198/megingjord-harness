@@ -46,6 +46,24 @@ The Workspace Layer resides inside the individual target project's repository. T
 
 ---
 
+## 1b. Layer-2 Coordination (HAMR vs GitHub-Native)
+
+Cross-agent coordination routes through one of two Layer-2 backends, selected
+by environment variable:
+
+| `MEGINGJORD_HAMR_ENABLED` | Backend | Requires |
+|---|---|---|
+| unset / `0` (**default**) | GitHub-native (`github-native-client.js`) | GitHub repo only |
+| `1` | HAMR Cloudflare Worker | Cloudflare account |
+
+GitHub-native routes (default): `github-mailbox.js` (Issues), `github-bundle-client.js`
+(Releases), `github-mcp-dispatch.js` (repository_dispatch), telemetry/health via
+scheduled Actions artifacts. The unified client auto-selects based on the env var.
+
+See `docs/howto/github-native-layer2.md` and [[github-native-layer2]] wiki page.
+
+---
+
 ## 2. Multi-Runtime Parity
 
 A core architectural goal of Megingjord is **runtime parity**. Standardizing developer-agent behavior across multiple execution environments prevents configuration drift and cognitive overhead.

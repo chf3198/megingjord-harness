@@ -68,6 +68,12 @@ history, workspace wiki, and local overrides.
 to all three runtimes — Copilot, Claude Code, and Codex are equal first-class
 citizens.
 
+**Zero-Cloudflare by default**: Cross-agent coordination (mailbox, bundles,
+telemetry, async dispatch) uses GitHub-native primitives out of the box — no
+Cloudflare account or `wrangler deploy` required. Set `MEGINGJORD_HAMR_ENABLED=1`
+to opt into the accelerated HAMR Cloudflare Worker for higher-throughput paths.
+See [`docs/howto/github-native-layer2.md`](docs/howto/github-native-layer2.md).
+
 See [`docs/howto/installation.md`](docs/howto/installation.md) for the full
 install walkthrough, including adding a second project.
 
@@ -88,6 +94,10 @@ npm run lint
 npm test
 npm run deploy:both:apply
 ```
+
+No Cloudflare account needed. Cross-agent coordination works immediately via
+GitHub-native primitives. To enable the HAMR accelerated path after deploying
+the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 
 ## Env-backed credentials
 

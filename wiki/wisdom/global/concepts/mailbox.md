@@ -75,10 +75,24 @@ Existing `agent-coord-remote.js` (megingjord-coord Worker, #740/#785) continues 
 - **R9.4** idempotent: same `(publisher_key_id, nonce)` always returns same write result; replay yields 409 deterministically.
 - **R9** failover: `mailbox-outbox.js` queues writes when Worker unreachable; `flushPending(client)` reconciles on substrate-health recovery.
 
+## GitHub-native alternative (Tier-1, default)
+
+`scripts/global/github-mailbox.js` provides the same write/read contract using
+GitHub Issues comment threads + ETag polling — no Cloudflare required (#2750).
+
+```js
+const { writeMessage, readMessages } = require('./github-mailbox');
+await writeMessage(owner, repo, payload);        // appends comment to issue
+const msgs = await readMessages(owner, repo);    // ETag-gated poll (304 = [])
+```
+
+Select via `github-native-client.js` (auto-routes based on `MEGINGJORD_HAMR_ENABLED`).
+See [[github-native-layer2]] and `docs/howto/github-native-layer2.md`.
+
 ## References
 
 - HAMR v3.2 §R2 + §5 child 5: `research/hamr-v3-2-2026-05-04.md` (#890).
 - v3.2.1 §R9 + DC-1: `research/hamr-v3-2-1-2026-05-05.md` (#907).
 - Baton signing (#894): `scripts/global/baton-signing.js`.
 - HAMR core Worker (#910): `cloudflare/hamr/`.
-- Implementation: this PR (#918).
+- GitHub-native mailbox (#2750): `scripts/global/github-mailbox.js`.
