@@ -85,6 +85,16 @@ def _active_ticket_labels(state: dict, cwd: str) -> set[str]:
 def active_ticket_is_no_code_lane(state: dict, cwd: str) -> bool:
     return "lane:no-code-remediation" in _active_ticket_labels(state, cwd)
 
+def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
+    """True when this is an admin-OVERRIDE merge lacking the Epic #2517 exception (#2706).
+    Fail-open: any internal error returns False (never brick a session on a guard bug)."""
+    try:
+        if not (" --admin" in joined or joined.rstrip().endswith("--admin")):
+            return False
+        return "merge-bypass:admin-exception" not in _active_ticket_labels(state, cwd)
+    except Exception:
+        return False
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
@@ -121,6 +131,11 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
         return emit("deny","Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
+        override = require_bypass_exception(joined, state, cwd)
+        if override:
+            return emit("deny", "Admin-override merge blocked (#2706): record the Epic #2517 exception "
+                        "FIRST - add the 'merge-bypass:admin-exception' label (or a BLOCKER_NOTE with "
+                        "bypass_reason: + approver:), THEN re-run the override merge.")
         if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
         pr_m = RE_PR_REF.search(joined)
         if pr_m:
