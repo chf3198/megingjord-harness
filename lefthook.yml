@@ -23,6 +23,8 @@ pre-push:
       run: npm run lint:sh || true
     megalint:
       run: node scripts/global/megalint/index.js
+    hydration-lint:
+      run: node scripts/global/hydration-lint.js
     closeout-preflight:
       run: node scripts/global/closeout-preflight.js
     # #1613: removed `test-evidence-diff` step. The validator at

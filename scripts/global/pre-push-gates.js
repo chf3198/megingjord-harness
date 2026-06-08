@@ -13,6 +13,7 @@ const BYPASSED_GATES = [
   'npm run lint:py',
   'npm run lint:sh',
   'node scripts/global/megalint/index.js',
+  'node scripts/global/hydration-lint.js',
 ];
 
 function warnBypass(source) {

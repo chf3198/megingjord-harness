@@ -1,5 +1,6 @@
 // tier: 2
 // github-bundle-client.js — GitHub-native bundle distribution via Releases API. Refs #2751.
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 'use strict';
 const https = require('node:https');
 const { execSync } = require('node:child_process');

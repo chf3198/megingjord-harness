@@ -3,7 +3,7 @@
 // cache-stats-push.js — HAMR Wave 5 child 2 (#933).
 // Computes rolling 7d hit-rate locally and POSTs Ed25519-signed payload to HAMR /cache-stats.
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');

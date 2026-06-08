@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');

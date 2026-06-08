@@ -1,6 +1,6 @@
 // ai-matrix-providers-fleet.js — OpenClaw local fleet provider configs
 'use strict';
-require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
+require('./global/load-local-env').loadLocalEnvOnce();
 
 const chat = (url, apiKey, model) => ({
   url,

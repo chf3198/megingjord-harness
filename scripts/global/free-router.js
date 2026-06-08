@@ -2,6 +2,7 @@
 // Phase 4 / #786 — free-model orchestrator MVP
 // Classifier+signal stack picks dispatch tier. Calls free LLM (Groq) when
 // available; falls back to deterministic cascade-dispatch logic otherwise.
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 const fs = require('fs');
 const path = require('path');
 

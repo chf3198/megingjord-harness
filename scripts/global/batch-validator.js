@@ -4,7 +4,7 @@
 // Dry-run + opt-in live mode for Anthropic Batch API submission.
 // Default: dry-run = $0 operator cost. Live mode requires --live --operator-approved.
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 
 const { submitBatch, pollBatch, isBatchEligible } = require('./anthropic-batch-router');
 

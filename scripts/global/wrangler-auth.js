@@ -3,6 +3,7 @@
 // wrangler-auth.js — Isolated wrangler executor for D1 (#1564).
 // Sources CLOUDFLARE_API_TOKEN from .env into a child process only.
 // Token never appears in shell history or command-line arguments.
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 'use strict';
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');

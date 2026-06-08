@@ -1,6 +1,7 @@
 // scripts/wiki/wiki-llm.js — LLM integration for wiki operations
 // Fleet routing: OpenClaw (primary) → Groq → Cerebras (failover)
 // HAMR-wrap (#1082): callLLM wraps via hamr-provider-wrapper when available.
+require('../global/load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 
 const HAMR = (() => { try { return require('../global/hamr-provider-wrapper'); } catch { return null; } })();
 const PROVIDER_TIER = { OpenClaw: 'fleet-fast', 'OpenClaw-Quality': 'fleet-quality',

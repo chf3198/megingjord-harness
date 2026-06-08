@@ -1,6 +1,7 @@
 // tier: 2
 // github-mcp-dispatch.js — GitHub-native async MCP dispatch via repository_dispatch. Refs #2752.
 // HAMR stays default for interactive RPC; this is the async fallback for fire-and-forget.
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before any credential read (canonical shim)
 'use strict';
 const https = require('node:https');
 const { execSync } = require('node:child_process');

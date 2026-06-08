@@ -2,7 +2,7 @@
 'use strict';
 // tier: 4
 
-require('dotenv').config();
+require('./load-local-env').loadLocalEnvOnce();
 
 const key = process.env.ANTHROPIC_API_KEY;
 const base = process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com';
