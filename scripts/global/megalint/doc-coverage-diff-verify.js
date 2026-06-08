@@ -3,7 +3,7 @@
 // Verifies declared DONE/UPDATED surfaces were actually modified in the PR diff.
 // Execution contexts: local-pre-push, CI, shallow-clone, multi-runtime, doc-only.
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const GIT_DIFF_TIMEOUT_MS = 10000;
@@ -21,11 +21,10 @@ function isShallowClone(cwd) {
 }
 
 function getChangedFiles(base, cwd) {
-  try {
-    const out = execSync(`git diff --name-only "${base}...HEAD"`,
-      { cwd: cwd || process.cwd(), timeout: GIT_DIFF_TIMEOUT_MS }).toString();
-    return new Set(out.trim().split('\n').filter(Boolean));
-  } catch (_) { return null; }
+  const proc = spawnSync('git', ['diff', '--name-only', `${base}...HEAD`],
+    { cwd: cwd || process.cwd(), timeout: GIT_DIFF_TIMEOUT_MS, encoding: 'utf8' });
+  if (proc.error || proc.status !== 0) return null;
+  return new Set((proc.stdout || '').trim().split('\n').filter(Boolean));
 }
 
 function structuralCheck(filePath, cwd) {
@@ -69,7 +68,7 @@ function verifyDeclaredSurfaces(declared, base, opts = {}) {
       severity: 'error', surface, reason: sc.reason }); continue; }
     if (changed) {
       const touched = [...changed].some(file => file === surface || file.startsWith(surface));
-      if (!touched) violations.push({ rule: 'doc-diff-not-changed', severity: 'warning',
+      if (!touched) violations.push({ rule: 'doc-diff-not-changed', severity: 'error',
         surface, detail: `declared DONE but not in diff vs ${base}` });
     }
   }

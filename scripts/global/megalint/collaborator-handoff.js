@@ -71,7 +71,7 @@ function validate(input) {
   }
   const body = bodyOf(handoff);
   const violations = checkSignerFields(body);
-  if (input.lane === 'lane:code-change' && process.env.DOC_COVERAGE_GATE_ADVISORY !== '1') {
+  if (input.lane === 'lane:code-change') {
     let matrix;
     try { matrix = docCoverage.loadMatrix(); } catch (_) { matrix = null; }
     if (matrix) violations.push(...docCoverage.checkBlock(body, input.labels || [], matrix));

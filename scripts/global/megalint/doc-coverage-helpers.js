@@ -7,7 +7,11 @@ const CFG = path.join(__dirname, '..', '..', '..', 'config');
 const NA_REASONS_PATH = path.join(CFG, 'doc-coverage-na-reasons.json');
 const CHANGE_TYPES_PATH = path.join(CFG, 'doc-coverage-change-types.yml');
 
-const loadNaReasons = () => { try { return Object.keys(JSON.parse(fs.readFileSync(NA_REASONS_PATH, 'utf8')).reasons); } catch (_) { return null; } };
+const loadNaReasons = (p) => {
+  const parsed = JSON.parse(fs.readFileSync(p || NA_REASONS_PATH, 'utf8'));
+  if (!parsed || !parsed.reasons) throw new Error('na-reasons.json malformed or missing reasons key');
+  return Object.keys(parsed.reasons);
+};
 
 function parseChangeTypes(text) {
   const out = {}; let cur = null; let field = null;
@@ -77,12 +81,14 @@ function valueViolation(surface, value) {
     const raw = String(value).replace(/^N\/A\b\s*(?:[—:-]\s*)?/i, '').trim();
     if (!raw) return { rule: 'doc-coverage-missing', severity: 'error',
       detail: `surface "${surface}" has bare N/A without reason` };
-    const validReasons = loadNaReasons();
-    if (validReasons) {
-      const reason = raw.split(/[\s:#]/)[0];
-      if (!validReasons.includes(reason)) return { rule: 'doc-coverage-invalid-na', severity: 'error',
-        detail: `surface "${surface}" N/A reason "${reason}" not in enum (${validReasons.join(', ')})` };
-    }
+    let validReasons;
+    try { validReasons = loadNaReasons(); }
+    catch (e) { return { rule: 'doc-coverage-config-error', severity: 'error', detail: `na-reasons config unavailable: ${e.message}` }; }
+    const reason = raw.split(/[\s:#]/)[0];
+    if (!validReasons.includes(reason)) return { rule: 'doc-coverage-invalid-na', severity: 'error',
+      detail: `surface "${surface}" N/A reason "${reason}" not in enum (${validReasons.join(', ')})` };
+    if (reason === 'covered-by-sibling-pr' && !/covered-by-sibling-pr\s*[:#]\s*#?\d+/i.test(raw))
+      return { rule: 'doc-coverage-invalid-na', severity: 'error', detail: `${surface}: covered-by-sibling-pr requires PR number, e.g. covered-by-sibling-pr:#123` };
     return null;
   }
   return { rule: 'doc-coverage-missing', severity: 'error',
