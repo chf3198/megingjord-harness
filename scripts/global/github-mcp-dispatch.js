@@ -5,6 +5,8 @@
 const https = require('node:https');
 const { execSync } = require('node:child_process');
 
+const HTTP_ERROR_MIN = 400;
+
 function getToken() {
   if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
   return execSync('gh auth token', { encoding: 'utf8' }).trim();
@@ -35,7 +37,7 @@ async function dispatch(owner, repo, eventType, payload = {}) {
       accept: 'application/vnd.github.v3+json',
     },
   }, data);
-  if (res.status >= 400) throw new Error(`dispatch failed: ${res.status} ${res.body}`);
+  if (res.status >= HTTP_ERROR_MIN) throw new Error(`dispatch failed: ${res.status} ${res.body}`);
   return { dispatched: true, event_type: eventType, timestamp: new Date().toISOString() };
 }
 
