@@ -1,0 +1,49 @@
+{
+  "description": "Eval fixtures for research-redteam-loop skill (#2720)",
+  "version": "1.0",
+  "fixtures": [
+    {
+      "id": "fast-accept",
+      "scenario": "Fleet returns score above gate on first iteration",
+      "input": { "gate": 93, "cap": 5 },
+      "fleet_response": { "ok": true, "score": 95, "model": "qwen2.5-coder:7b@100.91.113.16" },
+      "expected_verdict": "ACCEPT",
+      "expected_iterations": 1
+    },
+    {
+      "id": "fleet-failover",
+      "scenario": "Fleet unreachable; free-cloud returns score above gate",
+      "input": { "gate": 93, "cap": 5 },
+      "fleet_response": { "ok": false, "reason": "timeout" },
+      "free_cloud_response": { "ok": true, "score": 94, "model": "gemini-2.5-flash@free" },
+      "expected_verdict": "ACCEPT",
+      "expected_iterations": 1
+    },
+    {
+      "id": "cap-exhaust",
+      "scenario": "All iterations below gate; cap exhausted",
+      "input": { "gate": 93, "cap": 5 },
+      "fleet_responses_repeated": { "ok": true, "score": 80, "model": "qwen2.5-coder:7b@100.91.113.16" },
+      "expected_verdict": "REJECT",
+      "expected_reason": "max_iterations_reached"
+    },
+    {
+      "id": "all-fail",
+      "scenario": "Both fleet and free-cloud fail",
+      "input": { "gate": 93, "cap": 5 },
+      "fleet_response": { "ok": false, "reason": "timeout" },
+      "free_cloud_response": { "ok": false, "reason": "no_key" },
+      "expected_verdict": "REJECT",
+      "expected_reason": "all_reviewers_failed"
+    },
+    {
+      "id": "web-search-fail",
+      "scenario": "Web search throws; loop continues without web context",
+      "input": { "gate": 93, "cap": 5 },
+      "web_search_throws": true,
+      "fleet_response": { "ok": true, "score": 95, "model": "qwen2.5-coder:7b@100.91.113.16" },
+      "expected_verdict": "ACCEPT",
+      "expected_iter_web": false
+    }
+  ]
+}
