@@ -84,6 +84,41 @@ function loadLocalEnvOnce() {
   return loadLocalEnv();
 }
 
-module.exports = { loadLocalEnv, loadLocalEnvOnce, parseEnv, hydrate, DEFAULT_ENV_PATH };
+/**
+ * Typed error for a declared-required credential that is absent after hydration (#2769 AC5).
+ * Carries the absent key names. Its presence signals fail-closed: callers MUST surface the
+ * absence (terminal entry / approved auth) and MUST NOT prompt the client for the raw secret (G1/G4).
+ */
+class CredentialAbsentError extends Error {
+  constructor(absent) {
+    super(`required credential(s) absent after hydration: [${absent.join(',')}] — `
+      + 'resolve via terminal entry or approved auth; never prompt the client (G1/G4)');
+    this.name = 'CredentialAbsentError';
+    this.absent = absent;
+    this.code = 'CREDENTIAL_ABSENT';
+  }
+}
+
+/**
+ * Hydrate (once) then assert that every declared-required key is present — fail-closed (#2769 AC5).
+ * Optional keys are NOT checked here; they degrade silently. Never prompts the client; on a missing
+ * required key it throws CredentialAbsentError (or returns the report when opts.throwOnAbsent===false).
+ * Shares the availability semantics of credential-availability.js#preCredentialPromptCheck without a
+ * circular dependency (this is the lower layer).
+ * @param {string|string[]} requiredKeys @param {{env?:object,throwOnAbsent?:boolean}} opts
+ * @returns {{ok:boolean, absent:string[]}}
+ */
+function requireKeys(requiredKeys, opts = {}) {
+  loadLocalEnvOnce();
+  const env = opts.env || process.env;
+  const names = Array.isArray(requiredKeys) ? requiredKeys : [requiredKeys];
+  const absent = names.filter((name) => env[name] === undefined || env[name] === '');
+  if (absent.length && opts.throwOnAbsent !== false) throw new CredentialAbsentError(absent);
+  return { ok: absent.length === 0, absent };
+}
+
+module.exports = {
+  loadLocalEnv, loadLocalEnvOnce, requireKeys, CredentialAbsentError, parseEnv, hydrate, DEFAULT_ENV_PATH,
+};
 
 if (require.main === module) loadLocalEnv();

@@ -9,7 +9,7 @@
 // Mirrors the substrate-health-push.js producer pattern; graceful no-op (G6)
 // when the fields snapshot or operator key is unavailable.
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
 
 const GH_API_VERSION = '2022-11-28';
 

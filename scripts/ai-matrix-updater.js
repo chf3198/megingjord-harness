@@ -4,7 +4,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
+require('./global/load-local-env').loadLocalEnvOnce();
 const fetch = require('node-fetch');
 const { scoreResponse } = require('./ai-matrix-scorer');
 const { providers } = require('./ai-matrix-providers');

@@ -4,7 +4,7 @@
 // Routes non-time-critical work (research, wiki anneal) to Anthropic Batch API
 // (50% off + bypasses online quotas) per v3.2 §R5 + v3.2.1.
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 
 const ANTHROPIC_BATCH_URL = 'https://api.anthropic.com/v1/messages/batches';
 const ANTHROPIC_VERSION = '2023-06-01';

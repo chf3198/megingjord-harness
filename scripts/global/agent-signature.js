@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
 const fs = require('fs');
 const path = require('path');
 const sig = require('./governance-artifact-signature');

@@ -3,7 +3,7 @@
 // substrate-health-push.js — HAMR Wave 6 child 3 (#943).
 // Runs substrate-health.js (#911) locally; signs canonical JSON; POSTs to HAMR /substrate-health.
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');

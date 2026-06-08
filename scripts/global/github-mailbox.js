@@ -1,5 +1,6 @@
 // tier: 2
 // github-mailbox.js — GitHub-native append-log mailbox replacing HAMR /mailbox. Refs #2750.
+require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
 'use strict';
 const https = require('node:https');
 const fs = require('node:fs');

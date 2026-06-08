@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // tier: 3
 // Dashboard API handler — resolves all paths from COPILOT_HOME
+require('./load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

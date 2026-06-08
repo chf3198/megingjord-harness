@@ -13,7 +13,7 @@ async function viaHamr(p, fn) {
   if (!HAMR?.wrapProviderCall || process.env.MEGINGJORD_HAMR_DISABLED === '1') return fn();
   const r = await HAMR.wrapProviderCall(p, fn, { tier: 'observability' }); return r.value ?? r; // #1160 canonical (alias: r.response)
 }
-function loadEnv() { try { require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') }); } catch {} }
+function loadEnv() { try { require('./load-local-env').loadLocalEnvOnce(); } catch {} }
 const EXACT = new Set(['exact_request', 'exact_aggregate']);
 function providerMeta(days) {
   const map = {};

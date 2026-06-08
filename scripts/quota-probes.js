@@ -1,5 +1,6 @@
 // Quota Probes — live API checks for Groq, Google AI Studio
 // Returns normalized quota data for dashboard consumption
+require('./global/load-local-env').loadLocalEnvOnce(); // #2769 hydrate .env before any credential read
 
 const https = require('https');
 

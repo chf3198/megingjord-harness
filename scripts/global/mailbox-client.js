@@ -3,7 +3,7 @@
 // mailbox-client.js — operator-side R2 mailbox client (#918).
 // Per HAMR v3.2 §R2: signed Google A2A envelopes; reuses baton-signing.js (#894).
 'use strict';
-require('dotenv').config({ quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 const crypto = require('node:crypto');
 const baton = require('./baton-signing');
 

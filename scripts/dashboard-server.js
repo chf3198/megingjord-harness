@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-require('dotenv').config(); const http = require('http'); const fs = require('fs'); const path = require('path');
+require('./global/load-local-env').loadLocalEnvOnce(); const http = require('http'); const fs = require('fs'); const path = require('path');
 const PORT = process.env.DASH_PORT || 8090; const ROOT = path.resolve(__dirname, '..');
 const MIME = {'.html':'text/html','.css':'text/css','.js':'text/javascript','.json':'application/json'};
 const { resolveFleet, getDeviceURL, getOpenClawURL } = require('./global/fleet-config');

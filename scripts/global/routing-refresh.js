@@ -7,7 +7,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env'), quiet: true });
+require('./load-local-env').loadLocalEnvOnce();
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SNAP = path.join(ROOT, '.dashboard', 'routing-snapshot.json');

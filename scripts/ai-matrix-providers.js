@@ -1,6 +1,6 @@
 // ai-matrix-providers.js — cloud providers; fleet providers: ai-matrix-providers-fleet.js
 'use strict';
-require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
+require('./global/load-local-env').loadLocalEnvOnce();
 
 const chat = (url, apiKey, model) => ({
   url,

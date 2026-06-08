@@ -66,7 +66,7 @@ function probeTailscale() {
 }
 
 async function probe() {
-  require('dotenv').config({ quiet: true });
+  require('./load-local-env').loadLocalEnvOnce();
   const env = process.env;
   const inv = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'inventory', 'devices.json'), 'utf8'));
   const providerResults = await Promise.all(PROVIDER_PROBES.map(async p => [p.id, await probeProvider(p, env)]));
