@@ -2,23 +2,33 @@
 
 > The LLM reads this file to understand how the wiki works.
 > Co-evolved by human and LLM as conventions mature.
+> Operations detail: [`wiki/WIKI-operations.md`](WIKI-operations.md)
+> Typology and fleet routing: [`wiki/WIKI-typology.md`](WIKI-typology.md)
 
-## Architecture (3 layers)
+## Three-wiki typology
+
+| Sub-wiki | Path | Purpose |
+|---|---|---|
+| **Code wiki** | `wiki/code/` | Annotated code understanding |
+| **Work-log wiki** | `wiki/work-log/` | Session and ticket audit trail (append-only) |
+| **Wisdom wiki** | `wiki/wisdom/` | Distilled knowledge, research, and fleet entity pages |
+
+## Three-layer architecture
 
 | Layer | Path | Owner | Mutability |
 |---|---|---|---|
 | Raw sources | `raw/` | Human curates | Immutable after placement |
-| Wiki | `wiki/` | LLM writes | LLM updates freely |
+| Wiki pages | `wiki/` | LLM writes | LLM updates freely |
 | Schema | `WIKI.md` | Co-owned | Changed by agreement |
 
-## Page Types
+## Page types
 
 | Type | Directory | Purpose |
 |---|---|---|
-| Entity | `wiki/entities/` | Person, device, service, tool |
-| Concept | `wiki/concepts/` | Idea, pattern, technique, decision |
-| Source summary | `wiki/sources/` | Digest of one raw source |
-| Synthesis | `wiki/syntheses/` | Cross-cutting analysis, comparisons |
+| Entity | `wiki/*/entities/` | Person, device, service, tool |
+| Concept | `wiki/*/concepts/` | Idea, pattern, technique, decision |
+| Source summary | `wiki/*/sources/` | Digest of one raw source |
+| Synthesis | `wiki/*/syntheses/` | Cross-cutting analysis, comparisons |
 
 ## Frontmatter (required on every wiki page)
 
@@ -35,66 +45,22 @@ status: stub | draft | active | deprecated
 confidence: high | medium | low
 last_verified: 2026-04-30
 sources_count: N
-superseded_by: "[[newer-page]]"   # optional — when content is replaced
+superseded_by: "[[newer-page]]"   # optional
 ---
 ```
 
-**Lint**: `last_verified` >90d → stale. **Confidence**: `high`=3+ sources; `medium`=1-2; `low`=1 or inferred.
+**Confidence**: `high` = 3+ sources; `medium` = 1–2; `low` = 1 or inferred.
+**Staleness**: `last_verified` >90 days → stale warning during lint.
 
-## Naming Conventions
+## Naming conventions
 
-- Filenames: `kebab-case.md` (e.g., `penguin-1.md`, `llm-wiki-pattern.md`)
+- Filenames: `kebab-case.md` (e.g. `penguin-1.md`, `llm-wiki-pattern.md`)
 - Wikilinks: `[[page-name]]` — no path prefix, no extension
-- One concept per page — split if a page exceeds 80 lines of content
+- One concept per page — if content exceeds 80 lines, split into linked pages
 
-## Special Files
+## Special files
 
-- `wiki/index.md` — catalog of every page, grouped by type. Updated on
-  every ingest. LLM reads this first when answering queries.
-- `wiki/log.md` — append-only chronological record of operations.
-  Format: `## [YYYY-MM-DD] operation | Subject`
-
-## Operations
-
-### Ingest
-1. Human places source in `raw/` with frontmatter
-2. LLM reads source, discusses key takeaways
-3. LLM writes `wiki/sources/<slug>.md` summary
-4. LLM updates entity/concept pages (create or revise)
-5. LLM updates `wiki/index.md` with new/changed pages
-6. LLM appends entry to `wiki/log.md`
-7. Mark raw source frontmatter `status: ingested`
-
-### Query
-1. LLM reads `wiki/index.md` to find relevant pages
-2. LLM reads those pages, synthesizes answer with `[[citations]]`
-3. Valuable answers get filed as `wiki/syntheses/<slug>.md`
-
-### Lint
-1. Check for broken `[[wikilinks]]` (target page must exist)
-2. Check for orphan pages (no inbound links)
-3. Check frontmatter completeness (all required fields present)
-4. Check `wiki/index.md` is in sync with actual wiki/ contents
-5. Flag contradictions between pages
-6. Flag stale claims superseded by newer sources
-7. Output: health report with actionable items
-
-## Cross-Reference Rules
-
-- Every entity/concept page must link to ≥1 related page
-- Source summaries must link to entities/concepts they mention
-- Syntheses must cite ≥2 source/concept pages
-- Bidirectional: if A links to B, B should link back to A
-
-## Fleet Routing (for inference operations)
-
-| Operation | Primary | Failover |
-|---|---|---|
-| Ingest (summarize + cross-ref) | OpenClaw (7B) | Groq, Cerebras |
-| Query (synthesis) | OpenClaw (7B) | Copilot Pro |
-| Lint (structural checks) | Local scripts | Groq (fast) |
-
-## Constraints
-
-- Wiki files ≤100 lines (split if needed); Markdown only; no binary files
-- Git tracks wiki/; raw sources are the source of truth; wiki is derived
+- `wiki/index.md` — catalog of every page, grouped by type; updated on ingest
+- `wiki/log.md` — append-only chronological ops record
+- `wiki/WIKI-operations.md` — ingest, query, lint, and anneal procedures
+- `wiki/WIKI-typology.md` — three-wiki typology, fleet routing, namespace rules

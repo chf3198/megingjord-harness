@@ -1,98 +1,63 @@
 # Megingjord Harness Architecture
 
-Megingjord is a governance-first AI agent harness designed to provide robust, cross-runtime compliance, skills propagation, and local operational safety. This document details the core architectural layers, deployment topology, and governance flow.
+Megingjord is a **governance-first AI agent harness** providing cross-runtime
+compliance, skills propagation, and local operational safety for developer AI
+workflows across GitHub Copilot, Claude Code, and Codex.
 
----
+## Document map
 
-## 1. Multi-Layer Deployment Model (Two-Tier)
+| Topic | Detail |
+|---|---|
+| Two-tier layer model (global / workspace) | [`docs/architecture-layer-model.md`](docs/architecture-layer-model.md) |
+| Baton governance (Manager→Collaborator→Admin→Consultant) | [`docs/architecture-baton-model.md`](docs/architecture-baton-model.md) |
+| Multi-runtime parity (Copilot / Claude Code / Codex) | [`docs/architecture-runtime-parity.md`](docs/architecture-runtime-parity.md) |
+| Routing, fleet, cascade dispatch | [`docs/architecture-routing.md`](docs/architecture-routing.md) |
+| Deployment, Layer-2 coordination, sync commands | [`docs/architecture-deployment.md`](docs/architecture-deployment.md) |
+| Governance CI, wiki system, dashboard | [`docs/architecture-governance.md`](docs/architecture-governance.md) |
+| Contributor-facing subsystem index | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
 
-Megingjord operates on a strict **two-tier architecture**: a machine-level **Global Layer** and a repo-level **Workspace Layer**. This separation ensures that all projects share a common compliance baseline while retaining the flexibility to specify project-specific overrides.
+## Core architectural principles
+
+1. **Governance over convenience** — CI gates enforce baton order, signing, and
+   ticket-first workflow for every change; violations block merge
+2. **Source-of-truth discipline** — never edit deployed runtimes directly;
+   all changes flow from this repo outward via deploy commands
+3. **Runtime parity** — Copilot, Claude Code, and Codex are equal first-class
+   citizens; no runtime gets preferential treatment
+4. **Zero-cost default** — free-cloud (Gemini) and fleet (Ollama/Tailscale)
+   before any paid provider; override only when justified
+5. **No external infra required** — GitHub-native Layer-2 coordination works
+   without Cloudflare when `MEGINGJORD_HAMR_ENABLED` is unset
+
+## Two-tier model (overview)
 
 ```mermaid
 graph TD
-    subgraph Global ["Global Machine Layer (Home Directory (~/))"]
-        G_Copilot["~/.copilot/<br>(Global skills, instructions, hooks, scripts, wiki)"]
-        G_Claude["~/.claude/<br>(Global agents, hooks, settings)"]
-        G_Codex["~/.codex/<br>(Global AGENTS.md, config, hooks, rules)"]
-    end
-
-    subgraph Local ["Workspace Layer (Project Repository Root (./))"]
-        W_Copilot[".github/copilot-instructions.md<br>(Workspace overrides & adapters)"]
-        W_Claude["CLAUDE.md + .claude/settings.json<br>(Workspace overrides & adapters)"]
-        W_Codex["AGENTS.md + .codex/<br>(Workspace overrides & adapters)"]
-    end
-
-    %% Deployment flow
-    Deploy["Harness Repo Source<br>(skills/ instructions/ hooks/ scripts/)"] -->|npm run deploy:apply| G_Copilot
-    Deploy -->|npm run deploy:apply| G_Claude
-    Deploy -->|npm run deploy:apply| G_Codex
-
-    %% Override flow
-    W_Copilot -->|Local Context & Overrides| G_Copilot
-    W_Claude -->|Local Context & Overrides| G_Claude
-    W_Codex -->|Local Context & Overrides| G_Codex
+  subgraph Repo ["Source of Truth (this repo)"]
+    skills["skills/"] --- instr["instructions/"] --- hooks["hooks/"]
+  end
+  subgraph Global ["Global Layer (~/)"]
+    cop["~/.copilot/"] --- claude["~/.claude/"] --- codex["~/.codex/"]
+  end
+  subgraph Workspace ["Workspace Layer (each project repo)"]
+    w_cop[".github/copilot-instructions.md"]
+    w_claude["CLAUDE.md"]
+    w_codex["AGENTS.md"]
+  end
+  Repo -->|npm run deploy:apply| Global
+  Workspace -->|extends / overrides| Global
 ```
 
-### The Global Layer
-The Global Layer is installed once per machine (using `npm run deploy:apply`) and is shared across all local developer repositories.
-* **GitHub Copilot Chat (`~/.copilot/`)**: Houses core skills, global instructions, hook scripts, and compiled wiki databases.
-* **Claude Code (`~/.claude/`)**: Standardizes custom agents, global hooks, and command settings.
-* **Codex (`~/.codex/`)**: Centralizes the `AGENTS.md` and default rule schemas.
+## Harness Goal Constitution
 
-### The Workspace Layer
-The Workspace Layer resides inside the individual target project's repository. These files are checked into Git, establishing a transparent history of project-level context.
-* Local files extend or override global rules (e.g. project name, tech stack, workspace-specific commands).
-* On conflicts, global security and compliance rules take precedence unless explicitly delegated by a registered governance baton.
+**G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy > G5 Portability >
+G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability**
 
----
+Record rationale in ticket/PR evidence whenever a lower-priority goal wins.
 
-## 1b. Layer-2 Coordination (HAMR vs GitHub-Native)
+## Scope and constraints
 
-Cross-agent coordination routes through one of two Layer-2 backends, selected
-by environment variable:
-
-| `MEGINGJORD_HAMR_ENABLED` | Backend | Requires |
-|---|---|---|
-| unset / `0` (**default**) | GitHub-native (`github-native-client.js`) | GitHub repo only |
-| `1` | HAMR Cloudflare Worker | Cloudflare account |
-
-GitHub-native routes (default): `github-mailbox.js` (Issues), `github-bundle-client.js`
-(Releases), `github-mcp-dispatch.js` (repository_dispatch), telemetry/health via
-scheduled Actions artifacts. The unified client auto-selects based on the env var.
-
-See `docs/howto/github-native-layer2.md` and [[github-native-layer2]] wiki page.
-
----
-
-## 2. Multi-Runtime Parity
-
-A core architectural goal of Megingjord is **runtime parity**. Standardizing developer-agent behavior across multiple execution environments prevents configuration drift and cognitive overhead.
-
-```
-                  ┌─────────────────────────────────────┐
-                  │      Unified Harness Manifest       │
-                  │ (inventory/governance-manifest.json) │
-                  └──────────────────┬──────────────────┘
-                                     │
-                 ┌───────────────────┼───────────────────┐
-                 ▼                   ▼                   ▼
-        ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-        │  GitHub Copilot │ │   Claude Code   │ │      Codex      │
-        │   Instructions  │ │    CLAUDE.md    │ │    AGENTS.md    │
-        └─────────────────┘ └─────────────────┘ └─────────────────┘
-```
-
-The harness compiler (`npm run governance:adapters:emit`) ingests a single central manifest and automatically generates target-specific shims for every supported engine. Copilot, Claude Code, and Codex are supported as equal first-class citizens, sharing a unified compliance footprint.
-
----
-
-## 3. Governance Baton Model
-
-Megingjord enforces a strict Agile-linked role validation cycle, coordinating operations through four distinct batons:
-
-1. **Manager (Role: Manager)**: Conducts initial research, defines goals, captures tickets (Epic, story, task), and determines architectural scope.
-2. **Collaborator (Role: Collaborator)**: Executes the development work, modifies files in isolated sandboxes, and implements the required acceptance criteria.
-3. **Admin (Role: Admin)**: Automates quality verification, runs test suites, manages credentials securely, and handles PR staging.
-4. **Consultant (Role: Consultant)**: Conducts adversarial red-team analyses, identifies operational risks, and finalizes post-mortem evaluations.
-
-This ensures comprehensive operational governance and end-to-end traceability across every phase of the development lifecycle.
+- ≤100 lines per file (lint-enforced for checked paths); split into linked files for more
+- No build step; all JS uses CommonJS modules loaded at runtime
+- JSON for structured data; Markdown for prose
+- One live worktree per agent session (concurrent session safety)
