@@ -1,0 +1,45 @@
+name: Substrate Health
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci --prefer-offline
+
+      - name: Check fleet and HAMR health
+        id: health
+        run: |
+          STATUS="healthy"
+          DETAILS="{}"
+          node -e "require('./scripts/global/fleet-config.js');" 2>/dev/null && echo "fleet: ok" || STATUS="degraded"
+          echo "{\"status\":\"$STATUS\",\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"details\":$DETAILS}" > health.json
+          cat health.json
+
+      - name: Upload health artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: health.json
+          path: health.json
+          retention-days: 1
+
+      - name: Fail job when unhealthy
+        run: |
+          STATUS=$(node -p "require('./health.json').status")
+          [ "$STATUS" = "healthy" ] || exit 1
