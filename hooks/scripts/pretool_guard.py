@@ -101,12 +101,45 @@ def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
     except Exception:
         return True
 
+# Bounded {0,512} quantifier caps the backtracking window (#2739 cross-family review
+# hardening): a curl command line longer than this never legitimately targets a fleet host.
+RE_FLEET_CURL = re.compile(r"curl\b[^\n|]{0,512}(?::11434\b|/api/(?:generate|tags|chat)\b)")
+
+def is_raw_fleet_curl(joined: str) -> bool:
+    """True when a raw curl targets a fleet/ollama endpoint outside the dispatch
+    wrappers without the documented carve-out (#2192 vector #2 - raw curl bypasses
+    HAMR cost+observability). Fail-open: any error returns False (never brick)."""
+    try:
+        if "hamr-bypass-ok" in joined:
+            return False
+        return bool(RE_FLEET_CURL.search(joined))
+    except Exception:
+        return False
+
+def _emit_fleet_bypass_incident(cwd: str) -> None:
+    """Append a Tier-1 incident for a raw-fleet-curl bypass (#2192 AC1). Never raises."""
+    try:
+        path = os.path.join(os.path.expanduser("~"), ".megingjord", "incidents.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        event = {"version": 3, "service": "pretool-guard-fleet-bypass",
+                 "env": "local", "event": "governance.raw-fleet-curl-bypass",
+                 "pattern_id": "raw-fleet-curl-bypasses-hamr", "severity": "low", "cwd": cwd}
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+    except Exception:
+        pass  # telemetry failure must not affect the hook decision
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     no_code_lane = active_ticket_is_no_code_lane(state, cwd)
     if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
+    if is_raw_fleet_curl(joined):
+        _emit_fleet_bypass_incident(cwd)
+        return emit("ask", "Raw fleet/ollama curl detected (#2192 vector 2): prefer dispatchRedTeam / "
+                    "cascade-dispatch so HAMR records cost+observability. Add '# hamr-bypass-ok: <reason>' "
+                    "for an audited diagnostic bypass.", "Bypasses HAMR cost/observability layer.")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     if is_main_checkout(cwd):
         sw = RE_BRANCH_SWITCH.search(joined)
