@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+'use strict';
+// tier: 1
+// chain-integrity (Epic #2709 / #2721): self-enforcing meta-validator for the
+// governance-chain registry. Enforces the invariant "no link may depend on
+// operator discretion" - every link must be enforced or auto-emitted, every
+// enforcement_point must resolve to a real file, a touched governance_surface
+// requires a registry delta, the registry self-protects, and an existing
+// enforcement may not be silently WEAKENED (policy-downgrade / "Signal C").
+// Pure logic (unit-testable); the CI caller supplies changed-files + diff text.
+
+const fs = require('fs');
+const path = require('path');
+
+const LEGAL_GUARANTEES = new Set(['enforced', 'auto-emitted']);
+const REGISTRY_PATH = 'config/governance-chains.yml';
+const WEAKENING_PATTERNS = [
+  { rule: 'failurepolicy-downgrade', regex: /failurePolicy\s*:\s*Ignore/i },
+  { rule: 'blocking-to-advisory-downgrade', regex: /severity\s*:\s*['"]?advisory/i },
+];
+
+function globToRegExp(glob) {
+  const escaped = glob.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  const expanded = escaped.replace(/\*\*/g, ' ').replace(/\*/g, '[^/]*').replace(/ /g, '.*');
+  return new RegExp('^' + expanded + '$');
+}
+
+function checkLinkGuarantees(chains) {
+  const violations = [];
+  for (const [chain, links] of Object.entries(chains || {})) {
+    for (const link of links || []) {
+      if (!LEGAL_GUARANTEES.has(link.guarantee)) {
+        violations.push({ rule: 'discretionary-or-invalid-guarantee',
+          detail: `${chain}.${link.link}: guarantee must be enforced|auto-emitted, got '${link.guarantee}'` });
+      }
+    }
+  }
+  return violations;
+}
+
+function checkEnforcementPoints(chains, repoRoot) {
+  const violations = [];
+  for (const [chain, links] of Object.entries(chains || {})) {
+    for (const link of links || []) {
+      const filePart = String(link.enforcement_point || '').split(':')[0];
+      if (!filePart || !fs.existsSync(path.join(repoRoot, filePart))) {
+        violations.push({ rule: 'phantom-enforcement-point',
+          detail: `${chain}.${link.link}: enforcement_point '${link.enforcement_point}' does not resolve` });
+      }
+    }
+  }
+  return violations;
+}
+
+function checkSurfaceDelta(changedFiles, surfaceGlobs, registryChanged) {
+  const matchers = (surfaceGlobs || []).map(globToRegExp);
+  const touched = (changedFiles || []).filter((file) => matchers.some((rx) => rx.test(file)));
+  const onlyRegistry = touched.every((file) => file === REGISTRY_PATH);
+  if (touched.length && !registryChanged && !onlyRegistry) {
+    return [{ rule: 'surface-touched-without-registry-delta',
+      detail: `governed surface changed (${touched.join(', ')}) but the chain registry was not updated` }];
+  }
+  return [];
+}
+
+function checkSelfProtection(surfaceGlobs) {
+  if (!(surfaceGlobs || []).includes(REGISTRY_PATH)) {
+    return [{ rule: 'registry-not-self-protected',
+      detail: `the registry must list '${REGISTRY_PATH}' in governance_surface` }];
+  }
+  return [];
+}
+
+function scanWeakening(diffText) {
+  const added = String(diffText || '').split('\n').filter((line) => line.startsWith('+'));
+  const violations = [];
+  for (const pattern of WEAKENING_PATTERNS) {
+    if (added.some((line) => pattern.regex.test(line))) {
+      violations.push({ rule: pattern.rule, detail: `enforcement weakened: matched ${pattern.regex}` });
+    }
+  }
+  return violations;
+}
+
+function validate(registry = {}, opts = {}) {
+  const repoRoot = opts.repoRoot || process.cwd();
+  const violations = [
+    ...checkLinkGuarantees(registry.chains),
+    ...checkEnforcementPoints(registry.chains, repoRoot),
+    ...checkSurfaceDelta(opts.changedFiles, registry.governance_surface, opts.registryChanged),
+    ...checkSelfProtection(registry.governance_surface),
+    ...scanWeakening(opts.diffText),
+  ];
+  return { ok: violations.length === 0, violations };
+}
+
+module.exports = { validate, checkLinkGuarantees, checkEnforcementPoints,
+  checkSurfaceDelta, checkSelfProtection, scanWeakening, globToRegExp };
+
+if (require.main === module) {
+  const yaml = require('js-yaml');
+  const root = process.cwd();
+  const registry = yaml.load(fs.readFileSync(path.join(root, REGISTRY_PATH), 'utf8'));
+  const result = validate(registry, { repoRoot: root });
+  if (!result.ok) {
+    result.violations.forEach((violation) => console.error(`chain-integrity: ${violation.rule} - ${violation.detail}`));
+    process.exit(1);
+  }
+  console.log('chain-integrity: OK - no discretionary links, all enforcement points resolve');
+}
