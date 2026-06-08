@@ -1,0 +1,57 @@
+# Refs #2713 — doc-coverage matrix core (split from doc-coverage-matrix.yml)
+# Consumed by scripts/global/megalint/doc-coverage.js
+# See doc-coverage-matrix-extended.yml for agents/skills/infra/knowledge/tests/config/ci/research
+
+version: 1
+surfaces:
+  area:hooks:
+    required:
+      - docs/howto/hooks.md
+      - docs/howto/pre-push-gates.md
+      - .changes/unreleased/
+    suggested:
+      - docs/howto/hook-parity-check.md
+      - docs/howto/hook-timeout-configuration.md
+      - wiki/code/hooks.md
+      - README.md
+
+  area:scripts:
+    required:
+      - README.md
+      - .changes/unreleased/
+      - docs/howto/
+    suggested:
+      - wiki/code/scripts.md
+
+  area:instructions:
+    required:
+      - docs/workflow/learnings.md
+      - CLAUDE.md
+      - AGENTS.md
+      - .github/copilot-instructions.md
+      - .codex/AGENTS.md
+      - wiki/wisdom/project/
+    suggested:
+      - instructions/
+
+  area:governance:
+    required:
+      - .changes/unreleased/
+      - docs/workflow/learnings.md
+      - governance/README.md
+      - docs/howto/baton-workflow.md
+      - wiki/wisdom/global/concepts/
+    suggested:
+      - CONTRIBUTING.md
+      - .github/CONTRIBUTING.md
+      - governance-carve-outs/index.md
+      - docs/decisions.md
+      - .github/SECURITY.md
+
+  area:dashboard:
+    required:
+      - dashboard/README.md
+      - .changes/unreleased/
+    suggested:
+      - README.md
+      - wiki/code/dashboard.md

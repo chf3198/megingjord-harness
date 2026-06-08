@@ -1,0 +1,58 @@
+# Refs #2715 — change_type dimension for doc-coverage matrix
+# Maps MANAGER_HANDOFF change_type: field to surface requirement overrides.
+# If change_type is set, these overrides ADD TO or REMOVE FROM the matrix defaults.
+# Consumed by scripts/global/megalint/doc-coverage.js
+
+version: 1
+change_types:
+  feature-add:
+    description: New user-facing feature or capability
+    require_additional:
+      - README.md
+      - .changes/unreleased/
+      - docs/howto/
+    demote_to_suggested: []
+
+  bug-fix:
+    description: Defect repair with no new user-facing behavior
+    require_additional:
+      - .changes/unreleased/
+    demote_to_suggested:
+      - docs/howto/
+
+  refactor:
+    description: Internal code restructuring with no behavior change
+    require_additional: []
+    demote_to_suggested:
+      - docs/howto/
+      - README.md
+
+  config-change:
+    description: Configuration value or schema change
+    require_additional:
+      - .changes/unreleased/
+    demote_to_suggested:
+      - docs/howto/
+
+  infra-change:
+    description: CI, deployment, or infrastructure change
+    require_additional:
+      - .changes/unreleased/
+    demote_to_suggested:
+      - README.md
+
+  docs-only:
+    description: Documentation change only; no code or config change
+    require_additional: []
+    demote_to_suggested:
+      - .changes/unreleased/
+      - docs/howto/
+      - README.md
+
+  test-only:
+    description: Test addition or modification only
+    require_additional: []
+    demote_to_suggested:
+      - .changes/unreleased/
+      - docs/howto/
+      - README.md
