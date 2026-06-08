@@ -54,3 +54,20 @@ The lint workflow calls the same command:
 - `npm run hooks:pre-push`
 
 This keeps local and CI execution paths aligned.
+
+## Pre-flight admin-override bypass guard (#2706, Epic #2709)
+
+Beyond pre-push, `hooks/scripts/pretool_guard.py` enforces at tool-call time: an
+admin-override merge (a PR landed with the `--admin` branch-protection bypass) is
+**denied** unless the Epic #2517 exception is already recorded on the active ticket —
+the `merge-bypass:admin-exception` label, or a `BLOCKER_NOTE` with `bypass_reason:` +
+`approver:` in the PR body. Record the exception **before** the override.
+
+The guard is **fail-closed** (an unverifiable exception denies, never silently allows)
+and crash-safe (wrapped in `try/except`, so a guard bug yields a recoverable deny, not
+a session brick). This converts the bypass-exception link from a post-merge-only CI
+backstop to a pre-flight control — the "prevention over reaction" mandate.
+
+Companion: `scripts/global/gate-failure-tier1.js` auto-emits the Tier-1 incident on an
+operator-caused gate failure, so self-anneal escalation no longer depends on the
+operator remembering to log it (the gap behind #2703).
