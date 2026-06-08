@@ -85,15 +85,21 @@ def _active_ticket_labels(state: dict, cwd: str) -> set[str]:
 def active_ticket_is_no_code_lane(state: dict, cwd: str) -> bool:
     return "lane:no-code-remediation" in _active_ticket_labels(state, cwd)
 
+RE_ADMIN_OVERRIDE = re.compile(r"(?:^|\s)--admin(?:[=\s]|$)")
+
 def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
     """True when this is an admin-OVERRIDE merge lacking the Epic #2517 exception (#2706).
-    Fail-open: any internal error returns False (never brick a session on a guard bug)."""
+    Fail-CLOSED: once the command is a confirmed override, if the exception cannot be
+    verified (label backend error) require it (return True) rather than silently bypass -
+    consistent with the unbreakable-chain invariant. The except never re-raises, so a guard
+    bug yields a recoverable deny, not a crash/brick. Non-override commands short-circuit
+    to False before any throwable call."""
+    if not RE_ADMIN_OVERRIDE.search(joined):
+        return False
     try:
-        if not (" --admin" in joined or joined.rstrip().endswith("--admin")):
-            return False
         return "merge-bypass:admin-exception" not in _active_ticket_labels(state, cwd)
     except Exception:
-        return False
+        return True
 
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})

@@ -38,12 +38,20 @@ class BypassExceptionGuard(unittest.TestCase):
         self._labels(set())
         self.assertFalse(pretool_guard.require_bypass_exception("gh pr merge 5 --squash", {}, "."))
 
-    def test_fail_open_on_internal_error(self):
+    def test_override_detection_resists_flag_spacing_evasion(self):
+        # the brittle substring check missed these; the regex catches them
+        self._labels({"type:task"})
+        for cmd in ("gh pr merge 5 --admin --delete-branch", "gh pr merge 5 --admin=true",
+                    "gh pr merge 5 --admin\n"):
+            self.assertTrue(pretool_guard.require_bypass_exception(cmd, {}, "."), cmd)
+
+    def test_fail_closed_on_internal_error(self):
         def boom(state, cwd):
             raise RuntimeError("label backend down")
         pretool_guard._active_ticket_labels = boom
-        # a guard bug must NOT brick the session: returns False (allow), not raise
-        self.assertFalse(pretool_guard.require_bypass_exception("gh pr merge 5 --admin", {}, "."))
+        # an override whose exception cannot be verified must DENY (fail-closed), never
+        # silently bypass; the except prevents a crash so the session is not bricked
+        self.assertTrue(pretool_guard.require_bypass_exception("gh pr merge 5 --admin", {}, "."))
 
 
 if __name__ == "__main__":
