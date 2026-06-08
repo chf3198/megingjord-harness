@@ -60,3 +60,17 @@ function validate(input) {
 
 module.exports = { validate, loadMatrix, parseYamlSurfaces, surfacesForLabels,
   parseDocBlock, checkBlock };
+
+if (require.main === module) {
+  const { readFileSync } = require('fs');
+  const argv = process.argv.slice(2);
+  const bi = argv.indexOf('--body');
+  if (bi === -1 || !argv[bi + 1]) { process.stderr.write('Usage: doc-coverage.js --body <file> [--labels <json>] [--lane <lane>]\n'); process.exit(2); }
+  const body = readFileSync(argv[bi + 1], 'utf8');
+  const li = argv.indexOf('--labels'); const lni = argv.indexOf('--lane');
+  const labels = li !== -1 ? JSON.parse(argv[li + 1]) : [];
+  const lane = lni !== -1 ? argv[lni + 1] : 'lane:code-change';
+  const result = validate({ body, labels, lane, comments: [] });
+  if (!result.ok) { result.violations.forEach(v => process.stderr.write(`[${v.severity}] ${v.rule}: ${v.detail}\n`)); process.exit(1); }
+  process.stdout.write('doc-coverage: OK\n');
+}
