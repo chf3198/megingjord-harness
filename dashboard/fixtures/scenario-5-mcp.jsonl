@@ -1,0 +1,11 @@
+{"type":"system","message":"MCP discovery started","detail":"scanning configured MCP server endpoints","ts":0}
+{"type":"system","message":"filesystem online","detail":"12 tools: read_file · write_file · list_dir · create_file · …","ts":1200}
+{"type":"system","message":"github online","detail":"8 tools: create_issue · list_prs · merge_pull_request · …","ts":2000}
+{"type":"system","message":"search online","detail":"3 tools: grep_search · semantic_search · file_search","ts":2600}
+{"type":"agent","message":"Agent registered MCP","detail":"copilot connected 3 servers · 23 tools available","ts":3200}
+{"type":"tool","message":"MCP: read_file","detail":"dashboard/js/app.js · 100 lines · 2.1ms","ts":4800}
+{"type":"tool","message":"MCP: grep_search","detail":"query: IS_DEMO · 4 matches · 3 files · 0.3ms","ts":6100}
+{"type":"tool","message":"MCP: create_issue","detail":"#2814 created · 'feat: add coverage test' · via GitHub MCP","ts":7800}
+{"type":"tool","message":"MCP: list_dir","detail":"dashboard/ · 4 entries · 0.1ms","ts":9000}
+{"type":"system","message":"Tool call audit","detail":"8 MCP calls · 0 errors · avg latency 3.2ms","ts":10500}
+{"type":"system","message":"MCP health","detail":"filesystem: healthy · github: healthy · search: healthy","ts":11800}

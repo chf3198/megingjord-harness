@@ -1,0 +1,13 @@
+{"type":"system","message":"Fleet online","detail":"2 nodes available: 36gbwinresource · openclaw","ts":0}
+{"type":"agent","message":"Session started","detail":"codex · gpt-5.4 · no ticket linked","ts":1000}
+{"type":"warn","message":"Governance alert","detail":"G1 ticket-first-gate FAIL — no open issue for branch feat/unlabeled","ts":1800}
+{"type":"warn","message":"Baton blocked","detail":"codex cannot push without a linked GitHub issue","ts":1900}
+{"type":"system","message":"Operator action","detail":"filing issue to satisfy ticket-first gate","ts":3600}
+{"type":"system","message":"Issue created","detail":"#2811 filed · ticket-first gate now satisfied","ts":4200}
+{"type":"agent","message":"Session resumed","detail":"codex · gpt-5.4 · ticket #2811","ts":5000}
+{"type":"baton","role":"manager","issue":2811,"message":"Manager scoping","detail":"scope + AC + gates defined","ts":5800}
+{"type":"baton","role":"collaborator","issue":2811,"message":"Collaborator active","detail":"implementation","ts":7200}
+{"type":"llm","message":"Fleet LLM call","detail":"deepseek-coder-v2:lite · 940 tok · $0.00 (fleet)","ts":8900}
+{"type":"system","message":"Governance check","detail":"ticket-first PASS · all gates PASS","ts":10500}
+{"type":"baton","role":"admin","issue":2811,"message":"Admin gate","detail":"merged · CI green","ts":11800}
+{"type":"baton","role":"consultant","issue":2811,"message":"Consultant closeout","detail":"rubric 8/10 · done","ts":13200}

@@ -1,0 +1,12 @@
+{"type":"agent","message":"Copilot session started","detail":"ticket #2809 · claude-sonnet-4.6","ts":0}
+{"type":"agent","message":"Codex session started","detail":"ticket #2810 · gpt-5.4 (adjacent ticket)","ts":800}
+{"type":"system","message":"Conflict gate","detail":"#2809 and #2810: no overlapping file paths · safe to proceed","ts":1500}
+{"type":"baton","role":"collaborator","issue":2809,"message":"Copilot: collaborator","detail":"transport.js · fixture-runner.js","ts":2000}
+{"type":"baton","role":"collaborator","issue":2810,"message":"Codex: collaborator","detail":"scenario JSONLs · meta.json","ts":2200}
+{"type":"tool","message":"Copilot: create_file","detail":"dashboard/js/transport.js · 58 lines","ts":3800}
+{"type":"tool","message":"Codex: create_file","detail":"dashboard/fixtures/meta.json · 28 lines","ts":4100}
+{"type":"llm","message":"Copilot: fleet call","detail":"starcoder2:3b · 1,200 tok · $0.00 (fleet)","ts":5500}
+{"type":"llm","message":"Codex: fleet call","detail":"qwen2.5-coder:7b · 890 tok · $0.00 (fleet)","ts":5700}
+{"type":"baton","role":"admin","issue":2809,"message":"Copilot: admin gate","detail":"PR #2812 · CI green · merged","ts":9200}
+{"type":"baton","role":"admin","issue":2810,"message":"Codex: admin gate","detail":"PR #2813 · CI green · merged","ts":9600}
+{"type":"system","message":"Both sessions complete","detail":"total: $0.00 fleet · $0.02 paid · 2 PRs merged","ts":12000}
