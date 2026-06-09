@@ -8,10 +8,18 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Optional
+
+sys.path.insert(0, os.path.dirname(__file__))  # #2770 hydrate .env before any credential read
+try:
+    from load_local_env import load_local_env_once
+    load_local_env_once()
+except Exception:
+    pass  # graceful: hydration must never break the hook (G6)
 
 HAMR_BASE = os.environ.get("HAMR_BASE_URL", "https://hamr.chf3198.workers.dev")
 DEFAULT_TEAM = os.environ.get("HAMR_TEAM", "claude-code")

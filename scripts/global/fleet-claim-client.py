@@ -1,7 +1,14 @@
 """HAMR fleet-claim client (#2525). Tier-1 GitHub-label fallback when HAMR disabled."""
 from __future__ import annotations
-import json, os, subprocess, urllib.error, urllib.request
+import json, os, subprocess, sys, urllib.error, urllib.request
 from typing import Optional
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "hooks", "scripts"))
+try:  # #2770 hydrate .env before any credential read (parity shim lives in hooks/scripts)
+    from load_local_env import load_local_env_once
+    load_local_env_once()
+except Exception:
+    pass  # graceful: hydration must never break the client (G6)
 
 HAMR_BASE = os.environ.get("HAMR_BASE_URL", "https://hamr.chf3198.workers.dev")
 DEFAULT_TEAM = os.environ.get("HAMR_TEAM", "claude-code")
