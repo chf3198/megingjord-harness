@@ -1,0 +1,14 @@
+{"type":"system","message":"Fleet online","detail":"3 nodes: 36gbwinresource · openclaw · penguin-1","ts":0}
+{"type":"system","message":"MCP connected","detail":"filesystem · github · search (3 servers, 23 tools)","ts":800}
+{"type":"agent","message":"Session started","detail":"copilot · claude-sonnet-4.6 · ticket #2809","ts":1500}
+{"type":"baton","role":"manager","issue":2809,"message":"Manager scoping","detail":"AC authoring + gates","ts":2200}
+{"type":"baton","role":"collaborator","issue":2809,"message":"Collaborator picked up","detail":"implementation active","ts":3400}
+{"type":"tool","message":"grep_search","detail":"searching for transport patterns · 0.08s","ts":4100}
+{"type":"tool","message":"read_file","detail":"dashboard/js/app.js · 100 lines · 1.2ms","ts":4800}
+{"type":"llm","message":"Fleet LLM call","detail":"qwen3:32b · 1,820 tok · $0.00 (fleet)","ts":6200}
+{"type":"tool","message":"create_file","detail":"dashboard/js/transport.js · written","ts":8100}
+{"type":"system","message":"Governance check","detail":"ticket-first PASS · signer-fidelity PASS · lint PASS","ts":9000}
+{"type":"baton","role":"admin","issue":2809,"message":"Admin gate","detail":"commit · push · PR #2810 opened","ts":10200}
+{"type":"system","message":"CI green","detail":"lint PASS · test-evidence PASS · admin-gate PASS","ts":12500}
+{"type":"baton","role":"consultant","issue":2809,"message":"Consultant review","detail":"rubric 9/10 · approve_for_merge","ts":14000}
+{"type":"system","message":"Session complete","detail":"cost: $0.00 fleet · $0.04 paid · 74% fleet-routed","ts":15800}

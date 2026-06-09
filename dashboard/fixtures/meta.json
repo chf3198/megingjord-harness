@@ -1,0 +1,35 @@
+{
+  "default": "healthy-session",
+  "scenarios": [
+    {
+      "name": "healthy-session",
+      "label": "Healthy Agent Session",
+      "file": "scenario-1-healthy.jsonl",
+      "description": "Copilot session with fleet routing, MCP tools, and baton flow"
+    },
+    {
+      "name": "governance-alert",
+      "label": "Governance Alert",
+      "file": "scenario-2-governance.jsonl",
+      "description": "A G1 ticket-first violation blocks a session mid-flight"
+    },
+    {
+      "name": "cost-routing",
+      "label": "Cost Routing (G3)",
+      "file": "scenario-3-cost.jsonl",
+      "description": "Fleet routing saves 74% vs. premium providers"
+    },
+    {
+      "name": "multi-agent",
+      "label": "Multi-Agent Coordination",
+      "file": "scenario-4-multiagent.jsonl",
+      "description": "Copilot and Codex working in parallel on adjacent tickets"
+    },
+    {
+      "name": "mcp-discovery",
+      "label": "MCP Server Discovery",
+      "file": "scenario-5-mcp.jsonl",
+      "description": "A new MCP server comes online and registers its tool catalog"
+    }
+  ]
+}

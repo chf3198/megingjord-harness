@@ -8,6 +8,10 @@ const FALLBACK_MS = 5000;
 
 /** Connect SSE and dispatch events into Alpine state */
 function connectSSE(app) {
+  if (window.IS_DEMO) {
+    if (window.fixtureRunner) window.fixtureRunner.start(app, localStorage.getItem('demo-scenario'));
+    return;
+  }
   if (typeof EventSource === 'undefined') return startFallback(app);
   try { _eventSource = new EventSource(SSE_URL); } catch { return startFallback(app); }
 
