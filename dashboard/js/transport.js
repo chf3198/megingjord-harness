@@ -1,12 +1,15 @@
 // transport.js — environment detection
 // Must load BEFORE all other scripts. Sets window.IS_DEMO and window.HOST_ENV.
-// Function overrides (loadDevices, loadServices, etc.) are applied by
-// transport-mocks.js which loads AFTER all other scripts.
+// HOST_ENV: 'demo' (github.io or ?demo=1) | 'vscode' (acquireVsCodeApi present)
+//           | 'local' (default dev server)
+// Function overrides applied by transport-mocks.js (demo) / vscode-transport.js
 
 (function () {
   'use strict';
-  var params = new URLSearchParams(window.location.search);
-  window.IS_DEMO = window.location.hostname.includes('github.io')
+  const params = new URLSearchParams(window.location.search);
+  const isDemo = window.location.hostname.includes('github.io')
     || params.get('demo') === '1';
-  window.HOST_ENV = window.IS_DEMO ? 'demo' : 'local';
+  const isVscode = !isDemo && typeof acquireVsCodeApi !== 'undefined';
+  window.IS_DEMO = isDemo;
+  window.HOST_ENV = isDemo ? 'demo' : isVscode ? 'vscode' : 'local';
 })();
