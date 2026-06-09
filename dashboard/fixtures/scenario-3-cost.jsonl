@@ -1,0 +1,11 @@
+{"type":"system","message":"Routing decision","detail":"task: multi-file refactor → fleet lane selected (G3)","ts":0}
+{"type":"llm","message":"Fleet LLM call #1","detail":"starcoder2:3b · GPU · 1,420 tok · $0.00 (fleet)","ts":1200}
+{"type":"llm","message":"Fleet LLM call #2","detail":"qwen2.5-coder:32b · 2,100 tok · $0.00 (fleet)","ts":3800}
+{"type":"system","message":"Cost checkpoint","detail":"fleet: $0.00 · paid: $0.00 · fleet-share: 100%","ts":5000}
+{"type":"llm","message":"Premium escalation","detail":"ambiguous arch decision → claude-sonnet-4.6 · 1,850 tok · $0.019","ts":7200}
+{"type":"system","message":"Fleet returned","detail":"decision resolved → routed back to qwen3:32b","ts":9000}
+{"type":"llm","message":"Fleet LLM call #3","detail":"qwen3:32b · 3,240 tok · $0.00 (fleet)","ts":10500}
+{"type":"llm","message":"Fleet LLM call #4","detail":"starcoder2:3b · 1,100 tok · $0.00 (fleet)","ts":12000}
+{"type":"system","message":"Session cost summary","detail":"fleet: $0.00 (74%) · paid: $0.019 (26%)","ts":13500}
+{"type":"system","message":"G3 report","detail":"fleet-share: 74% · premium-share: 10% · below 20% governor ✓","ts":14500}
+{"type":"system","message":"Net savings","detail":"~$0.051 saved vs. all-paid routing for this session","ts":15200}
