@@ -75,9 +75,9 @@ function computePrecedence(goals, rubric, thresholdOverride) {
   const weight = (id) => (schemaWeights[id] != null ? schemaWeights[id] : defaultWeight(id));
   let weightedSum = 0, totalWeight = 0;
   for (const [id, goal] of Object.entries(goals)) {
-    const w = weight(id);
-    weightedSum += goal.score * w;
-    totalWeight += w;
+    const goalWeight = weight(id);
+    weightedSum += goal.score * goalWeight;
+    totalWeight += goalWeight;
   }
   const wmp = totalWeight > 0 // guard: empty goals → wmp=0, verdict=fail (intentional)
     ? Number((weightedSum / totalWeight).toFixed(2)) : 0;

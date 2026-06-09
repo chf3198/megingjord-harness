@@ -93,9 +93,9 @@ const checks = [
   [id('rubric', 1), 'rubric', () => {
     if (!issue) return skip(id('rubric', 1), 'rubric', 'missing --issue');
     const body = run(`gh issue view ${issue} --json comments -q '[.comments[].body]|add'`);
-    const m = body.match(/"precedence_verdict"\s*:\s*"([^"]+)"/);
-    if (!m) return ok(id('rubric', 1), 'rubric', true, 'precedence_verdict absent — legacy-unscored', 'rubric-precedence', 'run rubric-score.js v3 to produce precedence_verdict');
-    const verdict = m[1];
+    const match = body.match(/"precedence_verdict"\s*:\s*"([^"]+)"/);
+    if (!match) return ok(id('rubric', 1), 'rubric', true, 'precedence_verdict absent — legacy-unscored', 'rubric-precedence', 'run rubric-score.js v3 to produce precedence_verdict');
+    const verdict = match[1];
     return ok(id('rubric', 1), 'rubric', verdict !== 'fail', `precedence_verdict=${verdict}`, verdict === 'pass' ? 'rubric-precedence-pass' : 'rubric-precedence-fail', 'review goal scores weighted by G1>...>G10 priority');
   }],
 ];
