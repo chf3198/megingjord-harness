@@ -12,6 +12,10 @@ function connectSSE(app) {
     if (window.fixtureRunner) window.fixtureRunner.start(app, localStorage.getItem('demo-scenario'));
     return;
   }
+  if (window.HOST_ENV === 'vscode') {
+    if (typeof window.connectSSEVscode === 'function') window.connectSSEVscode(app);
+    return;
+  }
   if (typeof EventSource === 'undefined') return startFallback(app);
   try { _eventSource = new EventSource(SSE_URL); } catch { return startFallback(app); }
 
