@@ -63,7 +63,7 @@ test('scoreRubric on v2 still works (backward compat)', () => {
     closeout: 'Signed-by: x\nTeam&Model: y\nRole: consultant\nverification-timestamp: now\nprivacy reviewed\nrepo-local relative path\ndegraded fallback compat legacy v1\nboxes_checked\nmean',
   };
   const out = scoreRubric(v2, ctx);
-  expect(out.rubric_version).toBe('g1-g9-v2');
+  expect(out.rubric_version).toBe('g1-g9-v3'); // bumped from v2 in #2136
   expect(Object.keys(out.goals).length).toBe(9);
 });
 
