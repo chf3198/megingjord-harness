@@ -14,6 +14,7 @@
   // Pending request callbacks: requestId → { resolve, reject, timeout }
   const _pending = Object.create(null);
   let _reqId = 0;
+  const DEFAULT_TIMEOUT_MS = 8000;
 
   /**
    * Send a typed request to the extension host and return a Promise for the
@@ -24,7 +25,7 @@
    */
   function sendRequest(type, payload, timeoutMs) {
     const requestId = ++_reqId;
-    const timeout = timeoutMs || 8000;
+    const timeout = timeoutMs || DEFAULT_TIMEOUT_MS;
     return new Promise(function (resolve, reject) {
       const timer = setTimeout(function () {
         delete _pending[requestId];
@@ -60,8 +61,8 @@
       if (msg.type === 'activity' || msg.type === 'event') {
         try {
           const payload = msg.data || msg;
-          const a = eventToActivity(payload); // defined in event-source.js
-          addActivity(app.activityLog, a.type, a.message, a.detail);
+          const activity = eventToActivity(payload); // defined in event-source.js
+          addActivity(app.activityLog, activity.type, activity.message, activity.detail);
           if (payload.role && payload.issue) {
             app.batonState = mergeBatonEvents([payload]);
           }
