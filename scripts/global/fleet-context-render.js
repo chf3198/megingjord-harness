@@ -21,10 +21,13 @@ function renderWiki(wiki) {
 }
 
 const CLIP_MARKER = '\n…[clipped]';
+const SEP = '\n\n'; // separator joining rendered sections
 
 function clip(text, max) {
-  return text.length <= max ? text
-    : text.slice(0, Math.max(0, max - CLIP_MARKER.length)) + CLIP_MARKER;
+  if (text.length <= max) return text;
+  // #2819: when the budget can't fit the marker, hard-truncate (never exceed max).
+  if (max <= CLIP_MARKER.length) return text.slice(0, Math.max(0, max));
+  return text.slice(0, max - CLIP_MARKER.length) + CLIP_MARKER;
 }
 
 // renderContextPreamble(bundle, {maxChars}) -> { preamble, included, truncated }.
@@ -40,14 +43,15 @@ function renderContextPreamble(bundle = {}, opts = {}) {
   let used = 0;
   let truncated = false;
   for (const [, text] of sections) {
-    const remaining = maxChars - used;
+    const sep = parts.length ? SEP.length : 0; // join '\n\n' to a PRECEDING part only (no over-count)
+    const remaining = maxChars - used - sep;
     if (remaining <= 0) { truncated = true; break; }
     const piece = clip(text, remaining);
     if (piece.length < text.length) truncated = true;
     parts.push(piece);
-    used += piece.length + 2;
+    used += sep + piece.length;
   }
-  return { preamble: parts.join('\n\n'), included: sections.slice(0, parts.length).map(([name]) => name), truncated };
+  return { preamble: parts.join(SEP), included: sections.slice(0, parts.length).map(([name]) => name), truncated };
 }
 
 module.exports = { renderContextPreamble, renderTicket, renderRepoMap, renderWiki, DEFAULT_MAX_CHARS };

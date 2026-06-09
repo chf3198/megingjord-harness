@@ -47,3 +47,16 @@ test('#2802 D15: alreadyBundled parts are dropped from the bundle', () => {
   expect(bundle.repoMap).toBeDefined();
   expect(bundle.manifest.included).toEqual(['repoMap']);
 });
+
+// #2819 security hardening
+test('#2819 ticketContext rejects non-integer id (no shell injection)', () => {
+  expect(ticketContext('2802; rm -rf /')).toEqual({ number: '2802; rm -rf /', available: false });
+  expect(ticketContext(-5)).toEqual({ number: -5, available: false });
+  expect(ticketContext(1.5)).toEqual({ number: 1.5, available: false });
+  expect(ticketContext(null)).toBeNull();
+});
+
+test('#2819 repoMap refuses paths escaping root (path traversal)', () => {
+  expect(repoMap(['../../etc/passwd'], ROOT)[0]).toEqual({ path: '../../etc/passwd', available: false });
+  expect(repoMap([SELF], ROOT)[0].available).toBe(true); // legit path still works
+});
