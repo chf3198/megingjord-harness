@@ -89,6 +89,15 @@ const checks = [
     return ok(id('fleet', 3), 'fleet', pass, 'provider/lane mix scanned', 'local-llm-utilization', 'route free-tier work to local ollama');
   }],
   [id('fleet', 4), 'fleet', () => exists('logs/model-routing-telemetry.jsonl') ? ok(id('fleet', 4), 'fleet', Date.now() - fs.statSync(path.join(root, 'logs/model-routing-telemetry.jsonl')).mtimeMs < ONE_DAY_MS, 'telemetry freshness checked', 'telemetry-freshness', 'refresh telemetry daily') : skip(id('fleet', 4), 'fleet', 'missing routing telemetry')],
+  // #2136: surface precedence_verdict from closeout rubric JSON (priority_weights_v1 G1>...>G10)
+  [id('rubric', 1), 'rubric', () => {
+    if (!issue) return skip(id('rubric', 1), 'rubric', 'missing --issue');
+    const body = run(`gh issue view ${issue} --json comments -q '[.comments[].body]|add'`);
+    const match = body.match(/"precedence_verdict"\s*:\s*"([^"]+)"/);
+    if (!match) return ok(id('rubric', 1), 'rubric', true, 'precedence_verdict absent — legacy-unscored', 'rubric-precedence', 'run rubric-score.js v3 to produce precedence_verdict');
+    const verdict = match[1];
+    return ok(id('rubric', 1), 'rubric', verdict !== 'fail', `precedence_verdict=${verdict}`, verdict === 'pass' ? 'rubric-precedence-pass' : 'rubric-precedence-fail', 'review goal scores weighted by G1>...>G10 priority');
+  }],
 ];
 
 const results = dryRun ? checks.map(([id, domain]) => skip(id, domain, 'dry-run')) : checks.map(([, , fn]) => fn());

@@ -39,9 +39,9 @@ function validateRubric(rubric) {
   const missing = [];
   // v2 covers G1-G9 (9 goals); v3 covers G1-G10 (#1967). Derive max from rubric version.
   const maxGoal = String(rubric.version || '').includes('g10') ? 10 : 9;
-  for (let n = 1; n <= maxGoal; n += 1) {
-    const goal = goals[`G${n}`];
-    if (!goal || !Array.isArray(goal.boxes) || goal.boxes.length < 3) missing.push(`G${n}`);
+  for (let goalNum = 1; goalNum <= maxGoal; goalNum += 1) {
+    const goal = goals[`G${goalNum}`];
+    if (!goal || !Array.isArray(goal.boxes) || goal.boxes.length < 3) missing.push(`G${goalNum}`);
   }
   return { ok: missing.length === 0, missing };
 }
@@ -61,18 +61,51 @@ function scoreRubric(rubric, ctx) {
   }
   const scores = Object.values(out.goals).map(goal => goal.score);
   out.mean = Number((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2));
+  Object.assign(out, computePrecedence(out.goals, rubric, null));
   return out;
+}
+
+// #2136: priority_weights_v1 — G1=10, G2=9, ... descending. Synthesizes weights for
+// legacy v2 rubrics that lack precedence_weights. Returns {weighted_mean_precedence, precedence_verdict}.
+const DEFAULT_PRECEDENCE_THRESHOLD = 7.0; // matches schema precedence_pass_threshold default
+function computePrecedence(goals, rubric, thresholdOverride) {
+  const goalIds = Object.keys(goals);
+  const schemaWeights = rubric.precedence_weights || {};
+  // Synthesize descending weights for goals present in the rubric (largest weight = first goal)
+  const defaultWeight = (id) => Math.max(1, goalIds.length - goalIds.indexOf(id));
+  const weight = (id) => (schemaWeights[id] != null ? schemaWeights[id] : defaultWeight(id));
+  let weightedSum = 0, totalWeight = 0;
+  for (const [id, goal] of Object.entries(goals)) {
+    const goalWeight = weight(id);
+    weightedSum += goal.score * goalWeight;
+    totalWeight += goalWeight;
+  }
+  const wmp = totalWeight > 0 // guard: empty goals → wmp=0, verdict=fail (intentional)
+    ? Number((weightedSum / totalWeight).toFixed(2)) : 0;
+  const threshold = thresholdOverride != null ? thresholdOverride
+    : (rubric.precedence_pass_threshold != null ? rubric.precedence_pass_threshold : DEFAULT_PRECEDENCE_THRESHOLD);
+  return { weighted_mean_precedence: wmp, precedence_verdict: wmp >= threshold ? 'pass' : 'fail' };
 }
 
 function cli() {
   const rubricPath = arg('--rubric') || DEFAULT_RUBRIC;
   const rubric = JSON.parse(readText(rubricPath));
+  const thresholdArg = arg('--threshold');
+  const threshold = thresholdArg != null ? Number(thresholdArg) : null;
   const ctx = {
     trail: readText(arg('--trail')), diff: readText(arg('--diff')),
     closeout: readText(arg('--closeout')),
   };
-  process.stdout.write(`${JSON.stringify(scoreRubric(rubric, ctx), null, 2)}\n`);
+  const result = scoreRubric(rubric, ctx);
+  // Apply CLI threshold override after scoring
+  if (threshold != null) {
+    const precedence = computePrecedence(result.goals, rubric, threshold);
+    result.weighted_mean_precedence = precedence.weighted_mean_precedence;
+    result.precedence_verdict = precedence.precedence_verdict;
+  }
+  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 
 if (require.main === module) cli();
-module.exports = { evaluateCommand, scoreRubric, validateRubric, DEFAULT_RUBRIC };
+module.exports = { evaluateCommand, scoreRubric, validateRubric, computePrecedence, DEFAULT_RUBRIC };
+

@@ -1,8 +1,12 @@
 {
-  "version": "g1-g9-v2",
+  "version": "g1-g9-v3",
+  "minimum_supported_version": "g1-g9-v2",
   "transition_legacy_v1_until": "2026-05-22",
   "score_formula": "(boxes_checked / boxes_total) * 10",
   "command_dsl": "contains|regex|not_regex:<trail|diff|closeout>:<literal-or-regex>; contains uses | as all-required literals",
+  "precedence_model": "priority_weights_v1",
+  "precedence_weights": {"G1": 10, "G2": 9, "G3": 8, "G4": 7, "G5": 6, "G6": 5, "G7": 4, "G8": 3, "G9": 2, "G10": 1},
+  "precedence_pass_threshold": 7.0,
   "goals": {
     "G1": {"title": "Governance", "boxes": [
       {"id": "g1-baton-all-four", "check": "Issue trail has all four baton artifacts.", "evidence_command": "contains:trail:MANAGER_HANDOFF|COLLABORATOR_HANDOFF|ADMIN_HANDOFF|CONSULTANT_CLOSEOUT"},
