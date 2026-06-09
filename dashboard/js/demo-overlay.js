@@ -19,34 +19,34 @@ if (window.IS_DEMO) (function () {
   }
 
   function mountBanner(label) {
-    const b = document.createElement('div');
-    b.id = 'demo-banner';
-    b.innerHTML = '<span>\uD83C\uDFAD Demo Mode \u2014 <strong>' + label + '</strong></span>'
+    const banner = document.createElement('div');
+    banner.id = 'demo-banner';
+    banner.innerHTML = '<span>\uD83C\uDFAD Demo Mode \u2014 <strong>' + label + '</strong></span>'
       + '<button id="demo-switch-btn">Switch Scenario</button>'
       + '<button id="demo-glossary-btn">\uD83D\uDCD6 Concepts</button>'
       + '<a href="https://github.com/chf3198/megingjord-harness#readme"'
       + ' target="_blank" rel="noopener noreferrer">\uD83D\uDE80 Install locally \u2192</a>';
-    document.body.prepend(b);
+    document.body.prepend(banner);
     document.getElementById('demo-switch-btn').addEventListener('click', showPicker);
     document.getElementById('demo-glossary-btn').addEventListener('click', toggleGlossary);
   }
 
   function mountGlossary() {
-    const g = document.createElement('aside');
-    g.id = 'demo-glossary';
-    g.hidden = true;
-    g.innerHTML = '<h3>\uD83D\uDCD6 Concepts</h3><dl>'
+    const glossary = document.createElement('aside');
+    glossary.id = 'demo-glossary';
+    glossary.hidden = true;
+    glossary.innerHTML = '<h3>\uD83D\uDCD6 Concepts</h3><dl>'
       + GLOSSARY.map(function (e) { return '<dt>' + e[0] + '</dt><dd>' + e[1] + '</dd>'; }).join('')
       + '</dl><button id="demo-glossary-close">\u2715 Close</button>';
-    document.body.append(g);
+    document.body.append(glossary);
     document.getElementById('demo-glossary-close').addEventListener('click', function () {
-      g.hidden = true;
+      glossary.hidden = true;
     });
   }
 
   function toggleGlossary() {
-    const g = document.getElementById('demo-glossary');
-    if (g) g.hidden = !g.hidden;
+    const glossaryEl = document.getElementById('demo-glossary');
+    if (glossaryEl) glossaryEl.hidden = !glossaryEl.hidden;
   }
 
   function showPicker() {

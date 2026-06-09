@@ -3,19 +3,22 @@
 /* eslint-disable no-unused-vars */
 if (window.IS_DEMO) (function () {
   'use strict';
-  const D = [
+  const DEMO_K = { FLEET_CALLS: 187, TICKET: 2809, MS_60S: 60000, MS_30S: 30000, LATENCY_HIGH: 380, TOKENS_TODAY: 187400, PAID_TOKENS: 48800, RECONCILED: 183, MS_PER_DAY: 86400000, MS_2MIN: 120000 };
+  const DEMO_TODAY = new Date().toISOString().slice(0, 10);
+  const DEMO_YEST = new Date(Date.now() - DEMO_K.MS_PER_DAY).toISOString().slice(0, 10);
+  const DEVICES = [
     { id: '36gbwinresource', alias: '36GB Windows Resource', role: 'primary-fleet-inference', ram: '32GB', modelCount: 6, tailscaleIP: '100.91.113.16', ollama: true, openclaw: false, local: false, status: 'healthy' },
     { id: 'windows-laptop', alias: 'OpenClaw Host', role: 'primary-inference', ram: '16GB', modelCount: 7, tailscaleIP: '100.78.22.13', ollama: true, openclaw: true, local: false, status: 'healthy' },
     { id: 'penguin-1', alias: 'SML Chromebook', role: 'sml-agent', ram: '2.7GB', modelCount: 4, tailscaleIP: '100.86.248.35', ollama: true, openclaw: false, local: false, status: 'degraded' },
     { id: 'chromebook-2', alias: 'Dev Chromebook', role: 'primary-dev', ram: '6.3GB', modelCount: 0, tailscaleIP: null, ollama: false, openclaw: false, local: true, status: 'healthy' },
   ];
-  const S = [
+  const SERVICES = [
     { id: 'github-copilot', name: 'GitHub Copilot', type: 'paid', cost: '$19/mo', status: 'active' },
     { id: 'openrouter',     name: 'OpenRouter',     type: 'paid', cost: 'metered', status: 'active' },
     { id: 'hamr-worker',    name: 'HAMR Worker',    type: 'free', cost: 'free',    status: 'active' },
   ];
-  window.loadDevices  = async function () { return D; };
-  window.loadServices = async function () { return S; };
+  window.loadDevices  = async function () { return DEVICES; };
+  window.loadServices = async function () { return SERVICES; };
   window.runHealthChecks = async function (devices) {
     return Object.fromEntries((devices || []).map(function (d) {
       if (d.local) return [d.id, { status: 'healthy' }];
@@ -35,17 +38,17 @@ if (window.IS_DEMO) (function () {
   window.fetchAllLiveQuotas   = async function () { return []; };
   window.pollEventBus         = async function () { return []; };
   window.fetchRouterLaneStats = async function () {
-    return { fleet: { calls: 187, pct: 74 }, haiku: { calls: 41, pct: 16 }, premium: { calls: 26, pct: 10 }, free: { calls: 0, pct: 0 } };
+    return { fleet: { calls: DEMO_K.FLEET_CALLS, pct: 74 }, haiku: { calls: 41, pct: 16 }, premium: { calls: 26, pct: 10 }, free: { calls: 0, pct: 0 } };
   };
   window.fetchWikiHealth   = async function () { return { loaded: true, pages: 47, stale: 2 }; };
   window.fetchWikiMetrics  = async function () { return { total: 47, fresh: 45, stale: 2, avgTrust: 0.91 }; };
   window.pollGitHub        = async function () {
-    return { issues: { open: 12, recent: [{ number: 2809, title: 'Phase-1 dashboard', state: 'open' }] }, prs: { open: 1, recent: [] } };
+    return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, prs: { open: 1, recent: [] } };
   };
   window.fetchFleetHealthLog = async function () {
-    return [ { ts: Date.now() - 60000, node: '36gbwinresource', status: 'healthy', latencyMs: 12 },
-             { ts: Date.now() - 30000, node: 'windows-laptop',  status: 'healthy', latencyMs: 47 },
-             { ts: Date.now(),         node: 'penguin-1',        status: 'degraded', latencyMs: 380 } ];
+    return [ { ts: Date.now() - DEMO_K.MS_60S, node: '36gbwinresource', status: 'healthy', latencyMs: 12 },
+             { ts: Date.now() - DEMO_K.MS_30S, node: 'windows-laptop',  status: 'healthy', latencyMs: 47 },
+             { ts: Date.now(),                 node: 'penguin-1',        status: 'degraded', latencyMs: DEMO_K.LATENCY_HIGH } ];
   };
   window.fetchGovernanceState = async function () {
     return { ticketFirst: { status: 'pass', violations: 0 }, signerFidelity: { status: 'pass', violations: 0 },
@@ -53,10 +56,10 @@ if (window.IS_DEMO) (function () {
              lastChecked: new Date().toISOString() };
   };
   window.fetchCostTelemetry = async function () {
-    return [{ date: '2026-06-08', fleet: 0.00, paid: 0.14, sessions: 8 }, { date: '2026-06-09', fleet: 0.00, paid: 0.09, sessions: 5 }];
+    return [{ date: DEMO_YEST, fleet: 0.00, paid: 0.14, sessions: 8 }, { date: DEMO_TODAY, fleet: 0.00, paid: 0.09, sessions: 5 }];
   };
   window.fetchTokenTelemetrySummary = async function () {
-    return { todayTokens: 187400, fleetPct: 74, paidTokens: 48800, fleetSavingsUsd: 0.19, paidSpendUsd: 0.23 };
+    return { todayTokens: DEMO_K.TOKENS_TODAY, fleetPct: 74, paidTokens: DEMO_K.PAID_TOKENS, fleetSavingsUsd: 0.19, paidSpendUsd: 0.23 };
   };
   window.fetchQualityParitySummary  = async function () { return { fleetPassRate: 0.94, paidPassRate: 0.97, delta: 0.03, judgeCalls: 42 }; };
   window.fetchGoalHealthSummary = async function () {
@@ -66,9 +69,9 @@ if (window.IS_DEMO) (function () {
              G7: { score: 7, label: 'Throughput' },  G8: { score: 8, label: 'Observability' },
              G9: { score: 7, label: 'Interop' } };
   };
-  window.fetchTokenReconcileSummary = async function () { return { matched: 183, unmatched: 4, matchRate: 0.978 }; };
+  window.fetchTokenReconcileSummary = async function () { return { matched: DEMO_K.RECONCILED, unmatched: 4, matchRate: 0.978 }; };
   window.fetchAgentSessions = async function () {
-    return [{ id: 's1', agent: 'copilot', model: 'claude-sonnet-4.6', ticket: 2809, status: 'active', startTs: Date.now() - 120000, costUsd: 0.0041 }];
+    return [{ id: 's1', agent: 'copilot', model: 'claude-sonnet-4.6', ticket: DEMO_K.TICKET, status: 'active', startTs: Date.now() - DEMO_K.MS_2MIN, costUsd: 0.0041 }];
   };
   window.buildQuotaList = function (services) {
     return (services || []).map(function (s) { return Object.assign({}, s, { used: 0, limit: null }); });

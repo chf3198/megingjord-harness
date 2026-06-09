@@ -13,8 +13,8 @@ const fixtureRunner = (function () {
 
   async function loadScenario(name) {
     const meta = await fetch(FIXTURE_BASE + 'meta.json').then(function (r) { return r.json(); });
-    const s = meta.scenarios.find(function (sc) { return sc.name === name; }) || meta.scenarios[0];
-    const text = await fetch(FIXTURE_BASE + s.file).then(function (r) { return r.text(); });
+    const scenario = meta.scenarios.find(function (sc) { return sc.name === name; }) || meta.scenarios[0];
+    const text = await fetch(FIXTURE_BASE + scenario.file).then(function (r) { return r.text(); });
     return text.trim().split('\n').filter(Boolean).map(function (l) { return JSON.parse(l); });
   }
 
@@ -25,13 +25,13 @@ const fixtureRunner = (function () {
       return;
     }
     const typeMap = { warn: 'warn', llm: 'llm', tool: 'tool', agent: 'agent', system: 'system' };
-    const t = typeMap[ev.type] || 'system';
+    const evType = typeMap[ev.type] || 'system';
     const msg = ev.message || ev.type.replace(/_/g, ' ');
     const detail = ev.detail || '';
     if (typeof addActivity === 'function') {
-      addActivity(app.activityLog, t, msg, detail);
+      addActivity(app.activityLog, evType, msg, detail);
     } else if (app.activityLog) {
-      app.activityLog.unshift({ type: t, message: msg, detail: detail, ts: Date.now() });
+      app.activityLog.unshift({ type: evType, message: msg, detail: detail, ts: Date.now() });
       if (app.activityLog.length > 100) app.activityLog.pop();
     }
   }
