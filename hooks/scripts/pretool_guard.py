@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PreToolUse hook: pre-tool guards and admin sequencing gates."""
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
 from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path: sys.path.insert(0, str(SCRIPT_DIR))
@@ -38,7 +38,6 @@ def detect_it_ops_bypass(joined: str, env: dict | None = None) -> tuple[bool, st
     - commit message uses chore(it-ops): Conventional-Commits type prefix
     Returns (False, None) otherwise.
     """
-    import os
     env = env if env is not None else os.environ
     if env.get("MEGINGJORD_IT_OPS") == "1":
         return True, "env:MEGINGJORD_IT_OPS=1"
