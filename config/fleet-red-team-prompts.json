@@ -4,6 +4,7 @@
   "templates": {
     "epic-scope": {
       "prompt_template": "Adversarial red-team of Epic scope. Find scope-creep, cross-Epic conflicts, goal-lens misalignment. Classify each finding ACCEPT/REJECT/PARTIAL. Max 6 findings. Be skeptical.\n\n=== EPIC ===\n{{content}}",
+      "stakes": "high",
       "iteration_target": 2,
       "findings_cap": 6,
       "focus_areas": ["scope-creep", "goal-lens alignment", "cross-Epic conflict", "AC measurability"],
@@ -11,6 +12,7 @@
     },
     "child-implementation": {
       "prompt_template": "Adversarial red-team of child-ticket implementation plan. Find AC gaps, edge-case omissions, matrix-fit mismatches. Classify ACCEPT/REJECT/PARTIAL. Max 6 findings.\n\n=== CHILD ===\n{{content}}",
+      "stakes": "high",
       "iteration_target": 2,
       "findings_cap": 6,
       "focus_areas": ["AC completeness", "edge-case coverage", "test-strategy fit", "dependencies"],
@@ -18,6 +20,7 @@
     },
     "collaborator-handoff": {
       "prompt_template": "Adversarial review of COLLABORATOR_HANDOFF artifact. Verify per-AC PASS claims; spot missing evidence; flag any AC marked PASS without supporting test/lint/manual-check. Classify ACCEPT/REJECT/PARTIAL. Max 4 findings.\n\n=== HANDOFF ===\n{{content}}",
+      "stakes": "medium",
       "iteration_target": 1,
       "findings_cap": 4,
       "focus_areas": ["per-AC evidence", "missing test artifacts", "lint claims", "doc-coverage block"],
@@ -25,6 +28,7 @@
     },
     "admin-handoff": {
       "prompt_template": "Adversarial review of ADMIN_HANDOFF. Verify signer-independence, sync-verification, deploy-impact claims. Classify ACCEPT/REJECT/PARTIAL. Max 4 findings.\n\n=== HANDOFF ===\n{{content}}",
+      "stakes": "medium",
       "iteration_target": 1,
       "findings_cap": 4,
       "focus_areas": ["signer-independence", "sync-verification accuracy", "deploy-impact claims", "branch-name conformance"],
@@ -32,6 +36,7 @@
     },
     "pr-diff": {
       "prompt_template": "Adversarial code-review of PR diff. Find concurrency bugs, security risks, perf regressions, merge-safety hazards. Classify ACCEPT/REJECT/PARTIAL. Max 6 findings.\n\n=== DIFF ===\n{{content}}",
+      "stakes": "medium",
       "iteration_target": 2,
       "findings_cap": 6,
       "focus_areas": ["concurrency", "security", "perf", "merge-safety", "test coverage"],
@@ -39,6 +44,7 @@
     },
     "instruction-edit": {
       "prompt_template": "Adversarial review of instruction-edit. Find breaking-change risk, prose-collision-with-validator-regex risk, forward-compat concerns. Classify ACCEPT/REJECT/PARTIAL. Max 4 findings.\n\n=== EDIT ===\n{{content}}",
+      "stakes": "medium",
       "iteration_target": 1,
       "findings_cap": 4,
       "focus_areas": ["breaking-change risk", "prose-collision with validators", "forward-compat", "lint clean"],
@@ -46,6 +52,7 @@
     },
     "consultant-closeout": {
       "prompt_template": "Adversarial review of CONSULTANT_CLOSEOUT. Verify rubric integrity (min ≥ 7 across G1-G9), goal-lens override audit, anneal-decision honesty. Classify ACCEPT/REJECT/PARTIAL. Max 4 findings.\n\n=== CLOSEOUT ===\n{{content}}",
+      "stakes": "high",
       "iteration_target": 1,
       "findings_cap": 4,
       "focus_areas": ["rubric integrity", "goal-lens override audit", "anneal-decision honesty", "mid-flight-flaws accounting"],

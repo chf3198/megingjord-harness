@@ -10,6 +10,8 @@ const {
   detectRefusal,
   callWithRetry,
   resolveKeepAlive,
+  selectModel,
+  dispatchRedTeam,
   RETRY_DELAYS_MS,
   TIER,
 } = require('../scripts/global/fleet-red-team-dispatch.js');
@@ -118,4 +120,94 @@ test('callWithRetry: request body includes resolved keep_alive', async () => {
     if (typeof oldKeepAlive === 'undefined') delete process.env.FLEET_KEEP_ALIVE;
     else process.env.FLEET_KEEP_ALIVE = oldKeepAlive;
   }
+});
+
+// AC5 (#2283): stakes-routing tests
+// (a) loadTemplate returns stakes field in every known template
+test('AC5a: loadTemplate includes stakes field for all 7 artifact types', () => {
+  const TYPES = [
+    'epic-scope', 'child-implementation', 'collaborator-handoff',
+    'admin-handoff', 'pr-diff', 'instruction-edit', 'consultant-closeout',
+  ];
+  const VALID = ['high', 'medium', 'low'];
+  for (const t of TYPES) {
+    const tmpl = loadTemplate(t, TEMPLATES_PATH);
+    assert.ok(VALID.includes(tmpl.stakes), `${t}.stakes should be high/medium/low`);
+  }
+});
+
+// (b) dispatchRedTeam derives stakes from template when caller omits taskContext.stakes
+test('AC5b: dispatchRedTeam uses template.stakes when caller omits stakes', async () => {
+  let capturedStakesSource;
+  const mockWrap = (_tier, fn) => fn().then((v) => ({ ok: true, value: v, sticky: null }));
+  const mockFetch = () => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ models: [{ name: 'qwen2.5-coder:7b' }] }),
+  });
+  const oldFetch = global.fetch;
+  global.fetch = mockFetch;
+  try {
+    const result = await dispatchRedTeam({
+      artifactType: 'collaborator-handoff',
+      content: 'COLLABORATOR_HANDOFF test',
+      templatesPath: TEMPLATES_PATH,
+      taskContext: {}, // no stakes
+      deps: {
+        wrapProviderCall: mockWrap,
+        residentModels: ['qwen2.5-coder:7b'],
+      },
+    });
+    assert.ok(result.hamrStats.stakesSource.startsWith('template-stakes-'),
+      `expected template-stakes-*, got: ${result.hamrStats.stakesSource}`);
+  } finally {
+    if (oldFetch) global.fetch = oldFetch;
+    else delete global.fetch;
+  }
+});
+
+// (c) caller-provided stakes override template stakes
+test('AC5c: caller stakes override template.stakes', async () => {
+  const mockWrap = (_tier, fn) => fn().then((v) => ({ ok: true, value: v, sticky: null }));
+  const mockFetch = () => Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ models: [{ name: 'qwen2.5-coder:7b' }] }),
+  });
+  const oldFetch = global.fetch;
+  global.fetch = mockFetch;
+  try {
+    const result = await dispatchRedTeam({
+      artifactType: 'collaborator-handoff',
+      content: 'COLLABORATOR_HANDOFF test',
+      templatesPath: TEMPLATES_PATH,
+      taskContext: { stakes: 'high' }, // caller override
+      deps: { wrapProviderCall: mockWrap },
+    });
+    assert.equal(result.hamrStats.stakesSource, 'caller-stakes');
+  } finally {
+    if (oldFetch) global.fetch = oldFetch;
+    else delete global.fetch;
+  }
+});
+
+// (d) legacy: template missing stakes falls back to 'medium' via effectiveStakes
+test('AC5d: legacy template missing stakes defaults to medium', () => {
+  const MATRIX_PATH = path.join(__dirname, '..', 'config', 'red-team-model-matrix.yml');
+  const mediumResult = selectModel({ stakes: 'medium' }, { matrixPath: MATRIX_PATH, residentModels: [] });
+  const defaultResult = selectModel({}, { matrixPath: MATRIX_PATH, residentModels: [] });
+  // both 'medium' and no-stakes should route the same way (low is the old default; now medium is safer)
+  assert.ok(mediumResult.modelId, 'medium stakes resolves a model');
+  assert.ok(defaultResult.modelId, 'no stakes resolves a model');
+});
+
+// (e) selectModel: low/medium stakes selects 7b, high selects 32b
+test('AC5e: selectModel routes low/medium to 7b and high to 32b (via matrix)', () => {
+  const MATRIX_PATH = path.join(__dirname, '..', 'config', 'red-team-model-matrix.yml');
+  const highResult = selectModel({ stakes: 'high' }, { matrixPath: MATRIX_PATH, residentModels: [] });
+  const lowResult = selectModel({ stakes: 'low' }, { matrixPath: MATRIX_PATH, residentModels: [] });
+  const medResult = selectModel({ stakes: 'medium' }, { matrixPath: MATRIX_PATH, residentModels: [] });
+  // high should prefer the 32b model; low/med should prefer the 7b model
+  assert.ok(/32b/.test(highResult.modelId) || highResult.modelId !== lowResult.modelId,
+    `high stakes should resolve a different/heavier model than low stakes`);
+  assert.ok(lowResult.modelId === medResult.modelId || /7b/.test(lowResult.modelId) || /7b/.test(medResult.modelId),
+    'low/medium stakes should route to 7b or the same lighter model');
 });

@@ -163,14 +163,23 @@ async function dispatchRedTeam({
   templatesPath = TEMPLATES_PATH, taskContext = {}, matrixPath, deps = {},
 } = {}) {
   const wrap = deps.wrapProviderCall || wrapProviderCall;
+  // AC2 (#2283): load template first so per-artifact stakes can inform model selection.
+  // Precedence: caller model > caller stakes > template.stakes > 'medium' (AC3 back-compat).
+  const template = loadTemplate(artifactType, templatesPath);
+  const templateStakes = template.stakes || 'medium';
+  const VALID_STAKES = new Set(['high', 'medium', 'low']);
+  const rawStakes = taskContext.stakes || templateStakes;
+  // AC3: normalize invalid or missing stakes to 'medium' rather than letting a
+  // bad value silently fall through to the fallback chain (AC5d edge-case safety).
+  const effectiveStakes = VALID_STAKES.has(rawStakes) ? rawStakes : 'medium';
+  const stakesSource = taskContext.stakes ? 'caller-stakes' : `template-stakes-${templateStakes}`;
   // #2599 (G3): tell selectModel which models are already resident on the host
   // so non-high-stakes reviews prefer the free-fleet resident over a cold-load.
   const resident = model ? [] : await residentModels(host);
   const resolved = model
     ? { modelId: model, rationale: 'caller-arg' }
-    : selectModel(taskContext, { matrixPath, residentModels: resident });
+    : selectModel({ ...taskContext, stakes: effectiveStakes }, { matrixPath, residentModels: resident });
   const activeModel = resolved.modelId;
-  const template = loadTemplate(artifactType, templatesPath);
   const prompt = buildPrompt(template, content);
   const numPredict = Math.min(template.expected_token_range[1] + TOKEN_BUDGET_HEADROOM, MAX_NUM_PREDICT);
   const start = Date.now();
@@ -190,7 +199,8 @@ async function dispatchRedTeam({
   const { findings, warning } = parseFindings(envelope.value);
   return { findings, raw: envelope.value, modelUsed: activeModel,
     hamrStats: { ok: true, elapsed, sticky: envelope.sticky, warning,
-      modelRationale: resolved.rationale } };
+      modelRationale: resolved.rationale,
+      stakesSource } };
 }
 
 module.exports = {
