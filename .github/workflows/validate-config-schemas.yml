@@ -1,20 +1,17 @@
 # validate-config-schemas — JSON-schema validation gate for cross-runtime
 # config files. Refs #1957 / Epic #1956. Validates .claude/settings.json
 # against config/claude-code-settings.schema.json using Python jsonschema
-# (Draft 2020-12 compatible). Codex equivalent is advisory until a schema
-# is published. Fails on the flat-hook-entry regression that broke #1917.
+# (Draft 2020-12 compatible). Fails on the flat-hook-entry regression (#1917).
+#
+# #2812: this is a REQUIRED status check, so it must ALWAYS run and report.
+# A workflow-level `paths:` filter made it SKIP (→ "Pending" forever → blocked
+# the merge) on every PR that touched no schema file. Per GitHub's guidance,
+# path logic now lives in a step-level git-diff gate; the job ALWAYS reports
+# success and runs the real validation only when schema-relevant files change.
 name: validate-config-schemas
 on:
   pull_request:
     branches: [main]
-    paths:
-      - '.claude/**'
-      - '.codex/**'
-      - 'config/**'
-      - 'scripts/global/validate-config-schemas.js'
-      - 'tests/fixtures/flat_hook_settings.json'
-      - 'tests/validate-config-schemas.spec.js'
-      - '.github/workflows/validate-config-schemas.yml'
   push:
     branches: [main]
 permissions:
@@ -28,15 +25,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect schema-relevant changes (step-level gate, #2812)
+        id: changes
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+          fi
+          pattern='^(\.claude/|\.codex/|config/|scripts/global/validate-config-schemas\.js|tests/fixtures/flat_hook_settings\.json|tests/validate-config-schemas\.spec\.js|\.github/workflows/validate-config-schemas\.yml)'
+          if git diff --name-only "$base" HEAD | grep -qE "$pattern"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No schema-relevant files changed — validation N/A; reporting success (#2812)."
+          fi
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.changed == 'true'
         with:
           node-version: '20'
       - uses: actions/setup-python@v5
+        if: steps.changes.outputs.changed == 'true'
         with:
           python-version: '3.12'
       - name: Install jsonschema (Draft 2020-12)
+        if: steps.changes.outputs.changed == 'true'
         run: python3 -m pip install jsonschema
       - name: Validate cross-runtime config files
+        if: steps.changes.outputs.changed == 'true'
         run: node scripts/global/validate-config-schemas.js
       - name: Run regression-fixture assertion (flat-hook-entry must FAIL validation)
+        if: steps.changes.outputs.changed == 'true'
         run: node --test tests/validate-config-schemas.spec.js
