@@ -52,3 +52,16 @@ test('#2802 renderContextPreamble drops lowest-priority sections first under tig
 test('#2802 renderContextPreamble on empty bundle is safe', () => {
   expect(renderContextPreamble({})).toEqual({ preamble: '', included: [], truncated: false });
 });
+
+// #2819 char-budget off-by-one
+test('#2819 preamble length never exceeds maxChars (no separator over/under-count)', () => {
+  const bundle = {
+    ticket: { number: 1, title: 't', body: 'b'.repeat(50), available: true },
+    repoMap: [{ path: 'p', symbols: ['s'.repeat(50)], available: true }],
+    wiki: ['w'.repeat(50)],
+  };
+  for (const maxChars of [10, 55, 80, 120, 200]) {
+    const { preamble } = renderContextPreamble(bundle, { maxChars });
+    expect(preamble.length).toBeLessThanOrEqual(maxChars);
+  }
+});

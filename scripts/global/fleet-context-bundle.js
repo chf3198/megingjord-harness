@@ -17,7 +17,9 @@ function runQuiet(command) {
 
 // Live work-log for a ticket: title + body + comment bodies (the design lives in #2792's comments).
 function ticketContext(number) {
-  if (!number) return null;
+  if (number == null) return null;
+  // #2819 security: only a positive integer reaches the shell — blocks command injection.
+  if (!Number.isInteger(number) || number <= 0) return { number, available: false };
   const raw = runQuiet(`gh issue view ${number} --json title,body,comments`);
   if (!raw) return { number, available: false };
   try {
@@ -31,8 +33,13 @@ function ticketContext(number) {
 
 // Lightweight repo-map: top-level fn/class/export signatures of named files (no heavy parser).
 function repoMap(relPaths = [], root = process.cwd()) {
+  const resolvedRoot = path.resolve(root);
   return (relPaths || []).map((relPath) => {
-    const full = path.join(root, relPath);
+    const full = path.resolve(resolvedRoot, relPath);
+    // #2819 security: refuse paths that escape root (e.g. '../') — blocks path traversal.
+    if (full !== resolvedRoot && !full.startsWith(resolvedRoot + path.sep)) {
+      return { path: relPath, available: false };
+    }
     if (!fs.existsSync(full)) return { path: relPath, available: false };
     const source = fs.readFileSync(full, 'utf8');
     const signatures = (source.match(/^\s*(async\s+)?(function|class|module\.exports|exports\.)[^\n{=]*/gm)
