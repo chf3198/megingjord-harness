@@ -16,6 +16,7 @@ catch { redactString = (text) => ({ text }); } // redactString returns { text, h
 const DEFAULT_ENV_PATH = path.resolve(__dirname, '..', '..', '.env');
 
 let hydratedOnce = false;
+const dotenvFilled = new Set(); // names this process hydrated from .env (vs explicit export) for keychain precedence
 
 /**
  * Parse `.env` text into ordered [name, value] pairs.
@@ -81,7 +82,25 @@ function loadLocalEnv(opts = {}) {
 function loadLocalEnvOnce() {
   if (hydratedOnce) return { filled: [], skipped: 'cached' };
   hydratedOnce = true;
-  return loadLocalEnv();
+  const report = loadLocalEnv();
+  report.filled.forEach((name) => dotenvFilled.add(name)); // track filled names for keychain precedence
+  return report;
+}
+
+/**
+ * Keychain-aware credential resolver (#2772): explicit-export > opt-in keychain > .env. Default
+ * (no MEGINGJORD_KEYCHAIN) returns the .env/process.env value, so behavior is unchanged. Graceful.
+ * @param {string} name @param {object} [opts] @returns {string|null}
+ */
+function getCredential(name, opts = {}) {
+  loadLocalEnvOnce();
+  try {
+    const { getSecret } = require('./keychain-source');
+    return getSecret(name, { dotenvFilled, ...opts });
+  } catch {
+    const value = (opts.env || process.env)[name];
+    return value !== undefined && value !== '' ? value : null; // keychain module issue -> .env
+  }
 }
 
 /**
@@ -112,13 +131,18 @@ function requireKeys(requiredKeys, opts = {}) {
   loadLocalEnvOnce();
   const env = opts.env || process.env;
   const names = Array.isArray(requiredKeys) ? requiredKeys : [requiredKeys];
-  const absent = names.filter((name) => env[name] === undefined || env[name] === '');
+  // A key absent from env may still resolve from an opt-in keychain (#2772) before we fail-closed.
+  const absent = names.filter((name) => {
+    if (env[name] !== undefined && env[name] !== '') return false;
+    return !getCredential(name, { env });
+  });
   if (absent.length && opts.throwOnAbsent !== false) throw new CredentialAbsentError(absent);
   return { ok: absent.length === 0, absent };
 }
 
 module.exports = {
-  loadLocalEnv, loadLocalEnvOnce, requireKeys, CredentialAbsentError, parseEnv, hydrate, DEFAULT_ENV_PATH,
+  loadLocalEnv, loadLocalEnvOnce, requireKeys, getCredential, CredentialAbsentError,
+  parseEnv, hydrate, DEFAULT_ENV_PATH,
 };
 
 if (require.main === module) loadLocalEnv();
