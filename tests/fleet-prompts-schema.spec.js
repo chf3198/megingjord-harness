@@ -59,6 +59,26 @@ test('expected_token_range is [min, max] integer pair', () => {
   }
 });
 
+// AC1 (#2283): each template declares a valid stakes tier
+const VALID_STAKES = ['high', 'medium', 'low'];
+test('each template has valid stakes field (high/medium/low)', () => {
+  const obj = JSON.parse(fs.readFileSync(PROMPTS_PATH, 'utf8'));
+  for (const [key, tmpl] of Object.entries(obj.templates)) {
+    assert.ok(
+      VALID_STAKES.includes(tmpl.stakes),
+      `${key}.stakes must be high/medium/low, got: ${tmpl.stakes}`,
+    );
+  }
+});
+
+test('high-stakes templates are epic-scope, child-implementation, consultant-closeout', () => {
+  const obj = JSON.parse(fs.readFileSync(PROMPTS_PATH, 'utf8'));
+  const HIGH_STAKES = ['epic-scope', 'child-implementation', 'consultant-closeout'];
+  for (const key of HIGH_STAKES) {
+    assert.equal(obj.templates[key].stakes, 'high', `${key} should be stakes:high`);
+  }
+});
+
 test('findings_cap is 4 or 6 (matches Zenflow guidance 6-8 max)', () => {
   const obj = JSON.parse(fs.readFileSync(PROMPTS_PATH, 'utf8'));
   for (const [key, tmpl] of Object.entries(obj.templates)) {
