@@ -3,13 +3,13 @@
 /* eslint-disable no-unused-vars */
 if (window.IS_DEMO) (function () {
   'use strict';
-  var D = [
+  const D = [
     { id: '36gbwinresource', alias: '36GB Windows Resource', role: 'primary-fleet-inference', ram: '32GB', modelCount: 6, tailscaleIP: '100.91.113.16', ollama: true, openclaw: false, local: false, status: 'healthy' },
     { id: 'windows-laptop', alias: 'OpenClaw Host', role: 'primary-inference', ram: '16GB', modelCount: 7, tailscaleIP: '100.78.22.13', ollama: true, openclaw: true, local: false, status: 'healthy' },
     { id: 'penguin-1', alias: 'SML Chromebook', role: 'sml-agent', ram: '2.7GB', modelCount: 4, tailscaleIP: '100.86.248.35', ollama: true, openclaw: false, local: false, status: 'degraded' },
     { id: 'chromebook-2', alias: 'Dev Chromebook', role: 'primary-dev', ram: '6.3GB', modelCount: 0, tailscaleIP: null, ollama: false, openclaw: false, local: true, status: 'healthy' },
   ];
-  var S = [
+  const S = [
     { id: 'github-copilot', name: 'GitHub Copilot', type: 'paid', cost: '$19/mo', status: 'active' },
     { id: 'openrouter',     name: 'OpenRouter',     type: 'paid', cost: 'metered', status: 'active' },
     { id: 'hamr-worker',    name: 'HAMR Worker',    type: 'free', cost: 'free',    status: 'active' },
