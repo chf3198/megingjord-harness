@@ -92,7 +92,8 @@ def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
     verified (label backend error) require it (return True) rather than silently bypass -
     consistent with the unbreakable-chain invariant. The except never re-raises, so a guard
     bug yields a recoverable deny, not a crash/brick. Non-override commands short-circuit
-    to False before any throwable call."""
+    to False before any throwable call.
+    """
     if not RE_ADMIN_OVERRIDE.search(joined):
         return False
     try:
@@ -107,7 +108,8 @@ RE_FLEET_CURL = re.compile(r"curl\b[^\n|]{0,512}(?::11434\b|/api/(?:generate|tag
 def is_raw_fleet_curl(joined: str) -> bool:
     """True when a raw curl targets a fleet/ollama endpoint outside the dispatch
     wrappers without the documented carve-out (#2192 vector #2 - raw curl bypasses
-    HAMR cost+observability). Fail-open: any error returns False (never brick)."""
+    HAMR cost+observability). Fail-open: any error returns False (never brick).
+    """
     try:
         if "hamr-bypass-ok" in joined:
             return False
