@@ -1,6 +1,11 @@
 'use strict';
 // Shared label-rules evaluator for label-lint and label-scan workflows.
 // Single source of truth — prevents the gates from disagreeing (#1307).
+// Refs #2785: label-manifest.json is the canonical label definition list;
+// provisioner and this file share the same manifest so they can never drift.
+const path = require('path');
+const MANIFEST_PATH = path.join(__dirname, 'label-manifest.json');
+function loadManifest() { return JSON.parse(require('fs').readFileSync(MANIFEST_PATH, 'utf8')); }
 
 const STATUS_ROLE_REQUIRED = {
   'status:in-progress': 'role:collaborator',
@@ -87,4 +92,4 @@ function evaluate(issue) {
   return violations;
 }
 
-module.exports = { evaluate, STATUS_ROLE_REQUIRED, EPIC_ONLY_STATES };
+module.exports = { evaluate, STATUS_ROLE_REQUIRED, EPIC_ONLY_STATES, MANIFEST_PATH, loadManifest };
