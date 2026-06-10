@@ -1,4 +1,4 @@
-{"type":"system","message":"Fleet online","detail":"2 nodes available: fleet-win-01 · openclaw","ts":0}
+{"type":"system","message":"Fleet online","detail":"2 nodes available: fleet-win-01 · fleet-openclaw","ts":0}
 {"type":"agent","message":"Session started","detail":"codex · gpt-5.4 · no ticket linked","ts":1000}
 {"type":"warn","message":"Governance alert","detail":"G1 ticket-first-gate FAIL — no open issue for branch feat/unlabeled","ts":1800}
 {"type":"warn","message":"Baton blocked","detail":"codex cannot push without a linked GitHub issue","ts":1900}

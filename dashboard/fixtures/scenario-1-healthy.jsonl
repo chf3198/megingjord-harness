@@ -1,4 +1,4 @@
-{"type":"system","message":"Fleet online","detail":"3 nodes: fleet-win-01 · openclaw · dev-1","ts":0}
+{"type":"system","message":"Fleet online","detail":"3 nodes: fleet-win-01 · fleet-openclaw · dev-1","ts":0}
 {"type":"system","message":"MCP connected","detail":"filesystem · github · search (3 servers, 23 tools)","ts":800}
 {"type":"agent","message":"Session started","detail":"copilot · claude-sonnet-4.6 · ticket #2809","ts":1500}
 {"type":"baton","role":"manager","issue":2809,"message":"Manager scoping","detail":"AC authoring + gates","ts":2200}

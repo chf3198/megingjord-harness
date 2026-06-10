@@ -5,7 +5,7 @@ const OLLAMA_DEFAULT_PORT = 11434;
 
 function loadFleetSettings() {
   const defaults = {
-    fleetIPs: { 'penguin-1': '', 'windows-laptop': '', 'chromebook-2': '' },
+    fleetIPs: { 'dev-1': '', 'fleet-host': '', 'local-dev': '' },
     sshUser: 'admin',
     openclawPort: OPENCLAW_DEFAULT_PORT,
     ollamaPort: OLLAMA_DEFAULT_PORT,

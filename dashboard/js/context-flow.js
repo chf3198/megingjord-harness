@@ -8,7 +8,7 @@ function renderContextFlow() {
     { x: 200, y: 50, icon: '🧠', label: 'AUTO', sub: 'Model Select', tip: 'Routes prompts to Cloud LLM (primary) or OpenClaw (local fallback) based on model availability and rate limits.' },
     { x: 370, y: 50, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API', tip: 'GitHub Copilot cloud models (GPT-4o, Claude). Primary route. Responses stream back to VS Code.' },
     { x: 540, y: 50, icon: '🐙', label: 'GitHub', sub: 'API + Actions', tip: 'GitHub API: issues, PRs, commits. Actions CI/CD. Context flows bidirectionally via gh CLI and webhooks.' },
-    { x: 120, y: 150, icon: '🌐', label: 'Tailscale', sub: 'VPN Mesh', tip: 'Encrypted WireGuard mesh connecting all fleet devices. Routes traffic between Chromebooks and Windows laptop.' },
+    { x: 120, y: 150, icon: '🌐', label: 'Tailscale', sub: 'VPN Mesh', tip: 'Encrypted WireGuard mesh connecting all fleet devices. Routes traffic between fleet hosts.' },
     { x: 290, y: 150, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM Proxy', tip: 'LiteLLM proxy on fleet host. Routes to local Ollama models. Fallback when cloud is rate-limited.' },
     { x: 460, y: 150, icon: '🤖', label: 'Ollama', sub: 'Local LLM', tip: 'Local inference on fleet host. Runs quantized open-source models. Accessed via OpenClaw proxy over Tailscale.' },
     { x: 60, y: 210, icon: '💻', label: 'Dev-1', sub: 'Workstation', tip: 'Primary dev workstation. Runs VS Code + dashboard.' },
