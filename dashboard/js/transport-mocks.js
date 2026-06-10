@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 if (window.IS_DEMO) (function () {
   'use strict';
-  const DEMO_K = { FLEET_CALLS: 187, TICKET: 2809, MS_60S: 60000, MS_30S: 30000, LATENCY_HIGH: 380, TOKENS_TODAY: 187400, PAID_TOKENS: 48800, RECONCILED: 183, MS_PER_DAY: 86400000, MS_2MIN: 120000, CF_NEURONS: 8900, Q_LIMIT_FLEET: 500, CF_LIMIT: 10000, Q_LIMIT_COPILOT: 300 };
+  const DEMO_K = { FLEET_CALLS: 187, TICKET: 2809, MS_60S: 60000, MS_30S: 30000, LATENCY_HIGH: 380, LATENCY_LOW: 15, TOKENS_TODAY: 187400, PAID_TOKENS: 48800, RECONCILED: 183, MS_PER_DAY: 86400000, MS_2MIN: 120000, CF_NEURONS: 8900, Q_LIMIT_FLEET: 500, CF_LIMIT: 10000, Q_LIMIT_COPILOT: 300 };
   const DEMO_TODAY = new Date().toISOString().slice(0, 10);
   const DEMO_YEST = new Date(Date.now() - DEMO_K.MS_PER_DAY).toISOString().slice(0, 10);
   const DEVICES = [
@@ -20,9 +20,10 @@ if (window.IS_DEMO) (function () {
   window.loadDevices  = async function () { return DEVICES; };
   window.loadServices = async function () { return SERVICES; };
   window.runHealthChecks = async function (devices) {
+    const isDeg = window.demoConfig && window.demoConfig.currentScenario === 'governance-alert';
     return Object.fromEntries((devices || []).map(function (d) {
       if (d.local) return [d.id, { status: 'healthy' }];
-      if (d.id === 'dev-1') return [d.id, { status: 'degraded', models: ['qwen3.5:0.8b'] }];
+      if (isDeg && d.id === 'dev-1') return [d.id, { status: 'degraded', models: ['qwen3.5:0.8b'] }];
       return [d.id, { status: 'healthy', models: d.id === 'fleet-win-01'
         ? ['qwen3:32b', 'qwen2.5-coder:32b', 'starcoder2:3b'] : ['qwen2.5-coder:7b', 'deepseek-coder-v2:lite'] }];
     }));
@@ -51,9 +52,10 @@ if (window.IS_DEMO) (function () {
     return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, pulls: { open: 1, merged: 3, recent: [] }, actions: { recent: [] }, branches: { count: 2, active: ['main', 'feat/dashboard-demo'] } };
   };
   window.fetchFleetHealthLog = async function () {
+    const isDeg = window.demoConfig && window.demoConfig.currentScenario === 'governance-alert';
     return [ { ts: Date.now() - DEMO_K.MS_60S, node: 'fleet-win-01',    status: 'healthy',  latencyMs: 12 },
              { ts: Date.now() - DEMO_K.MS_30S, node: 'fleet-openclaw', status: 'healthy',  latencyMs: 47 },
-             { ts: Date.now(),                 node: 'dev-1',          status: 'degraded', latencyMs: DEMO_K.LATENCY_HIGH } ];
+             { ts: Date.now(),                 node: 'dev-1', status: isDeg ? 'degraded' : 'healthy', latencyMs: isDeg ? DEMO_K.LATENCY_HIGH : DEMO_K.LATENCY_LOW } ];
   };
   window.fetchGovernanceState = async function () {
     return { ticketFirst: { status: 'pass', violations: 0 }, signerFidelity: { status: 'pass', violations: 0 },

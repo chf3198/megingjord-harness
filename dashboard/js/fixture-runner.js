@@ -14,6 +14,8 @@ const fixtureRunner = (function () {
   async function loadScenario(name) {
     const meta = await fetch(FIXTURE_BASE + 'meta.json').then(function (r) { return r.json(); });
     const scenario = meta.scenarios.find(function (sc) { return sc.name === name; }) || meta.scenarios[0];
+    window.demoConfig = window.demoConfig || {};
+    window.demoConfig.currentScenario = scenario.name;
     const text = await fetch(FIXTURE_BASE + scenario.file).then(function (r) { return r.text(); });
     return text.trim().split('\n').filter(Boolean).map(function (l) { return JSON.parse(l); });
   }
