@@ -110,3 +110,37 @@ test('#1541 AC1: priority order — terminal-label wins over closeout-in-trail',
   });
   expect(result.reason).toBe('already-terminal-label');
 });
+
+// #2877: stale-baton-detector tests (AC-I2.4) — Refs #2872
+const collabHandoffComment = () => ({ body: '## COLLABORATOR_HANDOFF\n\n- scope: ...\n\nSigned-by: Soren Harper' });
+
+test('#2877 AC-I2.4a: in-progress + COLLABORATOR_HANDOFF present → warn-and-advance', () => {
+  const result = dec.decide({
+    state: 'open',
+    labels: ['status:in-progress', 'role:collaborator'],
+    comments: [collabHandoffComment()],
+  });
+  expect(result.action).toBe('warn-and-advance');
+  expect(result.reason).toBe('stale-baton-collab-handoff-not-advanced');
+  expect(result.target).toBe('status:testing');
+});
+
+test('#2877 AC-I2.4b: in-progress + no COLLABORATOR_HANDOFF → skip (existing)', () => {
+  const result = dec.decide({
+    state: 'open',
+    labels: ['status:in-progress', 'role:collaborator'],
+    comments: [],
+  });
+  expect(result.action).toBe('skip');
+  expect(result.reason).toBe('not-at-status-testing');
+});
+
+test('#2877 AC-I2.4c: status:testing present → activate (existing path unaffected)', () => {
+  const result = dec.decide({
+    state: 'open',
+    labels: ['status:testing', 'role:admin'],
+    comments: [collabHandoffComment()],
+  });
+  expect(result.action).toBe('activate');
+  expect(result.addLabels).toEqual(['status:review', 'role:consultant']);
+});
