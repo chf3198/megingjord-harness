@@ -10,7 +10,7 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from governance_state import ensure_state
-from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff
+from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, check_merged_pr
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -168,8 +168,15 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
             mismatched = sorted({ref for ref in refs if ref != expected})
             if mismatched:
                 return emit("deny", f"Commit blocked: one branch = one ticket. Remove mismatched refs: {', '.join(mismatched)}")
-    if RE_GIT_PUSH.search(joined) and not ops.get("commit"):
-        return emit("deny","Push blocked: commit step first (Admin sequencing).")
+    if RE_GIT_PUSH.search(joined):
+        # #2878: merged-branch-guard — block pushes to already-merged branches.
+        branch = current_branch(cwd)
+        if branch:
+            merged_pr = check_merged_pr(branch, cwd)
+            if merged_pr:
+                return emit("deny", f"Push blocked: branch '{branch}' was already merged via PR #{merged_pr}. Check out a new branch from main.")
+        if not ops.get("commit"):
+            return emit("deny", "Push blocked: commit step first (Admin sequencing).")
     if RE_PR_MERGE.search(joined):
         override = require_bypass_exception(joined, state, cwd)
         if override:
