@@ -40,6 +40,14 @@ jobs:
             });
             const result = decision.decide({ state: issue.state, labels, comments });
             console.log(`#${linkedNum}: consultant-activation decision=${result.action} reason=${result.reason}`);
+            // #2877: stale-baton-detector advisory path.
+            if (result.action === 'warn-and-advance') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedNum,
+                body: `⚠️ **Stale baton detected** — \`COLLABORATOR_HANDOFF\` is present on this issue but labels were not advanced to \`status:testing\`.\n\nPlease advance the baton: remove \`status:in-progress\` + \`role:collaborator\`, add \`status:testing\` + \`role:admin\`, then re-run the Admin gate.\n\nReason: \`${result.reason}\` | Target: \`${result.target}\` | Timestamp: ${new Date().toISOString()}`,
+              });
+              return;
+            }
             if (result.action !== 'activate') return;
             const remove = labels.filter(l => result.removeLabelsMatching.test(l));
             for (const l of remove) {
