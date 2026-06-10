@@ -7,10 +7,10 @@ if (window.IS_DEMO) (function () {
   const DEMO_TODAY = new Date().toISOString().slice(0, 10);
   const DEMO_YEST = new Date(Date.now() - DEMO_K.MS_PER_DAY).toISOString().slice(0, 10);
   const DEVICES = [
-    { id: '36gbwinresource', alias: '36GB Windows Resource', role: 'primary-fleet-inference', ram: '32GB', modelCount: 6, tailscaleIP: '100.91.113.16', ollama: true, openclaw: false, local: false, status: 'healthy' },
-    { id: 'windows-laptop', alias: 'OpenClaw Host', role: 'primary-inference', ram: '16GB', modelCount: 7, tailscaleIP: '100.78.22.13', ollama: true, openclaw: true, local: false, status: 'healthy' },
-    { id: 'penguin-1', alias: 'SML Chromebook', role: 'sml-agent', ram: '2.7GB', modelCount: 4, tailscaleIP: '100.86.248.35', ollama: true, openclaw: false, local: false, status: 'degraded' },
-    { id: 'chromebook-2', alias: 'Dev Chromebook', role: 'primary-dev', ram: '6.3GB', modelCount: 0, tailscaleIP: null, ollama: false, openclaw: false, local: true, status: 'healthy' },
+    { id: 'fleet-win-01', alias: 'Fleet Windows Host', role: 'primary-fleet-inference', modelCount: 6, tailscaleIP: '100.x.x.1', ollama: true, openclaw: false, local: false, status: 'healthy' },
+    { id: 'fleet-openclaw', alias: 'OpenClaw Host', role: 'primary-inference', modelCount: 7, tailscaleIP: '100.x.x.2', ollama: true, openclaw: true, local: false, status: 'healthy' },
+    { id: 'dev-1', alias: 'Dev Unit 1', role: 'sml-agent', modelCount: 4, tailscaleIP: '100.x.x.3', ollama: true, openclaw: false, local: false, status: 'degraded' },
+    { id: 'local-dev', alias: 'Local Dev', role: 'primary-dev', modelCount: 0, tailscaleIP: null, ollama: false, openclaw: false, local: true, status: 'healthy' },
   ];
   const SERVICES = [
     { id: 'github-copilot', name: 'GitHub Copilot', type: 'paid', cost: '$19/mo', status: 'active' },
@@ -22,8 +22,8 @@ if (window.IS_DEMO) (function () {
   window.runHealthChecks = async function (devices) {
     return Object.fromEntries((devices || []).map(function (d) {
       if (d.local) return [d.id, { status: 'healthy' }];
-      if (d.id === 'penguin-1') return [d.id, { status: 'degraded', models: ['qwen3.5:0.8b'] }];
-      return [d.id, { status: 'healthy', models: d.id === '36gbwinresource'
+      if (d.id === 'dev-1') return [d.id, { status: 'degraded', models: ['qwen3.5:0.8b'] }];
+      return [d.id, { status: 'healthy', models: d.id === 'fleet-win-01'
         ? ['qwen3:32b', 'qwen2.5-coder:32b', 'starcoder2:3b'] : ['qwen2.5-coder:7b', 'deepseek-coder-v2:lite'] }];
     }));
   };
@@ -31,9 +31,9 @@ if (window.IS_DEMO) (function () {
     return (devices || []).map(function (d) { return Object.assign({}, d, checks[d.id] || {}); });
   };
   window.fetchAllFleetStats = async function () {
-    return { '36gbwinresource': { tokPerSec: 80.5, activeModel: 'starcoder2:3b', utilPct: 42 },
-             'windows-laptop':  { tokPerSec: 8.4,  activeModel: 'qwen2.5-coder:7b', utilPct: 18 },
-             'penguin-1':       { tokPerSec: 12.1, activeModel: 'qwen3.5:0.8b', utilPct: 5 } };
+    return { 'fleet-win-01':    { tokPerSec: 80.5, activeModel: 'starcoder2:3b', utilPct: 42 },
+             'fleet-openclaw': { tokPerSec: 8.4,  activeModel: 'qwen2.5-coder:7b', utilPct: 18 },
+             'dev-1':          { tokPerSec: 12.1, activeModel: 'qwen3.5:0.8b', utilPct: 5 } };
   };
   window.fetchAllLiveQuotas   = async function () { return []; };
   window.pollEventBus         = async function () { return []; };
@@ -46,9 +46,9 @@ if (window.IS_DEMO) (function () {
     return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, prs: { open: 1, recent: [] } };
   };
   window.fetchFleetHealthLog = async function () {
-    return [ { ts: Date.now() - DEMO_K.MS_60S, node: '36gbwinresource', status: 'healthy', latencyMs: 12 },
-             { ts: Date.now() - DEMO_K.MS_30S, node: 'windows-laptop',  status: 'healthy', latencyMs: 47 },
-             { ts: Date.now(),                 node: 'penguin-1',        status: 'degraded', latencyMs: DEMO_K.LATENCY_HIGH } ];
+    return [ { ts: Date.now() - DEMO_K.MS_60S, node: 'fleet-win-01',    status: 'healthy',  latencyMs: 12 },
+             { ts: Date.now() - DEMO_K.MS_30S, node: 'fleet-openclaw', status: 'healthy',  latencyMs: 47 },
+             { ts: Date.now(),                 node: 'dev-1',          status: 'degraded', latencyMs: DEMO_K.LATENCY_HIGH } ];
   };
   window.fetchGovernanceState = async function () {
     return { ticketFirst: { status: 'pass', violations: 0 }, signerFidelity: { status: 'pass', violations: 0 },
