@@ -16,7 +16,7 @@ jobs:
   cross-team-edit-warn:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with: { fetch-depth: 0 }
       - name: Detect cross-cut edits
         uses: actions/github-script@v7
