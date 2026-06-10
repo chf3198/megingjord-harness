@@ -26,6 +26,12 @@ const fixtureRunner = (function () {
       app.batonState = existing.concat([ev]);
       return;
     }
+    if (ev.type === 'router' || ev.type === 'ticket') {
+      const key = ev.type === 'router' ? 'routerLog' : 'ticketLog';
+      window.demoConfig = window.demoConfig || {};
+      window.demoConfig[key] = window.demoConfig[key] || [];
+      window.demoConfig[key].unshift(ev); return;
+    }
     const typeMap = { warn: 'warn', llm: 'llm', tool: 'tool', agent: 'agent', system: 'system' };
     const evType = typeMap[ev.type] || 'system';
     const msg = ev.message || ev.type.replace(/_/g, ' ');

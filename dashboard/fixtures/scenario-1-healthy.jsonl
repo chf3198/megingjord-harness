@@ -12,3 +12,11 @@
 {"type":"system","message":"CI green","detail":"lint PASS · test-evidence PASS · admin-gate PASS","ts":12500}
 {"type":"baton","role":"consultant","issue":2809,"message":"Consultant review","detail":"rubric 9/10 · approve_for_merge","ts":14000}
 {"type":"system","message":"Session complete","detail":"cost: $0.00 fleet · $0.04 paid · 74% fleet-routed","ts":15800}
+{"type":"ticket","number":2809,"action":"created","title":"feat(dashboard): add transport demo mode","ts":2100}
+{"type":"router","lane":"fleet","model":"qwen3:32b","tokens":1820,"decision":"code-change: fleet direct (G3)","ts":5500}
+{"type":"router","lane":"fleet","model":"qwen2.5-coder:7b","tokens":340,"decision":"autocomplete: fleet direct","ts":7500}
+{"type":"ticket","number":2809,"action":"in-progress","title":"Collaborator active: transport demo mode","ts":8200}
+{"type":"router","lane":"haiku","model":"claude-haiku-3","tokens":2100,"decision":"4-tool chain: escalated to haiku","ts":9800}
+{"type":"router","lane":"fleet","model":"qwen3:32b","tokens":950,"decision":"code review: fleet direct","ts":12000}
+{"type":"router","lane":"fleet","model":"deepseek-coder-v2:lite","tokens":480,"decision":"test gen: fleet direct","ts":13500}
+{"type":"ticket","number":2809,"action":"merged","title":"feat(dashboard): transport demo mode shipped","ts":15500}
