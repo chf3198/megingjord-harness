@@ -1,6 +1,7 @@
 // Stress tests for #2795 fleet-dev execution path — escalation/gate chaos (G6) + the real secret-exposure
 // security gate over UNTRUSTED fleet output (G4) + a p99 budget (G7). Network/process-free (injected).
 const { test, expect } = require('@playwright/test');
+process.env.MEGINGJORD_NO_TELEMETRY = '1'; // #2885: tests must never write prod telemetry
 const { executeFleetDev, escalateTier } = require('../scripts/global/fleet-dev-execute.js');
 const { defaultSecurityGate, runChecks } = require('../scripts/global/fleet-dev-gates.js');
 

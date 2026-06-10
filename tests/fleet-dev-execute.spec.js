@@ -1,6 +1,7 @@
 // Refs #2795 P1-2 of Epic #2791 — fleet-dev execution path. Network/process-free: dispatch + both gates
 // + emit are injected.
 const { test, expect } = require('@playwright/test');
+process.env.MEGINGJORD_NO_TELEMETRY = '1'; // #2885: tests must never write prod telemetry
 const {
   executeFleetDev, runObjectiveGate, escalateTier, safeGate,
 } = require('../scripts/global/fleet-dev-execute.js');

@@ -9,6 +9,7 @@
 // Pure: the caller owns the persisted state dict; telemetry emit is injectable.
 const fs = require('fs');
 const path = require('path');
+const { resolveTelemetryFile } = require('./fleet-telemetry-path');
 
 const WINDOW_N = 20;     // velocity-relative window: judge on the last N attempts (not calendar)
 const MIN_SAMPLE = 5;    // never transition on a tiny sample → hold (fail-safe)
@@ -69,7 +70,9 @@ function routeClass(state, taskClass) {
 }
 
 function defaultEmit(record) {
-  try { fs.mkdirSync(path.dirname(TELEMETRY), { recursive: true }); fs.appendFileSync(TELEMETRY, JSON.stringify(record) + '\n'); }
+  if (process.env.MEGINGJORD_NO_TELEMETRY) return; // test/CI opt-out — never write prod telemetry
+  const file = resolveTelemetryFile(TELEMETRY); // traversal-safe MEGINGJORD_TELEMETRY_DIR redirect
+  try { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.appendFileSync(file, JSON.stringify(record) + '\n'); }
   catch { /* best-effort */ }
 }
 

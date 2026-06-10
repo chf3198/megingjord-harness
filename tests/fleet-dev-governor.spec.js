@@ -1,5 +1,6 @@
 // Refs #2796 P1-3 of Epic #2791 — escalation-rate governor. Pure, deterministic.
 const { test, expect } = require('@playwright/test');
+process.env.MEGINGJORD_NO_TELEMETRY = '1'; // #2885: tests must never write prod telemetry
 const {
   recordOutcome, governClass, escalationRate, routeClass, classEntry, WINDOW_N,
 } = require('../scripts/global/fleet-dev-governor.js');
