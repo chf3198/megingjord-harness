@@ -60,3 +60,8 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* Scale SVG diagram for narrow viewports where 9px node text would be unreadable */
+@media (max-width: 480px) {
+  .cf-wrap { transform: scale(0.7); transform-origin: top left; }
+}
