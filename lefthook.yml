@@ -35,3 +35,6 @@ pre-push:
     # server-side via .github/workflows/test-evidence.yml on PR.
     git-freshness:
       run: node scripts/global/git-freshness-check.js || true
+    # #2878: merged-branch-guard — block pushes to already-merged branches.
+    merged-branch-guard:
+      run: python3 hooks/scripts/merged-branch-guard.py
