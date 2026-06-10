@@ -236,6 +236,16 @@
       "_rationale": "Cross-family adversarial review prefers fleet (qwen2.5-coder). Haiku ceiling for high-complexity exploit reasoning."
     }
   },
+  "fleet_dev_deny_paths": {
+    "_rationale": "Least-Agency (OWASP-2026, design D9): high-blast-radius paths are OFF-LIMITS to autonomous fleet-development regardless of measured capability. Only senior-tier (premium) or human may author. Canonicalized substring/segment matching by scripts/global/fleet-dev-deny-paths.js (URI-decode + NFKC + non-ASCII fail-closed). Precision is SECURITY-FIRST: a false positive only escalates legit work to premium (G3 cost, acceptable); a false negative is a breach (unacceptable) — so patterns err broad. Edits are CODEOWNERS-governed via the /scripts/global/ entry.",
+    "patterns": [
+      "auth/", "/auth", "authn", "authz", "authentication", "/login", "/login/", "login/", "session/", "oauth", "oidc", "sso/", "saml", "jwt", "kerberos",
+      "crypto", "/keys/", "key-management", "keystore", "secret", "credential", "signing", "ed25519", "private-key", "certificate", "/cert/", ".pem", ".crt", "encrypt", "decrypt",
+      "iam/", "permission", "rbac", "role-policy", "access-control", "acl/", "entitlement", ".tf",
+      "pretool_guard", "canonical_main_enforcer", "governance/", "/megalint/", "baton-gates", "-gate.js", "-gate.py", "label-lint",
+      ".github/workflows/", "/release/", "release.sh", "release.yml", "publish", "deploy.sh", "sync.sh", "ci/", "/pipeline", "jenkinsfile", ".circleci/", ".travis.yml"
+    ]
+  },
   "code_dev_profile_meta": {
     "schema_version": "1.0",
     "_currency_note": "Per-model code_dev_profile values are DATED ESTIMATES (D6), not hard guarantees — refresh from public SWE-bench Verified leaderboards + local eval when a model is upgraded. Consumed by scripts/global/fleet-dev-eligibility.js.",
