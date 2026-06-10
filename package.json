@@ -265,6 +265,7 @@
     "gov:parity": "node scripts/global/megalint/parity-validator.js",
     "routing:fallback-report": "node scripts/global/routing-fallback-report.js",
     "routing:free-cloud-report": "node scripts/global/free-cloud-usage-report.js",
+    "routing:fleet-cost-report": "node scripts/global/fleet-dev-cost-report.js",
     "it-ops:usage-report": "node scripts/global/it-bypass-usage-report.js",
     "test:collaborator-input-shape": "node --test tests/collaborator-handoff-input-shape.spec.js",
     "test:compatibility": "node --test tests/orchestrator-compatibility.spec.js",
