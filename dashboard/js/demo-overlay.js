@@ -25,7 +25,7 @@ if (window.IS_DEMO) (function () {
       + '<button id="demo-switch-btn">Switch Scenario</button>'
       + '<button id="demo-glossary-btn">\uD83D\uDCD6 Concepts</button>'
       + '<a href="https://github.com/chf3198/megingjord-harness#readme"'
-      + ' target="_blank" rel="noopener noreferrer">\uD83D\uDE80 Install locally \u2192</a>';
+      + ' target="_blank" rel="noopener noreferrer">Learn how it works</a>';
     document.body.prepend(banner);
     document.getElementById('demo-switch-btn').addEventListener('click', showPicker);
     document.getElementById('demo-glossary-btn').addEventListener('click', toggleGlossary);
