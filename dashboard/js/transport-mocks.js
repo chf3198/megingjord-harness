@@ -46,7 +46,7 @@ if (window.IS_DEMO) (function () {
     return { fleet: { calls: DEMO_K.FLEET_CALLS, pct: 74 }, haiku: { calls: 41, pct: 16 }, premium: { calls: 26, pct: 10 }, free: { calls: 0, pct: 0 } };
   };
   window.fetchWikiHealth   = async function () { return { loaded: true, pages: 47, stale: 2 }; };
-  window.fetchWikiMetrics  = async function () { return { total: 47, fresh: 45, stale: 2, avgTrust: 0.91 }; };
+  window.fetchWikiMetrics  = async function () { return { total: 47, fresh: 45, stale: 2, avgTrust: 0.91, grade: 82, score: 82 }; };
   window.pollGitHub        = async function () {
     return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, pulls: { open: 1, merged: 3, recent: [] }, actions: { recent: [] }, branches: { count: 2, active: ['main', 'feat/dashboard-demo'] } };
   };
@@ -66,7 +66,12 @@ if (window.IS_DEMO) (function () {
   window.fetchTokenTelemetrySummary = async function () {
     return { todayTokens: DEMO_K.TOKENS_TODAY, fleetPct: 74, paidTokens: DEMO_K.PAID_TOKENS, fleetSavingsUsd: 0.19, paidSpendUsd: 0.23 };
   };
-  window.fetchQualityParitySummary  = async function () { return { fleetPassRate: 0.94, paidPassRate: 0.97, delta: 0.03, judgeCalls: 42 }; };
+  window.fetchQualityParitySummary  = async function () {
+    return { fleetPassRate: 0.94, paidPassRate: 0.97, delta: 0.03, judgeCalls: 42,
+      mean: 94, floor: 90, calibratedFloor: 91,
+      meanParity: 0.94, parityFloor: 0.90, floorDelta: 0.03, calibrated_floor: 0.91,
+      readiness: { liveMode: true } };
+  };
   window.fetchGoalHealthSummary = async function () {
     return { G1: { score: 9, label: 'Governance' }, G2: { score: 8, label: 'Quality' },
              G3: { score: 9, label: 'Zero Cost' },  G4: { score: 8, label: 'Privacy' },
