@@ -30,6 +30,7 @@ if (window.IS_DEMO) (function () {
 
   /* getTicketLog — synchronous; returns demo ticket entries. */
   window.getTicketLog = function () {
+    if (window.demoConfig && window.demoConfig.ticketLog && window.demoConfig.ticketLog.length) return window.demoConfig.ticketLog;
     return [
       { id: DEMO_TICKET, title: 'Demo Mode Quality Sprint', status: 'in-progress', role: 'collaborator' },
       { id: DEMO_PREV,   title: 'Fix demo device IDs',      status: 'done',         role: null },
@@ -47,6 +48,7 @@ if (window.IS_DEMO) (function () {
 
   /* getRouterLog — synchronous; fallback for buildBatonState when getBatonState absent. */
   window.getRouterLog = function () {
+    if (window.demoConfig && window.demoConfig.routerLog && window.demoConfig.routerLog.length) return window.demoConfig.routerLog;
     return [
       { lane: 'fleet',   model: 'qwen2.5-coder:32b', tokens: TOK_FLEET,   cost: 0,           ts: Date.now() - MS_8S },
       { lane: 'haiku',   model: 'claude-haiku-3',     tokens: TOK_HAIKU,   cost: COST_HAIKU,  ts: Date.now() - MS_5S },
