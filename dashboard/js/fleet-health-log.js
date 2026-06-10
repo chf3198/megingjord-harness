@@ -8,6 +8,10 @@ async function fetchFleetHealthLog() {
   } catch { return []; }
 }
 
+function fmtTs(ts) {
+  return ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+}
+
 function renderFleetHealthLog(log) {
   if (!log || !log.length) {
     return `<div class="fleet-log-empty">
@@ -19,7 +23,7 @@ function renderFleetHealthLog(log) {
   const rows = log.slice(-30).reverse().map(e => {
     const icon = e.status.includes('recovered') ? '🟢' :
       e.status.includes('offline') ? '🔴' : '🟡';
-    const time = e.ts ? new Date(e.ts).toLocaleString() : '';
+    const time = fmtTs(e.ts);
     return `<div class="fleet-log-row ${e.status}">
       <span class="fleet-log-icon">${icon}</span>
       <span class="fleet-log-time">${esc(time)}</span>

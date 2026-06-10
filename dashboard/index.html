@@ -38,11 +38,11 @@
             <button @click="setView('help')" :class="{active:isView('help')}" data-tip="view-help" title="Help">📘 Help</button>
         </nav>
         <div class="header-actions">
-            <button id="btn-refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh">↻</button>
-            <button id="btn-auto" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" :title="'Auto-refresh: '+config.refreshSec+'s'">⏱️</button>
-            <button id="btn-test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Stress test">🧪</button>
-            <button id="btn-tips" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Tooltips">💡</button>
-            <button id="btn-contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="Contrast">◐</button>
+            <button id="btn-refresh" aria-label="Refresh" @click="refreshAll()" :disabled="loading" data-tip="refresh" title="Refresh">↻<span class="btn-label">Refresh</span></button>
+            <button id="btn-auto" aria-label="Timer" @click="toggleAutoRefresh()" :aria-pressed="autoRefreshEnabled" data-tip="auto" :title="'Auto-refresh: '+config.refreshSec+'s'">⏱️<span class="btn-label">Timer</span></button>
+            <button id="btn-test" aria-label="Test" @click="runQuickTest()" :disabled="testRun.running" data-tip="test" title="Stress test">🧪<span class="btn-label">Test</span></button>
+            <button id="btn-tips" aria-label="Hint" @click="toggleTips()" :aria-pressed="tooltipsEnabled" data-tip="tips" title="Tooltips">💡<span class="btn-label">Hint</span></button>
+            <button id="btn-contrast" aria-label="Contrast" @click="setHighContrast(!config.highContrast)" :aria-pressed="config.highContrast" data-tip="contrast" title="Contrast">◐<span class="btn-label">Contrast</span></button>
         </div>
     </header>
     <main id="main-content" class="dashboard-grid" :class="'view-'+currentView">
