@@ -235,5 +235,42 @@
       "high": "haiku",
       "_rationale": "Cross-family adversarial review prefers fleet (qwen2.5-coder). Haiku ceiling for high-complexity exploit reasoning."
     }
+  },
+  "code_dev_profile_meta": {
+    "schema_version": "1.0",
+    "_currency_note": "Per-model code_dev_profile values are DATED ESTIMATES (D6), not hard guarantees — refresh from public SWE-bench Verified leaderboards + local eval when a model is upgraded. Consumed by scripts/global/fleet-dev-eligibility.js.",
+    "refreshed": "2026-06-10",
+    "default_profile": {
+      "swe_bench_verified": 0.0,
+      "repo_reasoning": 0.2,
+      "tool_calling": 0.3,
+      "context_stability_tokens": 4000,
+      "latency_tok_per_sec": 7,
+      "refreshed": "2026-06-10",
+      "source": "conservative-default",
+      "estimate": true
+    }
+  },
+  "code_dev_profiles": {
+    "qwen2.5-coder:32b": {
+      "swe_bench_verified": 0.31,
+      "repo_reasoning": 0.55,
+      "tool_calling": 0.6,
+      "context_stability_tokens": 8000,
+      "latency_tok_per_sec": 32,
+      "refreshed": "2026-06-10",
+      "source": "public SWE-bench Verified leaderboard range (estimate; refresh per D6)",
+      "estimate": true
+    },
+    "qwen2.5-coder:7b": {
+      "swe_bench_verified": 0.18,
+      "repo_reasoning": 0.3,
+      "tool_calling": 0.4,
+      "context_stability_tokens": 6000,
+      "latency_tok_per_sec": 7,
+      "refreshed": "2026-06-10",
+      "source": "public benchmark range (estimate; refresh per D6)",
+      "estimate": true
+    }
   }
 }
