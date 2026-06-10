@@ -293,6 +293,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
 | `it-ops:usage-report` | `node scripts/global/it-bypass-usage-report.js` |
+| `label:provision` | `node scripts/global/label-provision.js` |
 | `lint` | `node scripts/lint.js` |
 | `lint:all` | `npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md && npm run lint:decisions` |
 | `lint:coverage-metric` | `node scripts/global/lint-coverage-metric.js` |
