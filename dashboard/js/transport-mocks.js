@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 if (window.IS_DEMO) (function () {
   'use strict';
-  const DEMO_K = { FLEET_CALLS: 187, TICKET: 2809, MS_60S: 60000, MS_30S: 30000, LATENCY_HIGH: 380, TOKENS_TODAY: 187400, PAID_TOKENS: 48800, RECONCILED: 183, MS_PER_DAY: 86400000, MS_2MIN: 120000 };
+  const DEMO_K = { FLEET_CALLS: 187, TICKET: 2809, MS_60S: 60000, MS_30S: 30000, LATENCY_HIGH: 380, TOKENS_TODAY: 187400, PAID_TOKENS: 48800, RECONCILED: 183, MS_PER_DAY: 86400000, MS_2MIN: 120000, CF_NEURONS: 8900, Q_LIMIT_FLEET: 500, CF_LIMIT: 10000, Q_LIMIT_COPILOT: 300 };
   const DEMO_TODAY = new Date().toISOString().slice(0, 10);
   const DEMO_YEST = new Date(Date.now() - DEMO_K.MS_PER_DAY).toISOString().slice(0, 10);
   const DEVICES = [
@@ -35,7 +35,12 @@ if (window.IS_DEMO) (function () {
              'fleet-openclaw': { tokPerSec: 8.4,  activeModel: 'qwen2.5-coder:7b', utilPct: 18 },
              'dev-1':          { tokPerSec: 12.1, activeModel: 'qwen3.5:0.8b', utilPct: 5 } };
   };
-  window.fetchAllLiveQuotas   = async function () { return []; };
+  window.fetchAllLiveQuotas   = async function () {
+    return [
+      { id: 'openrouter',    name: 'OpenRouter Credits',  used: 2.84, limit: 10,   percent: 28, period: 'account' },
+      { id: 'cloudflare-ai', name: 'Cloudflare AI Neurons', used: DEMO_K.CF_NEURONS, limit: DEMO_K.CF_LIMIT, percent: 89, period: 'daily' },
+    ];
+  };
   window.pollEventBus         = async function () { return []; };
   window.fetchRouterLaneStats = async function () {
     return { fleet: { calls: DEMO_K.FLEET_CALLS, pct: 74 }, haiku: { calls: 41, pct: 16 }, premium: { calls: 26, pct: 10 }, free: { calls: 0, pct: 0 } };
@@ -73,7 +78,11 @@ if (window.IS_DEMO) (function () {
   window.fetchAgentSessions = async function () {
     return [{ id: 's1', agent: 'copilot', model: 'claude-sonnet-4.6', ticket: DEMO_K.TICKET, status: 'active', startTs: Date.now() - DEMO_K.MS_2MIN, costUsd: 0.0041 }];
   };
-  window.buildQuotaList = function (services) {
-    return (services || []).map(function (s) { return Object.assign({}, s, { used: 0, limit: null }); });
+  window.buildQuotaList = function () {
+    return [
+      { id: 'copilot-pro', name: 'Copilot Pro Requests', used: DEMO_K.FLEET_CALLS, limit: DEMO_K.Q_LIMIT_COPILOT, percent: 62, period: 'monthly' },
+      { id: 'hamr-worker', name: 'HAMR Worker Calls',    used: 89,  limit: DEMO_K.Q_LIMIT_FLEET, percent: 18, period: 'daily' },
+      { id: 'litellm',     name: 'LiteLLM Fleet Tokens', used: DEMO_K.FLEET_CALLS, limit: DEMO_K.Q_LIMIT_FLEET, percent: 37, period: 'daily' },
+    ];
   };
 })();
