@@ -10,7 +10,7 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from governance_state import ensure_state
-from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff
+from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -244,6 +244,10 @@ def main() -> int:
             gated = (not edit_paths) or any_path_in_governed_repo(edit_paths)
             if not derived and gated:
                 return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
+        elif not flags.get("code_touched"):
+            # #2876: first-edit MANAGER_HANDOFF ordering gate — Refs #2871
+            if not linked_issue_has_manager_handoff(cwd):
+                return emit("deny", "File edit blocked: MANAGER_HANDOFF not found on linked issue (#2876). Post Manager scope before first code edit.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash","run_command","send_command_input"}:
         # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
         # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.

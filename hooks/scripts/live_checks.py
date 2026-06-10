@@ -119,3 +119,23 @@ def linked_issue_has_collab_handoff(cwd: str) -> bool:
         return any("COLLABORATOR_HANDOFF" in c.get("body", "") for c in data.get("comments", []))
     except Exception:
         return True  # on API error → allow (fail open, not block)
+
+
+def linked_issue_has_manager_handoff(cwd: str) -> bool:
+    """Return True if linked issue (from branch name) has MANAGER_HANDOFF comment."""
+    try:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            text=True, stderr=subprocess.DEVNULL, cwd=cwd,
+        ).strip()
+        m = RE_BRANCH_ISSUE.match(branch)
+        if not m:
+            return True  # branch has no ticket ref → can't block
+        r = subprocess.run(
+            ["gh", "issue", "view", m.group(1), "--json", "comments"],
+            capture_output=True, text=True, cwd=cwd, timeout=20,
+        )
+        data = json.loads(r.stdout or "{}")
+        return any("MANAGER_HANDOFF" in c.get("body", "") for c in data.get("comments", []))
+    except Exception:
+        return True  # on API error → allow (fail open, not block)

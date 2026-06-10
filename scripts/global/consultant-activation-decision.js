@@ -18,9 +18,16 @@
 
 const TERMINAL_LABELS = ['status:done', 'status:cancelled'];
 const CLOSEOUT_HEADER_RE = /(^|\n)\s*(?:\*\*|##\s+)?CONSULTANT_CLOSEOUT(?:_EPIC_CLOSEOUT)?\b/;
+// #2877: stale-baton-detector — detects COLLABORATOR_HANDOFF posted but labels
+// not advanced to status:testing. Refs #2872 (AC-R2).
+const COLLAB_HANDOFF_RE = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
 
 function hasCloseoutComment(comments) {
   return (comments || []).some((c) => CLOSEOUT_HEADER_RE.test((c && c.body) || ''));
+}
+
+function hasCollabHandoffComment(comments) {
+  return (comments || []).some((c) => COLLAB_HANDOFF_RE.test((c && c.body) || ''));
 }
 
 function decide({ state, labels = [], comments = [] }) {
@@ -32,6 +39,13 @@ function decide({ state, labels = [], comments = [] }) {
   }
   if (hasCloseoutComment(comments)) {
     return { action: 'skip', reason: 'closeout-already-posted' };
+  }
+  // #2877: stale-baton-detector — COLLABORATOR_HANDOFF found but labels not
+  // advanced from status:in-progress to status:testing.
+  if (labels.includes('status:in-progress') && !labels.includes('status:testing')) {
+    if (hasCollabHandoffComment(comments)) {
+      return { action: 'warn-and-advance', reason: 'stale-baton-collab-handoff-not-advanced', target: 'status:testing' };
+    }
   }
   if (!labels.includes('status:testing')) {
     return { action: 'skip', reason: 'not-at-status-testing' };
@@ -45,5 +59,6 @@ function decide({ state, labels = [], comments = [] }) {
 }
 
 module.exports = {
-  decide, hasCloseoutComment, TERMINAL_LABELS, CLOSEOUT_HEADER_RE,
+  decide, hasCloseoutComment, hasCollabHandoffComment,
+  TERMINAL_LABELS, CLOSEOUT_HEADER_RE, COLLAB_HANDOFF_RE,
 };
