@@ -11,12 +11,12 @@ const LLM_MODELS = [
   { name: 'GPT-5.2', ctx: 128000, tier: 'cloud', mult: 1 },
   { name: 'GPT-5 mini', ctx: 128000, tier: 'cloud', mult: 0 },
   { name: 'Grok Code Fast 1', ctx: 128000, tier: 'cloud', mult: 0.25 },
-  { name: 'qwen2.5:7b', ctx: 128000, tier: 'local', device: 'windows-laptop' },
-  { name: 'mistral:latest', ctx: 32000, tier: 'local', device: 'windows-laptop' },
-  { name: 'qwen3.5:0.8b', ctx: 32000, tier: 'local', device: 'penguin-1' },
-  { name: 'phi3:mini', ctx: 4000, tier: 'local', device: 'windows-laptop' },
-  { name: 'gemma3:270m', ctx: 8000, tier: 'local', device: 'penguin-1' },
-  { name: 'tinyllama', ctx: 2048, tier: 'local', device: 'penguin-1' },
+  { name: 'qwen2.5:7b', ctx: 128000, tier: 'local', device: 'fleet-host' },
+  { name: 'mistral:latest', ctx: 32000, tier: 'local', device: 'fleet-host' },
+  { name: 'qwen3.5:0.8b', ctx: 32000, tier: 'local', device: 'dev-2' },
+  { name: 'phi3:mini', ctx: 4000, tier: 'local', device: 'fleet-host' },
+  { name: 'gemma3:270m', ctx: 8000, tier: 'local', device: 'dev-2' },
+  { name: 'tinyllama', ctx: 2048, tier: 'local', device: 'dev-2' },
 ];
 
 function renderLLMContext() {
