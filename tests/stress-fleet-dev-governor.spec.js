@@ -1,6 +1,7 @@
 // Stress tests for #2796 escalation governor — anti-flap / oscillation chaos (the hysteresis invariant)
 // + adversarial input (G6) + a p99 budget (G7). Pure, deterministic.
 const { test, expect } = require('@playwright/test');
+process.env.MEGINGJORD_NO_TELEMETRY = '1'; // #2885: tests must never write prod telemetry
 const {
   recordOutcome, governClass, routeClass, classEntry, WINDOW_N,
 } = require('../scripts/global/fleet-dev-governor.js');

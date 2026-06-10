@@ -7,6 +7,7 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { resolveTelemetryFile } = require('./fleet-telemetry-path');
 
 const TELEMETRY = path.join(process.env.HOME || '', '.megingjord', 'fleet-dev-telemetry.jsonl');
 const CHECK_TIMEOUT_MS = 180000;
@@ -46,9 +47,11 @@ function defaultSecurityGate(result) {
 
 // Append one telemetry record as a JSONL line; best-effort, never throws (G6/G8).
 function defaultEmit(record) {
+  if (process.env.MEGINGJORD_NO_TELEMETRY) return; // test/CI opt-out — never write prod telemetry
+  const file = resolveTelemetryFile(TELEMETRY); // traversal-safe MEGINGJORD_TELEMETRY_DIR redirect
   try {
-    fs.mkdirSync(path.dirname(TELEMETRY), { recursive: true });
-    fs.appendFileSync(TELEMETRY, JSON.stringify(record) + '\n');
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.appendFileSync(file, JSON.stringify(record) + '\n');
   } catch { /* telemetry is best-effort */ }
 }
 
