@@ -60,3 +60,40 @@ test('#2819 repoMap refuses paths escaping root (path traversal)', () => {
   expect(repoMap(['../../etc/passwd'], ROOT)[0]).toEqual({ path: '../../etc/passwd', available: false });
   expect(repoMap([SELF], ROOT)[0].available).toBe(true); // legit path still works
 });
+
+// #2802 robustness (gemini-2.5-pro OOM/binary finding): skip oversize + binary files, not crash.
+test('#2802 repoMap skips an oversize file (OOM guard) but reads its own text source', () => {
+  const fs = require('fs');
+  const os = require('os');
+  const big = path.join(os.tmpdir(), `fleet-ctx-big-${process.pid}.txt`);
+  fs.writeFileSync(big, 'x'.repeat(300 * 1024)); // 300KB > MAX_FILE_BYTES (256KB)
+  try {
+    // oversize file lives outside ROOT, so pass its own dir as root to isolate the size check
+    expect(repoMap([path.basename(big)], os.tmpdir())[0].available).toBe(false);
+  } finally { fs.unlinkSync(big); }
+  expect(repoMap([SELF], ROOT)[0].available).toBe(true); // text source is NOT misflagged as binary
+});
+
+test('#2802 repoMap flags a NUL-bearing (binary) file as unavailable', () => {
+  const fs = require('fs');
+  const os = require('os');
+  const bin = path.join(os.tmpdir(), `fleet-ctx-bin-${process.pid}.dat`);
+  fs.writeFileSync(bin, Buffer.from([0x41, 0x00, 0x42])); // 'A', NUL, 'B'
+  try {
+    expect(repoMap([path.basename(bin)], os.tmpdir())[0].available).toBe(false);
+  } finally { fs.unlinkSync(bin); }
+});
+
+// #2802 G8 (gemini-2.5-pro observability finding): silent by default, diagnosable under opt-in flag.
+test('#2802 ticketContext failure is silent by default, logs to stderr under debug flag', () => {
+  const { spawnSync } = require('child_process');
+  // issue 999999999 does not exist → `gh issue view` fails → runQuiet catch path exercised.
+  const script = "const{ticketContext}=require('./scripts/global/fleet-context-bundle.js');"
+    + 'console.log(JSON.stringify(ticketContext(999999999)));';
+  const opts = { cwd: path.join(__dirname, '..'), encoding: 'utf8' };
+  const quiet = spawnSync('node', ['-e', script], { ...opts, env: { ...process.env } });
+  const debug = spawnSync('node', ['-e', script], { ...opts, env: { ...process.env, MEGINGJORD_FLEET_CTX_DEBUG: '1' } });
+  expect(quiet.status).toBe(0); // graceful: never throws
+  expect(quiet.stderr).not.toContain('[fleet-context]'); // silent by default
+  expect(debug.stderr).toContain('[fleet-context] source unavailable'); // diagnosable on opt-in
+});
