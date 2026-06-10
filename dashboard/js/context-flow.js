@@ -9,11 +9,11 @@ function renderContextFlow() {
     { x: 370, y: 50, icon: '☁️', label: 'Cloud LLM', sub: 'Copilot API', tip: 'GitHub Copilot cloud models (GPT-4o, Claude). Primary route. Responses stream back to VS Code.' },
     { x: 540, y: 50, icon: '🐙', label: 'GitHub', sub: 'API + Actions', tip: 'GitHub API: issues, PRs, commits. Actions CI/CD. Context flows bidirectionally via gh CLI and webhooks.' },
     { x: 120, y: 150, icon: '🌐', label: 'Tailscale', sub: 'VPN Mesh', tip: 'Encrypted WireGuard mesh connecting all fleet devices. Routes traffic between Chromebooks and Windows laptop.' },
-    { x: 290, y: 150, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM :4000', tip: 'LiteLLM proxy on Windows laptop. Routes to local Ollama models. Fallback when cloud is rate-limited.' },
-    { x: 460, y: 150, icon: '🤖', label: 'Ollama', sub: 'Local 7B', tip: 'Local inference on Windows laptop (16GB RAM). Runs 7B models. Accessed via OpenClaw proxy over Tailscale.' },
-    { x: 60, y: 210, icon: '💻', label: 'CB-2', sub: 'This machine', tip: 'Chromebook-2 (penguin): primary dev workstation. 2.7GB RAM. Runs VS Code + dashboard.' },
-    { x: 200, y: 210, icon: '💻', label: 'CB-1', sub: 'SLM node', tip: 'Chromebook-1 (penguin-1): runs Ollama with tiny SLM models for lightweight local inference.' },
-    { x: 370, y: 210, icon: '🖥️', label: 'Win Laptop', sub: 'OpenClaw host', tip: 'Windows laptop (16GB). Hosts OpenClaw + Ollama. Primary fleet compute for local LLM inference.' },
+    { x: 290, y: 150, icon: '⚡', label: 'OpenClaw', sub: 'LiteLLM Proxy', tip: 'LiteLLM proxy on fleet host. Routes to local Ollama models. Fallback when cloud is rate-limited.' },
+    { x: 460, y: 150, icon: '🤖', label: 'Ollama', sub: 'Local LLM', tip: 'Local inference on fleet host. Runs quantized open-source models. Accessed via OpenClaw proxy over Tailscale.' },
+    { x: 60, y: 210, icon: '💻', label: 'Dev-1', sub: 'Workstation', tip: 'Primary dev workstation. Runs VS Code + dashboard.' },
+    { x: 200, y: 210, icon: '💻', label: 'Dev-2', sub: 'SLM node', tip: 'Secondary dev node: runs Ollama with small models for lightweight local inference.' },
+    { x: 370, y: 210, icon: '🖥️', label: 'Fleet Host', sub: 'OpenClaw host', tip: 'Fleet compute node. Hosts OpenClaw + Ollama. Primary local LLM inference.' },
   ];
   const arrows = [
     { from: 0, to: 1, label: 'prompt', tip: 'User prompt + file context + conversation history sent to model router' },
@@ -21,9 +21,9 @@ function renderContextFlow() {
     { from: 1, to: 5, label: 'local', dashed: true, tip: 'Fallback route: prompt sent to OpenClaw LiteLLM proxy over Tailscale' },
     { from: 5, to: 6, label: 'inference', tip: 'OpenClaw forwards to local Ollama for model inference' },
     { from: 4, to: 5, label: 'mesh', dashed: true, tip: 'Tailscale VPN tunnels traffic between devices' },
-    { from: 7, to: 4, label: '', dashed: true, tip: 'CB-2 connects to Tailscale mesh' },
-    { from: 8, to: 4, label: '', dashed: true, tip: 'CB-1 connects to Tailscale mesh' },
-    { from: 9, to: 5, label: 'host', tip: 'Windows laptop hosts the OpenClaw proxy locally' },
+    { from: 7, to: 4, label: '', dashed: true, tip: 'Dev-1 connects to Tailscale mesh' },
+    { from: 8, to: 4, label: '', dashed: true, tip: 'Dev-2 connects to Tailscale mesh' },
+    { from: 9, to: 5, label: 'host', tip: 'Fleet host runs OpenClaw proxy locally' },
     { from: 0, to: 3, label: 'gh cli', tip: 'VS Code uses gh CLI for issue/PR operations' },
   ];
   return `<div class="cf-wrap"><svg viewBox="0 0 ${W} ${H}"
