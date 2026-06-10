@@ -139,3 +139,22 @@ def linked_issue_has_manager_handoff(cwd: str) -> bool:
         return any("MANAGER_HANDOFF" in c.get("body", "") for c in data.get("comments", []))
     except Exception:
         return True  # on API error → allow (fail open, not block)
+
+
+def check_merged_pr(branch: str, cwd: str) -> int | None:
+    """Return the merged PR number for branch if one exists, None otherwise.
+
+    Fail-open: returns None on any error (gh CLI unavailable, timeout, etc.).
+    Refs #2878 (AC-I3.1).
+    """
+    try:
+        r = subprocess.run(
+            ["gh", "pr", "list", "--head", branch, "--state", "merged", "--json", "number"],
+            capture_output=True, text=True, cwd=cwd, timeout=20,
+        )
+        data = json.loads(r.stdout or "[]")
+        if data:
+            return int(data[0]["number"])
+        return None
+    except Exception:
+        return None  # fail-open — never block on API error
