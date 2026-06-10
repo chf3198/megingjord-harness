@@ -26,7 +26,10 @@ function renderGitHubMonitor(gh) {
     <span style="font-size:1.5rem">🔄</span>
     <p>Connecting to GitHub API…</p>
     <p style="font-size:0.72rem;color:var(--text-muted)">Data loads on first refresh cycle</p></div>`;
-  const { issues, pulls, actions, branches } = gh;
+  const issues = gh.issues || { open: 0, recent: [] };
+  const pulls = gh.pulls || { open: 0, merged: 0, recent: [] };
+  const actions = gh.actions || { recent: [] };
+  const branches = gh.branches || { count: 0, active: [] };
   const statsHtml = `<div class="gh-stats">
     <div class="gh-stat"><span class="gh-num">${issues.open}</span><span class="gh-lbl">Open Issues</span></div>
     <div class="gh-stat"><span class="gh-num">${pulls.open}</span><span class="gh-lbl">Open PRs</span></div>

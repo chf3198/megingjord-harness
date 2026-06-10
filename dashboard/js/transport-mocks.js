@@ -43,7 +43,7 @@ if (window.IS_DEMO) (function () {
   window.fetchWikiHealth   = async function () { return { loaded: true, pages: 47, stale: 2 }; };
   window.fetchWikiMetrics  = async function () { return { total: 47, fresh: 45, stale: 2, avgTrust: 0.91 }; };
   window.pollGitHub        = async function () {
-    return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, prs: { open: 1, recent: [] } };
+    return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, pulls: { open: 1, merged: 3, recent: [] }, actions: { recent: [] }, branches: { count: 2, active: ['main', 'feat/dashboard-demo'] } };
   };
   window.fetchFleetHealthLog = async function () {
     return [ { ts: Date.now() - DEMO_K.MS_60S, node: 'fleet-win-01',    status: 'healthy',  latencyMs: 12 },
