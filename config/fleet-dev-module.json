@@ -15,6 +15,7 @@
     "scripts/global/fleet-dev-deny-paths.js",
     "scripts/global/fleet-dev-anti-goodhart.js",
     "scripts/global/fleet-dev-critic-calibration.js",
-    "scripts/global/fleet-dev-cost-report.js"
+    "scripts/global/fleet-dev-cost-report.js",
+    "scripts/global/fleet-critic-flaw-classifier.js"
   ]
 }

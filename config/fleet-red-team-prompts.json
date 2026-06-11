@@ -35,7 +35,7 @@
       "expected_token_range": [500, 1000]
     },
     "pr-diff": {
-      "prompt_template": "Adversarial code-review of PR diff. Find concurrency bugs, security risks, perf regressions, merge-safety hazards. Classify ACCEPT/REJECT/PARTIAL. Max 6 findings.\n\n=== DIFF ===\n{{content}}",
+      "prompt_template": "Adversarial code-review of PR diff. Find concurrency bugs, security risks, perf regressions, merge-safety hazards. Classify each finding ACCEPT/REJECT/PARTIAL, and APPEND machine-readable tags to that same line: [tags: <comma-separated from security,correctness,concurrency,perf,merge-safety>] [severity: high|medium|low]. Include only the applicable tags; omit the brackets for an ACCEPT with nothing to flag. Max 6 findings.\n\n=== DIFF ===\n{{content}}",
       "stakes": "medium",
       "iteration_target": 2,
       "findings_cap": 6,
