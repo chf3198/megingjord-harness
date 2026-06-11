@@ -299,12 +299,22 @@ def main() -> int:
         # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.
         try:
             from hamr_bypass_detector import detect_bypass, emit_incident
-            from hamr_fleet_direct_block import should_block, block_message
-            _det = detect_bypass("\n".join(values))
+            from hamr_fleet_direct_block import should_block, block_message, review_bypass_decision
+            _joined = "\n".join(values)
+            _det = detect_bypass(_joined)
             emit_incident(_det)
             _blk = should_block(_det)
             if _blk.get("block"):
                 return emit("deny", block_message(_det))
+            # #2933 C7: raw cross-family-provider (paid) call in a review context — keep the $0
+            # cascade the default review path. DENY under the block flag; otherwise surface an
+            # advisory on stderr during soak (the incident is already recorded by emit_incident
+            # above, so the raw-bypass metric is captured without a second hook-JSON line).
+            _rev = review_bypass_decision(_det, _joined)
+            if _rev.get("flag"):
+                if _rev.get("block"):
+                    return emit("deny", _rev["message"])
+                print(f"[review-bypass-advisory] {_rev['message']}", file=sys.stderr)
         except Exception:
             pass  # detector failure must not break pre-tool flow
         result = check_terminal("\n".join(values), state, cwd)

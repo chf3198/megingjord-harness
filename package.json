@@ -279,7 +279,8 @@
     "fleet:backend-select:test": "node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js",
     "fleet:escalation-policy:test": "node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js",
     "review:stakes-router:test": "node --test tests/review-stakes-router.spec.js",
-    "review:cost-telemetry:test": "node --test tests/review-cost-telemetry.spec.js"
+    "review:cost-telemetry:test": "node --test tests/review-cost-telemetry.spec.js",
+    "review:bypass-gate:test": "node --test tests/review-bypass-gate.spec.js"
   },
   "keywords": [
     "devops",
