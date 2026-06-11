@@ -281,7 +281,8 @@
     "review:stakes-router:test": "node --test tests/review-stakes-router.spec.js",
     "review:cost-telemetry:test": "node --test tests/review-cost-telemetry.spec.js",
     "review:bypass-gate:test": "node --test tests/review-bypass-gate.spec.js",
-    "review:privacy-gate:test": "node --test tests/review-privacy-gate.spec.js"
+    "review:privacy-gate:test": "node --test tests/review-privacy-gate.spec.js",
+    "review:cli-parity:test": "node --test tests/review-cli-parity.spec.js"
   },
   "keywords": [
     "devops",
