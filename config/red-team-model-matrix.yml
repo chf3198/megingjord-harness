@@ -88,3 +88,22 @@ models:
 selection_defaults:
   stakes_when_unset: "low"
   fallback_chain: ["qwen2.5-coder:32b", "qwen2.5-coder:7b"]
+
+# Canonical fleet transport path (#2929, Epic #2926 C3) — implemented in
+# scripts/global/fleet-backend-select.js (selectFleetBackend + dispatchFleet),
+# wired through scripts/global/litellm-client.js#dispatchFleet and consumed by
+# scripts/global/cascade-dispatch.js.
+#
+#   PROBE-FIRST routing (avoids the 120s LiteLLM hard-timeout hang on a down/slow gateway):
+#     1. healthCheck() — fast (~5s) probe of the LiteLLM gateway /health endpoint.
+#     2. If gateway healthy  -> dispatch via LiteLLM (preferred; named route groups + caching).
+#     3. If gateway down/unhealthy OR the LiteLLM call fails/throws
+#                              -> fall straight to DIRECT Ollama (ollama-direct.js), no 120s wait.
+#     4. Every fallback emits a stderr line ("[fleet] litellm <reason> -> direct Ollama fallback")
+#        and a model-routing-telemetry row tagging the served backend (G8 observability).
+fleet_transport:
+  gateway: "http://100.78.22.13:4000"   # LiteLLM (preferred)
+  direct_fallback: "ollama-direct.js"    # direct Ollama (probe-first fallback target)
+  probe_timeout_ms: 5000
+  hard_timeout_ms: 120000
+  routing: "probe-first"

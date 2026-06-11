@@ -26,8 +26,8 @@ async function captureStderr(fn) {
 
 test('AC2: a healthy fleet inference emits the tier-start heartbeat line to stderr', async () => {
   seed('litellm-client', {
-    healthCheck: async () => ({ ok: true }),
-    chatComplete: async () => ({ ok: true, content: 'a sufficiently long fleet answer body', model: 'qwen2.5:7b-instruct' }),
+    // #2929 C3: cascade now dispatches via the probe-first dispatchFleet (not healthCheck+chatComplete).
+    dispatchFleet: async () => ({ ok: true, content: 'a sufficiently long fleet answer body', model: 'qwen2.5:7b-instruct', backend: 'litellm' }),
   });
   seed('model-routing-telemetry', { recordTelemetry: () => {} });
   seed('local-judge', { judgeResponse: async () => ({ ok: false }) });
@@ -39,8 +39,8 @@ test('AC2: a healthy fleet inference emits the tier-start heartbeat line to stde
 
 test('AC3: fleet-unreachable emits the free-cloud failover line to stderr ($0, never paid)', async () => {
   seed('litellm-client', {
-    healthCheck: async () => ({ ok: false }), // availability failure -> free-cloud
-    chatComplete: async () => ({ ok: false, error: 'ollama_unreachable' }),
+    // dispatchFleet itself can't reach either backend -> returns an availability error -> free-cloud.
+    dispatchFleet: async () => ({ ok: false, error: 'ollama_unreachable', backend: 'ollama', fallback_reason: 'probe-failed' }),
   });
   seed('model-routing-telemetry', { recordTelemetry: () => {} });
   seed('local-judge', { judgeResponse: async () => ({ ok: false }) });
