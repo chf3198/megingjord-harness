@@ -113,3 +113,13 @@ test('evaluate_path ALLOWS system tmp path', () => {
   expect(out).toMatch(/True/);
   expect(out).toMatch(/outside main-checkout repo/);
 });
+
+// Refs #2945: main_checkout_root() returns canonical path string
+test('main_checkout_root returns home/devenv-ops string', () => {
+  const expected = path.join(os.homedir(), 'devenv-ops');
+  const driver = `import sys; sys.path.insert(0, '${path.dirname(ENFORCER)}'); ` +
+    `from canonical_main_enforcer import main_checkout_root; print(main_checkout_root())`;
+  const result = spawnSync('python3', ['-c', driver], { encoding: 'utf8' });
+  expect(result.status).toBe(0);
+  expect(result.stdout.trim()).toBe(expected);
+});

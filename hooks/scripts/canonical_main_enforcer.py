@@ -17,6 +17,11 @@ import subprocess
 from pathlib import Path
 
 
+def main_checkout_root() -> str:
+    """Return the canonical main checkout path as a string."""
+    return str(Path.home() / "devenv-ops")
+
+
 def is_main_checkout(cwd: str) -> bool:
     """Return True if cwd is the canonical main checkout path.
 
