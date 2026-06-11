@@ -8,6 +8,8 @@
 const { chatComplete: ollamaChat, healthCheck: ollamaHealth } = require('./ollama-direct');
 const { getOpenClawURL } = require('./fleet-config');
 const { appendCacheStat } = require('./cache-stats-emit');
+// #2929 (Epic #2926 C3): probe-first routing so a down/slow gateway skips the 120s hang.
+const { dispatchFleet: dispatchFleetCore } = require('./fleet-backend-select');
 
 function emitCacheStatSafe(provider, model, usage) {
   try {
@@ -122,4 +124,26 @@ function cacheHeaders(provider, opts = {}) {
   }
 }
 
-module.exports = { chatComplete, healthCheck, getLiteLLMUrl, cacheHeaders };
+// #2929 C3: probe-first fleet dispatch wired with real deps. Routes via the fast health probe
+// FIRST, so a down/slow LiteLLM gateway falls straight to direct Ollama (no 120s hang) and the
+// switch is visible on stderr + telemetry. Additive — chatComplete/healthCheck are unchanged.
+function recordFleetBackendSafe(event) {
+  try {
+    require('./model-routing-telemetry').recordTelemetry({
+      lane: 'fleet', model: event.backend, outcome: event.fallback ? 'fallback' : 'ok',
+      escalation: null, escalation_reason: event.fallback_reason || null, execute: true,
+    });
+  } catch { /* telemetry is best-effort; never block a dispatch on a logging miss */ }
+}
+
+async function dispatchFleet(prompt, opts = {}) {
+  return dispatchFleetCore(prompt, opts, {
+    healthCheck,
+    litellmChat: (p, o) => litellmChat(p, { ...o, url: getLiteLLMUrl() }),
+    ollamaChat,
+    write: (line) => process.stderr.write(line),
+    record: recordFleetBackendSafe,
+  });
+}
+
+module.exports = { chatComplete, healthCheck, getLiteLLMUrl, cacheHeaders, dispatchFleet };

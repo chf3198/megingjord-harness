@@ -275,7 +275,8 @@
     "synthesis:init": "node scripts/global/synthesis-init.js",
     "synthesis:status": "node scripts/global/broker-synthesis-status.js",
     "synthesis:snapshot": "node scripts/global/synthesis-snapshot.js",
-    "collaborator:preflight": "node scripts/global/collaborator-preflight.js"
+    "collaborator:preflight": "node scripts/global/collaborator-preflight.js",
+    "fleet:backend-select:test": "node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js"
   },
   "keywords": [
     "devops",

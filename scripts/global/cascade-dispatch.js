@@ -3,7 +3,8 @@
 // tier: 3
 // Cascade dispatch: Ollama → heuristic gate → judge gate → escalation signal.
 
-const { chatComplete: ollamaChat, healthCheck } = require('./litellm-client');
+// #2929 C3: probe-first dispatchFleet (LiteLLM→direct-Ollama, no 120s hang, observable switch).
+const { dispatchFleet } = require('./litellm-client');
 const { recordTelemetry } = require('./model-routing-telemetry');
 const { getProfile } = require('./fleet-config');
 const { judgeResponse } = require('./local-judge');
@@ -50,12 +51,12 @@ function assessQuality(content, h) {
 }
 
 async function tryOllama(prompt, model, attempt = 0) {
-  const health = await healthCheck();
-  if (!health.ok) return { ok: false, reason: 'ollama_unreachable', tier: 'local' };
-  // #2842: emit start + 30s heartbeat to stderr during the multi-minute fleet inference (G3>>G7).
+  // #2929 C3: probe-first dispatch — a down/slow LiteLLM gateway falls straight to direct Ollama
+  // (no 120s hang); the LiteLLM→Ollama switch is emitted to stderr + telemetry.
+  // #2842: wrapped in withProgress for the tier-start + 30s heartbeat (G3>>G7 patience).
   const result = await withProgress(
     `fleet inference (${model})`,
-    () => ollamaChat(prompt, { model, maxTokens: 1024 }),
+    () => dispatchFleet(prompt, { model, maxTokens: 1024 }),
     { intervalMs: HEARTBEAT_MS }
   );
   if (!result.ok) {
@@ -63,7 +64,7 @@ async function tryOllama(prompt, model, attempt = 0) {
       await backoff(attempt);
       return tryOllama(prompt, model, attempt + 1);
     }
-    return { ok: false, reason: result.error, tier: 'local' };
+    return { ok: false, reason: result.error || 'ollama_unreachable', tier: 'local' };
   }
   return { ok: true, content: result.content, model: result.model, tier: 'local' };
 }
