@@ -162,6 +162,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `docs:lint` | `node scripts/docs-lint.js` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `fleet:backend-select:test` | `node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js` |
+| `fleet:escalation-policy:test` | `node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `git-state:drift` | `node scripts/global/git-state-drift-sensor.js` |

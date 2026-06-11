@@ -18,16 +18,15 @@ const { withProgress } = require('./dispatch-progress');
 
 const HEARTBEAT_MS = 30_000;
 
-// #2619: G3 lane-order. Availability failures (fleet down -> no answer) fail over to a
-// free $0 cloud tier BEFORE any paid tier; capability failures (fleet answered but
-// quality/judge inadequate) step up to paid haiku. suggested_tier is an advisory signal.
-const AVAILABILITY_REASONS = new Set(['ollama_unreachable', 'fleet_unavailable', 'cascade_script_not_found']);
+// #2619 / #2930 C4: cost-ascending escalation is now owned by fleet-escalation-policy.js, which
+// hard-pins availability failures to free-cloud (NEVER premium) and steps capability failures one
+// paid tier up — backed by the shared circuit-breaker. escalationTier stays as the back-compat
+// tier-string wrapper; the breaker-aware decision is fleetPolicy.escalate().
+const fleetPolicy = require('./fleet-escalation-policy');
+const cb = require('./circuit-breaker');
+const fleetBreaker = cb.create(); // in-process: skip the fleet attempt once it is known-down (5-fail/30s).
 function escalationTier(reason) {
-  if (!reason) return 'haiku';
-  if (AVAILABILITY_REASONS.has(reason)) return 'free-cloud';
-  // connection-style provider errors are availability failures too (no usable answer produced).
-  if (/econnrefused|fetch failed|timeout|network|enotfound|socket hang|connect/i.test(String(reason))) return 'free-cloud';
-  return 'haiku'; // quality_reason / judge_low_score / unknown -> capability step-up
+  return fleetPolicy.tierFor(reason);
 }
 
 function hints(prompt) {
@@ -73,12 +72,24 @@ async function cascade(prompt, opts = {}) {
   // (#2645) G3: hydrate provider keys for the free-cloud fallback
   if (!opts.env) loadLocalEnvOnce();
   const model = opts.model || 'qwen2.5:7b-instruct';
-  const h = hints(prompt); const start = Date.now();
-  const local = await tryOllama(prompt, model);
+  const h = hints(prompt); const start = Date.now(); const nowMs = start;
+  // #2930 C4: if the fleet breaker is open (known-down), skip the fleet attempt entirely and fail
+  // straight to free-cloud — don't pay the probe+timeout cost on every call during an outage.
+  const breakerBlocksFleet = !cb.canPass(fleetBreaker, nowMs);
+  const local = breakerBlocksFleet
+    ? { ok: false, reason: 'circuit-open', tier: 'local' }
+    : await tryOllama(prompt, model);
   const latency = Date.now() - start;
+  if (local.ok) cb.recordSuccess(fleetBreaker); // fleet answered → reset the breaker.
 
   if (!local.ok) {
-    const esc = escalationTier(local.reason); // #2619: fleet-down -> free-cloud, not paid haiku
+    // #2930 C4: availability failures record into the breaker (only when we actually tried fleet —
+    // a skipped attempt must not re-stamp the cooloff) and NEVER escalate an outage to a paid tier.
+    const decision = fleetPolicy.escalate({
+      reason: local.reason, currentTier: 'fleet',
+      breaker: breakerBlocksFleet ? null : fleetBreaker, nowMs,
+    });
+    const esc = decision.tier; // availability -> free-cloud (never premium); capability -> one paid tier up
     if (esc === 'free-cloud' && opts.executeFreeCloud !== false) {
       // #2842: surface the (previously silent) availability failover so the operator sees it stay $0.
       process.stderr.write(`[cascade] fleet unavailable (${local.reason}) → free-cloud failover ($0)\n`);
