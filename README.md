@@ -321,6 +321,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `repo:scope` | `node scripts/global/repo-scope.js` |
 | `review:bypass-gate:test` | `node --test tests/review-bypass-gate.spec.js` |
 | `review:cost-telemetry:test` | `node --test tests/review-cost-telemetry.spec.js` |
+| `review:privacy-gate:test` | `node --test tests/review-privacy-gate.spec.js` |
 | `review:stakes-router:test` | `node --test tests/review-stakes-router.spec.js` |
 | `rotation:check` | `node scripts/global/hamr-rotation-check.js` |
 | `router:cascade` | `node scripts/global/cascade-dispatch.js` |
