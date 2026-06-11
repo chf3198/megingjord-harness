@@ -233,6 +233,15 @@ def main() -> int:
     state = reset_on_branch_change(cwd, current_branch(cwd))
     flags = state.get("flags", {})
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit","write_to_file","replace_file_content","multi_replace_file_content"}:
+        # G-07 #2903: /memories/ write guard — block raw file-write tools from targeting
+        # /memories/ paths. Legitimate memory operations MUST use the managed `memory` tool.
+        # Raw writes here are an injection vector: retrieved content can trigger overwriting
+        # session governance rules (ASI04 Memory Poisoning, EU Art.12).
+        for path_val in iter_paths(payload.get("tool_input", {})):
+            if str(path_val).startswith("/memories/") or str(path_val) == "/memories":
+                return emit("deny",
+                    "Write to /memories/ blocked: use the memory tool for memory operations. "
+                    "Raw file writes to /memories/ are a governance injection vector (G-07, #2903).")
         if active_ticket_is_no_code_lane(state, cwd):
             return emit("deny", "File edit blocked: lane:no-code-remediation is issue-only. Re-route ticket to lane:code-change.")
         if is_main_checkout(cwd):
