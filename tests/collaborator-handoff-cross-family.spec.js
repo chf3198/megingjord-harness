@@ -15,6 +15,7 @@ Role: collaborator
 cross_family_reviewer: qwen2.5-coder:7b@fleet-tailscale
 cross_family_rating: 82/100
 cross_family_findings: No major issues found.
+cross_family_receipt: abcdef0123456789
 reviewer_family: qwen
 doc-coverage:
   N/A: all surfaces — lane test only`;

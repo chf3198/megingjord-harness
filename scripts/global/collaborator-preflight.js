@@ -4,6 +4,7 @@
 // Gates: lint → tests → changelog-fragment → fleet cross-family review.
 
 const { spawnSync } = require('child_process');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
@@ -71,10 +72,14 @@ async function run(argv = process.argv.slice(2), opts = {}) {
     ? await opts.runFleetReview(content, ticket)
     : await runFleetReview(content, ticket);
 
+  const receipt = crypto.createHash('sha256')
+    .update(`${review.reviewer}|${review.rating}|${review.findings}|${ticket}`)
+    .digest('hex').slice(0, 16);
   console.log('\n=== COLLABORATOR_HANDOFF cross-family fields ===');
   console.log(`cross_family_reviewer: ${review.reviewer}`);
   console.log(`cross_family_rating: ${review.rating}/100`);
   console.log(`cross_family_findings: ${review.findings}`);
+  console.log(`cross_family_receipt: ${receipt}`);
   return true;
 }
 

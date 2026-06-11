@@ -3,6 +3,7 @@
 // Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
 // #2424: doc-coverage block now blocking (not advisory).
 // #2439: cross_family_reviewer/rating/findings blocking; family independence check.
+// #2904: cross_family_receipt presence + 16-char hex format (H*→H promotion for G-01/G-02).
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
@@ -42,6 +43,12 @@ function checkCrossFamily(body) {
   if (!/cross_family_reviewer:/i.test(body)) violations.push(block('cross-family-reviewer'));
   if (!/cross_family_rating:/i.test(body)) violations.push(block('cross-family-rating'));
   if (!/cross_family_findings:/i.test(body)) violations.push(block('cross-family-findings'));
+  if (!/cross_family_receipt:/i.test(body)) violations.push(block('cross-family-receipt'));
+  const rm = (body || '').match(/cross_family_receipt\s*:\s*([0-9a-f]{16})/i);
+  if (/cross_family_receipt:/i.test(body) && !rm) {
+    violations.push({ rule: 'cross-family-receipt-format',
+      detail: 'cross_family_receipt must be a 16-char hex sha256 prefix' });
+  }
   const fm = (body || '').match(/reviewer_family\s*:\s*(\S+)/i);
   if (fm && !KNOWN_FAMILIES.includes(fm[1].toLowerCase())) {
     violations.push({ rule: 'unknown-reviewer-family',
