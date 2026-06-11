@@ -1,3 +1,4 @@
+// tier: 3
 // Rule-based fleet-dev eligibility router (#2794 P1-1 of Epic #2791; design D1, D6). Decides whether a
 // FLEET-lane coding task may run as AUTONOMOUS fleet-development, or must escalate — by MEASURED capability
 // (the model's code_dev_profile), not model size (D1). FAIL-CLOSED: default ineligible unless EVERY rule

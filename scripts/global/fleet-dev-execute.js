@@ -1,3 +1,4 @@
+// tier: 3
 // Fleet-dev execution path with a two-part objective gate + one-tier escalation (#2795 P1-2 of Epic
 // #2791; design D2, D8-gate). Dispatches a fleet implementation, then runs BOTH a functional gate
 // (lint+tests+AC) AND a security gate (secret/dep/SAST); only when BOTH pass is the result accepted (the

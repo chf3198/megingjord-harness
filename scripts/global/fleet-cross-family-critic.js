@@ -1,3 +1,4 @@
+// tier: 3
 // Cross-family generator-critic verification of fleet-authored code with prove-it escalation
 // (#2797 P1-4 of Epic #2791; Phase-0 #2792 design D4 / D8-critic). Given a fleet-authored change (pr-diff)
 // plus the objective-gate result, dispatch the diff to N DIFFERENT-FAMILY critics (reusing #2041

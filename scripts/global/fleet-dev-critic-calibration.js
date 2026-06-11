@@ -1,3 +1,4 @@
+// tier: 3
 // Critic-calibration loop (#2799 P1-6 of Epic #2791; design D11). Tracks whether the cross-family critic
 // (#2797) is still trustworthy: its PRECISION vs human-validated escalations, the prove-it test-ACCEPTANCE
 // rate, and verdict DRIFT after a model refresh. Degradation (precision/acceptance below floor, or drift

@@ -1,3 +1,4 @@
+// tier: 3
 // Default gates + telemetry for the fleet-dev execution path (#2795 P1-2; design D8-gate). The FUNCTIONAL
 // gate runs real local checks (lint + tests); the SECURITY gate runs a real local secret-exposure scan of
 // the fleet output (the highest-value check on untrusted LLM output) — full dependency-review + SAST are

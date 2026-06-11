@@ -1,3 +1,4 @@
+// tier: 3
 // Escalation-rate governor with hysteresis + shadow re-promotion (#2796 P1-3 of Epic #2791; design D3).
 // Tracks per-TASK-CLASS (default unit = area-label) fleet escalation rate over a VELOCITY-RELATIVE window
 // (the last N attempts — never a calendar threshold, per the agentic-traffic lesson). Hysteresis prevents
