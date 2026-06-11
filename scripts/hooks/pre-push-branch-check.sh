@@ -10,6 +10,7 @@ mkdir -p "$(dirname "$audit_log")"
 
 DELETE_SHA="0000000000000000000000000000000000000000"
 violations=0
+# shellcheck disable=SC2034  # remote_sha, remote_branch: read for git hook protocol completeness
 while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
   [ -z "${local_ref:-}" ] && continue
   local_branch=${local_ref#refs/heads/}
