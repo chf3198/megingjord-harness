@@ -154,6 +154,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
 | `deps:review` | `node scripts/global/dep-proposals-review.js` |
+| `dispatch:progress:test` | `node --test tests/dispatch-progress.spec.js tests/cascade-observability.spec.js` |
 | `doc-graph` | `node scripts/global/doc-graph-builder.js` |
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
