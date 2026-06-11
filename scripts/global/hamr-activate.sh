@@ -9,7 +9,7 @@ echo "▶ HAMR activation for: $repo_root"
 
 # Source repo-root .env for provider keys if present; secrets are never echoed.
 if [ -f "$repo_root/.env" ]; then
-  # shellcheck source=/dev/null
+  # shellcheck source=/dev/null disable=SC1091
   set -a; . "$repo_root/.env"; set +a
 fi
 

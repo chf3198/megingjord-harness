@@ -23,19 +23,19 @@ echo "Found $COUNT file(s) with $PATTERN"
 
 if [[ -z "$HITS" ]]; then echo "No placeholders found. ✓"; exit 0; fi
 
-echo "$HITS" | while read -r f; do echo "  - ${f#$ROOT/}"; done
+echo "$HITS" | while read -r f; do echo "  - ${f#"$ROOT"/}"; done
 
 if [[ $FIX_MODE -eq 1 && -n "$SIG_BLOCK" ]]; then
   echo ""
   echo "Replacing placeholders with provided SIG_BLOCK..."
   echo "$HITS" | while read -r f; do
     sed -i "s|$PATTERN|$SIG_BLOCK|g" "$f"
-    echo "  fixed: ${f#$ROOT/}"
+    echo "  fixed: ${f#"$ROOT"/}"
   done
   echo "Done. Verify with: node scripts/global/governance-verify.js"
 else
   echo ""
   echo "Re-run with --fix '<sig>' to replace. Example:"
-  echo "  SIG=\"Signed-by: Nova Mason\\nTeam&Model: codex:gpt-5.3-codex@github-copilot\\nRole: manager\""
+  printf '  SIG="Signed-by: Nova Mason\nTeam&Model: codex:gpt-5.3-codex@github-copilot\nRole: manager"\n'
   echo "  ./scripts/global/signature-backfill.sh --fix \"\$SIG\""
 fi
