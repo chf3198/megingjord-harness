@@ -224,6 +224,15 @@ async function dispatchRedTeam({
       stakesSource } };
 }
 
+// LIBRARY ONLY (no CLI). Direct CLI invocation redirects to the canonical dispatcher cascade-dispatch.js
+// (#2858 / Epic #2926 D1) and exits non-zero — it previously exited SILENTLY, stranding the operator into a
+// raw paid call (the root cause of review bypassing the $0 lanes). The review entrypoint is cascade-dispatch.
+if (require.main === module) {
+  process.stderr.write('fleet-red-team-dispatch.js is a LIBRARY, not a CLI.\n'
+    + 'Canonical review dispatcher: node scripts/global/cascade-dispatch.js --prompt "..." --model qwen2.5-coder:32b\n');
+  process.exit(2);
+}
+
 module.exports = {
   dispatchRedTeam, selectModel, loadMatrix, loadTemplate, buildPrompt,
   callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
