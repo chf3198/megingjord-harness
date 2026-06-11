@@ -5,7 +5,7 @@ description: >
   non-Anthropic fleet model (Qwen via Ollama) for independent adversarial review.
   Returns structured ACCEPT/REJECT/PARTIAL findings with hallucination-risk
   classification. Does not modify implementation; advisory output only.
-model: claude-sonnet-4-6
+model: claude-haiku-4-5
 tools:
   - Bash
   - Read
