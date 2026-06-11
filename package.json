@@ -277,7 +277,8 @@
     "synthesis:snapshot": "node scripts/global/synthesis-snapshot.js",
     "collaborator:preflight": "node scripts/global/collaborator-preflight.js",
     "fleet:backend-select:test": "node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js",
-    "fleet:escalation-policy:test": "node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js"
+    "fleet:escalation-policy:test": "node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js",
+    "review:stakes-router:test": "node --test tests/review-stakes-router.spec.js"
   },
   "keywords": [
     "devops",
