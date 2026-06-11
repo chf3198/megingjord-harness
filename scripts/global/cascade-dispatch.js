@@ -12,6 +12,10 @@ const { backoff, isRateLimitError } = require('./backoff');
 const { dispatchFreeCloud } = require('./free-cloud-dispatch'); // execute free $0 cloud on fleet-down
 // (#2645) shared .env hydration shim — make provider keys visible for the free-cloud fallback (G3)
 const { loadLocalEnvOnce } = require('./load-local-env');
+// (#2842 / Epic #2926 C2) progress observability so the operator sees the free fleet working
+const { withProgress } = require('./dispatch-progress');
+
+const HEARTBEAT_MS = 30_000;
 
 // #2619: G3 lane-order. Availability failures (fleet down -> no answer) fail over to a
 // free $0 cloud tier BEFORE any paid tier; capability failures (fleet answered but
@@ -48,7 +52,12 @@ function assessQuality(content, h) {
 async function tryOllama(prompt, model, attempt = 0) {
   const health = await healthCheck();
   if (!health.ok) return { ok: false, reason: 'ollama_unreachable', tier: 'local' };
-  const result = await ollamaChat(prompt, { model, maxTokens: 1024 });
+  // #2842: emit start + 30s heartbeat to stderr during the multi-minute fleet inference (G3>>G7).
+  const result = await withProgress(
+    `fleet inference (${model})`,
+    () => ollamaChat(prompt, { model, maxTokens: 1024 }),
+    { intervalMs: HEARTBEAT_MS }
+  );
   if (!result.ok) {
     if (isRateLimitError(result) && attempt < 3) {
       await backoff(attempt);
@@ -70,6 +79,8 @@ async function cascade(prompt, opts = {}) {
   if (!local.ok) {
     const esc = escalationTier(local.reason); // #2619: fleet-down -> free-cloud, not paid haiku
     if (esc === 'free-cloud' && opts.executeFreeCloud !== false) {
+      // #2842: surface the (previously silent) availability failover so the operator sees it stay $0.
+      process.stderr.write(`[cascade] fleet unavailable (${local.reason}) → free-cloud failover ($0)\n`);
       // #2621: actually execute a $0 cloud provider; graceful fall-through to advisory signal.
       const fc = await dispatchFreeCloud(prompt, opts.freeCloud || {});
       if (fc.ok) {
