@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-// hamr-sync-verify.js — HAMR Wave 7 child E (#955).
-// Read-only: confirms HAMR scripts are present in ~/.copilot/scripts/ and
-// ~/.codex/devenv-ops/scripts/ so all 3 teams have local access.
+// hamr-sync-verify.js — HAMR Wave 7 child E (#955). Refs #2950.
+// Read-only: confirms HAMR scripts and the C9 review pipeline modules are
+// present in ~/.copilot/scripts/ and ~/.codex/devenv-ops/scripts/.
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
+const { verifyRuntimeParity, REVIEW_CLI_MODULES } = require('./review-cli-parity');
 
 const HAMR_SCRIPTS = [
   'cache-hit-gate.js', 'cache-stats-emit.js', 'cache-stats-push.js',
@@ -19,6 +20,11 @@ const HAMR_SCRIPTS = [
 const TARGETS = [
   { team: 'copilot', dir: path.join(os.homedir(), '.copilot', 'scripts') },
   { team: 'codex', dir: path.join(os.homedir(), '.codex', 'devenv-ops', 'scripts') },
+];
+
+const REVIEW_TARGETS = [
+  { runtime: 'copilot', scriptsDir: path.join(os.homedir(), '.copilot', 'scripts') },
+  { runtime: 'codex', scriptsDir: path.join(os.homedir(), '.codex', 'devenv-ops', 'scripts') },
 ];
 
 function checkTarget(target) {
@@ -37,13 +43,11 @@ function checkTarget(target) {
 function run() {
   const results = TARGETS.map(checkTarget);
   const totalMissing = results.reduce((sum, r) => sum + r.missing.length, 0);
-  const summary = {
-    ok: totalMissing === 0,
-    targets: results,
-    total_missing: totalMissing,
-    hint: totalMissing > 0 ? 'run `npm run sync:both:apply` to deploy HAMR scripts' : null,
-  };
-  return summary;
+  const reviewParity = verifyRuntimeParity({ sourceDir: __dirname, targets: REVIEW_TARGETS });
+  const ok = totalMissing === 0 && reviewParity.parity;
+  const hint = totalMissing > 0 ? 'run `npm run sync:both:apply` to deploy HAMR scripts' :
+    !reviewParity.parity ? 'review pipeline gap: run `npm run deploy:both:apply`' : null;
+  return { ok, targets: results, total_missing: totalMissing, review_parity: reviewParity, hint };
 }
 
 if (require.main === module) {
@@ -52,4 +56,4 @@ if (require.main === module) {
   process.exit(result.ok ? 0 : 1);
 }
 
-module.exports = { run, HAMR_SCRIPTS, TARGETS };
+module.exports = { run, HAMR_SCRIPTS, TARGETS, REVIEW_CLI_MODULES, REVIEW_TARGETS };
