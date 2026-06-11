@@ -15,7 +15,17 @@ const DEFAULT_HOST = 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5-coder:32b';
 const TIER = 'fleet-local';
 const RETRY_DELAYS_MS = [1000, 4000];
-const REQUEST_TIMEOUT_MS = 600_000;
+const DEFAULT_TIMEOUT_POLICY = path.join(__dirname, '..', '..', 'config', 'timeout-policy.json');
+// G3 patience: read the fleet-red-team-rate class (Phase-0 #2174: qwen2.5-coder:32b p99=907s) so slow
+// Tailscale models are waited on; fall back to the prior 600s on a missing/malformed policy. Path-injectable.
+function loadFleetTimeout(policyPath = DEFAULT_TIMEOUT_POLICY, fallbackMs = 600_000) {
+  try {
+    const classes = JSON.parse(fs.readFileSync(policyPath, 'utf8')).classes;
+    const ms = classes && classes['fleet-red-team-rate'] && classes['fleet-red-team-rate'].ms;
+    return typeof ms === 'number' && ms > 0 ? ms : fallbackMs;
+  } catch { return fallbackMs; }
+}
+const REQUEST_TIMEOUT_MS = loadFleetTimeout();
 const DEFAULT_KEEP_ALIVE = '30m';
 const TEMPLATES_PATH = path.join(__dirname, '..', '..', 'config', 'fleet-red-team-prompts.json');
 const MATRIX_PATH = path.join(__dirname, '..', '..', 'config', 'red-team-model-matrix.yml');
@@ -111,11 +121,22 @@ function resolveKeepAlive(raw = process.env.FLEET_KEEP_ALIVE) {
 // Backward-compatible alias used by existing callers/tests.
 function keepAliveValue() { return resolveKeepAlive(); }
 
+// Heartbeat interval (ms): emit progress so operator knows fleet is working (G3 patience).
+const HEARTBEAT_INTERVAL_MS = 30_000;
+
 async function callOllamaOnce({ host, model, prompt, num_predict }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   // Keep model warm between baton reviews to reduce cold-load paid fallbacks.
   const keepAlive = resolveKeepAlive();
+  // Emit progress every 30s — keeps operator terminal active during slow Tailscale generations.
+  const patienceSec = Math.round(REQUEST_TIMEOUT_MS / 1000);
+  let heartbeatCount = 0;
+  const heartbeat = setInterval(() => {
+    heartbeatCount += 1;
+    process.stderr.write(`[fleet-dispatch] waiting on ${model} at ${host} (${heartbeatCount * HEARTBEAT_INTERVAL_MS / 1000}s / ${patienceSec}s patience)...\n`);
+  }, HEARTBEAT_INTERVAL_MS);
+  if (typeof heartbeat.unref === 'function') heartbeat.unref(); // a progress timer must never hold the loop open
   try {
     const response = await fetch(`${host}/api/generate`, {
       method: 'POST',
@@ -131,7 +152,7 @@ async function callOllamaOnce({ host, model, prompt, num_predict }) {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
-  } finally { clearTimeout(timeout); }
+  } finally { clearTimeout(timeout); clearInterval(heartbeat); }
 }
 
 async function callWithRetry({ host, model, prompt, num_predict }) {
@@ -208,6 +229,6 @@ module.exports = {
   callWithRetry, parseFindings, stripArxivHallucinations, detectRefusal,
   callWithRetry, callOllamaOnce, keepAliveValue, parseFindings,
   stripArxivHallucinations, detectRefusal,
-  resolveKeepAlive,
-  TIER, RETRY_DELAYS_MS, MATRIX_PATH,
+  resolveKeepAlive, loadFleetTimeout,
+  TIER, RETRY_DELAYS_MS, MATRIX_PATH, REQUEST_TIMEOUT_MS,
 };
