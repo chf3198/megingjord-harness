@@ -22,6 +22,10 @@
 
 version: 1
 generated_by: seed-rules-v1
+blast_radius_caps:
+  max_files_per_session: 200
+  max_pushes_per_session: 20
+  max_cost_usd_per_session: 5.00
 rules:
 
   - rule_id: refs-not-closes-in-pr
