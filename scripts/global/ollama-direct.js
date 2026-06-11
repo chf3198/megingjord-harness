@@ -3,9 +3,22 @@
 // tier: 3
 // Direct Ollama native-API client — fallback when OpenClaw/LiteLLM is unavailable.
 
+const fs = require('node:fs');
+const path = require('node:path');
+
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5:7b-instruct';
-const TIMEOUT_MS = 120000;
+const DEFAULT_TIMEOUT_POLICY = path.join(__dirname, '..', '..', 'config', 'timeout-policy.json');
+// G3 patience: read the fleet-dispatch-basic class (300s for 7b-class models); fall back to the prior 120s
+// on a missing/malformed policy. Path-injectable for tests.
+function loadBasicTimeout(policyPath = DEFAULT_TIMEOUT_POLICY, fallbackMs = 120_000) {
+  try {
+    const classes = JSON.parse(fs.readFileSync(policyPath, 'utf8')).classes;
+    const ms = classes && classes['fleet-dispatch-basic'] && classes['fleet-dispatch-basic'].ms;
+    return typeof ms === 'number' && ms > 0 ? ms : fallbackMs;
+  } catch { return fallbackMs; }
+}
+const TIMEOUT_MS = loadBasicTimeout();
 
 async function chatComplete(prompt, opts = {}) {
   const model = opts.model || DEFAULT_MODEL;
@@ -64,4 +77,4 @@ if (require.main === module) {
   }).catch(e => { console.error(e.message); process.exit(1); });
 }
 
-module.exports = { chatComplete, healthCheck, OLLAMA_URL, DEFAULT_MODEL };
+module.exports = { chatComplete, healthCheck, OLLAMA_URL, DEFAULT_MODEL, loadBasicTimeout, TIMEOUT_MS };
