@@ -1,11 +1,16 @@
 {
   "_description": "Adaptive timeout policy per Epic #2150 #2201. Defaults derived from Phase-0 #2174 dog-food observations.",
+  "_patience_posture": "#2937 / Epic #2926: fleet classes are deliberately GENEROUS — G3 (zero-cost fleet/local) ranks far above G7 (speed), so the harness WAITS for the free, optimal fleet rather than time out into a paid escalation. The C4 circuit-breaker bounds the wait so patience never becomes an infinite hang.",
   "version": 1,
   "default_ms": 600000,
   "classes": {
     "fleet-red-team-rate": {
-      "ms": 1200000,
-      "rationale": "qwen2.5-coder:32b on Tailscale fleet hit 907s p99 per Phase-0 #2174; 1200s adds 30% headroom"
+      "ms": 1500000,
+      "rationale": "qwen2.5-coder:32b on Tailscale fleet hit 907s p99 per Phase-0 #2174; raised 1200s→1500s for extra patience (G3 zero-cost fleet >> G7 speed — wait for the free fleet, don't escalate to paid) per #2937"
+    },
+    "fleet-reasoning-rate": {
+      "ms": 1800000,
+      "rationale": "qwen3:32b and reasoning-class fleet models — the most CAPABLE (optimal) fleet resource for research+planning consensus, and the slowest (observed >871s, unfinished at a 900s cap during Epic #2926 Phase-0). 1800s/30min patience, bounded by the C4 circuit-breaker; G3 >> G7 (#2937)"
     },
     "fleet-dispatch-basic": {
       "ms": 300000,
