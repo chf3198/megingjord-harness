@@ -17,6 +17,7 @@ SCHEMA_VERSION = 3
 SERVICE = "baton"
 DEFAULT_ENV = "local"
 EVENT_LOG_PATH = Path.home() / ".megingjord" / "baton-events.jsonl"
+DECISIONS_LOG_PATH = Path.home() / ".megingjord" / "decisions.jsonl"
 SUMMARY_MAX = 200
 
 # Redaction patterns — mirror subset of scripts/global/log-redaction.js for hook context
@@ -30,8 +31,8 @@ _REDACTION_PATTERNS = [
 
 
 def feature_enabled() -> bool:
-    """Off by default; enable via env."""
-    return os.environ.get("MEGINGJORD_BATON_EVENT_LOG", "").strip() == "1"
+    """On by default; disable via MEGINGJORD_BATON_EVENT_LOG=0 (#2918)."""
+    return os.environ.get("MEGINGJORD_BATON_EVENT_LOG", "1").strip() != "0"
 
 
 def redact(text: str) -> str:
@@ -94,3 +95,37 @@ def emit_role_handoff(from_role: str, to_role: str, ticket: int, signer: str = "
         from_role=from_role, to_role=to_role, signer=signer,
         summary=f"{from_role} -> {to_role} on #{ticket}",
     )
+
+
+def emit_decision(
+    role: str, decision_type: str, verdict: str, *,
+    ticket: Optional[int] = None,
+    input_summary: Optional[str] = None,
+    rationale: Optional[str] = None,
+) -> bool:
+    """Append structured governance decision to decisions.jsonl (#2918, G-19)."""
+    if not feature_enabled():
+        return False
+    record = {
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "version": SCHEMA_VERSION,
+        "service": SERVICE,
+        "env": os.environ.get("MEGINGJORD_ENV", DEFAULT_ENV),
+        "event": "governance.decision",
+        "role": role,
+        "decision_type": decision_type,
+        "verdict": verdict,
+    }
+    if ticket is not None:
+        record["ticket"] = int(ticket)
+    if input_summary:
+        record["input_summary"] = redact(input_summary[:SUMMARY_MAX])
+    if rationale:
+        record["rationale"] = redact(rationale[:SUMMARY_MAX])
+    try:
+        DECISIONS_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with DECISIONS_LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record) + "\n")
+        return True
+    except OSError:
+        return False  # G6: never break on log-write failure

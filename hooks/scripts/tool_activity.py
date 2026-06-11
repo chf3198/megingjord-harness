@@ -17,6 +17,16 @@ from repo_detection import classify_path
 PATCH_FILE_RE = re.compile(
     r"^\*\*\*\s+(?:Update|Add|Delete)\s+File:\s+(.+?)\s*$", re.MULTILINE
 )
+# Baton artifact names to detect in Bash inputs (gh issue comment bodies).
+_BATON_ARTIFACT_RE = re.compile(
+    r"\b(MANAGER_HANDOFF|COLLABORATOR_HANDOFF|ADMIN_HANDOFF|CONSULTANT_CLOSEOUT)\b"
+)
+_BATON_ROLE_MAP = {
+    "MANAGER_HANDOFF": ("manager", "manager.handoff"),
+    "COLLABORATOR_HANDOFF": ("collaborator", "collaborator.handoff"),
+    "ADMIN_HANDOFF": ("admin", "admin.handoff"),
+    "CONSULTANT_CLOSEOUT": ("consultant", "consultant.closeout"),
+}
 # Bash/terminal tools: inputs are shell commands, not file paths.
 # Path classification is skipped for these to prevent false code_touched.
 BASH_TOOLS = {"run_in_terminal", "terminal", "runTerminalCommand", "Bash", "run_command", "send_command_input"}
@@ -107,3 +117,18 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
             except Exception:
                 pass  # never break the gate on emitter failure
         roles["admin"] = True
+    # #2918: detect baton artifact posts in Bash inputs and emit decision events
+    if tool in BASH_TOOLS:
+        artifact_match = _BATON_ARTIFACT_RE.search(joined)
+        if artifact_match:
+            artifact_name = artifact_match.group(1)
+            role, decision_type = _BATON_ROLE_MAP.get(
+                artifact_name, ("unknown", "baton.artifact")
+            )
+            try:
+                from baton_event_emitter import emit_decision
+                ticket = state.get("active_ticket")
+                emit_decision(role, decision_type, "posted", ticket=ticket,
+                              input_summary=f"{artifact_name} posted on #{ticket}")
+            except Exception:
+                pass  # G6: never break activity tracking

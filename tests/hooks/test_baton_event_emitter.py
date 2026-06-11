@@ -1,4 +1,4 @@
-"""Tests for #2457: append-only baton-events.jsonl emitter (schema v3)."""
+"""Tests for #2457/#2918: append-only baton-events.jsonl emitter (schema v3)."""
 from __future__ import annotations
 import json
 import os
@@ -15,12 +15,18 @@ import baton_event_emitter as emitter  # noqa: E402
 
 
 class TestFeatureFlag(unittest.TestCase):
-    def test_disabled_by_default(self):
+    def test_enabled_by_default(self):
+        """#2918: feature is ON by default; no env var needed."""
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("MEGINGJORD_BATON_EVENT_LOG", None)
+            self.assertTrue(emitter.feature_enabled())
+
+    def test_disabled_when_set_to_zero(self):
+        """#2918: opt-out via MEGINGJORD_BATON_EVENT_LOG=0."""
+        with patch.dict(os.environ, {"MEGINGJORD_BATON_EVENT_LOG": "0"}):
             self.assertFalse(emitter.feature_enabled())
 
-    def test_enabled_when_set(self):
+    def test_enabled_when_set_to_one(self):
         with patch.dict(os.environ, {"MEGINGJORD_BATON_EVENT_LOG": "1"}):
             self.assertTrue(emitter.feature_enabled())
 
@@ -55,8 +61,7 @@ class TestEmit(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_emit_when_disabled_returns_false(self):
-        with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop("MEGINGJORD_BATON_EVENT_LOG", None)
+        with patch.dict(os.environ, {"MEGINGJORD_BATON_EVENT_LOG": "0"}):
             self.assertFalse(emitter.emit_baton_event("test", ticket=2457))
             self.assertFalse(self.log_path.exists())
 
