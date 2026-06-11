@@ -1,3 +1,4 @@
+// tier: 3
 // Fleet-dev observability + NET cost-of-quality (#2800 P1-7 of Epic #2791; design D7). Aggregates the
 // telemetry surfaces (routing lanes, #2795 escalations, #2796 demotions) into fleet-development-share,
 // escalation-rate, and the NET cost-of-quality: gross generation saving (fleet-accepted tasks that avoided

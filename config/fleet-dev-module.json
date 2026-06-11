@@ -1,0 +1,20 @@
+{
+  "module": "fleet-dev",
+  "description": "Opt-in, tier-3-gated HAMR module packaging the Epic #2791 fleet (local-LLM) development capability. A fleetless (Tier 0-2) operator carries zero fleet-dev code: the gate scripts/global/fleet-dev-module.js offers the fleet-dev lane only when this module is installed AND enabled AND MEGINGJORD_MINIMUM_TIER >= 3. The baseline router (model-routing-engine.js) has no fleet-dev imports, so baseline routing is byte-for-byte unchanged when the module is off (design D16; tier taxonomy instructions/resource-tier-portability.instructions.md).",
+  "requiredTier": 3,
+  "enableEnv": "MEGINGJORD_FLEET_DEV_ENABLED",
+  "enableValues": ["1", "true"],
+  "installPrecedent": "#2379 plugin model — discrete enable via the env flag; no fleet config required when disabled.",
+  "baselineInvariant": "Tier-1 (GitHub + git + node) carries no fleet-dev code; an excludes-fleet deploy omits the members below; the gate guarantees baseline behaviour at runtime regardless.",
+  "members": [
+    "scripts/global/fleet-dev-eligibility.js",
+    "scripts/global/fleet-dev-execute.js",
+    "scripts/global/fleet-dev-gates.js",
+    "scripts/global/fleet-dev-governor.js",
+    "scripts/global/fleet-cross-family-critic.js",
+    "scripts/global/fleet-dev-deny-paths.js",
+    "scripts/global/fleet-dev-anti-goodhart.js",
+    "scripts/global/fleet-dev-critic-calibration.js",
+    "scripts/global/fleet-dev-cost-report.js"
+  ]
+}

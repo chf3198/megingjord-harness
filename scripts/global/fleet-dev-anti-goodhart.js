@@ -1,3 +1,4 @@
+// tier: 3
 // Anti-Goodhart test-quality monitor (#2799 P1-6 of Epic #2791; design D10). Guards G2 from being eroded by
 // G3: when the fleet-development-SHARE metric rises while test-QUALITY metrics fall, that's the Goodhart
 // signature (share optimized at quality's expense) → trip a Tier-2 anneal AND gate the share metric so it

@@ -1,3 +1,4 @@
+// tier: 3
 // Least-Agency protected-path deny-list (#2798 P1-5 of Epic #2791; design D9 / OWASP-2026 Least Agency).
 // High-blast-radius paths (auth, crypto/key-mgmt, IAM/permissions, governance gates + pretool_guard,
 // CI/release) are OFF-LIMITS to AUTONOMOUS fleet-development regardless of measured capability — only
