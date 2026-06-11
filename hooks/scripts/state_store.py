@@ -39,6 +39,7 @@ def _default_state(cwd: str) -> dict[str, Any]:
         "admin_ops": {"version_check": False, "commit": False, "push": False, "pr_create": False,
             "ci_green": False, "merge": False, "publish": False, "release_integrity": False,
             "gh_release": False, "issue_close": False, "issue_linked": False, "visual_qa": False},
+        "blast_radius": {"files_edited_count": 0, "push_count": 0, "provider_call_count": 0},
         "drift": {"commits": 0, "commits_with_ticket": 0, "branches": 0,
             "branches_compliant": 0, "edits_gated": 0, "edits_ungated": 0}}
 
@@ -50,7 +51,7 @@ def load_state(cwd: str) -> dict[str, Any]:
         data = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             return _default_state(cwd)
-        defaults, keys = _default_state(cwd), ("routing", "roles", "flags", "admin_ops", "drift")
+        defaults, keys = _default_state(cwd), ("routing", "roles", "flags", "admin_ops", "blast_radius", "drift")
         data.setdefault("cwd", cwd)
         data.setdefault("repo_type", detect_repo_type(cwd))
         data.setdefault("current_phase", defaults["current_phase"])

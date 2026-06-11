@@ -30,6 +30,12 @@ _BATON_ROLE_MAP = {
 # Bash/terminal tools: inputs are shell commands, not file paths.
 # Path classification is skipped for these to prevent false code_touched.
 BASH_TOOLS = {"run_in_terminal", "terminal", "runTerminalCommand", "Bash", "run_command", "send_command_input"}
+EDIT_TOOLS = {
+    "apply_patch", "create_file", "edit_notebook_file", "create_new_jupyter_notebook",
+    "write_to_file", "replace_file_content", "multi_replace_file_content",
+    "replace_string_in_file", "multi_replace_string_in_file",
+}
+_PROVIDER_RE = re.compile(r"\b(cascade-dispatch|hamr-client|hamr\.workers\.dev|dispatchRedTeam)\b", re.IGNORECASE)
 
 
 def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
@@ -40,13 +46,14 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     roles = state.setdefault("roles", {})
     flags = state.setdefault("flags", {})
     ops = state.setdefault("admin_ops", {})
+    blast = state.setdefault("blast_radius", {})
+    blast.setdefault("files_edited_count", 0)
+    blast.setdefault("push_count", 0)
+    blast.setdefault("provider_call_count", 0)
 
-    if tool in {
-        "apply_patch", "create_file",
-        "edit_notebook_file", "create_new_jupyter_notebook",
-        "write_to_file", "replace_file_content", "multi_replace_file_content",
-    }:
+    if tool in EDIT_TOOLS:
         roles["collaborator"] = True
+        blast["files_edited_count"] += 1
 
     # #1960: Do not classify Bash command strings as file paths.
     # Only extract explicit patch-file names from Bash inputs.
@@ -100,6 +107,10 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     for pattern, key in _match_ops:
         if pattern.search(joined):
             ops[key] = True
+    if RE_GIT_PUSH.search(joined):
+        blast["push_count"] += 1
+    if _PROVIDER_RE.search(joined):
+        blast["provider_call_count"] += 1
 
     # #2444: auto-emit roles.admin once all required ops complete.
     # Mirrors check_admin_ops base/ext logic via shared helper.

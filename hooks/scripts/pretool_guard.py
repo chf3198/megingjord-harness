@@ -9,6 +9,7 @@ from admin_patterns import (  # noqa: E501
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
+from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
 from governance_state import ensure_state
 from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, check_merged_pr
 from runtime_paths import runtime_hook_paths
@@ -91,6 +92,25 @@ def active_ticket_is_no_code_lane(state: dict, cwd: str) -> bool:
     return "lane:no-code-remediation" in _active_ticket_labels(state, cwd)
 
 RE_ADMIN_OVERRIDE = re.compile(r"(?:^|\s)--admin(?:[=\s]|$)")
+MUTATING_TOOLS = {
+    "create_file", "apply_patch", "edit_notebook_file", "create_new_jupyter_notebook",
+    "replace_string_in_file", "multi_replace_string_in_file", "Write", "Edit", "MultiEdit",
+    "write_to_file", "replace_file_content", "multi_replace_file_content",
+    "run_in_terminal", "terminal", "runTerminalCommand", "Bash", "run_command", "send_command_input",
+}
+
+
+def enforce_blast_radius(tool: str, state: dict, cwd: str) -> int | None:
+    if tool not in MUTATING_TOOLS:
+        return None
+    reason = check_caps(state.get("blast_radius", {}), load_caps(cwd))
+    if not reason:
+        return None
+    override = os.environ.get(ENV_BYPASS, "0") == "1"
+    emit_cap_incident(reason, cwd, override=override)
+    if override:
+        return None
+    return emit("deny", f"Session blast-radius cap exceeded: {reason}")
 
 def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
     """True when this is an admin-OVERRIDE merge lacking the Epic #2517 exception (#2706).
@@ -237,6 +257,9 @@ def main() -> int:
     state = ensure_state(cwd)
     from state_store import reset_on_branch_change
     state = reset_on_branch_change(cwd, current_branch(cwd))
+    blast_result = enforce_blast_radius(tool, state, cwd)
+    if blast_result is not None:
+        return blast_result
     flags = state.get("flags", {})
     if tool in {"create_file","apply_patch","edit_notebook_file","create_new_jupyter_notebook","replace_string_in_file","multi_replace_string_in_file","Write","Edit","MultiEdit","write_to_file","replace_file_content","multi_replace_file_content"}:
         # G-07 #2903: /memories/ write guard — block raw file-write tools from targeting
