@@ -14,13 +14,13 @@ pre-push:
     lint-readability:
       run: npm run lint:readability:ci
     lint-js:
-      run: npm run lint:js || true
+      run: npm run lint:js
     lint-md:
       run: npm run lint:md
     lint-py:
-      run: npm run lint:py || true
+      run: npm run lint:py
     lint-sh:
-      run: npm run lint:sh || true
+      run: npm run lint:sh
     megalint:
       run: node scripts/global/megalint/index.js
     hydration-lint:
@@ -34,7 +34,7 @@ pre-push:
     # silently failed, and was suppressed by `|| true`. The gate runs
     # server-side via .github/workflows/test-evidence.yml on PR.
     git-freshness:
-      run: node scripts/global/git-freshness-check.js || true
+      run: node scripts/global/git-freshness-check.js
     # #2878: merged-branch-guard — block pushes to already-merged branches.
     merged-branch-guard:
       run: python3 hooks/scripts/merged-branch-guard.py
