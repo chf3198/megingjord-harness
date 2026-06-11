@@ -58,6 +58,12 @@ def emit(decision: str, reason: str, extra: str | None = None) -> int:
     hook = {"hookEventName":"PreToolUse","permissionDecision":decision,"permissionDecisionReason":reason}
     if extra: hook["additionalContext"] = extra
     print(json.dumps({"hookSpecificOutput": hook}))
+    if decision == "deny":
+        try:
+            from baton_event_emitter import emit_decision as _ed
+            _ed("pretool-guard", "tool-denied", "denied", rationale=reason)
+        except Exception:
+            pass  # G6: telemetry never breaks the gate
     return 0
 
 def _emit_it_bypass_telemetry(marker: str, cwd: str) -> None:
