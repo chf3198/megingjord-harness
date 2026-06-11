@@ -304,7 +304,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `lint:readability` | `node scripts/lint-readability.js` |
 | `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=475` |
 | `lint:router` | `node scripts/lint-router.js` |
-| `lint:sh` | `find scripts -name '*.sh' -exec shellcheck {} +` |
+| `lint:sh` | `find scripts -name '*.sh' -exec shellcheck --severity=warning {} +` |
 | `mailbox:flush` | `node scripts/global/mailbox-outbox.js flush` |
 | `mailbox:poll` | `node scripts/global/mailbox-client.js poll` |
 | `mailbox:send` | `node scripts/global/mailbox-client.js send` |
