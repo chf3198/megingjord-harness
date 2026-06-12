@@ -55,3 +55,39 @@ test('AC4: tierFor back-compat — availability→free-cloud, capability/null→
   assert.strictEqual(tierFor('judge_low_score'), 'haiku');
   assert.strictEqual(tierFor(undefined), 'haiku');
 });
+
+// --- #2973: availability classification for fleet-outage reason strings + structural outcome ---
+
+test('#2973 AC3: fleet-outage reason strings classify as availability', () => {
+  for (const r of ['gateway-unhealthy', 'probe-failed', 'litellm-call-failed', 'litellm-threw',
+    'litellm_error', 'no_litellm_url', 'empty_response', 'HTTP 400', 'HTTP 503', 'http 502']) {
+    assert.strictEqual(classifyFailure(r), 'availability', `${r} should be availability`);
+  }
+});
+
+test('#2973 AC3: a 3-digit HTTP status is availability; non-status text stays capability', () => {
+  assert.strictEqual(classifyFailure('HTTP 429'), 'availability');
+  assert.strictEqual(classifyFailure('judge_low_score'), 'capability'); // unchanged
+  assert.strictEqual(classifyFailure('too_short'), 'capability');
+});
+
+test('#2973 AC1: outcome=no-answer forces availability/free-cloud regardless of reason', () => {
+  // even a capability-looking reason must route to free-cloud when no answer was produced
+  const d = escalate({ outcome: 'no-answer', reason: 'judge_low_score', currentTier: 'fleet' });
+  assert.strictEqual(d.failureClass, 'availability');
+  assert.strictEqual(d.tier, 'free-cloud');
+  assert.strictEqual(d.premiumBlocked, true);
+});
+
+test('#2973 AC2: the bug shape (gateway-unhealthy + HTTP 400) escalates to free-cloud, never premium', () => {
+  for (const reason of ['gateway-unhealthy', 'HTTP 400']) {
+    const d = escalate({ reason, currentTier: 'fleet' });
+    assert.strictEqual(d.tier, 'free-cloud', `${reason} -> free-cloud`);
+    assert.strictEqual(d.premiumBlocked, true);
+  }
+});
+
+test('#2973 AC6: default outcome (answered) preserves capability->haiku step-up', () => {
+  assert.strictEqual(escalate({ reason: 'judge_low_score', currentTier: 'fleet' }).tier, 'haiku');
+  assert.strictEqual(escalate({ outcome: 'answered', reason: 'too_short', currentTier: 'fleet' }).tier, 'haiku');
+});

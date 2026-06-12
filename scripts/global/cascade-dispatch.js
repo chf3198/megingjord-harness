@@ -63,7 +63,9 @@ async function tryOllama(prompt, model, attempt = 0) {
       await backoff(attempt);
       return tryOllama(prompt, model, attempt + 1);
     }
-    return { ok: false, reason: result.error || 'ollama_unreachable', tier: 'local' };
+    // #2973 (F3): preserve dispatchFleet's fallback_reason (e.g. gateway-unhealthy) so the true
+    // outage signal survives — not just the last attempt's result.error.
+    return { ok: false, reason: result.error || 'ollama_unreachable', fallback_reason: result.fallback_reason, tier: 'local' };
   }
   return { ok: true, content: result.content, model: result.model, tier: 'local' };
 }
@@ -86,6 +88,9 @@ async function cascade(prompt, opts = {}) {
     // #2930 C4: availability failures record into the breaker (only when we actually tried fleet —
     // a skipped attempt must not re-stamp the cooloff) and NEVER escalate an outage to a paid tier.
     const decision = fleetPolicy.escalate({
+      // #2973 (F1): the fleet produced NO content here, so this is STRUCTURALLY an availability
+      // failure — classify it as such regardless of the (telemetry-only) reason string.
+      outcome: 'no-answer',
       reason: local.reason, currentTier: 'fleet',
       breaker: breakerBlocksFleet ? null : fleetBreaker, nowMs,
     });
