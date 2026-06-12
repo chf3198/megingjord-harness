@@ -3,6 +3,12 @@
 
 const { loadLocalEnvOnce } = require('./load-local-env');
 
+const HTTP_AUTH_UNAUTHORIZED = 401;
+const HTTP_AUTH_FORBIDDEN = 403;
+const HTTP_NOT_FOUND = 404;
+const HTTP_RATE_LIMITED = 429;
+const HTTP_SERVER_ERROR_MIN = 500;
+const REQUEST_TIMEOUT_MS = 12000;
 const TOOL_CASES = [
   { tool: 'search', path: '/search', body: { query: 'Tavily smoke search', max_results: 1 } },
   { tool: 'extract', path: '/extract', body: { urls: ['https://example.com'], include_images: false } },
@@ -11,10 +17,10 @@ const TOOL_CASES = [
 ];
 
 function classifyFailure(status) {
-  if (status === 401 || status === 403) return { code: 'auth-failed', remediation: 'set TAVILY_API_KEY or refresh key' };
-  if (status === 404) return { code: 'tool-unreachable', remediation: 'verify Tavily endpoint path and provider availability' };
-  if (status === 429) return { code: 'rate-limited', remediation: 'retry with backoff or reduce smoke frequency' };
-  if (status >= 500) return { code: 'provider-error', remediation: 'retry later; if persistent, fail over to free lane' };
+  if (status === HTTP_AUTH_UNAUTHORIZED || status === HTTP_AUTH_FORBIDDEN) return { code: 'auth-failed', remediation: 'set TAVILY_API_KEY or refresh key' };
+  if (status === HTTP_NOT_FOUND) return { code: 'tool-unreachable', remediation: 'verify Tavily endpoint path and provider availability' };
+  if (status === HTTP_RATE_LIMITED) return { code: 'rate-limited', remediation: 'retry with backoff or reduce smoke frequency' };
+  if (status >= HTTP_SERVER_ERROR_MIN) return { code: 'provider-error', remediation: 'retry later; if persistent, fail over to free lane' };
   return { code: 'unexpected-response', remediation: 'inspect response body and request payload' };
 }
 
@@ -23,7 +29,7 @@ async function probeTool(tc, apiKey, fetchImpl) {
   try {
     const res = await fetchImpl(url, {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ ...tc.body, api_key: apiKey }), signal: AbortSignal.timeout(12000),
+      body: JSON.stringify({ ...tc.body, api_key: apiKey }), signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (res.ok) return { tool: tc.tool, ok: true, status: res.status };
     const fail = classifyFailure(res.status);
@@ -37,14 +43,12 @@ async function runSmoke(input = {}) {
   const live = input.live === true;
   const apiKey = String(input.apiKey || process.env.TAVILY_API_KEY || '').trim();
   const fetchImpl = input.fetchImpl || global.fetch;
-  if (!live) {
-    return { ok: true, mode: 'dry-run', tools: TOOL_CASES.map((tc) => ({ tool: tc.tool, ok: true, reason: 'dry-run' })) };
-  }
+  if (!live) return { ok: true, mode: 'dry-run', tools: TOOL_CASES.map((tc) => ({ tool: tc.tool, ok: true, reason: 'dry-run' })) };
   if (!apiKey) return { ok: false, mode: 'live', error: 'missing-api-key', remediation: 'export TAVILY_API_KEY and rerun with --live' };
   if (typeof fetchImpl !== 'function') return { ok: false, mode: 'live', error: 'missing-fetch', remediation: 'use Node 18+ or provide fetch implementation' };
   const tools = [];
   for (const tc of TOOL_CASES) tools.push(await probeTool(tc, apiKey, fetchImpl));
-  return { ok: tools.every((t) => t.ok), mode: 'live', tools };
+  return { ok: tools.every((toolResult) => toolResult.ok), mode: 'live', tools };
 }
 
 async function main() {

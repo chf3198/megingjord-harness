@@ -13,7 +13,7 @@ function usage() {
   process.exit(1);
 }
 function readText(file) { try { return fs.readFileSync(file, 'utf8'); } catch { return ''; } }
-function readJson(file) { const t = readText(file).trim(); return t ? JSON.parse(t) : {}; }
+function readJson(file) { const text = readText(file).trim(); return text ? JSON.parse(text) : {}; }
 function write(file, text) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.tmp-${Date.now()}`;
@@ -52,13 +52,13 @@ function runCli(argv = process.argv.slice(2), home = process.env.MCP_REGISTER_TE
   };
   const order = target === 'all' ? ['copilot', 'codex', 'claude'] : [target];
   let failed = false;
-  for (const t of order) {
+  for (const targetName of order) {
     try {
-      const changed = jobs[t]();
-      console.log(`${t}: ${apply ? (changed ? 'updated' : 'no-op') : (changed ? 'would update' : 'would no-op')}`);
+      const changed = jobs[targetName]();
+      console.log(`${targetName}: ${apply ? (changed ? 'updated' : 'no-op') : (changed ? 'would update' : 'would no-op')}`);
     } catch (err) {
       failed = true;
-      console.error(`${t}: failed: ${(err && err.message) || String(err)}`);
+      console.error(`${targetName}: failed: ${(err && err.message) || String(err)}`);
     }
   }
   return failed ? 1 : 0;

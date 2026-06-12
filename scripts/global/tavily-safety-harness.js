@@ -4,10 +4,11 @@
 const { redactString } = require('./log-redaction');
 
 const INJECTION_RE = /ignore\s+previous|system\s+prompt|developer\s+message|exfiltrat|tool\s+call|override\s+policy/i;
+const MAX_QUERY_LEN = 240;
 
 /** @param {string} query @returns {string} */
 function minimizeQuery(query) {
-  return String(query || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+  return String(query || '').replace(/\s+/g, ' ').trim().slice(0, MAX_QUERY_LEN);
 }
 
 /** @param {string} query @returns {{query:string, hits:Array}} */
@@ -18,8 +19,9 @@ function redactQuery(query) {
 
 /** @param {string} text @returns {{unsafe:boolean, reason:string|null}} */
 function detectPromptInjection(text) {
-  const t = String(text || '');
-  return { unsafe: INJECTION_RE.test(t), reason: INJECTION_RE.test(t) ? 'prompt-injection-pattern' : null };
+  const textValue = String(text || '');
+  const unsafe = INJECTION_RE.test(textValue);
+  return { unsafe, reason: unsafe ? 'prompt-injection-pattern' : null };
 }
 
 /** @param {{retentionDays?:number, policyUrl?:string}} meta @returns {{ok:boolean, reason:string|null}} */
