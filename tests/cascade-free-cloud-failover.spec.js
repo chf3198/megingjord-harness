@@ -49,3 +49,13 @@ test('task_router.py: cascade-script-not-found availability failure suggests fre
   expect(result.suggested_tier).toBe('free-cloud');
   expect(result.reason).toBe('cascade_script_not_found');
 });
+
+test('#2973: fleet-outage reason strings route to free-cloud (not paid haiku)', () => {
+  for (const reason of ['gateway-unhealthy', 'probe-failed', 'empty_response',
+    'litellm-threw', 'HTTP 400', 'HTTP 503']) {
+    expect(escalationTier(reason)).toBe('free-cloud');
+  }
+  // capability paths unchanged (regression guard)
+  expect(escalationTier('too_short')).toBe('haiku');
+  expect(escalationTier('judge_low_score')).toBe('haiku');
+});

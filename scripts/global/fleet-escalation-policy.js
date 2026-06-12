@@ -13,12 +13,23 @@ const cb = require('./circuit-breaker');
 
 // Reasons that mean "no usable answer was produced" — an availability failure, not a quality one.
 // 'circuit-open' = the breaker skipped the fleet attempt (known-down) — an availability condition.
-const AVAILABILITY_REASONS = new Set(['ollama_unreachable', 'fleet_unavailable', 'cascade_script_not_found', 'circuit-open']);
+const AVAILABILITY_REASONS = new Set([
+  'ollama_unreachable', 'fleet_unavailable', 'cascade_script_not_found', 'circuit-open',
+  // #2973: fleet-outage reasons from fleet-backend-select.js + litellm-client.js when the fleet
+  // produced NO usable answer. These are availability failures, not quality ones.
+  'gateway-unhealthy', 'probe-failed', 'litellm-call-failed', 'litellm-threw',
+  'litellm_error', 'no_litellm_url', 'empty_response',
+]);
 const CONNECTION_RE = /econnrefused|fetch failed|timeout|network|enotfound|socket hang|connect/i;
+// #2973: a fleet attempt that returns an HTTP status error produced no usable content -> availability.
+const HTTP_STATUS_RE = /HTTP \d{3}/i;
 
 function classifyFailure(reason) {
   if (!reason) return 'capability';
-  if (AVAILABILITY_REASONS.has(reason) || CONNECTION_RE.test(String(reason))) return 'availability';
+  const text = String(reason);
+  if (AVAILABILITY_REASONS.has(reason) || CONNECTION_RE.test(text) || HTTP_STATUS_RE.test(text)) {
+    return 'availability';
+  }
   return 'capability';
 }
 
@@ -29,10 +40,14 @@ const CAPABILITY_NEXT = Object.freeze({ fleet: 'haiku', 'free-cloud': 'premium',
 /**
  * Decide the next tier for a failure. Availability failures are hard-pinned to free-cloud and
  * record a breaker failure; capability failures step exactly one rung up the paid ladder.
+ * #2973: `outcome` lets a caller that STRUCTURALLY knows the result classify deterministically
+ * instead of inferring from a free-text reason — `'no-answer'` ⇒ availability unconditionally
+ * (the reason string is then telemetry only). Default `'answered'` preserves reason-string inference.
+ * @param {{reason?, currentTier?, breaker?, nowMs?, outcome?: 'no-answer'|'answered'}} input
  * @returns {{tier, failureClass, breakerOpen, premiumBlocked}}
  */
-function escalate({ reason, currentTier = 'fleet', breaker = null, nowMs = 0 } = {}) {
-  const failureClass = classifyFailure(reason);
+function escalate({ reason, currentTier = 'fleet', breaker = null, nowMs = 0, outcome } = {}) {
+  const failureClass = outcome === 'no-answer' ? 'availability' : classifyFailure(reason);
   if (failureClass === 'availability') {
     if (breaker) cb.recordFailure(breaker, nowMs);
     const breakerOpen = breaker ? cb.status(breaker).state === cb.STATES.open : false;
