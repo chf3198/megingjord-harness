@@ -63,7 +63,6 @@ case "$agent" in
   copilot|codex|claude-code) ;;
   *) die "invalid agent '$agent' (expected: copilot|codex|claude-code)" ;;
 esac
-
 if [[ -n "$task_branch" && ! "$task_branch" =~ ^(feat|fix|hotfix)/[0-9]+-[a-z0-9][-a-z0-9]*$ ]]; then
   die "invalid task branch '$task_branch' (expected feat/<ticket#>-<slug>)"
 fi
@@ -74,12 +73,10 @@ root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
 
 cd "$root"
 log "syncing sandbox launcher branch: $sandbox"
-
 git fetch origin --prune
 if ! git show-ref --verify --quiet "refs/heads/$sandbox"; then
   die "missing local sandbox branch '$sandbox'"
 fi
-
 git switch "$sandbox"
 git reset --hard origin/main
 git clean -fd
@@ -92,9 +89,12 @@ fi
 if git show-ref --verify --quiet "refs/heads/$task_branch"; then
   warn "task branch already exists locally: $task_branch"
 fi
-
-git switch -c "$task_branch"
-bootstrap_node_modules "$root"
-configure_per_worktree_hooks "$root"
-log "ready on task branch: $task_branch"
-log "next: implement scoped changes and open PR with Refs #<ticket>"
+# Refs #2946: isolated worktree dir — not a branch in canonical-main
+ticket_num=$(echo "$task_branch" | grep -oP '(?<=/)[0-9]+(?=-)' | head -1)
+[[ -n "$ticket_num" ]] || die "cannot extract ticket# from task branch '$task_branch'"
+wt_dir="$HOME/devenv-ops-${ticket_num}"
+[[ -d "$wt_dir" ]] && die "worktree dir exists: $wt_dir (remove first)"
+git worktree add "$wt_dir" -b "$task_branch"
+bootstrap_node_modules "$wt_dir"
+configure_per_worktree_hooks "$wt_dir"
+log "worktree ready: $wt_dir ($task_branch) — cd, implement, PR with Refs #$ticket_num"

@@ -17,11 +17,11 @@ test('#1378 AC1: worktree-session-start.sh includes bootstrap_node_modules funct
 
 test('#1378 AC1: bootstrap is called after task-branch creation', () => {
   const content = fs.readFileSync(SESSION_START, 'utf-8');
-  // Must appear after `git switch -c "$task_branch"`
-  const switchPos = content.indexOf('git switch -c "$task_branch"');
-  const bootstrapCallPos = content.indexOf('bootstrap_node_modules "$root"');
-  expect(switchPos).toBeGreaterThan(0);
-  expect(bootstrapCallPos).toBeGreaterThan(switchPos);
+  // Refs #2946: now uses git worktree add + isolated dir, not git switch -c
+  const worktreeAddPos = content.indexOf('git worktree add "$wt_dir"');
+  const bootstrapCallPos = content.indexOf('bootstrap_node_modules "$wt_dir"');
+  expect(worktreeAddPos).toBeGreaterThan(0);
+  expect(bootstrapCallPos).toBeGreaterThan(worktreeAddPos);
 });
 
 test('#1378 AC1: bootstrap is idempotent (skips if node_modules already exists)', () => {
