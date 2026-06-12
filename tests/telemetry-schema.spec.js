@@ -53,6 +53,15 @@ test('telemetry summarize includes confidence split', () => {
   expect(out.confidenceDistribution.estimated).toBe(0.5);
 });
 
+test('telemetry stores Tavily route and budget decision for auditability', () => {
+  const entry = recordTelemetry({
+    lane: 'haiku', model: 'balanced-cloud', routeLabel: 'tavily-paid',
+    budgetDecision: { decision: 'soft-cap-alert', spentUsd: 3.1 }, outcome: 'ok'
+  });
+  expect(entry.tavily_route).toBe('tavily-paid');
+  expect(entry.budget_decision.decision).toBe('soft-cap-alert');
+});
+
 // AC4: npm run cost-report resolves to cost-report.js
 test('cost-report script is registered in package.json', () => {
   const pkg = require(path.join(__dirname, '../package.json'));

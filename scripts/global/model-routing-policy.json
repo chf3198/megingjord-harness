@@ -190,6 +190,11 @@
     "hardLimitShare": 0.12,
     "requireStructuredRationale": true
   },
+  "tavilyBudget": {
+    "softCapUsd": 3,
+    "hardCapUsd": 5,
+    "fallbackLane": "free"
+  },
   "cascadeEnforcement": {
     "enforceFreeFleetFirst": true,
     "minFleetUtilizationShare": 0.85,

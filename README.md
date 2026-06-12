@@ -104,6 +104,9 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 - Copy `.env.example` to `.env` for local resource credentials.
 - Tavily MCP must keep the secret only in `TAVILY_API_KEY`; do not inline Tavily keys in MCP URLs or tracked config.
 - Verify env-backed Tavily wiring with `npm run governance:credentials-env`.
+- Register Tavily MCP across Copilot/Codex/Claude surfaces with `npm run tavily:mcp:register:apply`.
+- Run deterministic Tavily smoke checks with `npm run tavily:smoke` (or live reachability via `npm run tavily:smoke:live`).
+- Security ownership and review cadence for Tavily flows: `docs/workflow/tavily-security-ownership.md`.
 
 ## Research-first gate notes
 
@@ -373,6 +376,11 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `synthesis:init` | `node scripts/global/synthesis-init.js` |
 | `synthesis:snapshot` | `node scripts/global/synthesis-snapshot.js` |
 | `synthesis:status` | `node scripts/global/broker-synthesis-status.js` |
+| `tavily:mcp:register` | `node scripts/global/tavily-mcp-register.js --target all` |
+| `tavily:mcp:register:apply` | `node scripts/global/tavily-mcp-register.js --target all --apply` |
+| `tavily:phase1:test` | `node --test tests/tavily-budget-governor.spec.js tests/tavily-search-router.spec.js tests/tavily-safety-harness.spec.js tests/tavily-mcp-register.spec.js tests/tavily-smoke.spec.js` |
+| `tavily:smoke` | `node scripts/global/tavily-smoke.js` |
+| `tavily:smoke:live` | `node scripts/global/tavily-smoke.js --live` |
 | `test` | `npx playwright test` |
 | `test:collaborator-input-shape` | `node --test tests/collaborator-handoff-input-shape.spec.js` |
 | `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
