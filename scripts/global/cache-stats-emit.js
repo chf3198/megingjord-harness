@@ -57,6 +57,11 @@ function appendCacheStat(record, opts = {}) {
     tier: typeof record.tier === 'string' ? record.tier : null,
   };
   normalized.cache_eligible = isCacheEligible(normalized);
+  // P1-5 (#2232): additive OTel attribution — only present when the caller supplies it,
+  // so pre-#2232 records remain byte-identical (backward-compatible).
+  if (typeof record['gen_ai.system'] === 'string') {
+    normalized['gen_ai.system'] = record['gen_ai.system'];
+  }
   if (!isInformativeRecord(normalized)) {
     return { ok: false, skipped: true, reason: 'non_informative_record', file, line: null };
   }
