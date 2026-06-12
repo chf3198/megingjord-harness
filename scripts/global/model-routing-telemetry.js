@@ -19,6 +19,8 @@ function pctMap(counts, sampleCount) {
 
 function recordTelemetry(entry) {
   ensureDir();
+  const routeLabel = entry.routeLabel || entry.tavily_route || null;
+  const budgetDecision = entry.budgetDecision || null;
   const legacy = {
     ts: new Date().toISOString(),
     lane: entry.lane || 'free',
@@ -30,6 +32,8 @@ function recordTelemetry(entry) {
     outcome: entry.outcome || 'ok',
     rollbackApplied: entry.rollbackApplied || false,
     execute: entry.execute || false,
+    tavily_route: routeLabel,
+    budget_decision: budgetDecision,
   };
   const canonical = normalizeTokenRecord({
     ...entry,

@@ -208,6 +208,9 @@
     "routing:refresh": "node scripts/global/routing-refresh.js --update-matrix",
     "routing:report": "node scripts/global/routing-baseline-report.js --days 7",
     "routing:telemetry": "node scripts/global/token-telemetry-report.js --json",
+    "tavily:mcp:register": "node scripts/global/tavily-mcp-register.js --target all",
+    "tavily:mcp:register:apply": "node scripts/global/tavily-mcp-register.js --target all --apply",
+    "tavily:phase1:test": "node --test tests/tavily-budget-governor.spec.js tests/tavily-search-router.spec.js tests/tavily-safety-harness.spec.js tests/tavily-mcp-register.spec.js tests/tavily-smoke.spec.js",
     "setup": "npm install && echo '✅ megingjord ready — run: npm start'",
     "signing:bootstrap": "node scripts/global/crypto-signing-bootstrap.js",
     "start": "node scripts/dashboard-server.js",
@@ -282,7 +285,9 @@
     "review:cost-telemetry:test": "node --test tests/review-cost-telemetry.spec.js",
     "review:bypass-gate:test": "node --test tests/review-bypass-gate.spec.js",
     "review:privacy-gate:test": "node --test tests/review-privacy-gate.spec.js",
-    "review:cli-parity:test": "node --test tests/review-cli-parity.spec.js"
+    "review:cli-parity:test": "node --test tests/review-cli-parity.spec.js",
+    "tavily:smoke": "node scripts/global/tavily-smoke.js",
+    "tavily:smoke:live": "node scripts/global/tavily-smoke.js --live"
   },
   "keywords": [
     "devops",
