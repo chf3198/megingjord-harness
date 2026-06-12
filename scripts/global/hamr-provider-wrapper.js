@@ -10,6 +10,7 @@ const os = require('node:os');
 const { cacheHeaders } = require('./litellm-client');
 const { appendCacheStat } = require('./cache-stats-emit');
 const ADAPTERS = require('./token-provider-adapters');
+const { providerToGenAiSystem } = require('./event-schema-otel-genai');
 const { maybeSpillover } = require('./header-spillover');
 const { pickStickyProvider } = require('./sticky-route');
 // (#2645) shared .env hydration shim (G3); hydrate once at load so wrapped calls find provider keys
@@ -55,12 +56,14 @@ function emitStatSafe(provider, payload, opts = {}) {
     const tokenRecord = adapter(payload || {}, { provider });
     appendCacheStat({
       provider, model: tokenRecord.model ?? null,
+      // P1-5 (#2232): semconv-normalized companion to raw `provider` (always a valid OTel system).
+      'gen_ai.system': providerToGenAiSystem(provider),
       cache_read_tokens: tokenRecord.cache_read_tokens ?? 0,
       input_tokens: tokenRecord.input_tokens ?? 0,
       output_tokens: tokenRecord.output_tokens ?? 0,
       executed: 'hamr-provider-wrapper',
       tier: opts.tier ?? null,
-    });
+    }, opts.file ? { file: opts.file } : {});
   } catch { /* never let stats break the call */ }
 }
 
@@ -130,4 +133,4 @@ if (require.main === module) {
   console.log(JSON.stringify({ exports: ['wrapProviderCall'], hamr_disabled: isDisabled() }));
 }
 
-module.exports = { wrapProviderCall, makeResult, isDisabled, readTeamConfig, TEAM_CONFIG_PATHS };
+module.exports = { wrapProviderCall, makeResult, emitStatSafe, isDisabled, readTeamConfig, TEAM_CONFIG_PATHS };

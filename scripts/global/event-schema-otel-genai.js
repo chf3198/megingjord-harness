@@ -17,6 +17,14 @@ const OTEL_GENAI_SYSTEMS = [
 
 const GENAI_PREFIX = 'gen_ai.';
 
+// P1-5 (#2232): map a wrapper provider id -> a valid OTel gen_ai.system value.
+// Providers that are not semconv systems (openrouter/litellm/copilot/groq/cerebras)
+// and any unknown provider fall back to the semconv catch-all 'other_system'.
+// Return is ALWAYS a member of OTEL_GENAI_SYSTEMS.
+function providerToGenAiSystem(provider) {
+  return OTEL_GENAI_SYSTEMS.includes(provider) ? provider : 'other_system';
+}
+
 function validateUsageField(event, field, errors) {
   const value = event[field];
   if (value !== undefined && (!Number.isInteger(value) || value < 0)) {
@@ -49,4 +57,4 @@ function isValidGenAI(event) {
   return { ok: errors.length === 0, errors, warnings: [] };
 }
 
-module.exports = { isValidGenAI, OTEL_GENAI_SYSTEMS, GENAI_PREFIX };
+module.exports = { isValidGenAI, OTEL_GENAI_SYSTEMS, GENAI_PREFIX, providerToGenAiSystem };
