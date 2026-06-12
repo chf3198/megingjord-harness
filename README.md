@@ -138,12 +138,12 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
-| `deploy` | `bash scripts/deploy.sh && node scripts/global/xteam-mcp-register.js --target copilot --root .` |
+| `deploy` | `bash scripts/deploy.sh --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . && node scripts/global/xteam-mcp-register.js --target codex --root .` |
 | `deploy:all` | `bash scripts/deploy.sh --target all && node scripts/global/xteam-mcp-register.js --target all --root .` |
 | `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all && node scripts/global/xteam-mcp-register.js --target all --root . --apply` |
 | `deploy:antigravity` | `bash scripts/deploy.sh --target antigravity && node scripts/global/xteam-mcp-register.js --target antigravity --root .` |
 | `deploy:antigravity:apply` | `bash scripts/deploy.sh --apply --target antigravity && node scripts/global/xteam-mcp-register.js --target antigravity --root . --apply` |
-| `deploy:apply` | `bash scripts/deploy.sh --apply && node scripts/global/xteam-mcp-register.js --target copilot --root . --apply` |
+| `deploy:apply` | `bash scripts/deploy.sh --apply --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . --apply && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
 | `deploy:both` | `bash scripts/deploy.sh --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . && node scripts/global/xteam-mcp-register.js --target codex --root .` |
 | `deploy:both:apply` | `bash scripts/deploy.sh --apply --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . --apply && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
 | `deploy:claude` | `bash scripts/deploy.sh --target claude && node scripts/global/xteam-mcp-register.js --target claude --root .` |
