@@ -19,6 +19,52 @@ const GOAL_DEFINITIONS = {
   G10: 'Maintainability: code clarity, low cognitive overhead, durable structure.',
 };
 
+// P1-4 (#2231): keyword -> goal map. Keywords are words drawn from each goal's own
+// name/definition (NOT synonyms — synonym expansion is out of scope for Phase-1).
+const GOAL_KEYWORDS = {
+  G1: ['governance', 'policy', 'provenance'],
+  G2: ['quality', 'correctness'],
+  G3: ['cost', 'free'],
+  G4: ['privacy'],
+  G5: ['portability'],
+  G6: ['resilience', 'fallback'],
+  G7: ['throughput'],
+  G8: ['observability'],
+  G9: ['interoperability'],
+  G10: ['maintainability'],
+};
+
+/**
+ * Escape regex metacharacters so a keyword is always matched literally (defensive —
+ * today's keywords are alpha-only, but this prevents a future metachar keyword from
+ * silently changing match semantics). Refs cross-family review #2231.
+ * @param {string} text keyword to escape
+ * @returns {string} regex-safe literal
+ */
+function escapeRegExp(text) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Precompile one case-insensitive whole-word (\b) regex per keyword at module load.
+const GOAL_KEYWORD_RES = Object.fromEntries(
+  Object.entries(GOAL_KEYWORDS).map(([key, words]) =>
+    [key, words.map((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i'))]),
+);
+
+/**
+ * AC1: case-insensitive, whole-word (\b) match of goal-keywords in `prompt`.
+ * @param {string} prompt text to scan
+ * @returns {string[]} deduplicated array (G-order) of formatted G-definition strings, [] on no match
+ */
+function expandKeywords(prompt) {
+  if (typeof prompt !== 'string' || !prompt) return [];
+  const out = [];
+  for (const [key, regexes] of Object.entries(GOAL_KEYWORD_RES)) {
+    if (regexes.some((regex) => regex.test(prompt))) out.push(`${key} ${GOAL_DEFINITIONS[key]}`);
+  }
+  return out;
+}
+
 function shouldInject(opts) {
   if (!opts) return false;
   if (opts.tier === 'diagnostic' || opts.tier === 'test') return false;
@@ -40,7 +86,15 @@ function buildPrefix({ includeDefinitions } = {}) {
 function injectGoalContext(opts) {
   if (!shouldInject(opts)) return { systemPrefix: null, injected: false };
   const includeDefinitions = Boolean(opts && opts.include_goal_definitions);
-  return { systemPrefix: buildPrefix({ includeDefinitions }), injected: true, includesDefinitions: includeDefinitions };
+  let systemPrefix = buildPrefix({ includeDefinitions });
+  // AC5: when expand_goal_keywords is set, append the prompt's matched G-definitions
+  // AFTER the PRIORITY_SENTENCE/DECISION_CHECK block (additive; default off).
+  let expandedGoals = [];
+  if (opts.expand_goal_keywords && typeof opts.prompt === 'string') {
+    expandedGoals = expandKeywords(opts.prompt);
+    if (expandedGoals.length) systemPrefix = `${systemPrefix} Goal context: ${expandedGoals.join(' ')}`;
+  }
+  return { systemPrefix, injected: true, includesDefinitions: includeDefinitions, expandedGoals };
 }
 
 function estimateOverheadTokens({ includeDefinitions } = {}) {
@@ -49,5 +103,5 @@ function estimateOverheadTokens({ includeDefinitions } = {}) {
   return includeDefinitions ? PRIORITY_LINE_TOKEN_EST + DEFINITIONS_TOKEN_EST : PRIORITY_LINE_TOKEN_EST;
 }
 
-module.exports = { injectGoalContext, shouldInject, buildPrefix,
-  estimateOverheadTokens, PRIORITY_SENTENCE, DECISION_CHECK, GOAL_DEFINITIONS };
+module.exports = { injectGoalContext, shouldInject, buildPrefix, expandKeywords,
+  estimateOverheadTokens, PRIORITY_SENTENCE, DECISION_CHECK, GOAL_DEFINITIONS, GOAL_KEYWORDS };
