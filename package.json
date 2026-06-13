@@ -287,7 +287,15 @@
     "review:privacy-gate:test": "node --test tests/review-privacy-gate.spec.js",
     "review:cli-parity:test": "node --test tests/review-cli-parity.spec.js",
     "tavily:smoke": "node scripts/global/tavily-smoke.js",
-    "tavily:smoke:live": "node scripts/global/tavily-smoke.js --live"
+    "tavily:smoke:live": "node scripts/global/tavily-smoke.js --live",
+    "deploy:manifest": "node scripts/global/deploy-manifest.js",
+    "deploy:manifest:copilot": "node scripts/global/deploy-manifest.js copilot",
+    "deploy:manifest:codex": "node scripts/global/deploy-manifest.js codex",
+    "deploy:manifest:claude": "node scripts/global/deploy-manifest.js claude",
+    "deploy:verify": "node scripts/global/verify-deploy.js",
+    "deploy:verify:copilot": "node scripts/global/verify-deploy.js copilot",
+    "deploy:verify:codex": "node scripts/global/verify-deploy.js codex",
+    "deploy:verify:claude": "node scripts/global/verify-deploy.js claude"
   },
   "keywords": [
     "devops",

@@ -153,6 +153,14 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deploy:claude:apply` | `bash scripts/deploy.sh --apply --target claude && node scripts/global/xteam-mcp-register.js --target claude --root . --apply` |
 | `deploy:codex` | `bash scripts/deploy.sh --target codex && node scripts/global/xteam-mcp-register.js --target codex --root .` |
 | `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
+| `deploy:manifest` | `node scripts/global/deploy-manifest.js` |
+| `deploy:manifest:claude` | `node scripts/global/deploy-manifest.js claude` |
+| `deploy:manifest:codex` | `node scripts/global/deploy-manifest.js codex` |
+| `deploy:manifest:copilot` | `node scripts/global/deploy-manifest.js copilot` |
+| `deploy:verify` | `node scripts/global/verify-deploy.js` |
+| `deploy:verify:claude` | `node scripts/global/verify-deploy.js claude` |
+| `deploy:verify:codex` | `node scripts/global/verify-deploy.js codex` |
+| `deploy:verify:copilot` | `node scripts/global/verify-deploy.js copilot` |
 | `deps:aggregate` | `node scripts/global/dep-graph-aggregate.js` |
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
