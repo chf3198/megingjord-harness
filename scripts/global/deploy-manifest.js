@@ -11,6 +11,7 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+require('./load-local-env').loadLocalEnvOnce(); // hydrate .env before reading DEPLOY_MANIFEST_HMAC_KEY
 
 const MANIFEST_DIR = path.resolve(__dirname, '..', '..', 'inventory', 'deploy-manifests');
 const HMAC_ALGO = 'sha256';
