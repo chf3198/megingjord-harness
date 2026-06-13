@@ -67,11 +67,21 @@ function checkLaneConsistency(body, expectedLane) {
     : [];
 }
 // AC #2906 — block lane:trivial declarations when actual diff size exceeds threshold.
-// diffLines: total added+removed lines from the PR diff (caller-supplied; null/undefined = skip).
+// FAIL-CLOSED (CWE-754): missing/invalid diffLines on a lane:trivial declaration is
+// itself a violation. Callers MUST supply a finite non-negative integer diff count.
+// diffLines: total added+removed lines from the PR diff (caller-supplied).
 function checkLaneTrivialDiffSize(body, diffLines, threshold) {
   const declared = extractField(body, 'lane');
   if (!declared || !/lane:trivial/i.test(declared)) return [];
-  if (diffLines == null || !Number.isFinite(diffLines)) return [];
+  // Reject null/undefined/NaN/Infinity/negative — absence of evidence = violation.
+  if (diffLines == null || !Number.isFinite(diffLines) || diffLines < 0) {
+    return [{
+      rule: 'lane:trivial-diff-missing',
+      detail: 'MANAGER_HANDOFF declares lane:trivial but diff line count is absent or invalid ' +
+        `(got: ${String(diffLines)}). Caller must supply a finite non-negative integer diff count.`,
+      severity: 'hard',
+    }];
+  }
   const limit = Number.isFinite(threshold) ? threshold : TRIVIAL_DIFF_THRESHOLD;
   if (diffLines > limit) {
     return [{
