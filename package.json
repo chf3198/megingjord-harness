@@ -1,7 +1,7 @@
 {
   "name": "megingjord-harness",
   "version": "3.3.8",
-  "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
+  "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex \u2014 multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
     "adr:build": "log4brains build",
@@ -211,7 +211,7 @@
     "tavily:mcp:register": "node scripts/global/tavily-mcp-register.js --target all",
     "tavily:mcp:register:apply": "node scripts/global/tavily-mcp-register.js --target all --apply",
     "tavily:phase1:test": "node --test tests/tavily-budget-governor.spec.js tests/tavily-search-router.spec.js tests/tavily-safety-harness.spec.js tests/tavily-mcp-register.spec.js tests/tavily-smoke.spec.js",
-    "setup": "npm install && echo '✅ megingjord ready — run: npm start'",
+    "setup": "npm install && echo '\u2705 megingjord ready \u2014 run: npm start'",
     "signing:bootstrap": "node scripts/global/crypto-signing-bootstrap.js",
     "start": "node scripts/dashboard-server.js",
     "state:offload": "node scripts/global/state-offload-client.js",
@@ -287,7 +287,15 @@
     "review:privacy-gate:test": "node --test tests/review-privacy-gate.spec.js",
     "review:cli-parity:test": "node --test tests/review-cli-parity.spec.js",
     "tavily:smoke": "node scripts/global/tavily-smoke.js",
-    "tavily:smoke:live": "node scripts/global/tavily-smoke.js --live"
+    "tavily:smoke:live": "node scripts/global/tavily-smoke.js --live",
+    "deploy:manifest": "node scripts/global/deploy-manifest.js",
+    "deploy:manifest:copilot": "node scripts/global/deploy-manifest.js copilot",
+    "deploy:manifest:codex": "node scripts/global/deploy-manifest.js codex",
+    "deploy:manifest:claude": "node scripts/global/deploy-manifest.js claude",
+    "deploy:verify": "node scripts/global/verify-deploy.js",
+    "deploy:verify:copilot": "node scripts/global/verify-deploy.js copilot",
+    "deploy:verify:codex": "node scripts/global/verify-deploy.js codex",
+    "deploy:verify:claude": "node scripts/global/verify-deploy.js claude"
   },
   "keywords": [
     "devops",
