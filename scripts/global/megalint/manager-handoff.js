@@ -1,10 +1,27 @@
 'use strict';
 // manager-handoff — validates MANAGER_HANDOFF schema + crypto signature fields.
+// AC #2906: lane:trivial diff-size gate (Gap G-03 / OWASP ASI09).
 
+const fs = require('node:fs');
+const path = require('node:path');
 const sig = require('../governance-artifact-signature');
 const { isValidStrategy } = require('../test-strategy-enum');
 const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates', 'related_tickets', 'overlap_decision'];
 const PHASE_ONE_LABEL = process.env.PHASE_ONE_LABEL || 'phase-gate:phase-1';
+
+// Load trivial-lane diff threshold from governance-rules.yaml or env override.
+function loadTrivialThreshold() {
+  if (process.env.TRIVIAL_DIFF_THRESHOLD) return Number(process.env.TRIVIAL_DIFF_THRESHOLD);
+  try {
+    const rulesPath = path.resolve(__dirname, '..', '..', '..', 'config', 'governance-rules.yaml');
+    const raw = fs.readFileSync(rulesPath, 'utf8');
+    const match = raw.match(/rule_id:\s*lane-trivial-diff-size[\s\S]*?threshold:\s*(\d+)/);
+    if (match) return Number(match[1]);
+  } catch { /* config absent: use default */ }
+  return 50;
+}
+
+const TRIVIAL_DIFF_THRESHOLD = loadTrivialThreshold();
 
 function findManagerHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?MANAGER_HANDOFF\b/;
@@ -49,6 +66,23 @@ function checkLaneConsistency(body, expectedLane) {
     ? [{ rule: 'lane-mismatch', detail: `MANAGER_HANDOFF lane='${declared}' but issue has label='${expectedLane}'` }]
     : [];
 }
+// AC #2906 — block lane:trivial declarations when actual diff size exceeds threshold.
+// diffLines: total added+removed lines from the PR diff (caller-supplied; null/undefined = skip).
+function checkLaneTrivialDiffSize(body, diffLines, threshold) {
+  const declared = extractField(body, 'lane');
+  if (!declared || !/lane:trivial/i.test(declared)) return [];
+  if (diffLines == null || !Number.isFinite(diffLines)) return [];
+  const limit = Number.isFinite(threshold) ? threshold : TRIVIAL_DIFF_THRESHOLD;
+  if (diffLines > limit) {
+    return [{
+      rule: 'lane:trivial-diff-too-large',
+      detail: `MANAGER_HANDOFF declares lane:trivial but diff is ${diffLines} lines (threshold: ${limit}). ` +
+        'Re-classify to an appropriate lane (lane:code-change, lane:config-only, etc.).',
+      severity: 'hard',
+    }];
+  }
+  return [];
+}
 function checkCrypto(body) {
   if (!/Crypto-Algorithm:/i.test(body)) return [];
   const result = sig.verifyArtifact(body, 'manager');
@@ -88,10 +122,14 @@ function validate(input) {
     ...checkRequiredFields(handoff.body),
     ...checkTestStrategy(handoff.body),
     ...checkLaneConsistency(handoff.body, input.lane),
+    ...checkLaneTrivialDiffSize(handoff.body, input.diffLines, TRIVIAL_DIFF_THRESHOLD),
     ...checkPhaseOneFields(handoff.body, input.labels),
     ...checkCrypto(handoff.body),
   ];
   return { ok: violations.length === 0, violations, found: true };
 }
 
-module.exports = { validate, findManagerHandoff, extractField, REQUIRED_FIELDS };
+module.exports = {
+  validate, findManagerHandoff, extractField, REQUIRED_FIELDS,
+  checkLaneTrivialDiffSize, TRIVIAL_DIFF_THRESHOLD,
+};

@@ -197,3 +197,19 @@ rules:
     severity: hard-mandatory
     cross_runtime_applicability:
       - all
+
+  - rule_id: lane-trivial-diff-size
+    class: context-substituting-for-guardrail
+    statement: >
+      A MANAGER_HANDOFF declaring lane:trivial must not have an actual PR diff
+      exceeding the configured line threshold; over-threshold trivial declarations
+      skip gates intended for real code changes (Gap G-03 / OWASP ASI09).
+    source: scripts/global/megalint/manager-handoff.js
+    threshold: 50
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
