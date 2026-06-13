@@ -1,5 +1,6 @@
 'use strict';
 // tests/deploy-integrity.spec.js (#2914): tdd-pyramid tests for deploy-manifest + verify-deploy.
+// Includes mutation tests for HMAC, symlink, TOCTOU-guard, and fail-closed paths.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -7,8 +8,10 @@ const path = require('node:path');
 const os = require('node:os');
 const crypto = require('node:crypto');
 
-const { generateManifest, writeManifest, collectFiles, hashFile, generateAndWrite } =
-  require('../scripts/global/deploy-manifest');
+const {
+  generateManifest, writeManifest, collectFiles, hashFile, generateAndWrite,
+  computeHmac, verifyManifestHmac,
+} = require('../scripts/global/deploy-manifest');
 const { verifyDeploy } = require('../scripts/global/verify-deploy');
 
 function makeTmpDir() {
@@ -20,6 +23,15 @@ function writeFile(dir, relPath, content) {
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, content, 'utf8');
   return full;
+}
+
+/** Write a signed manifest to manifestDir using a test HMAC key. */
+function writeSigned(manifestDir, targetName, manifest, key) {
+  fs.mkdirSync(manifestDir, { recursive: true });
+  const body = JSON.stringify(manifest, null, 2);
+  const sig = computeHmac(body, key);
+  const out = JSON.stringify({ ...manifest, hmac_sha256: sig }, null, 2) + '\n';
+  fs.writeFileSync(path.join(manifestDir, `${targetName}.manifest.json`), out, 'utf8');
 }
 
 // ── collectFiles ───────────────────────────────────────────────────────────────
@@ -44,7 +56,17 @@ test('collectFiles skips symlinks', () => {
   assert.ok(names.includes('real.js'));
 });
 
-// ── hashFile ──────────────────────────────────────────────────────────────────
+// MUTATION: if symlink-skip guard removed, this test would include 'link.js' in collectFiles
+test('[mutation] collectFiles symlink guard — link.js must never appear', () => {
+  const tmp = makeTmpDir();
+  writeFile(tmp, 'real.js', 'real');
+  fs.symlinkSync(path.join(tmp, 'real.js'), path.join(tmp, 'link.js'));
+  const files = collectFiles(tmp);
+  // If the guard is removed, link.js would appear — this assertion would fail
+  assert.ok(!files.some((f) => f.endsWith('link.js')), 'removing symlink guard causes this to fail');
+});
+
+// ── hashFile (read-once buffer / TOCTOU guard) ─────────────────────────────────
 
 test('hashFile produces correct SHA-256', () => {
   const tmp = makeTmpDir();
@@ -52,6 +74,101 @@ test('hashFile produces correct SHA-256', () => {
   const filePath = writeFile(tmp, 'test.txt', content);
   const expected = crypto.createHash('sha256').update(content, 'utf8').digest('hex');
   assert.equal(hashFile(filePath), expected);
+});
+
+// MUTATION: verify hashFile uses content correctly (not filename or path)
+test('[mutation] hashFile result changes when file content changes', () => {
+  const tmp = makeTmpDir();
+  const p = writeFile(tmp, 'f.txt', 'original');
+  const h1 = hashFile(p);
+  fs.writeFileSync(p, 'tampered', 'utf8');
+  const h2 = hashFile(p);
+  assert.notEqual(h1, h2, 'hash must change when content changes — removing read guards breaks this');
+});
+
+// ── HMAC sign + verify ─────────────────────────────────────────────────────────
+
+test('computeHmac is deterministic for same input', () => {
+  const sig1 = computeHmac('body', 'key');
+  const sig2 = computeHmac('body', 'key');
+  assert.equal(sig1, sig2);
+});
+
+test('computeHmac differs for different keys', () => {
+  assert.notEqual(computeHmac('body', 'key1'), computeHmac('body', 'key2'));
+});
+
+test('verifyManifestHmac passes when signed correctly', () => {
+  const orig = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_HMAC_KEY = 'testkey';
+  try {
+    const bodyObj = { schema: 'deploy-manifest/v1', entries: [] };
+    const body = JSON.stringify(bodyObj, null, 2);
+    const sig = computeHmac(body, 'testkey');
+    // parsed includes hmac_sha256; verifyManifestHmac strips it before recomputing
+    const parsed = { ...bodyObj, hmac_sha256: sig };
+    const result = verifyManifestHmac(parsed);
+    assert.ok(result.valid, `expected valid but got: ${result.error}`);
+  } finally {
+    if (orig === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = orig;
+  }
+});
+
+// MUTATION: if HMAC guard removed, tampered manifest would pass — this must fail
+test('[mutation] verifyManifestHmac rejects tampered manifest body', () => {
+  const orig = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_HMAC_KEY = 'testkey';
+  try {
+    const bodyObj = { schema: 'deploy-manifest/v1', entries: [] };
+    const body = JSON.stringify(bodyObj, null, 2);
+    const sig = computeHmac(body, 'testkey');
+    // Tamper: attacker modifies entries but keeps the original sig
+    const tamperedParsed = {
+      schema: 'deploy-manifest/v1',
+      entries: [{ path: 'evil.sh', sha256: 'aaa' }],
+      hmac_sha256: sig, // reusing old sig — should NOT pass
+    };
+    const result = verifyManifestHmac(tamperedParsed);
+    // If guard removed, result.valid would be true — this must be false
+    assert.ok(!result.valid, 'removing HMAC guard causes tampered manifest to pass — mutation detected');
+  } finally {
+    if (orig === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = orig;
+  }
+});
+
+// MUTATION: DEPLOY_MANIFEST_REQUIRE_SIG=1 without key must fail-closed
+test('[mutation] REQUIRE_SIG=1 with no key fails closed', () => {
+  const origKey = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  const origReq = process.env.DEPLOY_MANIFEST_REQUIRE_SIG;
+  delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_REQUIRE_SIG = '1';
+  try {
+    const parsed = { schema: 'deploy-manifest/v1', entries: [] };
+    const result = verifyManifestHmac(parsed);
+    assert.ok(!result.valid, 'removing fail-closed guard allows unsigned manifest — mutation detected');
+    assert.match(result.error, /fail-closed/);
+  } finally {
+    if (origKey === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = origKey;
+    if (origReq === undefined) delete process.env.DEPLOY_MANIFEST_REQUIRE_SIG;
+    else process.env.DEPLOY_MANIFEST_REQUIRE_SIG = origReq;
+  }
+});
+
+// MUTATION: manifest with no hmac_sha256 field must fail when key configured
+test('[mutation] verifyManifestHmac rejects manifest missing hmac_sha256 when key present', () => {
+  const orig = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_HMAC_KEY = 'testkey';
+  try {
+    const parsed = { schema: 'deploy-manifest/v1', entries: [] }; // no hmac_sha256
+    const result = verifyManifestHmac(parsed);
+    assert.ok(!result.valid, 'unsigned manifest must be rejected when key is configured');
+  } finally {
+    if (orig === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = orig;
+  }
 });
 
 // ── generateManifest ──────────────────────────────────────────────────────────
@@ -78,6 +195,21 @@ test('generateManifest throws on missing directory', () => {
   );
 });
 
+// MUTATION: if symlink-targetDir guard removed, symlink dirs would be accepted
+test('[mutation] generateManifest rejects symlink targetDir (CWE-59)', () => {
+  const tmp = makeTmpDir();
+  const realDir = path.join(tmp, 'real');
+  fs.mkdirSync(realDir);
+  writeFile(realDir, 'file.js', 'x');
+  const linkDir = path.join(tmp, 'link');
+  fs.symlinkSync(realDir, linkDir);
+  assert.throws(
+    () => generateManifest(linkDir, 'copilot'),
+    /symlink.*rejected|CWE-59/i,
+    'removing symlink guard allows symlink target dirs — mutation detected',
+  );
+});
+
 test('generateManifest entries each have sha256 field', () => {
   const tmp = makeTmpDir();
   writeFile(tmp, 'file.txt', 'content');
@@ -96,7 +228,6 @@ test('writeManifest writes valid JSON to expected path', () => {
   const targetDir = path.join(tmp, 'target');
   writeFile(targetDir, 'a.js', 'a');
   const manifest = generateManifest(targetDir, 'codex');
-  // Use internal write with override
   fs.mkdirSync(manifestDir, { recursive: true });
   const outPath = path.join(manifestDir, 'codex.manifest.json');
   fs.writeFileSync(outPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
@@ -105,9 +236,86 @@ test('writeManifest writes valid JSON to expected path', () => {
   assert.equal(parsed.file_count, 1);
 });
 
+// MUTATION: REQUIRE_SIG=1 with no key must throw from writeManifest
+test('[mutation] writeManifest fails closed when REQUIRE_SIG=1 and no key', () => {
+  const origKey = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  const origReq = process.env.DEPLOY_MANIFEST_REQUIRE_SIG;
+  delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_REQUIRE_SIG = '1';
+  try {
+    const tmp = makeTmpDir();
+    const targetDir = path.join(tmp, 'target');
+    writeFile(targetDir, 'f.js', 'x');
+    const manifest = generateManifest(targetDir, 'copilot');
+    assert.throws(
+      () => writeManifest('copilot', manifest),
+      /fail-closed|REQUIRE_SIG/,
+      'removing fail-closed guard in writeManifest allows unsigned write — mutation detected',
+    );
+  } finally {
+    if (origKey === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = origKey;
+    if (origReq === undefined) delete process.env.DEPLOY_MANIFEST_REQUIRE_SIG;
+    else process.env.DEPLOY_MANIFEST_REQUIRE_SIG = origReq;
+  }
+});
+
+// ── verifyDeploy: fail-closed on invalid arguments ────────────────────────────
+
+test('[mutation] verifyDeploy fails closed on null targetDir', () => {
+  const result = verifyDeploy(null, 'copilot');
+  assert.ok(!result.ok, 'null targetDir must fail closed — removing guard would allow null');
+  assert.ok(result.error);
+});
+
+test('[mutation] verifyDeploy fails closed on empty targetName', () => {
+  const result = verifyDeploy('/some/path', '');
+  assert.ok(!result.ok, 'empty targetName must fail closed');
+  assert.ok(result.error);
+});
+
+// ── verifyDeploy: symlink rejection (CWE-59) ──────────────────────────────────
+
+// MUTATION: if symlink guard on manifest path removed, symlink manifest would pass
+test('[mutation] verifyDeploy rejects symlink manifest path (CWE-59)', () => {
+  const tmp = makeTmpDir();
+  const targetDir = path.join(tmp, 'target');
+  const realManifestDir = path.join(tmp, 'real-manifests');
+  const linkManifestDir = path.join(tmp, 'link-manifests');
+  writeFile(targetDir, 'file.js', 'x');
+  const manifest = generateManifest(targetDir, 'copilot');
+  fs.mkdirSync(realManifestDir, { recursive: true });
+  fs.writeFileSync(path.join(realManifestDir, 'copilot.manifest.json'), JSON.stringify(manifest, null, 2));
+  // Symlink the manifest file itself to a different location
+  fs.mkdirSync(linkManifestDir, { recursive: true });
+  fs.symlinkSync(
+    path.join(realManifestDir, 'copilot.manifest.json'),
+    path.join(linkManifestDir, 'copilot.manifest.json'),
+  );
+  const result = verifyDeploy(targetDir, 'copilot', { manifestDir: linkManifestDir });
+  assert.ok(!result.ok, 'symlink manifest path must be rejected — removing guard allows CWE-59');
+  assert.match(result.error, /symlink.*rejected|CWE-59/i);
+});
+
+// MUTATION: if symlink guard on targetDir removed, symlink target would pass
+test('[mutation] verifyDeploy rejects symlink targetDir (CWE-59)', () => {
+  const tmp = makeTmpDir();
+  const realTarget = path.join(tmp, 'real-target');
+  const linkTarget = path.join(tmp, 'link-target');
+  const manifestDir = path.join(tmp, 'manifests');
+  writeFile(realTarget, 'file.js', 'x');
+  fs.symlinkSync(realTarget, linkTarget);
+  const manifest = generateManifest(realTarget, 'copilot');
+  fs.mkdirSync(manifestDir, { recursive: true });
+  fs.writeFileSync(path.join(manifestDir, 'copilot.manifest.json'), JSON.stringify(manifest, null, 2));
+  const result = verifyDeploy(linkTarget, 'copilot', { manifestDir });
+  assert.ok(!result.ok, 'symlink targetDir must be rejected — removing guard allows CWE-59');
+  assert.match(result.error, /symlink.*rejected|CWE-59/i);
+});
+
 // ── verifyDeploy: happy path ──────────────────────────────────────────────────
 
-test('verifyDeploy passes when files match manifest', () => {
+test('verifyDeploy passes when files match manifest (unsigned)', () => {
   const tmp = makeTmpDir();
   const targetDir = path.join(tmp, 'target');
   const manifestDir = path.join(tmp, 'manifests');
@@ -121,9 +329,26 @@ test('verifyDeploy passes when files match manifest', () => {
   assert.equal(result.missing.length, 0);
 });
 
-// ── verifyDeploy: hash mismatch ───────────────────────────────────────────────
+test('verifyDeploy passes with valid HMAC signature', () => {
+  const origKey = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_HMAC_KEY = 'integration-test-key';
+  try {
+    const tmp = makeTmpDir();
+    const targetDir = path.join(tmp, 'target');
+    const manifestDir = path.join(tmp, 'manifests');
+    writeFile(targetDir, 'hook.sh', '#!/bin/bash\necho ok');
+    const manifest = generateManifest(targetDir, 'copilot');
+    writeSigned(manifestDir, 'copilot', manifest, 'integration-test-key');
+    const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
+    assert.ok(result.ok, `HMAC-signed verify should pass: ${result.error}`);
+  } finally {
+    if (origKey === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = origKey;
+  }
+});
 
-test('verifyDeploy detects tampered file (hash mismatch)', () => {
+// MUTATION: tampered file must fail even when HMAC is valid on entries list
+test('[mutation] verifyDeploy detects tampered file (hash mismatch)', () => {
   const tmp = makeTmpDir();
   const targetDir = path.join(tmp, 'target');
   const manifestDir = path.join(tmp, 'manifests');
@@ -131,11 +356,32 @@ test('verifyDeploy detects tampered file (hash mismatch)', () => {
   const manifest = generateManifest(targetDir, 'copilot');
   fs.mkdirSync(manifestDir, { recursive: true });
   fs.writeFileSync(path.join(manifestDir, 'copilot.manifest.json'), JSON.stringify(manifest, null, 2));
-  // Tamper the deployed file
+  // Tamper the deployed file after manifest generation
   fs.writeFileSync(path.join(targetDir, 'hook.sh'), 'malicious content', 'utf8');
   const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
-  assert.ok(!result.ok);
+  assert.ok(!result.ok, 'tampered file must fail — removing hash check breaks integrity');
   assert.ok(result.mismatches.includes('hook.sh'), 'tampered file must appear in mismatches');
+});
+
+// MUTATION: tampered manifest must fail when HMAC guard is active
+test('[mutation] verifyDeploy rejects tampered manifest when key configured', () => {
+  const origKey = process.env.DEPLOY_MANIFEST_HMAC_KEY;
+  process.env.DEPLOY_MANIFEST_HMAC_KEY = 'test-key';
+  try {
+    const tmp = makeTmpDir();
+    const targetDir = path.join(tmp, 'target');
+    const manifestDir = path.join(tmp, 'manifests');
+    writeFile(targetDir, 'hook.sh', 'original');
+    const manifest = generateManifest(targetDir, 'copilot');
+    // Write manifest with WRONG key (simulates attacker who doesn't know key)
+    writeSigned(manifestDir, 'copilot', manifest, 'attacker-key');
+    const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
+    assert.ok(!result.ok, 'wrong HMAC key must cause failure — removing guard allows tampered manifests');
+    assert.ok(result.error, 'error field must be populated on HMAC failure');
+  } finally {
+    if (origKey === undefined) delete process.env.DEPLOY_MANIFEST_HMAC_KEY;
+    else process.env.DEPLOY_MANIFEST_HMAC_KEY = origKey;
+  }
 });
 
 // ── verifyDeploy: missing file ────────────────────────────────────────────────
@@ -148,7 +394,6 @@ test('verifyDeploy detects deleted file', () => {
   const manifest = generateManifest(targetDir, 'copilot');
   fs.mkdirSync(manifestDir, { recursive: true });
   fs.writeFileSync(path.join(manifestDir, 'copilot.manifest.json'), JSON.stringify(manifest, null, 2));
-  // Delete the file from the target
   fs.unlinkSync(path.join(targetDir, 'required.js'));
   const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
   assert.ok(!result.ok);
@@ -157,7 +402,7 @@ test('verifyDeploy detects deleted file', () => {
 
 // ── verifyDeploy: no manifest ─────────────────────────────────────────────────
 
-test('verifyDeploy returns error when no manifest exists', () => {
+test('verifyDeploy returns error when no manifest exists (fail-closed)', () => {
   const tmp = makeTmpDir();
   const targetDir = path.join(tmp, 'target');
   const manifestDir = path.join(tmp, 'empty-manifests');
@@ -178,7 +423,6 @@ test('verifyDeploy allows extra files not in manifest (non-fatal)', () => {
   const manifest = generateManifest(targetDir, 'copilot');
   fs.mkdirSync(manifestDir, { recursive: true });
   fs.writeFileSync(path.join(manifestDir, 'copilot.manifest.json'), JSON.stringify(manifest, null, 2));
-  // Add an extra file after manifest generation
   writeFile(targetDir, 'extra.js', 'extra');
   const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
   assert.ok(result.ok, 'extra files should not fail verification');
@@ -191,7 +435,6 @@ test('verifyDeploy errors when target directory missing', () => {
   const tmp = makeTmpDir();
   const manifestDir = path.join(tmp, 'manifests');
   fs.mkdirSync(manifestDir, { recursive: true });
-  // Write a fake manifest pointing to a non-existent target
   const fakeManifest = { schema: 'deploy-manifest/v1', target: 'copilot',
     generated_at: new Date().toISOString(), file_count: 1,
     entries: [{ path: 'file.js', sha256: 'abc' }] };
@@ -199,4 +442,22 @@ test('verifyDeploy errors when target directory missing', () => {
   const result = verifyDeploy('/nonexistent/deploy/target', 'copilot', { manifestDir });
   assert.ok(!result.ok);
   assert.ok(result.error || result.missing.length > 0);
+});
+
+// ── verifyDeploy: malformed manifest ─────────────────────────────────────────
+
+test('[mutation] verifyDeploy rejects malformed manifest (no entries) — fail-closed', () => {
+  const tmp = makeTmpDir();
+  const targetDir = path.join(tmp, 'target');
+  const manifestDir = path.join(tmp, 'manifests');
+  writeFile(targetDir, 'f.js', 'x');
+  fs.mkdirSync(manifestDir, { recursive: true });
+  // Write manifest without entries field
+  fs.writeFileSync(
+    path.join(manifestDir, 'copilot.manifest.json'),
+    JSON.stringify({ schema: 'deploy-manifest/v1', target: 'copilot' }),
+  );
+  const result = verifyDeploy(targetDir, 'copilot', { manifestDir });
+  assert.ok(!result.ok, 'malformed manifest must fail — removing schema check breaks fail-closed invariant');
+  assert.ok(result.error);
 });

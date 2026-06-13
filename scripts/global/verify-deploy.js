@@ -1,62 +1,131 @@
 #!/usr/bin/env node
 'use strict';
 // verify-deploy.js (#2914): compare deployed runtime artifacts against a stored SHA-256 manifest.
-// Exits 0 if all hashes match; exits 1 on any mismatch or missing file. Pre-deploy integrity check.
-// Addresses Gap G-09, OWASP ASI07 + ASI10, EU AI Act Art.15.
+// Exits 0 if all hashes match; exits 1 on any mismatch, missing file, symlink, or HMAC failure.
+// Pre-deploy integrity check. Addresses Gap G-09, OWASP ASI07 + ASI10, EU AI Act Art.15.
+//
+// Security contract:
+//   - Manifest path and target dir are lstat-checked to reject symlinks (CWE-59).
+//   - Manifest HMAC is verified when DEPLOY_MANIFEST_HMAC_KEY is set (or REQUIRE_SIG=1).
+//   - File hashing is delegated to hashFile (read-once buffer — no TOCTOU, CWE-367).
+//   - Any malformed/unexpected input results in ok:false (fail-closed, CWE-754).
 const fs = require('node:fs');
 const path = require('node:path');
-const { hashFile, collectFiles, MANIFEST_DIR, TARGET_DIRS } = require('./deploy-manifest');
+const { hashFile, collectFiles, verifyManifestHmac, MANIFEST_DIR, TARGET_DIRS } =
+  require('./deploy-manifest');
+
+/** @typedef {{ ok: boolean, mismatches: string[], missing: string[], extra: string[], manifest: object|null, error?: string }} VerifyResult */
 
 /**
- * Verify a target directory against a stored manifest.
- * @param {string} targetDir absolute path to deployed directory
- * @param {string} targetName logical name (e.g. 'copilot')
- * @param {{ manifestDir?: string }} opts
- * @returns {{ ok: boolean, mismatches: string[], missing: string[], extra: string[], manifest: object }}
+ * Read and lstat-validate the manifest file. Returns error result or { manifest, ok:true }.
+ * @param {string} manifestPath absolute path to manifest JSON
+ * @returns {VerifyResult|{ manifest: object }} error shape or parsed manifest
  */
-function verifyDeploy(targetDir, targetName, opts = {}) {
-  const manifestDir = opts.manifestDir || MANIFEST_DIR;
-  const manifestPath = path.join(manifestDir, `${targetName}.manifest.json`);
-
-  if (!fs.existsSync(manifestPath)) {
+function loadManifest(manifestPath) {
+  let stat;
+  try { stat = fs.lstatSync(manifestPath); } catch {
     return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
       error: `no manifest found at ${manifestPath} — run deploy-manifest first` };
   }
-
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  if (!manifest.entries || !Array.isArray(manifest.entries)) {
+  if (stat.isSymbolicLink()) {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: `manifest path is a symlink — rejected (CWE-59): ${manifestPath}` };
+  }
+  let manifest;
+  try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: 'manifest file could not be read or parsed as JSON' };
+  }
+  if (!manifest || typeof manifest !== 'object' || !Array.isArray(manifest.entries)) {
     return { ok: false, mismatches: [], missing: [], extra: [], manifest,
       error: 'manifest malformed: missing entries array' };
   }
+  return { manifest };
+}
 
-  if (!fs.existsSync(targetDir)) {
-    return { ok: false, mismatches: [], missing: manifest.entries.map((e) => e.path), extra: [], manifest,
+/**
+ * lstat-validate target directory. Returns error result or null when valid.
+ * @param {string} targetDir absolute path to deployed directory
+ * @returns {VerifyResult|null} error shape or null when directory is valid
+ */
+function checkTargetDir(targetDir) {
+  let stat;
+  try { stat = fs.lstatSync(targetDir); } catch {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
       error: `target directory does not exist: ${targetDir}` };
   }
+  if (stat.isSymbolicLink()) {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: `target directory is a symlink — rejected (CWE-59): ${targetDir}` };
+  }
+  if (!stat.isDirectory()) {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: `target path is not a directory: ${targetDir}` };
+  }
+  return null;
+}
 
-  const expectedMap = new Map(manifest.entries.map((e) => [e.path, e.sha256]));
-  const actualFiles = collectFiles(targetDir);
-  const actualMap = new Map(actualFiles.map((f) => [path.relative(targetDir, f), f]));
-
+/**
+ * Compare expected manifest entries against actual files on disk.
+ * @param {Map<string,string>} expectedMap relPath to expected sha256
+ * @param {Map<string,string>} actualMap relPath to absolute path on disk
+ * @returns {{ mismatches: string[], missing: string[], extra: string[] }} diff result
+ */
+function diffEntries(expectedMap, actualMap) {
   const mismatches = [];
   const missing = [];
   for (const [relPath, expectedHash] of expectedMap) {
-    if (!actualMap.has(relPath)) {
-      missing.push(relPath);
-    } else {
-      const actualHash = hashFile(actualMap.get(relPath));
-      if (actualHash !== expectedHash) mismatches.push(relPath);
-    }
+    if (!actualMap.has(relPath)) { missing.push(relPath); continue; }
+    const actual = hashFile(actualMap.get(relPath)); // read-once (no TOCTOU)
+    if (actual !== expectedHash) mismatches.push(relPath);
   }
+  const extra = [...actualMap.keys()].filter((p) => !expectedMap.has(p));
+  return { mismatches, missing, extra };
+}
 
-  // Extra files present in target but not in manifest are noted (informational, not a failure)
-  const extra = [];
-  for (const relPath of actualMap.keys()) {
-    if (!expectedMap.has(relPath)) extra.push(relPath);
+/**
+ * Validate arguments and load+verify the manifest, returning an error result or null.
+ * @param {string} targetDir absolute path to deployed directory
+ * @param {string} targetName logical name (e.g. 'copilot')
+ * @param {string} manifestPath absolute path to manifest JSON file
+ * @returns {{ error: VerifyResult, manifest: null } | { error: null, manifest: object }} result
+ */
+function prepareVerify(targetDir, targetName, manifestPath) {
+  if (!targetDir || typeof targetDir !== 'string' || !targetName || typeof targetName !== 'string') {
+    return { error: { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: 'verifyDeploy: invalid arguments — targetDir and targetName must be non-empty strings' }, manifest: null };
   }
+  const manifestResult = loadManifest(manifestPath);
+  if ('error' in manifestResult) return { error: manifestResult, manifest: null };
+  const { manifest } = manifestResult;
+  const targetErr = checkTargetDir(targetDir);
+  if (targetErr) return { error: targetErr, manifest: null };
+  const hmacResult = verifyManifestHmac(manifest);
+  if (!hmacResult.valid) {
+    return { error: { ok: false, mismatches: [], missing: [], extra: [], manifest,
+      error: `manifest integrity check failed: ${hmacResult.error}` }, manifest: null };
+  }
+  return { error: null, manifest };
+}
 
-  const ok = mismatches.length === 0 && missing.length === 0;
-  return { ok, mismatches, missing, extra, manifest };
+/**
+ * Verify a target directory against a stored manifest.
+ * Rejects symlinks on both manifest path and target directory (CWE-59).
+ * Fails closed on missing manifest, malformed manifest, or HMAC mismatch.
+ * @param {string} targetDir absolute path to deployed directory
+ * @param {string} targetName logical name (e.g. 'copilot')
+ * @param {{ manifestDir?: string }} opts optional overrides
+ * @returns {VerifyResult} verification result
+ */
+function verifyDeploy(targetDir, targetName, opts = {}) {
+  const manifestPath = path.join(opts.manifestDir || MANIFEST_DIR, `${targetName}.manifest.json`);
+  const { error, manifest } = prepareVerify(targetDir, targetName, manifestPath);
+  if (error) return error;
+  const expectedMap = new Map(manifest.entries.map((e) => [e.path, e.sha256]));
+  const actualFiles = collectFiles(targetDir);
+  const actualMap = new Map(actualFiles.map((f) => [path.relative(targetDir, f), f]));
+  const { mismatches, missing, extra } = diffEntries(expectedMap, actualMap);
+  return { ok: mismatches.length === 0 && missing.length === 0, mismatches, missing, extra, manifest };
 }
 
 if (require.main === module) {
@@ -66,19 +135,11 @@ if (require.main === module) {
     console.error(`Usage: verify-deploy.js <${validTargets.join('|')}>`);
     process.exit(1);
   }
-  const targetDir = TARGET_DIRS[targetArg];
-  const result = verifyDeploy(targetDir, targetArg);
-
-  if (result.error) {
-    console.error(`verify-deploy [${targetArg}]: ${result.error}`);
-    process.exit(1);
-  }
+  const result = verifyDeploy(TARGET_DIRS[targetArg], targetArg);
+  if (result.error) { console.error(`verify-deploy [${targetArg}]: ${result.error}`); process.exit(1); }
   if (result.ok) {
-    const count = result.manifest.file_count;
-    console.log(`verify-deploy [${targetArg}]: OK — ${count} file(s) match manifest`);
-    if (result.extra.length) {
-      console.log(`  info: ${result.extra.length} extra file(s) not in manifest (not a failure)`);
-    }
+    console.log(`verify-deploy [${targetArg}]: OK — ${result.manifest.file_count} file(s) match manifest`);
+    if (result.extra.length) console.log(`  info: ${result.extra.length} extra file(s) not in manifest`);
     process.exit(0);
   }
   console.error(`verify-deploy [${targetArg}]: INTEGRITY FAILURE`);
