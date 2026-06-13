@@ -84,17 +84,14 @@ function diffEntries(expectedMap, actualMap) {
 }
 
 /**
- * Validate arguments and load+verify the manifest, returning an error result or null.
- * @param {string} targetDir absolute path to deployed directory
- * @param {string} targetName logical name (e.g. 'copilot')
+ * Load and verify the manifest, check target dir, and verify HMAC.
+ * Arguments are pre-validated by verifyDeploy before this is called.
+ * @param {string} targetDir absolute path to deployed directory (pre-validated)
+ * @param {string} targetName logical name for error context
  * @param {string} manifestPath absolute path to manifest JSON file
  * @returns {{ error: VerifyResult, manifest: null } | { error: null, manifest: object }} result
  */
 function prepareVerify(targetDir, targetName, manifestPath) {
-  if (!targetDir || typeof targetDir !== 'string' || !targetName || typeof targetName !== 'string') {
-    return { error: { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
-      error: 'verifyDeploy: invalid arguments — targetDir and targetName must be non-empty strings' }, manifest: null };
-  }
   const manifestResult = loadManifest(manifestPath);
   if ('error' in manifestResult) return { error: manifestResult, manifest: null };
   const { manifest } = manifestResult;
@@ -118,6 +115,10 @@ function prepareVerify(targetDir, targetName, manifestPath) {
  * @returns {VerifyResult} verification result
  */
 function verifyDeploy(targetDir, targetName, opts = {}) {
+  if (!targetDir || typeof targetDir !== 'string' || !targetName || typeof targetName !== 'string') {
+    return { ok: false, mismatches: [], missing: [], extra: [], manifest: null,
+      error: 'verifyDeploy: invalid arguments — targetDir and targetName must be non-empty strings' };
+  }
   const manifestPath = path.join(opts.manifestDir || MANIFEST_DIR, `${targetName}.manifest.json`);
   const { error, manifest } = prepareVerify(targetDir, targetName, manifestPath);
   if (error) return error;
