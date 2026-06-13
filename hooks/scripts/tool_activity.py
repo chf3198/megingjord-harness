@@ -2,7 +2,9 @@
 """Tool activity tracking for governance state."""
 from __future__ import annotations
 
+import os
 import re
+import subprocess
 from typing import Any
 
 from baton_event_emitter import emit_role_handoff
@@ -34,8 +36,43 @@ EDIT_TOOLS = {
     "apply_patch", "create_file", "edit_notebook_file", "create_new_jupyter_notebook",
     "write_to_file", "replace_file_content", "multi_replace_file_content",
     "replace_string_in_file", "multi_replace_string_in_file",
+    # #2978: Claude Code mutator tools (were previously caught only via path-classification —
+    # the same branch that mis-fired on read-only Read/Grep/Glob).
+    "Edit", "Write", "MultiEdit", "NotebookEdit",
 }
+# #2978: READ-ONLY tools whose inputs contain file paths but NEVER mutate. Excluded from
+# path-classification so they cannot set code_touched/docs_touched. This is a DENYLIST (not a
+# mutator whitelist): an UNKNOWN non-Bash tool still flips the flags — for a governance gate a
+# false-positive (extra nag) is safer than a false-negative (silent mutation bypasses the gate).
+READ_ONLY_TOOLS = {
+    "Read", "Grep", "Glob", "NotebookRead", "read_file", "grep_search", "file_search",
+    "list_dir", "semantic_search", "read_notebook_file", "list_code_usages", "test_search",
+}
+# #2978: cheap pre-filter for raw-Bash mutations; a match triggers a real `git diff` confirm.
+BASH_MUTATE_RE = re.compile(
+    r"(>>?\s|\bsed\s+-i\b|\btee\b|\bgit\s+apply\b|\bgit\s+checkout\s+--|\bcp\s|\bmv\s|\bdd\s|\btruncate\b|\bpatch\b)"
+)
 _PROVIDER_RE = re.compile(r"\b(cascade-dispatch|hamr-client|hamr\.workers\.dev|dispatchRedTeam)\b", re.IGNORECASE)
+
+
+def _bash_mutated_tracked_paths(command: str) -> list[str]:
+    """#2978: when a Bash command looks mutating (cheap pre-filter), CONFIRM via a real
+    `git diff --name-only HEAD` and return the tracked paths that actually changed. A read-only
+    command (no pre-filter match) or any git failure returns [] — never raises, never blocks the
+    hook. Cross-cwd / worktree state-isolation stays Epic #2091's scope (runs in the hook's cwd).
+    """
+    if not BASH_MUTATE_RE.search(command):
+        return []
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-only", "HEAD"],
+            cwd=os.getcwd(), capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode != 0:
+            return []
+        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    except Exception:
+        return []
 
 
 def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
@@ -55,20 +92,22 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
         roles["collaborator"] = True
         blast["files_edited_count"] += 1
 
-    # #1960: Do not classify Bash command strings as file paths.
-    # Only extract explicit patch-file names from Bash inputs.
+    # #1960 + #2978: derive candidate_paths ONLY from genuine mutations, never from read-only tools.
+    # - Bash: explicit patch-file names (apply_patch) + paths a real `git diff` confirms changed.
+    # - Non-Bash, non-read-only (mutators + UNKNOWN tools): classify inputs (fail-safe — a governance
+    #   gate must not silently miss a mutation, so unknown tools still flip).
+    # - READ_ONLY_TOOLS (Read/Grep/Glob/...): skipped entirely → no false code_touched (the #2978 fix).
     candidate_paths: list[str] = []
-    if tool not in BASH_TOOLS:
+    if tool in BASH_TOOLS:
+        for value in values:
+            if "***" in value and "File:" in value:
+                candidate_paths.extend(m.strip() for m in PATCH_FILE_RE.findall(value))
+        candidate_paths.extend(_bash_mutated_tracked_paths(joined))
+    elif tool not in READ_ONLY_TOOLS:
         for value in values:
             candidate_paths.append(value)
             if "***" in value and "File:" in value:
-                for m in PATCH_FILE_RE.findall(value):
-                    candidate_paths.append(m.strip())
-    else:
-        for value in values:
-            if "***" in value and "File:" in value:
-                for m in PATCH_FILE_RE.findall(value):
-                    candidate_paths.append(m.strip())
+                candidate_paths.extend(m.strip() for m in PATCH_FILE_RE.findall(value))
 
     for value in candidate_paths:
         if "/" not in value and "." not in value:
