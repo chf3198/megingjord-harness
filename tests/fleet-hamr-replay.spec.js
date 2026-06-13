@@ -64,3 +64,46 @@ test('runScenario: handles missing assertion gracefully', () => {
   const r = runScenario({ id: 'malformed' });
   assert.equal(r.ok, false);
 });
+
+// --- #2233 (P1-6): generic predicate + new corpus entries exercising P1-2/P1-3 ---
+const { runScenario: runScenario2233, runPredicate, runAll: runAll2233 } = require('../scripts/regression/fleet-hamr-replay.js');
+
+test('#2233 AC3: entry 04 genuinely exercises hamr-bypass-detector.detectBypass (detected:true)', () => {
+  const sc = JSON.parse(require('node:fs').readFileSync(
+    require('node:path').join(__dirname, 'regression/fleet-hamr-corpus/04-bypass-detection-not-recognized.json'), 'utf8'));
+  assert.equal(runScenario2233(sc).ok, true);
+});
+
+test('#2233 AC3: entry 05 genuinely exercises hamr-fleet-direct-block.shouldBlock (block:true)', () => {
+  const sc = JSON.parse(require('node:fs').readFileSync(
+    require('node:path').join(__dirname, 'regression/fleet-hamr-corpus/05-fleet-direct-block-not-enforced.json'), 'utf8'));
+  assert.equal(runScenario2233(sc).ok, true);
+});
+
+test('#2233 AC5: generic predicate calls mod[fn](...args) + plucks result_path', () => {
+  const mod = { foo: (x) => ({ nested: { val: x * 2 } }) };
+  assert.equal(runPredicate(mod, { fn: 'foo', args: [3], result_path: 'nested.val', expected_result: 6 }).ok, true);
+  assert.equal(runPredicate(mod, { fn: 'foo', args: [3], result_path: 'nested.val', expected_result: 99 }).ok, false);
+});
+
+test('#2233 AC5: generic predicate without result_path deep-equals the whole return', () => {
+  const mod = { who: () => ({ a: 1, b: 2 }) };
+  assert.equal(runPredicate(mod, { fn: 'who', args: [], expected_result: { a: 1, b: 2 } }).ok, true);
+});
+
+test('#2233 AC5: missing fn is reported gracefully (no crash)', () => {
+  const r = runPredicate({}, { fn: 'doesNotExist', args: [], expected_result: true });
+  assert.equal(r.ok, false);
+  assert.match(r.reason, /not a function/);
+});
+
+test('#2233 AC5: legacy childProgressComplete predicate path still works (backward-compat)', () => {
+  const mod = { childProgressComplete: (child, comments) => comments.includes('done') };
+  assert.equal(runPredicate(mod, { input_child: { number: 1 }, input_comments: ['done'], expected_result: true }).ok, true);
+});
+
+test('#2233 AC5: full corpus (all entries 01-05) passes via runAll', () => {
+  const summary = runAll2233();
+  assert.equal(summary.failed.length, 0, `failed: ${JSON.stringify(summary.failed)}`);
+  assert.ok(summary.total >= 5);
+});

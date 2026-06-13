@@ -43,10 +43,37 @@ function runScenario(scenario) {
     if (ms < assertSpec.policy_check.min_ms) return { ok: false, reason: `timeout ${ms}ms < min ${assertSpec.policy_check.min_ms}` };
   }
   if (assertSpec.predicate_check) {
-    const result = mod.childProgressComplete(assertSpec.predicate_check.input_child, assertSpec.predicate_check.input_comments);
-    if (result !== assertSpec.predicate_check.expected_result) {
-      return { ok: false, reason: `predicate returned ${result}, expected ${assertSpec.predicate_check.expected_result}` };
+    const probe = runPredicate(mod, assertSpec.predicate_check);
+    if (!probe.ok) return probe;
+  }
+  return { ok: true };
+}
+
+// JSON-based deep-equality (the corpus is JSON, so all values are JSON-serializable). #2233.
+function deepEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/**
+ * Evaluate a corpus predicate_check against a loaded module. #2233 (P1-6):
+ * GENERIC form `{ fn, args?, result_path?, expected_result }` calls mod[fn](...args)
+ * and (optionally) plucks a dot-path field before comparing — so any module export can
+ * be exercised, not just childProgressComplete. Legacy form (no `fn`) preserves the
+ * original `childProgressComplete(input_child, input_comments)` behavior (entry 03).
+ */
+function runPredicate(mod, pc) {
+  let result;
+  if (pc.fn) {
+    if (typeof mod[pc.fn] !== 'function') return { ok: false, reason: `predicate fn '${pc.fn}' is not a function` };
+    result = mod[pc.fn](...(pc.args || []));
+    if (pc.result_path) {
+      result = String(pc.result_path).split('.').reduce((obj, key) => (obj == null ? obj : obj[key]), result);
     }
+  } else {
+    result = mod.childProgressComplete(pc.input_child, pc.input_comments);
+  }
+  if (!deepEqual(result, pc.expected_result)) {
+    return { ok: false, reason: `predicate returned ${JSON.stringify(result)}, expected ${JSON.stringify(pc.expected_result)}` };
   }
   return { ok: true };
 }
@@ -64,4 +91,4 @@ if (require.main === module) {
   process.exit(summary.failed.length > 0 ? 1 : 0);
 }
 
-module.exports = { loadCorpus, runScenario, runAll, checkModuleExports };
+module.exports = { loadCorpus, runScenario, runAll, checkModuleExports, runPredicate, deepEqual };

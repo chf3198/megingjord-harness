@@ -1,0 +1,21 @@
+{
+  "id": "fleet-direct-block-not-enforced",
+  "source": "P1-3 (Epic #2029, adopted by #2246 P1-6 #2233)",
+  "description": "hamr-fleet-direct-block.shouldBlock MUST return block:true for a fleet-bypass detection when MEGINGJORD_FLEET_DIRECT_BLOCK=1 — otherwise a direct fleet call slips past the env-gated block and the cost-ascending fleet-route enforcement is silently defeated (G3/G6). Uses a synthetic detection object so the assertion is deterministic (no live fleet / config dependency).",
+  "assertion": {
+    "type": "module-export-and-predicate",
+    "module": "scripts/global/hamr-fleet-direct-block.js",
+    "exports": ["shouldBlock", "isEnabled"],
+    "predicate_check": {
+      "fn": "shouldBlock",
+      "args": [
+        {
+          "detection": { "detected": true, "suppressed": false, "severity": "fleet-bypass" },
+          "env": { "MEGINGJORD_FLEET_DIRECT_BLOCK": "1" }
+        }
+      ],
+      "result_path": "block",
+      "expected_result": true
+    }
+  }
+}

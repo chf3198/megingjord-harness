@@ -1,0 +1,16 @@
+{
+  "id": "bypass-detection-not-recognized",
+  "source": "P1-2 #2220 (Epic #2029, adopted by #2246 P1-6 #2233)",
+  "description": "hamr-bypass-detector.detectBypass MUST flag a direct curl to a known paid-provider endpoint as detected:true — a HAMR-bypassing call must never go unrecognized, or it leaks outside the cost/observability layer (G3/G8). Uses a hardcoded paid-provider URL (api.anthropic.com) so the assertion is deterministic and env-independent (fleet-substring matching is config-dependent and intentionally avoided here).",
+  "assertion": {
+    "type": "module-export-and-predicate",
+    "module": "scripts/global/hamr-bypass-detector.js",
+    "exports": ["detectBypass", "emitIncident"],
+    "predicate_check": {
+      "fn": "detectBypass",
+      "args": ["curl -s https://api.anthropic.com/v1/messages -H 'x-api-key: REDACTED' -d '{}'"],
+      "result_path": "detected",
+      "expected_result": true
+    }
+  }
+}
