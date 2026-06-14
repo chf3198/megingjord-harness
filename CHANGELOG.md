@@ -71,6 +71,14 @@ Original Epic body said *"30d clean → step back one tier"* and AC8 child menti
 
 Tickets #1259, #1260, #1262 migrated from legacy prose-Refs to native GitHub Sub-issues primitive (per CLAUDE.md + Epic #1631).
 
+## [Unreleased] — #2971: planning-consensus first-edit guardrail
+
+### Added
+- `hooks/consensus-policy.json` with enforceable planning-consensus defaults (threshold 93, min_models 2, cross-family required, agreement band, max rounds).
+- `hooks/scripts/planning_consensus.py` reusable parser/evaluator used by hook gating.
+- First-edit planning-consensus gate in `hooks/scripts/pretool_guard.py` with audited override (`MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE=1`).
+- Python + JS wrapper tests for consensus math, cross-family checks, and gate/override behavior.
+
 ## [Unreleased] — #1118: document sync-verification requirements in rollouts
 
 ### Added

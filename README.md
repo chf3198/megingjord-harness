@@ -113,6 +113,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 - Research-first Epic detection is label-first: `phase-gate:research-first` on `type:epic` tickets.
 - `AC-R*` body matching remains a legacy fallback during migration and is slated for removal after #1888 enforcement follow-on completes.
 - Phase-1 MANAGER_HANDOFF checks use `phase-gate:phase-1` by default and can be overridden with `PHASE_ONE_LABEL` for validation runs.
+- First code edits on ticket branches require a qualifying `PLANNING_CONSENSUS` pass artifact on the linked issue (`hooks/consensus-policy.json` defaults). Use `MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE=1` only as an audited escape hatch.
 
 ## Scripts
 
