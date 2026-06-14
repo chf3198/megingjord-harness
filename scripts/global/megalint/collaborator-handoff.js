@@ -4,12 +4,14 @@
 // #2424: doc-coverage block now blocking (not advisory).
 // #2439: cross_family_reviewer/rating/findings blocking; family independence check.
 // #2904: cross_family_receipt presence + 16-char hex format (H*→H promotion for G-01/G-02).
+// #2907: self-check verification block required (hard-gate promotion from advisory).
 
 const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const docCoverage = require('./doc-coverage.js');
 const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
+const { checkHandoffHasVerification } = require(path.join(__dirname, '..', 'collaborator-self-check.js'));
 
 // #2562: accept string OR {body} comment elements so a caller passing bare
 // bodies (the baton-gates.yml regression) cannot silently false-fail the gate.
@@ -85,6 +87,12 @@ function validate(input) {
   }
   if (input.lane === 'lane:code-change') {
     violations.push(...checkCrossFamily(body));
+  }
+  // #2907: require self-check verification block in COLLABORATOR_HANDOFF (hard gate).
+  // Applies to lane:code-change; lightweight lanes already return early above.
+  const selfCheckResult = checkHandoffHasVerification(body);
+  if (!selfCheckResult.ok) {
+    violations.push({ rule: selfCheckResult.rule, detail: selfCheckResult.detail });
   }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });
   const blocking = violations.filter(v => v.severity !== 'advisory');
