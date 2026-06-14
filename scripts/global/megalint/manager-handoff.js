@@ -29,6 +29,9 @@ function loadTrivialThreshold() {
 /**
  * Load cross-runtime path prefixes from governance-rules.yaml.
  * Falls back to DEFAULT_CROSS_RUNTIME_PATHS if the config is absent or malformed.
+ * Emits a warning to stderr when a present config block cannot be parsed, so
+ * silent drift is observable (fail-closed: defaults are a safe floor, not a
+ * silent escape hatch from a misconfigured block).
  * @returns {string[]}
  */
 function loadCrossRuntimePaths() {
@@ -44,6 +47,12 @@ function loadCrossRuntimePaths() {
       if (items && items.length > 0) {
         return items.map((line) => line.replace(/^\s+-\s*/, '').trim());
       }
+      // Block matched but items could not be parsed — emit observable warning.
+      process.stderr.write(
+        '[manager-handoff] WARNING: governance-rules.yaml cross_runtime_paths block found ' +
+        'but could not be parsed. Falling back to DEFAULT_CROSS_RUNTIME_PATHS. ' +
+        'Check config/governance-rules.yaml cross-runtime-writes-required rule. Refs #2911.\n'
+      );
     }
   } catch { /* config absent: use default */ }
   return DEFAULT_CROSS_RUNTIME_PATHS;
@@ -174,7 +183,19 @@ function checkCrossRuntimeWrites(body, diffFiles, crossPaths) {
     touchesCrossRuntime = diffFiles.some((filePath) => {
       if (typeof filePath !== 'string') return false;
       const normalized = filePath.replace(/\\/g, '/');
-      return paths.some((prefix) => normalized.startsWith(prefix) || normalized.includes('/' + prefix));
+      // Scope-correct path matching: only trigger when the prefix is the FIRST
+      // path segment of the file (i.e. the file lives directly under the
+      // cross-runtime root directory, not inside an unrelated source subtree).
+      //
+      // BEFORE (over-broad): normalized.includes('/' + prefix) matched any path
+      // containing the prefix as a substring — e.g. src/feature/.claude/config.js
+      // would wrongly trigger the gate for the '.claude/' prefix.
+      //
+      // AFTER (scope-correct): startsWith(prefix) checks that the FIRST segment
+      // of the path IS the cross-runtime root (e.g. '.claude/settings.json').
+      // Paths like src/x/.claude/y do NOT start with '.claude/' and are not
+      // matched, preventing false-positive blocks on unrelated PRs. Refs #2911.
+      return paths.some((prefix) => normalized.startsWith(prefix));
     });
   }
 

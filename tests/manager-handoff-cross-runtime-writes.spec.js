@@ -101,14 +101,48 @@ test('.copilot/ path + field absent → cross-runtime-writes-missing (hard)', ()
   assert.strictEqual(result[0].severity, 'hard');
 });
 
-test('nested path inside .claude/ → still triggers gate', () => {
+// ── MUTATION GUARD: scope-correct path matching (over-broad fix #2911) ───────
+// The old code used normalized.includes('/' + prefix) which is over-broad:
+// src/x/.claude/y contains '/.claude/' as a substring and would wrongly trigger
+// the gate, blocking unrelated PRs. The fix uses startsWith(prefix) only —
+// only paths whose FIRST segment IS the cross-runtime root trigger the gate.
+
+test('MUTATION: src/x/.claude/y is NOT matched — over-broad includes() fix', () => {
+  // This path has .claude/ nested inside a source subtree, not at repo root.
+  // It must NOT trigger the cross_runtime_writes gate. Refs #2911.
+  const result = checkCrossRuntimeWrites(
+    'MANAGER_HANDOFF\nscope: add source feature\n',
+    ['src/x/.claude/y'],
+    PATHS
+  );
+  assert.deepStrictEqual(result, [],
+    'src/x/.claude/y must not trigger gate — .claude/ is not at repo root');
+});
+
+test('MUTATION: top-level .claude/something IS matched — startsWith check', () => {
+  // Confirm the corrected rule still catches the true cross-runtime case.
+  const result = checkCrossRuntimeWrites(
+    'MANAGER_HANDOFF\nscope: update claude settings\n',
+    ['.claude/settings.json'],
+    PATHS
+  );
+  assert.strictEqual(result.length, 1,
+    '.claude/settings.json must trigger gate — it is a top-level cross-runtime path');
+  assert.strictEqual(result[0].rule, 'cross-runtime-writes-missing');
+  assert.strictEqual(result[0].severity, 'hard');
+});
+
+test('repo-prefixed .claude/ path → NOT triggered (first segment is repo/, not .claude/)', () => {
+  // 'repo/.claude/agents/my-agent.md' does not start with '.claude/'.
+  // Under the scope-correct rule, only the root-level cross-runtime directories
+  // trigger the gate. A worktree/monorepo sub-path is NOT a cross-runtime write.
   const result = checkCrossRuntimeWrites(
     'MANAGER_HANDOFF\nscope: add agent\n',
     ['repo/.claude/agents/my-agent.md'],
     PATHS
   );
-  assert.strictEqual(result.length, 1);
-  assert.strictEqual(result[0].rule, 'cross-runtime-writes-missing');
+  assert.deepStrictEqual(result, [],
+    'repo/.claude/... must not trigger gate — first segment is repo/, not .claude/');
 });
 
 // ── Empty / blank field values → cross-runtime-writes-empty (hard) ────────
