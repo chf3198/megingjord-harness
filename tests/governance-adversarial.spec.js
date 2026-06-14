@@ -57,7 +57,7 @@ const makeCloseoutInput = (body) => ({
 // MUTATION CONTRACT: guards in collaborator-handoff.js#checkCrossFamily; removing
 // any guard causes these tests to fail (blocking list would empty).
 // ---------------------------------------------------------------------------
-describe('OA3 — fabricated cross_family_rating accepted', () => {
+describe('OA3 — fabricated/missing cross_family_rating is rejected', () => {
   test('S01: fabricated rating without receipt is rejected [mutation: removes receipt guard]', () => {
     const body = VALID_COLLAB_BODY
       .replace(/cross_family_receipt: \S+/, '');
