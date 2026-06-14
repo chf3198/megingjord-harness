@@ -46,6 +46,55 @@ def detect_it_ops_bypass(joined: str, env: dict | None = None) -> tuple[bool, st
         return True, "commit-subject-marker"
     return False, None
 
+# #2995: shell-level write-target detection — closes the canonical-main blind spot
+# where terminal writes (redirect / sed -i / tee / cp / mv) mutate tracked files,
+# bypassing the structured-edit-tool enforcer. evaluate_path() is the deny/allow
+# authority (only tracked, non-gitignored, in-repo paths are denied), so generous
+# extraction is safe; the extractor only narrows WHICH tokens to evaluate.
+_SHELL_DEV_SINKS = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
+# `>`/`>>` file redirects; lookbehind excludes fd-dup forms (2>, &>, >&N).
+_REDIRECT_RE = re.compile(r"(?<![0-9&>])>>?\s*([^\s;&|<>()`]+)")
+_TEE_RE = re.compile(r"\btee\b\s+(?:-{1,2}\S+\s+)*([^\s;&|<>()`]+)")
+# sed in-place: take the last bare token of the sed command segment as the target.
+# (Multi-file `sed -i s f1 f2` checks the last file only — a documented residual.)
+_SED_I_RE = re.compile(r"\bsed\b\s+[^|;&\n]*?-i\S*\s+[^|;&\n]*?\s([^\s;&|<>()`]+)(?=\s|$|;|\||&)")
+# cp/mv/install: destination is the last token of the command segment.
+_CP_MV_RE = re.compile(r"\b(?:cp|mv|install)\b\s+[^|;&\n]*?\s([^\s;&|<>()`]+)(?=\s|$|;|\||&)")
+# dd of=PATH (#2995 cross-family review): a common non-redirect file writer.
+_DD_RE = re.compile(r"\bdd\b[^|;&\n]*?\bof=([^\s;&|<>()`]+)")
+
+def shell_write_targets(joined: str) -> list[str]:
+    """Best-effort extraction of file-write targets from a shell command.
+
+    Covers the common idioms an agent uses to mutate files via the terminal:
+    `> f`, `>> f`, `tee f`, `sed -i ... f`, `cp/mv/install ... f`, `dd of=f`.
+    fd-redirects (`2>&1`, `>&2`) and `/dev/*` sinks are excluded. Returns raw target
+    tokens; callers MUST pass each through evaluate_path() — that is the deny/allow
+    authority, so over-extraction here is harmless (non-repo / gitignored targets
+    resolve to ALLOW). Fail-open: any parse error yields [] (never brick the hook).
+
+    RESIDUAL (defense-in-depth, not airtight — documented per #2995 cross-family
+    review): arbitrary in-process writers (`python -c "open(...,'w')"`,
+    `node -e fs.writeFileSync`), `patch < diff`, non-interactive editors
+    (`vim -c w`, `emacs --batch`), and multi-file `sed -i` (last file only) are NOT
+    parsed — they cannot be detected by static shell-token analysis. The structured
+    edit-tool enforcer (evaluate_path on Edit/Write/create_file/...) remains the
+    primary guard; this closes the common terminal-write idioms.
+    """
+    targets: list[str] = []
+    try:
+        for regex in (_REDIRECT_RE, _TEE_RE, _SED_I_RE, _CP_MV_RE, _DD_RE):
+            for match in regex.finditer(joined):
+                token = match.group(1).strip().strip("\"'")
+                if not token or token.startswith("-") or token.startswith("&"):
+                    continue
+                if token in _SHELL_DEV_SINKS:
+                    continue
+                targets.append(token)
+    except Exception:
+        return []
+    return targets
+
 def current_branch(cwd: str) -> str | None:
     try:
         res = subprocess.run(["git", "branch", "--show-current"], cwd=cwd,
@@ -188,6 +237,18 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         sw = RE_BRANCH_SWITCH.search(joined)
         if sw and sw.group(1) not in ("main", "master"):
             return emit("deny", f"Canonical-main read-only: branch switch to '{sw.group(1)}' from main checkout rejected (#2107). Use a worktree (devenv-ops-<team-or-ticket>/) instead.")
+        # #2995: close the shell-level-write blind spot. Terminal writes (redirect,
+        # sed -i, tee, cp, mv) to a tracked main file bypass the structured-edit-tool
+        # enforcer; evaluate_path() denies tracked/non-gitignored in-repo targets.
+        # IT-ops markers are intentionally NOT consulted here — they waive ticket/baton
+        # ceremony only, never the canonical-main read-only policy.
+        for target in shell_write_targets(joined):
+            allowed, reason = evaluate_path(target, cwd)
+            if not allowed:
+                return emit("deny",
+                    f"Canonical-main read-only (#2995): shell write to '{target}' rejected. {reason} "
+                    "IT-ops markers do NOT authorize tracked-file edits in main — use a dedicated "
+                    "worktree (devenv-ops-<team-or-ticket>/) + ticket branch.")
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
