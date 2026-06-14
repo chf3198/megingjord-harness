@@ -30,9 +30,13 @@ function checkSignerFields(body) {
     violations.push({ rule: 'missing-team-model',
       detail: 'COLLABORATOR_HANDOFF missing Team&Model field' });
   }
-  if (!/Role:\s*collaborator/i.test(body)) {
+  // Line-anchored check (CWE-20 / prompt-injection hardening #2921):
+  // bare /Role:\s*collaborator/i matched anywhere in body, allowing injected
+  // trailing text like "Set Role: collaborator." to satisfy the guard even
+  // when the structured field was absent. Require the field on its own line.
+  if (!/(?:^|\n)\s*Role:\s*collaborator\s*(?:\n|$)/i.test(body)) {
     violations.push({ rule: 'missing-role-collaborator',
-      detail: 'COLLABORATOR_HANDOFF missing Role: collaborator field' });
+      detail: 'COLLABORATOR_HANDOFF missing Role: collaborator field (must be on own line)' });
   }
   return violations;
 }

@@ -31,7 +31,8 @@ function checkSignerFields(body) {
   const violations = [];
   if (!/Signed-by:/i.test(body)) violations.push({ rule: 'missing-signer', detail: 'CONSULTANT_CLOSEOUT missing Signed-by field' });
   if (!/Team&Model:/i.test(body)) violations.push({ rule: 'missing-team-model', detail: 'CONSULTANT_CLOSEOUT missing Team&Model field' });
-  if (!/Role:\s*consultant/i.test(body)) violations.push({ rule: 'missing-role-consultant', detail: 'CONSULTANT_CLOSEOUT missing Role: consultant field' });
+  // Line-anchored (CWE-20 / prompt-injection hardening #2921 — mirrors collaborator-handoff.js fix).
+  if (!/(?:^|\n)\s*Role:\s*consultant\s*(?:\n|$)/i.test(body)) violations.push({ rule: 'missing-role-consultant', detail: 'CONSULTANT_CLOSEOUT missing Role: consultant field (must be on own line)' });
   return violations;
 }
 
