@@ -37,6 +37,10 @@ class ShellWriteTargetExtractor(unittest.TestCase):
     def test_mv_dest(self):
         self.assertIn("b.py", pretool_guard.shell_write_targets("mv a.py b.py"))
 
+    def test_dd_of(self):
+        # #2995 cross-family review: dd of=PATH is a non-redirect file writer.
+        self.assertIn("out.bin", pretool_guard.shell_write_targets("dd if=/dev/zero of=out.bin bs=1M count=1"))
+
     def test_dev_null_excluded(self):
         self.assertEqual(pretool_guard.shell_write_targets("echo x > /dev/null"), [])
 
