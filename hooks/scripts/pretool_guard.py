@@ -11,7 +11,7 @@ from admin_patterns import (  # noqa: E501
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
 from governance_state import ensure_state
-from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, check_merged_pr
+from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -139,6 +139,22 @@ def _active_ticket_labels(state: dict, cwd: str) -> set[str]:
 
 def active_ticket_is_no_code_lane(state: dict, cwd: str) -> bool:
     return "lane:no-code-remediation" in _active_ticket_labels(state, cwd)
+
+CONSENSUS_OVERRIDE_ENV = "MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE"
+
+def _emit_planning_consensus_override_incident(cwd: str, ticket: int | None) -> None:
+    """Best-effort incident for audited planning-consensus override usage (#2971)."""
+    try:
+        path = os.path.join(os.path.expanduser("~"), ".megingjord", "incidents.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        event = {"version": 3, "service": "pretool-guard-consensus", "env": "local",
+                 "event": "governance.planning-consensus-override",
+                 "pattern_id": "planning-consensus-override", "severity": "medium",
+                 "cwd": cwd, "ticket": ticket}
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+    except Exception:
+        pass
 
 RE_ADMIN_OVERRIDE = re.compile(r"(?:^|\s)--admin(?:[=\s]|$)")
 MUTATING_TOOLS = {
@@ -355,6 +371,11 @@ def main() -> int:
             # #2876: first-edit MANAGER_HANDOFF ordering gate — Refs #2871
             if not linked_issue_has_manager_handoff(cwd):
                 return emit("deny", "File edit blocked: MANAGER_HANDOFF not found on linked issue (#2876). Post Manager scope before first code edit.")
+            if not linked_issue_has_planning_consensus(cwd):
+                if os.environ.get(CONSENSUS_OVERRIDE_ENV) == "1":
+                    _emit_planning_consensus_override_incident(cwd, state.get("active_ticket"))
+                    return emit("allow", "Planning-consensus override accepted. Incident recorded for audit.")
+                return emit("deny", "File edit blocked: planning consensus >=93 is not verified on the linked issue. Post a PLANNING_CONSENSUS PASS artifact or use audited override via MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE=1.")
     if tool in {"run_in_terminal","terminal","runTerminalCommand","Bash","run_command","send_command_input"}:
         # Refs #2235 — wire #2220 detector as ADVISORY (no deny; emit incident only).
         # Refs #2236 — when MEGINGJORD_FLEET_DIRECT_BLOCK=1, enforce DENY on fleet-bypass.
