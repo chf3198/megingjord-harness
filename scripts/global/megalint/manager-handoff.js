@@ -1,6 +1,7 @@
 'use strict';
 // manager-handoff — validates MANAGER_HANDOFF schema + crypto signature fields.
 // AC #2906: lane:trivial diff-size gate (Gap G-03 / OWASP ASI09).
+// AC #2911: cross_runtime_writes hard-blocking gate (Rule 1.9 promotion).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -8,6 +9,10 @@ const sig = require('../governance-artifact-signature');
 const { isValidStrategy } = require('../test-strategy-enum');
 const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates', 'related_tickets', 'overlap_decision'];
 const PHASE_ONE_LABEL = process.env.PHASE_ONE_LABEL || 'phase-gate:phase-1';
+
+// Default cross-runtime path prefixes that trigger the cross_runtime_writes gate.
+// Configurable via governance-rules.yaml (rule_id: cross-runtime-writes-required).
+const DEFAULT_CROSS_RUNTIME_PATHS = ['.claude/', '.codex/', '.copilot/'];
 
 // Load trivial-lane diff threshold from governance-rules.yaml or env override.
 function loadTrivialThreshold() {
@@ -21,7 +26,31 @@ function loadTrivialThreshold() {
   return 50;
 }
 
+/**
+ * Load cross-runtime path prefixes from governance-rules.yaml.
+ * Falls back to DEFAULT_CROSS_RUNTIME_PATHS if the config is absent or malformed.
+ * @returns {string[]}
+ */
+function loadCrossRuntimePaths() {
+  try {
+    const rulesPath = path.resolve(__dirname, '..', '..', '..', 'config', 'governance-rules.yaml');
+    const raw = fs.readFileSync(rulesPath, 'utf8');
+    // Extract the cross_runtime_paths block under rule_id: cross-runtime-writes-required.
+    const block = raw.match(
+      /rule_id:\s*cross-runtime-writes-required[\s\S]*?cross_runtime_paths:([\s\S]*?)(?:\n  -\s*rule_id:|\n\s*enum_values:)/
+    );
+    if (block) {
+      const items = block[1].match(/^\s{6}-\s*(.+)$/gm);
+      if (items && items.length > 0) {
+        return items.map((line) => line.replace(/^\s+-\s*/, '').trim());
+      }
+    }
+  } catch { /* config absent: use default */ }
+  return DEFAULT_CROSS_RUNTIME_PATHS;
+}
+
 const TRIVIAL_DIFF_THRESHOLD = loadTrivialThreshold();
+const CROSS_RUNTIME_PATHS = loadCrossRuntimePaths();
 
 function findManagerHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?MANAGER_HANDOFF\b/;
@@ -102,6 +131,101 @@ function checkCrypto(body) {
   }));
 }
 
+/**
+ * AC #2911: hard-blocking cross_runtime_writes gate.
+ *
+ * Scope-correctness: only fires when the PR diff actually touches a cross-runtime
+ * config path (.claude/, .codex/, .copilot/). Tickets that genuinely do NOT touch
+ * those paths are unaffected — this gate does NOT block them.
+ *
+ * FAIL-CLOSED design (CWE-754 / OWASP ASI09):
+ *   - diffFiles must be an Array when the PR touches cross-runtime paths.
+ *   - null/undefined/non-array diffFiles on a cross-runtime-touching PR is itself
+ *     a violation — absence of evidence = violation, not a silent pass.
+ *   - An empty cross_runtime_writes value (empty string, "[]", or "none" without
+ *     explicit N/A rationale) is treated as absent.
+ *
+ * @param {string} body - MANAGER_HANDOFF comment body
+ * @param {string[]} diffFiles - list of file paths touched in the PR diff (caller-supplied)
+ * @param {string[]} crossPaths - configurable path prefixes (defaults to CROSS_RUNTIME_PATHS)
+ * @returns {Array<{rule:string,detail:string,severity:string}>}
+ */
+function checkCrossRuntimeWrites(body, diffFiles, crossPaths) {
+  const paths = Array.isArray(crossPaths) && crossPaths.length > 0 ? crossPaths : CROSS_RUNTIME_PATHS;
+
+  // Determine whether the PR diff actually touches any cross-runtime paths.
+  // If diffFiles is not supplied (null/undefined), we cannot confirm absence — treat as
+  // cross-runtime-touching to be fail-closed (callers that don't touch these paths
+  // should supply an empty array, not omit diffFiles).
+  let touchesCrossRuntime = false;
+  if (!Array.isArray(diffFiles)) {
+    // diffFiles absent — cannot determine scope; emit violation if the HANDOFF
+    // itself asserts cross_runtime_writes (i.e. the author claims it applies).
+    // If the HANDOFF has no cross_runtime_writes field at all AND diffFiles is null,
+    // we cannot know — skip (other gates and PR review cover this case).
+    const declared = extractField(body, 'cross_runtime_writes');
+    if (declared !== null) {
+      // Author declared the field; validate it properly.
+      touchesCrossRuntime = true;
+    } else {
+      return []; // cannot determine — scope-correct: don't block unrelated tickets
+    }
+  } else {
+    touchesCrossRuntime = diffFiles.some((filePath) => {
+      if (typeof filePath !== 'string') return false;
+      const normalized = filePath.replace(/\\/g, '/');
+      return paths.some((prefix) => normalized.startsWith(prefix) || normalized.includes('/' + prefix));
+    });
+  }
+
+  if (!touchesCrossRuntime) return []; // scope-correct: rule does not apply
+
+  // PR touches cross-runtime paths — cross_runtime_writes field is now required.
+  const declared = extractField(body, 'cross_runtime_writes');
+
+  if (declared === null) {
+    return [{
+      rule: 'cross-runtime-writes-missing',
+      detail: 'MANAGER_HANDOFF is missing required cross_runtime_writes field. ' +
+        'PR diff touches cross-runtime config paths (' + paths.join(', ') + '). ' +
+        'Per instructions/cross-team-artifact-write.instructions.md, list each touched path ' +
+        'with target_team and schema_source. Refs #2911.',
+      severity: 'hard',
+    }];
+  }
+
+  // Field is present — check it is not empty/trivially blank.
+  const trimmed = declared.trim();
+  const lower = trimmed.toLowerCase();
+  if (!trimmed || lower === '[]' || lower === 'none' || lower === 'n/a') {
+    return [{
+      rule: 'cross-runtime-writes-empty',
+      detail: 'MANAGER_HANDOFF cross_runtime_writes field is present but empty or trivially blank ' +
+        `(got: "${trimmed}"). Must list each cross-runtime path with target_team and schema_source. ` +
+        'Use "cross_runtime_writes: N/A" only when the rule genuinely does not apply. Refs #2911.',
+      severity: 'hard',
+    }];
+  }
+
+  // Check for pending target_team_sign_off — hard-blocking at closeout time.
+  // The field value may be a multi-line YAML list embedded in the comment body.
+  const signOffMatch = body.match(/target_team_sign_off\s*:\s*([^\n]+)/gi);
+  if (signOffMatch) {
+    const pendingItems = signOffMatch.filter((line) => /pending/i.test(line));
+    if (pendingItems.length > 0) {
+      return [{
+        rule: 'cross-runtime-writes-sign-off-pending',
+        detail: 'MANAGER_HANDOFF cross_runtime_writes has target_team_sign_off: pending. ' +
+          'Baton must not advance to Collaborator until the target team posts a TEAM_RESPONSE ' +
+          'with verdict: schema-valid. Refs #2911 + instructions/cross-team-artifact-write.instructions.md.',
+        severity: 'hard',
+      }];
+    }
+  }
+
+  return [];
+}
+
 function checkPhaseOneFields(body, labels) {
   if (!(labels || []).includes(PHASE_ONE_LABEL)) return [];
   const violations = [];
@@ -133,6 +257,7 @@ function validate(input) {
     ...checkTestStrategy(handoff.body),
     ...checkLaneConsistency(handoff.body, input.lane),
     ...checkLaneTrivialDiffSize(handoff.body, input.diffLines, TRIVIAL_DIFF_THRESHOLD),
+    ...checkCrossRuntimeWrites(handoff.body, input.diffFiles, CROSS_RUNTIME_PATHS),
     ...checkPhaseOneFields(handoff.body, input.labels),
     ...checkCrypto(handoff.body),
   ];
@@ -142,4 +267,6 @@ function validate(input) {
 module.exports = {
   validate, findManagerHandoff, extractField, REQUIRED_FIELDS,
   checkLaneTrivialDiffSize, TRIVIAL_DIFF_THRESHOLD,
+  checkCrossRuntimeWrites, CROSS_RUNTIME_PATHS, DEFAULT_CROSS_RUNTIME_PATHS,
+  loadCrossRuntimePaths,
 };

@@ -212,4 +212,24 @@ rules:
       - claude-code
       - codex
       - copilot
+
+  - rule_id: cross-runtime-writes-required
+    class: doc-vs-enforcement
+    statement: >
+      A MANAGER_HANDOFF for a ticket whose PR diff touches cross-runtime config
+      paths (.claude/, .codex/, .copilot/) MUST include a cross_runtime_writes
+      field listing each touched path; absent or empty field is a hard-blocking
+      gate violation (promoted from advisory per #2911 / Rule 1.9).
+    source: scripts/global/megalint/manager-handoff.js
+    cross_runtime_paths:
+      - .claude/
+      - .codex/
+      - .copilot/
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
       - antigravity
