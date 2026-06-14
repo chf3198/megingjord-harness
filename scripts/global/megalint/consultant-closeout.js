@@ -55,6 +55,60 @@ function checkEvidenceFields(body) {
   return violations;
 }
 
+/**
+ * checkRequiredFlawFields — hard-blocking gate for flaw-accounting fields (#2909).
+ *
+ * The baton-routing contract (role-baton-routing.instructions.md §"review → done") requires
+ * every CONSULTANT_CLOSEOUT to declare anneal_tickets_filed and mid_flight_flaws so that
+ * the recurrence detector and closeout-schema validator have reliable signal. Absence of
+ * either field is a G1 governance violation (missing evidence = silent pass, fail-open).
+ *
+ * Accepted forms:
+ *   anneal_tickets_filed: [#N, ...] | none
+ *   mid_flight_flaws: [...] | none
+ *
+ * @param {string} body
+ * @returns {{ rule: string, detail: string }[]}
+ */
+function checkRequiredFlawFields(body) {
+  const violations = [];
+  // anneal_tickets_filed must be present and non-empty after the colon.
+  // Matches: anneal_tickets_filed: none | anneal_tickets_filed: [#123] etc.
+  const annealPresent = /anneal_tickets_filed[ \t]*:/i.test(body);
+  if (!annealPresent) {
+    violations.push({
+      rule: 'missing-anneal-tickets-filed',
+      detail: 'CONSULTANT_CLOSEOUT missing anneal_tickets_filed field (required; declare [#N,...] or none)',
+    });
+  } else {
+    // Capture only the same line after the colon — [^\n\r]* prevents next-line bleed.
+    const annealValue = (body.match(/anneal_tickets_filed[ \t]*:[ \t]*([^\n\r]*)/i) || [])[1];
+    if (!annealValue || !annealValue.trim()) {
+      violations.push({
+        rule: 'empty-anneal-tickets-filed',
+        detail: 'CONSULTANT_CLOSEOUT anneal_tickets_filed has no value (declare [#N,...] or none)',
+      });
+    }
+  }
+  // mid_flight_flaws must be present and non-empty after the colon.
+  const flawsPresent = /mid_flight_flaws[ \t]*:/i.test(body);
+  if (!flawsPresent) {
+    violations.push({
+      rule: 'missing-mid-flight-flaws',
+      detail: 'CONSULTANT_CLOSEOUT missing mid_flight_flaws field (required; declare [...] or none)',
+    });
+  } else {
+    const flawsValue = (body.match(/mid_flight_flaws[ \t]*:[ \t]*([^\n\r]*)/i) || [])[1];
+    if (!flawsValue || !flawsValue.trim()) {
+      violations.push({
+        rule: 'empty-mid-flight-flaws',
+        detail: 'CONSULTANT_CLOSEOUT mid_flight_flaws has no value (declare [...] or none)',
+      });
+    }
+  }
+  return violations;
+}
+
 function checkCrypto(body) {
   if (!/Crypto-Algorithm:/i.test(body)) return [];
   const result = sig.verifyArtifact(body, 'consultant');
@@ -99,6 +153,7 @@ function validate(input) {
   const violations = [
     ...checkSignerFields(body),
     ...checkEvidenceFields(body),
+    ...checkRequiredFlawFields(body),
     ...checkCrypto(body),
     ...checkTier3Emission(body, input),
     ...checkGovTokenResolution(body, input),
@@ -109,4 +164,10 @@ function validate(input) {
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
 
-module.exports = { validate, findConsultantCloseout, checkCrossFamilyVerdict, checkFleetBundleProvenance };
+module.exports = {
+  validate,
+  findConsultantCloseout,
+  checkCrossFamilyVerdict,
+  checkFleetBundleProvenance,
+  checkRequiredFlawFields,
+};
