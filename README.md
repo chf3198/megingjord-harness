@@ -201,6 +201,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `governance:delegation-lint` | `node scripts/global/delegation-phrase-lint.js` |
 | `governance:dispatcher-set-labels:test` | `node --test tests/github-dispatcher-set-labels.spec.js` |
 | `governance:drift` | `node scripts/global/governance-drift-classifier.js --json` |
+| `governance:drift-sweep` | `node scripts/global/governance-drift-sweep.js --scan` |
+| `governance:drift-sweep:test` | `node --test tests/governance-drift-sweep.spec.js` |
 | `governance:duplicate-check` | `node scripts/global/ticket-duplicate-guard.js --scan` |
 | `governance:duplicate-check:test` | `node --test tests/ticket-duplicate-guard.spec.js` |
 | `governance:epic` | `node scripts/global/epic-evidence.js` |
