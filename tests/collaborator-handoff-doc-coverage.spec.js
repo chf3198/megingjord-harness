@@ -5,7 +5,7 @@ const { validate } = require('../scripts/global/megalint/collaborator-handoff.js
 const { checkBlock, parseDocBlock, loadMatrix } = require('../scripts/global/megalint/doc-coverage.js');
 
 const HANDOFF_SIGNED = (extra) =>
-  `## COLLABORATOR_HANDOFF\n${extra}\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
+  `## COLLABORATOR_HANDOFF\n${extra}\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\ncross_family_receipt: 0123456789abcdef\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
 
 test('validate: blocking when doc-coverage: block missing on lane:code-change with governance label', () => {
   const matrix = loadMatrix();
@@ -20,7 +20,7 @@ test('validate: blocking when doc-coverage: block missing on lane:code-change wi
 
 test('validate: passes when doc-coverage: block has required surfaces', () => {
   const body = HANDOFF_SIGNED(
-    'doc-coverage:\n  .changes/unreleased/: DONE — #2424.md\n  docs/workflow/learnings.md: N/A — no new pattern\n  governance/README.md: DONE\n  docs/howto/baton-workflow.md: DONE\n  wiki/wisdom/global/concepts/: N/A — no concept change\n'
+    'doc-coverage:\n  .changes/unreleased/: DONE — #2424.md\n  docs/workflow/learnings.md: N/A — no-user-visible-change\n  governance/README.md: DONE\n  docs/howto/baton-workflow.md: DONE\n  wiki/wisdom/global/concepts/: N/A — no-user-visible-change\n'
   );
   const result = validate({
     lane: 'lane:code-change', labels: ['area:governance'],
@@ -37,14 +37,17 @@ test('validate: skips doc-coverage check on lightweight lanes', () => {
   assert.equal(result.ok, true);
 });
 
-test('validate: advisory mode env var bypasses blocking', () => {
+test('validate: removed DOC_COVERAGE_GATE_ADVISORY env var no longer bypasses the gate', () => {
+  // #2712 removed the advisory escape hatch; #3016 confirms the env var is inert and
+  // the gate still blocks. The sanctioned bypass is now LEGACY_DOC_SKIP + a BLOCKER_NOTE.
   process.env.DOC_COVERAGE_GATE_ADVISORY = '1';
   const result = validate({
     lane: 'lane:code-change', labels: ['area:governance'],
     comments: [{ body: HANDOFF_SIGNED('no block'), user: { login: 'alex' } }],
   });
   delete process.env.DOC_COVERAGE_GATE_ADVISORY;
-  assert.equal(result.ok, true);
+  assert.equal(result.ok, false);
+  assert.ok(result.violations.some(v => v.rule === 'doc-coverage-missing'));
 });
 
 test('parseDocBlock: returns null when no doc-coverage: header', () => {

@@ -38,6 +38,12 @@ const COLLABORATOR = [
   f('cross_family_rating', { req: true }),
   f('cross_family_reviewer', { req: true }),
   f('cross_family_findings', { req: true }),
+  // #3016: the canonical builder must be ABLE to emit cross_family_receipt (#2904) so a
+  // gate-conforming handoff is possible — but keep it OPTIONAL here so the historical
+  // replay-eval corpus (artifacts predating the receipt) still builds. Runtime enforcement
+  // lives in collaborator-handoff.checkCrossFamily, which hard-requires it on live PRs.
+  f('cross_family_receipt', {}),
+  f('reviewer_family', {}),
 ];
 
 // ADMIN_HANDOFF — branch/commit + signer-independence + deploy-sync impact.

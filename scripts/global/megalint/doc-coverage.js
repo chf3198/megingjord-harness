@@ -10,7 +10,9 @@ function parseDocBlock(body) {
   const lines = (body || '').split('\n');
   let inBlock = false; const entries = {};
   for (const line of lines) {
-    if (!inBlock && /^\s*doc-coverage\s*:/i.test(line)) { inBlock = true; continue; }
+    // Accept both the canonical `doc-coverage:` and the baton-builder's `doc_coverage:`
+    // field-key form (#3016) — otherwise builder-produced handoffs parse as "no block".
+    if (!inBlock && /^\s*doc[-_]coverage\s*:/i.test(line)) { inBlock = true; continue; }
     if (!inBlock) continue;
     if (/^\S/.test(line)) break;
     const m = line.match(/^\s+([^:]+):\s*(.+)/);
