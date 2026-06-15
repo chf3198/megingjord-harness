@@ -3,6 +3,14 @@
 // (slice 1). Truncation priority: ticket > repo-map > wiki (drop lowest-priority first). Pure (no IO).
 const DEFAULT_MAX_CHARS = 4000;
 
+function resolveMaxChars(opts = {}) {
+  if (opts.maxChars === undefined || opts.maxChars === null) return DEFAULT_MAX_CHARS;
+  if (!Number.isInteger(opts.maxChars) || opts.maxChars <= 0) {
+    throw new TypeError('maxChars must be a positive integer');
+  }
+  return opts.maxChars;
+}
+
 function renderTicket(ticket) {
   if (!ticket || ticket.available === false) return '';
   const recent = (ticket.comments || []).slice(-3).join('\n---\n');
@@ -33,7 +41,7 @@ function clip(text, max) {
 // renderContextPreamble(bundle, {maxChars}) -> { preamble, included, truncated }.
 // Fills sections in priority order up to maxChars; flags truncation; never throws on a sparse bundle.
 function renderContextPreamble(bundle = {}, opts = {}) {
-  const maxChars = opts.maxChars || DEFAULT_MAX_CHARS;
+  const maxChars = resolveMaxChars(opts);
   const sections = [
     ['ticket', renderTicket(bundle.ticket)],
     ['repoMap', renderRepoMap(bundle.repoMap)],

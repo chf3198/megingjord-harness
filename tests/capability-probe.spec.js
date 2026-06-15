@@ -30,13 +30,39 @@ test.afterEach(() => {
 test('probe writes manifest with required schema fields', async () => {
   const { probe } = require(PROBE);
   const manifest = await probe();
-  expect(manifest.schema_version).toBe(1);
+  expect(manifest.schema_version).toBe(2);
   expect(manifest.probed_at).toBeTruthy();
   expect(manifest).toHaveProperty('tailscale');
   expect(manifest).toHaveProperty('fleet');
   expect(manifest).toHaveProperty('cloudflare');
   expect(manifest).toHaveProperty('providers');
   expect(manifest).toHaveProperty('mcp');
+});
+
+test('validateCapabilityManifest accepts the probe manifest and rejects stale schema', async () => {
+  const { probe, validateCapabilityManifest } = require(PROBE);
+  const manifest = await probe();
+  expect(validateCapabilityManifest(manifest)).toBe(manifest);
+  expect(() => validateCapabilityManifest({
+    probed_at: new Date().toISOString(), schema_version: 1,
+    tailscale: {}, fleet: {}, cloudflare: {}, providers: {}, mcp: {},
+  })).toThrow(/schema_version must be 2/);
+});
+
+test('validateCapabilityManifest rejects malformed nested capability sections', async () => {
+  const { validateCapabilityManifest } = require(PROBE);
+  expect(() => validateCapabilityManifest({
+    probed_at: new Date().toISOString(), schema_version: 2,
+    tailscale: {}, fleet: {}, cloudflare: { account: null }, providers: {}, mcp: {}, r2: {}, wrangler: {}, github_oidc: {}, npm_trusted_publishing: {},
+  })).toThrow(/cloudflare.account must be an object/);
+  expect(() => validateCapabilityManifest({
+    probed_at: new Date().toISOString(), schema_version: 2,
+    tailscale: {}, fleet: {}, cloudflare: { account: {} }, providers: {}, mcp: { rag_server: null }, r2: {}, wrangler: {}, github_oidc: {}, npm_trusted_publishing: {},
+  })).toThrow(/mcp.rag_server must be an object/);
+  expect(() => validateCapabilityManifest({
+    probed_at: new Date().toISOString(), schema_version: 2,
+    tailscale: {}, fleet: {}, cloudflare: { account: {} }, providers: [], mcp: { rag_server: {} }, r2: {}, wrangler: {}, github_oidc: {}, npm_trusted_publishing: {},
+  })).toThrow(/providers must be an object/);
 });
 
 test('probe is read-only — does not mutate inventory', async () => {
@@ -67,13 +93,25 @@ test('show returns 1 when manifest missing, 0 when present', async () => {
   expect(show()).toBe(1);
   fs.mkdirSync(path.join(tmpDir, '.dashboard'), { recursive: true });
   fs.writeFileSync(path.join(tmpDir, '.dashboard', 'capabilities.json'), JSON.stringify({
-    probed_at: new Date().toISOString(), schema_version: 1,
+    probed_at: new Date().toISOString(), schema_version: 2,
     tailscale: { available: false }, fleet: {}, cloudflare: { account: { available: false } },
-    providers: {}, mcp: { rag_server: { reachable: false } },
+    providers: {}, mcp: { rag_server: { reachable: false } }, r2: {}, wrangler: {}, github_oidc: {}, npm_trusted_publishing: {},
   }));
   delete require.cache[require.resolve(SHOW)];
   const { show: show2 } = require(SHOW);
   expect(show2()).toBe(0);
+});
+
+test('show returns 1 on malformed capability manifest (fail closed)', async () => {
+  fs.mkdirSync(path.join(tmpDir, '.dashboard'), { recursive: true });
+  fs.writeFileSync(path.join(tmpDir, '.dashboard', 'capabilities.json'), JSON.stringify({
+    probed_at: new Date().toISOString(), schema_version: 1,
+    tailscale: { available: false }, fleet: {}, cloudflare: { account: { available: false } },
+    providers: {}, mcp: { rag_server: { reachable: false } }, r2: {}, wrangler: {}, github_oidc: {}, npm_trusted_publishing: {},
+  }));
+  delete require.cache[require.resolve(SHOW)];
+  const { show: show2 } = require(SHOW);
+  expect(show2()).toBe(1);
 });
 
 test('tierAvailability reflects substrate state', async () => {

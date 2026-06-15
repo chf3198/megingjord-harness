@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const hamr = require('./hamr-probes');
+const { validateCapabilityManifest } = require('./fleet-envelope-contract');
 
 const TIMEOUT_TAILSCALE_MS = 4000;
 const TIMEOUT_FLEET_MS = 4000;
@@ -85,6 +86,7 @@ async function probe() {
     npm_trusted_publishing: hamr.probeNpmTrustedPublishing(),
     providers,
   };
+  validateCapabilityManifest(manifest);
   const dir = path.join(process.cwd(), '.dashboard');
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'capabilities.json'), JSON.stringify(manifest, null, 2));
@@ -105,4 +107,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { probe, probeProvider, probeFleet, probeTailscale, PROVIDER_PROBES, ...hamr };
+module.exports = { probe, probeProvider, probeFleet, probeTailscale, PROVIDER_PROBES, validateCapabilityManifest, ...hamr };
