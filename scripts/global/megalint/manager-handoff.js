@@ -159,92 +159,60 @@ function checkCrypto(body) {
  * @param {string[]} crossPaths - configurable path prefixes (defaults to CROSS_RUNTIME_PATHS)
  * @returns {Array<{rule:string,detail:string,severity:string}>}
  */
-function checkCrossRuntimeWrites(body, diffFiles, crossPaths) {
-  const paths = Array.isArray(crossPaths) && crossPaths.length > 0 ? crossPaths : CROSS_RUNTIME_PATHS;
+// Does the PR diff (or, if diffFiles is absent, the declared field) put this ticket
+// in scope for the cross_runtime_writes rule? Scope-correct: a prefix must be the FIRST
+// path segment (startsWith), not a substring — src/x/.claude/y is NOT cross-runtime (#2911).
+// diffFiles absent → in-scope only if the HANDOFF itself declares the field (fail-closed
+// for declarers; unrelated tickets that omit both are not blocked).
+function diffTouchesCrossRuntime(body, diffFiles, paths) {
+  if (!Array.isArray(diffFiles)) return extractField(body, 'cross_runtime_writes') !== null;
+  return diffFiles.some((filePath) => {
+    if (typeof filePath !== 'string') return false;
+    const normalized = filePath.replace(/\\/g, '/');
+    return paths.some((prefix) => normalized.startsWith(prefix));
+  });
+}
 
-  // Determine whether the PR diff actually touches any cross-runtime paths.
-  // If diffFiles is not supplied (null/undefined), we cannot confirm absence — treat as
-  // cross-runtime-touching to be fail-closed (callers that don't touch these paths
-  // should supply an empty array, not omit diffFiles).
-  let touchesCrossRuntime = false;
-  if (!Array.isArray(diffFiles)) {
-    // diffFiles absent — cannot determine scope; emit violation if the HANDOFF
-    // itself asserts cross_runtime_writes (i.e. the author claims it applies).
-    // If the HANDOFF has no cross_runtime_writes field at all AND diffFiles is null,
-    // we cannot know — skip (other gates and PR review cover this case).
-    const declared = extractField(body, 'cross_runtime_writes');
-    if (declared !== null) {
-      // Author declared the field; validate it properly.
-      touchesCrossRuntime = true;
-    } else {
-      return []; // cannot determine — scope-correct: don't block unrelated tickets
-    }
-  } else {
-    touchesCrossRuntime = diffFiles.some((filePath) => {
-      if (typeof filePath !== 'string') return false;
-      const normalized = filePath.replace(/\\/g, '/');
-      // Scope-correct path matching: only trigger when the prefix is the FIRST
-      // path segment of the file (i.e. the file lives directly under the
-      // cross-runtime root directory, not inside an unrelated source subtree).
-      //
-      // BEFORE (over-broad): normalized.includes('/' + prefix) matched any path
-      // containing the prefix as a substring — e.g. src/feature/.claude/config.js
-      // would wrongly trigger the gate for the '.claude/' prefix.
-      //
-      // AFTER (scope-correct): startsWith(prefix) checks that the FIRST segment
-      // of the path IS the cross-runtime root (e.g. '.claude/settings.json').
-      // Paths like src/x/.claude/y do NOT start with '.claude/' and are not
-      // matched, preventing false-positive blocks on unrelated PRs. Refs #2911.
-      return paths.some((prefix) => normalized.startsWith(prefix));
-    });
-  }
-
-  if (!touchesCrossRuntime) return []; // scope-correct: rule does not apply
-
-  // PR touches cross-runtime paths — cross_runtime_writes field is now required.
-  const declared = extractField(body, 'cross_runtime_writes');
-
+// Missing or trivially-blank cross_runtime_writes field → hard violation (or null if OK).
+function crossRuntimeFieldViolation(declared, paths) {
   if (declared === null) {
-    return [{
-      rule: 'cross-runtime-writes-missing',
-      detail: 'MANAGER_HANDOFF is missing required cross_runtime_writes field. ' +
-        'PR diff touches cross-runtime config paths (' + paths.join(', ') + '). ' +
-        'Per instructions/cross-team-artifact-write.instructions.md, list each touched path ' +
-        'with target_team and schema_source. Refs #2911.',
-      severity: 'hard',
-    }];
+    return { rule: 'cross-runtime-writes-missing', severity: 'hard',
+      detail: 'MANAGER_HANDOFF is missing required cross_runtime_writes field. PR diff touches ' +
+        'cross-runtime config paths (' + paths.join(', ') + '). Per ' +
+        'instructions/cross-team-artifact-write.instructions.md, list each touched path with ' +
+        'target_team and schema_source. Refs #2911.' };
   }
-
-  // Field is present — check it is not empty/trivially blank.
   const trimmed = declared.trim();
   const lower = trimmed.toLowerCase();
   if (!trimmed || lower === '[]' || lower === 'none' || lower === 'n/a') {
-    return [{
-      rule: 'cross-runtime-writes-empty',
+    return { rule: 'cross-runtime-writes-empty', severity: 'hard',
       detail: 'MANAGER_HANDOFF cross_runtime_writes field is present but empty or trivially blank ' +
         `(got: "${trimmed}"). Must list each cross-runtime path with target_team and schema_source. ` +
-        'Use "cross_runtime_writes: N/A" only when the rule genuinely does not apply. Refs #2911.',
-      severity: 'hard',
-    }];
+        'Use "cross_runtime_writes: N/A" only when the rule genuinely does not apply. Refs #2911.' };
   }
+  return null;
+}
 
-  // Check for pending target_team_sign_off — hard-blocking at closeout time.
-  // The field value may be a multi-line YAML list embedded in the comment body.
-  const signOffMatch = body.match(/target_team_sign_off\s*:\s*([^\n]+)/gi);
-  if (signOffMatch) {
-    const pendingItems = signOffMatch.filter((line) => /pending/i.test(line));
-    if (pendingItems.length > 0) {
-      return [{
-        rule: 'cross-runtime-writes-sign-off-pending',
-        detail: 'MANAGER_HANDOFF cross_runtime_writes has target_team_sign_off: pending. ' +
-          'Baton must not advance to Collaborator until the target team posts a TEAM_RESPONSE ' +
-          'with verdict: schema-valid. Refs #2911 + instructions/cross-team-artifact-write.instructions.md.',
-        severity: 'hard',
-      }];
-    }
+// target_team_sign_off: pending anywhere in the field → hard violation (or null).
+function signOffPendingViolation(body) {
+  const lines = body.match(/target_team_sign_off\s*:\s*([^\n]+)/gi);
+  if (lines && lines.some((line) => /pending/i.test(line))) {
+    return { rule: 'cross-runtime-writes-sign-off-pending', severity: 'hard',
+      detail: 'MANAGER_HANDOFF cross_runtime_writes has target_team_sign_off: pending. Baton must ' +
+        'not advance to Collaborator until the target team posts a TEAM_RESPONSE with ' +
+        'verdict: schema-valid. Refs #2911 + instructions/cross-team-artifact-write.instructions.md.' };
   }
+  return null;
+}
 
-  return [];
+function checkCrossRuntimeWrites(body, diffFiles, crossPaths) {
+  const paths = Array.isArray(crossPaths) && crossPaths.length > 0 ? crossPaths : CROSS_RUNTIME_PATHS;
+  if (!diffTouchesCrossRuntime(body, diffFiles, paths)) return []; // scope-correct: rule N/A
+  const declared = extractField(body, 'cross_runtime_writes');
+  const fieldViol = crossRuntimeFieldViolation(declared, paths);
+  if (fieldViol) return [fieldViol];
+  const signOff = signOffPendingViolation(body);
+  return signOff ? [signOff] : [];
 }
 
 function checkPhaseOneFields(body, labels) {
