@@ -84,18 +84,25 @@ function laneOf(input) {
 // BLOCKER_NOTE is present on the issue — an auditable, deliberate escape hatch.
 function legacyDocSkipActive(comments) {
   if (!process.env.LEGACY_DOC_SKIP) return false;
-  return (comments || []).some((c) => /BLOCKER_NOTE/.test(bodyOf(c)));
+  // Line-anchored (#3016 review): match the BLOCKER_NOTE artifact as a field, not a
+  // substring inside an unrelated word (e.g. "MY_BLOCKER_NOTEBOOK").
+  return (comments || []).some((c) => /(?:^|\n)\s*BLOCKER_NOTE\b/.test(bodyOf(c)));
 }
 
-// Run the doc-coverage check fail-CLOSED: a matrix-load error blocks rather than
-// silently disabling enforcement (the prior catch→skip was a fail-open hole).
+// Run the doc-coverage check fail-CLOSED: any failure to obtain a usable matrix
+// blocks rather than silently disabling enforcement. The prior catch→skip was a
+// fail-open hole; a null/undefined/empty matrix returned WITHOUT throwing is the
+// same hole (#3016 review), so treat it as a load failure too.
 function docCoverageViolations(body, labels, comments) {
   if (legacyDocSkipActive(comments)) {
     return [{ rule: 'doc-coverage-legacy-skip', severity: 'advisory',
       detail: 'LEGACY_DOC_SKIP active with BLOCKER_NOTE present; doc-coverage bypassed' }];
   }
   let matrix;
-  try { matrix = docCoverage.loadMatrix(); } catch (err) {
+  try {
+    matrix = docCoverage.loadMatrix();
+    if (!matrix || Object.keys(matrix).length === 0) throw new Error('matrix is null/empty');
+  } catch (err) {
     return [{ rule: 'doc-coverage-matrix-load-failed', severity: 'error',
       detail: `doc-coverage matrix failed to load (fail-closed): ${err.message}` }];
   }

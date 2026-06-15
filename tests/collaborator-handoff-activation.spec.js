@@ -69,6 +69,31 @@ test('fail-CLOSED: a matrix load failure blocks instead of silently skipping', (
   }
 });
 
+test('fail-CLOSED: a null/empty matrix returned WITHOUT throwing still blocks (#3016 review)', () => {
+  const original = dc.loadMatrix;
+  for (const bad of [null, undefined, {}]) {
+    dc.loadMatrix = () => bad;
+    try {
+      const result = ch.validate({ comments: [HANDOFF], labels: ['lane:code-change', 'area:governance'] });
+      assert.equal(result.ok, false, `matrix=${JSON.stringify(bad)} must fail closed`);
+      assert.ok(result.violations.some((v) => v.rule === 'doc-coverage-matrix-load-failed'));
+    } finally {
+      dc.loadMatrix = original;
+    }
+  }
+});
+
+test('BLOCKER_NOTE substring inside a word does NOT activate LEGACY_DOC_SKIP (#3016 review)', () => {
+  const prev = process.env.LEGACY_DOC_SKIP;
+  process.env.LEGACY_DOC_SKIP = '1';
+  try {
+    const decoy = ch.validate({ comments: [HANDOFF, { body: 'see MY_BLOCKER_NOTEBOOK for notes' }], labels: ['lane:code-change', 'area:governance'] });
+    assert.ok(decoy.violations.some((v) => /doc-coverage/.test(v.rule)), 'substring must not trigger the skip');
+  } finally {
+    if (prev === undefined) delete process.env.LEGACY_DOC_SKIP; else process.env.LEGACY_DOC_SKIP = prev;
+  }
+});
+
 test('LEGACY_DOC_SKIP bypasses doc-coverage ONLY with a BLOCKER_NOTE present', () => {
   const prev = process.env.LEGACY_DOC_SKIP;
   process.env.LEGACY_DOC_SKIP = '1';
