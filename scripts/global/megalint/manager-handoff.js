@@ -156,8 +156,8 @@ function checkCrypto(body) {
  *
  * @param {string} body - MANAGER_HANDOFF comment body
  * @param {string[]} diffFiles - list of file paths touched in the PR diff (caller-supplied)
- * @param {string[]} crossPaths - configurable path prefixes (defaults to CROSS_RUNTIME_PATHS)
- * @returns {Array<{rule:string,detail:string,severity:string}>}
+ * @param {string[]} paths - configurable cross-runtime path prefixes (defaults to CROSS_RUNTIME_PATHS)
+ * @returns {boolean} true when the ticket is in scope for the cross_runtime_writes rule
  */
 // Does the PR diff (or, if diffFiles is absent, the declared field) put this ticket
 // in scope for the cross_runtime_writes rule? Scope-correct: a prefix must be the FIRST
