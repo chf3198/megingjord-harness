@@ -116,8 +116,6 @@ jobs:
     name: consultant-gate
     needs: [admin-gate]
     runs-on: ubuntu-latest
-    env:
-      GATE_ADVISORY_MODE: '1'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
@@ -139,19 +137,30 @@ jobs:
               );
               return;
             }
-            const advisory = process.env.GATE_ADVISORY_MODE === '1';
+            // Hard-blocking schema validation (#2909): validate() returns ok=false when any
+            // required field (anneal_tickets_filed, mid_flight_flaws, verification-timestamp,
+            // rubric, verdict, signer fields) is absent. Advisory-only violations are excluded
+            // from the ok=false determination inside validate() itself.
+            const { validate, checkCrossFamilyVerdict } =
+              require('./scripts/global/megalint/consultant-closeout.js');
             const { checkConsultantFamilyIndependence } =
               require('./scripts/global/megalint/signer-fidelity.js');
-            const { checkCrossFamilyVerdict } =
-              require('./scripts/global/megalint/consultant-closeout.js');
-            const allViols = [
+            const schemaResult = validate({ comments });
+            if (!schemaResult.ok) {
+              const blocking = (schemaResult.violations || [])
+                .filter(v => v.severity !== 'advisory')
+                .map(v => `${v.rule}${v.detail ? ': ' + v.detail : ''}`).join('; ');
+              core.setFailed(`consultant-closeout schema violations in #${linkedIssue}: ${blocking}`);
+              return;
+            }
+            // Cross-family independence and verdict remain advisory (#2537).
+            const advisoryViols = [
               ...checkConsultantFamilyIndependence(trail),
               ...checkCrossFamilyVerdict(trail),
             ];
-            if (allViols.length > 0) {
-              const msg = allViols.map(v => `${v.rule}${v.detail ? ': ' + v.detail : ''}`).join('; ');
-              if (advisory) { core.warning(`[advisory] cross-family gate: ${msg}`); }
-              else { core.setFailed(`cross-family gate: ${msg}`); }
+            if (advisoryViols.length > 0) {
+              const msg = advisoryViols.map(v => `${v.rule}${v.detail ? ': ' + v.detail : ''}`).join('; ');
+              core.warning(`[advisory] cross-family gate: ${msg}`);
             }
 
   changelog-fragment:
