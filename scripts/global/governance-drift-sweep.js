@@ -6,6 +6,7 @@ const { loadLocalEnvOnce } = require('./load-local-env');
 const { listOpenTickets } = require('./governance-audit');
 const { parseBody } = require('../ticket-normalizer');
 const { applyFixes, rollback } = require('./governance-drift-fix');
+const { buildProposeQueue, writeQueue } = require('./governance-drift-propose');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const REPORT_FILE = path.join(ROOT, 'logs', 'governance-drift-sweep.json');
@@ -90,17 +91,26 @@ function runFix(argv, issues, deps) {
   return result.errors.length === 0;
 }
 
+function runPropose(issues, deps) {
+  const queue = (deps.buildProposeQueue || buildProposeQueue)(issues, classifyIssue);
+  (deps.writeQueue || writeQueue)(queue);
+  console.log(JSON.stringify(queue, null, 2));
+  return true; // propose is read-only; always succeeds (the queue itself is the output)
+}
+
 async function run(argv = process.argv.slice(2), deps = {}) {
   loadLocalEnvOnce();
   if (argv.includes('--help')) {
     console.log('Usage: node scripts/global/governance-drift-sweep.js [--scan] [--json]\n'
       + '       [--fix [--apply] [--classes D4,D5,D8,D3]]   (dry-run unless --apply)\n'
+      + '       [--propose]   (read-only review queue for D1,D2,D6,D7)\n'
       + '       [--rollback <run_id>]');
     return true;
   }
   const getIssues = () => (deps.listOpenTickets ? deps.listOpenTickets() : listOpenTickets());
   if (argv.includes('--rollback')) return runRollback(argv, deps);
   if (argv.includes('--fix')) return runFix(argv, getIssues(), deps);
+  if (argv.includes('--propose')) return runPropose(getIssues(), deps);
 
   const issues = getIssues();
   const report = buildReport(issues);
