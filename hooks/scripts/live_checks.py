@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Live GitHub API checks for pretool_guard hooks."""
 import json, re, subprocess, time
+from planning_consensus import linked_issue_has_planning_consensus as _linked_issue_has_planning_consensus
 
 RE_BRANCH_ISSUE = re.compile(r"(?:feat|fix|hotfix)/(\d+)-")
 PENDING_STATES = {"PENDING", "IN_PROGRESS", "QUEUED", "REQUESTED", "WAITING"}
@@ -139,6 +140,18 @@ def linked_issue_has_manager_handoff(cwd: str) -> bool:
         return any("MANAGER_HANDOFF" in c.get("body", "") for c in data.get("comments", []))
     except Exception:
         return True  # on API error → allow (fail open, not block)
+
+
+def linked_issue_has_planning_consensus(cwd: str) -> bool:
+    """Return True when linked ticket has a qualifying planning-consensus artifact.
+
+    This check is intentionally fail-closed for ticket branches: if we cannot
+    verify consensus evidence, execution transition is blocked with remediation.
+    """
+    try:
+        return _linked_issue_has_planning_consensus(cwd)
+    except Exception:
+        return False
 
 
 def check_merged_pr(branch: str, cwd: str) -> int | None:
