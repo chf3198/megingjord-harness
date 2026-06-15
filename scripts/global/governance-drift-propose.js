@@ -56,7 +56,13 @@ function buildProposeQueue(issues = [], classify) {
   const byNumber = new Map(issues.map((issue) => [issue.number, issue]));
   const proposals = [];
   for (const issue of issues) {
-    const detected = classify(issue, byNumber).filter((driftClass) => PROPOSE_CLASSES.includes(driftClass));
+    const result = classify(issue, byNumber);
+    // Enforce the classify contract (fail-closed): a non-array return would
+    // otherwise throw on .filter or silently mis-process (#2990 review finding).
+    if (!Array.isArray(result)) {
+      throw new Error(`buildProposeQueue: classify(#${issue.number}) must return an array of class strings`);
+    }
+    const detected = result.filter((driftClass) => PROPOSE_CLASSES.includes(driftClass));
     for (const driftClass of detected) {
       const meta = PROPOSE_META[driftClass];
       if (!ALLOWED_LANES.has(meta.inference_lane)) {

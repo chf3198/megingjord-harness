@@ -80,6 +80,14 @@ test('buildProposeQueue requires a classify function (fail-closed)', () => {
   assert.throws(() => buildProposeQueue([], null), /classify function is required/);
 });
 
+test('buildProposeQueue fails closed when classify returns a non-array (#2990 review)', () => {
+  const badClassify = () => null;
+  assert.throws(
+    () => buildProposeQueue([{ number: 99, title: 'x', state: 'open', labels: [] }], badClassify),
+    /must return an array/,
+  );
+});
+
 test('every PROPOSE_META lane is in the allowed set', () => {
   for (const cls of PROPOSE_CLASSES) {
     assert.ok(ALLOWED_LANES.has(PROPOSE_META[cls].inference_lane));
