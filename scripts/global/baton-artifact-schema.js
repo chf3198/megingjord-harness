@@ -38,6 +38,10 @@ const COLLABORATOR = [
   f('cross_family_rating', { req: true }),
   f('cross_family_reviewer', { req: true }),
   f('cross_family_findings', { req: true }),
+  // #3016: the activated collaborator-gate enforces cross_family_receipt (#2904) — the
+  // canonical builder must be able to emit it, else conforming handoffs are impossible.
+  f('cross_family_receipt', { req: true }),
+  f('reviewer_family', {}),
 ];
 
 // ADMIN_HANDOFF — branch/commit + signer-independence + deploy-sync impact.

@@ -82,6 +82,7 @@ test('all six comment artifacts build from minimal valid input', () => {
     COLLABORATOR_HANDOFF: {
       scope: 's', test_strategy: 'tdd-pyramid', per_ac_verification: '- AC1 PASS',
       cross_family_rating: '95', cross_family_reviewer: 'qwen@host', cross_family_findings: 'none',
+      cross_family_receipt: '0123456789abcdef',
     },
     ADMIN_HANDOFF: {
       branch: 'feat/1-x', commit: 'abc123', 'signer-independence-check': 'PASS',

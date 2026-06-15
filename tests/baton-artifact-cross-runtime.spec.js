@@ -25,7 +25,7 @@ const TM = 'claude-code:opus@anthropic';
 // Minimal valid input per comment artifact (all required fields populated, deterministic).
 const ARTIFACT_FIXTURES = {
   MANAGER_HANDOFF: { role: 'manager', fields: { scope: 's', lane: 'lane:code-change', test_strategy: 'tdd-pyramid', acceptance: '- AC1', gates: 'lint', related_tickets: 'none', overlap_decision: 'no-overlap' } },
-  COLLABORATOR_HANDOFF: { role: 'collaborator', fields: { scope: 's', test_strategy: 'tdd-pyramid', per_ac_verification: '- AC1 PASS', cross_family_rating: '95/100', cross_family_reviewer: 'qwen', cross_family_findings: 'ACCEPT' } },
+  COLLABORATOR_HANDOFF: { role: 'collaborator', fields: { scope: 's', test_strategy: 'tdd-pyramid', per_ac_verification: '- AC1 PASS', cross_family_rating: '95/100', cross_family_reviewer: 'qwen', cross_family_findings: 'ACCEPT', cross_family_receipt: '0123456789abcdef' } },
   ADMIN_HANDOFF: { role: 'admin', fields: { branch: 'feat/2674-x', commit: 'abc1234', 'signer-independence-check': 'PASS', 'deploy-runtime-impact': 'none' } },
   CONSULTANT_CLOSEOUT: { role: 'consultant', fields: { status: 'review', verdict: 'approve_for_merge', 'verification-timestamp': '2026-06-05T00:00:00Z', rubric_rating: '9/10', anneal_tickets_filed: 'none', mid_flight_flaws: 'none' } },
   EPIC_RESCOPE: { role: 'manager', fields: { summary: 'rescope summary' } },
