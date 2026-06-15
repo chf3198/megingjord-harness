@@ -43,38 +43,27 @@ function buildContextObservability({ included = [], truncated = false, manifestS
   };
 }
 
+function assertStringArray(value, message) {
+  if (!Array.isArray(value) || value.some((entry) => typeof entry !== 'string' || entry.trim() === '')) {
+    throw new TypeError(message);
+  }
+}
+
 function validateContextEnvelope(envelope) {
   if (!isPlainObject(envelope)) throw new TypeError('context envelope must be an object');
   if (typeof envelope.prompt !== 'string') throw new TypeError('context envelope prompt must be a string');
   if (!isPlainObject(envelope.manifest)) throw new TypeError('context envelope manifest must be an object');
-  if (envelope.manifest.schema !== 'fleet-context-bundle/v1') {
-    throw new TypeError('context envelope manifest schema must be fleet-context-bundle/v1');
-  }
-  if (!Array.isArray(envelope.manifest.included) || envelope.manifest.included.some((entry) => typeof entry !== 'string' || entry.trim() === '')) {
-    throw new TypeError('context envelope manifest.included must be an array of non-empty strings');
-  }
-  if (!Array.isArray(envelope.included) || envelope.included.some((entry) => typeof entry !== 'string' || entry.trim() === '')) {
-    throw new TypeError('context envelope included must be an array of non-empty strings');
-  }
+  if (envelope.manifest.schema !== 'fleet-context-bundle/v1') throw new TypeError('context envelope manifest schema must be fleet-context-bundle/v1');
+  assertStringArray(envelope.manifest.included, 'context envelope manifest.included must be an array of non-empty strings');
+  assertStringArray(envelope.included, 'context envelope included must be an array of non-empty strings');
   if (typeof envelope.truncated !== 'boolean') throw new TypeError('context envelope truncated must be a boolean');
   if (!isPlainObject(envelope.observability)) throw new TypeError('context envelope observability must be an object');
-  if (envelope.observability.schema !== CONTEXT_ENVELOPE_SCHEMA) {
-    throw new TypeError(`context envelope schema must be ${CONTEXT_ENVELOPE_SCHEMA}`);
-  }
-  if (envelope.observability.truncated !== envelope.truncated) {
-    throw new TypeError('context envelope observability.truncated must match truncated');
-  }
-  const observedIncluded = JSON.stringify(envelope.observability.included);
+  if (envelope.observability.schema !== CONTEXT_ENVELOPE_SCHEMA) throw new TypeError(`context envelope schema must be ${CONTEXT_ENVELOPE_SCHEMA}`);
+  if (envelope.observability.truncated !== envelope.truncated) throw new TypeError('context envelope observability.truncated must match truncated');
   const included = JSON.stringify(envelope.included);
-  if (observedIncluded !== included) {
-    throw new TypeError('context envelope observability.included must match included');
-  }
-  if (JSON.stringify(envelope.manifest.included) !== included) {
-    throw new TypeError('context envelope manifest.included must match included');
-  }
-  if (envelope.observability.manifestSchema !== envelope.manifest.schema) {
-    throw new TypeError('context envelope observability.manifestSchema must match manifest.schema');
-  }
+  if (JSON.stringify(envelope.observability.included) !== included) throw new TypeError('context envelope observability.included must match included');
+  if (JSON.stringify(envelope.manifest.included) !== included) throw new TypeError('context envelope manifest.included must match included');
+  if (envelope.observability.manifestSchema !== envelope.manifest.schema) throw new TypeError('context envelope observability.manifestSchema must match manifest.schema');
   return envelope;
 }
 
