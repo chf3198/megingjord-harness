@@ -98,3 +98,4 @@ npm run governance:cross-team-check     # verify 4 invariants present
 - Inventory + contradiction analysis: `research/cross-team-governance-inventory-2026-05-17.md`.
 - Anti-duplication contract: `instructions/canonical-governance-anti-duplication.instructions.md`.
 - Provider-neutral governance: `instructions/provider-neutral-governance.instructions.md`.
+- Doc-coverage Tech-Writer gate (enforced): every `lane:code-change` PR's `COLLABORATOR_HANDOFF` must carry a `doc-coverage:` block satisfying the required surfaces for its `area:*` label (matrix: `config/doc-coverage-matrix.yml`). The `collaborator-gate` (`.github/workflows/baton-gates.yml`) blocks on a missing/non-conforming block; `N/A` reasons must come from the approved enum; escape only via `LEGACY_DOC_SKIP` + a `BLOCKER_NOTE` (#2707/#3016).

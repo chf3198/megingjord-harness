@@ -71,8 +71,40 @@ function checkCrossFamily(body) {
   return violations;
 }
 
+// #3016: the CI caller (baton-gates.yml) passes `labels`, not a `lane` scalar, so
+// gating on input.lane alone left the doc-coverage + cross-family checks as dead code.
+// Prefer the explicit scalar (back-compat) but fall back to the lane:* label.
+function laneOf(input) {
+  if (input.lane) return input.lane;
+  const labels = input.labels || [];
+  return labels.find((label) => typeof label === 'string' && label.startsWith('lane:')) || null;
+}
+
+// #3016 (per #2707 AC1): LEGACY_DOC_SKIP bypasses doc-coverage ONLY when an explicit
+// BLOCKER_NOTE is present on the issue — an auditable, deliberate escape hatch.
+function legacyDocSkipActive(comments) {
+  if (!process.env.LEGACY_DOC_SKIP) return false;
+  return (comments || []).some((c) => /BLOCKER_NOTE/.test(bodyOf(c)));
+}
+
+// Run the doc-coverage check fail-CLOSED: a matrix-load error blocks rather than
+// silently disabling enforcement (the prior catch→skip was a fail-open hole).
+function docCoverageViolations(body, labels, comments) {
+  if (legacyDocSkipActive(comments)) {
+    return [{ rule: 'doc-coverage-legacy-skip', severity: 'advisory',
+      detail: 'LEGACY_DOC_SKIP active with BLOCKER_NOTE present; doc-coverage bypassed' }];
+  }
+  let matrix;
+  try { matrix = docCoverage.loadMatrix(); } catch (err) {
+    return [{ rule: 'doc-coverage-matrix-load-failed', severity: 'error',
+      detail: `doc-coverage matrix failed to load (fail-closed): ${err.message}` }];
+  }
+  return docCoverage.checkBlock(body, labels || [], matrix);
+}
+
 function validate(input) {
-  if (LIGHTWEIGHT.includes(input.lane) || laneSeverity(input.lane) === 'issue-only') {
+  const lane = laneOf(input);
+  if (LIGHTWEIGHT.includes(lane) || laneSeverity(lane) === 'issue-only') {
     return { ok: true, violations: [], reason: 'lightweight-lane-skip' };
   }
   const handoff = findCollaboratorHandoff(input.comments || []);
@@ -82,12 +114,8 @@ function validate(input) {
   }
   const body = bodyOf(handoff);
   const violations = checkSignerFields(body);
-  if (input.lane === 'lane:code-change') {
-    let matrix;
-    try { matrix = docCoverage.loadMatrix(); } catch (_) { matrix = null; }
-    if (matrix) violations.push(...docCoverage.checkBlock(body, input.labels || [], matrix));
-  }
-  if (input.lane === 'lane:code-change') {
+  if (lane === 'lane:code-change') {
+    violations.push(...docCoverageViolations(body, input.labels, input.comments));
     violations.push(...checkCrossFamily(body));
   }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });
@@ -95,4 +123,4 @@ function validate(input) {
   return { ok: blocking.length === 0, violations, found: true, signer };
 }
 
-module.exports = { validate, findCollaboratorHandoff, LIGHTWEIGHT };
+module.exports = { validate, findCollaboratorHandoff, laneOf, LIGHTWEIGHT };

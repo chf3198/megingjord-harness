@@ -269,3 +269,13 @@ gh pr checks <PR-number>
 # Rerun only failed checks
 gh run rerun <run-id> --failed
 ```
+
+## Doc-coverage is an enforced Collaborator-gate prerequisite (#3016)
+
+For `lane:code-change` work, the `COLLABORATOR_HANDOFF` MUST include a `doc-coverage:`
+block before the baton advances — this is a hard `collaborator-gate` check, not advisory.
+List every required surface for the ticket's `area:*` label (see `config/doc-coverage-matrix.yml`)
+as either `UPDATED/DONE: <path>` or `N/A — <reason>` where `<reason>` is from the approved
+enum (e.g. `no-user-visible-change`, `covered-by-sibling-pr`, `docs-only-no-functional-change`).
+Freeform N/A reasons fail the gate. A genuine legacy bypass requires `LEGACY_DOC_SKIP` set
+**and** a `BLOCKER_NOTE` on the linked issue.
