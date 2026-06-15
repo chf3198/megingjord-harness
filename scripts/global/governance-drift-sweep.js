@@ -5,6 +5,7 @@ const path = require('node:path');
 const { loadLocalEnvOnce } = require('./load-local-env');
 const { listOpenTickets } = require('./governance-audit');
 const { parseBody } = require('../ticket-normalizer');
+const { applyFixes, rollback } = require('./governance-drift-fix');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const REPORT_FILE = path.join(ROOT, 'logs', 'governance-drift-sweep.json');
@@ -64,17 +65,44 @@ function buildReport(issues = []) {
   };
 }
 
+function parseClasses(argv) {
+  const flagIndex = argv.indexOf('--classes');
+  if (flagIndex === -1 || !argv[flagIndex + 1]) return null;
+  return argv[flagIndex + 1].split(',').map((value) => value.trim().toUpperCase()).filter(Boolean);
+}
+
+function runRollback(argv, deps) {
+  const runId = argv[argv.indexOf('--rollback') + 1];
+  if (!runId) { console.error('governance-drift-sweep: --rollback requires a <run_id>.'); return false; }
+  const result = (deps.rollback || rollback)(runId, deps.fixOptions || {});
+  console.log(JSON.stringify(result, null, 2));
+  return result.errors.length === 0;
+}
+
+function runFix(argv, issues, deps) {
+  const result = (deps.applyFixes || applyFixes)(issues, {
+    apply: argv.includes('--apply'),
+    classes: parseClasses(argv),
+    classify: classifyIssue,
+    ...(deps.fixOptions || {}),
+  });
+  console.log(JSON.stringify(result, null, 2));
+  return result.errors.length === 0;
+}
+
 async function run(argv = process.argv.slice(2), deps = {}) {
   loadLocalEnvOnce();
   if (argv.includes('--help')) {
-    console.log('Usage: node scripts/global/governance-drift-sweep.js [--scan] [--json]');
+    console.log('Usage: node scripts/global/governance-drift-sweep.js [--scan] [--json]\n'
+      + '       [--fix [--apply] [--classes D4,D5,D8,D3]]   (dry-run unless --apply)\n'
+      + '       [--rollback <run_id>]');
     return true;
   }
-  if (argv.includes('--fix') || argv.includes('--rollback')) {
-    console.error('governance-drift-sweep: only --scan is implemented in Phase-1 child #2988.');
-    return false;
-  }
-  const issues = deps.listOpenTickets ? deps.listOpenTickets() : listOpenTickets();
+  const getIssues = () => (deps.listOpenTickets ? deps.listOpenTickets() : listOpenTickets());
+  if (argv.includes('--rollback')) return runRollback(argv, deps);
+  if (argv.includes('--fix')) return runFix(argv, getIssues(), deps);
+
+  const issues = getIssues();
   const report = buildReport(issues);
   fs.mkdirSync(path.dirname(REPORT_FILE), { recursive: true });
   fs.writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2));
