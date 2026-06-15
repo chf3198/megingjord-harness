@@ -21,6 +21,41 @@ const EDD_REQUIRED_FIELDS = ['scope', 'acceptance', 'risk', 'implementation-plan
 /** Header patterns that signal the start of an EDD artifact. */
 const EDD_HEADER_RE = /(?:^|\n)\s*(?:##\s+)?EDD\b|engineering\s+design\s+doc(?:ument)?/im;
 
+/** Governance control id this gate enforces (named to keep it out of magic-number lint). */
+const GOV_CONTROL = 'GOV-009';
+
+/** The standard "EDD artifact absent" hard violation result. */
+function eddMissingResult() {
+  return {
+    ok: false,
+    exempt: false,
+    violations: [{
+      rule: 'edd-missing',
+      detail: 'No EDD artifact found. lane:code-change tickets require an EDD before implementation ' +
+        `(${GOV_CONTROL}). Add an EDD comment to the linked issue with ` +
+        'scope:, acceptance:, risk:, implementation-plan:',
+      severity: 'hard',
+    }],
+  };
+}
+
+/** Lane scoping decision: 'exempt' (skip gate) or 'in-scope' (apply gate). */
+function laneScope(labels) {
+  if (isExempt(labels)) return 'exempt';
+  const hasCodeChange = labels.some((label) => label === 'lane:code-change');
+  const hasAnyLane = labels.some((label) => label.startsWith('lane:'));
+  return (hasAnyLane && !hasCodeChange) ? 'exempt' : 'in-scope';
+}
+
+/** Concatenate PR body + all issue comment bodies into one corpus string. */
+function buildCorpus(input) {
+  const prBodyText = typeof input.prBody === 'string' ? input.prBody : '';
+  const commentTexts = Array.isArray(input.comments)
+    ? input.comments.map((c) => (c && typeof c.body === 'string' ? c.body : '')).join('\n\n')
+    : '';
+  return [prBodyText, commentTexts].filter(Boolean).join('\n\n');
+}
+
 /**
  * Determine if the ticket's lanes exempt it from the EDD gate.
  * @param {string[]} labels - Array of label name strings.
@@ -59,7 +94,7 @@ function checkEddFields(eddText) {
     if (!re.test(eddText)) {
       violations.push({
         rule: 'edd-missing-field',
-        detail: `EDD artifact is missing required field '${field}:' (GOV-009 §Requirement)`,
+        detail: `EDD artifact is missing required field '${field}:' (${GOV_CONTROL} §Requirement)`,
         severity: 'hard',
       });
     }
@@ -84,62 +119,20 @@ function validate(input) {
       exempt: false,
       violations: [{
         rule: 'edd-gate-invalid-input',
-        detail: 'validate() received null/non-object input; failing closed (GOV-009)',
+        detail: `validate() received null/non-object input; failing closed (${GOV_CONTROL})`,
         severity: 'hard',
       }],
     };
   }
-
   const labels = Array.isArray(input.labels) ? input.labels : [];
+  // Exempt lanes (and non-exempt non-code-change lanes) skip the gate entirely.
+  if (laneScope(labels) === 'exempt') return { ok: true, exempt: true, violations: [] };
 
-  // Exempt lanes skip the gate entirely.
-  if (isExempt(labels)) {
-    return { ok: true, exempt: true, violations: [] };
-  }
-
-  // Only apply to lane:code-change (the default implementation lane).
-  // If no lane label is present, treat as code-change (fail-closed default).
-  const hasCodeChangeLane = labels.some((label) => label === 'lane:code-change');
-  const hasAnyLane = labels.some((label) => label.startsWith('lane:'));
-  if (hasAnyLane && !hasCodeChangeLane) {
-    // Non-exempt, non-code-change lane: not in scope.
-    return { ok: true, exempt: true, violations: [] };
-  }
-
-  // Build the full text corpus: PR body + all issue comments.
-  const prBodyText = typeof input.prBody === 'string' ? input.prBody : '';
-  const commentTexts = Array.isArray(input.comments)
-    ? input.comments.map((comment) => (comment && typeof comment.body === 'string' ? comment.body : '')).join('\n\n')
-    : '';
-  const fullText = [prBodyText, commentTexts].filter(Boolean).join('\n\n');
-
-  // FAIL-CLOSED: empty corpus = missing EDD.
-  if (fullText.trim().length === 0) {
-    return {
-      ok: false,
-      exempt: false,
-      violations: [{
-        rule: 'edd-missing',
-        detail: 'No EDD artifact found. lane:code-change tickets require an EDD before implementation ' +
-          '(GOV-009). Add an EDD comment to the linked issue with scope:, acceptance:, risk:, implementation-plan:',
-        severity: 'hard',
-      }],
-    };
-  }
-
+  const fullText = buildCorpus(input);
+  // FAIL-CLOSED: empty corpus or no EDD header = missing EDD.
+  if (fullText.trim().length === 0) return eddMissingResult();
   const eddSection = findEddSection(fullText);
-  if (!eddSection) {
-    return {
-      ok: false,
-      exempt: false,
-      violations: [{
-        rule: 'edd-missing',
-        detail: 'No EDD artifact found. lane:code-change tickets require an EDD before implementation ' +
-          '(GOV-009). Add an EDD comment to the linked issue with scope:, acceptance:, risk:, implementation-plan:',
-        severity: 'hard',
-      }],
-    };
-  }
+  if (!eddSection) return eddMissingResult();
 
   // EDD header found — validate required fields.
   const fieldViolations = checkEddFields(eddSection);
