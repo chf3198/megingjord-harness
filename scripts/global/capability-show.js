@@ -2,6 +2,7 @@
 // Phase 0 capability-show — pretty-print the manifest with per-tier feature availability (#788)
 const fs = require('fs');
 const path = require('path');
+const { validateCapabilityManifest } = require('./fleet-envelope-contract');
 
 const HOURS_PER_DAY = 24;
 const MS_PER_HOUR = 60 * 60 * 1000;
@@ -12,7 +13,8 @@ function _yes(b) { return b ? '✅' : '❌'; }
 function loadManifest() {
   const file = path.join(process.cwd(), '.dashboard', 'capabilities.json');
   if (!fs.existsSync(file)) return null;
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
+  try { return validateCapabilityManifest(JSON.parse(fs.readFileSync(file, 'utf8'))); }
+  catch { return null; }
 }
 
 const TIER_LABELS = {

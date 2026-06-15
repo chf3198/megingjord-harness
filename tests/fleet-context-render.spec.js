@@ -53,6 +53,11 @@ test('#2802 renderContextPreamble on empty bundle is safe', () => {
   expect(renderContextPreamble({})).toEqual({ preamble: '', included: [], truncated: false });
 });
 
+test('#3012 renderContextPreamble rejects invalid maxChars (fail closed)', () => {
+  expect(() => renderContextPreamble(BUNDLE, { maxChars: 0 })).toThrow(/maxChars must be a positive integer/);
+  expect(() => renderContextPreamble(BUNDLE, { maxChars: 'x' })).toThrow(/maxChars must be a positive integer/);
+});
+
 // #2819 char-budget off-by-one
 test('#2819 preamble length never exceeds maxChars (no separator over/under-count)', () => {
   const bundle = {
