@@ -18,8 +18,8 @@ function checkFleetBundleProvenance(body, input) {
     return [{ rule: 'fleet-bundle-unverifiable', severity: 'advisory',
       detail: 'CLOSEOUT cites governance-bundle-hash but no bundle was supplied to verify provenance.' }];
   }
-  const r = fleetCloseoutParity(body, input.governanceBundle, input.nowMs || Date.now());
-  return r.ok ? [] : [{ rule: 'fleet-bundle-parity-failed', detail: `fleet CLOSEOUT bundle parity: ${r.reason}` }];
+  const parity = fleetCloseoutParity(body, input.governanceBundle, input.nowMs || Date.now());
+  return parity.ok ? [] : [{ rule: 'fleet-bundle-parity-failed', detail: `fleet CLOSEOUT bundle parity: ${parity.reason}` }];
 }
 
 function findConsultantCloseout(comments) {
