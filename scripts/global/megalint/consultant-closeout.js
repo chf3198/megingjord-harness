@@ -18,8 +18,8 @@ function checkFleetBundleProvenance(body, input) {
     return [{ rule: 'fleet-bundle-unverifiable', severity: 'advisory',
       detail: 'CLOSEOUT cites governance-bundle-hash but no bundle was supplied to verify provenance.' }];
   }
-  const r = fleetCloseoutParity(body, input.governanceBundle, input.nowMs || Date.now());
-  return r.ok ? [] : [{ rule: 'fleet-bundle-parity-failed', detail: `fleet CLOSEOUT bundle parity: ${r.reason}` }];
+  const parity = fleetCloseoutParity(body, input.governanceBundle, input.nowMs || Date.now());
+  return parity.ok ? [] : [{ rule: 'fleet-bundle-parity-failed', detail: `fleet CLOSEOUT bundle parity: ${parity.reason}` }];
 }
 
 function findConsultantCloseout(comments) {
@@ -53,6 +53,59 @@ function checkEvidenceFields(body) {
   }
   if (!/verification[ _-]?timestamp/i.test(body)) violations.push({ rule: 'missing-verification-timestamp', detail: 'CONSULTANT_CLOSEOUT missing verification-timestamp field' });
   if (!/(verdict|approve|approved)/i.test(body)) violations.push({ rule: 'missing-verdict', detail: 'CONSULTANT_CLOSEOUT missing explicit verdict / approve statement' });
+  return violations;
+}
+
+/**
+ * checkRequiredFlawFields — hard-blocking gate for flaw-accounting fields (#2909).
+ *
+ * The baton-routing contract (role-baton-routing.instructions.md §"review → done") requires
+ * every CONSULTANT_CLOSEOUT to declare anneal_tickets_filed and mid_flight_flaws so that
+ * the recurrence detector and closeout-schema validator have reliable signal. Absence of
+ * either field is a G1 governance violation (missing evidence = silent pass, fail-open).
+ *
+ * Accepted forms:
+ *   anneal_tickets_filed: [#N, ...] | none
+ *   mid_flight_flaws: [...] | none
+ *
+ * @param {string} body
+ * @returns {{ rule: string, detail: string }[]}
+ */
+// A required closeout field has a value when it is non-empty on the same line
+// (`field: value`) OR on the immediately-following line — the canonical
+// baton-comment-build format renders longer values on the next line. A next
+// line that is itself another `Key:` field is treated as bleed, not a value,
+// so a genuinely-empty field is still caught (#2909, builder-compat fix).
+function flawFieldState(body, field) {
+  if (typeof body !== 'string') return 'missing'; // non-string body → field is absent (fail-closed)
+  // Anchor the field to line-start (after optional whitespace) so a longer token like
+  // `prefix_<field>:` does not satisfy the check (cross-family review #2909).
+  const match = body.match(
+    new RegExp(`(?:^|\\n)[ \\t]*${field}[ \\t]*:[ \\t]*([^\\n\\r]*)(?:\\r?\\n[ \\t]*([^\\n\\r]*))?`, 'i'));
+  if (!match) return 'missing';
+  if ((match[1] || '').trim()) return 'ok';
+  const next = (match[2] || '').trim();
+  if (next && !/^[A-Za-z][\w&-]*[ \t]*:/.test(next)) return 'ok';
+  return 'empty';
+}
+
+function checkRequiredFlawFields(body) {
+  const violations = [];
+  const fields = [
+    ['anneal_tickets_filed', 'declare [#N,...] or none'],
+    ['mid_flight_flaws', 'declare [...] or none'],
+  ];
+  for (const [field, hint] of fields) {
+    const state = flawFieldState(body, field);
+    const key = field.replace(/_/g, '-');
+    if (state === 'missing') {
+      violations.push({ rule: `missing-${key}`,
+        detail: `CONSULTANT_CLOSEOUT missing ${field} field (required; ${hint})` });
+    } else if (state === 'empty') {
+      violations.push({ rule: `empty-${key}`,
+        detail: `CONSULTANT_CLOSEOUT ${field} has no value (${hint})` });
+    }
+  }
   return violations;
 }
 
@@ -100,6 +153,7 @@ function validate(input) {
   const violations = [
     ...checkSignerFields(body),
     ...checkEvidenceFields(body),
+    ...checkRequiredFlawFields(body),
     ...checkCrypto(body),
     ...checkTier3Emission(body, input),
     ...checkGovTokenResolution(body, input),
@@ -110,4 +164,10 @@ function validate(input) {
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
 
-module.exports = { validate, findConsultantCloseout, checkCrossFamilyVerdict, checkFleetBundleProvenance };
+module.exports = {
+  validate,
+  findConsultantCloseout,
+  checkCrossFamilyVerdict,
+  checkFleetBundleProvenance,
+  checkRequiredFlawFields,
+};
