@@ -5,6 +5,7 @@
  * tests/**‌/‌*.spec.js pattern required by test-evidence-validator.js.
  */
 'use strict';
+const { describe, it } = require('node:test');
 const { execSync } = require('child_process');
 const path = require('path');
 
