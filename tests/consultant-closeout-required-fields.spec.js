@@ -42,6 +42,27 @@ test('checkRequiredFlawFields: mid_flight_flaws with list value → no violation
   assert.strictEqual(viols.length, 0);
 });
 
+test('checkRequiredFlawFields: value on the NEXT line (canonical builder format) → no violations', () => {
+  // baton-comment-build renders longer values on the line after the field name.
+  const body = [
+    'anneal_tickets_filed: none',
+    'mid_flight_flaws:',
+    '[flaw=x, decision=fixed, artifact=#99]; [flaw=y, decision=logged, artifact=incidents.jsonl]',
+  ].join('\n');
+  assert.strictEqual(checkRequiredFlawFields(body).length, 0);
+});
+
+test('MUTATION: genuinely-empty field followed by another Key: field → empty violation (no bleed)', () => {
+  // mid_flight_flaws empty, next line is a different field → must still be caught.
+  const body = [
+    'anneal_tickets_filed: none',
+    'mid_flight_flaws:',
+    'Signed-by: Orla Vale',
+  ].join('\n');
+  const rules = checkRequiredFlawFields(body).map((v) => v.rule);
+  assert.ok(rules.includes('empty-mid-flight-flaws'), `expected empty-mid-flight-flaws; got ${rules.join(',')}`);
+});
+
 // MUTATION tests — these assert the promoted BLOCKING behavior and would fail
 // if checkRequiredFlawFields were removed or made advisory-only.
 
