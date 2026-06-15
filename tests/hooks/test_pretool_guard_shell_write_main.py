@@ -49,6 +49,27 @@ class ShellWriteTargetExtractor(unittest.TestCase):
         self.assertEqual(pretool_guard.shell_write_targets("run_cmd 2>&1"), [])
         self.assertEqual(pretool_guard.shell_write_targets("run_cmd >&2"), [])
 
+    def test_arrow_minus_not_a_redirect(self):
+        # #3001: `a -> b` must NOT be parsed as a redirect (was over-blocking).
+        self.assertEqual(pretool_guard.shell_write_targets("echo 'step a -> step b'"), [])
+
+    def test_arrow_equals_not_a_redirect(self):
+        # #3001: `x => y` (fat arrow) must NOT be parsed as a redirect.
+        self.assertEqual(pretool_guard.shell_write_targets("echo 'map x => y'"), [])
+
+    def test_inline_gt_not_a_redirect(self):
+        # #3001: inline `a>b` (no boundary) is not treated as an output redirect.
+        self.assertEqual(pretool_guard.shell_write_targets("test $a>b"), [])
+
+    def test_fd_redirect_to_file_still_caught(self):
+        # A genuine fd redirect to a file IS still a write target.
+        self.assertIn("err.log", pretool_guard.shell_write_targets("run 2> err.log"))
+
+    def test_redirect_multiple_spaces_and_tabs(self):
+        # #3001 review nit: whitespace between operator and target is tolerated.
+        self.assertIn("out.txt", pretool_guard.shell_write_targets("echo x >    out.txt"))
+        self.assertIn("o2.txt", pretool_guard.shell_write_targets("echo x >\to2.txt"))
+
     def test_tmp_extracted_but_harmless(self):
         # Extracted, but evaluate_path will ALLOW a non-repo target — extractor stays generous.
         self.assertIn("/tmp/out", pretool_guard.shell_write_targets("ls > /tmp/out"))

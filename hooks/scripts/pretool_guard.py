@@ -52,8 +52,13 @@ def detect_it_ops_bypass(joined: str, env: dict | None = None) -> tuple[bool, st
 # authority (only tracked, non-gitignored, in-repo paths are denied), so generous
 # extraction is safe; the extractor only narrows WHICH tokens to evaluate.
 _SHELL_DEV_SINKS = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
-# `>`/`>>` file redirects; lookbehind excludes fd-dup forms (2>, &>, >&N).
-_REDIRECT_RE = re.compile(r"(?<![0-9&>])>>?\s*([^\s;&|<>()`]+)")
+# `>`/`>>` file redirects, anchored to a word boundary (#3001): the operator must be
+# at start-of-string or after whitespace, optionally with a leading fd digit. This
+# excludes arrow tokens (`->`, `=>`) and inline comparisons (`a>b`) that previously
+# matched and over-blocked. fd-dup forms (`2>&1`, `>&2`) are excluded because the
+# capture class rejects a leading `&`. (Residual: `&>file` all-output redirect is not
+# matched — uncommon; tee/redirect/dd cover the usual writers.)
+_REDIRECT_RE = re.compile(r"(?:^|\s)\d*>>?\s*([^\s;&|<>()`]+)")
 _TEE_RE = re.compile(r"\btee\b\s+(?:-{1,2}\S+\s+)*([^\s;&|<>()`]+)")
 # sed in-place: take the last bare token of the sed command segment as the target.
 # (Multi-file `sed -i s f1 f2` checks the last file only — a documented residual.)

@@ -5,6 +5,8 @@
 // test-evidence gate only recognizes tests/**/*.spec.{js,ts} for tdd-pyramid (known
 // validator gap #2980), so this spec EXECUTES the Python suite and fails if it fails —
 // genuine evidence, not a stub. Refs #2995, #2980.
+// #3001: the executed Python suite now also covers the arrow-token over-block fix
+// (test_arrow_minus/equals_not_a_redirect, test_fd_redirect_to_file_still_caught).
 const test = require('node:test');
 const assert = require('node:assert');
 const { spawnSync } = require('node:child_process');
