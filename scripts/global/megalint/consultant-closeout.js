@@ -77,8 +77,11 @@ function checkEvidenceFields(body) {
 // line that is itself another `Key:` field is treated as bleed, not a value,
 // so a genuinely-empty field is still caught (#2909, builder-compat fix).
 function flawFieldState(body, field) {
+  if (typeof body !== 'string') return 'missing'; // non-string body → field is absent (fail-closed)
+  // Anchor the field to line-start (after optional whitespace) so a longer token like
+  // `prefix_<field>:` does not satisfy the check (cross-family review #2909).
   const match = body.match(
-    new RegExp(`${field}[ \\t]*:[ \\t]*([^\\n\\r]*)(?:\\r?\\n[ \\t]*([^\\n\\r]*))?`, 'i'));
+    new RegExp(`(?:^|\\n)[ \\t]*${field}[ \\t]*:[ \\t]*([^\\n\\r]*)(?:\\r?\\n[ \\t]*([^\\n\\r]*))?`, 'i'));
   if (!match) return 'missing';
   if ((match[1] || '').trim()) return 'ok';
   const next = (match[2] || '').trim();

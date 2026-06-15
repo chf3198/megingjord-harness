@@ -63,6 +63,21 @@ test('MUTATION: genuinely-empty field followed by another Key: field → empty v
   assert.ok(rules.includes('empty-mid-flight-flaws'), `expected empty-mid-flight-flaws; got ${rules.join(',')}`);
 });
 
+test('checkRequiredFlawFields: line-anchored — prefix_<field>: does not satisfy the check', () => {
+  // #2909 review: a longer token like x_mid_flight_flaws: must NOT count as the field.
+  const body = [
+    'anneal_tickets_filed: none',
+    'x_mid_flight_flaws: bogus',
+  ].join('\n');
+  const rules = checkRequiredFlawFields(body).map((v) => v.rule);
+  assert.ok(rules.includes('missing-mid-flight-flaws'), `expected missing-mid-flight-flaws; got ${rules.join(',')}`);
+});
+
+test('checkRequiredFlawFields: non-string body → both fields missing (no throw)', () => {
+  assert.doesNotThrow(() => checkRequiredFlawFields(null));
+  assert.strictEqual(checkRequiredFlawFields(null).length, 2);
+});
+
 // MUTATION tests — these assert the promoted BLOCKING behavior and would fail
 // if checkRequiredFlawFields were removed or made advisory-only.
 
