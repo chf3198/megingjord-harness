@@ -65,6 +65,11 @@ class ShellWriteTargetExtractor(unittest.TestCase):
         # A genuine fd redirect to a file IS still a write target.
         self.assertIn("err.log", pretool_guard.shell_write_targets("run 2> err.log"))
 
+    def test_redirect_multiple_spaces_and_tabs(self):
+        # #3001 review nit: whitespace between operator and target is tolerated.
+        self.assertIn("out.txt", pretool_guard.shell_write_targets("echo x >    out.txt"))
+        self.assertIn("o2.txt", pretool_guard.shell_write_targets("echo x >\to2.txt"))
+
     def test_tmp_extracted_but_harmless(self):
         # Extracted, but evaluate_path will ALLOW a non-repo target — extractor stays generous.
         self.assertIn("/tmp/out", pretool_guard.shell_write_targets("ls > /tmp/out"))
