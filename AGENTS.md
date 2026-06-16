@@ -47,6 +47,13 @@ Development workbench for the DevEnv Ops Harness:
 - Quarantine conflicts in a rescue worktree; never clean collisions in place
 - See `research/concurrent-agent-worktrees-2026-04-24.md`
 
+## Tool-use reliability (anti-hallucination)
+
+Before authoring any governed artifact, read live data: `gh issue view <N>` for
+ticket state; `read_file` for repo content; `gh pr view <N>` for PR evidence.
+Never invent a `#N` issue ID — verify every citation with a tool call first.
+Full directives: `.github/copilot-instructions-tool-reliability.md` (#3046).
+
 ## Quick reference
 
 | Topic                                                   | File                                                                   |
