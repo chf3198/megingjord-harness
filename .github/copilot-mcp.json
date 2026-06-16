@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "megingjord-hamr": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/global/hamr-mcp-adapter.js"],
+      "env": {}
+    }
+  }
+}
