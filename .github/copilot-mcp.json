@@ -1,0 +1,13 @@
+{
+  "_doc": "Per-repo MCP server registrations for VS Code Copilot Agent mode. Refs #3047.",
+  "_note": "User-level config: ~/.config/Code/User/mcp.json. This file is the per-repo override.",
+  "servers": {
+    "megingjord-skill-invoke": {
+      "command": "node",
+      "args": ["${workspaceFolder}/scripts/global/copilot-skill-invoke-mcp.js"],
+      "env": {
+        "MEGINGJORD_SKILLS_ROOT": "${workspaceFolder}/skills"
+      }
+    }
+  }
+}
