@@ -16,6 +16,8 @@ const { execFileSync } = require('node:child_process');
 
 const BRANCH_RE = /^(?:feat|fix|hotfix|chore|skill)\/(\d+)(?:-|$)/;
 const STATE_ROOT = path.join(os.homedir(), '.copilot', 'hooks', 'state');
+const GIT_TIMEOUT_MS = 5000;
+const GH_TIMEOUT_MS = 15000;
 
 function parseArgs(argv) {
   const args = { ticket: null, cwd: process.cwd(), json: false };
@@ -72,14 +74,14 @@ function saveStateFile(filePath, state) {
 function currentBranch(cwd) {
   try {
     return execFileSync('git', ['-C', cwd, 'rev-parse', '--abbrev-ref', 'HEAD'],
-      { encoding: 'utf8', timeout: 5000 }).trim();
+      { encoding: 'utf8', timeout: GIT_TIMEOUT_MS }).trim();
   } catch { return null; }
 }
 
 function verifyIssue(ticketNum, cwd) {
   try {
     const out = execFileSync('gh', ['issue', 'view', String(ticketNum), '--json', 'number,state'],
-      { cwd, encoding: 'utf8', timeout: 15000 });
+      { cwd, encoding: 'utf8', timeout: GH_TIMEOUT_MS });
     const data = JSON.parse(out);
     return data && typeof data.number === 'number' && data.state !== 'CLOSED'
       ? { ok: true, number: data.number, state: data.state }
@@ -89,12 +91,13 @@ function verifyIssue(ticketNum, cwd) {
   }
 }
 
-function activate(opts) {
+// Validate activation preconditions: positive ticket, ticket-shaped branch that
+// matches, and a real (non-closed) linked issue. Returns {ok,ticket,branch} or {ok:false,reason}.
+function validateActivation(opts) {
   const { ticket, cwd } = opts;
   if (!ticket || !Number.isFinite(ticket) || ticket <= 0) {
     return { ok: false, reason: 'invalid or missing --ticket N (positive integer required)' };
   }
-
   const branch = currentBranch(cwd);
   if (!branch) {
     return { ok: false, reason: 'could not determine current git branch (not a git repo?)' };
@@ -104,17 +107,18 @@ function activate(opts) {
     return { ok: false,
       reason: `branch "${branch}" is not ticket-shaped; rename to feat/${ticket}-slug or fix/${ticket}-slug first` };
   }
-  const branchTicket = Number(branchMatch[1]);
-  if (branchTicket !== ticket) {
-    return { ok: false,
-      reason: `branch ticket #${branchTicket} does not match --ticket ${ticket}` };
+  if (Number(branchMatch[1]) !== ticket) {
+    return { ok: false, reason: `branch ticket #${branchMatch[1]} does not match --ticket ${ticket}` };
   }
-
   const issue = verifyIssue(ticket, cwd);
-  if (!issue.ok) {
-    return { ok: false, reason: issue.reason };
-  }
+  return issue.ok ? { ok: true, ticket, branch } : { ok: false, reason: issue.reason };
+}
 
+function activate(opts) {
+  const pre = validateActivation(opts);
+  if (!pre.ok) return pre;
+  const { ticket, branch } = pre;
+  const { cwd } = opts;
   const paths = statePaths(cwd);
   for (const filePath of [paths.session, paths.nosession]) {
     const state = loadStateFile(filePath);

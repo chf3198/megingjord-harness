@@ -27,20 +27,24 @@ function buildPromptDef(skillName) {
 
 const PROMPTS = WIRED_SKILLS.map(buildPromptDef);
 
-async function main() {
-  let McpServer, StdioServerTransport, zod;
+// Lazily load the MCP SDK; exit with an install hint if it is not present.
+function loadMcpSdk() {
   try {
-    ({ McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js'));
-    ({ StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js'));
-    zod = require('zod');
+    const { McpServer } = require('@modelcontextprotocol/sdk/server/mcp.js');
+    const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
+    const { z } = require('zod');
+    return { McpServer, StdioServerTransport, z };
   } catch (err) {
     process.stderr.write(
       `[skill-invoke-mcp] SDK not installed: ${err.message}\n` +
       'Run: cd scripts/xteam-mcp && npm install @modelcontextprotocol/sdk zod\n',
     );
-    process.exit(1);
+    return process.exit(1);
   }
-  const { z } = zod;
+}
+
+async function main() {
+  const { McpServer, StdioServerTransport, z } = loadMcpSdk();
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     { capabilities: { prompts: {} } },
