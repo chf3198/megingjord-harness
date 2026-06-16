@@ -28,7 +28,7 @@ const GEMINI_ALIAS_C2 = { manager: 'Gaia Mason', collaborator: 'Gaia Harper', ad
 
 // Current behaviour: copilot:gemini falls to "Nova" (defaultAliasSeed). Using this
 // for the passing signer in the baton-flow tests below.
-const GEMINI_ALIAS_NOW = { manager: 'Nova Mason', collaborator: 'Nova Harper', admin: 'Nova Reyes', consultant: 'Nova Vale' };
+const GEMINI_ALIAS_NOW = { manager: 'Gaia Mason', collaborator: 'Gaia Harper', admin: 'Gaia Reyes', consultant: 'Gaia Vale' };
 
 // A minimal but structurally complete COLLABORATOR_HANDOFF for copilot:gemini.
 function makeCollabHandoff(signedBy, docCoverage) {
@@ -49,27 +49,27 @@ function makeCollabHandoff(signedBy, docCoverage) {
 // Contract A: Signer-derivation (what the registry gives for copilot:gemini)
 // ---------------------------------------------------------------------------
 describe('C2 signer-derivation contract (copilot:gemini)', () => {
-  test('current behaviour: copilot:gemini-2.5-flash → Nova (defaultAliasSeed)', () => {
+  // C2 (#3044) is merged in this integration: copilot:gemini derives the deliberate
+  // Gaia seed (not the Gaiafallback). These assert the post-C2 canonical state.
+  test('copilot:gemini-2.5-flash → Gaia (deliberate registry entry, not Gaiafallback)', () => {
     const alias = canonicalSignerAlias('copilot', 'collaborator', 'gemini-2.5-flash');
-    // Pre-C2: no dedicated gemini entry for copilot team → falls to default.
-    assert.ok(alias.startsWith('Nova '), `expected Nova seed, got: ${alias}`);
-    assert.strictEqual(alias, 'Nova Harper');
+    assert.ok(alias.startsWith('Gaia '), `expected Gaia seed, got: ${alias}`);
+    assert.strictEqual(alias, 'Gaia Harper');
   });
 
-  test('current behaviour: enforceSignerAlias accepts Nova Harper for copilot:gemini collaborator', () => {
-    const result = enforceSignerAlias('copilot', 'collaborator', 'Nova Harper', { model: 'gemini-2.5-flash' });
+  test('enforceSignerAlias accepts Gaia Harper for copilot:gemini collaborator', () => {
+    const result = enforceSignerAlias('copilot', 'collaborator', 'Gaia Harper', { model: 'gemini-2.5-flash' });
     assert.strictEqual(result.ok, true, `Expected match; canonical=${result.canonical}`);
   });
 
-  test('current behaviour: enforceSignerAlias rejects a made-up alias', () => {
-    const result = enforceSignerAlias('copilot', 'collaborator', 'Gaia Harper', { model: 'gemini-2.5-flash' });
-    // Pre-C2: Gaia is not yet in registry; Nova is the canonical → mismatch.
-    assert.strictEqual(result.ok, false, 'Expected mismatch for Gaia pre-C2');
+  test('enforceSignerAlias rejects a made-up (non-registry) alias for copilot:gemini', () => {
+    const result = enforceSignerAlias('copilot', 'collaborator', 'Zephyr Fake', { model: 'gemini-2.5-flash' });
+    assert.strictEqual(result.ok, false, 'Expected mismatch for a non-registry alias');
   });
 
-  // C2 target state (todo until #3044 merges)
+  // C2 target state — now ACTIVE (no longer todo: #3044 is merged in this integration)
   for (const [role, expected] of Object.entries(GEMINI_ALIAS_C2)) {
-    test(`C2 target: copilot:gemini-2.5-flash/${role} → ${expected}`, { todo: 'depends-on: #3044 (C2 Copilot BYOK signer parity) not yet merged' }, () => {
+    test(`C2 target: copilot:gemini-2.5-flash/${role} → ${expected}`, () => {
       const alias = canonicalSignerAlias('copilot', role, 'gemini-2.5-flash');
       assert.strictEqual(alias, expected);
     });
@@ -78,18 +78,18 @@ describe('C2 signer-derivation contract (copilot:gemini)', () => {
 
 // ---------------------------------------------------------------------------
 // Contract B: Baton validator flow — copilot:gemini COLLABORATOR_HANDOFF passes
-//             with no bypass (using current Nova signer, lightweight lane)
+//             with no bypass (using current Gaiasigner, lightweight lane)
 // ---------------------------------------------------------------------------
 describe('Baton validator: copilot:gemini COLLABORATOR_HANDOFF (no bypass)', () => {
   test('lightweight lane skips doc-coverage gate (current baseline)', () => {
-    const handoff = { body: makeCollabHandoff('Nova Harper'), user: { login: 'copilot-agent' } };
+    const handoff = { body: makeCollabHandoff('Gaia Harper'), user: { login: 'copilot-agent' } };
     const result = validateCollab({ comments: [handoff], labels: ['lane:docs-research'] });
     assert.strictEqual(result.ok, true, `Expected pass; violations: ${JSON.stringify(result.violations)}`);
     assert.strictEqual(result.reason, 'lightweight-lane-skip');
   });
 
   test('code-change lane: signer + role fields present → no signer violation', () => {
-    const handoff = { body: makeCollabHandoff('Nova Harper'), user: { login: 'copilot-agent' } };
+    const handoff = { body: makeCollabHandoff('Gaia Harper'), user: { login: 'copilot-agent' } };
     const result = validateCollab({ comments: [handoff], labels: ['lane:code-change'] });
     const signerViolations = (result.violations || []).filter(v =>
       v.rule === 'missing-signer' || v.rule === 'missing-team-model' || v.rule === 'missing-role-collaborator');
@@ -105,8 +105,8 @@ describe('Baton validator: copilot:gemini COLLABORATOR_HANDOFF (no bypass)', () 
     assert.strictEqual(result.ok, false);
   });
 
-  test('validateArtifactAlias: Nova Harper matches registry for copilot:gemini-2.5-flash collaborator', () => {
-    const body = makeCollabHandoff('Nova Harper');
+  test('validateArtifactAlias: Gaia Harper matches registry for copilot:gemini-2.5-flash collaborator', () => {
+    const body = makeCollabHandoff('Gaia Harper');
     const result = validateArtifactAlias(body);
     assert.strictEqual(result.ok, true, `Expected ok; got: ${JSON.stringify(result)}`);
   });
@@ -114,7 +114,7 @@ describe('Baton validator: copilot:gemini COLLABORATOR_HANDOFF (no bypass)', () 
   test('validateArtifactAlias: wrong alias for copilot:gemini is flagged', () => {
     const body = makeCollabHandoff('Completely Wrong Name');
     const result = validateArtifactAlias(body);
-    // Registry finds Nova as canonical but "Completely Wrong Name" != Nova Harper → violation.
+    // Registry finds Gaia as canonical but "Completely Wrong Name" != Gaia Harper → violation.
     assert.strictEqual(result.ok, false, 'Wrong alias must produce a violation');
     assert.ok(result.violation, 'violation object must be present');
   });
@@ -193,7 +193,7 @@ describe('G7 perf: signer derivation p99 budget', () => {
   });
 
   test('300 validateCollab calls for copilot:gemini handoff under 50ms p99', () => {
-    const handoff = { body: makeCollabHandoff('Nova Harper'), user: { login: 'copilot-agent' } };
+    const handoff = { body: makeCollabHandoff('Gaia Harper'), user: { login: 'copilot-agent' } };
     const input = { comments: [handoff], labels: ['lane:docs-research'] };
     const durations = [];
     for (let trial = 0; trial < 300; trial += 1) {
