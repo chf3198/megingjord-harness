@@ -1,10 +1,20 @@
 {
+  "_doc": "Per-repo MCP server registrations for VS Code Copilot Agent mode. Refs #3043 (HAMR adapter) + #3047 (skill-invoke).",
+  "_note": "User-level config: ~/.config/Code/User/mcp.json. This file is the per-repo override.",
   "servers": {
     "megingjord-hamr": {
       "type": "stdio",
       "command": "node",
       "args": ["scripts/global/hamr-mcp-adapter.js"],
       "env": {}
+    },
+    "megingjord-skill-invoke": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${workspaceFolder}/scripts/global/copilot-skill-invoke-mcp.js"],
+      "env": {
+        "MEGINGJORD_SKILLS_ROOT": "${workspaceFolder}/skills"
+      }
     }
   }
 }
