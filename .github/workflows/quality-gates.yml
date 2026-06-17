@@ -77,4 +77,5 @@ jobs:
           tests/wiki-mirror-issue.spec.js
           tests/wiki-reconcile.spec.js
           tests/cursor-adapter.spec.js
+          tests/worktree-provision.spec.js
           --reporter=line

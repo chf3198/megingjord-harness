@@ -265,6 +265,8 @@
     "mcp:project-state": "node scripts/global/mcp-project-state.js",
     "mcp:register": "node scripts/global/xteam-mcp-register.js --target all --root . --apply",
     "worktree:bootstrap": "bash scripts/worktree-bootstrap-node-modules.sh",
+    "worktree:provision": "node scripts/global/worktree-provision.js",
+    "runtime:worktree": "bash scripts/agent-worktree.sh",
     "worktree:start": "bash scripts/worktree-session-start.sh",
     "governance:credentials-env": "node scripts/global/credentials-env-guard.js",
     "governance:rule-parity": "node scripts/global/governance-rule-parity.js",

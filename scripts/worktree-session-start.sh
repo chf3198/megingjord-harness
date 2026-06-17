@@ -95,6 +95,6 @@ fi
 
 git switch -c "$task_branch"
 bootstrap_node_modules "$root"
+node "$root/scripts/global/worktree-provision.js" --main="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')" || warn "worktree-provision skipped"  # #3088: link .env etc.
 configure_per_worktree_hooks "$root"
-log "ready on task branch: $task_branch"
-log "next: implement scoped changes and open PR with Refs #<ticket>"
+log "ready on task branch: $task_branch — implement scoped changes and open PR with Refs #<ticket>"
