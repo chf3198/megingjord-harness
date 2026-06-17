@@ -316,7 +316,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `lint:coverage-metric` | `node scripts/global/lint-coverage-metric.js` |
 | `lint:decisions` | `node scripts/global/decisions-md-validator.js` |
 | `lint:js` | `eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki` |
-| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!scripts/xteam-mcp/node_modules/**' '!.claude/**' '!research/**' '!wiki/wisdom/global/sources/**' '!wiki/wisdom/global/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**' '!generated/**' '!tests/fixtures/governance/golden/**' '!tests/fixtures/changelog-fragments-invalid/**'` |
+| `lint:md` | `markdownlint-cli2 '**/*.md' '!node_modules/**' '!scripts/xteam-mcp/node_modules/**' '!.claude/**' '!research/**' '!wiki/wisdom/global/sources/**' '!wiki/wisdom/global/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**' '!generated/**' '!tests/fixtures/governance/golden/**' '!tests/fixtures/changelog-fragments-invalid/**' '!wiki/work-log/**' '!wiki/code/**'` |
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
 | `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=475` |
