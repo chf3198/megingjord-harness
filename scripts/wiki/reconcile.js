@@ -126,6 +126,8 @@ function ghIssue(number) {
 
 /**
  * Resolve Wiki B truth for one ticket: live gh first, else the cache ladder (AC2).
+ * @param {number} number issue number
+ * @param {object|null} cache the validated work-log cache, or null
  * @param {Function} [fetchIssue] injectable gh fetcher (tests pass a stub / outage simulator)
  * @returns {{source:'gh'|'cache'|'none', sha?:string, item?:object, tier?:string, cacheAgeMs?:number}}
  */
