@@ -11,6 +11,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const { buildAttestation } = require('./sign-frontmatter');
+const { loadLocalEnvOnce } = require('../global/load-local-env');
 
 const ROOT = path.join(__dirname, '../..');
 const STATIC_DIR = path.join(ROOT, 'wiki', 'archive', 'static');
@@ -27,6 +28,7 @@ function publicKeyHex(pub) {
 
 /** Load a configured signing key, else generate an ephemeral one (G5/G6 — no secret required). */
 function resolveKey(opts = {}) {
+  loadLocalEnvOnce(); // hydrate .env before reading the signing-key credential
   const raw = opts.privateKeyPem || process.env.WIKI_ARCHIVE_SIGNING_KEY;
   if (raw) {
     const pem = fs.existsSync(raw) ? fs.readFileSync(raw, 'utf8') : raw;
