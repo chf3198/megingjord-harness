@@ -1,0 +1,6 @@
+---
+description: Governance unit demo
+alwaysApply: true
+priority: 1
+targets: "cursor"
+---

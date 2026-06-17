@@ -23,11 +23,11 @@ test('adapter-emit targets cursor and maps to .cursor/rules/<id>.mdc', () => {
   expect(p.endsWith(path.join('cursor', '.cursor', 'rules', 'demo.mdc'))).toBe(true);
 });
 
-test('golden: cursor frontmatter is Cursor-native (description + alwaysApply:true)', () => {
+test('golden: cursor frontmatter matches the committed golden fixture (Cursor-native)', () => {
   const fm = emit.frontmatter('cursor', UNIT);
-  const expected = ['---', 'description: Governance unit demo', 'alwaysApply: true',
-    'priority: 1', 'targets: "cursor"', '---'].join('\n');
-  expect(fm).toBe(expected);
+  const golden = fs.readFileSync(
+    path.join(ROOT, 'tests', 'fixtures', 'cursor-adapter', 'frontmatter.golden'), 'utf8').replace(/\n$/, '');
+  expect(fm).toBe(golden);
 });
 
 // ── committed project adapter ──
