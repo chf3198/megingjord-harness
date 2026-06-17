@@ -1,0 +1,18 @@
+# Golden NEGATIVE fixture for #3064 / Epic #3063. NOT a live workflow.
+# Reproduces the exact defect that caused the wiki-auto-update startup_failure:
+# a single step carrying TWO `env:` mapping keys. GitHub's workflow parser
+# rejects duplicate keys (startup_failure); python yaml.safe_load silently
+# merges them. actionlint (the gate added in this PR) flags this. The real fix
+# removed this pattern from .github/workflows/wiki-auto-update.yml.
+name: duplicate-env-fixture
+on: workflow_dispatch
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: step-with-duplicate-env
+        env:
+          FIRST: "1"
+        run: echo "this step has two env: keys — invalid"
+        env:
+          SECOND: "2"
