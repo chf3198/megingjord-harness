@@ -50,6 +50,15 @@ must say "agent runtime" or "orchestrating team" unless it is naming an adapter.
 - Anthropic-specific provider assumptions must not be promoted into shared
   governance language.
 
+### Cursor Adapter
+
+- Cursor project context lives in `.cursor/rules/megingjord.mdc` (the `.mdc` rules format,
+  `alwaysApply: true`); runtime home is `~/.cursor/` via `npm run deploy:cursor`.
+- Cursor MCP servers register in `~/.cursor/mcp.json` (the `mcpServers` key).
+- Runtime / HAMR / signing team value is `cursor`; the GitHub assignee slug is `cursor-team`.
+- Phase 0 (#3084) is the static adapter + registration; Cursor-native hooks
+  (`.cursor/hooks.json`, camelCase events) and HAMR substrate are Phase 1 (#3085) adapter-owned work.
+
 ## Compatibility Checklist
 
 - Shared sections name all three adapters or none of them.

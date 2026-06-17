@@ -5,7 +5,8 @@
     "claude-code",
     "copilot",
     "codex",
-    "antigravity"
+    "antigravity",
+    "cursor"
   ],
   "canonicalSurfaces": [
     "instructions",
@@ -48,6 +49,10 @@
     ],
     "claude-code": [
       "Claude Code supports hooks through settings.json"
+    ],
+    "cursor": [
+      "Phase 0 (#3084) is registration + static .cursor/rules adapter only — WAIVER: hook enforcement (.cursor/hooks.json camelCase event adapter) and HAMR substrate land in Phase 1 (#3085); subagents/visual-qa/wiki/ticket-gate in Phase 2 (#3086)",
+      "Cursor hook events are camelCase (sessionStart/beforeSubmitPrompt/preToolUse/stop) plus natives subagentStart/subagentStop/beforeShellExecution/beforeMCPExecution/afterFileEdit"
     ]
   },
   "deployTargets": [

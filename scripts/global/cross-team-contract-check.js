@@ -13,6 +13,7 @@ const ENTRY_POINTS = [
   { path: '.github/copilot-instructions.md', label: 'Copilot entry' },
   { path: '.codex/AGENTS.md', label: 'Codex project doc' },
   { path: '.antigravity/instructions.md', label: 'Antigravity entry' },
+  { path: '.cursor/rules/megingjord.mdc', label: 'Cursor entry' },
 ];
 
 const INVARIANTS = [
