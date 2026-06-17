@@ -8,7 +8,7 @@ const { validate } = require('./governance-manifest-validate');
 const root = path.resolve(__dirname, '..', '..');
 const manifestPath = path.join(root, 'inventory', 'governance-manifest.sample.json');
 const defaultOutRoot = path.join(root, 'generated', 'governance-adapters');
-const targets = ['copilot', 'cline', 'claude-code', 'continue', 'antigravity'];
+const targets = ['copilot', 'cline', 'claude-code', 'continue', 'antigravity', 'cursor'];
 
 function readJson(file) { return JSON.parse(fs.readFileSync(file, 'utf8')); }
 function write(file, content) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, `${content}\n`); }
@@ -35,10 +35,20 @@ function targetPath(target, unit, outRoot = defaultOutRoot) {
   if (target === 'claude-code') return path.join(base, 'CLAUDE.md');
   if (target === 'continue') return path.join(base, '.continue', 'rules', `${unit.id}.md`);
   if (target === 'antigravity') return path.join(base, '.antigravity', `${unit.id}.md`);
+  if (target === 'cursor') return path.join(base, '.cursor', 'rules', `${unit.id}.mdc`);
   throw new Error(`unsupported target: ${target}`);
 }
 function frontmatter(target, unit) {
   const lines = ['---'];
+  if (target === 'cursor') {
+    // Cursor .mdc rules use native frontmatter keys (description/globs/alwaysApply).
+    lines.push(`description: Governance unit ${unit.id}`);
+    lines.push('alwaysApply: true');
+    lines.push(`priority: ${unit.priority}`);
+    lines.push(`targets: ${JSON.stringify(unit.targets.join(','))}`);
+    lines.push('---');
+    return lines.join('\n');
+  }
   if (target === 'claude-code') {
     lines.push(`description: Governance unit ${unit.id}`);
     lines.push(`applyTo: ${JSON.stringify(unit.appliesTo[0] || '**')}`);

@@ -154,6 +154,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deploy:claude:apply` | `bash scripts/deploy.sh --apply --target claude && node scripts/global/xteam-mcp-register.js --target claude --root . --apply` |
 | `deploy:codex` | `bash scripts/deploy.sh --target codex && node scripts/global/xteam-mcp-register.js --target codex --root .` |
 | `deploy:codex:apply` | `bash scripts/deploy.sh --apply --target codex && node scripts/global/xteam-mcp-register.js --target codex --root . --apply` |
+| `deploy:cursor` | `bash scripts/deploy.sh --target cursor && node scripts/global/xteam-mcp-register.js --target cursor --root .` |
+| `deploy:cursor:apply` | `bash scripts/deploy.sh --apply --target cursor && node scripts/global/xteam-mcp-register.js --target cursor --root . --apply` |
 | `deploy:manifest` | `node scripts/global/deploy-manifest.js` |
 | `deploy:manifest:claude` | `node scripts/global/deploy-manifest.js claude` |
 | `deploy:manifest:codex` | `node scripts/global/deploy-manifest.js codex` |

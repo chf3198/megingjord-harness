@@ -5,10 +5,10 @@ const os = require('os');
 const path = require('path');
 
 const NAME = 'megingjord-xteam';
-const VALID = ['copilot', 'codex', 'claude', 'antigravity', 'all'];
+const VALID = ['copilot', 'codex', 'claude', 'antigravity', 'cursor', 'all'];
 
 function usage() {
-  console.error('Usage: xteam-mcp-register.js --target <copilot|codex|claude|antigravity|all> [--root <path>] [--apply]');
+  console.error('Usage: xteam-mcp-register.js --target <copilot|codex|claude|antigravity|cursor|all> [--root <path>] [--apply]');
   process.exit(1);
 }
 function atomicWrite(file, text) {
@@ -63,9 +63,10 @@ const jobs = {
   copilot: () => mergeJson(path.join(home, '.config/Code/User/mcp.json'), 'servers', entry('copilot', bin, false), apply),
   claude: () => mergeJson(path.join(home, '.claude.json'), 'mcpServers', entry('claude-code', bin, true), apply),
   antigravity: () => mergeJson(path.join(home, '.config/Antigravity/User/mcp.json'), 'servers', entry('antigravity', bin, false), apply),
+  cursor: () => mergeJson(path.join(home, '.cursor/mcp.json'), 'mcpServers', entry('cursor', bin, false), apply),
   codex: () => mergeCodex(path.join(home, '.codex/config.toml'), bin, apply),
 };
-const order = target === 'all' ? ['copilot', 'codex', 'claude', 'antigravity'] : [target];
+const order = target === 'all' ? ['copilot', 'codex', 'claude', 'antigravity', 'cursor'] : [target];
 const failures = [];
 for (const t of order) {
   try {
