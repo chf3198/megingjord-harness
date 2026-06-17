@@ -81,3 +81,15 @@ globally (#739 added the entries). Neither is ever committed.
   enforced by `npm run setup` template
 - Documented in `instructions/concurrent-agent-worktrees.md`
   (existing) and updated to point at this ADR
+
+## Amendment 2026-06-17 (#3088) — standing worktrees for dedicated-IDE runtimes
+
+The nested `.harness/worktrees/<vendor>/` location holds for VS Code-resident vendors
+(codex, copilot, continue) that share one IDE on `main`. **Dedicated-IDE runtimes (cursor,
+antigravity), which run their own IDE process with a persistently-open workspace, instead get
+a STANDING SIBLING worktree** `devenv-ops-<vendor>` on a `sandbox/<vendor>` branch — a clean
+workspace root for a separate IDE, and it avoids the `fatal: '<branch>' is already checked out`
+failure when created from the main checkout. `scripts/agent-worktree.sh <vendor>` implements both
+(sibling for cursor/antigravity, nested otherwise) and provisions the worktree via
+`scripts/global/worktree-provision.js` per `config/worktree-provisioning.json` (symlinks the
+shared set incl. `.env`; leaves local-ephemeral paths local). Consensus-cleared; see #3088.

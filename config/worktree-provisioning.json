@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "refs": "#3088",
+  "description": "Per-gitignored-path provisioning policy for git worktrees (D3/D4/D6 of the #3088 design). worktree-provision.js consumes this. Classes: shared-symlink (link from the main checkout), local-ephemeral (each worktree regenerates its own; never propagated), per-worktree-state (runtime state, kept local + per-cwd).",
+  "default": "local-ephemeral",
+  "default_rationale": "An unlisted gitignored path is more likely a new secret store than a benign cache; defaulting unknown paths to local-ephemeral fails safe against leaking a new secret into runtime worktrees (G4). A path MUST be explicitly marked shared-symlink to propagate.",
+  "paths": {
+    "node_modules": "shared-symlink",
+    ".env": "shared-symlink",
+    ".dashboard": "local-ephemeral",
+    "logs": "local-ephemeral",
+    "generated": "local-ephemeral",
+    ".cache": "local-ephemeral",
+    "tmp": "local-ephemeral",
+    ".log4brains": "local-ephemeral",
+    "hooks/scripts/state": "per-worktree-state"
+  }
+}

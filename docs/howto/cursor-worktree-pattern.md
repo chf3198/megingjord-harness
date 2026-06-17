@@ -5,16 +5,19 @@ in a dedicated worktree + branch, never directly on the canonical `main` checkou
 
 ## Create a Cursor worktree
 
-Per ADR-012 (`research/adr/012-multi-agent-worktree-governance.md`), Cursor worktrees live under
-`.harness/worktrees/cursor/`:
+Per ADR-012 as amended by #3088, Cursor (a dedicated-IDE runtime) gets a STANDING SIBLING worktree
+`devenv-ops-cursor` on a `sandbox/cursor` branch — the workspace root Cursor's IDE opens:
 
 ```bash
-scripts/agent-worktree.sh cursor <issue-number> <slug>
-# e.g. scripts/agent-worktree.sh cursor 3084 cursor-thin-adapter
+scripts/agent-worktree.sh cursor      # or: npm run runtime:worktree -- cursor
 ```
 
-This creates an isolated worktree on branch `feat/<issue>-<slug>` (or `fix/...`) and links
-`node_modules` from the main checkout. Do all Cursor edits there; merge via PR.
+The command takes a single `<vendor>` argument (no issue/slug — that was a stale 3-arg form in the
+earlier draft; flagged in Phase-0 UAT). It creates `devenv-ops-cursor [sandbox/cursor]`, works when
+run from the main checkout (it does NOT reuse the already-checked-out `main` branch), and provisions
+the worktree via `scripts/global/worktree-provision.js` — symlinking `node_modules` AND `.env` from
+the main checkout (per `config/worktree-provisioning.json`) so HAMR/provider calls find their keys.
+Do per-ticket Cursor work on `feat/<issue>-<slug>` branches inside that standing worktree; merge via PR.
 
 ## Deploy the Cursor adapter
 

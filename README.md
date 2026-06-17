@@ -356,6 +356,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `routing:refresh` | `node scripts/global/routing-refresh.js --update-matrix` |
 | `routing:report` | `node scripts/global/routing-baseline-report.js --days 7` |
 | `routing:telemetry` | `node scripts/global/token-telemetry-report.js --json` |
+| `runtime:worktree` | `bash scripts/agent-worktree.sh` |
 | `setup` | `npm install && echo '✅ megingjord ready — run: npm start'` |
 | `signing:bootstrap` | `node scripts/global/crypto-signing-bootstrap.js` |
 | `start` | `node scripts/dashboard-server.js` |
@@ -417,6 +418,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `wiki:replay-eval` | `node scripts/wiki/replay-eval-harness.js` |
 | `wiki:search` | `node scripts/wiki/search.js` |
 | `worktree:bootstrap` | `bash scripts/worktree-bootstrap-node-modules.sh` |
+| `worktree:provision` | `node scripts/global/worktree-provision.js` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
 <!-- /docs -->
 ## Token telemetry reconciliation configuration
