@@ -72,7 +72,7 @@
       "costPer1kTokens": 0,
       "endpoint": "openai-compatible",
       "_doc": "#2619: $0 cloud failover used when fleet is UNREACHABLE (availability failure), before any paid tier. Ordered free providers; see skills/openrouter-free-failover.",
-      "providers": ["openrouter-free", "gemini", "groq", "cerebras"]
+      "providers": ["cerebras", "groq", "gemini", "openrouter-free", "mistral", "github-models", "nvidia", "sambanova"]
     },
     "haiku": {
       "id": "balanced-cloud",

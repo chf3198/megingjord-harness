@@ -45,15 +45,13 @@ jobs:
       - name: Stage 1 - Classify diff
         id: classify
         env:
+          GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           FILES=$(gh pr view "$PR_NUMBER" --json files \
             --jq '.files[].path' | tr '\n' ',')
           echo "changed_files=$FILES" >> "$GITHUB_OUTPUT"
           echo "Classified files: $FILES"
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
 
       # -----------------------------------------------------------------------
       # Stage 2 — Invisible-char scan (HIGH-severity aborts)

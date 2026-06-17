@@ -44,6 +44,35 @@ const PROVIDERS = {
     headers: (k) => ({ 'content-type': 'application/json', authorization: `Bearer ${k}` }),
     parse: (j) => j?.choices?.[0]?.message?.content,
   },
+  // Added #3061: extra free-tier OpenAI-compatible providers (auto-skipped until their key is set).
+  mistral: {
+    envKey: 'MISTRAL_API_KEY',
+    url: () => 'https://api.mistral.ai/v1/chat/completions',
+    body: (prompt) => ({ model: 'mistral-large-latest', messages: [{ role: 'user', content: prompt }] }),
+    headers: (key) => ({ 'content-type': 'application/json', authorization: `Bearer ${key}` }),
+    parse: (json) => json?.choices?.[0]?.message?.content,
+  },
+  'github-models': {
+    envKey: 'GITHUB_MODELS_TOKEN',
+    url: () => 'https://models.github.ai/inference/chat/completions',
+    body: (prompt) => ({ model: 'openai/gpt-4o-mini', messages: [{ role: 'user', content: prompt }] }),
+    headers: (key) => ({ 'content-type': 'application/json', authorization: `Bearer ${key}` }),
+    parse: (json) => json?.choices?.[0]?.message?.content,
+  },
+  nvidia: {
+    envKey: 'NVIDIA_API_KEY',
+    url: () => 'https://integrate.api.nvidia.com/v1/chat/completions',
+    body: (prompt) => ({ model: 'meta/llama-3.3-70b-instruct', messages: [{ role: 'user', content: prompt }] }),
+    headers: (key) => ({ 'content-type': 'application/json', authorization: `Bearer ${key}` }),
+    parse: (json) => json?.choices?.[0]?.message?.content,
+  },
+  sambanova: {
+    envKey: 'SAMBANOVA_API_KEY',
+    url: () => 'https://api.sambanova.ai/v1/chat/completions',
+    body: (prompt) => ({ model: 'Meta-Llama-3.3-70B-Instruct', messages: [{ role: 'user', content: prompt }] }),
+    headers: (key) => ({ 'content-type': 'application/json', authorization: `Bearer ${key}` }),
+    parse: (json) => json?.choices?.[0]?.message?.content,
+  },
 };
 
 /** Ordered free-cloud providers from policy (falls back to all known). @returns {string[]} */

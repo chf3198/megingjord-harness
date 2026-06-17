@@ -1,0 +1,35 @@
+# actionlint.yml — Lint GitHub Actions workflow files. Refs #3064 Epic #3063.
+# Catches the class of defect that broke wiki-auto-update.yml: a step with a
+# DUPLICATE `env:` mapping key, which GitHub rejects as a startup_failure but
+# which python yaml.safe_load silently merges. Advisory in first ship (does not
+# block on findings); promotion to required is a follow-on per Epic #3063 C5.
+name: actionlint
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    name: actionlint-workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run actionlint (advisory)
+        run: |
+          VER=1.7.7
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${VER}/actionlint_${VER}_linux_amd64.tar.gz" \
+            | tar -xz actionlint
+          echo "Running actionlint ${VER} over .github/workflows/"
+          ./actionlint -color .github/workflows/*.yml || {
+            echo "::warning title=actionlint::actionlint reported findings (advisory; see log). Promotion to required tracked by Epic #3063 C5 (#3068)."
+            exit 0
+          }
+          echo "actionlint clean."
