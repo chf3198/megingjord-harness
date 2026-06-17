@@ -373,6 +373,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress:surface-audit:test` | `node --test tests/stress-surface-audit.spec.js` |
 | `stress:test` | `node scripts/global/stress-runner.js` |
 | `stress:wiki-metrics:test` | `node --test tests/stress-wiki-metrics.spec.js` |
+| `stress:wiki-mirror` | `node --test tests/stress-wiki-mirror-issue.spec.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |

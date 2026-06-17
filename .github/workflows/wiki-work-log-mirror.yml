@@ -1,0 +1,65 @@
+# wiki-work-log-mirror.yml — keep Wiki B (work-log) ticket-state live between merges.
+# On any issue event, mirror that single issue into wiki/work-log/tickets/<N>.md via
+# scripts/wiki/mirror-issue.js (reuses the #3065 renderer: provenance frontmatter +
+# log-redaction + validate-at-write). Idempotent (source_sha256 skip) so a re-run is a
+# no-op. Concurrency-grouped per issue to debounce label bursts. Refs #3066 Epic #3063.
+name: wiki-work-log-mirror
+
+on:
+  issues:
+    types: [opened, edited, closed, labeled, reopened]
+
+# Least privilege: write the mirror commit; read issue state. No PR/actions scope.
+permissions:
+  contents: write
+  issues: read
+
+# Debounce bursts (e.g. several labels applied quickly): collapse to the latest run
+# per issue number so the committed page reflects the most recent issue state.
+concurrency:
+  group: wiki-work-log-mirror-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    name: mirror-issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Mirror issue into Wiki B
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: node scripts/wiki/mirror-issue.js "${{ github.event.issue.number }}"
+
+      - name: Commit and push if changed
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wiki/work-log/tickets/
+          if git diff --cached --quiet; then
+            echo "Wiki B mirror: no change for issue #${ISSUE_NUMBER} (idempotent no-op)."
+            exit 0
+          fi
+          git commit -m "chore(it-ops): mirror issue #${ISSUE_NUMBER} to Wiki B [skip ci]" \
+            -m "Refs #${ISSUE_NUMBER}" \
+            -m "AI-Signature: Megingjord Work-Log Mirror" \
+            -m "AI-Team-Model: automation:github-actions@ci" \
+            -m "AI-Role: admin"
+          git push
