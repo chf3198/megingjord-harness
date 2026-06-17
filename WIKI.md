@@ -29,6 +29,14 @@ This file is the entry point. Detailed companion docs cover each major area:
 | Work-Log | `wiki/work-log/` | Ticket and PR mirrors — status, history                 |
 | Wisdom   | `wiki/wisdom/`   | Research knowledge — entities, concepts, syntheses      |
 
+### Backfill / population (#3065)
+
+Wiki A is populated by `npm run wiki:ingest:code` (scripts → `wiki/code/symbols/`, instructions →
+`wiki/code/concepts/`); Wiki B by `node scripts/wiki/backfill-work-log.js` (OPEN + last-90d-closed
+issues → `tickets/`, merged PRs → `prs/`, `log-redaction` on bodies + validate-at-write). Both
+carry provenance frontmatter and are derived mirrors — edit the source, not the page. The generated
+trees are excluded from `lint:md` (governed by `wiki:lint`) and the 100-line cap.
+
 ## Page Types (Wisdom wiki)
 
 | Type           | Directory                       | Purpose                             |

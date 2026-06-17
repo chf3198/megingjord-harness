@@ -73,4 +73,5 @@ jobs:
           tests/baton-replay-eval.spec.js
           tests/baton-replay-mine.spec.js
           tests/event-schema-v3.spec.js
+          tests/wiki-backfill-work-log.spec.js
           --reporter=line
