@@ -226,6 +226,7 @@
     "stress:realism": "MEGINGJORD_STRESS_TIER=B node scripts/global/stress-orchestrator.js",
     "stress:rebase": "node --test tests/stress-rebase-discipline.spec.js",
     "stress:role-baton": "node --test tests/stress-role-baton-linter.spec.js",
+    "stress:wiki-mirror": "node --test tests/stress-wiki-mirror-issue.spec.js",
     "stress:surface-audit": "node scripts/global/stress-surface-audit.js",
     "stress:surface-audit:test": "node --test tests/stress-surface-audit.spec.js",
     "stress:test": "node scripts/global/stress-runner.js",
