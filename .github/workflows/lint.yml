@@ -70,6 +70,12 @@ jobs:
       - name: Changelog fragment validation (#2128)
         run: node scripts/global/changelog-aggregate.js --validate-only
       - name: Vale prose lint
+        # Advisory (vale-action fail_on_error defaults false). reviewdog github-pr-check
+        # fetches the PR diff, which GitHub caps at 300 files — a >300-file PR (e.g. the
+        # Wiki backfill #3065) makes reviewdog 406 and exit 1, breaking this REQUIRED job
+        # on an infra error rather than a prose finding. continue-on-error keeps the
+        # advisory intent without blocking merge on large diffs. Follow-on: #3079.
+        continue-on-error: true
         uses: errata-ai/vale-action@d89dee975228ae261d22c15adcd03578634d429c # v2
         with:
           files: '.'
