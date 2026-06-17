@@ -1,0 +1,67 @@
+# wiki-reconcile-cron.yml — daily local-first catch-all reconciliation + Tier-0 archive
+# (#3067, Epic #3063). Repairs anything a missed/failed wiki event left stale: Wiki A
+# from local git (no network), Wiki B against gh truth with a checksum-validated cache
+# fallback. Emits schema-v3 audit events and publishes an Ed25519-signed static snapshot.
+# Never a silent no-op — the cache ladder escalates Tier-1/Tier-2 incidents.
+name: wiki-reconcile-cron
+
+on:
+  schedule:
+    - cron: '30 7 * * *' # 07:30 UTC daily
+  workflow_dispatch:
+
+# Least privilege: commit repairs + snapshot; read issue state for Wiki B truth.
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: wiki-reconcile-cron
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    name: reconcile-and-archive
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reconcile Wiki A (local git) and Wiki B (gh truth or cache)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: node scripts/wiki/reconcile.js
+
+      - name: Publish Tier-0 signed static archive
+        env:
+          WIKI_ARCHIVE_SIGNING_KEY: ${{ secrets.WIKI_ARCHIVE_SIGNING_KEY }}
+        run: node scripts/wiki/archive-snapshot.js
+
+      - name: Commit and push repairs + snapshot if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wiki/ dashboard/events.jsonl
+          if git diff --cached --quiet; then
+            echo "wiki-reconcile: no drift to repair (clean)."
+            exit 0
+          fi
+          git commit -m "chore(it-ops): daily wiki reconcile + Tier-0 archive [skip ci]" \
+            -m "Refs #3067" \
+            -m "AI-Signature: Megingjord Wiki Reconcile" \
+            -m "AI-Team-Model: automation:github-actions@ci" \
+            -m "AI-Role: admin"
+          git push
