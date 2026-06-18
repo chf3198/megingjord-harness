@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 
+# Refs #3090 — per-runtime IDE-indexing config (Antigravity TabIgnore); local, never committed
+.tabignore
+
 # Ephemeral hook state (runtime-only)
 hooks/state/
 
