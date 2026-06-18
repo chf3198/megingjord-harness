@@ -29,7 +29,7 @@ const SURFACE_RULES = [
   { surface: 'research-adr', floor: 'peer-review', code: false, test: (p) => /^research\/.+\.md$/.test(p) || /(^|\/)adr(\/|-)/i.test(p) },
   { surface: 'docs', floor: 'drift-lint', code: false, test: (p) => /^(instructions|wiki|docs)\/.+\.md$/.test(p) },
   { surface: 'test', floor: 'none', code: false, test: (p) => /^tests\/.+\.(spec|test)\.(js|ts)$/.test(p) || /_test\.py$/.test(p) },
-  { surface: 'governance-script', floor: 'tdd-pyramid', code: true, test: (p) => /^scripts\/(global\/)?[^/]*\.js$/.test(p) },
+  { surface: 'governance-script', floor: 'tdd-pyramid', code: true, test: (p) => /^scripts\/global\/.+\.js$/.test(p) || /^scripts\/[^/]+\.js$/.test(p) },
 ];
 
 // Path-identifiable stress triggers (the subset of the matrix's stress-applicability
@@ -90,7 +90,10 @@ function deriveFloor(changedPaths, opts = {}) {
   for (const filePath of changedPaths || []) {
     const surf = surfaceForPath(filePath);
     if (!surf) { perFile.push({ path: filePath, surface: 'unknown', floor: null, stress: false, reasons: [] }); continue; }
-    const onlyCodeStress = surf.code ? stressForPath(filePath, opts.root) : { stress: false, reasons: [] };
+    // The JS `stress-test` strategy (tests/stress-*.spec.js evidence) only applies to JS
+    // governance-scripts; python hooks (pytest) and other surfaces have their own story.
+    const stressEligible = surf.surface === 'governance-script';
+    const onlyCodeStress = stressEligible ? stressForPath(filePath, opts.root) : { stress: false, reasons: [] };
     if (surf.code) codeFloors.add(surf.floor);
     if (onlyCodeStress.stress) stressRequired = true;
     perFile.push({ path: filePath, surface: surf.surface, floor: surf.floor, code: surf.code,
@@ -137,7 +140,34 @@ function reconcile(declared, changedPaths, opts = {}) {
   return { meetsFloor: gaps.length === 0, gaps, derived, declared: decl };
 }
 
-function runCli(argv) {
+// #3105 P1.6: versioned audit-record schema for a reconcile() result (deterministic —
+// the caller supplies `ts` so the module stays pure). Feeds observability / replay-eval.
+const AUDIT_SCHEMA = 'test-floor-audit-v1';
+
+/**
+ * Build a versioned audit record from a reconcile() result.
+ * @param {object} result reconcile() output.
+ * @param {{ts?: string, ticket?: number}} [meta] caller-supplied timestamp/ticket.
+ * @returns {object} stable-shape audit record.
+ */
+function auditRecord(result, meta = {}) {
+  return {
+    schema: AUDIT_SCHEMA,
+    ts: meta.ts || null,
+    ticket: meta.ticket || null,
+    declared: result.declared,
+    derived_code_floors: result.derived.codeFloors,
+    stress_required: result.derived.stressRequired,
+    meets_floor: result.meetsFloor,
+    gaps: result.gaps,
+  };
+}
+
+/** Rollback (P1.6): the TEST_FLOOR_DISABLED env flag turns the advisory tool into a no-op. */
+function isDisabled(env = process.env) { return env.TEST_FLOOR_DISABLED === '1'; }
+
+function runCli(argv, env = process.env) {
+  if (isDisabled(env)) { process.stdout.write('test-floor: disabled (TEST_FLOOR_DISABLED=1)\n'); return 0; }
   const declared = (argv.find((a) => a.startsWith('--declared=')) || '').split('=')[1]
     || (argv.includes('--declared') ? argv[argv.indexOf('--declared') + 1] : '');
   const filesArg = (argv.find((a) => a.startsWith('--files=')) || '').split('=')[1]
@@ -159,6 +189,7 @@ function runCli(argv) {
 if (require.main === module) { process.exit(runCli(process.argv.slice(2))); }
 
 module.exports = {
-  SURFACE_RULES, STRESS_PATH_TRIGGERS, BELOW_CODE_FLOOR,
+  SURFACE_RULES, STRESS_PATH_TRIGGERS, BELOW_CODE_FLOOR, AUDIT_SCHEMA,
   surfaceForPath, stressForPath, deriveFloor, parseDeclared, reconcile, runCli,
+  auditRecord, isDisabled,
 };

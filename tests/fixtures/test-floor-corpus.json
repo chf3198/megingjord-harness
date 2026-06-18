@@ -1,0 +1,16 @@
+[
+  { "label": "gate without stress → flag", "paths": ["scripts/global/merge-claim-gate.js"], "declared": "tdd-pyramid", "expectedMeetsFloor": false },
+  { "label": "gate with stress → ok", "paths": ["scripts/global/merge-claim-gate.js"], "declared": "tdd-pyramid+stress-test", "expectedMeetsFloor": true },
+  { "label": "lease primitive without stress → flag", "paths": ["scripts/global/cross-team-lease.js"], "declared": "tdd-pyramid", "expectedMeetsFloor": false },
+  { "label": "worktree primitive with stress → ok", "paths": ["scripts/global/worktree-provision.js"], "declared": "tdd-pyramid+stress-test", "expectedMeetsFloor": true },
+  { "label": "plain script declared none → flag", "paths": ["scripts/global/plain-helper.js"], "declared": "none", "expectedMeetsFloor": false },
+  { "label": "plain script declared manual-verify → flag", "paths": ["scripts/global/plain-helper.js"], "declared": "manual-verify", "expectedMeetsFloor": false },
+  { "label": "plain script declared tdd-pyramid → ok", "paths": ["scripts/global/plain-helper.js"], "declared": "tdd-pyramid", "expectedMeetsFloor": true },
+  { "label": "docs declared drift-lint → ok", "paths": ["instructions/x.instructions.md"], "declared": "drift-lint", "expectedMeetsFloor": true },
+  { "label": "ci workflow declared golden-file → ok", "paths": [".github/workflows/ci.yml"], "declared": "golden-file", "expectedMeetsFloor": true },
+  { "label": "test-only declared none → ok", "paths": ["tests/foo.spec.js"], "declared": "none", "expectedMeetsFloor": true },
+  { "label": "python hook declared tdd-pyramid → ok", "paths": ["hooks/scripts/pretool_guard.py"], "declared": "tdd-pyramid", "expectedMeetsFloor": true },
+  { "label": "invalid declared enum → flag", "paths": ["scripts/global/foo.js"], "declared": "made-up", "expectedMeetsFloor": false },
+  { "label": "validator parser without stress → flag", "paths": ["scripts/global/megalint/some-validator.js"], "declared": "tdd-pyramid", "expectedMeetsFloor": false },
+  { "label": "docs-only mixed with passing declared → ok", "paths": ["docs/howto/x.md", "wiki/wisdom/global/concepts/y.md"], "declared": "drift-lint", "expectedMeetsFloor": true }
+]
