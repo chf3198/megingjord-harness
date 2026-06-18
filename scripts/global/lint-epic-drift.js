@@ -84,6 +84,49 @@ function lintEpicDrift(owner, repo) {
   return findings;
 }
 
+// ── pre-push scoping (#3099): block on the pusher's own Epic(s); advise the rest ──
+// The whole board is still scanned + reported; only the BLOCK is scoped to the branch
+// ticket + its parent Epic, so unrelated board hygiene stops taxing every push.
+
+const BRANCH_TICKET_RE = /^(?:feat|fix|hotfix|chore|skill)\/(\d+)-/;
+
+/** Parse the ticket number from a branch name; null when it doesn't match. */
+function ticketFromBranch(branch) {
+  const match = BRANCH_TICKET_RE.exec(String(branch || '').trim());
+  return match ? Number(match[1]) : null;
+}
+
+/** Resolve a ticket's parent Epic number via GraphQL (null on absence/error). */
+function resolveParentEpic(ticket, owner, repo, ghFn = gh) {
+  if (!ticket) return null;
+  try {
+    const query = `{repository(owner:"${owner}",name:"${repo}"){issue(number:${ticket}){parent{number}}}}`;
+    const parsed = JSON.parse(ghFn(['api', 'graphql', '-f', `query=${query}`]));
+    return parsed?.data?.repository?.issue?.parent?.number ?? null;
+  } catch { return null; }
+}
+
+/** The set of Epic numbers a push is responsible for: the branch ticket + its parent.
+ *  Returns null when the branch ticket can't be parsed → caller blocks on ALL (fail-safe). */
+function resolveRelevantEpics(branch, owner, repo, ghFn = gh) {
+  const ticket = ticketFromBranch(branch);
+  if (!ticket) return null;
+  const relevant = new Set([ticket]);
+  const parent = resolveParentEpic(ticket, owner, repo, ghFn);
+  if (parent) relevant.add(parent);
+  return relevant;
+}
+
+/** Split findings into blocking (drift on a relevant Epic) vs advisory (the rest).
+ *  relevantSet === null (unparseable branch) → fail-safe: everything blocks. */
+function partitionFindings(findings, relevantSet) {
+  const all = findings || [];
+  if (!relevantSet) return { blocking: all, advisory: [] };
+  const blocking = all.filter((finding) => relevantSet.has(finding.epic));
+  const advisory = all.filter((finding) => !relevantSet.has(finding.epic));
+  return { blocking, advisory };
+}
+
 if (require.main === module) {
   try {
     const raw = gh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner']);
@@ -94,4 +137,7 @@ if (require.main === module) {
   } catch (err) { console.error('Error:', err.message); process.exit(1); }
 }
 
-module.exports = { lintEpicDrift, QUERY, childProgressComplete };
+module.exports = {
+  lintEpicDrift, QUERY, childProgressComplete,
+  ticketFromBranch, resolveParentEpic, resolveRelevantEpics, partitionFindings,
+};
