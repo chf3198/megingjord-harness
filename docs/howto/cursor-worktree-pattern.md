@@ -30,25 +30,33 @@ npm run deploy:cursor:apply    # rsync .cursor/ -> ~/.cursor/ and register the M
 `megingjord-xteam` MCP server in `~/.cursor/mcp.json` (the `mcpServers` key). It is additive:
 your existing `~/.cursor/rules/*.mdc` and other MCP servers are preserved.
 
-## Scope (Phase 0 → Phase 1)
+## Scope (Phase 0 → Phase 1 → Phase 2)
 
 Phase 0 (#3084) was registration + the static `.cursor/rules/megingjord.mdc` adapter.
 
 Phase 1 (#3085) wires runtime enforcement:
 
 - **Hooks** — `.cursor/hooks.json` (regenerate with `npm run cursor:hooks-emit`) maps the
-  Cursor camelCase events onto the harness hook scripts via `scripts/global/cursor-hooks-emit.js`:
-  `sessionStart` → `session_context.py` + `hamr_activation_check.py`, `beforeSubmitPrompt` →
-  `userprompt_gate.py`, `preToolUse`/`beforeShellExecution`/`beforeMCPExecution` → `pretool_guard.py`,
-  `afterFileEdit` → `posttool_reminders.py`, `stop` → `stop_reminder.py`, and the Cursor-native
-  `subagentStart`/`subagentStop` onto session/stop. `deploy:cursor:apply` now also deploys the hook
-  scripts to `~/.cursor/hooks/`.
+  Cursor camelCase events onto the harness hook scripts via `scripts/global/cursor-hooks-emit.js`.
+  `deploy:cursor:apply` deploys the hook scripts to `~/.cursor/hooks/`.
 - **HAMR** — `HAMR_TEAM=cursor` is recognized by `hamr-activate.sh` (writes `~/.cursor/hamr-config.json`),
   `hamr_activation_check.py` (sessionStart advisory), and `hamr-provider-wrapper.js` (config-path lookup).
   Cursor activates with `HAMR_TEAM=cursor npm run hamr:activate` (provider-neutral default).
 
-Subagents map, visual-QA MCP, wiki cross-runtime read, and the ticket-lifecycle gate land in
-Phase 2 (#3086).
+Phase 2 (#3086) completes the #1912 twelve-surface parity:
+
+- **Ticket-lifecycle gates** — the EVENT_MAP now wires all nine requiredHookScripts:
+  `manager_ticket_gate.py` + `goal_lens.py` on `beforeSubmitPrompt`, and `commit_ticket_gate.py`
+  on `preToolUse`/`beforeShellExecution` (alongside `pretool_guard.py`).
+- **Agents/subagents** — `deploy:cursor:apply` deploys `agents/` → `~/.cursor/agents/`; the
+  Cursor-native `subagentStart`/`subagentStop` events are wired (Phase 1).
+- **Visual QA** — the governance gate is runtime-agnostic (`pretool_guard.py` blocks `git tag`
+  when UI is touched without recorded `visual_qa`; `stop_checks.py` includes it) and is already
+  deployed to `~/.cursor/hooks/`; the `playwright-vision-low-resource` skill reaches Cursor via
+  the shared skills dirs. Playwright MCP itself is operator-configured identically across all
+  runtimes (none auto-register it).
+- **Wiki** — Cursor reads `~/.copilot/wiki/` cross-runtime via `wiki-knowledge.instructions.md`
+  (mirror Claude Code). See the full surface table in `docs/architecture-runtime-parity.md`.
 
 ## Slugs
 

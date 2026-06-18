@@ -40,7 +40,8 @@ test('built hooks.json points commands at the deployed ~/.cursor hook dir', () =
   const obj = emit.build();
   expect(obj.version).toBe(1);
   expect(obj.hooks.stop[0].command).toBe('python3 ~/.cursor/hooks/scripts/stop_reminder.py');
-  expect(obj.hooks.beforeSubmitPrompt[0].command).toContain('userprompt_gate.py');
+  const submitCommands = obj.hooks.beforeSubmitPrompt.map((h) => h.command).join(' ');
+  expect(submitCommands).toContain('userprompt_gate.py');
 });
 
 test('golden: rendered .cursor/hooks.json matches the committed golden fixture', () => {
@@ -64,15 +65,27 @@ test('emit() writes .cursor/hooks.json under an arbitrary root (deterministic)',
 
 // ── stress-test: all-gates-fire + fault injection (G6) + p99 budget (G7) ──
 
-test('stress: all five canonical harness gates are reachable through Cursor events', () => {
+test('stress: all canonical harness gates are reachable through Cursor events', () => {
   const commands = Object.values(emit.build().hooks).flat().map((h) => h.command).join(' ');
   for (const gate of ['session_context.py', 'hamr_activation_check.py', 'userprompt_gate.py',
     'pretool_guard.py', 'posttool_reminders.py', 'stop_reminder.py']) {
     expect(commands, `gate ${gate} unreachable via Cursor hooks`).toContain(gate);
   }
-  // The three Cursor tool-execution events all funnel into the single pretool guard.
-  for (const ev of ['preToolUse', 'beforeShellExecution', 'beforeMCPExecution']) {
-    expect(emit.EVENT_MAP[ev]).toEqual(['pretool_guard.py']);
+  // Phase-2 (#3086): the tool-execution events also carry the commit-ticket gate.
+  expect(emit.EVENT_MAP.beforeMCPExecution).toEqual(['pretool_guard.py']);
+  for (const ev of ['preToolUse', 'beforeShellExecution']) {
+    expect(emit.EVENT_MAP[ev]).toEqual(['commit_ticket_gate.py', 'pretool_guard.py']);
+  }
+});
+
+// ── #3086 parity: every requiredHookScript reaches Cursor (ticket-lifecycle complete) ──
+
+test('parity: Cursor EVENT_MAP covers all orchestrator-governance-parity requiredHookScripts', () => {
+  const parity = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'inventory', 'orchestrator-governance-parity.json'), 'utf8'));
+  const wired = new Set(Object.values(emit.EVENT_MAP).flat());
+  for (const script of parity.requiredHookScripts) {
+    expect(wired.has(script), `requiredHookScript ${script} not wired into Cursor EVENT_MAP`).toBe(true);
   }
 });
 
