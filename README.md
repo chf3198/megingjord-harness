@@ -399,6 +399,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `tavily:smoke` | `node scripts/global/tavily-smoke.js` |
 | `tavily:smoke:live` | `node scripts/global/tavily-smoke.js --live` |
 | `test` | `npx playwright test` |
+| `test-floor:check` | `node scripts/global/test-floor-classifier.js` |
 | `test:collaborator-input-shape` | `node --test tests/collaborator-handoff-input-shape.spec.js` |
 | `test:compatibility` | `node --test tests/orchestrator-compatibility.spec.js` |
 | `test:headed` | `npx playwright test --headed` |
