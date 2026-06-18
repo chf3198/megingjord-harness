@@ -33,6 +33,7 @@ if [ -z "$provider" ]; then
   case "${HAMR_TEAM:-codex}" in
     claude-code) provider="anthropic" ;;
     codex) provider="openai-compatible" ;;
+    cursor) provider="provider-neutral" ;;
     *) provider="provider-neutral" ;;
   esac
 fi
@@ -67,6 +68,7 @@ case "$team" in
   claude-code) cfg_dir="$HOME/.claude" ;;
   copilot)     cfg_dir="$HOME/.copilot" ;;
   codex)       cfg_dir="$HOME/.codex/devenv-ops" ;;
+  cursor)      cfg_dir="$HOME/.cursor" ;;
   *)           echo "⚠ unknown HAMR_TEAM=$team; skipping marker"; cfg_dir="" ;;
 esac
 if [ -n "$cfg_dir" ]; then

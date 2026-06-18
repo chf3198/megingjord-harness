@@ -12,6 +12,7 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const HOOK_DIR = path.join(REPO_ROOT, 'hooks', 'scripts');
 const COPILOT_DEPLOY = path.join(os.homedir(), '.copilot', 'hooks', 'scripts');
 const CODEX_DEPLOY = path.join(os.homedir(), '.codex', 'devenv-ops', 'hooks');
+const CURSOR_DEPLOY = path.join(os.homedir(), '.cursor', 'hooks', 'scripts');
 
 const TRACKED = ['stop_checks.py', 'stop_reminder.py', 'manager_ticket_gate.py',
   'userprompt_gate.py', 'pretool_guard.py', 'tool_activity.py',
@@ -29,8 +30,9 @@ function diagnose(scriptName) {
   const main = gitShow('origin/main', `hooks/scripts/${scriptName}`);
   const copilot = read(path.join(COPILOT_DEPLOY, scriptName));
   const codex = read(path.join(CODEX_DEPLOY, scriptName));
-  const deployed = copilot || codex;
-  const deployState = (copilot === null && codex === null) ? 'not-deployed' : 'deployed';
+  const cursor = read(path.join(CURSOR_DEPLOY, scriptName));
+  const deployed = copilot || codex || cursor;
+  const deployState = (copilot === null && codex === null && cursor === null) ? 'not-deployed' : 'deployed';
   if (deployState === 'not-deployed') {
     return { script: scriptName, diagnosis: 'not-deployed', recommend: 'opt-out path: G5 portability respected; no action needed' };
   }
@@ -71,4 +73,4 @@ if (require.main === module) {
   process.exit(out.exitCode);
 }
 
-module.exports = { run, diagnose, TRACKED, HOOK_DIR, COPILOT_DEPLOY, CODEX_DEPLOY };
+module.exports = { run, diagnose, TRACKED, HOOK_DIR, COPILOT_DEPLOY, CODEX_DEPLOY, CURSOR_DEPLOY };

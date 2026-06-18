@@ -62,7 +62,7 @@ fi
 if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then $APPLY && rsync -a --exclude='*.local*' "$ROOT/.claude/" "$HOME/.claude/" && echo "✅ .claude/ → ~/.claude/" || echo "(dry run) Would deploy .claude/ → ~/.claude/"
   [[ "$TARGET" == "claude" ]] && exit 0; fi
 if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.antigravity"; rsync -a --exclude='*.local*' "$ROOT/.antigravity/" "$HOME/.antigravity/" 2>/dev/null || true; echo "ok .antigravity/ -> ~/.antigravity/"; } || echo "(dry run) Would deploy .antigravity/ -> ~/.antigravity/"; [[ "$TARGET" == "antigravity" ]] && exit 0; fi
-if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.cursor"; rsync -a --exclude='*.local*' "$ROOT/.cursor/" "$HOME/.cursor/" 2>/dev/null || true; echo "ok .cursor/ -> ~/.cursor/"; } || echo "(dry run) Would deploy .cursor/ -> ~/.cursor/"; [[ "$TARGET" == "cursor" ]] && exit 0; fi
+if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.cursor"; rsync -a --exclude='*.local*' "$ROOT/.cursor/" "$HOME/.cursor/" 2>/dev/null || true; rsync -a --exclude='__pycache__' --exclude='state/' "$ROOT/hooks/" "$HOME/.cursor/hooks/" 2>/dev/null || true; echo "ok .cursor/ -> ~/.cursor/ (+ hooks/ -> ~/.cursor/hooks/ for .cursor/hooks.json parity)"; } || echo "(dry run) Would deploy .cursor/ -> ~/.cursor/ and hooks/ -> ~/.cursor/hooks/"; [[ "$TARGET" == "cursor" ]] && exit 0; fi
 echo "Source: $ROOT → $COPILOT"
 if ! $APPLY; then
   echo "=== DRY RUN (pass --apply to deploy) ==="

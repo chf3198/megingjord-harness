@@ -26,6 +26,7 @@ const TEAM_CONFIG_PATHS = [
   path.join(os.homedir(), '.claude', 'hamr-config.json'),
   path.join(os.homedir(), '.copilot', 'hamr-config.json'),
   path.join(os.homedir(), '.codex', 'devenv-ops', 'hamr-config.json'),
+  path.join(os.homedir(), '.cursor', 'hamr-config.json'),
 ];
 
 /** Read the first available HAMR activation config across team runtimes.

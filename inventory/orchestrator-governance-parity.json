@@ -51,8 +51,8 @@
       "Claude Code supports hooks through settings.json"
     ],
     "cursor": [
-      "Phase 0 (#3084) is registration + static .cursor/rules adapter only — WAIVER: hook enforcement (.cursor/hooks.json camelCase event adapter) and HAMR substrate land in Phase 1 (#3085); subagents/visual-qa/wiki/ticket-gate in Phase 2 (#3086)",
-      "Cursor hook events are camelCase (sessionStart/beforeSubmitPrompt/preToolUse/stop) plus natives subagentStart/subagentStop/beforeShellExecution/beforeMCPExecution/afterFileEdit"
+      "Phase 1 (#3085) shipped hook enforcement (.cursor/hooks.json via scripts/global/cursor-hooks-emit.js camelCase event adapter) and HAMR substrate (HAMR_TEAM=cursor recognized by hamr-provider-wrapper, hamr_activation_check.py, hamr-activate.sh; ~/.cursor/hooks deployed) — REMAINING WAIVER: subagents/visual-qa/wiki/ticket-gate in Phase 2 (#3086)",
+      "Cursor hook events are camelCase (sessionStart/beforeSubmitPrompt/preToolUse/stop) plus natives subagentStart/subagentStop/beforeShellExecution/beforeMCPExecution/afterFileEdit; the adapter maps each onto the harness PascalCase taxonomy (SessionStart/UserPromptSubmit/PreToolUse/PostToolUse/Stop)"
     ]
   },
   "deployTargets": [
