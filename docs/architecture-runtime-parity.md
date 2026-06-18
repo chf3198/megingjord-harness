@@ -49,6 +49,10 @@ per runtime and is checked by `quality-required` CI.
 
 ⚠️ = partial; Codex tool support depends on the OpenAI Codex API version in use.
 
+**Cursor** is the 5th governed runtime (Epic #3083). Its full #1912 twelve-surface
+parity matrix lives in [docs/howto/cursor-parity-matrix.md](howto/cursor-parity-matrix.md)
+— all surfaces parity-complete or parity-via-shared-mechanism, no open waivers.
+
 ## Cross-runtime review discipline
 
 When Copilot and Claude Code or Codex disagree on behaviour:

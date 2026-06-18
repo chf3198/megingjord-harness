@@ -22,11 +22,14 @@ const DEFAULT_HOOK_DIR = '~/.cursor/hooks/scripts';
 
 // Cursor camelCase event -> ordered harness hook script(s) it invokes.
 // sessionStart drives both session context AND the HAMR activation advisory (AC2).
+// The full mapping covers all nine orchestrator-governance-parity requiredHookScripts:
+// the ticket-lifecycle gates (manager_ticket_gate / goal_lens / commit_ticket_gate) are
+// wired in Phase 2 (#3086) so Cursor reaches gate parity with Claude Code's settings.json.
 const EVENT_MAP = {
   sessionStart: ['session_context.py', 'hamr_activation_check.py'],
-  beforeSubmitPrompt: ['userprompt_gate.py'],
-  preToolUse: ['pretool_guard.py'],
-  beforeShellExecution: ['pretool_guard.py'],
+  beforeSubmitPrompt: ['manager_ticket_gate.py', 'goal_lens.py', 'userprompt_gate.py'],
+  preToolUse: ['commit_ticket_gate.py', 'pretool_guard.py'],
+  beforeShellExecution: ['commit_ticket_gate.py', 'pretool_guard.py'],
   beforeMCPExecution: ['pretool_guard.py'],
   afterFileEdit: ['posttool_reminders.py'],
   stop: ['stop_reminder.py'],

@@ -11,15 +11,27 @@
     ],
     "beforeSubmitPrompt": [
       {
+        "command": "python3 ~/.cursor/hooks/scripts/manager_ticket_gate.py"
+      },
+      {
+        "command": "python3 ~/.cursor/hooks/scripts/goal_lens.py"
+      },
+      {
         "command": "python3 ~/.cursor/hooks/scripts/userprompt_gate.py"
       }
     ],
     "preToolUse": [
       {
+        "command": "python3 ~/.cursor/hooks/scripts/commit_ticket_gate.py"
+      },
+      {
         "command": "python3 ~/.cursor/hooks/scripts/pretool_guard.py"
       }
     ],
     "beforeShellExecution": [
+      {
+        "command": "python3 ~/.cursor/hooks/scripts/commit_ticket_gate.py"
+      },
       {
         "command": "python3 ~/.cursor/hooks/scripts/pretool_guard.py"
       }

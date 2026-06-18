@@ -51,7 +51,7 @@
       "Claude Code supports hooks through settings.json"
     ],
     "cursor": [
-      "Phase 1 (#3085) shipped hook enforcement (.cursor/hooks.json via scripts/global/cursor-hooks-emit.js camelCase event adapter) and HAMR substrate (HAMR_TEAM=cursor recognized by hamr-provider-wrapper, hamr_activation_check.py, hamr-activate.sh; ~/.cursor/hooks deployed) — REMAINING WAIVER: subagents/visual-qa/wiki/ticket-gate in Phase 2 (#3086)",
+      "Phase 1 (#3085) + Phase 2 (#3086) COMPLETE — all 12 #1912 surfaces parity-complete or documented-waiver. Hooks: .cursor/hooks.json (scripts/global/cursor-hooks-emit.js) wires all 9 requiredHookScripts incl. the ticket-lifecycle gates (manager_ticket_gate/goal_lens on beforeSubmitPrompt, commit_ticket_gate on preToolUse/beforeShellExecution). HAMR: HAMR_TEAM=cursor across provider-wrapper/activation-check/activate.sh. Agents: agents/ deployed to ~/.cursor/agents/ + subagentStart/subagentStop hooks. visual_qa: governance gate is runtime-agnostic (pretool_guard git-tag block + stop_checks, deployed to ~/.cursor/hooks) and the playwright-vision-low-resource skill reaches Cursor via ~/.agents/skills — Playwright MCP itself is operator-configured identically across all runtimes (none auto-register it). wiki: cross-runtime read of ~/.copilot/wiki/ (mirror claude-code).",
       "Cursor hook events are camelCase (sessionStart/beforeSubmitPrompt/preToolUse/stop) plus natives subagentStart/subagentStop/beforeShellExecution/beforeMCPExecution/afterFileEdit; the adapter maps each onto the harness PascalCase taxonomy (SessionStart/UserPromptSubmit/PreToolUse/PostToolUse/Stop)"
     ]
   },
@@ -59,6 +59,8 @@
     "copilot",
     "codex",
     "claude",
+    "antigravity",
+    "cursor",
     "all"
   ],
   "strictAcceptance": {
@@ -102,6 +104,13 @@
         "deployTarget": null,
         "status": "cross-runtime-read",
         "notes": "Reads from ~/.copilot/wiki/ via wiki-knowledge.instructions.md; search command is node ~/.copilot/scripts/wiki-search.js"
+      },
+      "cursor": {
+        "wikiPath": "~/.copilot/wiki/ (cross-runtime read)",
+        "searchScript": null,
+        "deployTarget": null,
+        "status": "cross-runtime-read",
+        "notes": "Phase 2 (#3086): reads from ~/.copilot/wiki/ via wiki-knowledge.instructions.md (runtime-agnostic 'Any repo' access); search command is node ~/.copilot/scripts/wiki-search.js (mirror claude-code)"
       }
     },
     "digestManifest": {
@@ -137,9 +146,19 @@
       },
       "claude-code": {
         "note": "cross-runtime read; inherits copilot tiers"
+      },
+      "cursor": {
+        "note": "cross-runtime read; inherits copilot tiers (#3086)"
       }
     },
     "dependencies": [
+      {
+        "from": "cursor",
+        "to": "copilot",
+        "type": "cross-runtime-read",
+        "status": "expected",
+        "impact": "cursor inherits copilot wiki health (#3086)"
+      },
       {
         "from": "claude-code",
         "to": "copilot",
@@ -150,7 +169,8 @@
     ],
     "parityGaps": [
       "claude-code has no dedicated wiki home — reads Copilot runtime by design",
-      "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)"
+      "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)",
+      "cursor has no dedicated wiki home — reads Copilot runtime by design (#3086, mirror claude-code)"
     ]
   }
 }
