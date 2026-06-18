@@ -10,13 +10,14 @@
 // Copilot VS Code extension — they are present even in a Claude Code session. They are
 // NOT evidence of a copilot RUNTIME and are deliberately ignored here.
 
-const KNOWN = ['claude-code', 'codex', 'copilot', 'antigravity', 'openclaw'];
+const KNOWN = ['claude-code', 'codex', 'copilot', 'antigravity', 'cursor', 'openclaw'];
 
 // Definitive per-runtime primary markers (NOT the workspace-injected COPILOT_OTEL_*).
 const PRIMARY = [
   { runtime: 'claude-code', test: (env) => env.CLAUDECODE === '1' || Boolean(env.CLAUDE_CODE_ENTRYPOINT), signal: 'CLAUDECODE/CLAUDE_CODE_ENTRYPOINT' },
   { runtime: 'codex', test: (env) => Boolean(env.CODEX_HOME || env.CODEX_SANDBOX || env.CODEX_CLI), signal: 'CODEX_*' },
   { runtime: 'antigravity', test: (env) => Boolean(env.ANTIGRAVITY_AGENT || env.ANTIGRAVITY_HOME), signal: 'ANTIGRAVITY_*' },
+  { runtime: 'cursor', test: (env) => Boolean(env.CURSOR_AGENT || env.CURSOR_TRACE_ID || env.CURSOR_WORKSPACE), signal: 'CURSOR_*' },
   { runtime: 'openclaw', test: (env) => Boolean(env.OPENCLAW_AGENT || env.OPENCLAW_HOME), signal: 'OPENCLAW_*' },
 ];
 

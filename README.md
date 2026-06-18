@@ -142,6 +142,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |
+| `cursor:hooks-emit` | `node scripts/global/cursor-hooks-emit.js --root .` |
 | `deploy` | `bash scripts/deploy.sh --target both && node scripts/global/xteam-mcp-register.js --target copilot --root . && node scripts/global/xteam-mcp-register.js --target codex --root .` |
 | `deploy:all` | `bash scripts/deploy.sh --target all && node scripts/global/xteam-mcp-register.js --target all --root .` |
 | `deploy:all:apply` | `bash scripts/deploy.sh --apply --target all && node scripts/global/xteam-mcp-register.js --target all --root . --apply` |

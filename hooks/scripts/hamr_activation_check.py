@@ -20,9 +20,10 @@ def candidate_paths() -> list[Path]:
         "claude": home / ".claude" / "hamr-config.json",
         "copilot": home / ".copilot" / "hamr-config.json",
         "codex": home / ".codex" / "devenv-ops" / "hamr-config.json",
+        "cursor": home / ".cursor" / "hamr-config.json",
     }
-    runtime = (os.getenv("DEVENT_OPS_RUNTIME") or "copilot").lower()
-    order = [runtime, "copilot", "claude", "codex"]
+    runtime = (os.getenv("DEVENT_OPS_RUNTIME") or os.getenv("HAMR_TEAM") or "copilot").lower()
+    order = [runtime, "copilot", "claude", "codex", "cursor"]
     return [paths[name] for name in dict.fromkeys(order) if name in paths]
 
 

@@ -19,6 +19,7 @@ const RUNTIME_ENVS = [
   { name: 'copilot', env: { HAMR_TEAM: 'copilot', MEGINGJORD_TEAM: 'copilot', HAMR_MODEL: 'gpt-5', TZ: 'America/New_York', LANG: 'C', LC_ALL: 'C' } },
   { name: 'codex', env: { HAMR_TEAM: 'codex', MEGINGJORD_TEAM: 'codex', HAMR_MODEL: 'o1', TZ: 'Asia/Tokyo', LANG: 'ja_JP.UTF-8', LC_ALL: 'ja_JP.UTF-8' } },
   { name: 'antigravity', env: { HAMR_TEAM: 'antigravity', MEGINGJORD_TEAM: 'antigravity', HAMR_MODEL: 'gemini', TZ: 'Pacific/Kiritimati', LANG: 'de_DE.UTF-8', LC_ALL: 'de_DE.UTF-8' } },
+  { name: 'cursor', env: { HAMR_TEAM: 'cursor', MEGINGJORD_TEAM: 'cursor', HAMR_MODEL: 'gpt-4', TZ: 'Australia/Eucla', LANG: 'fr_FR.UTF-8', LC_ALL: 'fr_FR.UTF-8' } },
 ];
 const TM = 'claude-code:opus@anthropic';
 
