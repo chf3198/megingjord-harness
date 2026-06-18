@@ -66,6 +66,21 @@ A surface does NOT require `stress-test` when ALL of:
 
 This avoids the calendar-threshold anti-pattern. Velocity-relative + replay-eval calibration only.
 
+## Objective floor classifier (advisory; #3098, Epic #1948 re-ship)
+
+`scripts/global/test-floor-classifier.js` derives the **objective minimum floor from the changed
+file set** and reconciles it against the Manager-declared `test_strategy` — closing the gap where
+`test-evidence` only verifies the *declared* strategy has an artifact, never what the floor *should*
+be. `reconcile(declared, changedPaths)` flags two cases: (1) a stress-triggering surface (concurrency
+/ side-effect gate / adversarial parser, by path + reused `stress-surface-audit` content signals)
+with no `+stress-test` declared; (2) a below-floor declaration (`none`/`manual-verify`) on a real code
+surface. Run `npm run test-floor:check -- --declared <strategy> --files a.js,b.js` (or `--json`).
+
+Ships **advisory** (`--strict` opts into a non-zero exit). Promotion to a blocking pre-merge gate is
+replay-eval-gated per the model above. The matrix table here remains the authority the classifier
+mirrors. Deferred from the original Phase-1 scope (the phantom-closed #2652–#2657): replay-eval
+calibration, drift detector, cross-runtime parity, audit-schema/rollback — follow-ons under #1948.
+
 ## Goal-lens justification
 
 When matrix recommends a strategy other than `none` and Manager declares `none`, justify per goal-lens priority order (G1 Governance > G2 Quality > G3 Zero Cost > …). Justification goes in `MANAGER_HANDOFF` as a one-line note. `test-evidence` gate emits an advisory comment but does not block — Consultant authority on whether the override is acceptable.
