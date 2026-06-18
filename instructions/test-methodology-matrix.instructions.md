@@ -78,8 +78,16 @@ surface. Run `npm run test-floor:check -- --declared <strategy> --files a.js,b.j
 
 Ships **advisory** (`--strict` opts into a non-zero exit). Promotion to a blocking pre-merge gate is
 replay-eval-gated per the model above. The matrix table here remains the authority the classifier
-mirrors. Deferred from the original Phase-1 scope (the phantom-closed #2652–#2657): replay-eval
-calibration, drift detector, cross-runtime parity, audit-schema/rollback — follow-ons under #1948.
+mirrors.
+
+**Calibration + audit (#3105):** `scripts/global/test-floor-replay-eval.js` scores the classifier
+against the labeled corpus `tests/fixtures/test-floor-corpus.json` — `npm run test-floor:replay-eval`
+reports precision/recall and `promotionEligible` (precision at or above 0.85); the advisory→blocking
+flip is gated on that, not a calendar. `detectDrift(samples)` reports the under-declaration drift rate
+across a sample set. `auditRecord(result, {ts})` emits the versioned `test-floor-audit-v1` schema for
+observability, and `TEST_FLOOR_DISABLED=1` is the rollback no-op. (Building the corpus surfaced two
+real classifier fixes: nested `scripts/global/**` is a governance-script surface, and python hooks are
+not flagged for missing the JS `stress-test` strategy.)
 
 ## Goal-lens justification
 

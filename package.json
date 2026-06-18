@@ -305,7 +305,8 @@
     "deploy:verify:claude": "node scripts/global/verify-deploy.js claude",
     "governance:drift-sweep": "node scripts/global/governance-drift-sweep.js --scan",
     "governance:drift-sweep:test": "node --test tests/governance-drift-sweep.spec.js",
-    "test-floor:check": "node scripts/global/test-floor-classifier.js"
+    "test-floor:check": "node scripts/global/test-floor-classifier.js",
+    "test-floor:replay-eval": "node scripts/global/test-floor-replay-eval.js"
   },
   "keywords": [
     "devops",
