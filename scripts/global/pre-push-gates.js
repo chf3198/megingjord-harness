@@ -44,13 +44,23 @@ function run(argv = process.argv.slice(2), env = process.env) {
     } catch {}
   } else {
     try {
-      const { lintEpicDrift } = require('./lint-epic-drift.js');
-      const raw = require('child_process').execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).trim();
+      const cp = require('child_process');
+      const { lintEpicDrift, resolveRelevantEpics, partitionFindings } = require('./lint-epic-drift.js');
+      const raw = cp.execFileSync('gh', ['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], { encoding: 'utf8' }).trim();
       const [owner, repo] = raw.split('/');
       const findings = lintEpicDrift(owner, repo);
-      if (findings.length) {
-        console.error('❌ pre-push-gates: Ticket Governance Drift Detected:');
-        findings.forEach(f => console.error(`  - [Class ${f.class}] ${f.message}`));
+      // #3099: block only on drift the pusher owns (branch ticket + its parent Epic);
+      // report the rest of the board's drift as advisory rather than failing the push.
+      const branch = cp.execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { encoding: 'utf8' }).trim();
+      const relevant = resolveRelevantEpics(branch, owner, repo);
+      const { blocking, advisory } = partitionFindings(findings, relevant);
+      if (advisory.length) {
+        console.log('⚠️ pre-push-gates: unrelated board drift (advisory — not blocking this push):');
+        advisory.forEach(f => console.log(`  - [Class ${f.class}] ${f.message}`));
+      }
+      if (blocking.length) {
+        console.error('❌ pre-push-gates: drift on YOUR ticket/Epic — fix before push:');
+        blocking.forEach(f => console.error(`  - [Class ${f.class}] ${f.message}`));
         return 1;
       }
     } catch (e) {
