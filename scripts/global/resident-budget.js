@@ -23,13 +23,15 @@ function memoryPath(argv) {
   return process.env.MEGINGJORD_MEMORY_PATH || null;
 }
 
-/** Always-resident repo files: CLAUDE.md plus every instructions/*.md. */
+/** Always-resident repo files: CLAUDE.md plus ONLY the instructions it @-imports. The earlier
+ * all-files count over-counted; only @-imported instructions are actually resident (Epic T1). */
 function residentRepoFiles() {
-  const instructionsDir = path.join(root, 'instructions');
-  const files = [path.join(root, 'CLAUDE.md')];
-  if (fs.existsSync(instructionsDir)) {
-    for (const name of fs.readdirSync(instructionsDir)) {
-      if (name.endsWith('.md')) files.push(path.join(instructionsDir, name));
+  const claudeMd = path.join(root, 'CLAUDE.md');
+  const files = [claudeMd];
+  if (fs.existsSync(claudeMd)) {
+    const text = fs.readFileSync(claudeMd, 'utf8');
+    for (const match of text.matchAll(/@instructions\/(\S+\.md)/g)) {
+      files.push(path.join(root, 'instructions', match[1]));
     }
   }
   return files.filter((file) => fs.existsSync(file));

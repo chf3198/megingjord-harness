@@ -312,6 +312,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `help:topic` | `node scripts/help-topic.js` |
 | `hooks:install` | `bash scripts/global/install-hooks.sh` |
 | `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
+| `instructions:split-classify` | `node scripts/global/instructions-split-classifier.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
 | `it-ops:usage-report` | `node scripts/global/it-bypass-usage-report.js` |
 | `label:provision` | `node scripts/global/label-provision.js` |

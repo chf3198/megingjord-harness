@@ -183,6 +183,7 @@
     "lint:coverage-metric": "node scripts/global/lint-coverage-metric.js",
     "lint:decisions": "node scripts/global/decisions-md-validator.js",
     "resident:budget": "node scripts/global/resident-budget.js",
+    "instructions:split-classify": "node scripts/global/instructions-split-classifier.js",
     "memory:route": "node scripts/global/memory-write-router.js",
     "memory:dedup": "node scripts/global/memory-dedup-lint.js",
     "wiki:compile-doc": "node scripts/wiki/compile-doc.js",
