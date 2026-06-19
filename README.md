@@ -171,6 +171,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deps:review` | `node scripts/global/dep-proposals-review.js` |
 | `dispatch:progress:test` | `node --test tests/dispatch-progress.spec.js tests/cascade-observability.spec.js` |
 | `doc-graph` | `node scripts/global/doc-graph-builder.js` |
+| `doc-plane:lint` | `node scripts/global/doc-plane-boundary-lint.js` |
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
@@ -416,6 +417,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `validate:triage` | `node scripts/validate-plugin-triage.js` |
 | `wiki:anneal` | `node scripts/wiki/anneal.js` |
 | `wiki:auto-update` | `node scripts/wiki/auto-update-pipeline.js` |
+| `wiki:compile-doc` | `node scripts/wiki/compile-doc.js` |
 | `wiki:drift` | `node scripts/wiki/drift-detector.js` |
 | `wiki:health` | `node scripts/wiki/wiki-health-detector.js` |
 | `wiki:ingest` | `node scripts/wiki/ingest.js` |

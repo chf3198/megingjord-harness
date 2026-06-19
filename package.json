@@ -185,6 +185,8 @@
     "resident:budget": "node scripts/global/resident-budget.js",
     "memory:route": "node scripts/global/memory-write-router.js",
     "memory:dedup": "node scripts/global/memory-dedup-lint.js",
+    "wiki:compile-doc": "node scripts/wiki/compile-doc.js",
+    "doc-plane:lint": "node scripts/global/doc-plane-boundary-lint.js",
     "lint:js": "eslint -c lint-configs/eslint.config.devenv.js --max-warnings 9999 dashboard/js scripts/global scripts/wiki",
     "lint:md": "markdownlint-cli2 '**/*.md' '!node_modules/**' '!scripts/xteam-mcp/node_modules/**' '!.claude/**' '!research/**' '!wiki/wisdom/global/sources/**' '!wiki/wisdom/global/syntheses/**' '!raw/**' '!.dashboard/**' '!CHANGELOG-archive.md' '!tickets/**' '!planning/**' '!generated/**' '!tests/fixtures/governance/golden/**' '!tests/fixtures/changelog-fragments-invalid/**' '!wiki/work-log/**' '!wiki/code/**'",
     "lint:py": "ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/",
