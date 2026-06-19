@@ -1,0 +1,19 @@
+{
+  "team": "antigravity",
+  "model": "claude-sonnet-4-6",
+  "substrate": "google",
+  "role": "manager",
+  "expectedAlias": "Nova Mason",
+  "MANAGER_HANDOFF": {
+    "Signed-by": "Nova Mason",
+    "Team&Model": "antigravity:claude-sonnet-4-6@google",
+    "Role": "manager",
+    "scope": "antigravity governance parity — Phase-2 hooks and HAMR substrate",
+    "lane": "lane:code-change",
+    "test_strategy": "manual-verify",
+    "acceptance": "- AC1: hooks.json wires all 9 scripts\n- AC2: HAMR paths resolve for antigravity",
+    "gates": "lint shellcheck governance:sync-check",
+    "related_tickets": "#3095",
+    "overlap_decision": "no-overlap"
+  }
+}
