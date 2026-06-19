@@ -1,5 +1,9 @@
 # Megingjord — Architecture
 
+> **Canonical role (Epic #3124 D8):** the detailed architecture *reference* (docs-tree depth,
+> arc42-structured). For the short root overview see [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
+> Taxonomy: [`diataxis-taxonomy.md`](diataxis-taxonomy.md).
+
 Navigation hub for architecture documentation, structured after arc42 sections.
 
 ## Document map

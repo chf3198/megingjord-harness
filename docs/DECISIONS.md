@@ -1,5 +1,9 @@
 # Architecture Decision Records — Index
 
+> **Canonical role (Epic #3124 D8):** the ADR *index* — distinct from
+> [`decisions.md`](decisions.md) (the chronological decisions *log*). See
+> [`diataxis-taxonomy.md`](diataxis-taxonomy.md).
+
 ADRs document significant architecture and process decisions for Megingjord.
 Canonical store: [`research/adr/`](../research/adr/).
 
