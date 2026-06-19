@@ -1,5 +1,5 @@
 ---
-target: copilot
+target: antigravity
 id: global-task-router
 title: Global Task Router
 priority: P1
@@ -24,4 +24,4 @@ targets: "copilot,cline,claude-code,antigravity"
 Source: instructions/global-task-router.instructions.md
 Targets: copilot, cline, claude-code, antigravity
 
-This is a generated adapter preview for copilot.
+This is a generated adapter preview for antigravity.

@@ -1,5 +1,5 @@
 ---
-target: copilot
+target: antigravity
 id: governance-controls
 title: Governance Controls
 priority: P1
@@ -24,4 +24,4 @@ targets: "copilot,cline,continue,antigravity"
 Source: instructions/governance-controls.instructions.md
 Targets: copilot, cline, continue, antigravity
 
-This is a generated adapter preview for copilot.
+This is a generated adapter preview for antigravity.
