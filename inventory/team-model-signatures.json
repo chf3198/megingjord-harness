@@ -46,11 +46,6 @@
       "aliasSeed": "Cyrus"
     },
     {
-      "team": "antigravity",
-      "modelPattern": "^gemini-2\\.0-pro$",
-      "aliasSeed": "Apollo"
-    },
-    {
       "team": "codex",
       "modelPattern": "^gpt-5\\.4$",
       "aliasSeed": "Quill"
@@ -112,6 +107,26 @@
       "modelPattern": "phi",
       "aliasSeed": "Fia",
       "devicePattern": "^windows-laptop$"
+    },
+    {
+      "team": "antigravity",
+      "modelPattern": "gemini",
+      "aliasSeed": "Apollo"
+    },
+    {
+      "team": "antigravity",
+      "modelPattern": "claude-sonnet",
+      "aliasSeed": "Nova"
+    },
+    {
+      "team": "antigravity",
+      "modelPattern": "claude-opus",
+      "aliasSeed": "Axel"
+    },
+    {
+      "team": "antigravity",
+      "modelPattern": "claude-haiku",
+      "aliasSeed": "Aiden"
     },
     {
       "team": "*",
@@ -230,6 +245,34 @@
       "role": "consultant",
       "keyId": "openclaw-consultant-v1",
       "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEACCF0/o48aS8deiRJsyFPOAQqXoiyFfhQajo4AnaGaBY=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "antigravity",
+      "role": "manager",
+      "keyId": "antigravity-manager-v1",
+      "algorithm": "ed25519",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAX0OYK3cEeqSPBwpSyFJIQkYJnWXx6bRMrygvJMA12MU=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "antigravity",
+      "role": "collaborator",
+      "keyId": "antigravity-collaborator-v1",
+      "algorithm": "ed25519",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAXdkwDsKfkYBc8DNxWQ9ZVEhwHezfJCTj4UxGt5bJkOw=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "antigravity",
+      "role": "admin",
+      "keyId": "antigravity-admin-v1",
+      "algorithm": "ed25519",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAXJ9EP31PROFuy73IXfR/KLYFb5YOgYhud4NgCoeF49k=\\n-----END PUBLIC KEY-----\\n"
+    },
+    {
+      "team": "antigravity",
+      "role": "consultant",
+      "keyId": "antigravity-consultant-v1",
+      "algorithm": "ed25519",
+      "publicKey": "-----BEGIN PUBLIC KEY-----\\nMCowBQYDK2VwAyEAzDObrABU4g6ftSa0aKcH/W6D2hbxG25vwapcHxw10dU=\\n-----END PUBLIC KEY-----\\n"
     }
   ]
 }
