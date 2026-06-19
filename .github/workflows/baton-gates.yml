@@ -51,11 +51,21 @@ jobs:
             const { validate } = require('./scripts/global/megalint/collaborator-handoff.js');
             // #2562: pass full comment objects (validator reads .body + .user); mapping
             // to bare .body strings false-failed the gate on every PR.
-            const result = validate({ comments, labels });
+            // #3121: pass the PR file list so doc-coverage can advisory-verify that any
+            // surface declared UPDATED actually appears in the diff (wires the #2716 module).
+            const { data: prFilesData } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner, repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number, per_page: 100,
+            });
+            const prFiles = prFilesData.map(f => f.filename);
+            const result = validate({ comments, labels, prFiles });
             if (!result.ok) {
               const detail = (result.violations || []).map(v => v.rule + (v.detail ? ': ' + v.detail : '')).join('; ');
               core.setFailed(`collaborator-handoff violations in #${linkedIssue}: ${detail}`);
             }
+            const advisories = (result.violations || []).filter(v => v.severity === 'advisory');
+            if (advisories.length) core.warning(`[advisory] collaborator-gate #${linkedIssue}: ` +
+              advisories.map(v => v.rule + (v.detail ? ': ' + v.detail : '')).join('; '));
 
   admin-gate:
     name: admin-gate
