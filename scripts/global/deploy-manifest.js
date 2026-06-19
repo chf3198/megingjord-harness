@@ -59,6 +59,35 @@ function collectFiles(dir) {
  * @param {string} filePath absolute path to the file
  * @returns {string} sha256 hex digest
  */
+/**
+ * Check if a relative path is part of the deployed files for a target.
+ * Filters out IDE-specific or runtime-generated files/directories (CWE-754).
+ * @param {string} targetName logical target name
+ * @param {string} relPath relative file path
+ * @returns {boolean} true if path is deployed
+ */
+function isDeployedPath(targetName, relPath) {
+  if (targetName === 'antigravity') {
+    return relPath === 'hooks.json' ||
+           relPath === 'instructions.md' ||
+           relPath.startsWith('commands/') ||
+           relPath.startsWith('agents/');
+  }
+  if (targetName === 'cursor') {
+    return relPath === 'hooks.json' ||
+           relPath.startsWith('hooks/') ||
+           relPath.startsWith('agents/');
+  }
+  return true;
+}
+
+/**
+ * Hash a file using read-once-into-buffer to avoid TOCTOU (CWE-367).
+ * The file content is read atomically into memory before hashing —
+ * no stat/re-read window exists between check and use.
+ * @param {string} filePath absolute path to the file
+ * @returns {string} sha256 hex digest
+ */
 function hashFile(filePath) {
   const content = fs.readFileSync(filePath); // read-once: buffer is hashed immediately
   return crypto.createHash('sha256').update(content).digest('hex');
@@ -79,10 +108,12 @@ function generateManifest(targetDir, targetName) {
     throw new Error(`deploy-manifest: target directory is a symlink — rejected (CWE-59): ${targetDir}`);
   }
   const files = collectFiles(targetDir);
-  const entries = files.map((filePath) => ({
-    path: path.relative(targetDir, filePath),
-    sha256: hashFile(filePath),
-  }));
+  const entries = files
+    .map((filePath) => ({
+      path: path.relative(targetDir, filePath),
+      sha256: hashFile(filePath),
+    }))
+    .filter((entry) => isDeployedPath(targetName, entry.path));
   return {
     schema: 'deploy-manifest/v1',
     target: targetName,
@@ -166,6 +197,8 @@ const TARGET_DIRS = {
   copilot: path.join(process.env.HOME || '/root', '.copilot'),
   codex: path.join(process.env.HOME || '/root', '.codex'),
   claude: path.join(process.env.HOME || '/root', '.claude'),
+  antigravity: path.join(process.env.HOME || '/root', '.antigravity'),
+  cursor: path.join(process.env.HOME || '/root', '.cursor'),
 };
 
 if (require.main === module) {
@@ -188,6 +221,6 @@ if (require.main === module) {
 
 module.exports = {
   generateManifest, writeManifest, generateAndWrite, collectFiles, hashFile,
-  computeHmac, verifyManifestHmac, getHmacKey,
+  computeHmac, verifyManifestHmac, getHmacKey, isDeployedPath,
   MANIFEST_DIR, TARGET_DIRS,
 };
