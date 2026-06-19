@@ -1,5 +1,9 @@
 # Megingjord Harness Architecture
 
+> **Canonical role (Epic #3124 D8):** the architecture *overview* (GitHub root entry surface). For
+> the detailed, arc42-structured reference see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Taxonomy:
+> [`docs/diataxis-taxonomy.md`](docs/diataxis-taxonomy.md).
+
 Megingjord is a **governance-first AI agent harness** providing cross-runtime
 compliance, skills propagation, and local operational safety for developer AI
 workflows across GitHub Copilot, Claude Code, and Codex.

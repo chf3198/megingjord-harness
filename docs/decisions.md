@@ -1,5 +1,9 @@
 # Decisions Log
 
+> **Canonical role (Epic #3124 D8):** the chronological decisions *log* — distinct from
+> [`DECISIONS.md`](DECISIONS.md) (the ADR *index*). The case-variant filenames are intentional but
+> serve different purposes; see [`diataxis-taxonomy.md`](diataxis-taxonomy.md).
+
 This file is the canonical, portable-by-default record of architectural
 decisions made in this repo. It is the **fallback decisional surface** for
 operators without GitHub Discussions access (air-gapped, offline-during-

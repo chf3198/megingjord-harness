@@ -93,3 +93,16 @@ surfaces:
       - WIKI.md
     suggested:
       - docs/howto/contribute-to-wiki.md
+
+# Diátaxis quadrant requirements per area (Epic #3124 D8). Advisory annotation — the doc-coverage
+# validator (doc-coverage.js) reads only `surfaces:`, so this key is non-breaking. Authored schema
+# for future tooling; human reference is docs/diataxis-taxonomy.md.
+diataxis:
+  area:hooks: [how-to, reference]
+  area:scripts: [how-to, reference]
+  area:instructions: [reference, explanation]
+  area:agents: [reference, explanation]
+  area:dashboard: [tutorial, how-to]
+  area:knowledge: [explanation, reference]
+  area:governance: [explanation, reference]
+  area:infra: [how-to, reference]
