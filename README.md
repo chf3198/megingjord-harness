@@ -339,6 +339,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `output:clip` | `node scripts/global/output-clipper.js` |
 | `prefix:cache-report` | `node scripts/global/prefix-cache.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
+| `qa:cache` | `node scripts/global/governance-qa-cache.js` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
 | `rag:search` | `node scripts/global/rag-search.js` |
 | `readability:snapshot` | `bash scripts/readability-snapshot.sh` |
