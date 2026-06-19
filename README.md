@@ -336,6 +336,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `rag:search` | `node scripts/global/rag-search.js` |
 | `readability:snapshot` | `bash scripts/readability-snapshot.sh` |
 | `repo:scope` | `node scripts/global/repo-scope.js` |
+| `resident:budget` | `node scripts/global/resident-budget.js` |
 | `review:bypass-gate:test` | `node --test tests/review-bypass-gate.spec.js` |
 | `review:cli-parity:test` | `node --test tests/review-cli-parity.spec.js` |
 | `review:cost-telemetry:test` | `node --test tests/review-cost-telemetry.spec.js` |
