@@ -50,9 +50,10 @@ configure_per_worktree_hooks() {
   git -C "$worktree_root" config --worktree core.hooksPath "$hooks_path"
   log "per-worktree hooks: core.hooksPath → $hooks_path"
 }
-
+# shellcheck source=scripts/worktree-agent-init.sh
+source "$(dirname "$0")/worktree-agent-init.sh" # Refs #3103
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo "Usage: bash scripts/worktree-session-start.sh <copilot|codex|claude-code> [feat/<ticket#>-<slug>]"
+  echo "Usage: bash scripts/worktree-session-start.sh <copilot|codex|claude-code|antigravity> [feat/<ticket#>-<slug>]"
   exit 1
 fi
 
@@ -60,8 +61,8 @@ agent="$1"
 task_branch="${2:-}"
 
 case "$agent" in
-  copilot|codex|claude-code) ;;
-  *) die "invalid agent '$agent' (expected: copilot|codex|claude-code)" ;;
+  copilot|codex|claude-code|antigravity) ;;
+  *) die "invalid agent '$agent' (expected: copilot|codex|claude-code|antigravity)" ;;
 esac
 
 if [[ -n "$task_branch" && ! "$task_branch" =~ ^(feat|fix|hotfix)/[0-9]+-[a-z0-9][-a-z0-9]*$ ]]; then
@@ -88,13 +89,12 @@ if [[ -z "$task_branch" ]]; then
   log "sandbox refreshed at origin/main; no task branch requested"
   exit 0
 fi
-
 if git show-ref --verify --quiet "refs/heads/$task_branch"; then
   warn "task branch already exists locally: $task_branch"
 fi
 
 git switch -c "$task_branch"
 bootstrap_node_modules "$root"
-node "$root/scripts/global/worktree-provision.js" --main="$(git worktree list --porcelain | awk '/^worktree /{print $2; exit}')" || warn "worktree-provision skipped"  # #3088: link .env etc.
 configure_per_worktree_hooks "$root"
-log "ready on task branch: $task_branch — implement scoped changes and open PR with Refs #<ticket>"
+copy_env_if_needed "$agent" "$root"
+log "ready on task branch: $task_branch"

@@ -48,6 +48,8 @@ const IGNORE_FILES = [
   'claude-code-settings.schema.json',
   // Governance policy catalog — grows by design as decision rules are added
   'governance-decision-policy.json',
+  // Adapter emit manifest — grows with runtimes × governance units (#3103)
+  'governance-manifest.sample.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];

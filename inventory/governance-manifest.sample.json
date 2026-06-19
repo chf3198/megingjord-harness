@@ -5,54 +5,123 @@
       "id": "operator-identity-context",
       "title": "Operator Identity Context",
       "priority": "P1",
-      "appliesTo": ["**"],
-      "targets": ["copilot", "cline", "claude-code", "continue"],
-      "tags": ["governance", "baton", "operator"],
+      "appliesTo": [
+        "**"
+      ],
+      "targets": [
+        "copilot",
+        "cline",
+        "claude-code",
+        "continue",
+        "antigravity"
+      ],
+      "tags": [
+        "governance",
+        "baton",
+        "operator"
+      ],
       "bodyRef": "instructions/operator-identity-context.instructions.md"
     },
     {
       "id": "team-model-signing",
       "title": "Team Model Signing",
       "priority": "P1",
-      "appliesTo": ["instructions/**", "scripts/global/**"],
-      "targets": ["copilot", "claude-code", "continue"],
-      "tags": ["governance", "signing", "traceability"],
+      "appliesTo": [
+        "instructions/**",
+        "scripts/global/**"
+      ],
+      "targets": [
+        "copilot",
+        "claude-code",
+        "continue"
+      ],
+      "tags": [
+        "governance",
+        "signing",
+        "traceability"
+      ],
       "bodyRef": "instructions/team-model-signing.instructions.md"
     },
     {
       "id": "role-baton-routing",
       "title": "Role Baton Routing",
       "priority": "P1",
-      "appliesTo": ["**"],
-      "targets": ["copilot", "cline", "claude-code", "continue"],
-      "tags": ["governance", "baton", "routing"],
+      "appliesTo": [
+        "**"
+      ],
+      "targets": [
+        "copilot",
+        "cline",
+        "claude-code",
+        "continue",
+        "antigravity"
+      ],
+      "tags": [
+        "governance",
+        "baton",
+        "routing"
+      ],
       "bodyRef": "instructions/role-baton-routing.instructions.md"
     },
     {
       "id": "global-task-router",
       "title": "Global Task Router",
       "priority": "P1",
-      "appliesTo": ["**"],
-      "targets": ["copilot", "cline", "claude-code"],
-      "tags": ["governance", "routing", "lanes"],
+      "appliesTo": [
+        "**"
+      ],
+      "targets": [
+        "copilot",
+        "cline",
+        "claude-code",
+        "antigravity"
+      ],
+      "tags": [
+        "governance",
+        "routing",
+        "lanes"
+      ],
       "bodyRef": "instructions/global-task-router.instructions.md"
     },
     {
       "id": "governance-controls",
       "title": "Governance Controls",
       "priority": "P1",
-      "appliesTo": ["**"],
-      "targets": ["copilot", "cline", "continue"],
-      "tags": ["governance", "controls", "compliance"],
+      "appliesTo": [
+        "**"
+      ],
+      "targets": [
+        "copilot",
+        "cline",
+        "continue",
+        "antigravity"
+      ],
+      "tags": [
+        "governance",
+        "controls",
+        "compliance"
+      ],
       "bodyRef": "instructions/governance-controls.instructions.md"
     },
     {
       "id": "harness-goals",
       "title": "Harness Goal Constitution",
       "priority": "P1",
-      "appliesTo": ["**"],
-      "targets": ["copilot", "cline", "claude-code", "continue"],
-      "tags": ["governance", "goals", "priorities"],
+      "appliesTo": [
+        "**"
+      ],
+      "targets": [
+        "copilot",
+        "cline",
+        "claude-code",
+        "continue",
+        "antigravity"
+      ],
+      "tags": [
+        "governance",
+        "goals",
+        "priorities"
+      ],
       "bodyRef": "instructions/harness-goals.instructions.md"
     }
   ]

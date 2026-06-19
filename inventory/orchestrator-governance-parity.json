@@ -51,8 +51,15 @@
       "Claude Code supports hooks through settings.json"
     ],
     "cursor": [
-      "Phase 1 (#3085) + Phase 2 (#3086) COMPLETE — all 12 #1912 surfaces parity-complete or documented-waiver. Hooks: .cursor/hooks.json (scripts/global/cursor-hooks-emit.js) wires all 9 requiredHookScripts incl. the ticket-lifecycle gates (manager_ticket_gate/goal_lens on beforeSubmitPrompt, commit_ticket_gate on preToolUse/beforeShellExecution). HAMR: HAMR_TEAM=cursor across provider-wrapper/activation-check/activate.sh. Agents: agents/ deployed to ~/.cursor/agents/ + subagentStart/subagentStop hooks. visual_qa: governance gate is runtime-agnostic (pretool_guard git-tag block + stop_checks, deployed to ~/.cursor/hooks) and the playwright-vision-low-resource skill reaches Cursor via ~/.agents/skills — Playwright MCP itself is operator-configured identically across all runtimes (none auto-register it). wiki: cross-runtime read of ~/.copilot/wiki/ (mirror claude-code).",
+      "Phase 1 (#3085) + Phase 2 (#3086) COMPLETE \u2014 all 12 #1912 surfaces parity-complete or documented-waiver. Hooks: .cursor/hooks.json (scripts/global/cursor-hooks-emit.js) wires all 9 requiredHookScripts incl. the ticket-lifecycle gates (manager_ticket_gate/goal_lens on beforeSubmitPrompt, commit_ticket_gate on preToolUse/beforeShellExecution). HAMR: HAMR_TEAM=cursor across provider-wrapper/activation-check/activate.sh. Agents: agents/ deployed to ~/.cursor/agents/ + subagentStart/subagentStop hooks. visual_qa: governance gate is runtime-agnostic (pretool_guard git-tag block + stop_checks, deployed to ~/.cursor/hooks) and the playwright-vision-low-resource skill reaches Cursor via ~/.agents/skills \u2014 Playwright MCP itself is operator-configured identically across all runtimes (none auto-register it). wiki: cross-runtime read of ~/.copilot/wiki/ (mirror claude-code).",
       "Cursor hook events are camelCase (sessionStart/beforeSubmitPrompt/preToolUse/stop) plus natives subagentStart/subagentStop/beforeShellExecution/beforeMCPExecution/afterFileEdit; the adapter maps each onto the harness PascalCase taxonomy (SessionStart/UserPromptSubmit/PreToolUse/PostToolUse/Stop)"
+    ],
+    "antigravity": [
+      "Hook events: SessionStart/UserPromptSubmit/PreToolUse/PostToolUse/Stop (PascalCase, Antigravity SDK)",
+      "Injection: User Rules system-prompt XML + Knowledge Items (KI); @-import not supported",
+      "Phase-2 waiver: visual-qa (Playwright MCP) \u2014 Antigravity Playwright integration TBD",
+      "Phase-2 waiver: dedicated wiki path \u2014 reads from ~/.copilot/wiki/ (cross-runtime-read pattern)",
+      "Phase-1 gate: hooks.json + HAMR substrate (#3104, #3106) required before hook parity verified"
     ]
   },
   "deployTargets": [
@@ -111,6 +118,10 @@
         "deployTarget": null,
         "status": "cross-runtime-read",
         "notes": "Phase 2 (#3086): reads from ~/.copilot/wiki/ via wiki-knowledge.instructions.md (runtime-agnostic 'Any repo' access); search command is node ~/.copilot/scripts/wiki-search.js (mirror claude-code)"
+      },
+      "antigravity": {
+        "status": "cross-runtime-read",
+        "note": "Reads from ~/.copilot/wiki/; wiki-knowledge.instructions.md injected via KI (not @-import)"
       }
     },
     "digestManifest": {
@@ -168,9 +179,9 @@
       }
     ],
     "parityGaps": [
-      "claude-code has no dedicated wiki home — reads Copilot runtime by design",
+      "claude-code has no dedicated wiki home \u2014 reads Copilot runtime by design",
       "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)",
-      "cursor has no dedicated wiki home — reads Copilot runtime by design (#3086, mirror claude-code)"
+      "cursor has no dedicated wiki home \u2014 reads Copilot runtime by design (#3086, mirror claude-code)"
     ]
   }
 }
