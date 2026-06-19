@@ -414,6 +414,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `wiki:anneal` | `node scripts/wiki/anneal.js` |
 | `wiki:auto-update` | `node scripts/wiki/auto-update-pipeline.js` |
 | `wiki:drift` | `node scripts/wiki/drift-detector.js` |
+| `wiki:health` | `node scripts/wiki/wiki-health-detector.js` |
 | `wiki:ingest` | `node scripts/wiki/ingest.js` |
 | `wiki:ingest:code` | `node scripts/wiki/ingest-code.js` |
 | `wiki:lint` | `node scripts/wiki/lint.js` |

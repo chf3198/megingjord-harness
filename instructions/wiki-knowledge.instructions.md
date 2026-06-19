@@ -80,6 +80,18 @@ Phase-2 deferred: `graph` adapter (Wiki C GraphRAG, Epic #1942 Phase-2).
 calibration (Epic #1771/#1827 — replay-eval over calendar pattern).
 Detects: code-changed-wiki-stale, instruction-wiki-divergence, readme-wiki-divergence.
 
+## Wiki-Health Detector (per #3068, Epic #3063 — anti-recurrence)
+
+`scripts/wiki/wiki-health-detector.js` (`npm run wiki:health`) makes "wiki empty or stale"
+impossible to miss (the 2026-06-16 both-stores-empty meta-failure). It computes a per-store
+(A=code, B=work-log) health vector — `coverage_ratio` / `stale_ratio` / `consistency_errors`
+/ `reconcile_error_rate` / `actions_minutes` — emitting a schema-v3 G8 signal to
+`dashboard/events.jsonl`. Thresholds: `coverage < 0.95` OR `stale > 0.10` OR any
+`consistency_error` ⇒ advisory; `coverage 0` while `source_count > 0` ⇒ Tier-2 incident
+(`pattern_id: wiki-store-empty-or-stale`). The Drift Gate's advisory→required promotion is
+gated by replay-eval precision ≥ 0.85 against the historical-PR corpus (auto-revoking, NOT
+calendar) — the gate stays advisory until calibrated.
+
 ## Rules
 
 - Wiki at `~/.copilot/wiki/` is **read-only** from non-Megingjord repos
