@@ -332,6 +332,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `mcp:project-state` | `node scripts/global/mcp-project-state.js` |
 | `mcp:register` | `node scripts/global/xteam-mcp-register.js --target all --root . --apply` |
 | `memory:dedup` | `node scripts/global/memory-dedup-lint.js` |
+| `memory:read-route` | `node scripts/global/read-router.js` |
 | `memory:route` | `node scripts/global/memory-write-router.js` |
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
