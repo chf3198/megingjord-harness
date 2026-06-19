@@ -12,12 +12,14 @@ const WIKI_PATHS = {
   copilot: path.join(HOME, '.copilot', 'wiki'),
   codex: path.join(HOME, '.codex', 'devenv-ops', 'wiki'),
   'claude-code': path.join(HOME, '.copilot', 'wiki'),
+  antigravity: path.join(HOME, '.copilot', 'wiki'),
 };
 
 const SEARCH_SCRIPTS = {
   copilot: path.join(HOME, '.copilot', 'scripts', 'wiki-search.js'),
   codex: path.join(HOME, '.codex', 'devenv-ops', 'scripts', 'wiki-search.js'),
   'claude-code': null,
+  antigravity: null,
 };
 
 const SUBDIR_TIERS = {
@@ -59,7 +61,7 @@ function checkRuntime(findings, rt, digestManifest, runtimeTiers) {
     add(findings, `wiki-${rt}-search-missing`, 'medium', `${rt} wiki-search.js missing.`,
       `Expected: ${searchScript}`, rt === 'copilot' ? 'npm run deploy:apply' : 'npm run deploy:codex:apply');
   }
-  if (rt === 'claude-code') {
+  if (rt === 'claude-code' || rt === 'antigravity') {
     add(findings, `wiki-${rt}-depends-on-copilot`, 'low',
       `${rt} wiki read-only; depends_on copilot.wiki.`, `wikiPath: ${wikiPath} (cross-runtime)`, 'Expected design; no action required');
     return;
@@ -80,8 +82,9 @@ function run(options = {}) {
   const dependencies = [];
   if (digestManifest || runtimeTiers) {
     dependencies.push({ from: 'claude-code', to: 'copilot', type: 'cross-runtime-read', status: 'expected' });
+    dependencies.push({ from: 'antigravity', to: 'copilot', type: 'cross-runtime-read', status: 'expected' });
   }
-  for (const rt of ['copilot', 'codex', 'claude-code']) checkRuntime(findings, rt, digestManifest, runtimeTiers);
+  for (const rt of ['copilot', 'codex', 'claude-code', 'antigravity']) checkRuntime(findings, rt, digestManifest, runtimeTiers);
   return {
     ok: findings.filter(f => f.severity === 'high').length === 0,
     surface: 'wiki_docs_memory',

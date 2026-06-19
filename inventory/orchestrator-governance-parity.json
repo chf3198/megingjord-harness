@@ -160,6 +160,9 @@
       },
       "cursor": {
         "note": "cross-runtime read; inherits copilot tiers (#3086)"
+      },
+      "antigravity": {
+        "note": "cross-runtime read; inherits copilot tiers (#3109)"
       }
     },
     "dependencies": [
@@ -176,12 +179,20 @@
         "type": "cross-runtime-read",
         "status": "expected",
         "impact": "claude-code inherits copilot wiki health"
+      },
+      {
+        "from": "antigravity",
+        "to": "copilot",
+        "type": "cross-runtime-read",
+        "status": "expected",
+        "impact": "antigravity inherits copilot wiki health (#3109)"
       }
     ],
     "parityGaps": [
       "claude-code has no dedicated wiki home \u2014 reads Copilot runtime by design",
       "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)",
-      "cursor has no dedicated wiki home \u2014 reads Copilot runtime by design (#3086, mirror claude-code)"
+      "cursor has no dedicated wiki home \u2014 reads Copilot runtime by design (#3086, mirror claude-code)",
+      "antigravity has no dedicated wiki home \u2014 reads Copilot runtime by design (#3109, mirror claude-code)"
     ]
   }
 }
