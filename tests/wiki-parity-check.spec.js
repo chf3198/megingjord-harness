@@ -27,11 +27,13 @@ test('run() with runtimeTiers validates tier compliance', () => {
   assert.ok(typeof result.ok === 'boolean', 'tier validation works');
 });
 
-test('claude-code depends_on copilot edge emitted', () => {
+test('claude-code and antigravity depends_on copilot edge emitted', () => {
   const result = run({ digestManifest: {} });
   const dep = result.dependencies.find(d => d.from === 'claude-code' && d.to === 'copilot');
   assert.ok(dep, 'cross-runtime dependency found');
   assert.equal(dep.type, 'cross-runtime-read');
+  const depAnti = result.dependencies.find(d => d.from === 'antigravity' && d.to === 'copilot');
+  assert.ok(depAnti, 'antigravity cross-runtime dependency found');
 });
 
 test('SUBDIR_TIERS models required/optional/ingest-only', () => {
