@@ -1,0 +1,67 @@
+name: P1 Ready-Stall Detector
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  detect-stall:
+    name: detect-stall
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+            // Fetch open issues with status:ready and priority:P1
+            const issues = await github.paginate(
+              github.rest.issues.listForRepo,
+              {
+                ...context.repo,
+                state: 'open',
+                labels: 'status:ready,priority:P1',
+                per_page: 100
+              }
+            );
+
+            for (const issue of issues) {
+              const updatedAt = new Date(issue.updated_at);
+              if (updatedAt > twentyFourHoursAgo) continue;
+
+              // Check for BLOCKER_NOTE in comments
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { ...context.repo, issue_number: issue.number, per_page: 100 }
+              );
+
+              const hasBlockerNote = comments.some(c =>
+                typeof c.body === 'string' && c.body.includes('BLOCKER_NOTE')
+              );
+
+              if (!hasBlockerNote) {
+                const hoursStalled = Math.floor(
+                  (Date.now() - updatedAt.getTime()) / (60 * 60 * 1000)
+                );
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: issue.number,
+                  body: [
+                    `⚠️ **P1 Ready-Stall Escalation** — stalled ${hoursStalled}h`,
+                    '',
+                    'This P1 ticket has been at `status:ready` for more than 24 hours',
+                    'without a `BLOCKER_NOTE` comment.',
+                    '',
+                    '**Manager must add one of**:',
+                    '1. `BLOCKER_NOTE` with `owner`, `unblock_condition`, `eta_or_review_time`',
+                    '2. Escalation comment linking a follow-up owner action',
+                    '',
+                    'See `instructions/ticket-driven-work.instructions.md` — Ready-SLA section.'
+                  ].join('\n')
+                });
+              }
+            }
