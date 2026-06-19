@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Shared runtime path helpers for Copilot/Codex hook parity."""
+"""Shared runtime path helpers for Copilot/Codex/Antigravity hook parity."""
 from __future__ import annotations
 
 import os
@@ -38,7 +38,12 @@ def repo_scope_candidates() -> list[Path]:
 
 
 def state_root() -> Path:
-    return codex_managed_root() / "state" if runtime_name() == "codex" else copilot_home() / "hooks" / "state"
+    rt = runtime_name()
+    if rt == "codex":
+        return codex_managed_root() / "state"
+    if rt == "antigravity":
+        return Path.home() / ".gemini" / "antigravity" / "state"
+    return copilot_home() / "hooks" / "state"
 
 
 def script_candidates(name: str) -> list[Path]:
@@ -55,4 +60,7 @@ def wiki_candidates() -> list[Path]:
 
 
 def runtime_hook_paths() -> tuple[str, ...]:
+    if runtime_name() == "antigravity":
+        ag = str(Path.home() / ".gemini" / "antigravity" / "hooks" / "scripts")
+        return (ag, str(copilot_home() / "hooks" / "scripts"))
     return (str(codex_managed_root() / "hooks"), str(copilot_home() / "hooks" / "scripts"))
