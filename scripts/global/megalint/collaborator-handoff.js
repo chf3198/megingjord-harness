@@ -93,7 +93,7 @@ function legacyDocSkipActive(comments) {
 // blocks rather than silently disabling enforcement. The prior catch→skip was a
 // fail-open hole; a null/undefined/empty matrix returned WITHOUT throwing is the
 // same hole (#3016 review), so treat it as a load failure too.
-function docCoverageViolations(body, labels, comments) {
+function docCoverageViolations(body, labels, comments, prFiles) {
   if (legacyDocSkipActive(comments)) {
     return [{ rule: 'doc-coverage-legacy-skip', severity: 'advisory',
       detail: 'LEGACY_DOC_SKIP active with BLOCKER_NOTE present; doc-coverage bypassed' }];
@@ -106,7 +106,9 @@ function docCoverageViolations(body, labels, comments) {
     return [{ rule: 'doc-coverage-matrix-load-failed', severity: 'error',
       detail: `doc-coverage matrix failed to load (fail-closed): ${err.message}` }];
   }
-  return docCoverage.checkBlock(body, labels || [], matrix);
+  // #3121: prFiles (when supplied by the CI gate) enables advisory diff-verification —
+  // a surface declared UPDATED must actually appear in the PR diff.
+  return docCoverage.checkBlock(body, labels || [], matrix, null, prFiles);
 }
 
 function validate(input) {
@@ -122,7 +124,7 @@ function validate(input) {
   const body = bodyOf(handoff);
   const violations = checkSignerFields(body);
   if (lane === 'lane:code-change') {
-    violations.push(...docCoverageViolations(body, input.labels, input.comments));
+    violations.push(...docCoverageViolations(body, input.labels, input.comments, input.prFiles));
     violations.push(...checkCrossFamily(body));
   }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });

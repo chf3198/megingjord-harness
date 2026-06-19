@@ -48,11 +48,21 @@ function checkRuntimePaths(violations, declared, runtime) {
   }
 }
 
+// A changed file "covers" a surface when it equals the surface (root file) or sits
+// under it (directory surface). The `/`-boundary guard prevents `docs` matching
+// `docs-other.md` — the unanchored startsWith would over-match. #3121 hardening.
+function surfaceTouched(surface, changed) {
+  const stem = String(surface).replace(/\/+$/, '');
+  return [...changed].some(file => file === stem || file === surface || file.startsWith(`${stem}/`));
+}
+
+// #3121: accept a pre-fetched changed-file set (opts.changedFiles) so the check runs in
+// the PR-API-driven CI context (filenames already in hand, no git base / spawn needed).
 function verifyDeclaredSurfaces(declared, base, opts = {}) {
-  const { cwd, runtime, shallow: forceShallow } = opts;
+  const { cwd, runtime, shallow: forceShallow, changedFiles, structural = true } = opts;
   const shallow = forceShallow !== undefined ? forceShallow : isShallowClone(cwd);
   const violations = [];
-  if (shallow) {
+  if (shallow && structural) {
     for (const surface of declared) {
       const sc = structuralCheck(surface, cwd);
       if (!sc.ok) violations.push({ rule: 'doc-diff-shallow-structural-fail',
@@ -61,16 +71,17 @@ function verifyDeclaredSurfaces(declared, base, opts = {}) {
     return { ok: violations.filter(viol => viol.severity === 'error').length === 0,
       violations, mode: 'shallow-structural' };
   }
-  const changed = base ? getChangedFiles(base, cwd) : null;
+  const preFetched = changedFiles ? new Set(changedFiles) : null;
+  const changed = preFetched || (base ? getChangedFiles(base, cwd) : null);
   for (const surface of declared) {
-    const sc = structuralCheck(surface, cwd);
-    if (!sc.ok) { violations.push({ rule: 'doc-diff-structural-fail',
-      severity: 'error', surface, reason: sc.reason }); continue; }
-    if (changed) {
-      const touched = [...changed].some(file => file === surface || file.startsWith(surface));
-      if (!touched) violations.push({ rule: 'doc-diff-not-changed', severity: 'error',
-        surface, detail: `declared DONE but not in diff vs ${base}` });
+    if (structural) {
+      const sc = structuralCheck(surface, cwd);
+      if (!sc.ok) { violations.push({ rule: 'doc-diff-structural-fail',
+        severity: 'error', surface, reason: sc.reason }); continue; }
     }
+    if (changed && !surfaceTouched(surface, changed))
+      violations.push({ rule: 'doc-diff-not-changed', severity: 'error',
+        surface, detail: `declared DONE but not in diff${base ? ` vs ${base}` : ''}` });
   }
   checkRuntimePaths(violations, declared, runtime);
   return { ok: violations.filter(viol => viol.severity === 'error').length === 0,
@@ -78,4 +89,4 @@ function verifyDeclaredSurfaces(declared, base, opts = {}) {
 }
 
 module.exports = { verifyDeclaredSurfaces, structuralCheck, getChangedFiles,
-  isShallowClone, RUNTIME_DOC_ROOTS };
+  isShallowClone, surfaceTouched, RUNTIME_DOC_ROOTS };
