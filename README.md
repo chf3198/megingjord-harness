@@ -336,6 +336,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `memory:read-route` | `node scripts/global/read-router.js` |
 | `memory:route` | `node scripts/global/memory-write-router.js` |
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
+| `prefix:cache-report` | `node scripts/global/prefix-cache.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
 | `rag:search` | `node scripts/global/rag-search.js` |
