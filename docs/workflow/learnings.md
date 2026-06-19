@@ -1,20 +1,29 @@
-# Workflow Learnings
+# Workflow Learnings (pointer index)
+
+Thin chronological index. Full prose lives in the canonical home
+[[workflow-learnings]] (`wiki/wisdom/project/research/workflow-learnings.md`) per Epic #3124 D4 —
+one fact, one home, no duplicated prose. Each line points to its source ticket + the wiki entry.
 
 ## 2026-06-02
-- #2617: Make overlap boundaries explicit at manager handoff (`related_tickets`, `overlap_decision`) so conflict prevention is enforced by schema, not operator memory.
-- #2626: Direct fleet model calls without bounded timeout can stall sessions; use guarded wrappers or explicit timeout flags.
+
+- #2617 — explicit overlap boundaries at manager handoff. See [[workflow-learnings]].
+- #2626 — bound fleet calls with a timeout or guarded wrapper. See [[workflow-learnings]].
 
 ## 2026-06-07
-- #2569: Don't ask the client for a credential already in the approved local `.env`. Before any credential prompt, call `credential-availability.js#preCredentialPromptCheck([names])` — `use-local` if available, else `report-absent-no-prompt` (report + terminal-entry, never request the raw secret in chat). Builds on #2645's `loadLocalEnv`.
+
+- #2569 — never prompt the client for a credential already in local `.env`. See [[workflow-learnings]].
 
 ## 2026-06-08
-- #2730: Multi-close batch contract is for INSEPARABLE single-diff work only. If each AC has its own file(s), logic, and tests, it is separable and requires per-ticket workflow (dedicated worktree + branch + baton + own PR per ticket). Using batch as a convenience shortcut is a G1 violation. Pattern: `batch-shortcut-bypasses-per-ticket-workflow`.
-- #2735: Six doc-coverage bugs shipped silently because the gate was advisory: `loadNaReasons()` must throw (not return null) on bad config; `execSync` with template strings is OWASP A03 injection — use `spawnSync` + args array; `severity:'warning'` violations don't block `ok:false` — promote to `'error'`; `DOC_COVERAGE_GATE_ADVISORY` env bypass must be removed from all callers, not just the validator itself.
-- #2726/#2737: Pretool hook reads `~/.copilot/hooks/state/` (not `~/.megingjord/state/`). After a GraphQL merge (bypassing `gh pr merge`), hook state `admin_ops.merge` stays False. Record it manually via `load_state`/`save_state` from the correct `hooks/scripts/state_store.py` before attempting issue close.
-- #2726: Baton CI gate `evidence-completeness` checks issue comment timestamps vs PR creation time. If MANAGER_HANDOFF or COLLABORATOR_HANDOFF is posted AFTER the PR is created, the gate fails with "retroactive planting" error. Post ALL baton artifacts before `gh pr create`.
-- #2697: Fleet calls that lack a bounded timeout can stall the full session indefinitely. Always wrap fleet dispatches with an explicit `timeout` option or use the fleet-call-guard bounded wrapper.
-- #3016 (Epic #2707): A blocking-capable validator is still a no-op if it is gated on an argument the caller never passes. `collaborator-handoff.js` ran the doc-coverage + cross-family checks only when `input.lane === 'lane:code-change'`, but `baton-gates.yml` calls `validate({ comments, labels })` with no `lane` scalar — so both checks were dead code on every PR despite #2712 shipping the hard-block logic. Lesson: gate on data the real caller actually provides (derive from `labels`), and add a test that uses the **exact CI call signature**, not a hand-tuned one. Also prefer fail-**closed** on dependency-load errors (the prior `catch → matrix = null → skip` silently disabled enforcement).
-- #3098/#1948: "Phantom completion" — children #2652–#2657 were CLOSED with prose "consultant evidence" but their implementation never merged (`git log` shows zero commits; no PR referenced). Closing a ticket with a narrative claim is not proof of merge. Lesson: completion-truth needs a comment-time validator that verifies cited files exist at `origin/main` and cited PRs are actually merged (the unbuilt #1889, now reparented to #2891) — complementary to, not redundant with, the post-close `merge-evidence` gate. When a re-ship is needed, derive the objective floor from the diff (`test-floor-classifier.js`) rather than trusting the agent-declared `test_strategy`.
+
+- #2730 — multi-close batching is for inseparable single-diff work only. See [[workflow-learnings]].
+- #2735 — advisory doc-coverage gate hid six bugs; fail-closed + spawnSync. See [[workflow-learnings]].
+- #2726/#2737 — pretool hook state path + record `admin_ops.merge` after REST merge. See [[workflow-learnings]].
+- #2726 — post all baton artifacts before `gh pr create`. See [[workflow-learnings]].
+- #2697 — unbounded fleet calls stall the session. See [[workflow-learnings]].
+- #3016 — a validator gated on an arg the caller never passes is dead code. See [[workflow-learnings]].
+- #3098/#1948 — phantom completion: closed-with-prose but never merged. See [[workflow-learnings]].
 
 ## 2026-06-19
-- #3121/#2716/#2707: A SECOND phantom-completion class — code that *merged* but was never *wired*. #2716 closed `resolution:completed` shipping `doc-coverage-diff-verify.js` (`verifyDeclaredSurfaces`, comprehensive), but the module had **zero callers** — the live gate (`collaborator-handoff.js#checkBlock`) never invoked it, and the workflow never even fetched PR files. The module's own unit tests passed and the ticket closed, yet the feature did nothing in production. This is distinct from #3098's never-merged phantom: here the code exists and is correct, but is dead. Lesson: a feature ticket is not done until its code is reachable from the real entrypoint — a wiring test that asserts the *caller* invokes the new code matters as much as the unit tests, and "module exists + unit tests green" must never be read as "gate enforces it." The fix (this ticket) wires the existing module in rather than reimplementing — when you find dead-but-correct code, wire it, don't duplicate it.
+
+- #3121/#2716 — second phantom class: merged-but-unwired; need a wiring test. See [[workflow-learnings]].
+- #3124/#3127 — drain MEMORY.md to pointers; measure with `npm run resident:budget`. See [[workflow-learnings]].

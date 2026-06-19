@@ -330,6 +330,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `mailbox:send` | `node scripts/global/mailbox-client.js send` |
 | `mcp:project-state` | `node scripts/global/mcp-project-state.js` |
 | `mcp:register` | `node scripts/global/xteam-mcp-register.js --target all --root . --apply` |
+| `memory:dedup` | `node scripts/global/memory-dedup-lint.js` |
+| `memory:route` | `node scripts/global/memory-write-router.js` |
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
