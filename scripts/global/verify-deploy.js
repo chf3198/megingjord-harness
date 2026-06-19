@@ -11,7 +11,7 @@
 //   - Any malformed/unexpected input results in ok:false (fail-closed, CWE-754).
 const fs = require('node:fs');
 const path = require('node:path');
-const { hashFile, collectFiles, verifyManifestHmac, MANIFEST_DIR, TARGET_DIRS } =
+const { hashFile, collectFiles, verifyManifestHmac, MANIFEST_DIR, TARGET_DIRS, isDeployedPath } =
   require('./deploy-manifest');
 
 /** @typedef {{ ok: boolean, mismatches: string[], missing: string[], extra: string[], manifest: object|null, error?: string }} VerifyResult */
@@ -124,7 +124,11 @@ function verifyDeploy(targetDir, targetName, opts = {}) {
   if (error) return error;
   const expectedMap = new Map(manifest.entries.map((e) => [e.path, e.sha256]));
   const actualFiles = collectFiles(targetDir);
-  const actualMap = new Map(actualFiles.map((f) => [path.relative(targetDir, f), f]));
+  const actualMap = new Map(
+    actualFiles
+      .map((f) => [path.relative(targetDir, f), f])
+      .filter(([relPath]) => isDeployedPath(targetName, relPath))
+  );
   const { mismatches, missing, extra } = diffEntries(expectedMap, actualMap);
   return { ok: mismatches.length === 0 && missing.length === 0, mismatches, missing, extra, manifest };
 }

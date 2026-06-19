@@ -461,3 +461,29 @@ test('[mutation] verifyDeploy rejects malformed manifest (no entries) — fail-c
   assert.ok(!result.ok, 'malformed manifest must fail — removing schema check breaks fail-closed invariant');
   assert.ok(result.error);
 });
+
+test('isDeployedPath filters out IDE-specific files for antigravity and cursor targets', () => {
+  const { isDeployedPath } = require('../scripts/global/deploy-manifest');
+  
+  // antigravity positive cases
+  assert.ok(isDeployedPath('antigravity', 'hooks.json'));
+  assert.ok(isDeployedPath('antigravity', 'instructions.md'));
+  assert.ok(isDeployedPath('antigravity', 'commands/worktree-status.md'));
+  assert.ok(isDeployedPath('antigravity', 'agents/ticket-manager.md'));
+  
+  // antigravity negative cases
+  assert.ok(!isDeployedPath('antigravity', 'extensions/some-ext/file.js'));
+  assert.ok(!isDeployedPath('antigravity', 'argv.json'));
+  
+  // cursor positive cases
+  assert.ok(isDeployedPath('cursor', 'hooks.json'));
+  assert.ok(isDeployedPath('cursor', 'hooks/some-hook.js'));
+  
+  // cursor negative cases
+  assert.ok(!isDeployedPath('cursor', 'extensions/some-ext/file.js'));
+  assert.ok(!isDeployedPath('cursor', 'argv.json'));
+  
+  // other targets should not filter
+  assert.ok(isDeployedPath('copilot', 'arbitrary-file.js'));
+});
+
