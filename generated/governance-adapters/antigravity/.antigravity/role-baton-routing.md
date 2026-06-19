@@ -1,9 +1,9 @@
 ---
-target: continue
-id: operator-identity-context
-title: Operator Identity Context
+target: antigravity
+id: role-baton-routing
+title: Role Baton Routing
 priority: P1
-bodyRef: instructions/operator-identity-context.instructions.md
+bodyRef: instructions/role-baton-routing.instructions.md
 appliesTo:
   - "**"
 targets:
@@ -20,9 +20,9 @@ paths:
 priority: P1
 targets: "copilot,cline,claude-code,continue,antigravity"
 ---
-# Operator Identity Context
+# Role Baton Routing
 
-Source: instructions/operator-identity-context.instructions.md
+Source: instructions/role-baton-routing.instructions.md
 Targets: copilot, cline, claude-code, continue, antigravity
 
-This is a generated adapter preview for continue.
+This is a generated adapter preview for antigravity.

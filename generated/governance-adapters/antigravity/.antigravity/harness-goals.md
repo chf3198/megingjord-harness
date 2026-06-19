@@ -1,9 +1,9 @@
 ---
-target: continue
-id: operator-identity-context
-title: Operator Identity Context
+target: antigravity
+id: harness-goals
+title: Harness Goal Constitution
 priority: P1
-bodyRef: instructions/operator-identity-context.instructions.md
+bodyRef: instructions/harness-goals.instructions.md
 appliesTo:
   - "**"
 targets:
@@ -20,9 +20,9 @@ paths:
 priority: P1
 targets: "copilot,cline,claude-code,continue,antigravity"
 ---
-# Operator Identity Context
+# Harness Goal Constitution
 
-Source: instructions/operator-identity-context.instructions.md
+Source: instructions/harness-goals.instructions.md
 Targets: copilot, cline, claude-code, continue, antigravity
 
-This is a generated adapter preview for continue.
+This is a generated adapter preview for antigravity.

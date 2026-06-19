@@ -1,5 +1,5 @@
 ---
-target: continue
+target: antigravity
 id: operator-identity-context
 title: Operator Identity Context
 priority: P1
@@ -25,4 +25,4 @@ targets: "copilot,cline,claude-code,continue,antigravity"
 Source: instructions/operator-identity-context.instructions.md
 Targets: copilot, cline, claude-code, continue, antigravity
 
-This is a generated adapter preview for continue.
+This is a generated adapter preview for antigravity.
