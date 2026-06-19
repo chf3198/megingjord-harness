@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""SessionStart hook: warn when HAMR activation is absent, stale, or disabled."""
+"""SessionStart hook: warn when HAMR activation is absent, stale, or disabled.
+
+Runtime support: claude, copilot, codex, cursor, antigravity.
+"""
 from __future__ import annotations
 
 import json
@@ -21,9 +24,10 @@ def candidate_paths() -> list[Path]:
         "copilot": home / ".copilot" / "hamr-config.json",
         "codex": home / ".codex" / "devenv-ops" / "hamr-config.json",
         "cursor": home / ".cursor" / "hamr-config.json",
+        "antigravity": home / ".gemini" / "antigravity" / "hamr-config.json",
     }
     runtime = (os.getenv("DEVENT_OPS_RUNTIME") or os.getenv("HAMR_TEAM") or "copilot").lower()
-    order = [runtime, "copilot", "claude", "codex", "cursor"]
+    order = [runtime, "copilot", "claude", "codex", "cursor", "antigravity"]
     return [paths[name] for name in dict.fromkeys(order) if name in paths]
 
 
