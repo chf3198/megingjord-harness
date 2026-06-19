@@ -68,3 +68,37 @@ test('covers all six comment artifacts plus PR body', () => {
     ['ADMIN_HANDOFF', 'BLOCKER_NOTE', 'COLLABORATOR_HANDOFF', 'CONSULTANT_CLOSEOUT', 'EPIC_RESCOPE', 'MANAGER_HANDOFF'],
   );
 });
+
+// Antigravity baton fixture — Refs #3107, Epic #3095.
+// Verifies signing alias derivation and artifact byte-identity for the antigravity runtime.
+const path = require('path');
+const fs = require('fs');
+const { validate: signerFidelityValidate } = require('../scripts/global/megalint/signer-fidelity.js');
+const REGISTRY = JSON.parse(fs.readFileSync(path.join(__dirname, '../inventory/team-model-signatures.json'), 'utf8'));
+const AG_FIXTURE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/antigravity-baton.json'), 'utf8'));
+
+test('antigravity registry derives Nova Mason for claude-sonnet role=manager', () => {
+  const team = AG_FIXTURE.team;
+  const model = AG_FIXTURE.model;
+  const role = AG_FIXTURE.role;
+  const entry = REGISTRY.registry.find(
+    (e) => (e.team === '*' || e.team === team) && new RegExp(e.modelPattern, 'i').test(model),
+  );
+  const alias = `${entry?.aliasSeed || REGISTRY.defaultAliasSeed} ${REGISTRY.roleSurnames[role]}`;
+  expect(alias).toBe(AG_FIXTURE.expectedAlias);
+});
+
+test('antigravity MANAGER_HANDOFF passes signer-fidelity check', () => {
+  const body = Object.entries(AG_FIXTURE.MANAGER_HANDOFF)
+    .map(([k, v]) => `${k}: ${v}`).join('\n');
+  const result = signerFidelityValidate({ body, team: AG_FIXTURE.team });
+  expect(result.violations.filter((v) => v.severity !== 'advisory')).toHaveLength(0);
+});
+
+test('MANAGER_HANDOFF is byte-identical under antigravity env', () => {
+  const input = { artifact: 'MANAGER_HANDOFF', role: 'manager', teamModel: 'claude-code:opus@anthropic', ticket: 3107, fields: ARTIFACT_FIXTURES.MANAGER_HANDOFF.fields };
+  const agEnv = RUNTIME_ENVS.find((r) => r.name === 'antigravity').env;
+  const agOut = renderUnderEnv(agEnv, () => buildArtifact(input));
+  const refOut = buildArtifact(input);
+  expect(agOut).toBe(refOut);
+});
