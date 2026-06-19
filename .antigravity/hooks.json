@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/session_context.py"
+      },
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/hamr_activation_check.py"
+      },
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/manager_ticket_gate.py"
+      },
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/goal_lens.py"
+      }
+    ],
+    "userPromptSubmit": [
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/userprompt_gate.py"
+      }
+    ],
+    "beforeToolExecution": [
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/commit_ticket_gate.py"
+      },
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/pretool_guard.py"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/posttool_reminders.py"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "python3 ~/.gemini/antigravity/hooks/scripts/stop_reminder.py"
+      }
+    ]
+  }
+}
