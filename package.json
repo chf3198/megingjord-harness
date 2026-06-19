@@ -182,6 +182,7 @@
     "lint:all": "npm run lint:js && npm run lint:py && npm run lint:sh && npm run lint:md && npm run lint:decisions",
     "lint:coverage-metric": "node scripts/global/lint-coverage-metric.js",
     "lint:decisions": "node scripts/global/decisions-md-validator.js",
+    "prefix:cache-report": "node scripts/global/prefix-cache.js",
     "resident:budget": "node scripts/global/resident-budget.js",
     "instructions:split-classify": "node scripts/global/instructions-split-classifier.js",
     "memory:route": "node scripts/global/memory-write-router.js",
