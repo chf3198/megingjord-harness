@@ -89,3 +89,7 @@ generated/doc-graph.json
 
 # Refs #2914 — runtime deploy manifests (generated state; never committed)
 inventory/deploy-manifests/
+
+# Refs #3068 — wiki-health runtime artifacts (generated state / runtime log; never committed)
+generated/wiki-drift-gate-state.json
+dashboard/events.jsonl

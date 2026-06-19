@@ -30,9 +30,19 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - name: Run wiki drift detector (advisory)
+      - name: Wiki health + gate-promotion decision (#3068)
+        id: gate
+        run: |
+          # AC3: promotion is replay-eval-precision-gated (>=0.85), NOT calendar; auto-revokes
+          # each run when precision drops. Stays advisory until the corpus is calibrated.
+          PRECISION=$(node -e "try{const r=require('./scripts/wiki/replay-eval-harness');const o=(r.runReplayEval||r.run||(()=>({})))();process.stdout.write(String(o.mean_precision ?? 0))}catch{process.stdout.write('0')}")
+          node scripts/wiki/wiki-health-detector.js --precision="$PRECISION" || true
+          REQUIRED=$(node -e "try{const s=require('./generated/wiki-drift-gate-state.json');process.stdout.write(s.gate==='required'?'true':'false')}catch{process.stdout.write('false')}")
+          echo "required=$REQUIRED" >> "$GITHUB_OUTPUT"
+          echo "::notice::wiki-drift gate required=$REQUIRED (replay-eval precision=$PRECISION; threshold 0.85)"
+      - name: Run wiki drift detector (advisory unless promoted to required)
         id: drift
-        continue-on-error: true
+        continue-on-error: ${{ steps.gate.outputs.required != 'true' }}
         run: |
           node scripts/wiki/drift-detector.js > drift-report.json 2>&1
           cat drift-report.json
