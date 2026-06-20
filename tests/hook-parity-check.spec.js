@@ -37,7 +37,7 @@ function withStubs(stubs, fn) {
   }
 }
 
-function buildStubs({ branch, main, copilot, codex }, scriptName = 'stop_checks.py') {
+function buildStubs({ branch, main, copilot, codex, cursor, antigravity }, scriptName = 'stop_checks.py') {
   const REPO = path.resolve(__dirname, '..');
   const home = os.homedir();
   return {
@@ -45,6 +45,8 @@ function buildStubs({ branch, main, copilot, codex }, scriptName = 'stop_checks.
       [path.join(REPO, 'hooks', 'scripts', scriptName)]: branch,
       [path.join(home, '.copilot', 'hooks', 'scripts', scriptName)]: copilot,
       [path.join(home, '.codex', 'devenv-ops', 'hooks', scriptName)]: codex,
+      [path.join(home, '.cursor', 'hooks', 'scripts', scriptName)]: cursor,
+      [path.join(home, '.gemini', 'antigravity', 'hooks', 'scripts', scriptName)]: antigravity,
     },
     gitShow: { [`origin/main:hooks/scripts/${scriptName}`]: main },
   };
@@ -86,8 +88,8 @@ test('branch-and-runtime-diverged when all three differ', () => {
   });
 });
 
-test('not-deployed when both copilot and codex absent', () => {
-  const stubs = buildStubs({ branch: 'A', main: 'A', copilot: null, codex: null });
+test('not-deployed when all runtime targets absent', () => {
+  const stubs = buildStubs({ branch: 'A', main: 'A', copilot: null, codex: null, cursor: null, antigravity: null });
   withStubs(stubs, (mod) => {
     const r = mod.diagnose('stop_checks.py');
     assert.equal(r.diagnosis, 'not-deployed');
@@ -119,4 +121,28 @@ test('TRACKED constant covers expected hook scripts', () => {
   assert.ok(mod.TRACKED.includes('stop_checks.py'));
   assert.ok(mod.TRACKED.includes('repo_detection.py'));
   assert.ok(mod.TRACKED.includes('userprompt_gate.py'));
+});
+
+test('target antigravity: not-deployed opt-out when antigravity absent (#3104)', () => {
+  const stubs = buildStubs({ branch: 'A', main: 'A', copilot: 'A', codex: 'A', antigravity: null });
+  withStubs(stubs, (mod) => {
+    const r = mod.diagnose('stop_checks.py', 'antigravity');
+    assert.equal(r.diagnosis, 'not-deployed');
+    assert.match(r.recommend, /G5|opt-out/i);
+  });
+});
+
+test('target antigravity: ok when antigravity deployed matches branch+main (#3104)', () => {
+  const stubs = buildStubs({ branch: 'A', main: 'A', copilot: null, codex: null, antigravity: 'A' });
+  withStubs(stubs, (mod) => {
+    const r = mod.diagnose('stop_checks.py', 'antigravity');
+    assert.equal(r.diagnosis, 'ok');
+  });
+});
+
+test('DEPLOY_TARGETS exposes antigravity target (#3104)', () => {
+  delete require.cache[modulePath];
+  const mod = require(modulePath);
+  assert.ok(Object.keys(mod.DEPLOY_TARGETS).includes('antigravity'));
+  assert.equal(typeof mod.deployedFor, 'function');
 });
