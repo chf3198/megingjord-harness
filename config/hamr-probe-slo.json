@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "offload": {
+    "coverage_floor_7d": 0.85,
+    "gate_quality_floor_7d": 0.9,
+    "incident_ceiling_7d": 10
+  },
+  "breaker": {
+    "fail_threshold": 5,
+    "cooloff_ms": 30000
+  }
+}

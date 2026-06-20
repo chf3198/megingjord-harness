@@ -10,6 +10,7 @@
 // allow-list + log-redaction; raw diffs/tokens/issue-bodies never included.
 const crypto = require('node:crypto');
 const { redactEvent } = require('./log-redaction');
+const { ALL_KEYS } = require('./governance-bundle-fields');
 
 // 300s default: fast/volatile fields (PR checks, issue trail) must be recent.
 const FAST_TTL_MS = Number(process.env.GOVERNANCE_BUNDLE_FAST_TTL_MS || 300000);
@@ -22,7 +23,9 @@ const FIELD_KEYS = [
 
 function canonicalFields(fields) {
   const out = {};
-  for (const k of FIELD_KEYS) if (fields && fields[k] !== undefined) out[k] = fields[k];
+  const keys = fields && fields.schema === 'governance-fields/v2' ? ALL_KEYS : FIELD_KEYS;
+  const src = fields && fields.fields ? fields.fields : fields;
+  for (const k of keys) if (src && src[k] !== undefined) out[k] = src[k];
   return out;
 }
 
@@ -34,7 +37,8 @@ function contentHash(fields, issue, generatedAt) {
 function buildBundle({ issue, fields, nowMs }) {
   const generatedAt = new Date(nowMs).toISOString();
   const redacted = redactEvent(canonicalFields(fields || {})).event;
-  const bundle = { schema: 'governance-bundle/v1', issue: Number(issue), fields: redacted, generated_at: generatedAt };
+  const schema = (fields && fields.schema === 'governance-fields/v2') ? 'governance-bundle/v2' : 'governance-bundle/v1';
+  const bundle = { schema, issue: Number(issue), fields: redacted, generated_at: generatedAt };
   bundle.content_hash = contentHash(redacted, bundle.issue, generatedAt);
   return bundle;
 }

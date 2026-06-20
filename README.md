@@ -288,6 +288,9 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hamr:compress` | `node scripts/global/constitution-compressor.js` |
 | `hamr:deploy` | `bash scripts/global/hamr-deploy.sh` |
 | `hamr:doctor` | `node scripts/global/hamr-doctor.js` |
+| `hamr:epic-3008:test` | `npx playwright test tests/hamr-tool-policy.spec.js tests/governance-evidence-bridge.spec.js tests/hamr-offload-kpi.spec.js tests/cascade-context-integration.spec.js tests/hamr-epic-parity.spec.js` |
+| `hamr:evidence-bridge` | `node -e "const b=require('./scripts/global/governance-evidence-bridge');const i=process.argv[1];b.writeSnapshot(i,[])"` |
+| `hamr:evidence-diag` | `node -e "const d=require('./scripts/global/governance-evidence-diag');console.log(JSON.stringify(d.diagnoseEvidence(process.argv[1],[])))"` |
 | `hamr:fleet-cascade-gate` | `node scripts/global/fleet-cascade-gate.js` |
 | `hamr:fleet-cascade-gate:test` | `node --test tests/fleet-cascade-gate.spec.js` |
 | `hamr:governance-bundle-push` | `node scripts/global/governance-bundle-push.js` |
@@ -296,6 +299,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hamr:install-cron` | `bash scripts/global/install-cron.sh` |
 | `hamr:log-rotate` | `node scripts/global/log-rotate.js` |
 | `hamr:multi-judge:test` | `node --test tests/multi-judge-prompts.spec.js tests/multi-judge-variance.spec.js tests/multi-judge-orchestrator.spec.js` |
+| `hamr:offload-kpi` | `node scripts/global/hamr-offload-kpi.js` |
+| `hamr:offload-kpi:test` | `npx playwright test tests/hamr-offload-kpi.spec.js tests/hamr-epic-parity.spec.js` |
 | `hamr:policy-overrides` | `node scripts/global/cascade-policy-overrides.js` |
 | `hamr:premium-budget:test` | `node --test tests/premium-budget-governor.spec.js` |
 | `hamr:rule-gate` | `node scripts/global/rule-coverage-gate.js` |
@@ -304,6 +309,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hamr:sticky-route` | `node scripts/global/sticky-route.js` |
 | `hamr:sync-verify` | `node scripts/global/hamr-sync-verify.js` |
 | `hamr:teardown` | `bash scripts/global/hamr-teardown.sh` |
+| `hamr:tool-policy:test` | `npx playwright test tests/hamr-tool-policy.spec.js` |
+| `hamr:tool-proxy` | `node scripts/global/hamr-tool-proxy.js` |
 | `harness:self-test` | `node scripts/global/harness-self-test.js` |
 | `harness:self-test:capability` | `node scripts/global/harness-self-test.js --capability` |
 | `harness:self-test:regression` | `node scripts/global/harness-self-test.js --regression` |

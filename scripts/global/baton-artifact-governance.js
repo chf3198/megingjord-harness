@@ -88,4 +88,4 @@ function analyzeComments(comments, opts = {}) {
   return { ok: violations.length === 0, count: entries(comments).length, violations };
 }
 
-module.exports = { analyzeComments, ARTIFACT_ROLE, isEpic, EPIC_FORBIDDEN_ARTIFACTS, violation };
+module.exports = { entries, analyzeComments, ARTIFACT_ROLE, isEpic, EPIC_FORBIDDEN_ARTIFACTS, violation };
