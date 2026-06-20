@@ -77,7 +77,7 @@ const { validate: signerFidelityValidate } = require('../scripts/global/megalint
 const REGISTRY = JSON.parse(fs.readFileSync(path.join(__dirname, '../inventory/team-model-signatures.json'), 'utf8'));
 const AG_FIXTURE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/antigravity-baton.json'), 'utf8'));
 
-test('antigravity registry derives Nova Mason for claude-sonnet role=manager', () => {
+test('antigravity registry derives Aria Mason for claude-sonnet role=manager', () => {
   const team = AG_FIXTURE.team;
   const model = AG_FIXTURE.model;
   const role = AG_FIXTURE.role;

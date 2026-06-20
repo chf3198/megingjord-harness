@@ -3,9 +3,9 @@
   "model": "claude-sonnet-4-6",
   "substrate": "google",
   "role": "manager",
-  "expectedAlias": "Nova Mason",
+  "expectedAlias": "Aria Mason",
   "MANAGER_HANDOFF": {
-    "Signed-by": "Nova Mason",
+    "Signed-by": "Aria Mason",
     "Team&Model": "antigravity:claude-sonnet-4-6@google",
     "Role": "manager",
     "scope": "antigravity governance parity — Phase-2 hooks and HAMR substrate",
