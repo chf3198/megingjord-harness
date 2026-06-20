@@ -1,6 +1,6 @@
 ---
 name: Sandbox Worktree Governance
-description: Governance controls for multi-agent sandbox worktrees used by Copilot, Claude Code, and Codex.
+description: Governance controls for multi-agent sandbox worktrees used by Copilot, Claude Code, Codex, Cursor, and Antigravity.
 applyTo: "**"
 ---
 
@@ -8,9 +8,10 @@ applyTo: "**"
 
 ## Operating Model
 
-- `sandbox/copilot`, `sandbox/codex`, and `sandbox/claude-code` are launcher branches.
+- `sandbox/copilot`, `sandbox/codex`, `sandbox/claude-code`, `sandbox/cursor`, and `sandbox/antigravity` are launcher branches.
 - Launcher branches are not delivery branches.
 - Delivery work must happen on ticket-linked task branches (`feat/<issue#>-<slug>`, `fix/<issue#>-<slug>`, `hotfix/<issue#>-<slug>`).
+- Per-runtime governance injection differs: Antigravity uses the User Rules system-prompt block plus Knowledge Items (KI) — the `@`-import mechanism is not supported; Cursor uses `.cursor/rules/*.mdc`; Claude Code uses `@`-imports in `CLAUDE.md`.
 
 ## Required Session Start
 
@@ -24,7 +25,7 @@ Before starting implementation in any sandbox worktree:
 
 Preferred command:
 
-- `bash scripts/worktree-session-start.sh <copilot|codex|claude-code> feat/<issue#>-<slug>`
+- `bash scripts/worktree-session-start.sh <copilot|codex|claude-code|cursor|antigravity> feat/<issue#>-<slug>`
 
 Lease command:
 
