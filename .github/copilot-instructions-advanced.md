@@ -92,3 +92,8 @@ This convention is uniform across Copilot, Claude Code, and Codex. Rationale:
 
 Full contract: `global-standards.instructions.md` §"Deferred-finalize
 merge-evidence contract (Epic #2295 P1.3)".
+
+## Tool-Use Reliability
+
+Tool-read-first rule, forbidden ID invention, fabrication prohibition:
+[copilot-instructions-tool-reliability.md](copilot-instructions-tool-reliability.md)

@@ -81,6 +81,21 @@
       "aliasSeed": "Coda"
     },
     {
+      "team": "copilot",
+      "modelPattern": "gemini",
+      "aliasSeed": "Gaia"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gpt-4",
+      "aliasSeed": "Gale"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "^o[0-9]",
+      "aliasSeed": "Onyx"
+    },
+    {
       "team": "claude-code",
       "modelPattern": "sonnet",
       "aliasSeed": "Clio"
