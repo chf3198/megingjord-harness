@@ -15,6 +15,7 @@ const { dispatchFreeCloud } = require('./free-cloud-dispatch'); // execute free 
 const { loadLocalEnvOnce } = require('./load-local-env');
 // (#2842 / Epic #2926 C2) progress observability so the operator sees the free fleet working
 const { withProgress } = require('./dispatch-progress');
+const { buildContextualPrompt } = require('./fleet-context-dispatch');
 
 const HEARTBEAT_MS = 30_000;
 
@@ -70,10 +71,21 @@ async function tryOllama(prompt, model, attempt = 0) {
   return { ok: true, content: result.content, model: result.model, tier: 'local' };
 }
 
+function resolvePrompt(prompt, opts = {}) {
+  if (!opts.ticket && !opts.paths && !opts.wikiQuery) return prompt;
+  try {
+    return buildContextualPrompt({ ticket: opts.ticket, paths: opts.paths, wikiQuery: opts.wikiQuery, task: prompt, maxContextChars: opts.maxContextChars }).prompt;
+  } catch (err) {
+    process.stderr.write(`[cascade] context envelope skipped: ${err.message}\n`);
+    return prompt;
+  }
+}
+
 async function cascade(prompt, opts = {}) {
   // (#2645) G3: hydrate provider keys for the free-cloud fallback
   if (!opts.env) loadLocalEnvOnce();
   const model = opts.model || 'qwen2.5:7b-instruct';
+  prompt = resolvePrompt(prompt, opts);
   const h = hints(prompt); const start = Date.now(); const nowMs = start;
   // #2930 C4: if the fleet breaker is open (known-down), skip the fleet attempt entirely and fail
   // straight to free-cloud — don't pay the probe+timeout cost on every call during an outage.
@@ -141,6 +153,7 @@ async function cascade(prompt, opts = {}) {
 async function main() {
   const args = process.argv.slice(2);
   const prompt = args[args.indexOf('--prompt') + 1] || '';
+  const ticket = args[args.indexOf('--ticket') + 1] || undefined;
   const model = args[args.indexOf('--model') + 1] || undefined;
   const json = args.includes('--json');
   if (!prompt) { console.error('--prompt required'); process.exit(1); }
@@ -149,11 +162,11 @@ async function main() {
     console.log(json ? JSON.stringify(soloResult) : `escalation_needed=true reason=fleet_unavailable suggested_tier=${soloResult.suggested_tier}`);
     return;
   }
-  const result = await cascade(prompt, { model });
+  const result = await cascade(prompt, { model, ticket });
   if (json) return console.log(JSON.stringify(result, null, 2));
   if (result.ok) console.log(result.content);
   if (result.escalation_needed) process.stderr.write(`[cascade] escalate→${result.suggested_tier}: ${result.reason || result.quality_reason}\n`);
 }
 
 if (require.main === module) main().catch(e => { console.error(e.message); process.exit(1); });
-module.exports = { cascade, assessQuality, hints, escalationTier };
+module.exports = { cascade, assessQuality, hints, escalationTier, resolvePrompt };

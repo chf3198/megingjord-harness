@@ -30,7 +30,7 @@ function fieldsFile(issue) {
 function readFields(issue) {
   const f = fieldsFile(issue);
   if (!fs.existsSync(f)) return null;
-  try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; }
+  try { const parsed = JSON.parse(fs.readFileSync(f, 'utf8')); return parsed.fields || parsed; } catch { return null; }
 }
 
 async function pushBundle(opts = {}) {

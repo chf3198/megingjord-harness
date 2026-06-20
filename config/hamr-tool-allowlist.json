@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "defaultDeny": true,
+  "roles": {
+    "manager": [
+      "github_read",
+      "wiki_search",
+      "repo_map",
+      "context_dispatch"
+    ],
+    "collaborator": [
+      "github_read",
+      "wiki_search",
+      "repo_map",
+      "github_self_comment",
+      "context_dispatch"
+    ],
+    "admin": [
+      "github_read",
+      "wiki_search",
+      "repo_map",
+      "context_dispatch"
+    ],
+    "consultant": [
+      "github_read",
+      "wiki_search",
+      "repo_map",
+      "github_self_comment",
+      "context_dispatch"
+    ]
+  },
+  "workflows": [
+    "github_read",
+    "wiki_search",
+    "repo_map",
+    "github_self_comment",
+    "context_dispatch"
+  ]
+}
