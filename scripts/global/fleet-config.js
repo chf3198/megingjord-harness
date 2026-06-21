@@ -11,9 +11,8 @@ const OLLAMA_DEFAULT_PORT = 11434;
 const OPENCLAW_DEFAULT_PORT = 4000;
 
 function loadInventory() {
-  const inv = path.resolve(__dirname, '..', '..', 'inventory', 'devices.json');
-  if (!fs.existsSync(inv)) return [];
-  return JSON.parse(fs.readFileSync(inv, 'utf8')).devices || [];
+  const { resolveInventory } = require('./resolve-inventory');
+  return resolveInventory('devices', { probeEnrich: false }).devices || [];
 }
 
 function detectTailscale() {
