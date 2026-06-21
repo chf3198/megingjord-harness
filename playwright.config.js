@@ -1,8 +1,14 @@
 // Playwright config — devenv-ops dashboard E2E tests
+// Refs #3166: only collect @playwright/test specs; node:test specs
+// run via split-test-runner.js to prevent cross-framework pollution.
 const { defineConfig } = require('@playwright/test');
+const {
+  nodeTestIgnoreList,
+} = require('./scripts/global/split-test-runner-ignore');
 
 module.exports = defineConfig({
   testDir: './tests',
+  testIgnore: nodeTestIgnoreList(),
   timeout: 30000,
   retries: 1,
   workers: 2,

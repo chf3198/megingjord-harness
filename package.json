@@ -256,7 +256,7 @@
     "sync:codex": "bash scripts/sync.sh --target codex",
     "sync:codex:dry": "bash scripts/sync.sh --dry-run --target codex",
     "sync:dry": "bash scripts/sync.sh --dry-run",
-    "test": "npx playwright test",
+    "test": "node scripts/global/split-test-runner.js",
     "test:headed": "npx playwright test --headed",
     "test:quality": "npx playwright test tests/google-quality.spec.js",
     "test:sse-load": "node scripts/tools/sse-load-test.js",
