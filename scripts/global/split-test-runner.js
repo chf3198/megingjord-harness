@@ -13,10 +13,10 @@ const TESTS = path.join(ROOT, 'tests');
 
 function findSpecs(dir) {
   const result = [];
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, e.name);
-    if (e.isDirectory()) { result.push(...findSpecs(full)); continue; }
-    if (e.name.endsWith('.spec.js')) result.push(full);
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) { result.push(...findSpecs(full)); continue; }
+    if (entry.name.endsWith('.spec.js')) result.push(full);
   }
   return result;
 }
@@ -27,46 +27,42 @@ function classify(file) {
   return 'node';
 }
 
+/** Spawn a child runner, inheriting stdio; returns true on exit 0. */
+function spawnRunner(command, args) {
+  const proc = spawnSync(command, args, {
+    cwd: ROOT, stdio: 'inherit', encoding: 'utf8',
+  });
+  return proc.status === 0;
+}
+
 function run(argv) {
   const verbose = argv.includes('--verbose');
   const nodeOnly = argv.includes('--node-only');
   const pwOnly = argv.includes('--pw-only');
   const passthrough = argv.filter(
-    a => !['--verbose', '--node-only', '--pw-only'].includes(a)
+    arg => !['--verbose', '--node-only', '--pw-only'].includes(arg)
   );
 
-  const all = findSpecs(TESTS);
-  const pw = [];
-  const nt = [];
-  for (const f of all) {
-    if (classify(f) === 'playwright') pw.push(f);
-    else nt.push(f);
+  const playwrightSpecs = [];
+  const nodeSpecs = [];
+  for (const file of findSpecs(TESTS)) {
+    if (classify(file) === 'playwright') playwrightSpecs.push(file);
+    else nodeSpecs.push(file);
   }
-
   if (verbose) {
     process.stderr.write(
-      `[split-runner] ${pw.length} playwright, ${nt.length} node:test\n`
-    );
+      `[split-runner] ${playwrightSpecs.length} playwright, `
+      + `${nodeSpecs.length} node:test\n`);
   }
 
   let ok = true;
-
-  if (!nodeOnly && pw.length) {
-    const args = ['playwright', 'test', ...passthrough];
-    const r = spawnSync('npx', args, {
-      cwd: ROOT, stdio: 'inherit', encoding: 'utf8',
-    });
-    if (r.status !== 0) ok = false;
+  if (!nodeOnly && playwrightSpecs.length) {
+    ok = spawnRunner('npx', ['playwright', 'test', ...passthrough]) && ok;
   }
-
-  if (!pwOnly && nt.length) {
-    const rel = nt.map(f => path.relative(ROOT, f));
-    const r = spawnSync('node', ['--test', ...rel], {
-      cwd: ROOT, stdio: 'inherit', encoding: 'utf8',
-    });
-    if (r.status !== 0) ok = false;
+  if (!pwOnly && nodeSpecs.length) {
+    const rel = nodeSpecs.map(file => path.relative(ROOT, file));
+    ok = spawnRunner('node', ['--test', ...rel]) && ok;
   }
-
   return ok;
 }
 

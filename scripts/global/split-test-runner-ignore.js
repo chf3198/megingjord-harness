@@ -11,10 +11,10 @@ const TESTS = path.resolve(__dirname, '..', '..', 'tests');
 
 function findSpecs(dir) {
   const result = [];
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, e.name);
-    if (e.isDirectory()) { result.push(...findSpecs(full)); continue; }
-    if (e.name.endsWith('.spec.js')) result.push(full);
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) { result.push(...findSpecs(full)); continue; }
+    if (entry.name.endsWith('.spec.js')) result.push(full);
   }
   return result;
 }
@@ -27,8 +27,8 @@ function isPlaywrightSpec(file) {
 /** Returns relative paths (from tests/) of non-Playwright specs. */
 function nodeTestIgnoreList() {
   return findSpecs(TESTS)
-    .filter(f => !isPlaywrightSpec(f))
-    .map(f => path.relative(TESTS, f));
+    .filter(file => !isPlaywrightSpec(file))
+    .map(file => path.relative(TESTS, file));
 }
 
 module.exports = { nodeTestIgnoreList, isPlaywrightSpec };

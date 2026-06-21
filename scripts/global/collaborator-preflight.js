@@ -19,8 +19,8 @@ function runLint(cwd = ROOT) {
 /** Derive sibling spec paths for changed source files. */
 function deriveTestPaths(changedFiles, cwd = ROOT) {
   return changedFiles
-    .map(f => {
-      const base = path.basename(f, '.js');
+    .map(file => {
+      const base = path.basename(file, '.js');
       const candidate = path.join(cwd, 'tests', `${base}.spec.js`);
       return fs.existsSync(candidate) ? candidate : null;
     })
@@ -29,32 +29,32 @@ function deriveTestPaths(changedFiles, cwd = ROOT) {
 
 /** Resolve the test-path subset from CLI args or git diff. */
 function resolveTestScope(argv, cwd = ROOT) {
-  const explicit = (argv.find(a => a.startsWith('--test-paths=')) || '')
+  const explicit = (argv.find(arg => arg.startsWith('--test-paths=')) || '')
     .replace('--test-paths=', '').split(',').filter(Boolean);
   if (explicit.length) return explicit;
   const base = spawnSync('git', ['merge-base', 'HEAD', 'main'], {
     cwd, encoding: 'utf8',
   });
   if (base.status !== 0) return [];
-  const r = spawnSync('git', [
+  const diff = spawnSync('git', [
     'diff', '--name-only', '--diff-filter=ACMR',
     base.stdout.trim(), 'HEAD',
   ], { cwd, encoding: 'utf8' });
-  if (r.status !== 0) return [];
-  const changed = (r.stdout || '').split('\n').filter(Boolean);
+  if (diff.status !== 0) return [];
+  const changed = (diff.stdout || '').split('\n').filter(Boolean);
   return deriveTestPaths(changed, cwd);
 }
 
 function runTests(cwd = ROOT, testPaths) {
   if (testPaths && testPaths.length) {
-    const rel = testPaths.map(p => path.relative(cwd, path.resolve(p)));
-    const r = spawnSync('node', ['--test', ...rel], {
+    const rel = testPaths.map(tp => path.relative(cwd, path.resolve(tp)));
+    const scoped = spawnSync('node', ['--test', ...rel], {
       cwd, encoding: 'utf8',
     });
-    return { ok: r.status === 0, output: r.stderr || r.stdout };
+    return { ok: scoped.status === 0, output: scoped.stderr || scoped.stdout };
   }
-  const r = spawnSync('npm', ['test'], { cwd, encoding: 'utf8' });
-  return { ok: r.status === 0, output: r.stderr || r.stdout };
+  const full = spawnSync('npm', ['test'], { cwd, encoding: 'utf8' });
+  return { ok: full.status === 0, output: full.stderr || full.stdout };
 }
 
 function checkChangelogFragment(ticket, cwd = ROOT) {
