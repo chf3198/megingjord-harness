@@ -414,7 +414,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `tavily:phase1:test` | `node --test tests/tavily-budget-governor.spec.js tests/tavily-search-router.spec.js tests/tavily-safety-harness.spec.js tests/tavily-mcp-register.spec.js tests/tavily-smoke.spec.js` |
 | `tavily:smoke` | `node scripts/global/tavily-smoke.js` |
 | `tavily:smoke:live` | `node scripts/global/tavily-smoke.js --live` |
-| `test` | `npx playwright test` |
+| `test` | `node scripts/global/split-test-runner.js` |
 | `test-floor:check` | `node scripts/global/test-floor-classifier.js` |
 | `test-floor:replay-eval` | `node scripts/global/test-floor-replay-eval.js` |
 | `test:collaborator-input-shape` | `node --test tests/collaborator-handoff-input-shape.spec.js` |
