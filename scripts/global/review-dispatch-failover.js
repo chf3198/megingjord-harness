@@ -43,14 +43,15 @@ async function freeCloudReviewFailover(prompt, opts = {}) {
     safeRecord(record, { lane: 'free-cloud', model: reviewer, provider: result.provider,
       latencyMs: elapsed, outcome: 'review-failover', taskClass: 'review' });
     const { findings } = parse({ response: result.content });
-    return { findings, raw: result.content, modelUsed: reviewer,
+    // #3167: `text` is the uniform response-text contract across dispatch paths.
+    return { findings, raw: result.content, text: result.content, modelUsed: reviewer,
       hamrStats: { ok: true, substituted: true, substituted_reviewer: reviewer,
         substitution_reason: 'fleet-unreachable', tier: 'free-cloud', elapsed } };
   }
   const degradedReason = classifyDegradation(result);
   safeRecord(record, { lane: 'free-cloud', model: 'none', provider: 'none', latencyMs: elapsed,
     outcome: `degraded:${degradedReason}`, taskClass: 'review' });
-  return { findings: [], raw: null, modelUsed: opts.fallbackModel || 'fleet-unreachable',
+  return { findings: [], raw: null, text: '', modelUsed: opts.fallbackModel || 'fleet-unreachable',
     hamrStats: { ok: false, degraded: true, degraded_reason: degradedReason,
       suggested_tier: 'free-cloud', elapsed } };
 }
@@ -62,7 +63,7 @@ async function onFleetUnavailable(opts = {}) {
     deps: { parseFindings: opts.parseFindings, ...(opts.deps || {}) }, fallbackModel: opts.fallbackModel,
   });
   if (failover.hamrStats.ok) return failover;
-  return { findings: [], raw: null, modelUsed: opts.fallbackModel,
+  return { findings: [], raw: null, text: '', modelUsed: opts.fallbackModel,
     hamrStats: { ok: false, elapsed: opts.elapsed, error: opts.error, degraded: true,
       degraded_reason: failover.hamrStats.degraded_reason, suggested_tier: 'free-cloud' } };
 }
