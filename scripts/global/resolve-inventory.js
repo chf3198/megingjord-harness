@@ -19,30 +19,30 @@ function envKeyForDevice(id) {
 }
 
 function mergeDeviceList(base, overlay) {
-  const map = new Map((base || []).map((d) => [d.id, { ...d }]));
-  for (const d of overlay || []) {
-    const prev = map.get(d.id) || {};
-    const merged = { ...prev, ...d };
-    if (Array.isArray(d.ollamaModels)) merged.ollamaModels = d.ollamaModels.slice();
-    map.set(d.id, merged);
+  const map = new Map((base || []).map((device) => [device.id, { ...device }]));
+  for (const device of overlay || []) {
+    const prev = map.get(device.id) || {};
+    const merged = { ...prev, ...device };
+    if (Array.isArray(device.ollamaModels)) merged.ollamaModels = device.ollamaModels.slice();
+    map.set(device.id, merged);
   }
   return [...map.values()];
 }
 
 function applyEnvDevices(devices) {
-  return devices.map((d) => {
-    const ip = process.env[envKeyForDevice(d.id)];
-    return ip ? { ...d, tailscaleIP: ip, ip } : d;
+  return devices.map((device) => {
+    const ip = process.env[envKeyForDevice(device.id)];
+    return ip ? { ...device, tailscaleIP: ip, ip } : device;
   });
 }
 
 function enrichFromProbe(doc, root) {
   const cap = readJson(path.join(root || process.cwd(), '.dashboard', 'capabilities.json'));
   if (!cap?.fleet) return doc;
-  const devices = (doc.devices || []).map((d) => {
-    const p = cap.fleet[d.id];
-    if (!p) return d;
-    return { ...d, probeReachable: p.reachable, probeModels: p.models };
+  const devices = (doc.devices || []).map((device) => {
+    const probe = cap.fleet[device.id];
+    if (!probe) return device;
+    return { ...device, probeReachable: probe.reachable, probeModels: probe.models };
   });
   return { ...doc, devices };
 }
