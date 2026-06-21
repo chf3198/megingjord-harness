@@ -12,7 +12,8 @@ const { wrapProviderCall } = require('./hamr-provider-wrapper');
 const { residentModels } = require('./fleet-resident');
 
 const DEFAULT_HOST = 'http://100.91.113.16:11434';
-const DEFAULT_MODEL = 'qwen2.5-coder:32b';
+// #3167: routine reviews default to the fast 7b; 32b is high-stakes opt-in only.
+const DEFAULT_MODEL = 'qwen2.5-coder:7b';
 const TIER = 'fleet-local';
 const RETRY_DELAYS_MS = [1000, 4000];
 const DEFAULT_TIMEOUT_POLICY = path.join(__dirname, '..', '..', 'config', 'timeout-policy.json');
@@ -218,7 +219,10 @@ async function dispatchRedTeam({
       fallbackModel: activeModel, elapsed, error: envelope.meta?.error ?? envelope.error });
   }
   const { findings, warning } = parseFindings(envelope.value);
-  return { findings, raw: envelope.value, modelUsed: activeModel,
+  // #3167: expose the response TEXT so consumers stop calling .match/.slice on
+  // `raw` (the Ollama response object) — the raw.slice-is-not-a-function crash.
+  const text = (envelope.value && envelope.value.response) || '';
+  return { findings, raw: envelope.value, text, modelUsed: activeModel,
     hamrStats: { ok: true, elapsed, sticky: envelope.sticky, warning,
       modelRationale: resolved.rationale,
       stakesSource } };
