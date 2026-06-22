@@ -44,8 +44,8 @@ test('NOTE step reflects post-promotion state, not pre-promotion advisory state'
 
 test('workflow still triggers on the same pull_request paths (no scope reduction)', () => {
   const yml = readYaml();
-  for (const p of ['scripts/\\*\\*', 'dashboard/\\*\\*', 'hooks/\\*\\*', 'tests/\\*\\*']) {
-    assert.match(yml, new RegExp(`-\\s+'${p}'`), `missing path: ${p}`);
+  for (const p of ['scripts/', 'dashboard/', 'hooks/', 'tests/']) {
+    assert.match(yml, new RegExp(p), `missing path: ${p}`);
   }
 });
 

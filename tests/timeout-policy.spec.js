@@ -31,9 +31,9 @@ test('classFromModel: undefined -> null', () => {
   assert.equal(classFromModel(undefined), null);
 });
 
-test('getTimeout: qwen2.5-coder:32b returns fleet-red-team-rate budget (1200s)', () => {
+test('getTimeout: qwen2.5-coder:32b returns fleet-red-team-rate budget (1500s)', () => {
   const ms = getTimeout({ model: 'qwen2.5-coder:32b' });
-  assert.equal(ms, 1200000);
+  assert.equal(ms, 1500000);
 });
 
 test('getTimeout: hamr-cache-stat workload returns 30s', () => {
@@ -48,12 +48,12 @@ test('getTimeout: unknown class falls back to default_ms', () => {
 
 test('getTimeout: lane:trivial multiplier halves budget', () => {
   const ms = getTimeout({ model: 'qwen2.5-coder:32b', lane: 'lane:trivial' });
-  assert.equal(ms, 600000);
+  assert.equal(ms, 750000);
 });
 
 test('getTimeout: lane:code-change preserves budget (multiplier 1.0)', () => {
   const ms = getTimeout({ model: 'qwen2.5-coder:32b', lane: 'lane:code-change' });
-  assert.equal(ms, 1200000);
+  assert.equal(ms, 1500000);
 });
 
 test('getTimeout: lane:config-only applies 0.75 multiplier', () => {

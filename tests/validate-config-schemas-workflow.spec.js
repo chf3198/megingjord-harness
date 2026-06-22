@@ -52,8 +52,8 @@ test('workflow has concurrency group keyed by ref (re-run safety)', () => {
 
 test('workflow paths include all cross-runtime config surfaces', () => {
   const y = read();
-  for (const p of ['\\.claude/\\*\\*', '\\.codex/\\*\\*', 'config/\\*\\*']) {
-    assert.match(y, new RegExp(`-\\s+'${p}'`), `missing path: ${p}`);
+  for (const p of ['\\.claude/', '\\.codex/', 'config/']) {
+    assert.match(y, new RegExp(p), `missing path: ${p}`);
   }
 });
 

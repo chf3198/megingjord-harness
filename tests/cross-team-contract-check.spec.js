@@ -45,14 +45,15 @@ test('detects missing invariant in synthetic entry-point file', () => {
   assert.equal(hit, false);
 });
 
-test('entry-point list covers exactly 5 runtimes', () => {
-  assert.equal(ENTRY_POINTS.length, 5);
+test('entry-point list covers exactly 6 runtimes', () => {
+  assert.equal(ENTRY_POINTS.length, 6);
   const labels = ENTRY_POINTS.map(e => e.label);
   assert.ok(labels.some(l => l.includes('AGENTS')));
   assert.ok(labels.some(l => l.includes('CLAUDE')));
   assert.ok(labels.some(l => l.includes('Copilot')));
   assert.ok(labels.some(l => l.includes('Codex')));
   assert.ok(labels.some(l => l.includes('Antigravity')));
+  assert.ok(labels.some(l => l.includes('Cursor')));
 });
 
 test('invariant patterns recognize full-body example', () => {

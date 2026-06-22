@@ -5,7 +5,7 @@ const { describe, it, before, after } = require('node:test');
 const path = require('node:path');
 
 let client;
-const SCRIPTS_DIR = path.resolve('/home/curtisfranks/devenv-ops-2756/scripts/global');
+const SCRIPTS_DIR = path.resolve(__dirname, '..', 'scripts', 'global');
 
 function resolveScript(name) {
   return path.resolve(SCRIPTS_DIR, name);
@@ -51,6 +51,8 @@ before(() => {
 after(() => { delete process.env.MEGINGJORD_HAMR_ENABLED; });
 
 describe('GitHub-native mode (default)', () => {
+  before(() => { delete process.env.MEGINGJORD_HAMR_ENABLED; });
+
   it('readMailbox returns github-native messages', async () => {
     delete process.env.MEGINGJORD_HAMR_ENABLED;
     const msgs = await client.readMailbox('o', 'r', 0);

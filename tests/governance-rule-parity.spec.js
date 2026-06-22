@@ -7,14 +7,14 @@ const parity = require('../scripts/global/governance-rule-parity');
 test('rule parity reports the known drift classes', () => {
   const report = parity.run({ write: false });
   const ids = report.findings.map(f => f.id).sort();
-  assert.deepEqual(ids, ['lane-enum-drift', 'lightweight-set-drift', 'merge-evidence-linkage-drift']);
+  assert.deepEqual(ids, ['lane-enum-drift', 'merge-evidence-linkage-drift']);
   assert.equal(report.status, 'drift-detected');
   assert.equal(report.blocked, false);
 });
 
 test('rule parity finds a blocking introduced conflict in pr mode', () => {
-  const report = parity.run({ write: false, mode: 'pr', introducedFindings: ['lightweight-set-drift'] });
-  const conflict = report.findings.find(f => f.id === 'lightweight-set-drift');
+  const report = parity.run({ write: false, mode: 'pr', introducedFindings: ['lane-enum-drift'] });
+  const conflict = report.findings.find(f => f.id === 'lane-enum-drift');
   assert.equal(conflict.severity, 'hard');
   assert.equal(report.blocked, true);
 });

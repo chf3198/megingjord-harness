@@ -1,13 +1,16 @@
 name: HAMR Bypass Lint
 
+# #2940: HAMR-bypass detection is a REQUIRED status check, so it must ALWAYS run
+# and report. A workflow-level `paths:` filter made it SKIP (→ "Expected" forever
+# → blocked the merge) on every PR that touched none of scripts/dashboard/hooks/
+# tests (e.g. config-only or docs/instructions-only PRs — hit live on #2939/#2937).
+# Per GitHub's guidance, the path logic now lives in a step-level git-diff gate;
+# the job ALWAYS reports success and runs the real lint only when HAMR-relevant
+# files change. Same defect class + fix as #2812 (validate-config-schemas).
+
 on:
   pull_request:
     branches: [main]
-    paths:
-      - 'scripts/**'
-      - 'dashboard/**'
-      - 'hooks/**'
-      - 'tests/**'
   schedule:
     - cron: '23 7 * * *'
 
@@ -20,10 +23,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect HAMR-relevant changes (step-level gate, #2940)
+        id: changes
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+          fi
+          pattern='^(scripts/|dashboard/|hooks/|tests/|\.github/workflows/hamr-bypass-lint\.yml)'
+          if [ "${{ github.event_name }}" = "schedule" ] || git diff --name-only "$base" HEAD | grep -qE "$pattern"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No HAMR-relevant files changed — lint N/A; reporting success (#2940)."
+          fi
       - uses: actions/setup-node@v4
+        if: steps.changes.outputs.changed == 'true'
         with:
           node-version: '20'
       - name: Run HAMR-bypass lint (required gate)
+        if: steps.changes.outputs.changed == 'true'
         env:
           HAMR_BYPASS_GATE: '1'
         run: node scripts/global/lint-hamr-bypass.js
@@ -32,3 +53,4 @@ jobs:
           echo "Promoted to required per #1157: HAMR_BYPASS_GATE=1, continue-on-error removed."
           echo "Stability evidence at promotion: 29/30 recent runs successful (#1158 close cycle)."
           echo "Required-status-checks list updated separately via Admin gh api PATCH (#1157 AC3)."
+          echo "#2940: always-report via step-level git-diff gate (mirrors #2812)."

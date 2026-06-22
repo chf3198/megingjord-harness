@@ -15,9 +15,9 @@ test('FRAMINGS are distinct per persona', () => {
   assert.match(FRAMINGS.adversarial, /red-team|adversarial|FAIL/);
 });
 
-test('loadRubric returns g1-g9-v2 with all 9 goals', () => {
+test('loadRubric returns g1-g9-v3 with all 9 goals', () => {
   const r = loadRubric();
-  assert.equal(r.version, 'g1-g9-v2');
+  assert.equal(r.version, 'g1-g9-v3');
   for (let i = 1; i <= 9; i++) assert.ok(r.goals[`G${i}`]);
 });
 
