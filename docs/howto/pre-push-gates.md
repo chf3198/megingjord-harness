@@ -34,6 +34,32 @@ The local pre-push gate distinction:
 - **Advisory gates**: lint-py, lint-sh — these run but suppress failures (`|| true`) while baseline warnings are being burned down.
 - **Server-state-only gates**: test-evidence — these CANNOT run locally; documented for operator awareness but not invoked by lefthook.
 
+## closeout-preflight and the deferred-final sequence (#3169)
+
+`closeout-preflight` validates the linked issue's baton artifacts at pre-push. In the
+**deferred-final** flow the `CONSULTANT_CLOSEOUT` is meant to cite the PR — which does not
+exist yet at first push — so requiring a fully-evidenced closeout pre-push would invert the
+baton (forcing teams to post the closeout before the PR). The supported sequence is therefore:
+
+```
+commit  ->  push (no PR yet)  ->  open PR  ->  CONSULTANT_CLOSEOUT  ->  merge  ->  close issue
+```
+
+To support it, the consultant-closeout check is **deferred to PR-open**:
+
+- **No PR yet, no closeout posted**: `MANAGER_HANDOFF` is still validated, but the
+  consultant-closeout check is deferred (a `consultant-closeout deferred to PR-open` line is
+  logged). The push is not blocked for a missing closeout.
+- **A closeout is already posted early**: it is still validated — deferral relaxes the
+  ordering, it never silently un-checks a closeout that is present.
+- **The PR exists** (`prBody` resolvable): the consultant-closeout check and
+  `merge-evidence-pr-gate` run as before.
+
+Enforcement is preserved downstream regardless: the required CI `consultant-gate`,
+`merge-evidence-pr-gate`, and the `pretool_guard` close gate (which requires the merge to be
+recorded before `gh issue close`) keep the closeout mandatory **before merge and before issue
+close**. The pre-push deferral only removes the baton-inverting pre-PR requirement.
+
 ## Manual run
 
 - `npm run hooks:pre-push`

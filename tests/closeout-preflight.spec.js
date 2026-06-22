@@ -7,42 +7,114 @@ const path = require('path');
 const SCRIPT = path.resolve(__dirname, '..', 'scripts', 'global', 'closeout-preflight.js');
 const preflight = require('../scripts/global/closeout-preflight.js');
 
-function runWith(issueJson, branch) {
-  return spawnSync(process.execPath, [SCRIPT], {
-    env: {
-      ...process.env,
-      CLOSEOUT_PREFLIGHT_BRANCH: branch,
-      CLOSEOUT_PREFLIGHT_ISSUE_JSON: JSON.stringify(issueJson),
-    },
-    encoding: 'utf8',
-  });
+function runWith(issueJson, branch, prBody) {
+  const env = {
+    ...process.env,
+    CLOSEOUT_PREFLIGHT_BRANCH: branch,
+    CLOSEOUT_PREFLIGHT_ISSUE_JSON: JSON.stringify(issueJson),
+  };
+  // A non-empty PR body simulates "PR exists"; omitting it simulates "no PR yet"
+  // (the deferred-final pre-PR push state) — #3169.
+  if (prBody !== undefined) env.CLOSEOUT_PREFLIGHT_PR_BODY = prBody;
+  return spawnSync(process.execPath, [SCRIPT], { env, encoding: 'utf8' });
 }
+
+const MANAGER_HANDOFF_FIXTURE =
+  'MANAGER_HANDOFF\nscope: fix pre-push\nlane: lane:code-change\ntest_strategy: tdd-pyramid\n'
+  + 'acceptance: pass/fail\ngates: CI\nrelated_tickets: #3008\noverlap_decision: none\n'
+  + 'Signed-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager';
+
+const CONSULTANT_CLOSEOUT_FIXTURE =
+  '## CONSULTANT_CLOSEOUT\nstatus: review\nverdict: approve_for_merge\n'
+  + 'verification-timestamp: 2026-06-21T00:00:00Z\n'
+  + 'rubric_rating: G1:9 G2:9 G3:9 G4:9 G5:9 G6:9 G7:9 G8:9 G9:9 -> min(G1..G9)=9, rubric 9/10\n'
+  + 'anneal_tickets_filed: none\nmid_flight_flaws: none\n'
+  + 'Signed-by: Orla Vale\nTeam&Model: claude-code:opus@anthropic\nRole: consultant';
 
 test('closeout-preflight passes when linked issue has a valid consultant closeout', () => {
   const result = runWith({
     title: 'D3 local closeout preflight',
     body: 'Fix pre-push hook',
     comments: [
-      { body: 'MANAGER_HANDOFF\nscope: fix pre-push\nlane: lane:code-change\ntest_strategy: unit\nacceptance: pass/fail\ngates: CI\nSigned-by: Soren Mason\nTeam&Model: copilot:model\nRole: manager' },
-      { body: '## CONSULTANT_CLOSEOUT\nrubric: G1=9, G2=8\nverification-timestamp: 2026-05-14T23:00:00Z\nverdict: approved\nSigned-by: Soren Vale\nTeam&Model: copilot:model\nRole: consultant\nSee #1566' },
+      { body: MANAGER_HANDOFF_FIXTURE },
+      { body: CONSULTANT_CLOSEOUT_FIXTURE },
     ],
-    labels: [],
+    labels: ['lane:code-change'],
     state: 'open',
-  }, 'feat/1566-closeout-preflight');
+  }, 'fix/1566-closeout-preflight');
   expect(result.status).toBe(0);
   expect(result.stdout).toContain('PASS #1566');
 });
 
-test('closeout-preflight fails when linked issue lacks consultant closeout', () => {
+test('closeout-preflight enforces consultant closeout once the PR exists (AC2)', () => {
+  // PR body present (simulating PR-open) -> consultant-closeout is required again.
   const result = runWith({
-    title: 'EPIC: D3 local closeout preflight',
-    body: '## Epic Summary\nChild: #1564',
-    comments: [],
-    labels: [],
+    title: 'D3 local closeout preflight',
+    body: 'Fix pre-push hook',
+    comments: [{ body: MANAGER_HANDOFF_FIXTURE }],
+    labels: ['lane:code-change'],
     state: 'open',
-  }, 'feat/1566-closeout-preflight');
+  }, 'fix/1566-closeout-preflight', 'Refs #1566\nmerge-evidence-deferred-final: #1566');
   expect(result.status).toBe(1);
   expect(result.stderr).toContain('missing-consultant-closeout');
+});
+
+test('closeout-preflight defers consultant closeout pre-PR in deferred-final flow (AC1)', () => {
+  // No PR body and no closeout posted yet -> consultant-closeout is deferred, not required.
+  const result = runWith({
+    title: 'D3 local closeout preflight',
+    body: 'Fix pre-push hook',
+    comments: [{ body: MANAGER_HANDOFF_FIXTURE }],
+    labels: ['lane:code-change'],
+    state: 'open',
+  }, 'fix/1566-closeout-preflight');
+  expect(result.status).toBe(0);
+  expect(result.stdout).toContain('deferred to PR-open');
+  expect(result.stdout).toContain('PASS #1566');
+});
+
+test('closeout-preflight still validates an early-posted closeout pre-PR', () => {
+  // A team that posts a (malformed) closeout early is still checked — deferral
+  // relaxes ordering, it does not silently un-check a present closeout.
+  const result = runWith({
+    title: 'D3 local closeout preflight',
+    body: 'Fix pre-push hook',
+    comments: [
+      { body: MANAGER_HANDOFF_FIXTURE },
+      { body: '## CONSULTANT_CLOSEOUT\n(no required fields)' },
+    ],
+    labels: ['lane:code-change'],
+    state: 'open',
+  }, 'fix/1566-closeout-preflight');
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain('consultant-closeout');
+});
+
+test('selectPreflightValidators defers closeout only when no PR and no closeout', () => {
+  const noPr = preflight.selectPreflightValidators(false, false);
+  expect(noPr.validators).toEqual(['manager-handoff']);
+  expect(noPr.closeoutDeferred).toBe(true);
+
+  const prExists = preflight.selectPreflightValidators(true, false);
+  expect(prExists.validators).toContain('consultant-closeout');
+  expect(prExists.validators).toContain('merge-evidence-pr-gate');
+  expect(prExists.closeoutDeferred).toBe(false);
+
+  const earlyCloseout = preflight.selectPreflightValidators(false, true);
+  expect(earlyCloseout.validators).toContain('consultant-closeout');
+  expect(earlyCloseout.validators).not.toContain('merge-evidence-pr-gate');
+  expect(earlyCloseout.closeoutDeferred).toBe(false);
+});
+
+test('hasCloseoutComment detects a CONSULTANT_CLOSEOUT artifact, not a prose mention', () => {
+  expect(preflight.hasCloseoutComment([{ body: '## CONSULTANT_CLOSEOUT\nx' }])).toBe(true);
+  expect(preflight.hasCloseoutComment([{ body: 'CONSULTANT_CLOSEOUT\nx' }])).toBe(true);
+  expect(preflight.hasCloseoutComment([{ body: 'MANAGER_HANDOFF' }])).toBe(false);
+  // Prose mention inside another artifact must NOT count as a posted closeout (#3169).
+  expect(preflight.hasCloseoutComment([
+    { body: 'MANAGER_HANDOFF\nscope: defer the CONSULTANT_CLOSEOUT check to PR-open' },
+  ])).toBe(false);
+  expect(preflight.hasCloseoutComment([])).toBe(false);
 });
 
 test('closeout-preflight skips branches without ticket numbers', () => {
@@ -56,8 +128,8 @@ test('closeout-preflight derives lane from labels when handoff is docs-only', ()
     title: 'D Test',
     body: '',
     comments: [
-      { body: 'MANAGER_HANDOFF\nscope: docs\nlane: lane:docs-only\ntest_strategy: peer-review\nacceptance: ok\ngates: peer\nSigned-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager' },
-      { body: '## CONSULTANT_CLOSEOUT\nG1=9\nverification-timestamp: 2026-05-15T00:00:00Z\nverdict: approved\nSigned-by: Orla Vale\nTeam&Model: claude-code:opus@anthropic\nRole: consultant\nrubric_rating: 9/10' },
+      { body: 'MANAGER_HANDOFF\nscope: docs\nlane: lane:docs-only\ntest_strategy: peer-review\nacceptance: ok\ngates: peer\nrelated_tickets: #1639\noverlap_decision: none\nSigned-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager' },
+      { body: CONSULTANT_CLOSEOUT_FIXTURE },
     ],
     labels: ['lane:docs-only', 'type:doc'],
     state: 'open',
