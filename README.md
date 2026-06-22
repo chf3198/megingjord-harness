@@ -176,6 +176,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
+| `epic-3162:test` | `npx playwright test tests/resolve-inventory.spec.js tests/inventory-portability.spec.js tests/fleet-setup-handlers.spec.js tests/fleet-inventory-contract.spec.js` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `fleet:backend-select:test` | `node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js` |
 | `fleet:escalation-policy:test` | `node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js` |
@@ -311,15 +312,20 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hamr:teardown` | `bash scripts/global/hamr-teardown.sh` |
 | `hamr:tool-policy:test` | `npx playwright test tests/hamr-tool-policy.spec.js` |
 | `hamr:tool-proxy` | `node scripts/global/hamr-tool-proxy.js` |
+| `harness:doctor` | `node scripts/global/harness-fleet-doctor.js` |
 | `harness:self-test` | `node scripts/global/harness-self-test.js` |
 | `harness:self-test:capability` | `node scripts/global/harness-self-test.js --capability` |
 | `harness:self-test:regression` | `node scripts/global/harness-self-test.js --regression` |
 | `harness:self-test:test` | `node --test tests/harness-self-test-runner.spec.js tests/harness-self-test-reporters.spec.js tests/harness-self-test-telemetry.spec.js tests/harness-self-test.spec.js` |
+| `harness:setup` | `node scripts/global/harness-setup.js` |
 | `health` | `node scripts/health-check.js` |
 | `help:topic` | `node scripts/help-topic.js` |
 | `hooks:install` | `bash scripts/global/install-hooks.sh` |
 | `hooks:pre-push` | `node scripts/global/pre-push-gates.js` |
 | `instructions:split-classify` | `node scripts/global/instructions-split-classifier.js` |
+| `inventory:history-scrub:plan` | `node scripts/global/inventory-history-scrub.js` |
+| `inventory:history-scrub:verify` | `node scripts/global/inventory-history-scrub.js --verify` |
+| `inventory:portability-check` | `node scripts/global/inventory-portability-check.js` |
 | `issue:transition` | `node scripts/global/issue-transition.js` |
 | `it-ops:usage-report` | `node scripts/global/it-bypass-usage-report.js` |
 | `label:provision` | `node scripts/global/label-provision.js` |
