@@ -93,8 +93,6 @@ if git show-ref --verify --quiet "refs/heads/$task_branch"; then
   warn "task branch already exists locally: $task_branch"
 fi
 
-git switch -c "$task_branch"
-bootstrap_node_modules "$root"
-configure_per_worktree_hooks "$root"
-copy_env_if_needed "$agent" "$root"
-log "ready on task branch: $task_branch"
+# Refs #2946: isolate the task branch in its own worktree dir, not in the
+# current (possibly canonical-main) checkout. Helper lives in worktree-agent-init.sh.
+create_task_worktree "$agent" "$task_branch"
