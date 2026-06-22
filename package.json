@@ -152,6 +152,7 @@
     "governance:worktree-inventory": "node scripts/global/worktree-inventory.js",
     "governance:worktree-lock:test": "node --test tests/worktree-active-session-lock.spec.js",
     "governance:worktrees": "node scripts/global/worktree-governance-audit.js --json",
+    "worktree:lifecycle": "node scripts/global/worktree-lifecycle-gate.js --session-diagnosis",
     "hamr:activate": "bash scripts/global/hamr-activate.sh",
     "hamr:batch-route:test": "node --test tests/batch-route-async.spec.js",
     "hamr:batch-router": "node scripts/global/anthropic-batch-router.js",

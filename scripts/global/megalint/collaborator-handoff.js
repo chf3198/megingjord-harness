@@ -9,6 +9,7 @@ const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const docCoverage = require('./doc-coverage.js');
+const wtGate = require('../worktree-lifecycle-gate');
 const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
 
 // #2562: accept string OR {body} comment elements so a caller passing bare
@@ -126,6 +127,7 @@ function validate(input) {
   if (lane === 'lane:code-change') {
     violations.push(...docCoverageViolations(body, input.labels, input.comments, input.prFiles));
     violations.push(...checkCrossFamily(body));
+    violations.push(...wtGate.checkCollaborator(body, { ...input, lane }));
   }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });
   const blocking = violations.filter(v => v.severity !== 'advisory');

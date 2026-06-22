@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const sig = require('../governance-artifact-signature');
 const { isValidStrategy } = require('../test-strategy-enum');
+const wtGate = require('../worktree-lifecycle-gate');
 const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates', 'related_tickets', 'overlap_decision'];
 const PHASE_ONE_LABEL = process.env.PHASE_ONE_LABEL || 'phase-gate:phase-1';
 
@@ -135,6 +136,7 @@ function validate(input) {
     ...checkLaneTrivialDiffSize(handoff.body, input.diffLines, TRIVIAL_DIFF_THRESHOLD),
     ...checkPhaseOneFields(handoff.body, input.labels),
     ...checkCrypto(handoff.body),
+    ...wtGate.checkManager(handoff.body, input),
   ];
   return { ok: violations.length === 0, violations, found: true };
 }
