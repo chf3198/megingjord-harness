@@ -49,6 +49,31 @@ async function fetchPrBody(branch, opts = {}) {
   } catch { return null; }
 }
 
+// #3169: deferred-final flow — the CONSULTANT_CLOSEOUT is meant to cite the PR,
+// which does not exist at first push. Forcing the consultant-closeout check at
+// pre-push inverts the baton (teams post the closeout before the PR). Defer the
+// consultant-closeout check to PR-open: require it only once the PR exists, OR
+// validate an already-posted closeout if a team posts one early. Downstream
+// enforcement (required CI consultant-gate, merge-evidence-pr-gate, and the
+// pretool_guard merge-recorded close gate) keeps the closeout mandatory before
+// merge and issue close, so deferral relaxes ordering, never enforcement.
+// Match an actual CONSULTANT_CLOSEOUT *artifact* (a comment whose body carries the
+// artifact header), NOT a prose mention of the string — other baton artifacts
+// (MANAGER_HANDOFF, EDD, COLLABORATOR_HANDOFF) routinely reference "CONSULTANT_CLOSEOUT"
+// in their text, which an unanchored match would wrongly treat as a posted closeout.
+const CLOSEOUT_ARTIFACT_RE = /(?:^|\n)\s*(?:##\s*)?CONSULTANT_CLOSEOUT\b/i;
+function hasCloseoutComment(comments) {
+  return (comments || []).some((c) => CLOSEOUT_ARTIFACT_RE.test(c.body || ''));
+}
+
+function selectPreflightValidators(prExists, closeoutAlreadyPosted) {
+  const validators = ['manager-handoff'];
+  const enforceCloseoutNow = prExists || closeoutAlreadyPosted;
+  if (enforceCloseoutNow) validators.push('consultant-closeout');
+  if (prExists) validators.push('merge-evidence-pr-gate');
+  return { validators, closeoutDeferred: !enforceCloseoutNow };
+}
+
 async function run(opts = {}) {
   if (process.env.SKIP_CLOSEOUT_PREFLIGHT === '1') { console.log('closeout-preflight: skipped (SKIP_CLOSEOUT_PREFLIGHT=1)'); return 0; }
   const branch = currentBranch();
@@ -60,14 +85,17 @@ async function run(opts = {}) {
   const input = toValidatorInput(issue, issueNum, branch);
   const prBody = await fetchPrBody(branch, opts);
   if (prBody !== null) input.prBody = prBody;
-  const validators = ['manager-handoff', 'consultant-closeout'];
-  if (prBody !== null) validators.push('merge-evidence-pr-gate');
+  const { validators, closeoutDeferred } = selectPreflightValidators(
+    prBody !== null, hasCloseoutComment(input.comments));
+  if (closeoutDeferred) {
+    console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
+  }
   let failed = false;
   for (const name of validators) {
-    const r = megalint.run(name, { ...input, issueNumber: issueNum });
-    if (r.ok) continue;
+    const result = megalint.run(name, { ...input, issueNumber: issueNum });
+    if (result.ok) continue;
     failed = true; console.error(`closeout-preflight: FAIL [${name}] #${issueNum}`);
-    for (const v of r.violations || []) console.error(`  - ${v.rule}: ${v.detail}`);
+    for (const violation of result.violations || []) console.error(`  - ${violation.rule}: ${violation.detail}`);
   }
   if (failed) return 1;
   console.log(`closeout-preflight: PASS #${issueNum}`);
@@ -76,4 +104,5 @@ async function run(opts = {}) {
 
 if (require.main === module) run().then((code) => process.exit(code));
 
-module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run };
+module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run,
+  hasCloseoutComment, selectPreflightValidators };
