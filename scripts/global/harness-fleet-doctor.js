@@ -5,8 +5,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { resolveInventory } = require('./resolve-inventory');
-const { getCredential, loadLocalEnvOnce } = require('./load-local-env');
-const { fleetSetupStatus, OPTIONAL_KEYS } = require('../../dashboard/api/fleet-setup-status');
+const { loadLocalEnvOnce } = require('./load-local-env');
+const { fleetSetupStatus } = require('../../dashboard/api/fleet-setup-status');
 
 const OVERLAY = path.join(os.homedir(), '.megingjord', 'devices.json');
 
