@@ -125,6 +125,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `adr:preview` | `log4brains preview` |
 | `agent:coord:remote` | `node scripts/global/agent-coord-remote.js` |
 | `agent:tier-c` | `node scripts/global/tier-c-guard.js` |
+| `anneal:closeout-advisory` | `node scripts/global/open-pr-closeout-scan.js` |
 | `anneal:detect` | `node scripts/global/workflow-anneal-detect.js` |
 | `anneal:goal-sensor` | `node scripts/global/anneal-goal-sensor.js` |
 | `anneal:graph` | `node scripts/global/anneal-graph.js` |

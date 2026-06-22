@@ -80,4 +80,7 @@ jobs:
           tests/wiki-reconcile.spec.js
           tests/cursor-adapter.spec.js
           tests/worktree-provision.spec.js
+          tests/closeout-recurrence-guard.spec.js
+          tests/open-pr-closeout-scan.spec.js
+          tests/stress-closeout-recurrence.spec.js
           --reporter=line
