@@ -6,6 +6,7 @@ const fs = require('fs');
 const sig = require(path.join(__dirname, '..', 'governance-artifact-signature.js'));
 const { enforceTier3Emission } = require(path.join(__dirname, 'goal-failure-emission.js'));
 const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-bundle.js'));
+const wtGate = require('../worktree-lifecycle-gate');
 const { checkMemoryNoteRecurrence } = require(path.join(__dirname, '..', 'closeout-recurrence-guard.js'));
 
 // #2094 AC-4: parity for a fleet-authored CLOSEOUT. Same standard as non-fleet
@@ -162,6 +163,7 @@ function validate(input) {
     ...checkSubstantiveContent(body, input.isEpic === true),
     ...checkCrossFamilyVerdict(body),
     ...checkFleetBundleProvenance(body, input),
+    ...wtGate.checkConsultant(body, input),
   ];
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }

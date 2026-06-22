@@ -8,6 +8,7 @@ const path = require('path');
 const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const { extractAIFamily } = require('./signer-fidelity.js');
+const wtGate = require('../worktree-lifecycle-gate');
 
 function findAdminHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?ADMIN_HANDOFF\b/;
@@ -91,6 +92,7 @@ function validate(input) {
   ];
   if (input.lane === 'lane:code-change') {
     violations.push(...checkCrossFamily(handoff.body || '', collabHandoff));
+    violations.push(...wtGate.checkAdmin(handoff.body || '', input));
   }
   const signer = roleIdentity({ body: handoff.body, author: handoff.user && handoff.user.login });
   const blocking = violations.filter(v => v.severity !== 'advisory');

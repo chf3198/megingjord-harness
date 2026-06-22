@@ -51,6 +51,8 @@ Conflict check:
 - Targeted audit: `node scripts/global/worktree-governance-audit.js --target=codex --json`.
 - Default audits must still check all Copilot, Claude Code, and Codex launchers.
 - Cleanup plan: `node scripts/global/worktree-cleanup-plan.js --json`.
+- Lifecycle diagnosis (#2252): `node scripts/global/worktree-lifecycle-gate.js --session-diagnosis`.
+- Baton worktree fields (lane:code-change): `worktree_branch`, `worktree_behind_main`, `worktree_cleanup`, `worktree_residual_risk`.
 - VS Code active workspace: `node scripts/global/worktree-cleanup-plan.js --workspace .dashboard/active-worktrees.code-workspace`.
 
 ## Escalation

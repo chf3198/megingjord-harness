@@ -42,5 +42,6 @@ create_task_worktree() {
   bootstrap_node_modules "$worktree_dir"
   configure_per_worktree_hooks "$worktree_dir"
   copy_env_if_needed "$agent" "$worktree_dir"
+  node "$worktree_dir/scripts/global/worktree-lifecycle-gate.js" --session-diagnosis 2>/dev/null || true
   log "worktree ready: $worktree_dir ($task_branch) — cd \"$worktree_dir\", implement, open PR with Refs #${ticket_num}"
 }
