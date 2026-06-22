@@ -35,6 +35,11 @@ jobs:
             });
             const labels = issue.labels.map(l => l.name);
             const lane = labels.find(l => l.startsWith('lane:')) || 'lane:code-change';
+            const lightweight = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:config-only', 'lane:no-code-remediation'];
+            if (lightweight.includes(lane)) {
+              console.log(`Issue #${issueNumber}: lightweight lane (${lane}); test-evidence gate skipped.`);
+              return;
+            }
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: issueNumber, per_page: 100,
