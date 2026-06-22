@@ -1,0 +1,47 @@
+# Runtime Compatibility Matrix Template
+# Required for tickets touching hooks, CLI tools, or pre-push gates.
+# Fill out each runtime section in COLLABORATOR_HANDOFF cross_family_findings.
+
+runtime_compatibility:
+  copilot:
+    gh_auth: "available via GitHub session"
+    hook_execution: "lefthook runs in integrated terminal"
+    fallback: "N/A — full support expected"
+    evidence: ""  # e.g. "tested in session 2026-06-22"
+
+  claude_code:
+    gh_auth: "available via gh auth login"
+    hook_execution: "lefthook runs in integrated terminal"
+    fallback: "N/A — full support expected"
+    evidence: ""
+
+  antigravity:
+    gh_auth: "available via stored credentials"
+    hook_execution: "lefthook runs in integrated terminal"
+    fallback: "N/A — full support expected"
+    evidence: ""
+
+  codex:
+    gh_auth: "may be absent in sandbox environments"
+    hook_execution: "hooks run but API calls may fail"
+    fallback: "graceful skip with advisory (G6)"
+    evidence: ""  # e.g. "tested via CODEX_SANDBOX=1 mock"
+
+  cursor:
+    gh_auth: "undocumented — varies by configuration"
+    hook_execution: "varies — no documented hook contract"
+    fallback: "graceful skip with advisory (G6)"
+    evidence: ""  # e.g. "documented assumption — needs validation"
+
+# Applicability: this matrix is REQUIRED when the ticket's lane is
+# lane:code-change AND the diff touches any of:
+#   - lefthook.yml
+#   - scripts/global/pre-push-gates.js
+#   - scripts/global/megalint/**
+#   - scripts/global/closeout-preflight.js
+#   - scripts/hooks/**
+#   - hooks/scripts/**
+#
+# The megalint advisory validator (work-log-sync.js or future
+# runtime-compat-check.js) checks for this matrix's presence in
+# COLLABORATOR_HANDOFF for applicable diffs.
