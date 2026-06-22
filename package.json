@@ -20,6 +20,7 @@
     "auth:profile": "node scripts/global/authorization-profile.js",
     "auth:profile:context": "node scripts/global/authorization-profile-context.js",
     "capability:probe": "node scripts/global/capability-probe.js",
+    "check:closeout": "node scripts/global/open-pr-closeout-check.js",
     "capability:show": "node scripts/global/capability-show.js",
     "harness:setup": "node scripts/global/harness-setup.js",
     "harness:doctor": "node scripts/global/harness-fleet-doctor.js",

@@ -27,6 +27,10 @@ pre-push:
       run: node scripts/global/hydration-lint.js
     closeout-preflight:
       run: node scripts/global/closeout-preflight.js
+    # #3028 (Epic #3026 C3): warn when an open PR's linked issue lacks CONSULTANT_CLOSEOUT.
+    # Advisory by default (exit 0); set CLOSEOUT_CHECK_BLOCK=1 to enforce; [skip-closeout-check] overrides.
+    closeout-presence-check:
+      run: node scripts/global/open-pr-closeout-check.js
     # #1613: removed `test-evidence-diff` step. The validator at
     # scripts/global/test-evidence-validator.js requires server-state inputs
     # (PR body labels, PR comments, PR file list) that aren't available
