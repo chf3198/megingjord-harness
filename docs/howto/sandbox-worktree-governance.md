@@ -28,6 +28,24 @@ Record this evidence at session start:
 - Branch name follows `feat/<N>-...` or `fix/<N>-...`.
 - Ticket linkage exists before edits (`#N`).
 
+## One Ticket Per Worktree (#2967)
+
+A pretool guard (`hooks/scripts/one_ticket_per_worktree.py`) blocks posting an
+Agile baton artifact (MANAGER_HANDOFF / COLLABORATOR_HANDOFF / ADMIN_HANDOFF /
+CONSULTANT_CLOSEOUT) for a **second** ticket from a worktree whose active ticket
+still has an unresolved baton. It is provider-neutral (identical verdict for
+Claude Code / Copilot / Codex / Antigravity, since all post via `gh issue
+comment`).
+
+What stays allowed (false-positive prevention): non-baton coordination comments,
+follow-on `gh issue create`, label edits, multi-close batch sibling evidence
+("resolved as part of batch with #N"), and **sequential** iteration — finish and
+`gh issue close` the active ticket, then start the next.
+
+**Recovery path** if you hit the deny: finish the active ticket
+(`CONSULTANT_CLOSEOUT` + `gh issue close #N`), or run the next ticket from its own
+worktree. Emergency override: `export MEGINGJORD_ONE_TICKET_GUARD_OFF=1`.
+
 ## Stale-Worktree Taxonomy
 
 Use inventory and governance outputs as classification evidence.
