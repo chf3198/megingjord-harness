@@ -17,6 +17,12 @@ Before implementation, refresh the launcher and move to a ticket branch:
 bash scripts/worktree-session-start.sh <copilot|codex|claude-code> feat/<issue#>-<slug>
 ```
 
+Since #2946 the task branch is created in an **isolated worktree directory**
+(`~/devenv-ops-<issue#>`) rather than switched in place — so after running the
+command, `cd ~/devenv-ops-<issue#>` to implement. This keeps the canonical-main
+checkout untouched (it is read-only for tracked paths) even when a ticket needs
+new tracked files.
+
 Record this evidence at session start:
 - `git worktree list` output.
 - Branch name follows `feat/<N>-...` or `fix/<N>-...`.

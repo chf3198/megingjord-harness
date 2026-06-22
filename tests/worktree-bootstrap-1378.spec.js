@@ -6,6 +6,7 @@ const { execSync, spawnSync } = require('child_process');
 
 const REPO = path.resolve(__dirname, '..');
 const SESSION_START = path.join(REPO, 'scripts', 'worktree-session-start.sh');
+const AGENT_INIT = path.join(REPO, 'scripts', 'worktree-agent-init.sh');
 const BOOTSTRAP = path.join(REPO, 'scripts', 'worktree-bootstrap-node-modules.sh');
 
 test('#1378 AC1: worktree-session-start.sh includes bootstrap_node_modules function', () => {
@@ -15,13 +16,28 @@ test('#1378 AC1: worktree-session-start.sh includes bootstrap_node_modules funct
   expect(content).toContain('ln -sf');
 });
 
-test('#1378 AC1: bootstrap is called after task-branch creation', () => {
-  const content = fs.readFileSync(SESSION_START, 'utf-8');
-  // Must appear after `git switch -c "$task_branch"`
-  const switchPos = content.indexOf('git switch -c "$task_branch"');
-  const bootstrapCallPos = content.indexOf('bootstrap_node_modules "$root"');
-  expect(switchPos).toBeGreaterThan(0);
-  expect(bootstrapCallPos).toBeGreaterThan(switchPos);
+test('#2946 AC1: task branch is created in an isolated worktree dir, not in-place', () => {
+  const session = fs.readFileSync(SESSION_START, 'utf-8');
+  const init = fs.readFileSync(AGENT_INIT, 'utf-8');
+  // The old in-place `git switch -c "$task_branch"` must be gone.
+  expect(session.includes('git switch -c "$task_branch"')).toBe(false);
+  // worktree-session-start.sh delegates to the extracted helper (AC2).
+  expect(session).toContain('create_task_worktree "$agent" "$task_branch"');
+  // The helper lives in worktree-agent-init.sh and uses an isolated worktree dir.
+  expect(init).toContain('create_task_worktree()');
+  expect(init).toContain('git worktree add "$worktree_dir"');
+  expect(init).toContain('$HOME/devenv-ops-${ticket_num}');
+});
+
+test('#2946 AC3: bootstrap/hooks/env in the helper target the new worktree dir', () => {
+  const init = fs.readFileSync(AGENT_INIT, 'utf-8');
+  // After the isolated worktree-add, init steps must run against $worktree_dir.
+  const addPos = init.indexOf('git worktree add "$worktree_dir"');
+  const bootstrapPos = init.indexOf('bootstrap_node_modules "$worktree_dir"');
+  const hooksPos = init.indexOf('configure_per_worktree_hooks "$worktree_dir"');
+  expect(addPos).toBeGreaterThan(0);
+  expect(bootstrapPos).toBeGreaterThan(addPos);
+  expect(hooksPos).toBeGreaterThan(addPos);
 });
 
 test('#1378 AC1: bootstrap is idempotent (skips if node_modules already exists)', () => {
