@@ -10,6 +10,7 @@ const { stepGate, patternRateGate, singleFlightGate, releaseSingleFlight } = req
 const { emitEvent, readEvents } = require('./anneal-event-schema');
 const { gateCandidate, markConfirmed } = require('./anneal-worker-confirmation');
 const { execute } = require('./github-dispatcher');
+const { applyFrictionCrossTeamWeighting } = require('./friction-recurrence');
 
 const INCIDENTS = path.join(os.homedir(), '.megingjord', 'incidents.jsonl');
 const SUPPRESS_FILE = path.join(os.homedir(), '.megingjord', 'suppression-registry.json');
@@ -115,7 +116,11 @@ async function run(argv, opts = {}) {
   const tier1 = sourceEvents.filter((item) => item.tier === Number('1'));
   const tier2 = sourceEvents.filter((item) => item.tier === TWO);
   const flight = singleFlightGate(sessionId); if (!flight.ok) return emitKillSwitch(flight.reason, '', sessionId, nowIso);
-  const candidates = buildCandidates(tier1).filter((item) => !isSuppressed(item.pattern_id, suppressions));
+  // #3165: friction events (tier:1) already qualify via buildCandidates; cross-team-weight
+  // them so a pothole hitting >= 2 distinct teams escalates one severity level. Additive —
+  // only friction candidates are touched; ordinary anneal candidates pass through unchanged.
+  const candidates = applyFrictionCrossTeamWeighting(buildCandidates(tier1), tier1)
+    .filter((item) => !isSuppressed(item.pattern_id, suppressions));
   const out = [];
   const ctx = { applyFlag, nowIso, sessionId, tier2, dispatcherOpts: opts.dispatcherOpts || {}, dedupeLookup: opts.dedupeLookup };
   try {

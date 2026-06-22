@@ -63,6 +63,8 @@
     "git:conflict-predict:test": "node --test tests/git-conflict-predict.spec.js",
     "git:freshness-check": "node scripts/global/git-freshness-check.js",
     "git:freshness-check:test": "node --test tests/git-freshness-check.spec.js",
+    "friction:test": "node --test tests/friction-event.spec.js",
+    "friction:test:py": "python3 -m unittest tests.hooks.test_friction_event",
     "goals:regen": "node scripts/global/goals-contract-generate.js",
     "governance:actuator-transitions:test": "node --test tests/actuator-transitions.spec.js",
     "governance:adapters:emit": "node scripts/global/governance-adapter-emit.js",

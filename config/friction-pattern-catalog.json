@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "description": "Seed catalog of confirmed friction pattern_ids (#3165, Epic #3008/#3095). emitFriction (scripts/global/friction-event.js / hooks/scripts/friction_event.py) writes tier:1 v3 events keyed by these ids to ~/.megingjord/incidents.jsonl; the anneal-tier2-autofile recurrence model (cross-team weighted via friction-recurrence.js) promotes recurring ones to Tier-2. New pattern_ids may be emitted before they appear here — the catalog documents confirmed ones, it does not gate emission.",
+  "patterns": [
+    {
+      "pattern_id": "preflight-full-suite",
+      "surface": "scripts/global/collaborator-preflight.js",
+      "description": "collaborator-preflight runs the full (flaky) test suite instead of the changed-file subset, so unrelated baseline failures block the handoff.",
+      "first_seen_teams": ["cursor", "claude-code"],
+      "refs": ["#3008", "#3095", "#3166"]
+    },
+    {
+      "pattern_id": "fleet-32b-timeout",
+      "surface": "scripts/global/fleet-red-team-dispatch.js",
+      "description": "qwen2.5-coder:32b cross-family review times out or stalls on the fleet host; the 7b tier is the routine default.",
+      "first_seen_teams": ["cursor", "claude-code"],
+      "refs": ["#3008", "#3095", "#3167"]
+    },
+    {
+      "pattern_id": "worktree-push-gate-commit-desync",
+      "surface": "hooks/scripts/pretool_guard.py",
+      "description": "Admin push gate reads the commit flag from the session (main) cwd while work lives in a linked worktree, so a committed worktree branch is falsely blocked 'commit step first'.",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#3168"]
+    },
+    {
+      "pattern_id": "closeout-pre-push-chicken-egg",
+      "surface": "scripts/global/closeout-preflight.js",
+      "description": "closeout-preflight required CONSULTANT_CLOSEOUT before the PR existed, inverting the baton in the deferred-final flow.",
+      "first_seen_teams": ["cursor", "claude-code"],
+      "refs": ["#3008", "#3095", "#3169"]
+    },
+    {
+      "pattern_id": "canonical-main-enforcer-redirect-false-block",
+      "surface": "hooks/scripts/canonical_main_enforcer.py",
+      "description": "canonical-main enforcer false-blocks a shell '>' redirect or 'git checkout -- <path>' targeting a worktree-tracked file when the cwd is mis-detected as the main checkout. Workaround: use the Write tool or 'git -C <wt>'.",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#3165"]
+    },
+    {
+      "pattern_id": "push-gate-heredoc-git-push-false-block",
+      "surface": "hooks/scripts/pretool_guard.py",
+      "description": "push gate scans the whole bash command, so a heredoc body containing the literal string 'git push' false-blocks the command. Workaround: write such files with the Write tool.",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#3165"]
+    },
+    {
+      "pattern_id": "push-gate-branch-delete-false-block",
+      "surface": "hooks/scripts/pretool_guard.py",
+      "description": "push gate blocks 'git push origin --delete <branch>' (a branch deletion has no commit) with 'commit step first'. Workaround: delete the remote ref via 'gh api -X DELETE .../git/refs/heads/<branch>'.",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#3165"]
+    },
+    {
+      "pattern_id": "sync-direction-reverse-trap",
+      "surface": "package.json scripts",
+      "description": "sync:claude / sync:codex copy the deployed runtime INTO the checkout (reverse direction); forward deploy is deploy:apply + deploy:claude:apply. Running sync from canonical main can regress merged files.",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#2355", "#3165"]
+    },
+    {
+      "pattern_id": "test-evidence-tdd-pyramid-no-pytest",
+      "surface": "scripts/global/test-evidence-validator.js",
+      "description": "test-evidence tdd-pyramid checker matches only tests/**/*.{spec,test}.{js,ts}; a python-hooks PR with a pytest test_*.py fails 'missing-spec-file' though the matrix maps hooks/scripts/*.py to tdd-pyramid (pytest).",
+      "first_seen_teams": ["claude-code"],
+      "refs": ["#3168", "#3183"]
+    }
+  ]
+}

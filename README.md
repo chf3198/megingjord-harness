@@ -182,6 +182,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `fleet:escalation-policy:test` | `node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
 | `format:check` | `prettier --check .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
+| `friction:test` | `node --test tests/friction-event.spec.js` |
+| `friction:test:py` | `python3 -m unittest tests.hooks.test_friction_event` |
 | `git-state:drift` | `node scripts/global/git-state-drift-sensor.js` |
 | `git:conflict-predict` | `node scripts/global/git-conflict-predict.js` |
 | `git:conflict-predict:test` | `node --test tests/git-conflict-predict.spec.js` |
