@@ -1,0 +1,16 @@
+{
+  "_note": "Generic service registry template — operator data in ~/.megingjord/services.json",
+  "lastUpdated": "2026-06-01",
+  "subscriptions": [
+    {
+      "id": "example-cloud",
+      "name": "Example Cloud Provider",
+      "cost": "metered",
+      "features": ["api", "inference"],
+      "status": "inactive"
+    }
+  ],
+  "freeTier": [
+    { "id": "example-free-api", "provider": "example", "limits": "see provider docs" }
+  ]
+}

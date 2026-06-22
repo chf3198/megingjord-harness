@@ -5,9 +5,7 @@
 
 const path = require('node:path');
 const fs = require('node:fs');
-
-const DEFAULT_DEVICES = path.resolve(__dirname, '..', '..', 'inventory', 'devices.json');
-const DEFAULT_PROFILE = path.resolve(__dirname, '..', '..', 'inventory', 'fleet-latency-profile.json');
+const { resolveInventory } = require('./resolve-inventory');
 
 const DEFAULT_TTFT_P99_S = 999;
 const DEFAULT_TOTAL_P99_S = 9999;
@@ -20,10 +18,14 @@ const TIER_CLOUD_CHEAP = 3;
 const TIER_CLOUD_STANDARD = 4;
 const TIER_CLOUD_PREMIUM = 5;
 
-function loadInventory(devicesPath = DEFAULT_DEVICES, profilePath = DEFAULT_PROFILE, fsImpl = fs) {
-  const devices = JSON.parse(fsImpl.readFileSync(devicesPath, 'utf8'));
-  const profile = JSON.parse(fsImpl.readFileSync(profilePath, 'utf8'));
-  return { devices: devices.devices || [], profile: profile.hosts || {} };
+function loadInventory(devicesPath = null, profilePath = null, fsImpl = fs) {
+  const devices = devicesPath
+    ? JSON.parse(fsImpl.readFileSync(devicesPath, 'utf8'))
+    : resolveInventory('devices', { probeEnrich: false });
+  const profileDoc = profilePath
+    ? JSON.parse(fsImpl.readFileSync(profilePath, 'utf8'))
+    : resolveInventory('fleet-latency-profile', { probeEnrich: false });
+  return { devices: devices.devices || [], profile: profileDoc.hosts || {} };
 }
 
 function tierForDevice(device) {

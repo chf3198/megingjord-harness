@@ -69,7 +69,7 @@ function probeTailscale() {
 async function probe() {
   require('./load-local-env').loadLocalEnvOnce();
   const env = process.env;
-  const inv = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'inventory', 'devices.json'), 'utf8'));
+  const inv = require('./resolve-inventory').resolveInventory('devices', { probeEnrich: false });
   const providerResults = await Promise.all(PROVIDER_PROBES.map(async p => [p.id, await probeProvider(p, env)]));
   const providers = Object.fromEntries(providerResults);
   const [cfResult, r2Result, oidcResult] = await Promise.all([hamr.probeCloudflare(), hamr.probeR2(), hamr.probeGithubOidc()]);

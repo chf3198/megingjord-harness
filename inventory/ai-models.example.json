@@ -1,0 +1,12 @@
+{
+  "_note": "Generic provider routing rules — operator overrides in ~/.megingjord/ai-models.json",
+  "lastUpdated": "2026-06-01",
+  "optimizationStrategy": {
+    "rule1": "Prefer free/local tiers before paid cloud",
+    "rule2": "Use fleet Ollama for coding-heavy sessions when online",
+    "rule3": "Reserve premium models for complex reasoning only",
+    "rule4": "Never escalate to paid without explicit justification",
+    "rule5": "Offload availability failures to free-cloud before premium",
+    "rule6": "Use capability probe manifest for provider readiness"
+  }
+}

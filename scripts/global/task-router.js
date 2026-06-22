@@ -5,10 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 const policyPath = path.join(__dirname, 'task-router-policy.json');
-const inventoryPath = path.join(__dirname, '..', '..', 'inventory', 'devices.json');
 const policy = JSON.parse(fs.readFileSync(policyPath, 'utf8'));
-const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
-const aiRules = require('../../inventory/ai-models.json').optimizationStrategy || {};
+const inventory = require('./resolve-inventory').resolveInventory('devices', { probeEnrich: false });
+const aiRules = require('./resolve-inventory').resolveInventory('ai-models', { probeEnrich: false }).optimizationStrategy || {};
 
 function score(prompt, list) {
   const text = String(prompt || '').toLowerCase();

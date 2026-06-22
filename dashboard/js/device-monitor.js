@@ -1,21 +1,20 @@
-// Device Monitor — load inventory JSONs for dashboard
-// Fetches from /inventory/ directory
-
+// Device Monitor — merged inventory via setup API (#3173).
 async function loadDevices() {
   try {
-    const r = await fetch('../inventory/devices.json');
-    const data = await r.json();
-    return data.devices.map(d => ({
-      id: d.id,
-      alias: d.alias,
-      role: d.role,
-      ram: d.ram?.total || 'unknown',
-      modelCount: (d.ollamaModels || []).length,
-      tailscaleIP: d.tailscaleIP || null,
-      ollama: d.ollama,
-      openclaw: !!d.openclaw,
-      local: !!d.local,
-      status: 'unknown'
+    const response = await fetch('/api/fleet/inventory');
+    const payload = await response.json();
+    const devices = payload.inventory?.devices || payload.devices?.devices || [];
+    return devices.map((device) => ({
+      id: device.id,
+      alias: device.alias || device.hostname,
+      role: device.role || device.capabilities?.[0] || 'node',
+      ram: device.ram?.total || 'unknown',
+      modelCount: (device.ollamaModels || []).length,
+      tailscaleIP: device.tailscaleIP || device.resolvedIP || null,
+      ollama: device.ollama || (device.ollamaModels || []).length > 0,
+      openclaw: (device.services || []).includes('openclaw-gateway'),
+      local: !!device.local,
+      status: device.probeReachable ? 'online' : 'unknown',
     }));
   } catch {
     return [];
@@ -24,20 +23,17 @@ async function loadDevices() {
 
 async function loadServices() {
   try {
-    const r = await fetch('../inventory/services.json');
-    const data = await r.json();
-    const all = [
-      ...(data.subscriptions || []),
-      ...(data.freeTier || []),
-      ...(data.selfHosted || []),
-    ];
-    return all.map(s => ({
-      id: s.id,
-      name: s.name,
-      type: s.type || s.cost ? 'paid' : 'free',
-      cost: s.cost || 'free',
-      quotas: s.quotas,
-      status: s.status
+    const response = await fetch('/api/fleet/inventory');
+    const payload = await response.json();
+    const data = payload.services || {};
+    const all = [...(data.subscriptions || []), ...(data.freeTier || []), ...(data.selfHosted || [])];
+    return all.map((service) => ({
+      id: service.id,
+      name: service.name,
+      type: service.type || (service.cost ? 'paid' : 'free'),
+      cost: service.cost || 'free',
+      quotas: service.quotas,
+      status: service.status || 'unknown',
     }));
   } catch {
     return [];

@@ -43,6 +43,10 @@ async function handleApi(req, res) {
     const healthResponse = await proxyGet(`${OPENCLAW}/health`);
     return jsonRes(res, healthResponse.status, healthResponse.body);
   }
+  if (requestUrl.startsWith('/api/fleet/setup/') || requestUrl === '/api/fleet/inventory') {
+    const { handleFleetSetupApi } = require('../dashboard/api/fleet-setup-handlers');
+    return handleFleetSetupApi(req, res, requestUrl, jsonRes);
+  }
   const fm = requestUrl.match(/^\/api\/fleet\/([^/]+)\/(.+)$/);
   if (fm) {
     const base = FLEET[fm[1]];
@@ -87,13 +91,8 @@ async function handleApi(req, res) {
   if (requestUrl === '/api/quota-probes') { const { probeAll } = require('./quota-probes'); return jsonRes(res, 200, await probeAll()); }
   if (requestUrl === '/api/copilot-usage') { const { getCopilotQuota } = require('./copilot-tracker'); return jsonRes(res, 200, getCopilotQuota()); }
   if (requestUrl === '/api/copilot-usage/sync' && req.method === 'POST') { let syncBody=''; req.on('data',c=>syncBody+=c); req.on('end',()=>{ try { const syncData=JSON.parse(syncBody); const { setManualUsage } = require('./copilot-tracker'); return jsonRes(res,200,setManualUsage(syncData.cost,syncData.requests)); } catch(e){ return jsonRes(res,400,{error:e.message}); } }); return; }
-  if (requestUrl === '/api/logs/token-telemetry-summary') { const { writeTokenTelemetryReport } = require('./global/token-telemetry-report'); return jsonRes(res, 200, writeTokenTelemetryReport(30)); }
-  if (requestUrl === '/api/logs/quality-parity') {
-    const { writeQualityParityReport } = require('./global/quality-parity-report'); const parsedUrl = new URL(req.url, 'http://localhost'); const live = parsedUrl.searchParams.get('live') === '1' || process.env.QUALITY_PARITY_LIVE === '1';
-    return writeQualityParityReport({ mode: live ? 'live' : 'dry-run' }).then(report => jsonRes(res, 200, report)).catch(error => jsonRes(res, 500, { error: error.message }));
-  }
-  if (requestUrl === '/api/logs/token-telemetry-reconcile') { const { writeReconciliationReport } = require('./global/token-telemetry-reconcile'); writeReconciliationReport(30).then(reconcileReport => jsonRes(res, 200, reconcileReport)).catch(e => jsonRes(res, 500, { error: e.message })); return; }
-  if (requestUrl === '/api/logs/cost-telemetry') { const logFile=path.join(ROOT,'logs','cost-telemetry.jsonl'); const text=fs.existsSync(logFile)?fs.readFileSync(logFile,'utf8'):''; res.setHeader('Content-Type','text/plain'); return res.end(text); }
+  const logRoute = require('./dashboard-api-log-routes').handleLogRoutes(requestUrl, req, res, jsonRes, ROOT);
+  if (logRoute !== false) return logRoute;
   jsonRes(res, 404, { error: 'not found' });
 }
 
