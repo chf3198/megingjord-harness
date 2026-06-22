@@ -37,7 +37,34 @@ install_hook() {
     echo "✅ $name extended with $target"
     return 0
   fi
-  ln -sf "$src" "$dst"
+  link_cycle_safe "$name" "$target" "$src" "$dst"
+}
+
+# Cycle-safe idempotent symlink (#2972). A bare `ln -sf "$src" "$dst"` can, on a
+# re-run against an already-materialized tree, point the destination hook at
+# itself — an ELOOP "too many levels of symbolic links" that bricks every tool
+# call routed through that hook. Guard against it three ways:
+#   1. Idempotent skip — if dst already resolves to the same real path as src
+#      and is readable, there is nothing to do.
+#   2. Self-link refusal — never create a link whose source and destination are
+#      the same inode (the exact ELOOP brick of #2972).
+#   3. Clean replace — remove dst first, then create a fresh symlink, so a stale
+#      or already-cyclic dst is repaired rather than re-looped.
+link_cycle_safe() {
+  local name=$1 target=$2 src=$3 dst=$4
+  local src_real dst_real
+  src_real=$(readlink -f "$src" 2>/dev/null || true)
+  dst_real=$(readlink -f "$dst" 2>/dev/null || true)
+  if [ -n "$src_real" ] && [ "$src_real" = "$dst_real" ] && [ -r "$dst" ]; then
+    echo "✅ $name already links $target (idempotent skip)"
+    return 0
+  fi
+  if [ -e "$dst" ] && [ "$src" -ef "$dst" ]; then
+    echo "❌ refusing self-referential link for $name: $dst -ef $src"
+    return 1
+  fi
+  rm -f "$dst"
+  ln -s "$src" "$dst"
   echo "✅ symlinked $name → $target"
 }
 

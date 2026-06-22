@@ -8,6 +8,7 @@ const path = require('node:path');
 const { homedir } = require('node:os');
 const { probeKeyTier } = require('./baton-signing');
 const { judgeFamilies } = require('./judge-quorum');
+const { scanHookHealth, repairBrokenLink, hookHealthRemediations } = require('./hook-symlink-health');
 
 const REM = {
   wrangler: { missing: 'Install Wrangler 4.x: `npm i -g wrangler@4 && wrangler login`' },
@@ -51,7 +52,7 @@ function buildRemediations(caps) {
  * @param {object} keyTier - Result from baton-signing.probeKeyTier().
  * @returns {object} Doctor report — tier, reason, key_tier, judge_families, remediations.
  */
-function buildReport(caps, keyTier) {
+function buildReport(caps, keyTier, hookHealth = { scanned: 0, broken: [] }) {
   const { tier, reason } = tierFor(caps);
   return {
     schema_version: 1,
@@ -59,7 +60,8 @@ function buildReport(caps, keyTier) {
     reason,
     key_tier: keyTier,
     judge_families: Object.keys(judgeFamilies()),
-    remediations: buildRemediations(caps),
+    remediations: [...buildRemediations(caps), ...hookHealthRemediations(hookHealth)],
+    hook_health: hookHealth,
     capabilities_snapshot_present: caps !== null,
   };
 }
@@ -68,17 +70,33 @@ async function runDoctor(opts = {}) {
   const capPath = opts.capPath ?? path.join(homedir(), 'devenv-ops', '.dashboard', 'capabilities.json');
   const caps = readCapabilities(capPath);
   const keyTier = await probeKeyTier();
-  return buildReport(caps, keyTier);
+  const hookHealth = scanHookHealth(opts.hookRoots);
+  // --fix removes cyclic/unreadable hook links so the operator can re-deploy (#2972).
+  if (opts.fix) {
+    for (const item of hookHealth.broken) item.repaired = repairBrokenLink(item.path);
+  }
+  return buildReport(caps, keyTier, hookHealth);
 }
 
 async function main() {
   const wantJson = process.argv.includes('--json');
-  const report = await runDoctor();
+  const fix = process.argv.includes('--fix');
+  const report = await runDoctor({ fix });
   if (wantJson) { console.log(JSON.stringify(report, null, 2)); return; }
   const tierLabel = report.tier.toUpperCase();
   console.log(`HAMR ${tierLabel} (${report.reason})`);
   console.log(`  key tier: ${report.key_tier.tier} (${report.key_tier.source})`);
   console.log(`  judge families available: ${report.judge_families.join(', ')}`);
+  const broken = report.hook_health.broken;
+  if (broken.length === 0) {
+    console.log(`  hook health: ok (${report.hook_health.scanned} deployed hook scripts scanned)`);
+  } else {
+    console.log(`  hook health: ${broken.length} BROKEN hook script(s) — operator-lockout risk (#2972):`);
+    for (const b of broken) {
+      console.log(`    [${b.reason}] ${b.path}${b.repaired ? ' (removed by --fix; re-run npm run deploy:claude:apply)' : ''}`);
+    }
+    if (!fix) console.log('    recover: npm run hamr:doctor --fix');
+  }
   if (report.remediations.length === 0) {
     console.log('  remediations: none — all capabilities present');
   } else {
