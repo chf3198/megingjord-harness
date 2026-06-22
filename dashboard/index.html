@@ -17,7 +17,7 @@
     <script src="js/help-content.js"></script><script src="js/help-user.js"></script><script src="js/help-dev.js"></script>
     <script src="js/wiki-panel.js"></script><script src="js/wiki-reader.js"></script><script src="js/wiki-metrics.js"></script>
     <script src="js/context-flow.js"></script><script src="js/llm-context.js"></script><script src="js/github-monitor.js"></script>
-    <script src="js/fleet-health-log.js"></script><script src="js/fleet-settings.js"></script>
+    <script src="js/fleet-health-log.js"></script><script src="js/fleet-settings.js"></script><script src="js/fleet-setup-wizard.js"></script>
     <script src="js/governance-panel.js"></script><script src="js/ticket-log.js"></script>
     <script src="js/tooltips.js"></script><script src="js/app-actions.js"></script>
     <script src="js/credential-store.js"></script><script src="js/provider-presets.js"></script><script src="js/fleet-probe.js"></script><script src="js/settings-panel.js"></script><script src="js/settings-form.js"></script><script src="js/settings-actions.js"></script>
@@ -80,6 +80,7 @@
             <h2>🏗️ Devices <button class="shb" data-tip="devices" aria-label="Help: Devices">?</button></h2><div x-html="renderDeviceCards(devices)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-services" class="panel">
             <h2>⚡ Services <button class="shb" data-tip="services" aria-label="Help: Services">?</button></h2><div x-html="renderServiceCards(services)"></div></section></template>
+        <template x-if="isView('fleet')"><section id="panel-fleet-setup" class="panel"><h2>🛠 Fleet Setup</h2><div id="fleet-setup-target" x-init="registerFleetSetupPanel&&registerFleetSetupPanel($el)"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-settings" class="panel">
             <h2>⚙️ Fleet Resources <button class="shb" data-tip="settings" aria-label="Help: Resources">?</button></h2><div id="settings-content" x-html="renderSettingsPanel(loadFleetResources(), window._lastProbeResults, window._hostInfo)" x-init="fetchHostInfo().then(h=>{window._hostInfo=h;$el.innerHTML=renderSettingsPanel(loadFleetResources(),window._lastProbeResults,h);})"></div><div id="settings-form-container"></div></section></template>
         <template x-if="isView('fleet')"><section id="panel-config" class="panel">
@@ -93,8 +94,6 @@
             <h2>📚 Research Wiki <button class="shb" data-tip="wiki-reader" aria-label="Help: Wiki">?</button></h2><div x-html="renderWikiReader(wikiPages)"></div></section></template>
         <!-- COST: 1 panel --><template x-if="isView('cost')"><section id="panel-cost" class="panel full-width"><h2>💰 Cost + Token Telemetry <button class="shb" data-tip="cost" aria-label="Help: Cost">?</button><span class="panel-ts" x-text="panelTs.cost ? '⟳ '+panelTs.cost : ''"></span></h2><div x-html="renderTokenTelemetryPanel(tokenTelemetry)"></div><div x-html="renderQualityParityPanel(qualityParity)"></div><div x-html="renderTokenReconcilePanel(reconcileData)"></div><div x-html="renderCostMonitor(costData)"></div></section></template>
         <!-- AGENTS --><template x-if="isView('agents')"><section id="panel-agents" class="panel full-width"><h2>🤖 Agents <button class="shb" data-tip="agents" aria-label="Help: Agents">?</button><span class="panel-ts" x-text="panelTs.agents ? '⟳ '+panelTs.agents : ''"></span></h2><div x-html="renderAgentInventory()"></div><hr class="panel-divider"><h3 class="panel-subheading">🔴 Live Sessions</h3><div x-html="renderTierCBanner(agentSessions)"></div><div x-html="renderConflictAlerts(agentSessions)"></div><div x-html="renderAgentSessions(agentSessions)"></div></section></template>
-        <!-- HELP: 1 panel full-width -->
-        <template x-if="isView('help')"><section id="panel-help" class="panel full-width">
-            <h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>
+        <template x-if="isView('help')"><section id="panel-help" class="panel full-width"><h2>📘 Help Center</h2><div x-html="renderHelpPanel(helpDevMode)"></div></section></template>
     </main>
     <footer class="footer"><span>Last refresh: <span x-text="lastRefresh"></span></span><span>megingjord v3.3.7</span></footer><aside id="app-tip" class="app-tip" x-show="activeTip" x-html="activeTip" x-transition.opacity></aside></body></html>

@@ -65,8 +65,9 @@ test('complexity 0.71 routes to premium (above premium threshold)', () => {
 });
 
 // AC4: ai-models.json optimization rules imported by task-router
-test('task-router imports ai-models.json optimization rules', () => {
-  const aiModels = require(path.join(__dirname, '../inventory/ai-models.json'));
+test('task-router imports ai-models optimization rules via resolve-inventory', () => {
+  const { resolveInventory } = require(path.join(__dirname, '../scripts/global/resolve-inventory'));
+  const aiModels = resolveInventory('ai-models', { probeEnrich: false });
   expect(aiModels.optimizationStrategy).toBeDefined();
   expect(typeof aiModels.optimizationStrategy.rule1).toBe('string');
   expect(typeof aiModels.optimizationStrategy.rule3).toBe('string');

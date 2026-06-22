@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": 1,
+  "lastUpdated": "2026-06-01",
+  "note": "Generic latency seeds — refresh via fleet-profile-bench; operator overlay in ~/.megingjord/",
+  "hosts": {
+    "fleet-gpu": {
+      "models": {
+        "qwen2.5-coder:7b": {
+          "ttft_p50_s": 5, "ttft_p99_s": 15,
+          "total_p50_s": 60, "total_p99_s": 120,
+          "timeout_recommendation_s": 240, "sample_size": 0, "source": "example-seed"
+        }
+      }
+    }
+  }
+}

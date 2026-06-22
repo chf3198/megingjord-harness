@@ -12,6 +12,9 @@ git clone https://github.com/chf3198/megingjord-harness.git
 cd megingjord-harness
 npm install
 npm run deploy:both:apply   # seeds ~/.copilot/ + ~/.claude/ + ~/.codex/
+cp .env.example .env        # then fill keys or use Dashboard Fleet Setup
+npm run harness:setup       # discover + probe + readiness report
+npm run harness:doctor      # verify overlay + probe freshness
 ```
 
 After this, every project on the machine inherits the global governance
