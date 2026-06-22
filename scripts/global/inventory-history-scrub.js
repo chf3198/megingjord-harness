@@ -2,8 +2,6 @@
 'use strict';
 // #3172 — operator-run git history scrub helper (Admin executes; no auto force-push).
 const { execFileSync } = require('node:child_process');
-const fs = require('node:fs');
-const path = require('node:path');
 
 const PATHS = ['inventory/devices.json', 'inventory/ai-models.json', 'inventory/services.json', 'inventory/fleet-latency-profile.json'];
 const TAG = 'pre-inventory-scrub-3172';

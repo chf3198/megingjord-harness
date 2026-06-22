@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { keychainProvider } = require('./keychain-source');
+require('./load-local-env').loadLocalEnvOnce();
 
 const ENV_NAME = /^[A-Z][A-Z0-9_]{0,127}$/;
 
