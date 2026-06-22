@@ -1,6 +1,6 @@
 // tier: 3
 // fleet-router.js — cost-aware fleet routing per Phase-0 §2 (#2524)
-// Consumes inventory/devices.json + fleet-latency-profile.json + fleet-probe.js.
+// Consumes resolveInventory(devices + fleet-latency-profile) + fleet-probe.js (#3170).
 'use strict';
 
 const path = require('node:path');

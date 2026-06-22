@@ -5,7 +5,7 @@ epic: 3162
 ticket: 3163
 lane: docs-research
 test_strategy: peer-review
-status: draft
+status: completed
 operator_decisions: B1-B4 (recorded on #3162)
 ---
 

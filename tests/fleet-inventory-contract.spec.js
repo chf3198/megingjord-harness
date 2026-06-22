@@ -28,3 +28,18 @@ test('harnessFleetDoctor returns structured report', () => {
 test('fleet-config CLI exits zero', () => {
   execFileSync('node', ['scripts/global/fleet-config.js', 'fleet'], { cwd: path.join(__dirname, '..'), encoding: 'utf8' });
 });
+
+test('fleet-benchmark-runner loadDevices falls back to resolveInventory', () => {
+  const { loadDevices } = require('../scripts/global/fleet-benchmark-runner');
+  const doc = loadDevices({});
+  expect(doc.devices.length).toBeGreaterThan(0);
+});
+
+test('skills reference overlay not tracked inventory/devices.json', () => {
+  const root = path.join(__dirname, '..');
+  for (const rel of ['skills/fleet-portable-config/SKILL.md', 'skills/network-platform-resources/SKILL.md']) {
+    const text = fs.readFileSync(path.join(root, rel), 'utf8');
+    expect(text).toMatch(/resolve-inventory|~\/\.megingjord/);
+    expect(text).not.toMatch(/Edit tracked `inventory\/devices\.json`/);
+  }
+});

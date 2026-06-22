@@ -30,8 +30,12 @@ async function benchOnce(host, model, prompt, timeoutMs) {
     return { ok: true, status: response.status, latency_ms: ms, tok_s: tok };
   } catch (e) { return { ok: false, status: 0, latency_ms: Date.now() - t0, reason: classifyError(0, '', e.message), error: e.message }; }
 }
+function loadDevices(opts = {}) {
+  if (opts.devices) return JSON.parse(fs.readFileSync(opts.devices, 'utf8'));
+  return require('./resolve-inventory').resolveInventory('devices', { probeEnrich: false });
+}
 async function run(opts = {}) {
-  const inv = JSON.parse(fs.readFileSync(opts.devices || path.join(process.cwd(), 'inventory/devices.json'), 'utf8'));
+  const inv = loadDevices(opts);
   const devices = inv.devices.filter((d) => d.ollama && d.tailscaleIP).map((d) => ({ id: d.id, host: d.tailscaleIP }));
   const out = { ts: new Date().toISOString(), prompt: opts.prompt || PROMPT, timeout_ms: opts.timeoutMs || 90000, devices: [] };
   for (const device of devices) {
@@ -55,4 +59,4 @@ async function run(opts = {}) {
 if (require.main === module) run({ devices: arg('devices'), out: arg('out'), prompt: arg('prompt', PROMPT), timeoutMs: num(arg('timeout-ms'), 90000) })
   .then((r) => { console.log(JSON.stringify(r, null, 2)); process.exit(0); })
   .catch((e) => { console.error(e.message); process.exit(1); });
-module.exports = { classifyError, benchOnce, run };
+module.exports = { classifyError, benchOnce, run, loadDevices };
