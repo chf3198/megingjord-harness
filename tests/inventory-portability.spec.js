@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 const { test, expect } = require('@playwright/test');
+const path = require('node:path');
 const { run, scanFile } = require('../scripts/global/inventory-portability-check');
 
 test('example inventory has no Tailscale IPs', () => {
