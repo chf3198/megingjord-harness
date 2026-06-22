@@ -11,6 +11,7 @@ from admin_patterns import (  # noqa: E501
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
 from governance_state import ensure_state
+from one_ticket_per_worktree import check_one_ticket_per_worktree
 from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
@@ -241,9 +242,26 @@ def _emit_worktree_push_desync(cwd: str) -> None:
     except Exception:
         pass  # telemetry failure must not affect the hook decision
 
+def _read_body_file(path: str, cwd: str) -> str:
+    """#2967: read a `--body-file` target (cwd-relative or absolute) for baton-artifact
+    detection. Returns '' on any error so the guard never breaks on a missing file.
+    """
+    try:
+        full = path if os.path.isabs(path) else os.path.join(cwd, path)
+        with open(full, "r", encoding="utf-8") as handle:
+            return handle.read()
+    except Exception:
+        return ""
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
+    # #2967: one-ticket-per-worktree — refuse a baton artifact for a second,
+    # still-unresolved ticket from this worktree (provider-neutral, fail-open).
+    one_ticket_deny = check_one_ticket_per_worktree(
+        joined, state, body_file_reader=lambda path: _read_body_file(path, cwd))
+    if one_ticket_deny:
+        return emit("deny", one_ticket_deny)
     no_code_lane = active_ticket_is_no_code_lane(state, cwd)
     if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
