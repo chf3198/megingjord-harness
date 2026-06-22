@@ -72,6 +72,28 @@ Companion: `scripts/global/gate-failure-tier1.js` auto-emits the Tier-1 incident
 operator-caused gate failure, so self-anneal escalation no longer depends on the
 operator remembering to log it (the gap behind #2703).
 
+## Push-gate commit-step worktree fallback (#3168)
+
+`pretool_guard.py` blocks a `git push` until the Admin commit step is recorded. The flag
+is keyed on the **session cwd**, which is typically the main checkout. When governed work
+lives in a **linked worktree** but the session cwd is the main checkout (stuck on `main`
+with no ticket commits), the recorded flag is unreachable and the gate would falsely block
+the push — the recurring "Push blocked: commit step first" desync.
+
+`hooks/scripts/worktree_push_gate.py` resolves the worktree the push actually targets and
+accepts the commit step there:
+
+- `resolve_push_cwd` picks the push directory: an explicit `git -C <path>` wins, then a
+  leading `cd <path> &&`, otherwise the session cwd.
+- `commit_step_satisfied` accepts the push when the session state recorded the commit, OR
+  the resolved worktree's state recorded it, OR the branch has a **real commit ahead of
+  base** (`origin/main`/`main`) — a cwd-independent signal that fails closed on any git
+  error so the session-state check still governs.
+
+When the push is allowed via the worktree fallback rather than the in-session flag, the
+guard emits a Tier-1 `incidents.jsonl` event with `pattern_id:
+worktree-push-gate-commit-desync` for observability — the fallback is visible, never silent.
+
 ## Fleet-review hard-gate (Epic #2192)
 
 The fleet/cross-family red-team review was promoted from an opt-in tool to a hard gate.

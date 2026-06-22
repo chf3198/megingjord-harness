@@ -226,6 +226,21 @@ def _emit_fleet_bypass_incident(cwd: str) -> None:
     except Exception:
         pass  # telemetry failure must not affect the hook decision
 
+def _emit_worktree_push_desync(cwd: str) -> None:
+    """Append a Tier-1 incident when a push is allowed via the worktree fallback
+    rather than the session commit flag (#3168 AC3). Never raises.
+    """
+    try:
+        path = os.path.join(os.path.expanduser("~"), ".megingjord", "incidents.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        event = {"version": 3, "service": "pretool-guard-worktree-push",
+                 "env": "local", "event": "governance.worktree-push-commit-desync",
+                 "pattern_id": "worktree-push-gate-commit-desync", "severity": "low", "cwd": cwd}
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+    except Exception:
+        pass  # telemetry failure must not affect the hook decision
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
@@ -284,7 +299,18 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
             if merged_pr:
                 return emit("deny", f"Push blocked: branch '{branch}' was already merged via PR #{merged_pr}. Check out a new branch from main.")
         if not ops.get("commit"):
-            return emit("deny", "Push blocked: commit step first (Admin sequencing).")
+            # #3168: the session cwd is often the main checkout (on `main`, no ticket
+            # commits) while the work lives in a linked worktree. Resolve the pushed
+            # branch's worktree and accept the commit step there (worktree state OR a
+            # real commit ahead of base) rather than falsely blocking the push.
+            from worktree_push_gate import commit_step_satisfied
+            from state_store import load_state
+            satisfied, used_worktree = commit_step_satisfied(
+                joined, cwd, ops.get("commit"), load_state)
+            if not satisfied:
+                return emit("deny", "Push blocked: commit step first (Admin sequencing).")
+            if used_worktree:
+                _emit_worktree_push_desync(cwd)
     if RE_PR_MERGE.search(joined):
         override = require_bypass_exception(joined, state, cwd)
         if override:
