@@ -135,6 +135,16 @@ jobs:
             const refsMatch = body.match(/Refs\s+#(\d+)/i);
             if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
             const linkedIssue = parseInt(refsMatch[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue,
+            });
+            const labels = issue.labels.map(l => l.name);
+            const lightweight = ['lane:docs-research', 'lane:docs-only', 'lane:trivial', 'lane:research', 'lane:config-only', 'lane:no-code-remediation'];
+            if (labels.some(l => lightweight.includes(l))) {
+              console.log(`Issue #${linkedIssue}: lightweight lane; consultant gate skipped.`);
+              return;
+            }
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: linkedIssue, per_page: 100,
