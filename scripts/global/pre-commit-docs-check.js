@@ -59,5 +59,17 @@ if (require.main === module) {
   process.exit(result.ok ? 0 : 1);
 }
 
+const WORK_LOG_RE = /^(?:M|A)\s+wiki\/work-log\/tickets\/(\d+)\.md$/m;
+const HANDOFF_BLOCK_RE = /(?:MANAGER_HANDOFF|COLLABORATOR_HANDOFF|ADMIN_HANDOFF|CONSULTANT_CLOSEOUT)/;
+
+function workLogHandoffCheck(staged) {
+  const match = WORK_LOG_RE.exec(String(staged || ''));
+  if (!match) return { ok: true, skipped: 'no-work-log-staged' };
+  return {
+    ok: true, advisory: true,
+    message: `work-log tickets/${match[1]}.md staged — ensure handoffs are posted on GitHub.`,
+  };
+}
+
 module.exports = { check, packageJsonStaged, runDocsCheck, gitStagedFiles,
-  REMEDIATION, PACKAGE_JSON_STAGED_PATTERN };
+  workLogHandoffCheck, REMEDIATION, PACKAGE_JSON_STAGED_PATTERN };

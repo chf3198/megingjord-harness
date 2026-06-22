@@ -1,0 +1,46 @@
+{
+  "area": "governance",
+  "description": "Task-scoped context for area:governance tickets. Load before designing solutions.",
+  "critical_instructions": [
+    "instructions/role-baton-routing.instructions.md",
+    "instructions/feature-completion-governance.instructions.md",
+    "instructions/global-standards.instructions.md",
+    "instructions/harness-goals.instructions.md",
+    "instructions/workflow-resilience.instructions.md"
+  ],
+  "existing_infrastructure": [
+    "scripts/global/closeout-preflight.js",
+    "scripts/global/open-pr-closeout-check.js",
+    "scripts/global/open-pr-closeout-scan.js",
+    "scripts/global/pre-push-gates.js",
+    "scripts/global/lint-epic-drift.js",
+    "scripts/global/megalint/index.js",
+    "scripts/global/megalint/consultant-closeout.js",
+    "scripts/global/megalint/collaborator-handoff.js",
+    "scripts/global/megalint/admin-handoff.js",
+    "scripts/global/megalint/signer-fidelity.js"
+  ],
+  "shared_fetchers": {
+    "readIssue": "closeout-preflight.js exports readIssue() — reuse, do not duplicate",
+    "normalizeComments": "closeout-preflight.js exports normalizeComments()",
+    "normalizeLabels": "closeout-preflight.js exports normalizeLabels()",
+    "scanOpenPRs": "open-pr-closeout-scan.js exports scanOpenPRs()"
+  },
+  "anti_patterns": [
+    "Do not add a new lefthook pre-push gate — extend megalint instead (13 gates already)",
+    "Do not make a new GitHub API call — reuse readIssue() from closeout-preflight.js",
+    "Do not ignore the deferred-final flow (CONSULTANT_CLOSEOUT is posted after PR exists)",
+    "Do not claim runtime compatibility without filling config/runtime-compatibility-matrix.yml",
+    "Do not validate remote-only state without comparing against local work-log claims"
+  ],
+  "lifecycle_states": [
+    "pre-PR (first push): validate MANAGER_HANDOFF + COLLABORATOR_HANDOFF only",
+    "post-PR (PR exists): validate + ADMIN_HANDOFF",
+    "post-merge: validate + CONSULTANT_CLOSEOUT"
+  ],
+  "runtime_considerations": [
+    "Codex CLI may lack gh auth in sandbox — degrade gracefully",
+    "Cursor hook execution is undocumented — degrade gracefully",
+    "All VS Code runtimes (Copilot, Claude Code, Antigravity) have lefthook + gh auth"
+  ]
+}

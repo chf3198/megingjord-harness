@@ -26,6 +26,7 @@ const changelogFragmentPresence = require('./changelog-fragment-presence.js');
 const adminMergeException = require('./admin-merge-exception.js');
 const batchCancelEvidence = require('./batch-cancel-evidence.js');
 const fleetCallLint = require('./fleet-call-lint.js');
+const workLogSync = require('./work-log-sync.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -63,6 +64,7 @@ const VALIDATORS = {
   'admin-merge-exception': adminMergeException,
   'batch-cancel-evidence': batchCancelEvidence,
   'fleet-call-lint': fleetCallLint,
+  'work-log-sync': workLogSync,
 };
 
 function runAll(input) {
