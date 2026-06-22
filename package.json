@@ -13,6 +13,7 @@
     "anneal:goal-sensor": "node scripts/global/anneal-goal-sensor.js",
     "anneal:graph": "node scripts/global/anneal-graph.js",
     "anneal:review": "node scripts/global/anneal-review.js",
+    "anneal:closeout-advisory": "node scripts/global/open-pr-closeout-scan.js",
     "anneal:rotate": "node scripts/global/anneal-log-rotate.js",
     "anneal:schedule-health": "node scripts/global/anneal-schedule-health.js",
     "auth:audit": "node scripts/global/authorization-audit.js",
