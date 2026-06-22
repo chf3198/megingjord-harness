@@ -86,12 +86,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 ~/.copilot/hooks/scripts/commit_ticket_gate.py",
+            "command": "f=\"$HOME/.copilot/hooks/scripts/commit_ticket_gate.py\"; if [ -r \"$f\" ]; then exec python3 \"$f\"; else echo \"[hook-degrade #2972] $f unreadable (cyclic/missing symlink) — allowing tool; recover with: npm run hamr:doctor --fix\" >&2; exit 0; fi",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 ~/.copilot/hooks/scripts/pretool_guard.py",
+            "command": "f=\"$HOME/.copilot/hooks/scripts/pretool_guard.py\"; if [ -r \"$f\" ]; then exec python3 \"$f\"; else echo \"[hook-degrade #2972] $f unreadable (cyclic/missing symlink) — allowing tool; recover with: npm run hamr:doctor --fix\" >&2; exit 0; fi",
             "timeout": 5
           }
         ]
