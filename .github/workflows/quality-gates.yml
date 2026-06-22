@@ -83,4 +83,6 @@ jobs:
           tests/closeout-recurrence-guard.spec.js
           tests/open-pr-closeout-scan.spec.js
           tests/stress-closeout-recurrence.spec.js
+          tests/open-pr-closeout-check.spec.js
+          tests/stress-open-pr-closeout-check.spec.js
           --reporter=line
