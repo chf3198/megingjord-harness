@@ -52,7 +52,7 @@ model selection (e.g. `governance-check` lane always uses a specific model).
 
 ## Fleet architecture
 
-Fleet hosts are defined in `inventory/devices.json`:
+Fleet hosts are resolved via `scripts/global/resolve-inventory.js` from `inventory/*.example.json` + `~/.megingjord/` overlay:
 
 ```json
 {

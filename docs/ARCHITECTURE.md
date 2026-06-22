@@ -45,7 +45,7 @@ Codex                          policy.json          OR Cloud (Claude /       + s
 | **Governance CI**        | `.github/workflows/baton-gates.yml`  | [architecture-governance.md](architecture-governance.md) |
 | **Wiki system**          | `wiki/` + `scripts/wiki/ingest.js`   | [architecture-governance.md](architecture-governance.md) |
 | **Dashboard**            | `dashboard/index.html`               | [architecture-governance.md](architecture-governance.md) |
-| **Fleet**                | `inventory/devices.json`             | [architecture-routing.md](architecture-routing.md)       |
+| **Fleet**                | `resolve-inventory.js` + `*.example.json` | [architecture-routing.md](architecture-routing.md)       |
 | **Deployment**           | `scripts/deploy.sh`                  | [architecture-deployment.md](architecture-deployment.md) |
 
 ## Key quality attributes
