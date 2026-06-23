@@ -54,6 +54,23 @@ function findDormantSince(comments, labeledAt) {
   return pause ? pause.created_at : null;
 }
 
+async function processEpic(epic, { github, owner, repo, threshold, dryRun, core }) {
+  const labels = (epic.labels || []).map(l => (typeof l === 'string' ? l : l.name));
+  if (!labels.includes('status:dormant')) return;
+  const comments = await github.paginate(github.rest.issues.listComments, {
+    owner, repo, issue_number: epic.number, per_page: 100,
+  });
+  const dormantSince = findDormantSince(comments, null);
+  const decision = needsDormantReview({ dormantSinceIso: dormantSince, comments, reviewAfterDays: threshold });
+  core.info(`Epic #${epic.number}: ${decision.reason} (age=${decision.ageDays ?? '?'}d)`);
+  if (decision.needed && !dryRun) {
+    await github.rest.issues.createComment({
+      owner, repo, issue_number: epic.number,
+      body: reviewReminderComment(epic.number, decision.ageDays, threshold),
+    });
+  }
+}
+
 async function run({ github, context, core }) {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
@@ -61,35 +78,18 @@ async function run({ github, context, core }) {
   const dryRun = context.payload.inputs?.dry_run === 'true';
   const targetNum = context.payload.inputs?.epic_number
     ? Number(context.payload.inputs.epic_number) : null;
-
   const epics = targetNum
     ? [(await github.rest.issues.get({ owner, repo, issue_number: targetNum })).data]
     : await github.paginate(github.rest.issues.listForRepo, {
         owner, repo, labels: 'type:epic,status:dormant', state: 'open', per_page: 100,
       });
-
   for (const epic of epics) {
-    const labels = (epic.labels || []).map(l => (typeof l === 'string' ? l : l.name));
-    if (!labels.includes('status:dormant')) continue;
-
-    const comments = await github.paginate(github.rest.issues.listComments, {
-      owner, repo, issue_number: epic.number, per_page: 100,
-    });
-    const dormantSince = findDormantSince(comments, null);
-    const decision = needsDormantReview({ dormantSinceIso: dormantSince, comments, reviewAfterDays: threshold });
-
-    core.info(`Epic #${epic.number}: ${decision.reason} (age=${decision.ageDays ?? '?'}d)`);
-    if (decision.needed && !dryRun) {
-      await github.rest.issues.createComment({
-        owner, repo, issue_number: epic.number,
-        body: reviewReminderComment(epic.number, decision.ageDays, threshold),
-      });
-    }
+    await processEpic(epic, { github, owner, repo, threshold, dryRun, core });
   }
 }
 
 module.exports = {
   DEFAULT_REVIEW_DAYS, REVIEW_RE,
   daysSince, hasRecentReview, needsDormantReview,
-  reviewReminderComment, findDormantSince, run,
+  reviewReminderComment, findDormantSince, processEpic, run,
 };
