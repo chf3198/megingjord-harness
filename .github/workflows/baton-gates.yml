@@ -208,3 +208,29 @@ jobs:
             const result = validate({ labels, prBody: body, prFiles: files.map(f => f.filename) });
             if (!result.ok) core.setFailed(`changelog-fragment: ${result.reason}`);
             else console.log(`changelog-fragment ok: ${result.reason}`);
+
+  cross-team-response-fidelity:
+    name: cross-team-response-fidelity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            // #2912: hard-blocking gate (promoted from advisory after soak completion).
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping cross-team-response-fidelity.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const { validate } = require('./scripts/global/megalint/cross-team-response-fidelity.js');
+            const result = validate({ comments });
+            if (!result.ok) {
+              const blocking = (result.violations || [])
+                .filter(v => v.severity !== 'advisory')
+                .map(v => `${v.rule}${v.detail ? ': ' + v.detail : ''}`).join('; ');
+              if (blocking) core.setFailed(`cross-team-response-fidelity violations in #${linkedIssue}: ${blocking}`);
+            }

@@ -103,6 +103,20 @@ function checkCrypto(body) {
   }));
 }
 
+// #2912: block merge when a TEAM_QUESTION sign-off is still pending.
+function checkTargetTeamSignOff(body) {
+  const val = extractField(body, 'target_team_sign_off');
+  if (!val) return [];
+  if (/^pending$/i.test(val.trim())) {
+    return [{
+      rule: 'target-team-sign-off-pending',
+      detail: 'MANAGER_HANDOFF target_team_sign_off is "pending". Resolve the TEAM_QUESTION sign-off before merging.',
+      severity: 'hard',
+    }];
+  }
+  return [];
+}
+
 function checkPhaseOneFields(body, labels) {
   if (!(labels || []).includes(PHASE_ONE_LABEL)) return [];
   const violations = [];
@@ -135,6 +149,7 @@ function validate(input) {
     ...checkLaneConsistency(handoff.body, input.lane),
     ...checkLaneTrivialDiffSize(handoff.body, input.diffLines, TRIVIAL_DIFF_THRESHOLD),
     ...checkPhaseOneFields(handoff.body, input.labels),
+    ...checkTargetTeamSignOff(handoff.body),
     ...checkCrypto(handoff.body),
     ...wtGate.checkManager(handoff.body, input),
   ];
@@ -143,5 +158,5 @@ function validate(input) {
 
 module.exports = {
   validate, findManagerHandoff, extractField, REQUIRED_FIELDS,
-  checkLaneTrivialDiffSize, TRIVIAL_DIFF_THRESHOLD,
+  checkLaneTrivialDiffSize, TRIVIAL_DIFF_THRESHOLD, checkTargetTeamSignOff,
 };
