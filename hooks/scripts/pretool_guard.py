@@ -10,7 +10,8 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path
 from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
-from governance_state import ensure_state
+from governance_state import ensure_state, save_state
+from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
 from one_ticket_per_worktree import check_one_ticket_per_worktree
 from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
 from runtime_paths import runtime_hook_paths
@@ -417,9 +418,15 @@ def main() -> int:
             if not derived and gated:
                 return emit("deny","File edit blocked: no active ticket. Manager must reference a ticket (#N) before edits.")
         elif not flags.get("code_touched"):
-            # #2876: first-edit MANAGER_HANDOFF ordering gate — Refs #2871
-            if not linked_issue_has_manager_handoff(cwd):
-                return emit("deny", "File edit blocked: MANAGER_HANDOFF not found on linked issue (#2876). Post Manager scope before first code edit.")
+            # #2876 + #3204: authoritative MANAGER_HANDOFF + collaborator phase
+            if not linked_issue_has_authoritative_manager_handoff(cwd):
+                return emit("deny", "File edit blocked: authoritative MANAGER_HANDOFF with matching worktree_branch required (#3204). Post Manager scope before first code edit.")
+            phase = state.get("current_phase", "manager")
+            if phase == "ready" and linked_issue_has_authoritative_manager_handoff(cwd):
+                state["current_phase"] = "collaborator"
+                save_state(state)
+            elif phase != "collaborator":
+                return emit("deny", "File edit blocked: collaborator baton phase required (#3204). Post MANAGER_HANDOFF, then continue on next prompt.")
             if not linked_issue_has_planning_consensus(cwd):
                 if os.environ.get(CONSENSUS_OVERRIDE_ENV) == "1":
                     _emit_planning_consensus_override_incident(cwd, state.get("active_ticket"))
