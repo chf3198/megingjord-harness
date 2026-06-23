@@ -56,6 +56,36 @@ Per Epic #1612 replay-eval-gated promotion model:
   scans `instructions/*.md` for MUST/SHALL/REQUIRED statements; emits
   inventory of statements lacking corresponding programmatic validator.
 
+## Auto-mode governance parity (#2957)
+
+Auto model selection (Copilot Auto-mode routed to lower-capability models) MUST NOT
+reduce governance discipline relative to frontier routing. The enforcement principle is
+**route-invariance**: governance gates read no model/route/auto-mode signal, so the
+decision is identical regardless of which model is driving the baton. A gate that relaxes
+on a routing hint is the exact bug class this rule forbids.
+
+- `scripts/global/baton-progression-parity.js` (wired into `pre-pr-gate.js`) enforces
+  baton-progression **continuity**: the artifacts present on the linked issue must form a
+  contiguous, time-ordered prefix of MANAGER → COLLABORATOR → ADMIN → CONSULTANT. A
+  skipped role or out-of-order post is denied (fail-fast) before a privileged push/merge.
+  This is the programmatic backstop for the instructional "post all four artifacts, in
+  order, before the PR" contract — which a less-capable model cannot be trusted to honor
+  on prose alone.
+
+### Auto-mode implementation-time checklist (Copilot runtime)
+
+When executing under Auto-mode, before any privileged admin action (push, `gh pr merge`):
+
+1. Confirm the linked issue carries the prior baton artifacts **in role order** — do not
+   post a later-stage artifact before its predecessors exist and predate it.
+2. Do not present a preflight/gate fallback in a way that looks like a bypass — when a
+   gate blocks, treat the block as redirect guidance, fix the cause, and re-run. Never
+   route around it.
+3. **Tier-2 emission rule**: when a progression gap or bypass-looking attempt is observed
+   during implementation, an `auto-mode-baton-progression-gap` incident is emitted to
+   `~/.megingjord/incidents.jsonl` for the recurrence detector. Emission is observability,
+   never a substitute for fixing the gap.
+
 ## Phase 2 (deferred to standalone tickets)
 
 The 8 detached siblings from Epic #1894 remain as P2 backlog work:
