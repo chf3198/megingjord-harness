@@ -98,3 +98,24 @@ test('phase-1: accepts non-bulleted conditional field lines', () => {
   const r = V.validate({ comments: [{ body }], labels: ['phase-gate:phase-1'] });
   expect(r.ok).toBe(true);
 });
+
+// #2912: TEAM_QUESTION sign-off gate
+test('#2912: target_team_sign_off:pending blocks merge with hard violation', () => {
+  const body = `${fullHandoff}\ntarget_team_sign_off: pending`;
+  const r = V.validate({ comments: [{ body }] });
+  expect(r.ok).toBe(false);
+  const v = r.violations.find(x => x.rule === 'target-team-sign-off-pending');
+  expect(v).toBeTruthy();
+  expect(v.severity).toBe('hard');
+});
+
+test('#2912: target_team_sign_off:n/a does not block merge', () => {
+  const body = `${fullHandoff}\ntarget_team_sign_off: n/a`;
+  const r = V.validate({ comments: [{ body }] });
+  expect(r.violations.some(v => v.rule === 'target-team-sign-off-pending')).toBe(false);
+});
+
+test('#2912: absent target_team_sign_off field does not block merge', () => {
+  const r = V.validate({ comments: [{ body: fullHandoff }] });
+  expect(r.violations.some(v => v.rule === 'target-team-sign-off-pending')).toBe(false);
+});

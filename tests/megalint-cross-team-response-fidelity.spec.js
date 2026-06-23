@@ -100,12 +100,23 @@ test('Q5 case-insensitive alias comparison: lowercase signedBy does not false-po
     `case-insensitive compare expected; got ${JSON.stringify(r.violations)}`);
 });
 
-test('Q7 every emitted violation carries severity field for advisory-mode-soak', () => {
+test('Q7 every emitted violation carries severity:hard after promotion from advisory (#2912)', () => {
   const r = validator.validate({ comments: [teamResponse({
     fromTeam: 'claude-code', signedBy: 'Apollo Vale', teamModel: 'antigravity:gemini-2.0-pro@google', role: 'consultant',
   })]});
   for (const v of r.violations) {
-    assert.ok(v.severity, `violation ${v.rule} missing severity field for advisory-mode gating`);
+    assert.strictEqual(v.severity, 'hard',
+      `violation ${v.rule} must be severity:hard after #2912 promotion (got: ${v.severity})`);
   }
+});
+
+test('#2912 regression: TEAM_RESPONSE from wrong team produces hard-blocking violation (not advisory)', () => {
+  const r = validator.validate({ comments: [teamResponse({
+    fromTeam: 'codex', signedBy: 'Apollo Vale', teamModel: 'antigravity:gemini-2.0-pro@google', role: 'consultant',
+  })]});
+  assert.strictEqual(r.ok, false);
+  const mismatch = r.violations.find(v => v.rule === 'team-response-signer-team-mismatch');
+  assert.ok(mismatch, 'expected team-response-signer-team-mismatch violation');
+  assert.strictEqual(mismatch.severity, 'hard', 'team-response-signer-team-mismatch must be hard-blocking');
 });
 
