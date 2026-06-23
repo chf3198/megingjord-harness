@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "description": "Role-scoped tool allowlists for dynamic least-privilege per-tool enforcement. Enforced at runtime by hooks/scripts/role_tool_allowlist_enforcer.py via pretool_guard. Closes Gap G-16. Refs #2919 (ASI02, ASI06, EU Art.15).",
+  "operationSchema": {
+    "git_push": "Allow git push to remote (any branch)",
+    "pr_merge": "Allow gh pr merge commands",
+    "deploy": "Allow npm run deploy / deployment commands",
+    "git_branch_create": "Allow git checkout -b / git switch -c (new branch creation)"
+  },
+  "roles": {
+    "manager": {
+      "git_push": false,
+      "pr_merge": false,
+      "deploy": false,
+      "git_branch_create": true
+    },
+    "collaborator": {
+      "git_push": false,
+      "pr_merge": false,
+      "deploy": false,
+      "git_branch_create": true
+    },
+    "admin": {
+      "git_push": true,
+      "pr_merge": true,
+      "deploy": true,
+      "git_branch_create": false
+    },
+    "consultant": {
+      "git_push": false,
+      "pr_merge": false,
+      "deploy": false,
+      "git_branch_create": false
+    }
+  }
+}

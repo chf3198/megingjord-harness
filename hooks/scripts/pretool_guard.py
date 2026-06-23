@@ -275,7 +275,21 @@ def _check_auth_profile(joined: str) -> int | None:
             if not allowed:
                 return emit("deny", reason)
     except Exception:
-        pass  # G6: enforcer failure is never a blocker
+        pass
+    return None
+
+
+def _check_role_tool_allowlist(joined: str, state: dict) -> int | None:
+    """#2919: enforce role-scoped tool allowlist based on active baton phase (G-16)."""
+    try:
+        from role_tool_allowlist_enforcer import check_command as _rtl_check
+        result = _rtl_check(joined, state.get("current_phase"))
+        if result is not None:
+            allowed, reason = result
+            if not allowed:
+                return emit("deny", reason)
+    except Exception:
+        pass
     return None
 
 
@@ -283,6 +297,9 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     auth_result = _check_auth_profile(joined)
     if auth_result is not None:
         return auth_result
+    role_result = _check_role_tool_allowlist(joined, state)
+    if role_result is not None:
+        return role_result
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     # #2967: one-ticket-per-worktree — refuse a baton artifact for a second,
