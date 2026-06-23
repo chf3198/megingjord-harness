@@ -8,6 +8,7 @@ const { enforceTier3Emission } = require(path.join(__dirname, 'goal-failure-emis
 const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-bundle.js'));
 const wtGate = require('../worktree-lifecycle-gate');
 const { checkMemoryNoteRecurrence } = require(path.join(__dirname, '..', 'closeout-recurrence-guard.js'));
+const { checkRubricVerdictConsistency } = require('./consultant-rubric-consistency.js');
 
 // #2094 AC-4: parity for a fleet-authored CLOSEOUT. Same standard as non-fleet
 // — a CLOSEOUT that cites a governance-bundle-hash must trace to a hash-valid,
@@ -155,6 +156,7 @@ function validate(input) {
   const violations = [
     ...checkSignerFields(body),
     ...checkEvidenceFields(body),
+    ...checkRubricVerdictConsistency(body),
     ...checkRequiredFlawFields(body),
     ...checkCrypto(body),
     ...checkTier3Emission(body, input),
@@ -175,4 +177,5 @@ module.exports = {
   checkFleetBundleProvenance,
   checkRequiredFlawFields,
   checkMemoryNoteRecurrence,
+  checkRubricVerdictConsistency,
 };
