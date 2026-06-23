@@ -182,3 +182,5 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
                               input_summary=f"{artifact_name} posted on #{ticket}")
             except Exception:
                 pass  # G6: never break activity tracking
+            if artifact_name == "MANAGER_HANDOFF":
+                state["current_phase"] = "ready"

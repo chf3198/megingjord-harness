@@ -59,7 +59,12 @@
       "refs": ["#2355", "#3165"]
     },
     {
-      "pattern_id": "test-evidence-tdd-pyramid-no-pytest",
+      "pattern_id": "stale-manager-handoff-gate-bypass",
+      "surface": "hooks/scripts/baton_handoff_checks.py",
+      "description": "Historical MANAGER_HANDOFF without worktree_branch satisfied the #2876 first-edit gate while a session's authoritative handoff was posted after implementation (#2252 class).",
+      "first_seen_teams": ["cursor"],
+      "refs": ["#3204", "#2252", "#2876"]
+    }
       "surface": "scripts/global/test-evidence-validator.js",
       "description": "test-evidence tdd-pyramid checker matches only tests/**/*.{spec,test}.{js,ts}; a python-hooks PR with a pytest test_*.py fails 'missing-spec-file' though the matrix maps hooks/scripts/*.py to tdd-pyramid (pytest).",
       "first_seen_teams": ["claude-code"],

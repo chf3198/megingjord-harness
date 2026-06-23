@@ -11,6 +11,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from governance_state import ensure_state, save_state
+from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
 from repo_scope import is_repo_enabled
 from routing_context import build_route_context, run_fleet_cascade
 from semantic_router import classify as semantic_classify
@@ -49,6 +50,10 @@ def main() -> int:
         return 0
 
     state = ensure_state(cwd)
+    if linked_issue_has_authoritative_manager_handoff(cwd):
+        phase = state.get("current_phase", "manager")
+        if phase in ("manager", "ready"):
+            state["current_phase"] = "collaborator"
     # Layer 0: semantic pre-classifier (zero cost, <1ms)
     semantic = semantic_classify(prompt)
     # Layer 1+: keyword classifier (falls through if semantic is unclear)
