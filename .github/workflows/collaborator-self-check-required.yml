@@ -1,0 +1,78 @@
+name: collaborator-self-check-required
+# #2907: promoted from advisory-only to hard-blocking gate.
+# Opt-out: add label 'collaborator-self-check:waived' to the linked issue or PR.
+# Lightweight lanes (docs-research, trivial, config-only, no-code-remediation) are skipped.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  required:
+    name: collaborator-self-check-required
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { OVERRIDE_LABEL } =
+              require('./scripts/global/collaborator-self-check.js');
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) {
+              core.setFailed('No Refs #N in PR body — cannot verify collaborator self-check.');
+              return;
+            }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue,
+            });
+            const labels = issue.labels.map(l => l.name);
+            const prLabels = context.payload.pull_request.labels.map(l => l.name);
+            const lightweight = [
+              'lane:docs-research', 'lane:docs-only', 'lane:trivial',
+              'lane:research', 'lane:config-only', 'lane:no-code-remediation',
+            ];
+            if (labels.some(l => lightweight.includes(l))) {
+              console.log(`Issue #${linkedIssue}: lightweight lane; self-check gate skipped.`);
+              return;
+            }
+            if (labels.includes(OVERRIDE_LABEL) || prLabels.includes(OVERRIDE_LABEL)) {
+              console.log('collaborator-self-check-required: SKIPPED (waiver label)');
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const collab = comments.map(c => c.body || '').find(b => b.includes('COLLABORATOR_HANDOFF'));
+            if (!collab) {
+              core.setFailed(
+                `No COLLABORATOR_HANDOFF comment found on issue #${linkedIssue}. ` +
+                'Post the artifact before creating the PR.'
+              );
+              return;
+            }
+            if (!/Pre-handoff verification/i.test(collab)) {
+              core.setFailed(
+                `COLLABORATOR_HANDOFF on issue #${linkedIssue} is missing "Pre-handoff verification" block. ` +
+                'Run runChecks() and paste formatChecks() output into the handoff comment. ' +
+                'Waive with label "collaborator-self-check:waived" if intentional (#2907).'
+              );
+              return;
+            }
+            if (/Pre-handoff verification.*FAIL/i.test(collab)) {
+              core.setFailed(
+                `COLLABORATOR_HANDOFF on issue #${linkedIssue} shows "Pre-handoff verification (FAIL)". ` +
+                'Fix all failing checks before advancing to Admin gate.'
+              );
+              return;
+            }
+            console.log(`collaborator-self-check-required: PASS (issue #${linkedIssue})`);
