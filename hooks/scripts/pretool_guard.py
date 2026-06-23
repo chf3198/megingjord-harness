@@ -8,7 +8,7 @@ from admin_patterns import (  # noqa: E501
     DANGEROUS_CMD_RE, RE_GH_ISSUE_CLOSE, RE_GH_RELEASE_CREATE, RE_GIT_COMMIT,
     RE_GIT_PUSH, RE_GIT_TAG, RE_PR_CHECKS, RE_PR_CREATE, RE_PR_MERGE,
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
-from canonical_main_enforcer import is_main_checkout, evaluate_path
+from canonical_main_enforcer import is_main_checkout, evaluate_path, main_checkout_root
 from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
 from governance_state import ensure_state, save_state
 from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
@@ -400,13 +400,24 @@ def main() -> int:
                     "Raw file writes to /memories/ are a governance injection vector (G-07, #2903).")
         if active_ticket_is_no_code_lane(state, cwd):
             return emit("deny", "File edit blocked: lane:no-code-remediation is issue-only. Re-route ticket to lane:code-change.")
-        if is_main_checkout(cwd):
-            for path_val in iter_paths(payload.get("tool_input", {})):
-                if not (path_val.startswith("/") or path_val.startswith("./") or "/" in path_val):
+        # Canonical-main write guard: block writes whether cwd is main checkout
+        # OR target path is an absolute path inside canonical-main (Refs #2945).
+        _main_rt = main_checkout_root()
+        for path_val in iter_paths(payload.get("tool_input", {})):
+            if is_main_checkout(cwd):
+                check_root = cwd
+            elif path_val.startswith("/"):
+                try:
+                    Path(os.path.normpath(path_val)).relative_to(
+                        os.path.normpath(_main_rt))
+                except ValueError:
                     continue
-                allowed, reason = evaluate_path(path_val, cwd)
-                if not allowed:
-                    return emit("deny", f"Canonical-main read-only (#2107): {reason}")
+                check_root = _main_rt  # absolute path targets canonical-main
+            else:
+                continue
+            allowed, reason = evaluate_path(path_val, check_root)
+            if not allowed:
+                return emit("deny", f"Canonical-main read-only (#2107): {reason}")
         if not state.get("active_ticket"):
             from worktree_ticket import resolve_ticket_from_paths, any_path_in_governed_repo
             edit_paths = list(iter_paths(payload.get("tool_input", {})))
