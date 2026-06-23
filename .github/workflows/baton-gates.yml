@@ -53,6 +53,7 @@ jobs:
             // to bare .body strings false-failed the gate on every PR.
             // #3121: pass the PR file list so doc-coverage can advisory-verify that any
             // surface declared UPDATED actually appears in the diff (wires the #2716 module).
+            // #2907: validate() now enforces Pre-handoff verification block presence (hard gate).
             const { data: prFilesData } = await github.rest.pulls.listFiles({
               owner: context.repo.owner, repo: context.repo.repo,
               pull_number: context.payload.pull_request.number, per_page: 100,

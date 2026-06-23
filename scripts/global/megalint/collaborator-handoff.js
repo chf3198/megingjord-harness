@@ -11,6 +11,8 @@ const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-e
 const docCoverage = require('./doc-coverage.js');
 const wtGate = require('../worktree-lifecycle-gate');
 const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
+// #2907: hard-gate promotion — require self-check evidence in COLLABORATOR_HANDOFF.
+const { checkHandoffHasVerification } = require('../collaborator-self-check.js');
 
 // #2562: accept string OR {body} comment elements so a caller passing bare
 // bodies (the baton-gates.yml regression) cannot silently false-fail the gate.
@@ -128,6 +130,9 @@ function validate(input) {
     violations.push(...docCoverageViolations(body, input.labels, input.comments, input.prFiles));
     violations.push(...checkCrossFamily(body));
     violations.push(...wtGate.checkCollaborator(body, { ...input, lane }));
+    // #2907: require self-check evidence block (Pre-handoff verification) in COLLABORATOR_HANDOFF.
+    const selfCheck = checkHandoffHasVerification(body);
+    if (!selfCheck.ok) violations.push({ rule: selfCheck.rule, detail: selfCheck.detail });
   }
   const signer = roleIdentity({ body, author: handoff.user && handoff.user.login });
   const blocking = violations.filter(v => v.severity !== 'advisory');

@@ -12,13 +12,17 @@ const validBody = `## COLLABORATOR_HANDOFF
 Signed-by: Soren Harper
 Team&Model: copilot:claude-sonnet-4-6@github
 Role: collaborator
+worktree_branch: feat/2907-test
+worktree_behind_main: 0
 cross_family_reviewer: qwen2.5-coder:7b@fleet-tailscale
 cross_family_rating: 82/100
 cross_family_findings: No major issues found.
 cross_family_receipt: abcdef0123456789
 reviewer_family: qwen
 doc-coverage:
-  N/A: all surfaces — lane test only`;
+  N/A: all surfaces — lane test only
+Pre-handoff verification (PASS)
+- [x] \`branch-name-prefix\` — pass`;
 
 const makeInput = body => ({
   lane: 'lane:code-change',
