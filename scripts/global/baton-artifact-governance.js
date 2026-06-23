@@ -34,8 +34,8 @@ function classifyComment(body) {
 // Last-of-each-type across the comment trail (#3030 C1) — matches per-role gate finders.
 function entries(comments) {
   const last = new Map();
-  for (const c of comments || []) {
-    for (const entry of classifyComment(String((c && c.body) || c || ''))) {
+  for (const comment of comments || []) {
+    for (const entry of classifyComment(String((comment && comment.body) || comment || ''))) {
       last.set(entry.artifact, entry);
     }
   }
@@ -44,8 +44,8 @@ function entries(comments) {
 
 function entriesAll(comments) {
   const out = [];
-  for (const c of comments || []) {
-    out.push(...classifyComment(String((c && c.body) || c || '')));
+  for (const comment of comments || []) {
+    out.push(...classifyComment(String((comment && comment.body) || comment || '')));
   }
   return out;
 }
@@ -55,14 +55,14 @@ function fixable(rule) {
 }
 
 function violation(artifact, rule, detail, severity = 'hard') {
-  const v = { artifact, rule, detail, severity };
+  const record = { artifact, rule, detail, severity };
   if (fixable(rule)) {
-    v.remediation = {
+    record.remediation = {
       mode: 'source-edit-first',
       suggestedFix: 'Edit the offending issue comment/artifact in place, then rerun consultant checks.',
     };
   }
-  return v;
+  return record;
 }
 
 function validateEntry(entry, opts, linkedIsEpic) {
@@ -92,7 +92,7 @@ function analyzeComments(comments, opts = {}) {
   for (const entry of entriesAll(comments)) {
     if (activeBodies.has(entry.body)) continue;
     const stale = validateEntry(entry, opts, linkedIsEpic);
-    for (const v of stale) advisories.push({ ...v, severity: 'advisory', rule: `superseded-${v.rule}` });
+    for (const item of stale) advisories.push({ ...item, severity: 'advisory', rule: `superseded-${item.rule}` });
   }
   return { ok: violations.length === 0, count: active.length, violations, advisories };
 }
