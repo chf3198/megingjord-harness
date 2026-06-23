@@ -38,9 +38,9 @@ if (require.main === module) {
     process.exit(0);
   }
   process.stderr.write('registry-tuple-coverage: FAIL — unmapped (team,model) tuples resolve to a generic alias:\n');
-  for (const u of result.unmapped) {
-    process.stderr.write(`  - ${u.team}:${u.model} -> ${u.resolvedTo}`
-      + (u.wildcardSeed ? ` (${u.wildcardSeed})` : '')
+  for (const unmappedTuple of result.unmapped) {
+    process.stderr.write(`  - ${unmappedTuple.team}:${unmappedTuple.model} -> ${unmappedTuple.resolvedTo}`
+      + (unmappedTuple.wildcardSeed ? ` (${unmappedTuple.wildcardSeed})` : '')
       + ' — add an explicit registry entry so this team signs distinctly.\n');
   }
   process.exit(1);
