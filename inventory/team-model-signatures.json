@@ -1,5 +1,7 @@
 {
-  "lastUpdated": "2026-05-16",
+  "lastUpdated": "2026-06-23",
+  "registryVersion": "19b5131a82b7795c",
+  "registryVersionNote": "sha256(registry||roleSurnames||defaultAliasSeed)[0:16]; recompute via scripts/global/registry-version.js --write. Bound into sign+validate (C1 AC3, #3029).",
   "defaultAliasSeed": "Nova",
   "roleSurnames": {
     "manager": "Mason",
@@ -38,6 +40,37 @@
     "openclaw-gateway": "openclaw",
     "google": "antigravity",
     "cursor-ide": "cursor"
+  },
+  "autoModeCoverage": {
+    "_note": "Models each runtime can route to (incl. Auto-mode). registry-tuple-coverage.js (#3029 AC2) FAILS if any tuple here resolves to the cross-team wildcard or defaultAliasSeed instead of a team-specific entry — surfacing an unmapped model at add-time, not park-time.",
+    "copilot": [
+      "claude-sonnet-4-6",
+      "claude-opus-4-8",
+      "gpt-5",
+      "gpt-5-mini",
+      "gpt-5-codex",
+      "gpt-4.1",
+      "gpt-4o",
+      "o3-mini",
+      "o4-mini",
+      "qwen2.5-coder",
+      "gemini-2.5-flash",
+      "mistral-large"
+    ],
+    "codex": [
+      "gpt-5.4",
+      "gpt-5-codex"
+    ],
+    "antigravity": [
+      "gemini-2.5-pro",
+      "claude-sonnet-4-6",
+      "claude-opus-4-8",
+      "claude-haiku-4-5"
+    ],
+    "claude-code": [
+      "sonnet",
+      "opus"
+    ]
   },
   "registry": [
     {
@@ -79,6 +112,36 @@
       "team": "copilot",
       "modelPattern": "gpt-5.*codex",
       "aliasSeed": "Coda"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gpt-5",
+      "aliasSeed": "Gideon"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gpt-4",
+      "aliasSeed": "Gage"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "^o[0-9]",
+      "aliasSeed": "Odell"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "qwen",
+      "aliasSeed": "Quenby"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "gemini",
+      "aliasSeed": "Gale"
+    },
+    {
+      "team": "copilot",
+      "modelPattern": "mistral",
+      "aliasSeed": "Marlow"
     },
     {
       "team": "claude-code",
