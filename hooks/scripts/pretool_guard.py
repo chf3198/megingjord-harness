@@ -265,7 +265,24 @@ def _read_body_file(path: str, cwd: str) -> str:
     except Exception:
         return ""
 
+def _check_auth_profile(joined: str) -> int | None:
+    """#2910: enforce active authorization profile before privileged operations."""
+    try:
+        from auth_profile_enforcer import check_command
+        result = check_command(joined)
+        if result is not None:
+            allowed, reason = result
+            if not allowed:
+                return emit("deny", reason)
+    except Exception:
+        pass  # G6: enforcer failure is never a blocker
+    return None
+
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
+    auth_result = _check_auth_profile(joined)
+    if auth_result is not None:
+        return auth_result
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     # #2967: one-ticket-per-worktree — refuse a baton artifact for a second,

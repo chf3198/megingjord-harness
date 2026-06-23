@@ -1,5 +1,13 @@
 {
   "schemaVersion": 1,
+  "description": "Authorization capability matrix per profile. Enforced at runtime by hooks/scripts/auth_profile_enforcer.py via pretool_guard. Refs #2910 (G-05, ASI02).",
+  "capabilitySchema": {
+    "install": "Allow package manager install commands (npm install, pip install, apt install, etc.)",
+    "upgrade": "Allow package version upgrade commands",
+    "privileged": "Allow privilege escalation commands (sudo, su, chown, etc.)",
+    "execute_local": "Allow local command execution",
+    "execute_remote": "Allow remote execution (ssh, scp, rsync remote, ansible, etc.)"
+  },
   "defaultProfile": "owner",
   "profiles": {
     "owner": {
