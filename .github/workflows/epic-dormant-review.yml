@@ -1,0 +1,45 @@
+name: Epic Dormant Review
+# Rule E5: post EPIC_REVIEW reminders for dormant Epics overdue for review.
+# Implements #2920. Default threshold: EPIC_DORMANT_AFTER_DAYS=90 days.
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # daily at 08:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only (no comment posted)'
+        type: boolean
+        default: true
+      epic_number:
+        description: 'Optional: single Epic to evaluate (else all dormant Epics)'
+        required: false
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: epic-dormant-review
+  cancel-in-progress: false
+
+jobs:
+  epic-dormant-review:
+    name: epic-dormant-review
+    runs-on: ubuntu-latest
+    env:
+      EPIC_DORMANT_AFTER_DAYS: '90'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Post dormant-review reminders
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          EPIC_DORMANT_AFTER_DAYS: ${{ env.EPIC_DORMANT_AFTER_DAYS }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { run } = require('./scripts/global/epic-dormant-review.js');
+            await run({ github, context, core });
