@@ -22,6 +22,11 @@
 
 version: 1
 generated_by: seed-rules-v1
+# #2913: session behavioral anomaly detection thresholds (Gap G-15 / ASI05 / EU-AI-Act-Art14)
+session_anomaly_thresholds:
+  writes_in_session: 50
+  sensitive_path_reads: 10
+  pushes_in_session: 5
 blast_radius_caps:
   max_files_per_session: 200
   max_pushes_per_session: 20
