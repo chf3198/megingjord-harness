@@ -11,6 +11,16 @@ const opt = {};
 for (let i = 0; i < args.length; i += 2) if (args[i]?.startsWith('--')) opt[args[i].slice(2)] = args[i + 1] || '';
 
 const registry = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'inventory', 'team-model-signatures.json'), 'utf8'));
+// Registry integrity bound into signing (#3029 C1 AC3): refuse to sign on
+// signer-surface drift so a stale/edited registry cannot mint mismatched
+// aliases. MEGINGJORD_SKIP_REGISTRY_INTEGRITY=1 is the documented escape hatch (G6).
+const { verifyRegistryIntegrity } = require('./registry-version');
+const integrity = verifyRegistryIntegrity(registry);
+if (!integrity.ok && process.env.MEGINGJORD_SKIP_REGISTRY_INTEGRITY !== '1') {
+  process.stderr.write(`agent-signature: registry integrity ${integrity.reason} `
+    + `(stored=${integrity.stored || 'none'} expected=${integrity.expected}). ${integrity.hint || ''}\n`);
+  process.exit(3);
+}
 // Identity is settings/substrate-derived, never hard-coded to one team (G5).
 // Resolve from explicit flag, then HAMR_TEAM/MEGINGJORD_TEAM env, then a HIGH-CONFIDENCE
 // runtime detection (#2659) — so each runtime auto-attributes its team even when HAMR_TEAM

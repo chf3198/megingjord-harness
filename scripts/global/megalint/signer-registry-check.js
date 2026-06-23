@@ -7,6 +7,9 @@ const fs = require('fs');
 const path = require('path');
 
 const REGISTRY_PATH = path.join(__dirname, '..', '..', '..', 'inventory', 'team-model-signatures.json');
+// Registry integrity (#3029 C1 AC3) — bound into the validation side too, so the
+// validator and signer share one fail-closed drift check.
+const { verifyRegistryIntegrity } = require('../registry-version');
 let cachedRegistry = null;
 
 function loadRegistry(overridePath) {
@@ -59,17 +62,20 @@ function extractArtifactFields(body) {
 }
 
 function validateArtifactAlias(body, opts = {}) {
-  const fields = extractArtifactFields(body);
-  if (fields.roleMatches.length > 1) {
-    return {
-      ok: false,
-      fields,
-      violation: {
-        rule: 'mixed-semantic-role-fields',
-        detail: `Multiple Role: fields found (${fields.roleMatches.join(', ')}) — keep one execution role per baton artifact.`,
-      },
-    };
+  const registry = loadRegistry(opts.registryOverride);
+  if (registry && !opts.skipRegistryIntegrity) {
+    const integrity = verifyRegistryIntegrity(registry);
+    if (!integrity.ok) {
+      return {
+        ok: false,
+        violation: {
+          rule: integrity.reason,
+          detail: integrity.hint || `registry integrity ${integrity.reason}`,
+        },
+      };
+    }
   }
+  const fields = extractArtifactFields(body);
   if (fields.roleMatches.length > 1) {
     return {
       ok: false,
@@ -106,5 +112,5 @@ function validateArtifactAlias(body, opts = {}) {
 
 module.exports = {
   loadRegistry, parseTeamModel, matchRegistryEntry, expectedAliasFor,
-  extractArtifactFields, validateArtifactAlias, REGISTRY_PATH,
+  extractArtifactFields, validateArtifactAlias, verifyRegistryIntegrity, REGISTRY_PATH,
 };
