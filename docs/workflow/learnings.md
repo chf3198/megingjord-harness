@@ -27,3 +27,7 @@ one fact, one home, no duplicated prose. Each line points to its source ticket +
 
 - #3121/#2716 — second phantom class: merged-but-unwired; need a wiring test. See [[workflow-learnings]].
 - #3124/#3127 — drain MEMORY.md to pointers; measure with `npm run resident:budget`. See [[workflow-learnings]].
+
+## 2026-06-23
+
+- #3204/#2252 — stale MANAGER_HANDOFF without `worktree_branch:` bypassed #2876; authoritative latest-handoff gate added. See [[workflow-learnings]].

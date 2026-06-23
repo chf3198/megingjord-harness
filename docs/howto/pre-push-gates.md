@@ -49,7 +49,9 @@ To support it, the consultant-closeout check is **deferred to PR-open**:
 
 - **No PR yet, no closeout posted**: `MANAGER_HANDOFF` is still validated, but the
   consultant-closeout check is deferred (a `consultant-closeout deferred to PR-open` line is
-  logged). The push is not blocked for a missing closeout.
+  logged). The push is not blocked for a missing closeout. On ticket branches, the first-edit
+  gate also requires an **authoritative** handoff: latest `MANAGER_HANDOFF` must declare
+  `worktree_branch:` matching HEAD (#3204, `baton_handoff_checks.py`).
 - **A closeout is already posted early**: it is still validated — deferral relaxes the
   ordering, it never silently un-checks a closeout that is present.
 - **The PR exists** (`prBody` resolvable): the consultant-closeout check and
