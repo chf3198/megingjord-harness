@@ -6,6 +6,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 
+const { checkBatonProgression, emitProgressionIncident } = require('./baton-progression-parity.js');
+
 const ARTIFACTS = ['MANAGER_HANDOFF', 'COLLABORATOR_HANDOFF', 'ADMIN_HANDOFF', 'CONSULTANT_CLOSEOUT'];
 
 const gh = args => { try { return execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); } catch (e) { return e.stdout?.toString('utf8') || ''; } };
@@ -49,8 +51,13 @@ function check(opts = {}) {
   if (predate) violations.push(predate);
   const closes = checkClosesKeyword(opts.prBodyDraft, leadTicket);
   if (closes) violations.push(closes);
+  // #2957: route-invariant baton-progression continuity (skipped-step / out-of-order)
+  // on top of the presence-only completeness check above.
+  const progression = checkBatonProgression(comments);
+  if (progression) violations.push(progression);
 
   const isTestEnv = opts.skipDrift || (typeof global.test === 'function') || process.env.NODE_ENV === 'test';
+  if (progression && !isTestEnv) emitProgressionIncident(progression);
   if (isTestEnv) {
     // skip drift checks in unit test runner
   } else if (process.env.SKIP_DRIFT_LINT === 'true') {
