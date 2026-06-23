@@ -72,7 +72,13 @@ function findManagerHandoff(comments) {
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
 }
 function extractField(body, field) {
-  const m = body.match(new RegExp(`(?:^|\\n)[-*]?\\s*${field}\\s*:\\s*([^\\n]+)`, 'i'));
+  // Tolerates: plain `field:`, list-prefixed `- field:`, and
+  // bold-markdown `**field:**` or `**field**:` (F-BC1 / #3030).
+  // Pattern: optional `**` around field+colon, then capture value.
+  const re = new RegExp(
+    `(?:^|\\n)[-*]?\\s*(?:\\*\\*)?${field}(?::\\*\\*|\\*\\*\\s*:|\\s*:)\\s*([^\\n]+)`, 'i'
+  );
+  const m = body.match(re);
   return m ? m[1].trim() : null;
 }
 function checkRequiredFields(body) {
