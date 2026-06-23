@@ -421,12 +421,10 @@ def main() -> int:
             # #2876 + #3204: authoritative MANAGER_HANDOFF + collaborator phase
             if not linked_issue_has_authoritative_manager_handoff(cwd):
                 return emit("deny", "File edit blocked: authoritative MANAGER_HANDOFF with matching worktree_branch required (#3204). Post Manager scope before first code edit.")
-            phase = state.get("current_phase", "manager")
-            if phase == "ready" and linked_issue_has_authoritative_manager_handoff(cwd):
+            # #3206: authoritative MH ⇒ collaborator (mirrors userprompt_gate; no "next prompt")
+            if state.get("current_phase") != "collaborator":
                 state["current_phase"] = "collaborator"
                 save_state(state)
-            elif phase != "collaborator":
-                return emit("deny", "File edit blocked: collaborator baton phase required (#3204). Post MANAGER_HANDOFF, then continue on next prompt.")
             if not linked_issue_has_planning_consensus(cwd):
                 if os.environ.get(CONSENSUS_OVERRIDE_ENV) == "1":
                     _emit_planning_consensus_override_incident(cwd, state.get("active_ticket"))

@@ -11,9 +11,8 @@ requires:
 
 1. **Authoritative `MANAGER_HANDOFF`** on the linked issue — the **latest**
    handoff must include `worktree_branch:` matching the current branch.
-2. **Collaborator phase** — session state must be `collaborator` (promoted from
-   `ready` after handoff post, or on the next prompt when authoritative handoff
-   exists).
+2. **Collaborator phase** — auto-promoted to `collaborator` on first edit when
+   authoritative handoff exists (`pretool_guard.py` + `userprompt_gate.py`; #3206).
 
 Implementation: `hooks/scripts/baton_handoff_checks.py`, wired from
 `pretool_guard.py`, `userprompt_gate.py`, and `tool_activity.py`.
