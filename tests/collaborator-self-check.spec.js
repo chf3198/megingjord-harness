@@ -161,3 +161,32 @@ test('mcpLoadCheck detects MCP via plain MCP marker', () => {
   expect(result.ok).toBe(true);
 });
 
+// #2907: checkHandoffHasVerification — hard gate for Pre-handoff verification block.
+test('checkHandoffHasVerification: passes when PASS block is present', () => {
+  const body = 'COLLABORATOR_HANDOFF\nPre-handoff verification (PASS)\n- [x] `branch-name-prefix` — pass';
+  expect(C.checkHandoffHasVerification(body).ok).toBe(true);
+});
+
+test('checkHandoffHasVerification: fails when block is missing', () => {
+  const result = C.checkHandoffHasVerification('COLLABORATOR_HANDOFF\nsome other content');
+  expect(result.ok).toBe(false);
+  expect(result.rule).toBe('missing-self-check-verification');
+});
+
+test('checkHandoffHasVerification: fails when block shows FAIL', () => {
+  const body = 'Pre-handoff verification (FAIL)\n- [ ] `branch-name-prefix` — fail';
+  const result = C.checkHandoffHasVerification(body);
+  expect(result.ok).toBe(false);
+  expect(result.rule).toBe('self-check-verification-failed');
+});
+
+test('checkHandoffHasVerification: fails on empty/missing body', () => {
+  expect(C.checkHandoffHasVerification('').ok).toBe(false);
+  expect(C.checkHandoffHasVerification(null).ok).toBe(false);
+});
+
+test('checkHandoffHasVerification: passes on SKIPPED block (waiver)', () => {
+  const body = 'Pre-handoff verification: SKIPPED (override-waived)';
+  expect(C.checkHandoffHasVerification(body).ok).toBe(true);
+});
+

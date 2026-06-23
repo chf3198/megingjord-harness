@@ -42,3 +42,8 @@ pre-push:
     # #2878: merged-branch-guard — block pushes to already-merged branches.
     merged-branch-guard:
       run: python3 hooks/scripts/merged-branch-guard.py
+    # #2907: collaborator-self-check hard gate — exits 1 when COLLABORATOR_SELF_CHECK_INPUT
+    # is provided and runChecks fails. Without env var the gate passes (CI gate enforces
+    # server-side). Bypass: COLLABORATOR_SELF_CHECK_SKIP=1 (emits advisory warning).
+    collaborator-self-check:
+      run: node scripts/global/collaborator-self-check.js

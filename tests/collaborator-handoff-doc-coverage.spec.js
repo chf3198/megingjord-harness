@@ -4,8 +4,9 @@ const assert = require('node:assert/strict');
 const { validate } = require('../scripts/global/megalint/collaborator-handoff.js');
 const { checkBlock, parseDocBlock, loadMatrix } = require('../scripts/global/megalint/doc-coverage.js');
 
+const VERIFICATION_BLOCK = 'Pre-handoff verification (PASS)\n- [x] `branch-name-prefix` — pass\n';
 const HANDOFF_SIGNED = (extra) =>
-  `## COLLABORATOR_HANDOFF\n${extra}\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\ncross_family_receipt: 0123456789abcdef\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
+  `## COLLABORATOR_HANDOFF\n${extra}\n${VERIFICATION_BLOCK}worktree_branch: feat/test\nworktree_behind_main: 0\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\ncross_family_receipt: 0123456789abcdef\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
 
 test('validate: blocking when doc-coverage: block missing on lane:code-change with governance label', () => {
   const matrix = loadMatrix();
