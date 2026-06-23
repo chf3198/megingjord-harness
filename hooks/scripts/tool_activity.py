@@ -15,6 +15,7 @@ from admin_patterns import (
     iter_strings, required_admin_ops,
 )
 from repo_detection import classify_path
+from session_anomaly import update_session_counters
 
 PATCH_FILE_RE = re.compile(
     r"^\*\*\*\s+(?:Update|Add|Delete)\s+File:\s+(.+?)\s*$", re.MULTILINE
@@ -91,6 +92,9 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     if tool in EDIT_TOOLS:
         roles["collaborator"] = True
         blast["files_edited_count"] += 1
+
+    # #2913: session aggregate counters for sequence-level anomaly detection (G-15)
+    update_session_counters(state, tool, values)
 
     # #1960 + #2978: derive candidate_paths ONLY from genuine mutations, never from read-only tools.
     # - Bash: explicit patch-file names (apply_patch) + paths a real `git diff` confirms changed.
