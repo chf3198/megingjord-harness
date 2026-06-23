@@ -3,6 +3,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const { findManagerHandoff, extractField } = require('./manager-handoff');
 const sig = require(path.join(__dirname, '..', 'governance-artifact-signature.js'));
 const { enforceTier3Emission } = require(path.join(__dirname, 'goal-failure-emission.js'));
 const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-bundle.js'));
@@ -141,6 +142,22 @@ function checkSubstantiveContent(body, isEpic) {
   return [{ rule: 'epic-closeout-no-substantive-evidence', detail: 'CONSULTANT_CLOSEOUT on an Epic must reference: (a) #N child ref, (b) PR ref, (c) research/*.md — see #1453.' }];
 }
 
+function checkCrossRuntimeWritesPending(comments) {
+  const handoff = findManagerHandoff(comments || []);
+  if (!handoff) return [];
+  const crw = extractField(handoff.body || '', 'cross_runtime_writes');
+  if (!crw || !crw.trim() || /^none$/i.test(crw.trim())) return [];
+  if (/target_team_sign_off\s*:\s*pending/i.test(handoff.body || '')) {
+    return [{
+      rule: 'cross-runtime-sign-off-pending',
+      detail: 'CONSULTANT_CLOSEOUT blocked: MANAGER_HANDOFF cross_runtime_writes has ' +
+        'target_team_sign_off: pending. All cross-runtime writes require a resolved ' +
+        'sign-off before closeout. Refs #2911.',
+    }];
+  }
+  return [];
+}
+
 function checkCrossFamilyVerdict(body) {
   if (!/cross_family_verdict:/i.test(body)) return [{ rule: 'cross-family-verdict-missing', severity: 'advisory', detail: 'CONSULTANT_CLOSEOUT: cross_family_verdict field missing (advisory; #2537)' }];
   if (!/cross_family_verdict:\s*(ACCEPT|PARTIAL|REJECT)\s*[—–-]+\s*\S+@\S+\s*[—–-]+\s*.+/i.test(body)) return [{ rule: 'cross-family-verdict-malformed', detail: 'cross_family_verdict must be: ACCEPT|PARTIAL|REJECT — <model@host> — <rationale>' }];
@@ -165,6 +182,7 @@ function validate(input) {
     ...checkSubstantiveContent(body, input.isEpic === true),
     ...checkCrossFamilyVerdict(body),
     ...checkFleetBundleProvenance(body, input),
+    ...checkCrossRuntimeWritesPending(input.comments),
     ...wtGate.checkConsultant(body, input),
   ];
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
@@ -178,4 +196,5 @@ module.exports = {
   checkRequiredFlawFields,
   checkMemoryNoteRecurrence,
   checkRubricVerdictConsistency,
+  checkCrossRuntimeWritesPending,
 };

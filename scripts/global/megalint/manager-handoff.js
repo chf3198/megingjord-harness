@@ -24,6 +24,49 @@ function loadTrivialThreshold() {
 
 const TRIVIAL_DIFF_THRESHOLD = loadTrivialThreshold();
 
+// Load cross-runtime paths from governance-rules.yaml or CROSS_RUNTIME_PATHS env override.
+function loadCrossRuntimePaths() {
+  if (process.env.CROSS_RUNTIME_PATHS) return process.env.CROSS_RUNTIME_PATHS.split(',').map(p => p.trim());
+  try {
+    const raw = fs.readFileSync(
+      path.resolve(__dirname, '..', '..', '..', 'config', 'governance-rules.yaml'), 'utf8');
+    const ruleStart = raw.indexOf('rule_id: cross-runtime-writes-gate');
+    if (ruleStart >= 0) {
+      const nextRule = raw.indexOf('\n  - rule_id:', ruleStart + 1);
+      const block = nextRule >= 0 ? raw.slice(ruleStart, nextRule) : raw.slice(ruleStart);
+      const pathsIdx = block.indexOf('cross_runtime_paths:');
+      if (pathsIdx >= 0) {
+        const paths = [...block.slice(pathsIdx).matchAll(/\n\s+- ['"]?([^'"\n\r]+)['"]?/g)]
+          .map(m => m[1].trim()).filter(Boolean);
+        if (paths.length) return paths;
+      }
+    }
+  } catch { /* config absent: use default */ }
+  return ['.claude/', '.codex/', '.copilot/'];
+}
+
+const CROSS_RUNTIME_PATHS = loadCrossRuntimePaths();
+
+// AC #2911 — block when diff touches cross-runtime paths but cross_runtime_writes is absent.
+// FAIL-OPEN when changedPaths is not supplied (caller has not yet been updated).
+function checkCrossRuntimeWrites(body, changedPaths, configPaths) {
+  if (!Array.isArray(changedPaths) || changedPaths.length === 0) return [];
+  const paths = Array.isArray(configPaths) && configPaths.length ? configPaths : CROSS_RUNTIME_PATHS;
+  const affected = changedPaths.filter(p => paths.some(cp => p === cp || p.startsWith(cp) || p.includes(`/${cp.replace(/\/$/, '')}/`)));
+  if (affected.length === 0) return [];
+  const declared = extractField(body, 'cross_runtime_writes');
+  if (!declared || !declared.trim() || /^none$/i.test(declared.trim())) {
+    return [{
+      rule: 'cross-runtime-writes-missing',
+      detail: `MANAGER_HANDOFF diff touches cross-runtime path(s) [${affected.join(', ')}] ` +
+        'but cross_runtime_writes field is absent or none. ' +
+        'List all cross-runtime files under cross_runtime_writes:.',
+      severity: 'hard',
+    }];
+  }
+  return [];
+}
+
 function findManagerHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?MANAGER_HANDOFF\b/;
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
@@ -148,6 +191,7 @@ function validate(input) {
     ...checkTestStrategy(handoff.body),
     ...checkLaneConsistency(handoff.body, input.lane),
     ...checkLaneTrivialDiffSize(handoff.body, input.diffLines, TRIVIAL_DIFF_THRESHOLD),
+    ...checkCrossRuntimeWrites(handoff.body, input.changedPaths),
     ...checkPhaseOneFields(handoff.body, input.labels),
     ...checkTargetTeamSignOff(handoff.body),
     ...checkCrypto(handoff.body),
@@ -159,4 +203,5 @@ function validate(input) {
 module.exports = {
   validate, findManagerHandoff, extractField, REQUIRED_FIELDS,
   checkLaneTrivialDiffSize, TRIVIAL_DIFF_THRESHOLD, checkTargetTeamSignOff,
+  checkCrossRuntimeWrites, CROSS_RUNTIME_PATHS,
 };
