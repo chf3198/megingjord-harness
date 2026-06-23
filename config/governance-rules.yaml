@@ -213,3 +213,21 @@ rules:
       - codex
       - copilot
       - antigravity
+
+  - rule_id: cross-runtime-writes-gate
+    class: doc-vs-no-enforcement
+    statement: >
+      MANAGER_HANDOFF must declare cross_runtime_writes when the PR diff
+      touches cross-runtime config paths; absence is hard-blocking. Refs #2911.
+    source: scripts/global/megalint/manager-handoff.js
+    cross_runtime_paths:
+      - '.claude/'
+      - '.codex/'
+      - '.copilot/'
+    enum_values: []
+    severity: hard-mandatory
+    cross_runtime_applicability:
+      - claude-code
+      - codex
+      - copilot
+      - antigravity
