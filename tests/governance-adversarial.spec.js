@@ -172,13 +172,7 @@ verdict: approve_for_merge`;
       `expected missing-rubric; got: ${rules.join(', ')}`);
   });
 
-  test('S09b: [KNOWN-GAP #2908] G-score floor not yet enforced — documents the rubber-stamp gap', () => {
-    // NOT a mutation test (it asserts ABSENCE of a guard, so it passes whether or not a guard
-    // exists). It is a deliberate KNOWN-GAP marker: consultant-closeout.js does not yet enforce a
-    // minimum G-score floor, so a G1=2 + approve_for_merge closeout is not blocked. Child #2908
-    // (consultant rubric internal-consistency validator: G-score vs verdict) will add that floor;
-    // when it lands this assertion flips to fail and forces an explicit update here. Kept OUTSIDE
-    // the mutation-test contract on purpose and named so it cannot be mistaken for a passing guard.
+  test('S09b: G-score floor enforced — low rubric + approve blocked (#2908)', () => {
     const body = `## CONSULTANT_CLOSEOUT
 Signed-by: Orla Vale
 Team&Model: claude-code:claude-sonnet-4-6@anthropic
@@ -187,12 +181,9 @@ verification-timestamp: 2026-06-13T00:00:00Z
 verdict: approve_for_merge
 G1: 2 G2: 8 G3: 8 G4: 8 G5: 8 G6: 8 G7: 8 G8: 8 G9: 8`;
     const result = closeout.validate(makeCloseoutInput(body));
-    // rubric present + verdict present → blocking violations should be empty (gap exists).
-    // When a floor enforcement lands, this test will fail and force an explicit decision.
-    const blocking = (result.violations || []).filter(v => v.severity !== 'advisory');
-    const gap = blocking.filter(v => v.rule.includes('rubric-floor'));
-    assert.strictEqual(gap.length, 0,
-      'G1=2 rubber-stamp gap: no floor enforced yet; update test when floor is implemented');
+    const rules = (result.violations || []).map(v => v.rule);
+    assert.ok(rules.includes('rubric-floor-violation'),
+      `expected rubric-floor-violation; got: ${rules.join(', ')}`);
   });
 
   test('S10: closeout missing verdict is rejected [mutation: removes verdict guard]', () => {
