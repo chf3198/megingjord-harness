@@ -355,7 +355,7 @@
     "lefthook": "^1.8.4",
     "log4brains": "^1.1.0",
     "markdown-magic": "^4.8.0",
-    "markdownlint-cli2": "^0.17.2",
+    "markdownlint-cli2": "^0.22.1",
     "prettier": "^3.6.2",
     "wrangler": "^4.87.0"
   },
