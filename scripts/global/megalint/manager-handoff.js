@@ -148,6 +148,19 @@ function checkTargetTeamSignOff(body) {
   const val = extractField(body, 'target_team_sign_off');
   if (!val) return [];
   if (/^pending$/i.test(val.trim())) {
+    const posted = extractField(body, 'team_question_posted_at');
+    const escalation = extractField(body, 'escalation');
+    if (escalation && /sign-off-timeout/i.test(escalation)) return [];
+    if (posted) {
+      const days = (Date.now() - Date.parse(posted)) / 86400000;
+      if (days > 7) {
+        return [{
+          rule: 'sign-off-timeout-exceeded',
+          detail: 'target_team_sign_off pending >7d — post escalation: sign-off-timeout or resolve sign-off',
+          severity: 'advisory',
+        }];
+      }
+    }
     return [{
       rule: 'target-team-sign-off-pending',
       detail: 'MANAGER_HANDOFF target_team_sign_off is "pending". Resolve the TEAM_QUESTION sign-off before merging.',
