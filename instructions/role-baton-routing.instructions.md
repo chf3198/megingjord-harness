@@ -167,6 +167,20 @@ Accountability ownership is historical metadata, not an execution-role label.
 Dashboard/audit views may resolve historical ownership to manager for reporting,
 but this must not re-add a `role:*` label to terminal issues.
 
+### Explicit accountable-team schema (Epic #2345 / design #2346)
+
+Persistent accountability is recorded as an `accountable-team:<team>` label
+(`claude-code | copilot | codex | antigravity`) that is **distinct** from, and
+never shares a namespace with, the transient `role:*` baton label. Unlike
+`role:*`, it persists across **all** states including terminal — so a closed
+ticket answers "who owns this?" without an execution-role label. The team-of-
+record resolves in order: (1) the `accountable-team:*` label, else (2) the team
+in the most recent baton/closeout signing block, else (3) the default manager
+team. Authority: only the Manager or Admin role may set or change it, and never
+as a side effect of a baton transition. Helper: `scripts/global/accountable-team.js`;
+backfill: `scripts/global/accountable-team-backfill.js` (dry-run default).
+See `docs/howto/accountable-team-schema.md`.
+
 ## Hard Rules
 
 - Execution `role:*` labels are required for active role-owned states only (`triage`, `in-progress`, `testing`, `review`, and Epic-only `dormant`/`deferred`).
