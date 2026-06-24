@@ -51,7 +51,7 @@ if (window.IS_DEMO) (function () {
     return { issues: { open: 12, recent: [{ number: DEMO_K.TICKET, title: 'Phase-1 dashboard', state: 'open' }] }, pulls: { open: 1, merged: 3, recent: [] }, actions: { recent: [] }, branches: { count: 2, active: ['main', 'feat/dashboard-demo'] } };
   };
   window.fetchFleetHealthLog = async function () {
-    var isDeg = window.demoConfig && window.demoConfig.currentScenario === 'governance-alert';
+    const isDeg = window.demoConfig && window.demoConfig.currentScenario === 'governance-alert';
     return [{ ts: Date.now() - DEMO_K.MS_60S, node: 'fleet-win-01', status: 'healthy', latencyMs: 12 },
       { ts: Date.now() - DEMO_K.MS_30S, node: 'fleet-openclaw', status: 'healthy', latencyMs: 47 },
       { ts: Date.now(), node: 'dev-1', status: isDeg ? 'degraded' : 'healthy', latencyMs: isDeg ? DEMO_K.LATENCY_HIGH : DEMO_K.LATENCY_LOW }];
@@ -61,9 +61,9 @@ if (window.IS_DEMO) (function () {
       lintRequired: { status: 'pass', violations: 0 }, testEvidence: { status: 'pass', violations: 0 }, lastChecked: new Date().toISOString() };
   };
   window.fetchCostTelemetry = async function () {
-    var nowMs = Date.now();
-    var e = [7200000,5400000,3600000,1800000,900000].map(function(d,i){
-      var lanes=['fleet','fleet','haiku','fleet','premium'], models=['qwen3:32b','qwen2.5-coder:7b','claude-haiku-3','qwen3:32b','claude-sonnet-4'];
+    const nowMs = Date.now();
+    const e = [7200000,5400000,3600000,1800000,900000].map(function(d,i){
+      const lanes=['fleet','fleet','haiku','fleet','premium'], models=['qwen3:32b','qwen2.5-coder:7b','claude-haiku-3','qwen3:32b','claude-sonnet-4'];
       return {ts:new Date(nowMs-d).toISOString(),lane:lanes[i],model:models[i]};
     });
     return {entries:e,summary:null};
@@ -87,7 +87,7 @@ if (window.IS_DEMO) (function () {
       readiness: { liveMode: true } };
   };
   window.fetchGoalHealthSummary = async function () {
-    var goalDefs = {G1:['Governance',9],G2:['Quality',8],G3:['Zero Cost',9],G4:['Privacy',8],G5:['Portability',7],G6:['Resilience',8],G7:['Throughput',7],G8:['Observability',8],G9:['Interop',7]};
+    const goalDefs = {G1:['Governance',9],G2:['Quality',8],G3:['Zero Cost',9],G4:['Privacy',8],G5:['Portability',7],G6:['Resilience',8],G7:['Throughput',7],G8:['Observability',8],G9:['Interop',7]};
     return Object.fromEntries(Object.entries(goalDefs).map(function(e){return [e[0],{score:e[1][1],label:e[1][0]}];}));
   };
   window.fetchTokenReconcileSummary = async function () { return { matched: DEMO_K.RECONCILED, unmatched: 4, matchRate: 0.978 }; };

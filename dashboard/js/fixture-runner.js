@@ -22,11 +22,11 @@ const fixtureRunner = (function () {
 
   function applyEvent(app, ev) {
     if (ev.type === 'baton') {
-      var entry = { issue: ev.issue, activeRole: ev.role,
+      const entry = { issue: ev.issue, activeRole: ev.role,
         status: 'in-progress', message: ev.message,
         title: ev.title || '', agent: ev.agent || '',
         model: ev.model || '', detail: ev.detail || '' };
-      var existing = (app.batonState || []).filter(function (b) { return b.issue !== ev.issue; });
+      const existing = (app.batonState || []).filter(function (b) { return b.issue !== ev.issue; });
       app.batonState = existing.concat([entry]);
       window._demoFixtureBatonState = app.batonState;
       return;

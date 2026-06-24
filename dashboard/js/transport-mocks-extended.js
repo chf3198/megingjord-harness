@@ -47,7 +47,7 @@ if (window.IS_DEMO) (function () {
   /* getRouterLog — synchronous; fallback for buildBatonState when getBatonState absent. */
   window.getRouterLog = function () {
     if (window.demoConfig && window.demoConfig.routerLog && window.demoConfig.routerLog.length) return window.demoConfig.routerLog;
-    var now = new Date();
+    const now = new Date();
     return [
       { time: new Date(now - MS_8S).toLocaleTimeString(), agent: 'fleet-direct', model: 'qwen2.5-coder:32b', task: 'code review: baton-flow.js' },
       { time: new Date(now - MS_5S).toLocaleTimeString(), agent: 'haiku-escalate', model: 'claude-haiku-3', task: '4-tool chain: refactor transport' },
