@@ -64,8 +64,8 @@ function upgradeToV3(event, surfaceContext = {}) {
   };
   // Preserve v2 anneal fields if present (additive)
   if (ver === 2) {
-    for (const f of V2_ANNEAL_FIELDS) {
-      if (event[f] !== undefined) base[f] = event[f];
+    for (const fieldName of V2_ANNEAL_FIELDS) {
+      if (event[fieldName] !== undefined) base[fieldName] = event[fieldName];
     }
   }
   // Preserve all v1 fields too (consumer compat)

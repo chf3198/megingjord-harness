@@ -7,8 +7,8 @@ const HEADER = /(^|\n)\s*(?:\*\*|##\s+)?BATON_TRANSITION\b/;
 
 function findLatest(comments) {
   let latest = null;
-  for (const c of comments || []) {
-    const body = String((c && c.body) || c || '');
+  for (const commentItem of comments || []) {
+    const body = String((commentItem && commentItem.body) || commentItem || '');
     if (HEADER.test(body)) latest = body;
   }
   return latest;
