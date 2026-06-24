@@ -36,6 +36,11 @@ create_task_worktree() {
   local ticket_num worktree_dir
   ticket_num="$(echo "$task_branch" | grep -oP '(?<=/)[0-9]+(?=-)' | head -1)"
   [[ -n "$ticket_num" ]] || die "cannot parse ticket number from task branch '$task_branch'"
+  if [[ -n "${HAMR_TEAM:-}${MEGINGJORD_TEAM:-}" ]]; then
+    local pusher_team="${HAMR_TEAM:-$MEGINGJORD_TEAM}"
+    node "$(dirname "$0")/global/cross-team-worktree-preflight.js" "$ticket_num" "$pusher_team" \
+      || die "cross-team worktree collision on #${ticket_num}"
+  fi
   worktree_dir="$HOME/devenv-ops-${ticket_num}"
   [[ -e "$worktree_dir" ]] && die "worktree dir already exists: $worktree_dir (remove it first)"
   git worktree add "$worktree_dir" -b "$task_branch"
