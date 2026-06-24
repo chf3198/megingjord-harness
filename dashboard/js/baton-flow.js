@@ -1,5 +1,5 @@
-// Baton Flow — Multi-ticket parallel agent baton visualization
-// Shows Manager→Collaborator→Admin→Consultant per ticket
+// Baton Flow — Multi-ticket parallel agent baton (M→C→A→Consultant)
+/* global detectMissingEvents, getTicketTimeline, esc */ /* exported renderBatonFlow, buildBatonState */
 
 const BATON_ROLES = [
   { id: 'manager', icon: '🎯', label: 'Mgr' },
