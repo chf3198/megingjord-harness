@@ -102,3 +102,21 @@ test('real ## header is still classified — no false negative (#2564)', () => {
   expect(r.count).toBe(1); // CONSULTANT_CLOSEOUT header classified; prose mention ignored
   expect(r.ok).toBe(true);
 });
+
+test('last-of-type: stale bad MANAGER_HANDOFF does not block when newer valid one exists (#3030)', () => {
+  const comments = [
+    { body: '## MANAGER_HANDOFF\nSigned-by: Curtis Franks\nTeam&Model: codex:gpt-5.4@codex-cli\nRole: manager' },
+    mk('MANAGER_HANDOFF', 'manager', 'codex:gpt-5.4@codex-cli'),
+  ];
+  const r = G.analyzeComments(comments);
+  expect(r.ok).toBe(true);
+  expect(r.advisories?.length).toBeGreaterThan(0);
+});
+
+test('MANAGER_HANDOFF_SUPERSEDED is ignored (#3030)', () => {
+  const comments = [
+    { body: '## MANAGER_HANDOFF_SUPERSEDED\nSigned-by: Curtis Franks\nTeam&Model: codex:gpt-5.4@codex-cli\nRole: manager' },
+    mk('MANAGER_HANDOFF', 'manager', 'codex:gpt-5.4@codex-cli'),
+  ];
+  expect(G.analyzeComments(comments).ok).toBe(true);
+});

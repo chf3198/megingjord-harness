@@ -5,6 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const sig = require('../governance-artifact-signature');
+const { extractField } = require('./artifact-field-extract');
 const { isValidStrategy } = require('../test-strategy-enum');
 const wtGate = require('../worktree-lifecycle-gate');
 const REQUIRED_FIELDS = ['scope', 'lane', 'test_strategy', 'acceptance', 'gates', 'related_tickets', 'overlap_decision'];
@@ -70,10 +71,6 @@ function checkCrossRuntimeWrites(body, changedPaths, configPaths) {
 function findManagerHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?MANAGER_HANDOFF\b/;
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
-}
-function extractField(body, field) {
-  const m = body.match(new RegExp(`(?:^|\\n)[-*]?\\s*${field}\\s*:\\s*([^\\n]+)`, 'i'));
-  return m ? m[1].trim() : null;
 }
 function checkRequiredFields(body) {
   const violations = [];
