@@ -1,6 +1,6 @@
+/* global addActivity, addRouterLogEntry */
 let _lastEventTs = null;
-const _batonTickets = {};
-const _batonHistory = {};
+const _batonTickets = {}, _batonHistory = {};
 const _ticketLog = {};
 const CLOSED_STATUSES = new Set(['done', 'cancelled']);
 const ACTIVE_STATUSES = new Set(['in-progress', 'review', 'testing', 'ready-for-testing']);
