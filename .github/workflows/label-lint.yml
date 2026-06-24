@@ -22,6 +22,7 @@ jobs:
           script: |
             const { evaluate } = require('./scripts/global/label-rules.js');
             const protection = require('./scripts/global/label-lint-close-protection.js');
+            const optimistic = require('./scripts/global/label-lint-optimistic-transition.js');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const issueNum = context.payload.issue.number;
@@ -45,6 +46,19 @@ jobs:
             });
             console.log(`#${issueNum}: close-protection decision=${decision.action} reason=${decision.reason} (#1472)`);
             if (decision.action === 'auto-transition') {
+              const snapLabels = labels;
+              const snapUpdated = issue.updated_at;
+              const fresh = (await github.rest.issues.get({ owner, repo, issue_number: issueNum })).data;
+              const drift = optimistic.shouldAbortTransition(
+                snapLabels, fresh.labels.map(l => l.name), snapUpdated, fresh.updated_at);
+              if (drift.abort) {
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: issueNum,
+                  body: `${marker}\n⚠️ label-lint auto-transition aborted (${drift.reason}); concurrent label edit detected.`,
+                });
+                console.log(`#${issueNum}: auto-transition aborted: ${drift.reason}`);
+                return;
+              }
               for (const name of decision.removeLabels) {
                 if (labels.includes(name)) {
                   try {

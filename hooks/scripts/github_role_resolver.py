@@ -17,7 +17,7 @@ import time
 from typing import Optional
 
 CACHE_TTL_SECONDS = 60
-MAX_STALE_SECONDS = 300  # G6: serve stale up to 5 min on GitHub-down
+MAX_STALE_SECONDS = 90  # G6: bound stale role cache (#3034 C6)
 _cache: dict[int, tuple[float, dict]] = {}
 _cache_lock = threading.Lock()
 
