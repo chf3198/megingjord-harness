@@ -14,7 +14,7 @@ from session_anomaly import check_anomaly, emit_anomaly_incident
 from governance_state import ensure_state, save_state
 from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
 from one_ticket_per_worktree import check_one_ticket_per_worktree
-from live_checks import ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
+from live_checks import ci_gate_status, ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -384,7 +384,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
         pr_m = RE_PR_REF.search(joined)
         if pr_m:
-            ci_state = ci_gate_status_stable(pr_m.group(1), cwd)
+            ci_state = ci_gate_status(pr_m.group(1), cwd)
             if ci_state == "pending-only":
                 return emit("deny", "Merge blocked: required CI checks are still pending. Wait and re-check status only.")
             if ci_state in {"failing", "unknown"}:
