@@ -1,9 +1,13 @@
 'use strict';
-// Shared baton field extraction — tolerates plain, markdown-bold, and heading prefixes (#3030 F-BC1).
+// Shared baton field extraction — tolerates plain, markdown-bold, heading,
+// and list-prefixed field patterns (#3030 F-BC1, #3225 AC4).
 
 function extractField(body, field) {
+  // Supports: `field:`, `- field:`, `* field:`, `## field:`,
+  // `**field:**`, `**field**:` (colon outside bold).
   const re = new RegExp(
-    `(?:^|\\n)\\s*(?:#{1,3}\\s+)?(?:\\*{0,2})?\\s*${field}\\s*:\\s*([^\\n]+)`,
+    `(?:^|\\n)[-*]?\\s*(?:#{1,3}\\s+)?(?:\\*\\*)?\\s*${field}` +
+    `(?::\\*\\*|\\*\\*\\s*:|\\s*:)\\s*([^\\n]+)`,
     'i',
   );
   const m = String(body || '').match(re);

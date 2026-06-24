@@ -71,3 +71,26 @@ test('CLI exits 1 for incomplete consultant body', () => {
   expect(result.status).toBe(1);
   expect(result.stderr.toString()).toContain('FAIL');
 });
+
+// #3225 — bold-markdown field parsing via shared helper integration
+test('manager: bold-markdown fields pass (#3225)', () => {
+  const body = `## MANAGER_HANDOFF\n**scope:** test\n**lane:** lane:code-change\n**test_strategy:** tdd-pyramid\n**acceptance:**\n- AC1\n**gates:**\n- lint\nSigned-by: Soren Mason\nTeam&Model: copilot:model\nRole: manager`;
+  const { ok, violations } = validate('manager', body);
+  expect(violations).toEqual([]);
+  expect(ok).toBe(true);
+});
+
+test('manager: colon-outside-bold fields pass (#3225 AC4)', () => {
+  const body = `## MANAGER_HANDOFF\n**scope**: test\n**lane**: lane:code-change\n**test_strategy**: tdd-pyramid\n**acceptance**:\n- AC1\n**gates**:\n- lint\nSigned-by: Soren Mason\nTeam&Model: copilot:model\nRole: manager`;
+  const { ok, violations } = validate('manager', body);
+  expect(violations).toEqual([]);
+  expect(ok).toBe(true);
+});
+
+test('manager: hyphen list-prefix fields pass (#3225 AC4)', () => {
+  const body = `## MANAGER_HANDOFF\n- scope: test\n- lane: lane:code-change\n- test_strategy: tdd-pyramid\n- acceptance:\n- AC1\n- gates:\n- lint\nSigned-by: Soren Mason\nTeam&Model: copilot:model\nRole: manager`;
+  const { ok, violations } = validate('manager', body);
+  expect(violations).toEqual([]);
+  expect(ok).toBe(true);
+});
+
