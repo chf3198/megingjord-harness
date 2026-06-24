@@ -76,7 +76,7 @@ if (require.main === module) {
     process.exit(0);
   } else {
     process.stderr.write(`[baton-preflight] ${role}: FAIL\n`);
-    for (const v of violations) process.stderr.write(`  • ${v}\n`);
+    for (const violation of violations) process.stderr.write(`  • ${violation}\n`);
     process.exit(1);
   }
 }

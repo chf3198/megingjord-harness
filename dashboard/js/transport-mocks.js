@@ -61,10 +61,10 @@ if (window.IS_DEMO) (function () {
       lintRequired: { status: 'pass', violations: 0 }, testEvidence: { status: 'pass', violations: 0 }, lastChecked: new Date().toISOString() };
   };
   window.fetchCostTelemetry = async function () {
-    var n = Date.now();
+    var nowMs = Date.now();
     var e = [7200000,5400000,3600000,1800000,900000].map(function(d,i){
       var lanes=['fleet','fleet','haiku','fleet','premium'], models=['qwen3:32b','qwen2.5-coder:7b','claude-haiku-3','qwen3:32b','claude-sonnet-4'];
-      return {ts:new Date(n-d).toISOString(),lane:lanes[i],model:models[i]};
+      return {ts:new Date(nowMs-d).toISOString(),lane:lanes[i],model:models[i]};
     });
     return {entries:e,summary:null};
   };
@@ -87,8 +87,8 @@ if (window.IS_DEMO) (function () {
       readiness: { liveMode: true } };
   };
   window.fetchGoalHealthSummary = async function () {
-    var g = {G1:['Governance',9],G2:['Quality',8],G3:['Zero Cost',9],G4:['Privacy',8],G5:['Portability',7],G6:['Resilience',8],G7:['Throughput',7],G8:['Observability',8],G9:['Interop',7]};
-    return Object.fromEntries(Object.entries(g).map(function(e){return [e[0],{score:e[1][1],label:e[1][0]}];}));
+    var goalDefs = {G1:['Governance',9],G2:['Quality',8],G3:['Zero Cost',9],G4:['Privacy',8],G5:['Portability',7],G6:['Resilience',8],G7:['Throughput',7],G8:['Observability',8],G9:['Interop',7]};
+    return Object.fromEntries(Object.entries(goalDefs).map(function(e){return [e[0],{score:e[1][1],label:e[1][0]}];}));
   };
   window.fetchTokenReconcileSummary = async function () { return { matched: DEMO_K.RECONCILED, unmatched: 4, matchRate: 0.978 }; };
   window.fetchAgentSessions = async function () { return [{ id: 's1', agent: 'copilot', model: 'claude-sonnet-4.6', ticket: DEMO_K.TICKET, status: 'active', startTs: Date.now() - DEMO_K.MS_2MIN, costUsd: 0.0041 }]; };
