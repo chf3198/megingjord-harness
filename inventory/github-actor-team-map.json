@@ -1,0 +1,8 @@
+{
+  "actors": {
+    "chf3198": "claude-code",
+    "cursoragent": "cursor",
+    "github-actions": "copilot"
+  },
+  "_note": "Maps GitHub logins to harness team slugs for author-team verification (#3032). Unmapped authors fail-open (advisory)."
+}
