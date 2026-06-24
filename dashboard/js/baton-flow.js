@@ -37,7 +37,7 @@ function renderBatonRow(t) {
     </span>${arrow}`;
   }).join('');
 
-  const badge = statusBadge(t.status);
+  const badge = batonStatusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
   const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
   const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
@@ -63,7 +63,7 @@ function renderBatonRow(t) {
   </div>`;
 }
 
-function statusBadge(s) {
+function batonStatusBadge(s) {
   return ({ 'in-progress': 'active', ready: 'degraded', done: 'healthy', idle: 'unknown', review: 'degraded' })[s] || 'unknown';
 }
 function normalizeBaton(state) {

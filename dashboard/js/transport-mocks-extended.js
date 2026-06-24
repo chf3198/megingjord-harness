@@ -22,9 +22,7 @@ if (window.IS_DEMO) (function () {
       return window._demoFixtureBatonState;
     }
     return [
-      { role: 'manager',      issue: DEMO_TICKET, message: 'Scoping ACs + gates',  ts: Date.now() - MS_14S },
-      { role: 'collaborator', issue: DEMO_TICKET, message: 'Implementation active', ts: Date.now() - MS_9S },
-      { role: 'admin',        issue: DEMO_TICKET, message: 'CI gates running',      ts: Date.now() - MS_4_5S },
+      { activeRole: 'collaborator', issue: DEMO_TICKET, status: 'in-progress', title: 'Demo Mode Quality Sprint', agent: 'copilot', model: 'claude-sonnet-4' },
     ];
   };
 
@@ -32,8 +30,8 @@ if (window.IS_DEMO) (function () {
   window.getTicketLog = function () {
     if (window.demoConfig && window.demoConfig.ticketLog && window.demoConfig.ticketLog.length) return window.demoConfig.ticketLog;
     return [
-      { id: DEMO_TICKET, title: 'Demo Mode Quality Sprint', status: 'in-progress', role: 'collaborator' },
-      { id: DEMO_PREV,   title: 'Fix demo device IDs',      status: 'done',         role: null },
+      { issue: DEMO_TICKET, title: 'Demo Mode Quality Sprint', status: 'in-progress', activeRole: 'collaborator' },
+      { issue: DEMO_PREV,   title: 'Fix demo device IDs',      status: 'done',        activeRole: null },
     ];
   };
 
@@ -49,10 +47,11 @@ if (window.IS_DEMO) (function () {
   /* getRouterLog — synchronous; fallback for buildBatonState when getBatonState absent. */
   window.getRouterLog = function () {
     if (window.demoConfig && window.demoConfig.routerLog && window.demoConfig.routerLog.length) return window.demoConfig.routerLog;
+    var now = new Date();
     return [
-      { lane: 'fleet',   model: 'qwen2.5-coder:32b', tokens: TOK_FLEET,   cost: 0,           ts: Date.now() - MS_8S },
-      { lane: 'haiku',   model: 'claude-haiku-3',     tokens: TOK_HAIKU,   cost: COST_HAIKU,  ts: Date.now() - MS_5S },
-      { lane: 'premium', model: 'claude-sonnet-4',    tokens: TOK_PREMIUM, cost: COST_PREMIUM, ts: Date.now() - MS_2S },
+      { time: new Date(now - MS_8S).toLocaleTimeString(), agent: 'fleet-direct', model: 'qwen2.5-coder:32b', task: 'code review: baton-flow.js' },
+      { time: new Date(now - MS_5S).toLocaleTimeString(), agent: 'haiku-escalate', model: 'claude-haiku-3', task: '4-tool chain: refactor transport' },
+      { time: new Date(now - MS_2S).toLocaleTimeString(), agent: 'premium', model: 'claude-sonnet-4', task: 'complex analysis: architecture' },
     ];
   };
 })();

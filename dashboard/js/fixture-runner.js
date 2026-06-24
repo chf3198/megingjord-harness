@@ -22,15 +22,30 @@ const fixtureRunner = (function () {
 
   function applyEvent(app, ev) {
     if (ev.type === 'baton') {
-      const existing = (app.batonState || []).filter(function (b) { return b.issue !== ev.issue; });
-      app.batonState = existing.concat([ev]);
+      var entry = { issue: ev.issue, activeRole: ev.role,
+        status: 'in-progress', message: ev.message,
+        title: ev.title || '', agent: ev.agent || '',
+        model: ev.model || '', detail: ev.detail || '' };
+      var existing = (app.batonState || []).filter(function (b) { return b.issue !== ev.issue; });
+      app.batonState = existing.concat([entry]);
+      window._demoFixtureBatonState = app.batonState;
       return;
     }
-    if (ev.type === 'router' || ev.type === 'ticket') {
-      const key = ev.type === 'router' ? 'routerLog' : 'ticketLog';
+    if (ev.type === 'router') {
       window.demoConfig = window.demoConfig || {};
-      window.demoConfig[key] = window.demoConfig[key] || [];
-      window.demoConfig[key].unshift(ev); return;
+      window.demoConfig.routerLog = window.demoConfig.routerLog || [];
+      window.demoConfig.routerLog.unshift({
+        time: new Date().toLocaleTimeString(),
+        agent: ev.lane || 'auto', model: ev.model || '?',
+        task: ev.decision || '' }); return;
+    }
+    if (ev.type === 'ticket') {
+      window.demoConfig = window.demoConfig || {};
+      window.demoConfig.ticketLog = window.demoConfig.ticketLog || [];
+      window.demoConfig.ticketLog.unshift({
+        issue: ev.number || ev.issue,
+        title: ev.title || '', status: ev.action || 'backlog',
+        activeRole: ev.role || null }); return;
     }
     const typeMap = { warn: 'warn', llm: 'llm', tool: 'tool', agent: 'agent', system: 'system' };
     const evType = typeMap[ev.type] || 'system';
