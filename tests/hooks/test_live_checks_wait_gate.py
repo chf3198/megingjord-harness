@@ -36,24 +36,27 @@ class PretToolMergeGate(unittest.TestCase):
         }
 
     def test_pending_blocks_merge(self):
+        from unittest.mock import patch
         pretool_guard.emit = lambda decision, reason, extra=None: (decision, reason, extra)
-        pretool_guard.ci_gate_status_stable = lambda _pr, _cwd: "pending-only"
-        result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
+        with patch("pretool_guard.ci_gate_status_stable", return_value="pending-only"):
+            result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
         self.assertEqual(result[0], "deny")
         self.assertIn("still pending", result[1])
 
     def test_failing_blocks_merge(self):
+        from unittest.mock import patch
         pretool_guard.emit = lambda decision, reason, extra=None: (decision, reason, extra)
-        pretool_guard.ci_gate_status_stable = lambda _pr, _cwd: "failing"
-        result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
+        with patch("pretool_guard.ci_gate_status_stable", return_value="failing"):
+            result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
         self.assertEqual(result[0], "deny")
         self.assertIn("not fully green", result[1])
 
     def test_transient_unknown_resolving_green_allows_merge(self):
         # #2603: a green stable result must NOT hit the not-fully-green deny.
+        from unittest.mock import patch
         pretool_guard.emit = lambda decision, reason, extra=None: (decision, reason, extra)
-        pretool_guard.ci_gate_status_stable = lambda _pr, _cwd: "green"
-        result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
+        with patch("pretool_guard.ci_gate_status_stable", return_value="green"):
+            result = pretool_guard.check_terminal("gh pr merge 99", self._state(), ".")
         self.assertNotEqual(result, ("deny", "Merge blocked: required CI checks are not fully green (live API check).", None))
 
 

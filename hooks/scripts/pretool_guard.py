@@ -384,7 +384,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
         pr_m = RE_PR_REF.search(joined)
         if pr_m:
-            ci_state = ci_gate_status(pr_m.group(1), cwd)
+            ci_state = ci_gate_status_stable(pr_m.group(1), cwd)
             if ci_state == "pending-only":
                 return emit("deny", "Merge blocked: required CI checks are still pending. Wait and re-check status only.")
             if ci_state in {"failing", "unknown"}:
