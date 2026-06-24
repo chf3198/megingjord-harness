@@ -79,19 +79,18 @@ async function tryClaim({ github, context, callerSubstrate, callerAlias, epicNum
   }
   // Step 3: post claim + swap label atomically
   const claimBody = formatClaim(callerSubstrate, callerAlias);
-  await github.rest.issues.createComment({ owner, repo, issue_number: epicNumber, body: claimBody });
+  const posted = await github.rest.issues.createComment({ owner, repo, issue_number: epicNumber, body: claimBody });
+  const ourTs = new Date(posted.data.created_at).getTime();
   await github.rest.issues.addLabels({ owner, repo, issue_number: epicNumber, labels: ['consultant:cross-team-in-progress'] });
   await github.rest.issues.removeLabel({ owner, repo, issue_number: epicNumber, name: 'consultant:cross-team-needed' }).catch(() => {});
-  // Step 4: race-check — wait then re-read
   await new Promise(r => setTimeout(r, RECHECK_DELAY_MS));
   const afterRace = await github.paginate(github.rest.issues.listComments, {
     owner, repo, issue_number: epicNumber, per_page: 100,
   });
   const earlierByOther = afterRace.find(c => {
     const m = (c.body || '').match(CLAIM_RE);
-    if (!m) return false;
-    if (m[1] === callerSubstrate) return false;
-    return new Date(c.created_at) < new Date(); // earlier than ours? (we'd need our own ts to compare)
+    if (!m || m[1] === callerSubstrate) return false;
+    return new Date(c.created_at).getTime() < ourTs;
   });
   if (earlierByOther) {
     const winner = earlierByOther.body.match(CLAIM_RE)[1];
