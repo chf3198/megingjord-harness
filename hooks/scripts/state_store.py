@@ -70,8 +70,8 @@ def load_state(cwd: str) -> dict[str, Any]:
 def save_state(state: dict[str, Any]) -> None:
     cwd = str(state.get("cwd") or os.getcwd())
     path = state_path(cwd)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(state, indent=2, sort_keys=True), encoding="utf-8")
+    from atomic_io import atomic_write_json
+    atomic_write_json(path, state)
 
 
 def ensure_state(cwd: str) -> dict[str, Any]:
