@@ -83,7 +83,13 @@ function isOtelGenAI(event) {
 }
 
 function emitV3(event, file) {
-  const { ok, errors } = isValidV3(event);
+  const enriched = Object.assign({
+    team: process.env.HAMR_TEAM || process.env.MEGINGJORD_TEAM || 'unknown',
+    trigger_role: 'system',
+  }, event);
+  if (!enriched.team) enriched.team = 'unknown';
+  if (!enriched.trigger_role) enriched.trigger_role = 'system';
+  const { ok, errors } = isValidV3(enriched);
   if (!ok) throw new Error(`Invalid v3 event: ${errors.join('; ')}`);
   const fs = require('fs');
   const path = require('path');
