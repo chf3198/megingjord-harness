@@ -31,3 +31,7 @@ one fact, one home, no duplicated prose. Each line points to its source ticket +
 ## 2026-06-23
 
 - #3204/#2252 — stale MANAGER_HANDOFF without `worktree_branch:` bypassed #2876; authoritative latest-handoff gate added. See [[workflow-learnings]].
+
+## 2026-06-24
+
+- #3243/#3242 — file-editing tools on non-workspace worktree paths trigger VS Code auth dialogs on every call; use shell commands (sed -i, cat, patch) for paths outside registered workspace. See [[worktree-tool-boundary]].
