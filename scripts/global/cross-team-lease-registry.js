@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { readJson, writeJsonAtomic, mutateJson } = require('./atomic-json-store');
 
 const DEFAULT_PATH = path.join(process.cwd(), '.dashboard', 'cross-team-leases.json');
 const TTL_HOURS = 24;
@@ -19,11 +20,13 @@ function listArg(value) {
 }
 function read(file = DEFAULT_PATH) {
   if (!fs.existsSync(file)) return empty();
-  return JSON.parse(fs.readFileSync(file, 'utf8'));
+  return readJson(file, empty);
 }
 function write(registry, file = DEFAULT_PATH) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, `${JSON.stringify(registry, null, 2)}\n`);
+  writeJsonAtomic(registry, file);
+}
+function mutateRegistry(file, mutator) {
+  return mutateJson(file, mutator, empty);
 }
 function active(registry, at = now()) {
   return registry.leases.filter(l => l.status === 'active' && l.expires_at > at);
@@ -84,5 +87,5 @@ function commentBlock(event, lease) {
   ];
   return rows.join('\n');
 }
-module.exports = { read, write, createLease, refreshLease, expireLeases,
+module.exports = { read, write, mutateRegistry, createLease, refreshLease, expireLeases,
   closeLease, active, commentBlock, DEFAULT_PATH };

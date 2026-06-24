@@ -31,17 +31,22 @@ async function post(issue, body, opts = {}) {
 async function run(argv = process.argv.slice(2), opts = {}) {
   const args = parse(argv);
   const cmd = args._[0];
-  const registry = leaseRegistry.read(args.file || leaseRegistry.DEFAULT_PATH);
+  const file = args.file || leaseRegistry.DEFAULT_PATH;
   const commands = {
-    create: () => leaseRegistry.createLease(registry, args),
-    refresh: () => leaseRegistry.refreshLease(registry, args.ticket, args.ttl_hours),
-    expire: () => leaseRegistry.expireLeases(registry),
-    close: () => leaseRegistry.closeLease(registry, args.ticket),
-    list: () => leaseRegistry.active(registry),
+    create: (registry) => leaseRegistry.createLease(registry, args),
+    refresh: (registry) => leaseRegistry.refreshLease(registry, args.ticket, args.ttl_hours),
+    expire: (registry) => leaseRegistry.expireLeases(registry),
+    close: (registry) => leaseRegistry.closeLease(registry, args.ticket),
+    list: (registry) => leaseRegistry.active(registry),
   };
   if (!commands[cmd]) throw new Error('usage: create|refresh|expire|close|list');
-  const result = commands[cmd]();
-  if (cmd !== 'list') leaseRegistry.write(registry, args.file || leaseRegistry.DEFAULT_PATH);
+  if (cmd === 'list') {
+    const registry = leaseRegistry.read(file);
+    const result = commands.list(registry);
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return result;
+  }
+  const result = leaseRegistry.mutateRegistry(file, (registry) => commands[cmd](registry));
   if (args.post_comment && result && !Array.isArray(result)) {
     await post(result.ticket, leaseRegistry.commentBlock(cmd, result), opts);
   }
