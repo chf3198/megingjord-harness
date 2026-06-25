@@ -37,7 +37,7 @@ function renderBatonRow(t) {
     </span>${arrow}`;
   }).join('');
 
-  const badge = statusBadge(t.status);
+  const badge = batonStatusBadge(t.status);
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
   const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
   const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
@@ -63,7 +63,7 @@ function renderBatonRow(t) {
   </div>`;
 }
 
-function statusBadge(s) {
+function batonStatusBadge(s) {
   return ({ 'in-progress': 'active', ready: 'degraded', done: 'healthy', idle: 'unknown', review: 'degraded' })[s] || 'unknown';
 }
 function normalizeBaton(state) {
@@ -78,11 +78,11 @@ function normalizeBaton(state) {
     collaborator: 'Collaborator: implementation + validation',
     admin: 'Admin: CI gates run, PR merged', consultant: 'Consultant: critique + CLOSEOUT' };
   const items = tl.map((h, i) => {
-    const r = BATON_ROLES.find(x => x.id === h.role);
-    const t = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
-    const ttl = `${roleDesc[h.role] || h.role} \u2014 at ${t}`;
+    const roleEntry = BATON_ROLES.find(x => x.id === h.role);
+    const timeStr = h.ts ? new Date(h.ts).toLocaleTimeString() : '?';
+    const ttl = `${roleDesc[h.role] || h.role} \u2014 at ${timeStr}`;
     return `<span class="tl-step" title="${esc(ttl)}" data-tip="tl-step">`
-      + `${r?.icon || '?'} ${t}</span>${i < tl.length - 1 ? ' → ' : ''}`;  }).join('');
+      + `${roleEntry?.icon || '?'} ${timeStr}</span>${i < tl.length - 1 ? ' → ' : ''}`;  }).join('');
   return `<div class="baton-timeline" title="Baton handoff history">${items}</div>`;
 }
 

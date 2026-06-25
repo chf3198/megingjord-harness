@@ -4,6 +4,8 @@
 // Roles: manager | collaborator | admin | consultant
 'use strict';
 
+const { extractField } = require('./megalint/artifact-field-extract');
+
 const SCHEMAS = {
   manager: {
     fields: ['scope', 'lane', 'test_strategy', 'acceptance', 'gates'],
@@ -43,10 +45,7 @@ const SCHEMAS = {
   },
 };
 
-function extractField(body, field) {
-  const m = body.match(new RegExp(`(?:^|\\n)[-*]?\\s*${field}\\s*:\\s*([^\\n]+)`, 'i'));
-  return m ? m[1].trim() : null;
-}
+// extractField imported from shared megalint/artifact-field-extract (#3225).
 
 function validate(role, body) {
   const schema = SCHEMAS[role];
@@ -77,7 +76,7 @@ if (require.main === module) {
     process.exit(0);
   } else {
     process.stderr.write(`[baton-preflight] ${role}: FAIL\n`);
-    for (const v of violations) process.stderr.write(`  • ${v}\n`);
+    for (const violation of violations) process.stderr.write(`  • ${violation}\n`);
     process.exit(1);
   }
 }

@@ -79,6 +79,9 @@ jobs:
             //    calendar window) — #1433. Retroactive planting = handoff posted
             //    AFTER the PR (negative lag). PR.created_at and comment.created_at
             //    share one server clock, so ordering is exact; no 60s buffer needed.
+            // #3246: merge-bypass:admin-exception label demotes timing check to warning
+            //    for legitimate multi-agent baton gaps where PR creation preceded handoff.
+            const adminBypass = (pr.labels || []).some(l => l.name === 'merge-bypass:admin-exception');
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: linkedNum, per_page: 100,
@@ -91,10 +94,13 @@ jobs:
             } else {
               const lagMs = prCreatedAt - new Date(handoff.created_at);
               if (lagMs < 0) {
-                violations.push(
-                  `COLLABORATOR_HANDOFF posted ${Math.round(-lagMs / 1000)}s AFTER PR creation — ` +
-                  'it must predate the PR (retroactive planting check)'
-                );
+                const timingMsg = `COLLABORATOR_HANDOFF posted ${Math.round(-lagMs / 1000)}s AFTER PR ` +
+                  'creation — retroactive planting check';
+                if (adminBypass) {
+                  core.warning(`[admin-exception bypass] ${timingMsg} — waived by merge-bypass:admin-exception label (Refs #3246)`);
+                } else {
+                  violations.push(`${timingMsg} — it must predate the PR`);
+                }
               }
             }
 

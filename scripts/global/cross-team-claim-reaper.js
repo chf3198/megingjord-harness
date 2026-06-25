@@ -5,7 +5,7 @@
 // per the 24h TTL convention from cross-team-queue.js, and emits action
 // descriptors. The workflow YAML handles the actual GitHub API calls.
 
-const X = require('./cross-team-signer-substrate.js');
+const signerSubstrate = require('./cross-team-signer-substrate.js');
 
 function isClaimExpired(claim, nowMs) {
   if (!claim || !claim.expires) return null;
@@ -18,7 +18,7 @@ function findExpiredClaims(epics, registry, nowMs) {
   const expired = [];
   for (const epic of epics || []) {
     if (!epic) continue;
-    const claim = X.activeClaim(epic.comments || [], registry);
+    const claim = signerSubstrate.activeClaim(epic.comments || [], registry);
     if (!claim) continue;
     if (isClaimExpired(claim, nowMs) === true) {
       expired.push({

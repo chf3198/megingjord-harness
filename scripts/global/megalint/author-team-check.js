@@ -36,9 +36,9 @@ function checkComment(body, login) {
 
 function validate(input) {
   const violations = [];
-  for (const c of input.comments || []) {
-    const r = checkComment(c.body || c, c.user?.login || c.author || '');
-    if (!r.ok && r.violation) violations.push(r.violation);
+  for (const comment of input.comments || []) {
+    const checkResult = checkComment(comment.body || comment, comment.user?.login || comment.author || '');
+    if (!checkResult.ok && checkResult.violation) violations.push(checkResult.violation);
   }
   return { ok: violations.length === 0, violations };
 }
