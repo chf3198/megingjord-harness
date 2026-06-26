@@ -129,8 +129,9 @@ function parseMarker(body = '') {
 // per detector. `comments` is the ordered issue/PR comment list (the mirror).
 function replayMarkers(comments = []) {
   const state = new Map();
-  for (const c of comments || []) {
-    const marker = parseMarker(typeof c === 'string' ? c : (c && c.body) || '');
+  for (const comment of comments || []) {
+    const body = typeof comment === 'string' ? comment : (comment && comment.body) || '';
+    const marker = parseMarker(body);
     if (marker) state.set(detectorKey(marker), marker);
   }
   return state;
