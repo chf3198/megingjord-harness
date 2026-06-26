@@ -16,6 +16,7 @@ const DEFAULT_MAX_CYCLES = 3;
 //   { touchesFile, ownArtifactOrGitOp, governanceMetadata, environmental, currentRole }
 // Returns { remediator, impact }.
 function routeRemediation(finding = {}) {
+  finding = finding || {}; // explicit null bypasses the default param
   if (finding.environmental) return { remediator: null, impact: 'override' };
   if (finding.touchesFile) return { remediator: 'collaborator', impact: 'baton-back' };
   if (finding.governanceMetadata) return { remediator: 'manager', impact: 'hold' };
@@ -29,6 +30,7 @@ function routeRemediation(finding = {}) {
 
 // Build an open baton-back marker from a routed finding plus its provenance.
 function openMarker(finding = {}, meta = {}) {
+  meta = meta || {};
   const { remediator, impact } = routeRemediation(finding);
   return {
     open: true,
@@ -64,6 +66,7 @@ function clearMarker(marker, detectorPassed) {
 // spins forever nor blocks on a timer thread: it escalates to a Tier-2 anneal
 // and parks the ticket as deferred for an async client/UAT decision.
 function nextCycle(marker, maxCycles = DEFAULT_MAX_CYCLES) {
+  marker = marker || {};
   const cycle = (marker.cycle || 1) + 1;
   if (cycle > maxCycles) {
     return {
@@ -81,6 +84,67 @@ function nextCycle(marker, maxCycles = DEFAULT_MAX_CYCLES) {
   return { ...marker, cycle, escalate: false };
 }
 
+// ---------------------------------------------------------------------------
+// Timeline mirror (authoritative) + local rebuild-by-replay (mirror).
+//
+// A marker is persisted as a `## BATON_BACK` artifact comment on the issue/PR
+// timeline — that server-side copy is authoritative and survives context loss.
+// Local state is never trusted as primary: it is *rebuilt* by replaying every
+// BATON_BACK comment in chronological order (last-write-wins per detector), so
+// a fresh session reconstructs identical open/closed state from the timeline.
+const BATON_BACK_HEADER_RE = /(?:^|\n)\s*(?:##\s*)?BATON_BACK\b/i;
+const SERIALIZED_FIELDS = ['open', 'source', 'detector', 'remediator', 'impact',
+  'finding_ref', 'lesson', 'cycle', 'grounding', 'review'];
+
+function detectorKey(marker) {
+  return (marker && marker.detector) || '_default';
+}
+
+// Serialize a marker to the canonical BATON_BACK artifact comment body.
+function serializeMarker(marker = {}) {
+  const lines = ['## BATON_BACK'];
+  for (const field of SERIALIZED_FIELDS) {
+    if (marker[field] === undefined || marker[field] === null) continue;
+    lines.push(`${field}: ${marker[field]}`);
+  }
+  return lines.join('\n');
+}
+
+// Parse one BATON_BACK artifact comment body back into a marker, or null.
+function parseMarker(body = '') {
+  if (!BATON_BACK_HEADER_RE.test(body || '')) return null;
+  const marker = {};
+  for (const raw of String(body).split('\n')) {
+    const m = raw.match(/^\s*([a-z_]+):\s*(.*)$/i);
+    if (!m || !SERIALIZED_FIELDS.includes(m[1])) continue;
+    const [, key, value] = m;
+    if (key === 'open') marker.open = value.trim() === 'true';
+    else if (key === 'cycle') marker.cycle = Number(value.trim()) || 1;
+    else marker[key] = value.trim();
+  }
+  return Object.keys(marker).length ? marker : null;
+}
+
+// Rebuild local state by replaying the timeline: chronological last-write-wins
+// per detector. `comments` is the ordered issue/PR comment list (the mirror).
+function replayMarkers(comments = []) {
+  const state = new Map();
+  for (const c of comments || []) {
+    const marker = parseMarker(typeof c === 'string' ? c : (c && c.body) || '');
+    if (marker) state.set(detectorKey(marker), marker);
+  }
+  return state;
+}
+
+// The close-gate invariant over the timeline: true if ANY replayed marker is
+// still open. closeout-preflight consults this to block close while open.
+function anyOpen(comments = []) {
+  for (const marker of replayMarkers(comments).values()) {
+    if (isOpen(marker)) return true;
+  }
+  return false;
+}
+
 module.exports = {
   DEFAULT_MAX_CYCLES,
   routeRemediation,
@@ -89,4 +153,8 @@ module.exports = {
   closeGateAllows,
   clearMarker,
   nextCycle,
+  serializeMarker,
+  parseMarker,
+  replayMarkers,
+  anyOpen,
 };

@@ -54,3 +54,34 @@ test('nextCycle: bounded, non-blocking escalation past maxCycles', () => {
   assert.strictEqual(m.escalation.park, 'status:deferred');
   assert.strictEqual(m.escalation.pattern_id, 'baton-back-nonconverging');
 });
+
+test('serialize/parse round-trips a marker through the timeline format', () => {
+  const m = bb.openMarker({ touchesFile: true }, { detector: 'ci', source: 'layerA' });
+  const parsed = bb.parseMarker(bb.serializeMarker(m));
+  assert.strictEqual(parsed.open, true);
+  assert.strictEqual(parsed.detector, 'ci');
+  assert.strictEqual(parsed.remediator, 'collaborator');
+  assert.strictEqual(parsed.impact, 'baton-back');
+  assert.strictEqual(parsed.cycle, 1);
+});
+
+test('parseMarker: ignores a comment without the BATON_BACK header', () => {
+  assert.strictEqual(bb.parseMarker('## MANAGER_HANDOFF\nopen: true'), null);
+});
+
+test('replay: local state rebuilds from the timeline, last-write-wins per detector', () => {
+  const open = bb.serializeMarker(bb.openMarker({ touchesFile: true }, { detector: 'ci' }));
+  const cleared = bb.serializeMarker(bb.clearMarker(bb.parseMarker(open), true));
+  // Open then later cleared -> replayed state is closed.
+  assert.strictEqual(bb.anyOpen([{ body: open }, { body: cleared }]), false);
+  // Open with no clearing comment -> replayed state is open.
+  assert.strictEqual(bb.anyOpen([{ body: open }]), true);
+  // Two detectors, one still open -> close-gate holds.
+  const other = bb.serializeMarker(bb.openMarker({ touchesFile: true }, { detector: 'lint' }));
+  assert.strictEqual(bb.anyOpen([{ body: open }, { body: cleared }, { body: other }]), true);
+});
+
+test('replay: empty / non-artifact timeline is closed (no false gate)', () => {
+  assert.strictEqual(bb.anyOpen([]), false);
+  assert.strictEqual(bb.anyOpen([{ body: 'plain comment' }]), false);
+});

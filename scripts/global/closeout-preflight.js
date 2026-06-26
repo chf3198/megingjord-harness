@@ -3,6 +3,7 @@
 const { execFileSync } = require('node:child_process');
 const megalint = require('./megalint');
 const { execute } = require('./github-dispatcher');
+const batonBack = require('./baton-back');
 
 function extractIssueFromBranch(branch) {
   const m = String(branch || '').match(/(?:feat|fix|chore|docs|refactor|perf|hotfix)\/(\d+)-/i);
@@ -91,6 +92,14 @@ async function run(opts = {}) {
     console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
   }
   let failed = false;
+  // Baton-back close-gate invariant (#3257): a ticket may not close while a
+  // baton-back marker is still open on the timeline. Enforce only when the
+  // closeout itself is being enforced (PR exists or closeout already posted),
+  // so it gates close-time, not ordinary intermediate pushes.
+  if (!closeoutDeferred && batonBack.anyOpen(input.comments)) {
+    console.error(`closeout-preflight: FAIL [baton-back-close-gate] #${issueNum} — open baton-back marker; remediate + clear before close`);
+    failed = true;
+  }
   for (const name of validators) {
     const result = megalint.run(name, { ...input, issueNumber: issueNum });
     if (result.ok) continue;

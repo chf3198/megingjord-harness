@@ -184,3 +184,43 @@ test('readIssue honors MCP-disabled CLI fallback', async () => {
   expect(args.slice(0, 3)).toEqual(['issue', 'view', '1995']);
   expect(issue.title).toBe('CLI');
 });
+
+// --- baton-back close-gate wiring (#3257) ---------------------------------
+const batonBack = require('../scripts/global/baton-back.js');
+const OPEN_BB = batonBack.serializeMarker(
+  batonBack.openMarker({ touchesFile: true }, { detector: 'ci' }));
+const CLEARED_BB = batonBack.serializeMarker(
+  batonBack.clearMarker(batonBack.parseMarker(OPEN_BB), true));
+
+test('close-gate blocks close while a baton-back marker is open on the timeline', () => {
+  const result = runWith({
+    title: 'baton-back close gate', body: 'Fix a thing',
+    comments: [{ body: MANAGER_HANDOFF_FIXTURE }, { body: OPEN_BB },
+      { body: CONSULTANT_CLOSEOUT_FIXTURE }],
+    labels: ['lane:code-change'], state: 'open',
+  }, 'fix/3257-baton-back');
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain('baton-back-close-gate');
+});
+
+test('close-gate allows close once the baton-back marker is cleared by replay', () => {
+  const result = runWith({
+    title: 'baton-back cleared', body: 'Fix a thing',
+    comments: [{ body: MANAGER_HANDOFF_FIXTURE }, { body: OPEN_BB },
+      { body: CLEARED_BB }, { body: CONSULTANT_CLOSEOUT_FIXTURE }],
+    labels: ['lane:code-change'], state: 'open',
+  }, 'fix/3257-baton-back');
+  // The cleared marker must not trip the close-gate (other validators aside).
+  expect(result.stderr).not.toContain('baton-back-close-gate');
+});
+
+test('close-gate stays silent pre-PR: deferred-final flow is not gated by baton-back', () => {
+  const result = runWith({
+    title: 'baton-back pre-PR', body: 'Fix a thing',
+    comments: [{ body: MANAGER_HANDOFF_FIXTURE }, { body: OPEN_BB }],
+    labels: ['lane:code-change'], state: 'open',
+  }, 'fix/3257-baton-back');
+  // No PR + no closeout posted -> closeout deferred -> baton-back gate not run.
+  expect(result.stdout).toContain('deferred to PR-open');
+  expect(result.stderr).not.toContain('baton-back-close-gate');
+});
