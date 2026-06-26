@@ -12,7 +12,7 @@ Every change merged to `main` documents itself across four parallel surfaces. Th
 |---|---|---|---|
 | 1 | GitHub Issues | Every merge has `Closes #N` + complete baton trail on the issue | `closeout-schema` workflow, `baton-gates` |
 | 2 | Release notes | Each `lane:code-change` PR ships `.changes/unreleased/<N>.md` | `changelog-fragment-presence` validator (#2157 / C5) |
-| 3 | Project docs | README, design docs, dev guide — updated per area-label coverage matrix | `doc-coverage` advisory (#2155 / C2) + Tech-Writer sub-phase (#2154 / C1) |
+| 3 | Project docs | README, design docs, dev guide — updated per area-label coverage matrix | `doc-coverage` **hard block** (#2712, lane-derived #3016) + Tech-Writer sub-phase (#2154 / C1) |
 | 4 | Wikis | `wiki/code/`, `wiki/wisdom/project/`, `wiki/work-log/` — updated when scoped | `wiki-lint-gate` workflow (#2156 / C3) |
 
 ## 3. The pre-merge gates
@@ -21,7 +21,7 @@ Every change merged to `main` documents itself across four parallel surfaces. Th
 |---|---|---|---|
 | Issues | `baton-gates` CI | Missing handoff or role-mismatch | Post the missing baton artifact in canonical format |
 | Release notes | `changelog-fragment-presence` | No `.changes/unreleased/<N>.md` and no `[skip-changelog]` | Add `.changes/unreleased/<N>.md` or marker |
-| Project docs | `doc-coverage` advisory | Missing `doc-coverage:` block in COLLABORATOR_HANDOFF | Add block declaring UPDATED/N-A per surface |
+| Project docs | `doc-coverage` **hard block** | Missing `doc-coverage:` block in COLLABORATOR_HANDOFF (on a gated lane) | Add block declaring UPDATED/N-A per surface |
 | Wikis | `wiki-lint-gate` advisory | wiki:lint reports issues | Currently advisory; promoted to required after baseline cleanup |
 
 ## 4. The Tech-Writer sub-phase
@@ -35,7 +35,9 @@ doc-coverage:
   N/A: design docs — internal-only validator; no public surface change
 ```
 
-The advisory validator parses the block. Missing block on `lane:code-change` emits a warning but does not block merge in first ship. Promotion to blocking happens after Epic #2148 close.
+The validator (`scripts/global/megalint/doc-coverage.js`) parses the block. The gate is now a **hard block** (#2712; the old `DOC_COVERAGE_GATE_ADVISORY` escape hatch was removed). The lane is **derived from the issue labels** (#3016), so a builder-produced handoff is gated correctly. A missing or incomplete block on a gated lane **fails the merge**.
+
+Lanes that skip the gate: `lane:docs-research` and `lane:config-only` (no required project-doc surface). The #3121 diff-verification check — declared `UPDATED` surfaces must actually appear in the PR diff — ships advisory-first and promotes per the replay-eval-gated model.
 
 ## 5. The doc-coverage matrix
 
