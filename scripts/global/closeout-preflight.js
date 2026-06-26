@@ -75,6 +75,16 @@ function selectPreflightValidators(prExists, closeoutAlreadyPosted) {
   return { validators, closeoutDeferred: !enforceCloseoutNow };
 }
 
+// Baton-back close-gate invariant (#3257): a ticket may not close while a
+// baton-back marker is still open on the timeline. Enforce only when the
+// closeout itself is being enforced (not deferred), so it gates close-time,
+// not ordinary intermediate pushes. Returns true when the gate blocks.
+function batonBackGateBlocks(comments, closeoutDeferred, issueNum) {
+  if (closeoutDeferred || !batonBack.anyOpen(comments)) return false;
+  console.error(`closeout-preflight: FAIL [baton-back-close-gate] #${issueNum} — open baton-back marker; remediate + clear before close`);
+  return true;
+}
+
 async function run(opts = {}) {
   if (process.env.SKIP_CLOSEOUT_PREFLIGHT === '1') { console.log('closeout-preflight: skipped (SKIP_CLOSEOUT_PREFLIGHT=1)'); return 0; }
   const branch = currentBranch();
@@ -91,15 +101,7 @@ async function run(opts = {}) {
   if (closeoutDeferred) {
     console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
   }
-  let failed = false;
-  // Baton-back close-gate invariant (#3257): a ticket may not close while a
-  // baton-back marker is still open on the timeline. Enforce only when the
-  // closeout itself is being enforced (PR exists or closeout already posted),
-  // so it gates close-time, not ordinary intermediate pushes.
-  if (!closeoutDeferred && batonBack.anyOpen(input.comments)) {
-    console.error(`closeout-preflight: FAIL [baton-back-close-gate] #${issueNum} — open baton-back marker; remediate + clear before close`);
-    failed = true;
-  }
+  let failed = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
   for (const name of validators) {
     const result = megalint.run(name, { ...input, issueNumber: issueNum });
     if (result.ok) continue;
@@ -114,4 +116,4 @@ async function run(opts = {}) {
 if (require.main === module) run().then((code) => process.exit(code));
 
 module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run,
-  hasCloseoutComment, selectPreflightValidators };
+  hasCloseoutComment, selectPreflightValidators, batonBackGateBlocks };
