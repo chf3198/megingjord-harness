@@ -70,6 +70,64 @@ RE_GH_ISSUE_CREATE = re.compile(r"\bgh\s+issue\s+create\b")
 RE_GIT_TAG = re.compile(r"\bgit\s+tag\b")
 
 
+# --- #3265: genuine-ship push accounting for the G-15 blast-radius counter ---
+# A push counts toward the session push limit ONLY if it is a real, successful
+# code-shipping push. Branch deletions, dry-runs, and pushes the remote/pre-push
+# gate rejected are not real ships and must not drift the counter (false halt).
+_RE_PUSH_DELETE = re.compile(
+    r"\bgit\s+push\b[^\n]*?(?:\s(?:--delete|-d)\b|\s:[^\s]+)"
+)
+_RE_PUSH_DRYRUN = re.compile(r"\bgit\s+push\b[^\n]*?\s(?:--dry-run|-n)\b")
+# Push-specific rejection markers only — never matches successful-push output,
+# so a real ship is never accidentally suppressed (which would weaken the guard).
+_RE_PUSH_REJECTED = re.compile(
+    r"!\s*\[rejected\]|\[remote rejected\]|error:\s*failed to push|"
+    r"updates were rejected|protected branch hook declined|"
+    r"\bpush declined\b|pre-push hook declined|\bhook declined\b",
+    re.IGNORECASE,
+)
+_EXIT_CODE_KEYS = ("exit_code", "exitCode", "returncode", "return_code", "code", "status")
+_ERROR_FLAG_KEYS = ("is_error", "isError", "error")
+
+
+def _push_outcome_failed(tool_response: Any) -> bool:
+    """True only on a POSITIVE failure signal from the PostToolUse result.
+
+    Unknown/absent outcome returns False (count it): over-counting halts safely,
+    while under-counting risks missing a genuine runaway. Refs #3265.
+    """
+    if tool_response is None:
+        return False
+    if isinstance(tool_response, dict):
+        for key in _EXIT_CODE_KEYS:
+            val = tool_response.get(key)
+            if isinstance(val, int) and val != 0:
+                return True
+        for key in _ERROR_FLAG_KEYS:
+            if tool_response.get(key) is True:
+                return True
+    text = (tool_response if isinstance(tool_response, str)
+            else "\n".join(iter_strings(tool_response)))
+    return bool(_RE_PUSH_REJECTED.search(text))
+
+
+def is_countable_push(cmd: str, tool_response: Any = None) -> bool:
+    """Whether a command should increment the G-15 session push counter.
+
+    Counts only a genuine, successful code-shipping `git push`. Excludes
+    branch-deletes (`--delete`/`-d`/colon delete-refspec), dry-runs, and pushes
+    rejected by the remote or pre-push gate. Refs #3265 (AC2/AC3).
+    """
+    if not RE_GIT_PUSH.search(cmd):
+        return False
+    if _RE_PUSH_DELETE.search(cmd) or _RE_PUSH_DRYRUN.search(cmd):
+        return False
+    if _push_outcome_failed(tool_response):
+        return False
+    return True
+
+
+
 def required_admin_ops(flags: dict, repo_type: str) -> list[str]:
     """Admin op keys required for completion. Stays in sync with
     stop_checks.check_admin_ops base/ext logic (#2444).

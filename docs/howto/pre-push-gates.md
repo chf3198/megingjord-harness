@@ -171,3 +171,29 @@ Claude-Code is the **reference implementation** of the fleet-review hard-gate. C
 Copilot runtime parity (V5 wrapper-conformance) is **deferred** and tracked via a
 cross-team `TEAM_QUESTION` on #2740 — it is a cross-team sign-off request, not a client gate.
 Until those teams sign off, the gate enforces on the Claude-Code surface only.
+
+## Session push counter — genuine-ship accounting (#3265)
+
+A session-level guard (the G-15 blast-radius counter, Refs #2913) halts the session
+when the number of pushes in one session exceeds `pushes_in_session` (default 5). It
+exists for human-oversight (ASI05 / EU-AI-Act Art.14) against a runaway agent.
+
+Only a **genuine, successful, code-shipping push** counts toward that limit. The
+counter (`hooks/scripts/tool_activity.py` via `admin_patterns.is_countable_push`,
+added in #3265) does **not** increment on:
+
+- **branch deletions** — `git push --delete` / `-d` / a colon delete-refspec (`:branch`);
+- **dry runs** — `git push --dry-run` / `-n`;
+- **rejected pushes** — a push the remote or a pre-push gate declined (detected from the
+  PostToolUse result: a non-zero exit code or an unambiguous push-rejection marker such
+  as `! [rejected]` or `error: failed to push`).
+
+A normal `src:dst` push (e.g. `HEAD:refs/heads/main`) still counts — only the
+space-prefixed `:branch` delete form is excluded. When the push outcome is unknown the
+counter **counts** the push: over-counting halts safely, whereas under-counting could
+miss a real runaway.
+
+Why it matters: before #3265 a clean ship that retried a few times, or that deleted its
+merged branch, drifted the counter above the limit and produced a **false** oversight
+halt (e.g. `total_pushes=6 > pushes_in_session=5` on an otherwise-clean merge). The guard
+is still strict on genuine off-the-books pushes; it just no longer miscounts non-ships.
