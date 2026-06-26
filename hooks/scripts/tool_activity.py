@@ -12,7 +12,7 @@ from admin_patterns import (
     RE_GH_ISSUE_CLOSE, RE_GH_ISSUE_CREATE, RE_GH_RELEASE_CREATE,
     RE_GIT_COMMIT, RE_GIT_PUSH, RE_PR_CHECKS, RE_PR_CREATE,
     RE_PR_MERGE, RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, RE_VSCE_SHOW,
-    iter_strings, required_admin_ops,
+    is_countable_push, iter_strings, required_admin_ops,
 )
 from repo_detection import classify_path
 from session_anomaly import update_session_counters
@@ -150,7 +150,9 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     for pattern, key in _match_ops:
         if pattern.search(joined):
             ops[key] = True
-    if RE_GIT_PUSH.search(joined):
+    # #3265: count only genuine, successful code-shipping pushes — not
+    # branch-deletes, dry-runs, or pushes the pre-push gate rejected.
+    if is_countable_push(joined, payload.get("tool_response")):
         blast["push_count"] += 1
     if _PROVIDER_RE.search(joined):
         blast["provider_call_count"] += 1
