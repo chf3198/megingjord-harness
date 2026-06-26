@@ -1,0 +1,52 @@
+# Metric catalog (#3152, Epic #3147 S4) — the improvable-metric registry for qualifying workflows.
+#
+# Each workflow maps to ONE improvable metric, a golden baseline (seed value, calibrated by the
+# workflow's benchmark suite on first real run), an improvable target, the comparison direction,
+# and the `suite` spec that exercises it. `scripts/global/benchmark-audit.js#auditBenchmarkCoverage`
+# cross-references this catalog against the tree and flags any workflow whose `suite` is absent
+# (a metric-suite gap) — that is how the long-tail backfill children are kept honest.
+#
+# Baselines are SEED values, not measured ceilings: the harness convention is seed-on-first-run
+# (benchmark-harness.js never fails a seed). They are deliberately conservative so the first real
+# run records the true baseline and the `target` stays an honest improvable goal. Direction:
+# `higher-better` (ratios/rates we want to grow) or `lower-better` (costs/latencies we want to cut).
+# Deterministic, local, $0 — this file feeds no LLM and triggers no network call.
+version: 1
+workflows:
+  wiki-rag-token-reduction:
+    metric: token-reduction-ratio
+    baseline: 0.30          # ≥30% replay-eval floor (wiki-knowledge instruction)
+    target: 0.50
+    direction: higher-better
+    suite: tests/benchmark-wiki-rag.spec.js
+    backfill_ticket: "#3157"
+    note: Flagship — Wiki RAG token-reduction & tokens/retrieval (client-named).
+  hamr-fleet-utilization:
+    metric: fleet-success-rate
+    baseline: 0.80          # fleet-first lane; premium-share governor caps paid at 20%
+    target: 0.95
+    direction: higher-better
+    suite: tests/benchmark-hamr-fleet-utilization.spec.js
+    backfill_ticket: "#3158"
+    note: Flagship — HAMR fleet success-rate & paid-$ avoided (client-named).
+  resident-budget:
+    metric: resident-instruction-tokens
+    baseline: 100000        # always-resident instruction budget (G3); lower is better
+    target: 80000
+    direction: lower-better
+    suite: tests/benchmark-resident-budget.spec.js
+    backfill_ticket: "#3267"
+  governance-qa-cache-hit-rate:
+    metric: cache-hit-rate
+    baseline: 0.50
+    target: 0.75
+    direction: higher-better
+    suite: tests/benchmark-qa-cache-hit-rate.spec.js
+    backfill_ticket: "#3268"
+  output-pruning-savings:
+    metric: pruned-token-ratio
+    baseline: 0.20
+    target: 0.40
+    direction: higher-better
+    suite: tests/benchmark-output-pruning.spec.js
+    backfill_ticket: "#3269"
