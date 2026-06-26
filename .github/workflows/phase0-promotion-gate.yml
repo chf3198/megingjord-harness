@@ -1,0 +1,50 @@
+name: Phase-0 to Phase-1 Promotion Gate
+# Enforces the Phase-0 -> Phase-1 promotion gate for research-first Epics
+# (Epic #2678). On a research-first Phase-0 child closing, auto-materializes a
+# Phase-1 seed child if the parent Epic's Phase-0 is green with none. On a
+# research-first Epic closing, blocks the close if Phase-0 is green but it has
+# zero Phase-1 children. Runtime-agnostic: the same scripts/global modules are
+# the single enforcement path for Copilot / Codex / Claude Code / Antigravity.
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  phase0-promotion-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue = context.payload.issue;
+            const labels = (issue.labels || []).map(l => l.name);
+            const isEpic = labels.includes('type:epic');
+            const isResearchFirst = labels.includes('phase-gate:research-first');
+            if (!isResearchFirst) {
+              console.log(`#${issue.number}: not research-first; skip`);
+              return;
+            }
+            if (isEpic) {
+              const guard = require('./scripts/global/phase0-closure-guard.js');
+              await guard.run({ github, context, core });
+              return;
+            }
+            // A Phase-0 child closed: resolve its parent Epic and auto-materialize.
+            const body = issue.body || '';
+            const parentMatch = body.match(/\bParent:\s*#(\d+)/i) || body.match(/Refs\s+(?:Epic\s+)?#(\d+)/i);
+            if (!parentMatch) {
+              console.log(`#${issue.number}: no parent Epic ref; skip materialize`);
+              return;
+            }
+            const epicNumber = parseInt(parentMatch[1], 10);
+            const { materialize } = require('./scripts/global/phase1-auto-materialize.js');
+            const result = await materialize({ github, owner, repo, epicNumber, triggerRole: 'system' });
+            console.log(`materialize(#${epicNumber}): ${JSON.stringify({ created: result.created, reason: result.reason, child: result.child })}`);

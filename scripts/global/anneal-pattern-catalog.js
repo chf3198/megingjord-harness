@@ -61,6 +61,13 @@ const PATTERNS = [
     threshold: { occurrences: 1, window_days: 14 },
     remediation: 'Enforce one-worktree-per-agent; quarantine rescue worktree on collision',
   },
+  {
+    pattern_id: 'phase0-complete-no-phase1',
+    description: 'Research-first Epic reached green-complete Phase-0 but has zero Phase-1 children',
+    detection_signature: /phase0-complete-no-phase1|phase-?0.*green.*no.*phase-?1/i,
+    threshold: { occurrences: 1, window_days: 30 },
+    remediation: 'Auto-materialize a Phase-1 seed child; closure-block guard fails Epic close until present (Epic #2678)',
+  },
 ];
 
 function getPattern(id) {

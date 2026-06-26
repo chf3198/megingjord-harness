@@ -53,6 +53,15 @@ Always prefer lowest tier. Fleet before free-cloud. Free-cloud before paid.
 - Worktree: `bash scripts/worktree-session-start.sh antigravity feat/<N>-<slug>`
 - Deploy: `bash scripts/deploy.sh --target antigravity --apply`
 
+## Worktree tool boundary (worktree-tool-boundary.instructions.md, #3243 #3245)
+File-editing tools (view_file, replace_file_content, multi_replace_file_content,
+write_to_file) are permitted ONLY inside the registered workspace path. Sibling git
+worktrees (e.g. `devenv-ops-2826`) are OUTSIDE it — edit/read them with shell commands
+via run_command instead (`cat`, in-place `sed`, `awk`, `patch`, heredoc). Otherwise every
+call triggers a VS Code "Allow in Workspace?" prompt — client-arbitration friction (G1/G4).
+Full rule: `instructions/worktree-tool-boundary.instructions.md`; governance doc:
+`research/concurrent-agent-worktrees-2026-04-24.md`.
+
 ## Injection note (Antigravity-specific)
 This file is delivered via User Rules (system-prompt XML). No @-import support.
 Persistent context: Knowledge Items at ~/.gemini/antigravity/knowledge/ (relevance-retrieved).
