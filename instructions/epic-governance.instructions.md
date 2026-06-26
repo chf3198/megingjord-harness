@@ -58,6 +58,7 @@ A research-first Epic (label `type:epic` + `phase-gate:research-first`) MUST sat
 3. The Epic MUST receive a Manager `EPIC_RESCOPE` or equivalent comment summarizing Phase-0 outcomes before transitioning out of `status:in-progress`.
 4. Phase-1 implementation child tickets MUST cite the Phase-0 research children they consume in their body (`Refs #N` per source child).
 5. If any Phase-0 child is reopened, the gate re-arms and Phase-1 work is paused until the reopened child closes again.
+6. A research-first Epic whose Phase-0 is **green-complete** (all Phase-0 children closed, at least one carrying a `CONSULTANT_CLOSEOUT`, and the Epic carrying an `EPIC_RESCOPE`) MUST have at least one `phase-gate:phase-1` child before it may close. A green Phase-0 with zero Phase-1 children auto-materializes a Phase-1 seed child and **blocks** Epic close until one exists (Epic #2678 — closes the #2661 silent-close gap).
 
 ### Operational semantics (normative)
 
@@ -66,6 +67,7 @@ A research-first Epic (label `type:epic` + `phase-gate:research-first`) MUST sat
 - Clause 3 transition guard: on any Epic status leaving `status:in-progress`, absence of an `EPIC_RESCOPE` marker is a gate violation. <!-- enforced-by: scripts/global/megalint/research-first-phase-gate.js -->
 - Clause 4 source citation: each Phase-1 child carries label `phase-gate:phase-1` and MUST include at least one `Refs #N` Phase-0 source child in body. <!-- enforced-by: scripts/global/megalint/manager-handoff.js -->
 - Clause 5 re-arm trigger: a Phase-0 child `issues.reopened` event pauses Phase-1 by posting `EPIC_PHASE_GATE_PAUSE`; resumption requires child re-close plus Manager `EPIC_RESCOPE` refresh. <!-- pending-enforcement: #1888 clause-5 -->
+- Clause 6 promotion gate: `phase0GreenComplete(epicNumber)` is the deterministic predicate; on a green Phase-0 with zero `phase-gate:phase-1` children it returns `missingPhase1Children: true`. `phase1-auto-materialize` then seeds one Phase-1 child, and `phase0-closure-guard` posts a structured `EPIC_PHASE_GATE_PAUSE` / `BLOCKER_NOTE`, emits an `incidents.jsonl` event (`pattern_id: phase0-complete-no-phase1`), reopens the Epic, and fails the run (non-zero exit). This is BLOCKING (per Epic #2678 AC3/AC6, not advisory); `PHASE0_GATE_BYPASS=1` downgrades to an advisory comment plus an audit warning (G6 escape hatch, never silent). The enforcement core is runtime-agnostic — one shared module set is the single path for Copilot / Codex / Claude Code / Antigravity. <!-- enforced-by: scripts/global/megalint/phase0-promotion-gate.js + scripts/global/phase0-closure-guard.js + scripts/global/phase1-auto-materialize.js + .github/workflows/phase0-promotion-gate.yml -->
 
 ## Epic Progress Comment Protocol
 

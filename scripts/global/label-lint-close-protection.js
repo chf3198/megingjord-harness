@@ -5,14 +5,17 @@
 //
 // Decision rules:
 // 1. If issue is open or already terminal → no-op.
-// 2. If issue closed without a terminal label AND a CONSULTANT_CLOSEOUT
+// 2. Phase-0 promotion guard (#2678): if the issue is a research-first Epic
+//    whose Phase-0 is green-complete but with zero Phase-1 children, block the
+//    close (reopen) regardless of closeout — the close is premature.
+// 3. If issue closed without a terminal label AND a CONSULTANT_CLOSEOUT
 //    comment exists AND the pre-close status is `status:review` OR
 //    `status:testing` (the two states the baton produces just before close):
 //      → auto-transition to status:done + resolution:completed.
-// 3. Otherwise (closed without terminal, no closeout in trail) → reopen
+// 4. Otherwise (closed without terminal, no closeout in trail) → reopen
 //    and post the "Close blocked" advisory.
 //
-// Pre-fix: rule 2 required `status:review` ONLY, missing the merge-via-
+// Pre-fix: rule 3 required `status:review` ONLY, missing the merge-via-
 // `Closes #N`-trailer path that fires at `status:testing`. Caused
 // reopen-on-merge friction across #1506/#1508/#1512.
 
@@ -24,10 +27,16 @@ function hasCloseoutComment(comments) {
   return (comments || []).some((c) => CLOSEOUT_HEADER_RE.test((c && c.body) || ''));
 }
 
-function decide({ state, labels = [], comments = [] }) {
+function decide({ state, labels = [], comments = [], phase0MissingPhase1 = false }) {
   if (state !== 'closed') return { action: 'noop', reason: 'issue-open' };
   if (labels.some((l) => TERMINAL_LABELS.includes(l))) {
     return { action: 'noop', reason: 'already-terminal' };
+  }
+  // #2678: a research-first Epic with green Phase-0 and no Phase-1 children
+  // must not close — the Phase-1 chain is missing. Block ahead of any
+  // closeout-based auto-transition.
+  if (phase0MissingPhase1) {
+    return { action: 'block-close', reopen: true, reason: 'phase0-green-no-phase1-children' };
   }
   const closeoutPresent = hasCloseoutComment(comments);
   const preCloseLabel = VALID_PRE_CLOSE_LABELS.find((l) => labels.includes(l));
