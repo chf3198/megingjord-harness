@@ -97,3 +97,152 @@ test.describe('test-evidence-validator (#1214)', () => {
     expect(ALLOWED_STRATEGIES).toContain('none');
   });
 });
+
+test.describe('test-evidence-validator #3276 — pytest evidence for tdd-pyramid Python hooks', () => {
+  const fs = require('node:fs');
+  const base = { comments: [], lane: 'lane:code-change' };
+  const PY_SOURCE = 'hooks/scripts/push_counter.py';
+  const PY_SPEC = 'tests/hooks/test_push_counter.py';
+  const PY_SPEC_ALT = 'tests/hooks/push_counter_test.py';
+  const JS_SPEC = 'tests/push.spec.js';
+
+  // AC1 + AC5: python source + pytest spec → PASS with distinct reason token (G8 attributability).
+  test('AC1/AC5: python source + pytest spec passes via python path with distinct reason', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  test('AC1: *_test.py naming also accepted', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE, PY_SPEC_ALT] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  // AC2/AC4(b): python source + no test → FAIL.
+  test('AC2: python source with no test fails', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('missing-spec-file');
+  });
+
+  // AC2/AC4(e): pytest spec but NO python source → FAIL (no false positive).
+  test('AC2: pytest spec without python source fails (no false positive)', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SPEC, 'scripts/global/foo.js'] });
+    expect(r.ok).toBe(false);
+  });
+
+  // AC4(c): JS regression — JS path unchanged, original reason token preserved.
+  test('AC4: JS source + JS spec still passes with evidence-present reason', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: ['scripts/global/foo.js', JS_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('evidence-present');
+  });
+
+  // AC4(d): mixed JS+py source + only pytest → PASS.
+  test('AC4: mixed JS+py source with only pytest spec passes', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid',
+      pr_files: ['scripts/global/foo.js', PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+  });
+
+  // AC4(g): tdd-trophy delegation locks the same python-pytest acceptance.
+  test('AC4: tdd-trophy delegates to the same python-pytest acceptance', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-trophy', pr_files: [PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  // AC4(f): malformed / edge-case paths never crash; degrade to no-match (G6 resilience).
+  test('AC4: edge-case paths do not crash', () => {
+    const edgeSets = [
+      [],
+      ['noextensionfile'],
+      ['tests/hooks/tést_unicodé.py'],
+      ['hooks/scripts/with space.py', 'tests/hooks/test_x.py'],
+      ['hooks/scripts/deleted_only.py'],
+    ];
+    for (const files of edgeSets) {
+      expect(() => validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: files })).not.toThrow();
+    }
+    // space-in-source + pytest spec is a valid python diff → passes.
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid',
+      pr_files: ['hooks/scripts/with space.py', 'tests/hooks/test_x.py'] }).ok).toBe(true);
+    // empty set fails the python path.
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [] }).ok).toBe(false);
+  });
+
+  // AC3: doclint — the methodology matrix tdd-pyramid evidence row mentions a pytest artifact.
+  test('AC3: matrix tdd-pyramid evidence row mentions a pytest artifact', () => {
+    const matrix = fs.readFileSync(
+      path.resolve(__dirname, '../instructions/test-methodology-matrix.instructions.md'), 'utf8');
+    const lines = matrix.split('\n');
+    const evidenceRow = lines.find(l => /^\|\s*`tdd-pyramid`\s*\|/.test(l));
+    expect(evidenceRow).toBeTruthy();
+    expect(/test_\*\.py|pytest|_test\.py/i.test(evidenceRow)).toBe(true);
+    // tdd-trophy delegates to the same checker — ensure the python-hook surface still maps to tdd-pyramid.
+    const surfaceRow = lines.find(l => /hooks\/scripts\/\*\.py/.test(l));
+    expect(/tdd-pyramid/.test(surfaceRow || '')).toBe(true);
+  });
+});
+
+test.describe('test-evidence-validator #3278 — composed test_strategy (<primary>+stress-test)', () => {
+  const fs = require('node:fs');
+  const base = { comments: [], lane: 'lane:code-change' };
+
+  // AC1/AC3: composed strategy runs the PRIMARY checker; stress half is enforced by stress-evidence.yml.
+  test('AC3: tdd-pyramid+stress-test passes when primary JS spec present', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('evidence-present');
+  });
+
+  test('AC3: eval-harness+stress-test passes when tests/eval/** present', () => {
+    const r = validate({ ...base, test_strategy: 'eval-harness+stress-test', pr_files: ['tests/eval/x.json'] });
+    expect(r.ok).toBe(true);
+  });
+
+  // AC1: the PRIMARY checker is still enforced under composition (no false positive).
+  test('AC3: composed strategy with no primary evidence fails the primary checker', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test', pr_files: ['scripts/foo.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('missing-spec-file');
+  });
+
+  // AC1: malformed compositions are rejected as unknown-strategy.
+  test('AC3: non-stress-test second part is unknown-strategy', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+golden-file', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  test('AC3: three-part composition is unknown-strategy', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test+foo', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC1 (G6): bare stress-test has no primary checker — degrade gracefully, do not crash.
+  test('AC3: bare stress-test degrades to unknown-strategy without throwing', () => {
+    let r;
+    expect(() => { r = validate({ ...base, test_strategy: 'stress-test', pr_files: ['tests/stress-x.spec.js'] }); }).not.toThrow();
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC1: single-strategy path is unchanged (regression).
+  test('AC3: single-strategy path unchanged', () => {
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: ['tests/x.spec.js'] }).ok).toBe(true);
+    expect(validate({ ...base, test_strategy: 'golden-file', pr_files: ['tests/fixtures/x.json'] }).ok).toBe(true);
+    expect(validate({ ...base, test_strategy: 'fuzz-testing', pr_files: [] }).violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC4: the workflow test_strategy capture must include '+' so composed strategies are not truncated.
+  test('AC4: test-evidence.yml test_strategy capture includes + (no accidental truncation)', () => {
+    const wf = fs.readFileSync(path.resolve(__dirname, '../.github/workflows/test-evidence.yml'), 'utf8');
+    const line = wf.split('\n').find((l) => l.includes('test_strategy:') && l.includes('match('));
+    expect(line).toBeTruthy();
+    // the character class for the test_strategy capture must contain a literal '+'
+    expect(/\[a-z[^\]]*\+/.test(line)).toBe(true);
+  });
+});
