@@ -37,7 +37,7 @@ doc-coverage:
 
 The validator (`scripts/global/megalint/doc-coverage.js`) parses the block. The gate is now a **hard block** (#2712; the old `DOC_COVERAGE_GATE_ADVISORY` escape hatch was removed). The lane is **derived from the issue labels** (#3016), so a builder-produced handoff is gated correctly. A missing or incomplete block on a gated lane **fails the merge**.
 
-Lanes that skip the gate: `lane:docs-research` and `lane:config-only` (no required project-doc surface). The #3121 diff-verification check — declared `UPDATED` surfaces must actually appear in the PR diff — ships advisory-first and promotes per the replay-eval-gated model.
+Lanes that skip the gate: `lane:docs-research` and `lane:config-only` (no required project-doc surface). The #3121 diff-verification check — declared `UPDATED` surfaces must actually appear in the PR diff — is **blocking** as of #3122: the `doc-coverage-updated-not-in-diff` violation is promoted from advisory to error once `npm run doc-coverage:replay-eval` precision reaches the 0.85 floor against `tests/fixtures/doc-coverage-diff-corpus.json`, auto-reverting to advisory below it. Rollback: `DOC_COVERAGE_DIFF_BLOCKING_DISABLED=1`. A second, always-advisory `doc-coverage-surface-substandard` signal (the now-wired #2716 `structuralCheck`) flags a declared file surface that is in the diff but a stub / header-less.
 
 ## 5. The doc-coverage matrix
 

@@ -3,7 +3,9 @@
 // DOC_COVERAGE_GATE_ADVISORY removed — this gate is now a hard block (#2712)
 const { loadMatrix, parseYamlSurfaces, surfacesForLabels,
   valueViolation } = require('./doc-coverage-helpers');
-const { verifyDeclaredSurfaces } = require('./doc-coverage-diff-verify');
+const { verifyDeclaredSurfaces, structuralCheck,
+  surfaceTouched } = require('./doc-coverage-diff-verify');
+const { diffSeverity } = require('./doc-coverage-diff-replay-eval');
 
 const LANE_SKIP = new Set(['lane:docs-research', 'lane:config-only']);
 
@@ -28,12 +30,13 @@ function findSurfaceValue(block, surface) {
 }
 
 // #3121 (Epic #2707): verify that surfaces declared UPDATED/DONE actually appear in the
-// PR diff. Delegates to the (previously-unwired) #2716 module — single source of truth —
-// running diff-membership only (structural:false) and advisory-first: a declared-but-absent
-// surface is the gaming hole the #3095 handback surfaced, but a hard block would break
-// in-flight PRs, so the check ships advisory and promotes per the replay-eval-gated model.
-// Skipped entirely when prFiles is unavailable (local pre-push / no PR context).
-function diffVerifyViolations(block, requiredSurfaces, prFiles) {
+// PR diff. Delegates to the #2716 module — single source of truth — running diff-membership
+// (structural:false) for the primary signal. #3122: that signal's severity is now PROMOTED
+// from advisory→blocking by the replay-eval gate (`diffSeverity`) once corpus precision
+// reaches the floor, auto-revoking below it. A SECOND, always-advisory structural signal
+// (the now-wired #2716 `structuralCheck`) flags a declared file surface that exists but is
+// a stub / header-less. Skipped entirely when prFiles is unavailable (local pre-push).
+function diffVerifyViolations(block, requiredSurfaces, prFiles, cwd) {
   if (!Array.isArray(prFiles)) return [];
   const declaredUpdated = requiredSurfaces.filter((surface) => {
     const value = findSurfaceValue(block, surface);
@@ -42,12 +45,29 @@ function diffVerifyViolations(block, requiredSurfaces, prFiles) {
   if (!declaredUpdated.length) return [];
   const result = verifyDeclaredSurfaces(declaredUpdated, null,
     { changedFiles: prFiles, structural: false });
-  return result.violations.map((viol) => ({
-    rule: 'doc-coverage-updated-not-in-diff', severity: 'advisory',
+  const severity = diffSeverity(); // AC1: replay-eval-gated advisory→blocking, auto-revoke
+  const diffViol = result.violations.map((viol) => ({
+    rule: 'doc-coverage-updated-not-in-diff', severity,
     detail: `surface "${viol.surface}" declared UPDATED but no matching file is in the PR diff` }));
+  // Structural advisory runs ONLY on surfaces actually in the diff — a not-in-diff surface
+  // is already covered by the diff-membership violation; re-flagging it file-not-found is noise.
+  const changed = new Set(prFiles);
+  const touched = declaredUpdated.filter((surface) => surfaceTouched(surface, changed));
+  return diffViol.concat(structuralAdvisories(touched, cwd));
 }
 
-function checkBlock(body, labels, matrix, changeType, prFiles) {
+// AC2: the previously-dead structuralCheck, now wired as a second advisory. Only file
+// surfaces (have an extension) are checked — directory surfaces have no single doc body.
+function structuralAdvisories(surfaces, cwd) {
+  return surfaces.flatMap((surface) => {
+    if (!/\.\w+$/.test(surface)) return [];
+    const sc = structuralCheck(surface, cwd);
+    return sc.ok ? [] : [{ rule: 'doc-coverage-surface-substandard', severity: 'advisory',
+      detail: `surface "${surface}" declared UPDATED but ${sc.reason}` }];
+  });
+}
+
+function checkBlock(body, labels, matrix, changeType, prFiles, cwd) {
   const expected = surfacesForLabels(labels, matrix, changeType);
   if (!expected.required.length) return [];
   const block = parseDocBlock(body);
@@ -60,7 +80,7 @@ function checkBlock(body, labels, matrix, changeType, prFiles) {
     const violation = valueViolation(surface, value);
     return violation ? [violation] : [];
   });
-  return violations.concat(diffVerifyViolations(block, expected.required, prFiles));
+  return violations.concat(diffVerifyViolations(block, expected.required, prFiles, cwd));
 }
 
 function validate(input) {
@@ -80,13 +100,14 @@ function validate(input) {
   const handoff = (input.comments || []).slice().reverse()
     .find(c => /(^|\n)\s*(?:##\s*)?COLLABORATOR_HANDOFF\b/i.test(c.body || ''));
   const body = handoff ? handoff.body : (input.body || '');
-  const violations = checkBlock(body, input.labels, matrix, changeType, input.prFiles);
-  // Advisory violations (the diff-verification check, advisory-first) surface but do not block.
+  const violations = checkBlock(body, input.labels, matrix, changeType, input.prFiles, input.cwd);
+  // Advisory violations surface but do not block; the diff-membership check blocks only
+  // once #3122's replay-eval gate has promoted it (severity becomes 'error').
   return { ok: violations.every((v) => v.severity === 'advisory'), violations };
 }
 
 module.exports = { validate, loadMatrix, parseYamlSurfaces, surfacesForLabels,
-  parseDocBlock, checkBlock, diffVerifyViolations };
+  parseDocBlock, checkBlock, diffVerifyViolations, structuralAdvisories };
 
 if (require.main === module) {
   const { readFileSync } = require('fs');
