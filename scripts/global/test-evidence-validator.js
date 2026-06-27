@@ -15,10 +15,32 @@ function anyFile(prFiles, patterns) {
   return (prFiles || []).some(f => patterns.some(p => p.test(f)));
 }
 
+// JS/TS spec (original, unchanged) and Python pytest spec (#3276): tests/**/test_*.py or *_test.py.
+const JS_SPEC_RE = /^tests\/.+\.(spec|test)\.(js|ts)$/;
+const PY_SPEC_RE = /^tests\/(?:.+\/)?(?:test_[^/]+|[^/]+_test)\.py$/;
+
+// "Python surface present" predicate (#3276): a *.py path in the diff that is NOT itself a
+// pytest spec. Gates Python evidence on real Python source change so a stray test file in a
+// pure-JS diff cannot satisfy the gate (no false positive). Path-pattern only — intentionally
+// not git-status-aware and POSIX forward-slash (matches `gh pr view --json files`).
+function hasPythonSource(prFiles) {
+  return (prFiles || []).some(f => /\.py$/.test(f) && !PY_SPEC_RE.test(f));
+}
+
+// tdd-pyramid / tdd-trophy: accept a JS/TS spec (unchanged), OR a Python pytest spec when the
+// diff also changes Python source. Distinct `python-pytest-evidence` reason for G8 attributability.
+function pyramidCheck(ctx) {
+  if (anyFile(ctx.pr_files, [JS_SPEC_RE])) return ok();
+  if ((ctx.pr_files || []).some(f => PY_SPEC_RE.test(f)) && hasPythonSource(ctx.pr_files)) {
+    return ok('python-pytest-evidence');
+  }
+  return fail('missing-spec-file',
+    'tdd-pyramid requires tests/**/*.spec.{js,ts}, or tests/**/test_*.py|*_test.py with a Python source file in the diff');
+}
+
 const CHECKERS = {
-  'tdd-pyramid': (ctx) => anyFile(ctx.pr_files, [/^tests\/.+\.(spec|test)\.(js|ts)$/])
-    ? ok() : fail('missing-spec-file', 'TDD strategy requires tests/**/*.spec.{js,ts}'),
-  'tdd-trophy': (ctx) => CHECKERS['tdd-pyramid'](ctx),
+  'tdd-pyramid': (ctx) => pyramidCheck(ctx),
+  'tdd-trophy': (ctx) => pyramidCheck(ctx),
   'contract-test': (ctx) => anyFile(ctx.pr_files,
     [/^cloudflare\/.*(test|spec)\.(ts|js)$/, /^tests\/.*contract.*\.(spec|test)\.(js|ts)$/])
     ? ok() : fail('missing-contract-test', 'contract-test requires cloudflare/**/test.ts or tests/**contract*.spec.*'),

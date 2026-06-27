@@ -97,3 +97,91 @@ test.describe('test-evidence-validator (#1214)', () => {
     expect(ALLOWED_STRATEGIES).toContain('none');
   });
 });
+
+test.describe('test-evidence-validator #3276 — pytest evidence for tdd-pyramid Python hooks', () => {
+  const fs = require('node:fs');
+  const base = { comments: [], lane: 'lane:code-change' };
+  const PY_SOURCE = 'hooks/scripts/push_counter.py';
+  const PY_SPEC = 'tests/hooks/test_push_counter.py';
+  const PY_SPEC_ALT = 'tests/hooks/push_counter_test.py';
+  const JS_SPEC = 'tests/push.spec.js';
+
+  // AC1 + AC5: python source + pytest spec → PASS with distinct reason token (G8 attributability).
+  test('AC1/AC5: python source + pytest spec passes via python path with distinct reason', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  test('AC1: *_test.py naming also accepted', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE, PY_SPEC_ALT] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  // AC2/AC4(b): python source + no test → FAIL.
+  test('AC2: python source with no test fails', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SOURCE] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('missing-spec-file');
+  });
+
+  // AC2/AC4(e): pytest spec but NO python source → FAIL (no false positive).
+  test('AC2: pytest spec without python source fails (no false positive)', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [PY_SPEC, 'scripts/global/foo.js'] });
+    expect(r.ok).toBe(false);
+  });
+
+  // AC4(c): JS regression — JS path unchanged, original reason token preserved.
+  test('AC4: JS source + JS spec still passes with evidence-present reason', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: ['scripts/global/foo.js', JS_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('evidence-present');
+  });
+
+  // AC4(d): mixed JS+py source + only pytest → PASS.
+  test('AC4: mixed JS+py source with only pytest spec passes', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid',
+      pr_files: ['scripts/global/foo.js', PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+  });
+
+  // AC4(g): tdd-trophy delegation locks the same python-pytest acceptance.
+  test('AC4: tdd-trophy delegates to the same python-pytest acceptance', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-trophy', pr_files: [PY_SOURCE, PY_SPEC] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('python-pytest-evidence');
+  });
+
+  // AC4(f): malformed / edge-case paths never crash; degrade to no-match (G6 resilience).
+  test('AC4: edge-case paths do not crash', () => {
+    const edgeSets = [
+      [],
+      ['noextensionfile'],
+      ['tests/hooks/tést_unicodé.py'],
+      ['hooks/scripts/with space.py', 'tests/hooks/test_x.py'],
+      ['hooks/scripts/deleted_only.py'],
+    ];
+    for (const files of edgeSets) {
+      expect(() => validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: files })).not.toThrow();
+    }
+    // space-in-source + pytest spec is a valid python diff → passes.
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid',
+      pr_files: ['hooks/scripts/with space.py', 'tests/hooks/test_x.py'] }).ok).toBe(true);
+    // empty set fails the python path.
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: [] }).ok).toBe(false);
+  });
+
+  // AC3: doclint — the methodology matrix tdd-pyramid evidence row mentions a pytest artifact.
+  test('AC3: matrix tdd-pyramid evidence row mentions a pytest artifact', () => {
+    const matrix = fs.readFileSync(
+      path.resolve(__dirname, '../instructions/test-methodology-matrix.instructions.md'), 'utf8');
+    const lines = matrix.split('\n');
+    const evidenceRow = lines.find(l => /^\|\s*`tdd-pyramid`\s*\|/.test(l));
+    expect(evidenceRow).toBeTruthy();
+    expect(/test_\*\.py|pytest|_test\.py/i.test(evidenceRow)).toBe(true);
+    // tdd-trophy delegates to the same checker — ensure the python-hook surface still maps to tdd-pyramid.
+    const surfaceRow = lines.find(l => /hooks\/scripts\/\*\.py/.test(l));
+    expect(/tdd-pyramid/.test(surfaceRow || '')).toBe(true);
+  });
+});
