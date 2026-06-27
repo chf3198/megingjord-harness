@@ -47,7 +47,7 @@ A surface does NOT require `stress-test` when ALL of:
 
 | Strategy | Required evidence in PR or issue trail |
 |---|---|
-| `tdd-pyramid` | New/modified `tests/**/*.spec.{js,ts}` file in PR diff; `npm test` green |
+| `tdd-pyramid` | New/modified `tests/**/*.spec.{js,ts}` (JS/TS) OR `tests/**/test_*.py` / `*_test.py` (pytest, when the diff also changes Python source) in PR diff; `npm test` / `pytest` green |
 | `tdd-trophy` | Same as pyramid + at least one integration-flavored fixture |
 | `contract-test` | Schema assertion in trail OR `tests/**/contract.spec.*` in PR |
 | `golden-file` | `tests/fixtures/**` referenced in PR OR fixture diff inline |
