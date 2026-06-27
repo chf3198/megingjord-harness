@@ -164,6 +164,47 @@ function checkCrossFamilyVerdict(body) {
   return [];
 }
 
+// #2266: positive issue-only closeout evidence schema for `lane:no-code-remediation`.
+// Epic #2258's no-code lane shipped via #2264/#2265/#2268, but the surrounding validators
+// (merge-evidence, admin-handoff, branch-name) only *silently exempt* the issue-only lane.
+// This turns that silent exemption into an EXPLICIT, auditable declaration: a no-code
+// CONSULTANT_CLOSEOUT must positively state `N/A` for each surface it skips (PR, merge,
+// CI, deploy) so "no evidence existed" can never be mistaken for "evidence was omitted".
+// Gated strictly on the authoritative GitHub label (input.labels), never on body text, so
+// a code-change closeout cannot forge the reduced schema (anti-over-accept, #2266 AC5).
+// Non-no-code lanes are a no-op (#2266 AC4). Verdict/rubric/flaw fields stay required for
+// ALL lanes via the universal checks in validate() (#2266 AC3).
+const NO_CODE_REMEDIATION_LANE = 'lane:no-code-remediation';
+const ISSUE_ONLY_NA_SURFACES = Object.freeze([
+  { key: 'pr',     label: 'PR',     re: /(?:^|\n)[ \t]*(?:pr|pull[- ]?request|pr-evidence)[ \t]*:[ \t]*n\/?a\b/i },
+  { key: 'merge',  label: 'merge',  re: /(?:^|\n)[ \t]*merge(?:[- ]?evidence)?[ \t]*:[ \t]*n\/?a\b/i },
+  { key: 'ci',     label: 'CI',     re: /(?:^|\n)[ \t]*(?:ci|ci[- ]?checks|checks)[ \t]*:[ \t]*n\/?a\b/i },
+  { key: 'deploy', label: 'deploy', re: /(?:^|\n)[ \t]*(?:deploy|deploy[- ]?runtime[- ]?impact|sync[- ]?verification)[ \t]*:[ \t]*n\/?a\b/i },
+]);
+
+// checkIssueOnlyEvidenceSchema — #2266 AC1/AC2. Returns one violation per surface whose
+// explicit N/A declaration is missing on a lane:no-code-remediation closeout.
+function checkIssueOnlyEvidenceSchema(body, input) {
+  const labels = (input && input.labels) || [];
+  if (!labels.includes(NO_CODE_REMEDIATION_LANE)) return [];
+  const advisory = process.env.NO_CODE_EVIDENCE_SCHEMA_ADVISORY === '1';
+  const text = typeof body === 'string' ? body : '';
+  return ISSUE_ONLY_NA_SURFACES
+    .filter(surface => !surface.re.test(text))
+    .map(surface => {
+      const violation = {
+        rule: `issue-only-${surface.key}-na-missing`,
+        detail: `lane:no-code-remediation CONSULTANT_CLOSEOUT must explicitly declare `
+          + `\`${surface.label}: N/A\` — issue-only remediation has no ${surface.label} surface, `
+          + `and silent omission is not accepted. See #2266 and `
+          + `docs/howto/no-code-remediation-workflow.md. `
+          + `Rollback: NO_CODE_EVIDENCE_SCHEMA_ADVISORY=1 demotes to advisory.`,
+      };
+      if (advisory) violation.severity = 'advisory';
+      return violation;
+    });
+}
+
 function validate(input) {
   const closeout = findConsultantCloseout(input.comments || []);
   if (!closeout) {
@@ -183,6 +224,7 @@ function validate(input) {
     ...checkCrossFamilyVerdict(body),
     ...checkFleetBundleProvenance(body, input),
     ...checkCrossRuntimeWritesPending(input.comments),
+    ...checkIssueOnlyEvidenceSchema(body, input),
     ...wtGate.checkConsultant(body, input),
   ];
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
@@ -197,4 +239,5 @@ module.exports = {
   checkMemoryNoteRecurrence,
   checkRubricVerdictConsistency,
   checkCrossRuntimeWritesPending,
+  checkIssueOnlyEvidenceSchema,
 };
