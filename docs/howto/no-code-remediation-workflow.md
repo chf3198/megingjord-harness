@@ -35,6 +35,25 @@ Use explicit reduced markers:
 - `COLLABORATOR_HANDOFF: N/A - no-code remediation lane`
 - `ADMIN_HANDOFF: N/A - no-code remediation lane`
 
+### Issue-only closeout evidence schema (#2266)
+
+For a `lane:no-code-remediation` ticket the CONSULTANT_CLOSEOUT MUST **explicitly
+declare `N/A`** for every delivery surface the lane skips, so "no evidence existed"
+is never confused with "evidence was silently omitted". All four are required
+(validator: `scripts/global/megalint/consultant-closeout.js#checkIssueOnlyEvidenceSchema`,
+enforced only when the `lane:no-code-remediation` label is present — code-change
+closeouts are unaffected):
+
+- `PR: N/A - <reason>`            (aliases: `pull-request`, `pr-evidence`)
+- `merge-evidence: N/A - <reason>` (alias: `merge`)
+- `CI: N/A - <reason>`            (aliases: `ci-checks`, `checks`)
+- `sync-verification: N/A - <reason>` (aliases: `deploy`, `deploy-runtime-impact`)
+
+The verdict / rubric / `mid_flight_flaws` requirements above still apply in full —
+the schema **adds** the N/A surface declarations, it does not relax the terminal-close
+bar. Rollback: `NO_CODE_EVIDENCE_SCHEMA_ADVISORY=1` demotes the surface checks to
+advisory (never silent).
+
 ## Common False Positives
 
 - Stale advisory label appears on a merged closed ticket.
