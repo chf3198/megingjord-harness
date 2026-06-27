@@ -172,6 +172,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
 | `deps:review` | `node scripts/global/dep-proposals-review.js` |
 | `dispatch:progress:test` | `node --test tests/dispatch-progress.spec.js tests/cascade-observability.spec.js` |
+| `doc-coverage:replay-eval` | `node scripts/global/megalint/doc-coverage-diff-replay-eval.js` |
+| `doc-coverage:replay-eval:test` | `node --test tests/doc-coverage-diff-replay-eval.spec.js tests/doc-coverage-diff-wiring.spec.js tests/doc-coverage-diff-stress.spec.js` |
 | `doc-graph` | `node scripts/global/doc-graph-builder.js` |
 | `doc-plane:lint` | `node scripts/global/doc-plane-boundary-lint.js` |
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |

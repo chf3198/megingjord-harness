@@ -1,0 +1,14 @@
+[
+  { "label": "declared file present in diff → no gap", "declared": ["docs/howto/x.md"], "paths": ["docs/howto/x.md"], "expectedInDiff": true },
+  { "label": "declared file absent from diff → gap", "declared": ["docs/howto/x.md"], "paths": ["scripts/global/foo.js"], "expectedInDiff": false },
+  { "label": "README declared, changed alongside code → no gap", "declared": ["README.md"], "paths": ["README.md", "src/a.js"], "expectedInDiff": true },
+  { "label": "two declared docs both in diff → no gap", "declared": ["docs/a.md", "docs/b.md"], "paths": ["docs/a.md", "docs/b.md"], "expectedInDiff": true },
+  { "label": "wiki surface declared, unrelated diff → gap", "declared": ["wiki/wisdom/global/concepts/p.md"], "paths": ["other.md"], "expectedInDiff": false },
+  { "label": "directory surface covered by nested change → no gap", "declared": ["docs/howto/"], "paths": ["docs/howto/install.md"], "expectedInDiff": true },
+  { "label": "declared but empty diff → gap", "declared": ["docs/x.md"], "paths": [], "expectedInDiff": false },
+  { "label": "prefix-collision guard: docs declared, docs-other changed → gap", "declared": ["docs/x.md"], "paths": ["docs-other.md"], "expectedInDiff": false },
+  { "label": "changelog fragment declared and present → no gap", "declared": [".changes/unreleased/3122.md"], "paths": [".changes/unreleased/3122.md"], "expectedInDiff": true },
+  { "label": "instructions surface declared, present → no gap", "declared": ["instructions/release-docs-hygiene.instructions.md"], "paths": ["instructions/release-docs-hygiene.instructions.md"], "expectedInDiff": true },
+  { "label": "two declared, one missing → gap", "declared": ["docs/a.md", "docs/b.md"], "paths": ["docs/a.md"], "expectedInDiff": false },
+  { "label": "root file declared and present → no gap", "declared": ["CHANGELOG.md"], "paths": ["CHANGELOG.md"], "expectedInDiff": true }
+]
