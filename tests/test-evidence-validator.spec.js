@@ -185,3 +185,64 @@ test.describe('test-evidence-validator #3276 — pytest evidence for tdd-pyramid
     expect(/tdd-pyramid/.test(surfaceRow || '')).toBe(true);
   });
 });
+
+test.describe('test-evidence-validator #3278 — composed test_strategy (<primary>+stress-test)', () => {
+  const fs = require('node:fs');
+  const base = { comments: [], lane: 'lane:code-change' };
+
+  // AC1/AC3: composed strategy runs the PRIMARY checker; stress half is enforced by stress-evidence.yml.
+  test('AC3: tdd-pyramid+stress-test passes when primary JS spec present', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(true);
+    expect(r.reason).toBe('evidence-present');
+  });
+
+  test('AC3: eval-harness+stress-test passes when tests/eval/** present', () => {
+    const r = validate({ ...base, test_strategy: 'eval-harness+stress-test', pr_files: ['tests/eval/x.json'] });
+    expect(r.ok).toBe(true);
+  });
+
+  // AC1: the PRIMARY checker is still enforced under composition (no false positive).
+  test('AC3: composed strategy with no primary evidence fails the primary checker', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test', pr_files: ['scripts/foo.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('missing-spec-file');
+  });
+
+  // AC1: malformed compositions are rejected as unknown-strategy.
+  test('AC3: non-stress-test second part is unknown-strategy', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+golden-file', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  test('AC3: three-part composition is unknown-strategy', () => {
+    const r = validate({ ...base, test_strategy: 'tdd-pyramid+stress-test+foo', pr_files: ['tests/x.spec.js'] });
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC1 (G6): bare stress-test has no primary checker — degrade gracefully, do not crash.
+  test('AC3: bare stress-test degrades to unknown-strategy without throwing', () => {
+    let r;
+    expect(() => { r = validate({ ...base, test_strategy: 'stress-test', pr_files: ['tests/stress-x.spec.js'] }); }).not.toThrow();
+    expect(r.ok).toBe(false);
+    expect(r.violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC1: single-strategy path is unchanged (regression).
+  test('AC3: single-strategy path unchanged', () => {
+    expect(validate({ ...base, test_strategy: 'tdd-pyramid', pr_files: ['tests/x.spec.js'] }).ok).toBe(true);
+    expect(validate({ ...base, test_strategy: 'golden-file', pr_files: ['tests/fixtures/x.json'] }).ok).toBe(true);
+    expect(validate({ ...base, test_strategy: 'fuzz-testing', pr_files: [] }).violations[0].rule).toBe('unknown-strategy');
+  });
+
+  // AC4: the workflow test_strategy capture must include '+' so composed strategies are not truncated.
+  test('AC4: test-evidence.yml test_strategy capture includes + (no accidental truncation)', () => {
+    const wf = fs.readFileSync(path.resolve(__dirname, '../.github/workflows/test-evidence.yml'), 'utf8');
+    const line = wf.split('\n').find((l) => l.includes('test_strategy:') && l.includes('match('));
+    expect(line).toBeTruthy();
+    // the character class for the test_strategy capture must contain a literal '+'
+    expect(/\[a-z[^\]]*\+/.test(line)).toBe(true);
+  });
+});

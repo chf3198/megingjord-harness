@@ -45,7 +45,7 @@ jobs:
               issue_number: issueNumber, per_page: 100,
             });
             const trail = comments.map(c => c.body || '').join('\n');
-            const stratMatch = trail.match(/test_strategy:\s*([a-z-]+)/i);
+            const stratMatch = trail.match(/test_strategy:\s*([a-z+-]+)/i); // [a-z+-]+ keeps composed '<primary>+stress-test' intact (#3278)
             const test_strategy = stratMatch ? stratMatch[1].toLowerCase() : 'none';
             const { data: prFilesData } = await github.rest.pulls.listFiles({
               owner: context.repo.owner, repo: context.repo.repo,

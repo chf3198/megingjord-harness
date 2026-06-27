@@ -68,11 +68,19 @@ const CHECKERS = {
 };
 
 function validate(ctx = {}) {
-  const strategy = ctx.test_strategy || 'none';
-  if (!ALLOWED_STRATEGIES.includes(strategy)) {
-    return fail('unknown-strategy', `'${strategy}' not in matrix enum; see instructions/test-methodology-matrix.instructions.md`);
+  const raw = ctx.test_strategy || 'none';
+  // Composed strategy (#3278): '<primary>+stress-test' per the matrix (Epic #1875). The primary
+  // checker runs here; the stress half is enforced by the separate stress-evidence gate. Honor the
+  // matrix contract rather than rejecting the composed form or relying on the workflow truncating it.
+  const parts = raw.split('+').map((s) => s.trim());
+  const primary = parts[0];
+  const composedValid = parts.length === 1 || (parts.length === 2 && parts[1] === 'stress-test');
+  // CHECKERS lacks a bare 'stress-test' key (it is only ever a SECOND strategy), so gating on the
+  // checker's existence both rejects unknown strategies and avoids a crash on a standalone stress-test.
+  if (!composedValid || !CHECKERS[primary]) {
+    return fail('unknown-strategy', `'${raw}' not in matrix enum; see instructions/test-methodology-matrix.instructions.md`);
   }
-  return CHECKERS[strategy](ctx);
+  return CHECKERS[primary](ctx);
 }
 
 if (require.main === module) {
