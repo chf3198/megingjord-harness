@@ -2,18 +2,15 @@
 // Refs #2716 — diff-based surface verification for doc-coverage gate
 // Verifies declared DONE/UPDATED surfaces were actually modified in the PR diff.
 // Execution contexts: local-pre-push, CI, shallow-clone, multi-runtime, doc-only.
+// #3122: removed the never-wired checkRuntimePaths + RUNTIME_DOC_ROOTS (no caller in
+// the issue/PR gate context ever supplied a `runtime`) — the phantom-completion class
+// Epic #2707 surfaced. structuralCheck stays and is now wired by the doc-coverage gate.
 
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const GIT_DIFF_TIMEOUT_MS = 10000;
 const MIN_DOC_BYTES = 300;
-
-const RUNTIME_DOC_ROOTS = {
-  copilot: ['docs/', 'wiki/', 'instructions/', '.github/copilot-instructions.md'],
-  codex: ['docs/', '.codex/', 'AGENTS.md'],
-  'claude-code': ['docs/', '.claude/', 'CLAUDE.md'],
-};
 
 function isShallowClone(cwd) {
   try { return fs.existsSync(path.join(cwd || process.cwd(), '.git', 'shallow')); }
@@ -38,16 +35,6 @@ function structuralCheck(filePath, cwd) {
   } catch (e) { return { ok: false, reason: e.message }; }
 }
 
-function checkRuntimePaths(violations, declared, runtime) {
-  if (!runtime || !RUNTIME_DOC_ROOTS[runtime]) return;
-  const roots = RUNTIME_DOC_ROOTS[runtime];
-  for (const surface of declared) {
-    if (!roots.some(root => surface.startsWith(root) || surface === root.replace(/\/$/, '')))
-      violations.push({ rule: 'doc-diff-runtime-path-mismatch', severity: 'warning',
-        surface, detail: `not under expected ${runtime} doc roots: ${roots.join(', ')}` });
-  }
-}
-
 // A changed file "covers" a surface when it equals the surface (root file) or sits
 // under it (directory surface). The `/`-boundary guard prevents `docs` matching
 // `docs-other.md` — the unanchored startsWith would over-match. #3121 hardening.
@@ -59,7 +46,7 @@ function surfaceTouched(surface, changed) {
 // #3121: accept a pre-fetched changed-file set (opts.changedFiles) so the check runs in
 // the PR-API-driven CI context (filenames already in hand, no git base / spawn needed).
 function verifyDeclaredSurfaces(declared, base, opts = {}) {
-  const { cwd, runtime, shallow: forceShallow, changedFiles, structural = true } = opts;
+  const { cwd, shallow: forceShallow, changedFiles, structural = true } = opts;
   const shallow = forceShallow !== undefined ? forceShallow : isShallowClone(cwd);
   const violations = [];
   if (shallow && structural) {
@@ -83,10 +70,9 @@ function verifyDeclaredSurfaces(declared, base, opts = {}) {
       violations.push({ rule: 'doc-diff-not-changed', severity: 'error',
         surface, detail: `declared DONE but not in diff${base ? ` vs ${base}` : ''}` });
   }
-  checkRuntimePaths(violations, declared, runtime);
   return { ok: violations.filter(viol => viol.severity === 'error').length === 0,
     violations, mode: 'diff-verify' };
 }
 
 module.exports = { verifyDeclaredSurfaces, structuralCheck, getChangedFiles,
-  isShallowClone, surfaceTouched, RUNTIME_DOC_ROOTS };
+  isShallowClone, surfaceTouched };

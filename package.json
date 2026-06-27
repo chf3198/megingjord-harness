@@ -335,7 +335,9 @@
     "hamr:evidence-diag": "node -e \"const d=require('./scripts/global/governance-evidence-diag');console.log(JSON.stringify(d.diagnoseEvidence(process.argv[1],[])))\"",
     "hamr:offload-kpi": "node scripts/global/hamr-offload-kpi.js",
     "hamr:offload-kpi:test": "npx playwright test tests/hamr-offload-kpi.spec.js tests/hamr-epic-parity.spec.js",
-    "hamr:epic-3008:test": "npx playwright test tests/hamr-tool-policy.spec.js tests/governance-evidence-bridge.spec.js tests/hamr-offload-kpi.spec.js tests/cascade-context-integration.spec.js tests/hamr-epic-parity.spec.js"
+    "hamr:epic-3008:test": "npx playwright test tests/hamr-tool-policy.spec.js tests/governance-evidence-bridge.spec.js tests/hamr-offload-kpi.spec.js tests/cascade-context-integration.spec.js tests/hamr-epic-parity.spec.js",
+    "doc-coverage:replay-eval": "node scripts/global/megalint/doc-coverage-diff-replay-eval.js",
+    "doc-coverage:replay-eval:test": "node --test tests/doc-coverage-diff-replay-eval.spec.js tests/doc-coverage-diff-wiring.spec.js tests/doc-coverage-diff-stress.spec.js"
   },
   "keywords": [
     "devops",
