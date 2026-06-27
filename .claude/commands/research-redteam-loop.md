@@ -17,6 +17,10 @@ See `skills/research-redteam-loop/SKILL.md` for the full contract.
 ## What this does
 
 1. Reads/refreshes the research deliverable for `#N`.
+1a. **Corpus-overlap stage (mandatory, #2801):** runs `corpus-overlap-scan.js` over
+   the design scope across **open+closed** issues, embeds a `related_tickets:` +
+   `overlap_decision:` block, and feeds candidates to the reviewer. ACCEPT is blocked
+   if overlap exists with no recorded boundary decision.
 2. Fetches web evidence (3+ refs); degrades gracefully if unavailable.
 3. Dispatches to fleet (qwen, 120 s timeout) or free-cloud fallback
    (gemini/groq/cerebras, 45 s). Cross-family invariant enforced.
@@ -28,6 +32,9 @@ See `skills/research-redteam-loop/SKILL.md` for the full contract.
 ## Dispatch commands
 
 ```bash
+# Corpus-overlap scan (mandatory pre-ACCEPT stage, #2801)
+node scripts/global/corpus-overlap-scan.js --scope-file /tmp/deliverable.md --json
+
 # Fleet (primary, G3 zero-cost)
 node scripts/global/fleet-red-team-dispatch.js \
   --artifact-type research-deliverable \
