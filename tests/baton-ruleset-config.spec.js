@@ -53,6 +53,17 @@ describe('Ruleset config - required status checks (AC1)', () => {
     );
   });
 
+  it('omits integration_id (GitHub Rulesets API rejects null) — API-valid shape', () => {
+    const config = buildRulesetConfig();
+    const checks = config.rules.find(
+      (rule) => rule.type === 'required_status_checks'
+    ).parameters.required_status_checks;
+    for (const chk of checks) {
+      assert.ok(!('integration_id' in chk),
+        'integration_id must be omitted, not null (HTTP 422 otherwise)');
+    }
+  });
+
   it('every required context is in the known-reporting allowlist', () => {
     const config = buildRulesetConfig();
     const statusRule = config.rules.find(

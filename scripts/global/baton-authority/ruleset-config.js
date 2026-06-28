@@ -49,10 +49,14 @@ function buildRulesetConfig() {
         type: 'required_status_checks',
         parameters: {
           strict_required_status_checks_policy: true,
+          // `integration_id` is intentionally OMITTED: the GitHub Rulesets API
+          // rejects `integration_id: null` (HTTP 422 "data matches no possible
+          // input"). It is only needed to disambiguate a context reported by a
+          // specific GitHub App; `baton-authority/merge` is an Actions check, so
+          // context alone is the correct, API-valid shape.
           required_status_checks: [
             {
               context: 'baton-authority/merge',
-              integration_id: null,
             },
           ],
         },
