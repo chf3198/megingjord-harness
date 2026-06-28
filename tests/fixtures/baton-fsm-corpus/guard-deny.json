@@ -1,0 +1,255 @@
+[
+  {
+    "name": "guard_deny_triage_manager_handoff_missing_manager_handoff",
+    "state": 2,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "manager_handoff",
+      "required_next": 3
+    }
+  },
+  {
+    "name": "guard_deny_in-progress_collaborator_handoff_missing_collaborator_handoff",
+    "state": 4,
+    "event": 3,
+    "evidence": 16,
+    "expected": {
+      "decision": 2,
+      "reason": "collaborator_handoff",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_in-progress_collaborator_handoff_missing_all_acs_pass",
+    "state": 4,
+    "event": 3,
+    "evidence": 2,
+    "expected": {
+      "decision": 2,
+      "reason": "all_acs_pass",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_testing_admin_handoff_missing_admin_handoff",
+    "state": 5,
+    "event": 4,
+    "evidence": 352,
+    "expected": {
+      "decision": 2,
+      "reason": "admin_handoff",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_testing_admin_handoff_missing_signer_independent",
+    "state": 5,
+    "event": 4,
+    "evidence": 324,
+    "expected": {
+      "decision": 2,
+      "reason": "signer_independent",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_testing_admin_handoff_missing_ci_green",
+    "state": 5,
+    "event": 4,
+    "evidence": 292,
+    "expected": {
+      "decision": 2,
+      "reason": "ci_green",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_testing_admin_handoff_missing_worktree_merge_ok",
+    "state": 5,
+    "event": 4,
+    "evidence": 100,
+    "expected": {
+      "decision": 2,
+      "reason": "worktree_merge_ok",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_testing_merge_missing_admin_handoff",
+    "state": 5,
+    "event": 6,
+    "evidence": 352,
+    "expected": {
+      "decision": 2,
+      "reason": "admin_handoff",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_testing_merge_missing_signer_independent",
+    "state": 5,
+    "event": 6,
+    "evidence": 324,
+    "expected": {
+      "decision": 2,
+      "reason": "signer_independent",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_testing_merge_missing_ci_green",
+    "state": 5,
+    "event": 6,
+    "evidence": 292,
+    "expected": {
+      "decision": 2,
+      "reason": "ci_green",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_testing_merge_missing_worktree_merge_ok",
+    "state": 5,
+    "event": 6,
+    "evidence": 100,
+    "expected": {
+      "decision": 2,
+      "reason": "worktree_merge_ok",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "guard_deny_review_consultant_closeout_missing_consultant_closeout",
+    "state": 6,
+    "event": 5,
+    "evidence": 128,
+    "expected": {
+      "decision": 2,
+      "reason": "consultant_closeout",
+      "required_next": 7
+    }
+  },
+  {
+    "name": "guard_deny_review_consultant_closeout_missing_pr_merged",
+    "state": 6,
+    "event": 5,
+    "evidence": 8,
+    "expected": {
+      "decision": 2,
+      "reason": "pr_merged",
+      "required_next": 7
+    }
+  },
+  {
+    "name": "guard_deny_testing_baton_back_missing_baton_back_reason",
+    "state": 5,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "baton_back_reason",
+      "required_next": 4
+    }
+  },
+  {
+    "name": "guard_deny_backlog_cancel_missing_disposition_recorded",
+    "state": 0,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_queued_cancel_missing_disposition_recorded",
+    "state": 1,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_triage_cancel_missing_disposition_recorded",
+    "state": 2,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_ready_cancel_missing_disposition_recorded",
+    "state": 3,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_in-progress_cancel_missing_disposition_recorded",
+    "state": 4,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_testing_cancel_missing_disposition_recorded",
+    "state": 5,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_review_cancel_missing_disposition_recorded",
+    "state": 6,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_dormant_cancel_missing_disposition_recorded",
+    "state": 9,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "guard_deny_deferred_cancel_missing_disposition_recorded",
+    "state": 10,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded",
+      "required_next": 8
+    }
+  }
+]

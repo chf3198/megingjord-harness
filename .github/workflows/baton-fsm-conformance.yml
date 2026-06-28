@@ -1,0 +1,42 @@
+name: Baton FSM Conformance
+# ADVISORY gate — promotion to blocking is gated on replay-eval precision
+# >= 0.85 (auto-revoking, not calendar). Refs #3288, Epic #3284.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/global/baton-fsm/**'
+      - 'tests/fixtures/baton-fsm-corpus/**'
+      - 'tests/baton-fsm-conformance.spec.js'
+      - 'tests/baton-fsm-wasm-integrity.spec.js'
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: fsm-conformance-advisory
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Run conformance tests
+        run: node --test tests/baton-fsm-conformance.spec.js
+
+      - name: Run WASM integrity tests
+        run: node --test tests/baton-fsm-wasm-integrity.spec.js
+
+      - name: Generate conformance matrix
+        run: node scripts/global/baton-fsm/conformance-matrix.js
+
+      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: baton-fsm-conformance-matrix
+          path: generated/baton-fsm-conformance-matrix.json
+          retention-days: 30
