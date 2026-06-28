@@ -1,0 +1,53 @@
+name: Prompt Artifact Lint
+
+# #3302 — structural-quality linter for skill/agent PROMPT ARTIFACTS
+# (skills/**/SKILL.md, agents/**, .claude/commands/*.md). Closes the audit-#3296
+# governance seam: eval-harness checks behavior, doc-coverage checks prose, but
+# neither runs a structural check over the artifacts themselves.
+#
+# ADVISORY-FIRST (AC3): the linter runs WITHOUT --strict, so it always reports
+# success and never blocks merge. Promotion to a blocking gate is replay-eval-gated
+# (precision ≥ 0.85 against the historical-PR corpus), never calendar-gated.
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '41 7 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  prompt-artifact-lint:
+    name: prompt-artifact-lint (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: Detect prompt-artifact changes (step-level gate)
+        id: changes
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+          fi
+          pattern='^(skills/|agents/|\.claude/commands/|scripts/global/megalint/prompt-artifact-lint\.js)'
+          if [ "${{ github.event_name }}" = "schedule" ] || git diff --name-only "$base" HEAD | grep -qE "$pattern"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No prompt-artifact files changed — lint N/A; reporting success."
+          fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          node-version: '20'
+      - name: Run prompt-artifact lint (advisory — never blocks)
+        if: steps.changes.outputs.changed == 'true'
+        run: node scripts/global/megalint/prompt-artifact-lint.js
+      - name: Note
+        run: |
+          echo "#3302: advisory-first. Promotion to blocking is replay-eval-gated (no calendar)."
+          echo "Boundary: eval-harness owns behavior; doc-coverage owns prose; this owns artifact structure."

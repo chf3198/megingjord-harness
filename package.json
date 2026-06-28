@@ -326,6 +326,7 @@
     "deploy:verify:claude": "node scripts/global/verify-deploy.js claude",
     "governance:drift-sweep": "node scripts/global/governance-drift-sweep.js --scan",
     "governance:drift-sweep:test": "node --test tests/governance-drift-sweep.spec.js",
+    "prompt-artifact:lint": "node scripts/global/megalint/prompt-artifact-lint.js",
     "test-floor:check": "node scripts/global/test-floor-classifier.js",
     "test-floor:replay-eval": "node scripts/global/test-floor-replay-eval.js",
     "wiki:health": "node scripts/wiki/wiki-health-detector.js",
