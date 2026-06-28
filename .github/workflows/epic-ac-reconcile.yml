@@ -1,0 +1,39 @@
+name: Epic AC Reconcile
+on:
+  issues:
+    types: [edited]
+  workflow_dispatch:
+    inputs:
+      epic:
+        description: 'Epic issue number'
+        required: true
+
+concurrency:
+  group: epic-ac-reconcile-${{ github.event.issue.number || inputs.epic }}
+  cancel-in-progress: true
+
+jobs:
+  reconcile:
+    name: reconcile
+    if: github.event.issue && contains(github.event.issue.labels.*.name, 'type:epic') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const path = require('path');
+            const { reconcileEpic, epicReadyToClose } = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/epic-ac-reconcile.js'));
+            const num = context.payload.inputs?.epic ? Number(context.payload.inputs.epic) : context.issue.number;
+            const { data: issue } = await github.rest.issues.get({ owner: context.repo.owner, repo: context.repo.repo, issue_number: num });
+            const hasMeasuring = (issue.labels || []).some(l => (l.name || l) === 'status:measuring');
+            const reconciled = reconcileEpic({ body: issue.body || '', hasMeasuringLabel: hasMeasuring });
+            const ready = epicReadyToClose(reconciled);
+            core.summary.addHeading(`Epic #${num} reconciliation (REPORT-ONLY)`);
+            core.summary.addTable([
+              [{ data: 'AC', header: true }, { data: 'Checked', header: true }, { data: 'truth_status', header: true }],
+              ...reconciled.map(r => [r.ac_id, String(r.checked), r.truth_status]),
+            ]);
+            core.summary.addRaw(`\n\n**ready_to_close**: ${ready}\n`);
+            await core.summary.write();
+            core.notice(`Epic #${num} reconciliation: ${ready ? 'READY_TO_CLOSE' : 'NOT READY'} (${reconciled.length} ACs)`);

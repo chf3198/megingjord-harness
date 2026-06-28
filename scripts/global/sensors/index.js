@@ -1,6 +1,6 @@
 'use strict';
 // Sensor aggregator (#1257) — composes 6 pure-function sensors per Phase-0 R&D §2 (#1247).
-// Per Epic #1113 AC3.
+// Per Epic #1113 AC3. Refs #1290 — added dc sensor (declared-complete) per Epic #1271 AC2.
 
 const ga = require('./ga');
 const ll = require('./ll');
@@ -8,8 +8,9 @@ const cf = require('./cf');
 const pr = require('./pr');
 const rp = require('./rp');
 const oo = require('./oo');
+const dc = require('./dc');
 
-function aggregate({ violationCount, runs, closeouts, reviews, reopens, flag } = {}) {
+function aggregate({ violationCount, runs, closeouts, reviews, reopens, flag, epicComments, reconciledByEpic } = {}) {
   return {
     ga: ga.compute({ violationCount }).value,
     ll: ll.compute({ runs }).value,
@@ -17,7 +18,8 @@ function aggregate({ violationCount, runs, closeouts, reviews, reopens, flag } =
     pr: pr.compute({ reviews }).value,
     rp: rp.compute({ reopens }).value,
     oo: oo.compute({ flag }).value,
+    dc: dc.compute({ epicComments, reconciledByEpic }).value,
   };
 }
 
-module.exports = { ga, ll, cf, pr, rp, oo, aggregate };
+module.exports = { ga, ll, cf, pr, rp, oo, dc, aggregate };

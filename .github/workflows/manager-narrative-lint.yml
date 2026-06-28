@@ -1,0 +1,21 @@
+name: Manager Narrative Lint
+on:
+  issue_comment:
+    types: [created, edited]
+
+concurrency:
+  group: narrative-lint-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    if: contains(github.event.issue.labels.*.name, 'type:epic')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const path = require('path');
+            const lint = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/manager-narrative-lint.js'));
+            await lint.run({ github, context, core });
