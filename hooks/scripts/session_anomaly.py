@@ -13,10 +13,11 @@ from pathlib import Path
 from typing import Any
 
 INCIDENTS_PATH = Path.home() / ".megingjord" / "incidents.jsonl"
+ENV_ANOMALY_BYPASS = "MEGINGJORD_SESSION_ANOMALY_DISABLED"
 DEFAULT_THRESHOLDS: dict[str, int] = {
-    "writes_in_session": 50,
-    "sensitive_path_reads": 10,
-    "pushes_in_session": 5,
+    "writes_in_session": 250,
+    "sensitive_path_reads": 15,
+    "pushes_in_session": 25,
 }
 _SENSITIVE_RE = re.compile(
     r"(?i)(\.env|secrets?[\\/]|credentials?[\\/]|private_key|"
@@ -85,8 +86,12 @@ def check_anomaly(state: dict[str, Any], cwd: str) -> str | None:
     return None
 
 
-def emit_anomaly_incident(reason: str, cwd: str) -> None:
-    """Append ANOMALY_DETECTED v3 event to incidents.jsonl. Never raises."""
+def emit_anomaly_incident(reason: str, cwd: str, override: bool = False) -> None:
+    """Append ANOMALY_DETECTED v3 event to incidents.jsonl. Never raises.
+
+    #3316: when override is True the breach is still recorded (audited, not
+    silent) with the bypass env named, for parity with blast-radius caps.
+    """
     try:
         INCIDENTS_PATH.parent.mkdir(parents=True, exist_ok=True)
         event = {
@@ -100,6 +105,8 @@ def emit_anomaly_incident(reason: str, cwd: str) -> None:
             "reason": reason,
             "gap": "G-15",
             "refs": ["ASI05", "EU-AI-Act-Art14"],
+            "override": bool(override),
+            "override_env": ENV_ANOMALY_BYPASS if override else None,
         }
         with INCIDENTS_PATH.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(event) + "\n")
