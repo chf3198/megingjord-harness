@@ -18,16 +18,16 @@ import pretool_guard  # noqa: E402
 
 class BlastRadiusCapTests(unittest.TestCase):
     def test_check_caps_detects_file_breach(self):
-        reason = br.check_caps({"files_edited_count": 201}, br.DEFAULT_CAPS)
-        self.assertIn("files_edited_count=201", reason)
+        reason = br.check_caps({"files_edited_count": 1001}, br.DEFAULT_CAPS)
+        self.assertIn("files_edited_count=1001", reason)
 
     def test_check_caps_detects_push_breach(self):
-        reason = br.check_caps({"push_count": 21}, br.DEFAULT_CAPS)
-        self.assertIn("push_count=21", reason)
+        reason = br.check_caps({"push_count": 51}, br.DEFAULT_CAPS)
+        self.assertIn("push_count=51", reason)
 
     def test_check_caps_detects_cost_breach(self):
-        reason = br.check_caps({"provider_call_count": 101}, br.DEFAULT_CAPS)
-        self.assertIn("estimated_cost_usd=5.05", reason)
+        reason = br.check_caps({"provider_call_count": 401}, br.DEFAULT_CAPS)
+        self.assertIn("estimated_cost_usd=20.05", reason)
 
     def test_load_caps_reads_yaml_block(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -56,7 +56,7 @@ class BlastRadiusCapTests(unittest.TestCase):
 class PretoolGuardIntegrationTests(unittest.TestCase):
     def test_pretool_guard_denies_when_cap_exceeded(self):
         payload = {"tool_name": "run_in_terminal", "tool_input": {"command": "echo hi"}, "cwd": str(REPO_ROOT)}
-        state = {"flags": {}, "admin_ops": {}, "blast_radius": {"files_edited_count": 999}, "active_ticket": 2917}
+        state = {"flags": {}, "admin_ops": {}, "blast_radius": {"files_edited_count": 1001}, "active_ticket": 2917}
         captured = {}
 
         def fake_emit(decision, reason, extra=None):
@@ -73,7 +73,7 @@ class PretoolGuardIntegrationTests(unittest.TestCase):
 
     def test_pretool_guard_allows_with_override_env(self):
         payload = {"tool_name": "run_in_terminal", "tool_input": {"command": "echo hi"}, "cwd": str(REPO_ROOT)}
-        state = {"flags": {}, "admin_ops": {}, "blast_radius": {"files_edited_count": 999}, "active_ticket": 2917}
+        state = {"flags": {}, "admin_ops": {}, "blast_radius": {"files_edited_count": 1001}, "active_ticket": 2917}
         with patch("pretool_guard.ensure_state", return_value=state), \
              patch("state_store.reset_on_branch_change", return_value=state), \
              patch.dict(os.environ, {br.ENV_BYPASS: "1"}, clear=False), \

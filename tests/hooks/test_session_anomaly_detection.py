@@ -1,6 +1,7 @@
 """Tests for #2913 session behavioral anomaly detection (Gap G-15)."""
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -101,6 +102,17 @@ class EmitAnomalyIncidentTests(unittest.TestCase):
         self.assertEqual(payload["gap"], "G-15")
         self.assertIn("total_writes", payload["reason"])
 
+    def test_writes_override_fields_when_bypassed(self):
+        with tempfile.TemporaryDirectory() as home:
+            with patch("pathlib.Path.home", return_value=Path(home)):
+                sa.INCIDENTS_PATH = Path(home) / ".megingjord" / "incidents.jsonl"
+                sa.emit_anomaly_incident("total_writes=999", "/tmp/r", override=True)
+            log = Path(home) / ".megingjord" / "incidents.jsonl"
+            payload = json.loads(log.read_text(encoding="utf-8").strip())
+        self.assertTrue(payload["override"])
+        self.assertEqual(payload["override_env"], sa.ENV_ANOMALY_BYPASS)
+
+
 
 class PretoolGuardAnomalyIntegrationTests(unittest.TestCase):
     def _make_payload(self, tool="run_in_terminal"):
@@ -110,7 +122,7 @@ class PretoolGuardAnomalyIntegrationTests(unittest.TestCase):
         payload = self._make_payload()
         state = {
             "flags": {}, "admin_ops": {}, "blast_radius": {"push_count": 0},
-            "session": {"total_writes": 99, "total_reads_sensitive_paths": 0, "total_pushes": 0},
+            "session": {"total_writes": 999, "total_reads_sensitive_paths": 0, "total_pushes": 0},
             "active_ticket": 2913,
         }
         captured = {}
@@ -127,6 +139,21 @@ class PretoolGuardAnomalyIntegrationTests(unittest.TestCase):
             pretool_guard.main()
         self.assertEqual(captured.get("decision"), "deny")
         self.assertIn("anomaly detected", captured.get("reason", "").lower())
+
+    def test_allows_with_anomaly_override_env(self):
+        payload = self._make_payload()
+        state = {
+            "flags": {}, "admin_ops": {}, "blast_radius": {"push_count": 0},
+            "session": {"total_writes": 9999, "total_reads_sensitive_paths": 0, "total_pushes": 0},
+            "active_ticket": 3316,
+        }
+        with patch("pretool_guard.ensure_state", return_value=state), \
+             patch("state_store.reset_on_branch_change", return_value=state), \
+             patch.dict(os.environ, {sa.ENV_ANOMALY_BYPASS: "1"}, clear=False), \
+             patch("session_anomaly.emit_anomaly_incident"), \
+             patch("sys.stdin", io.StringIO(json.dumps(payload))):
+            code = pretool_guard.main()
+        self.assertEqual(code, 0)
 
 
 if __name__ == "__main__":

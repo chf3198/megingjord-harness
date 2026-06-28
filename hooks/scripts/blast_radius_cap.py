@@ -10,9 +10,9 @@ from typing import Any
 ENV_BYPASS = "MEGINGJORD_BLAST_RADIUS_DISABLED"
 COST_PER_CALL_USD = 0.05
 DEFAULT_CAPS = {
-    "max_files_per_session": 200,
-    "max_pushes_per_session": 20,
-    "max_cost_usd_per_session": 5.00,
+    "max_files_per_session": 1000,
+    "max_pushes_per_session": 50,
+    "max_cost_usd_per_session": 20.00,
 }
 
 
