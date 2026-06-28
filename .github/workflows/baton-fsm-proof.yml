@@ -1,0 +1,39 @@
+# baton-fsm-proof.yml — CI gate for baton FSM invariant proofs.
+# BLOCKING: a broken FSM invariant must block merge.
+# Refs #3289, Epic #3284.
+name: baton-fsm-proof
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/global/baton-fsm/**'
+
+permissions:
+  contents: read
+
+jobs:
+  fsm-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run FSM model checker
+        run: node scripts/global/baton-fsm/verify/proof-report.js
+
+      - name: Run FSM invariant tests
+        run: node --test tests/baton-fsm-invariants.spec.js
+
+      - name: Run evidence-loader contract tests
+        run: node --test tests/baton-fsm-loader-contract.spec.js
+
+      - name: Upload proof report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baton-fsm-proof-report
+          path: generated/baton-fsm-proof-report.json
+          retention-days: 30

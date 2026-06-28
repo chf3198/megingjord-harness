@@ -1,0 +1,40 @@
+{
+  "schema": "baton-fsm-proof-v1",
+  "timestamp": "2026-06-28T04:38:03.190Z",
+  "allProven": true,
+  "invariants": {
+    "I1": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I2": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I3": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I4": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I5": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I6": {
+      "proven": true,
+      "counterexample": null
+    },
+    "I7": {
+      "proven": true,
+      "counterexample": null
+    }
+  },
+  "stats": {
+    "stateCount": 11,
+    "eventCount": 12,
+    "transitionCount": 22
+  }
+}
