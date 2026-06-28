@@ -1,3 +1,18 @@
+---
+title: "#3199 Acceptance detail — Work-Log Sync Megalint Validator"
+type: work-log
+content_trust_score: 0.95
+created: "2026-06-22"
+updated: "2026-06-22"
+tags: [issue, wiki-b, detail-acceptance]
+related: [3199]
+status: READY
+source_path: "github:issue/3199"
+source_sha256: "c3a4f1fb7a149c9520a7b45df894f09f0862bf7d7593c2005a76e932b771e809"
+content_hash: "ca236eb4ab5dceb610db66f4b81df7b8067de8287cd04086dbb2f085041f988f"
+last_updated: "2026-06-22"
+generated_by_run: local
+---
 # #3199 Acceptance Criteria (v3, red-team + research amended)
 
 ## AC1 — Megalint validator implementation
