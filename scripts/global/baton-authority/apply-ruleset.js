@@ -22,11 +22,14 @@ function buildApiUrl(rulesetId) {
   return base;
 }
 
+const FALLBACK_SLUG = OWNER + '/' + REPO;
+
 /**
  * The gh api path (repo-relative) used by the live applier.
+ * `slug` is the live "owner/repo"; defaults to the canonical fallback constant.
  */
-function apiPath(rulesetId) {
-  const base = 'repos/' + OWNER + '/' + REPO + '/rulesets';
+function apiPath(rulesetId, slug) {
+  const base = 'repos/' + (slug || FALLBACK_SLUG) + '/rulesets';
   return rulesetId ? base + '/' + rulesetId : base;
 }
 
@@ -40,12 +43,28 @@ function defaultRunGh(ghArgs, input) {
 }
 
 /**
+ * Resolve the LIVE repo slug ("owner/repo") from gh. Rename-proof: a repo
+ * rebrand (e.g. devenv-ops -> megingjord-harness) leaves a redirect that gh
+ * follows on GET but NOT on POST/PUT, so a stale constant would 307 the apply.
+ * Fail-soft: falls back to the canonical constant when gh is unavailable.
+ */
+function resolveRepoSlug(runGh) {
+  try {
+    const out = runGh(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], undefined);
+    const slug = String(out || '').trim();
+    return /^[^/\s]+\/[^/\s]+$/.test(slug) ? slug : FALLBACK_SLUG;
+  } catch (err) {
+    return FALLBACK_SLUG;
+  }
+}
+
+/**
  * Find the id of an existing ruleset by name. Fail-soft: returns null when gh
  * is unavailable or the lookup errors (offline / unauthenticated).
  */
-function findExistingRulesetId(runGh) {
+function findExistingRulesetId(runGh, slug) {
   try {
-    const out = runGh(['api', apiPath()], undefined);
+    const out = runGh(['api', apiPath(null, slug)], undefined);
     const list = JSON.parse(out);
     const match = (list || []).find((rs) => rs && rs.name === RULESET_NAME);
     return match ? match.id : null;
@@ -56,12 +75,14 @@ function findExistingRulesetId(runGh) {
 
 /**
  * Perform the idempotent live apply: PUT when a ruleset of RULESET_NAME already
- * exists, POST otherwise. Returns { method, path, id, response }.
+ * exists, POST otherwise. Resolves the live repo slug first (rename-proof).
+ * Returns { method, path, id, slug, response }.
  */
 function applyRuleset(config, runGh) {
-  const existingId = findExistingRulesetId(runGh);
+  const slug = resolveRepoSlug(runGh);
+  const existingId = findExistingRulesetId(runGh, slug);
   const method = existingId ? 'PUT' : 'POST';
-  const path = apiPath(existingId);
+  const path = apiPath(existingId, slug);
   const body = JSON.stringify(config);
   const out = runGh(['api', '-X', method, path, '--input', '-'], body);
   let id = existingId;
@@ -71,7 +92,7 @@ function applyRuleset(config, runGh) {
   } catch (err) {
     // response not JSON (or empty) -- keep the discovered id
   }
-  return { method, path, id, response: out };
+  return { method, path, id, slug, response: out };
 }
 
 /**
@@ -155,6 +176,7 @@ module.exports = {
   formatDryRun,
   buildApiUrl,
   apiPath,
+  resolveRepoSlug,
   findExistingRulesetId,
   applyRuleset,
 };
