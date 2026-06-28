@@ -77,6 +77,17 @@
     }
   },
   {
+    "name": "legal_review_merge",
+    "state": 6,
+    "event": 6,
+    "evidence": 360,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 6
+    }
+  },
+  {
     "name": "legal_review_consultant_closeout",
     "state": 6,
     "event": 5,

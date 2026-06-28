@@ -610,16 +610,6 @@
     }
   },
   {
-    "name": "illegal_review_merge",
-    "state": 6,
-    "event": 6,
-    "evidence": 0,
-    "expected": {
-      "decision": 2,
-      "reason": "illegal-transition"
-    }
-  },
-  {
     "name": "illegal_review_baton_back",
     "state": 6,
     "event": 8,

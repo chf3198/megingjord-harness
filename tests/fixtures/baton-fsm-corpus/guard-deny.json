@@ -121,6 +121,50 @@
     }
   },
   {
+    "name": "guard_deny_review_merge_missing_consultant_closeout",
+    "state": 6,
+    "event": 6,
+    "evidence": 352,
+    "expected": {
+      "decision": 2,
+      "reason": "consultant_closeout",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_review_merge_missing_signer_independent",
+    "state": 6,
+    "event": 6,
+    "evidence": 328,
+    "expected": {
+      "decision": 2,
+      "reason": "signer_independent",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_review_merge_missing_ci_green",
+    "state": 6,
+    "event": 6,
+    "evidence": 296,
+    "expected": {
+      "decision": 2,
+      "reason": "ci_green",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "guard_deny_review_merge_missing_worktree_merge_ok",
+    "state": 6,
+    "event": 6,
+    "evidence": 104,
+    "expected": {
+      "decision": 2,
+      "reason": "worktree_merge_ok",
+      "required_next": 6
+    }
+  },
+  {
     "name": "guard_deny_review_consultant_closeout_missing_consultant_closeout",
     "state": 6,
     "event": 5,
