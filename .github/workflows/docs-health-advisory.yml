@@ -1,0 +1,56 @@
+# Refs #3298 (source audit #3296 AC4) — periodic prose-doc health scan (advisory).
+# Extends the #3068 wiki-health pattern to non-wiki PROSE surfaces. Surfaces orphan
+# and stale prose docs that the merge-time doc-coverage gate structurally cannot see
+# (it only fires on changed PRs). ADVISORY: continue-on-error; never blocks. Any
+# promotion to a blocking gate is replay-eval-gated, never calendar-based — the cron
+# below is only the SCAN cadence, not a promotion threshold.
+
+name: docs-health-advisory
+
+on:
+  schedule:
+    - cron: '30 7 * * 1'   # weekly Monday 07:30 UTC — scan cadence only
+  push:
+    paths:
+      - 'docs/**'
+      - 'instructions/**'
+      - 'governance/**'
+      - 'config/doc-health-owners.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'instructions/**'
+      - 'governance/**'
+      - 'config/doc-health-owners.yml'
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  docs-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so git last-commit-age (freshness) is accurate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Run docs-health detector (advisory)
+        continue-on-error: true
+        run: |
+          node scripts/global/docs-health-detector.js | tee docs-health-report.txt
+          node scripts/global/docs-health-detector.js --json > docs-health-report.json 2>&1 || true
+          echo "::notice::docs-health: advisory scan complete (orphan/stale prose). Refs #3298."
+      - name: Upload docs-health report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-health-report
+          path: |
+            docs-health-report.txt
+            docs-health-report.json
+          retention-days: 7

@@ -4,7 +4,13 @@ When code in a given area changes, the corresponding documentation surfaces
 **must** be updated in the same PR. This matrix is the enforcement spec for
 the CI doc-update gate (issue #641).
 
-Generated: 2026-04-30 | Refs #522 #335
+This is the **trigger** half of the #2708 freshness policy (which code change
+requires which doc update). The **ownership + freshness** half — per-surface owner
+and `freshness_window` — lives in [`config/doc-health-owners.yml`](../../config/doc-health-owners.yml),
+scanned by [`docs:health`](docs-health.md) (#3298). Together they complete the
+freshness-policy owner map (#2708).
+
+Generated: 2026-04-30 | Refs #522 #335 #2708 #3298
 
 ## Matrix
 
