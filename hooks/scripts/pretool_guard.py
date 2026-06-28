@@ -10,7 +10,9 @@ from admin_patterns import (  # noqa: E501
     RE_RELEASE_INTEGRITY, RE_VSCE_PUBLISH, SECRET_FILE_RE, iter_paths, iter_strings)
 from canonical_main_enforcer import is_main_checkout, evaluate_path, main_checkout_root
 from blast_radius_cap import ENV_BYPASS, check_caps, emit_cap_incident, load_caps
-from session_anomaly import check_anomaly, emit_anomaly_incident
+from session_anomaly import (
+    ENV_ANOMALY_BYPASS, check_anomaly, emit_anomaly_incident,
+)
 from governance_state import ensure_state, save_state
 from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
 from one_ticket_per_worktree import check_one_ticket_per_worktree
@@ -186,11 +188,17 @@ def enforce_blast_radius(tool: str, state: dict, cwd: str) -> int | None:
     return emit("deny", f"Session blast-radius cap exceeded: {reason}")
 
 def enforce_session_anomaly(state: dict, cwd: str) -> int | None:
-    """#2913: deny when session aggregate counters exceed anomaly thresholds (G-15)."""
+    """#2913: deny when session aggregate counters exceed anomaly thresholds (G-15).
+    #3316: MEGINGJORD_SESSION_ANOMALY_DISABLED=1 bypasses (audited incident still
+    emitted) for parity with the blast-radius cap override.
+    """
     reason = check_anomaly(state, cwd)
     if not reason:
         return None
-    emit_anomaly_incident(reason, cwd)
+    override = os.environ.get(ENV_ANOMALY_BYPASS, "0") == "1"
+    emit_anomaly_incident(reason, cwd, override=override)
+    if override:
+        return None
     return emit("deny",
         f"Session anomaly detected — human review required: {reason}. "
         "Refs #2913 (G-15 / ASI05 / EU-AI-Act-Art14).")

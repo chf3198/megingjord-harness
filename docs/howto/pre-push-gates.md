@@ -175,8 +175,15 @@ Until those teams sign off, the gate enforces on the Claude-Code surface only.
 ## Session push counter — genuine-ship accounting (#3265)
 
 A session-level guard (the G-15 blast-radius counter, Refs #2913) halts the session
-when the number of pushes in one session exceeds `pushes_in_session` (default 5). It
-exists for human-oversight (ASI05 / EU-AI-Act Art.14) against a runaway agent.
+when the number of pushes in one session exceeds `pushes_in_session` (default 25,
+raised from 5 in #3316 so a large multi-child Epic in a single session is not falsely
+halted). It exists for human-oversight (ASI05 / EU-AI-Act Art.14) against a runaway
+agent. The companion anomaly thresholds (`writes_in_session` 250, `sensitive_path_reads`
+15) and the blast-radius caps (`max_files_per_session` 1000, `max_pushes_per_session`
+50, `max_cost_usd_per_session` 20.00) live in `config/governance-rules.yaml`. Set
+`MEGINGJORD_SESSION_ANOMALY_DISABLED=1` to bypass the anomaly halt for a known-large
+session — the breach is still recorded to `incidents.jsonl` (audited, not silent),
+parity with `MEGINGJORD_BLAST_RADIUS_DISABLED=1` for the blast-radius caps.
 
 Only a **genuine, successful, code-shipping push** counts toward that limit. The
 counter (`hooks/scripts/tool_activity.py` via `admin_patterns.is_countable_push`,
