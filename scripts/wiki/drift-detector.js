@@ -10,6 +10,11 @@ const ROOT = path.resolve(__dirname, '../..');
 const WIKI = path.join(ROOT, 'wiki');
 const SRC_DIRS = [{ dir: path.join(ROOT, 'scripts/global'), re: /\.js$/ }, { dir: path.join(ROOT, 'instructions'), re: /\.md$/ }];
 const SYM_DIR = path.join(WIKI, 'code', 'symbols');
+// Wiki A pages live in two sub-layers (wiki-knowledge.instructions.md): scripts ->
+// symbols/ (structural), instructions -> concepts/ (semantic). Coverage must credit
+// BOTH — instruction sources are covered by their concepts/ page, not a symbols/ page.
+const CONCEPTS_DIR = path.join(WIKI, 'code', 'concepts');
+const CODE_PAGE_DIRS = [SYM_DIR, CONCEPTS_DIR];
 const WL_DIRS = [path.join(WIKI, 'work-log', 'tickets'), path.join(WIKI, 'work-log', 'prs')];
 const WISDOM_DIR = path.join(WIKI, 'wisdom');
 
@@ -37,22 +42,29 @@ function parseFm(content) {
   }));
 }
 
-function detectCodeDrift() {
+// opts (test-injectable; defaults to the module constants): { root, pageDirs, srcDirs }.
+// pageDirs MUST include both symbols/ and concepts/ so instruction sources (covered by a
+// concepts/ page) are credited, not falsely reported uncovered (#3300).
+function detectCodeDrift(opts = {}) {
+  const root = opts.root || ROOT;
+  const pageDirs = opts.pageDirs || CODE_PAGE_DIRS;
+  const srcDirs = opts.srcDirs || SRC_DIRS;
   const orphans = [], uncovered = [], stale = [], covered = new Set();
-  for (const sf of lsFiles(SYM_DIR, /\.md$/)) {
-    const meta = parseFm(fs.readFileSync(sf, 'utf-8'));
-    const src = meta.source_path ? path.join(ROOT, meta.source_path) : null;
-    if (!src || !fs.existsSync(src)) {
-      orphans.push({ wiki: path.relative(ROOT, sf), reason: 'no-source-backing' });
-    } else {
-      covered.add(src);
-      if (meta.source_sha256 && sha256(fs.readFileSync(src, 'utf-8')) !== meta.source_sha256)
-        stale.push({ wiki: path.relative(ROOT, sf), source: meta.source_path, reason: 'hash-mismatch' });
+  for (const pageDir of pageDirs)
+    for (const sf of lsFiles(pageDir, /\.md$/)) {
+      const meta = parseFm(fs.readFileSync(sf, 'utf-8'));
+      const src = meta.source_path ? path.join(root, meta.source_path) : null;
+      if (!src || !fs.existsSync(src)) {
+        orphans.push({ wiki: path.relative(root, sf), reason: 'no-source-backing' });
+      } else {
+        covered.add(src);
+        if (meta.source_sha256 && sha256(fs.readFileSync(src, 'utf-8')) !== meta.source_sha256)
+          stale.push({ wiki: path.relative(root, sf), source: meta.source_path, reason: 'hash-mismatch' });
+      }
     }
-  }
-  for (const { dir, re } of SRC_DIRS)
+  for (const { dir, re } of srcDirs)
     for (const srcFile of lsFiles(dir, re))
-      if (!covered.has(srcFile)) uncovered.push({ source: path.relative(ROOT, srcFile), reason: 'no-wiki-coverage' });
+      if (!covered.has(srcFile)) uncovered.push({ source: path.relative(root, srcFile), reason: 'no-wiki-coverage' });
   return { orphans, uncovered, stale };
 }
 
