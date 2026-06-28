@@ -10,7 +10,7 @@ Date: 2026-05-12
 | Human-readable compatibility | Preserve existing `Signed-by`/`Team&Model`/`Role`, append `Crypto-*` |
 
 ## Detailed Findings (with source links)
-- Team plans: [CC plan](research/epic-1298-cc-rd-plan-2026-05-12.md), [CP plan](research/epic-1298-cp-rd-plan-2026-05-12.md), [CX plan](research/epic-1298-cx-rd-plan-2026-05-12.md).
+- Team plans: [CC plan](epic-1298-cc-rd-plan-2026-05-12.md), [CP plan](epic-1298-cp-rd-plan-2026-05-12.md), [CX plan](epic-1298-cx-rd-plan-2026-05-12.md).
 - Implementation landed:
   - [scripts/global/governance-artifact-signature.js](scripts/global/governance-artifact-signature.js)
   - [scripts/global/agent-signature.js](scripts/global/agent-signature.js)

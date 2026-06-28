@@ -1,0 +1,54 @@
+name: Prose Link Check
+
+# #3297 — relative-`.md`-link checker for PROSE-DOC surfaces (docs/, instructions/,
+# research/, wiki/wisdom/). Closes the audit-#3296 (AC3) gap: docs-anchors checks
+# doc->code anchors and docs-health checks orphan/stale, but neither verifies that a
+# prose doc's relative .md links resolve. Auto-generated wiki mirrors (wiki/work-log,
+# wiki/code) are excluded (pipeline-owned).
+#
+# ADVISORY-FIRST (AC3): runs WITHOUT --strict, so it always reports success and never
+# blocks merge. Promotion to a blocking gate is replay-eval-gated (precision >= 0.85
+# against the historical-PR corpus), never calendar-gated.
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '43 7 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  prose-link-check:
+    name: prose-link-check (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: Detect prose-doc changes (step-level gate)
+        id: changes
+        run: |
+          base="${{ github.event.pull_request.base.sha || github.event.before }}"
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+          fi
+          pattern='^(docs/|instructions/|research/|wiki/wisdom/|scripts/global/megalint/prose-link-check\.js)'
+          if [ "${{ github.event_name }}" = "schedule" ] || git diff --name-only "$base" HEAD | grep -qE "$pattern"; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No prose-doc files changed — link check N/A; reporting success."
+          fi
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          node-version: '20'
+      - name: Run prose-link-check (advisory — never blocks)
+        if: steps.changes.outputs.changed == 'true'
+        run: node scripts/global/megalint/prose-link-check.js
+      - name: Note
+        run: |
+          echo "#3297: advisory-first. Promotion to blocking is replay-eval-gated (no calendar)."
+          echo "Boundary: docs-anchors owns doc->code; prompt-artifact-lint owns prompt structure; this owns prose .md->.md links."
