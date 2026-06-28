@@ -18,6 +18,7 @@ const {
   main,
   formatDryRun,
   buildApiUrl,
+  resolveRepoSlug,
   findExistingRulesetId,
   applyRuleset,
 } = require('../scripts/global/baton-authority/apply-ruleset');
@@ -165,34 +166,62 @@ describe('apply-ruleset dry-run', () => {
 });
 
 describe('apply-ruleset --apply idempotency (AC3)', () => {
-  it('POSTs (creates) when no ruleset of that name exists', () => {
+  // Dispatch a fake gh by subcommand. `slug` is the value `gh repo view` returns.
+  function makeRunGh({ slug = 'chf3198/megingjord-harness', list = '[]', mutateResp } = {}) {
     const calls = [];
     const runGh = (args, input) => {
       calls.push({ args, input });
-      if (args[1] === 'api' && args.length === 2) return '[]';
-      if (args.includes('-X')) return JSON.stringify({ id: 42, name: RULESET_NAME });
-      return '[]';
+      if (args[0] === 'repo' && args[1] === 'view') return slug;
+      if (args.includes('-X')) return mutateResp;
+      if (args[0] === 'api') return list; // list lookup
+      return list;
     };
-    // first call is the list lookup: args = ['api', '<path>']
+    return { runGh, calls };
+  }
+
+  it('POSTs (creates) when no ruleset of that name exists', () => {
+    const { runGh, calls } = makeRunGh({
+      list: '[]', mutateResp: JSON.stringify({ id: 42, name: RULESET_NAME }),
+    });
     const result = main(['--apply'], { runGh });
     assert.equal(result.action, 'applied');
     assert.equal(result.method, 'POST');
     assert.equal(result.id, 42);
     const mutate = calls.find((c) => c.args.includes('-X'));
     assert.ok(mutate.args.includes('POST'), 'must POST to create');
+    assert.ok(mutate.args.some((a) => a.includes('chf3198/megingjord-harness')),
+      'POST path must target the resolved live repo slug');
   });
 
   it('PUTs (updates) idempotently when a ruleset of that name exists', () => {
-    const existing = JSON.stringify([{ id: 7, name: RULESET_NAME }]);
-    const runGh = (args) => {
-      if (args.length === 2 && args[0] === 'api') return existing;
-      if (args.includes('-X')) return JSON.stringify({ id: 7, name: RULESET_NAME });
-      return existing;
-    };
+    const { runGh } = makeRunGh({
+      list: JSON.stringify([{ id: 7, name: RULESET_NAME }]),
+      mutateResp: JSON.stringify({ id: 7, name: RULESET_NAME }),
+    });
     const result = main(['--apply'], { runGh });
     assert.equal(result.method, 'PUT');
     assert.equal(result.id, 7);
     assert.ok(result.path.endsWith('/7'), 'PUT path targets existing id');
+  });
+
+  it('resolves the live repo slug (rename-proof) and uses it for the path', () => {
+    const { runGh } = makeRunGh({
+      slug: 'chf3198/renamed-repo',
+      list: '[]', mutateResp: JSON.stringify({ id: 9 }),
+    });
+    const result = applyRuleset(buildRulesetConfig(), runGh);
+    assert.equal(result.slug, 'chf3198/renamed-repo');
+    assert.ok(result.path.includes('chf3198/renamed-repo'), 'path follows the live slug');
+  });
+
+  it('resolveRepoSlug falls back to the canonical constant on gh error', () => {
+    const runGh = () => { throw new Error('gh not found'); };
+    assert.equal(resolveRepoSlug(runGh), 'chf3198/megingjord-harness');
+  });
+
+  it('resolveRepoSlug falls back when output is not a valid owner/repo', () => {
+    const runGh = () => 'not a slug';
+    assert.equal(resolveRepoSlug(runGh), 'chf3198/megingjord-harness');
   });
 
   it('findExistingRulesetId is fail-soft on gh error (offline)', () => {
@@ -202,10 +231,10 @@ describe('apply-ruleset --apply idempotency (AC3)', () => {
 
   it('applyRuleset keeps the discovered id when the gh response is not JSON', () => {
     // cross-family finding #1/#3: cover the non-JSON / unexpected gh response.
-    const runGh = (args) => {
-      if (args.length === 2) return JSON.stringify([{ id: 5, name: RULESET_NAME }]);
-      return 'not-json-output'; // PUT response is garbage
-    };
+    const { runGh } = makeRunGh({
+      list: JSON.stringify([{ id: 5, name: RULESET_NAME }]),
+      mutateResp: 'not-json-output',
+    });
     const result = applyRuleset(buildRulesetConfig(), runGh);
     assert.equal(result.method, 'PUT');
     assert.equal(result.id, 5, 'falls back to the discovered id, no crash');
@@ -214,9 +243,9 @@ describe('apply-ruleset --apply idempotency (AC3)', () => {
   it('applyRuleset sends the full config as JSON body', () => {
     let sentBody = null;
     const runGh = (args, input) => {
-      if (args.length === 2) return '[]';
-      sentBody = input;
-      return JSON.stringify({ id: 1 });
+      if (args[0] === 'repo' && args[1] === 'view') return 'chf3198/megingjord-harness';
+      if (args.includes('-X')) { sentBody = input; return JSON.stringify({ id: 1 }); }
+      return '[]';
     };
     applyRuleset(buildRulesetConfig(), runGh);
     const parsed = JSON.parse(sentBody);
@@ -226,8 +255,8 @@ describe('apply-ruleset --apply idempotency (AC3)', () => {
 });
 
 describe('buildApiUrl', () => {
-  it('builds correct base URL', () => {
-    assert.ok(buildApiUrl().includes('chf3198/devenv-ops/rulesets'));
+  it('builds correct base URL with the canonical repo slug', () => {
+    assert.ok(buildApiUrl().includes('chf3198/megingjord-harness/rulesets'));
   });
 
   it('appends ruleset ID when provided', () => {

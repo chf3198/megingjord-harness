@@ -8,7 +8,11 @@
 'use strict';
 
 const OWNER = 'chf3198';
-const REPO = 'devenv-ops';
+// Canonical repo slug (rebranded from `devenv-ops` -> `megingjord-harness`).
+// This is the FALLBACK only: apply-ruleset resolves the live slug at runtime via
+// `gh repo view` so a future rename cannot re-break live apply (the #3315 AC3
+// 307-on-POST regression: gh follows the rename redirect for GET, not POST).
+const REPO = 'megingjord-harness';
 const RULESET_NAME = 'baton-authority-merge-gate';
 
 // Status-check contexts that are actually reported, unconditionally, on every
