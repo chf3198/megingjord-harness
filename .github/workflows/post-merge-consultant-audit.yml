@@ -1,0 +1,79 @@
+# Post-merge consultant audit (ADVISORY — never gates merge)
+# Refs #3293, Epic #3284 W5. Plane separation: the deterministic FSM
+# (W1a/W2) is the sole blocking gate; this is post-merge inference/advice.
+name: post-merge-consultant-audit
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  audit:
+    name: post-merge-consultant-audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 2
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            // Post-merge advisory audit — NEVER blocks merge
+            const { runPostMergeAudit } = require(
+              './scripts/global/baton-postmerge-audit/post-merge-auditor'
+            );
+            const sha = context.sha;
+            const { data: prs } = await github.rest.repos
+              .listPullRequestsAssociatedWithCommit({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: sha,
+              });
+            const mergedPr = prs.find(pr => pr.merged_at) || prs[0];
+            if (!mergedPr) {
+              console.log('No merged PR for this push; skipping.');
+              return;
+            }
+            const ghClient = {
+              createIssue: async ({ title, body, labels }) => {
+                const { data } = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title, body, labels,
+                });
+                return { number: data.number, url: data.html_url };
+              },
+            };
+            // Dispatch placeholder — routes through HAMR/fleet in production.
+            // Returns a passing verdict so the workflow is wired but inert
+            // until the dispatch adapter ships.
+            const dispatch = async () => ({
+              verdict: 'ACCEPT', score: 8,
+              reviewer_model_family: 'qwen', findings: [],
+            });
+            const authorTeamModel = 'claude-code:opus@claude-code-cli';
+            try {
+              const result = await runPostMergeAudit(
+                {
+                  number: mergedPr.number, title: mergedPr.title,
+                  diff: '(workflow-level diff not yet wired)',
+                  url: mergedPr.html_url,
+                },
+                { dispatch, ghClient, authorTeamModel }
+              );
+              console.log('Audit result:', JSON.stringify(result, null, 2));
+              await core.summary.addRaw([
+                '### Post-merge consultant audit (advisory)',
+                '',
+                `Verdict: ${result.audit.verdict}`,
+                `Score: ${result.audit.score}`,
+                `Reviewer family: ${result.audit.reviewer_model_family}`,
+                `Merge-blocking: ${result.mergeBlocking}`,
+                `Escalated: ${result.escalation ? result.escalation.escalated : false}`,
+              ].join('\n')).write();
+            } catch (err) {
+              // Advisory — log and continue, never fail the workflow
+              console.log('Post-merge audit error (advisory):', err.message);
+            }
