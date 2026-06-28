@@ -329,6 +329,7 @@
     "test-floor:check": "node scripts/global/test-floor-classifier.js",
     "test-floor:replay-eval": "node scripts/global/test-floor-replay-eval.js",
     "wiki:health": "node scripts/wiki/wiki-health-detector.js",
+    "docs:health": "node scripts/global/docs-health-detector.js",
     "hamr:tool-proxy": "node scripts/global/hamr-tool-proxy.js",
     "hamr:tool-policy:test": "npx playwright test tests/hamr-tool-policy.spec.js",
     "hamr:evidence-bridge": "node -e \"const b=require('./scripts/global/governance-evidence-bridge');const i=process.argv[1];b.writeSnapshot(i,[])\"",

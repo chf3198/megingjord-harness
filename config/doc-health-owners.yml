@@ -1,0 +1,123 @@
+# Refs #3298 (source audit #3296 AC4) — per-surface owner + freshness map for PROSE docs.
+#
+# Completes the #2708 freshness-policy owner map: the *trigger* half (which code
+# change requires which doc update) already lives in docs/howto/doc-update-trigger-matrix.md;
+# this file is the *ownership + freshness* half. Consumed by
+# scripts/global/docs-health-detector.js (`npm run docs:health`).
+#
+# SCOPE: PROSE doc surfaces only — docs/, instructions/, governance/, and root
+# agent/community markdown. PROMPT ARTIFACTS (skills/**/SKILL.md, agents/**,
+# .claude/commands/*.md) are eval-harness artifacts and are deliberately EXCLUDED
+# (per instructions/test-methodology-matrix + memory doc_audit_excludes_prompt_artifacts);
+# their structural quality is governed by #3302, not by doc-rot signals.
+#
+# Schema: ordered list; first matching glob wins.
+#   - glob:    path glob ( ** = any depth, * = within a path segment ) relative to repo root
+#   - owner:   baton role accountable for currency ( manager | collaborator | admin | consultant )
+#   - freshness_window: 7d | 14d | 30d | 90d | 180d | none   ( none = intentionally archival, exempt )
+# `freshness_window` is a per-surface CONTENT property (mirrors the wiki frontmatter
+# contract), NOT a process-promotion calendar threshold — the advisory->blocking
+# promotion of this detector remains replay-eval-gated, never calendar-based.
+
+version: 1
+surfaces:
+  # --- root governance-contract mirror set (the four-file agent-instruction quartet) ---
+  - glob: CLAUDE.md
+    owner: manager
+    freshness_window: 30d
+  - glob: AGENTS.md
+    owner: manager
+    freshness_window: 30d
+  - glob: .codex/AGENTS.md
+    owner: manager
+    freshness_window: 30d
+  - glob: .github/copilot-instructions.md
+    owner: manager
+    freshness_window: 30d
+
+  # --- root release + architecture surfaces ---
+  - glob: README.md
+    owner: admin
+    freshness_window: 30d
+  - glob: ARCHITECTURE.md
+    owner: manager
+    freshness_window: 90d
+  - glob: WIKI.md
+    owner: collaborator
+    freshness_window: 90d
+  - glob: CHANGELOG.md
+    owner: admin
+    freshness_window: none
+  - glob: CHANGELOG-archive.md
+    owner: admin
+    freshness_window: none
+
+  # --- community-health surfaces (age slowly; refreshed on policy change) ---
+  - glob: SECURITY.md
+    owner: admin
+    freshness_window: 180d
+  - glob: SUPPORT.md
+    owner: admin
+    freshness_window: 180d
+  - glob: CONTRIBUTING.md
+    owner: manager
+    freshness_window: 180d
+  - glob: CODE_OF_CONDUCT.md
+    owner: admin
+    freshness_window: none
+  - glob: .github/CONTRIBUTING.md
+    owner: manager
+    freshness_window: 180d
+  - glob: .github/SECURITY.md
+    owner: admin
+    freshness_window: 180d
+  - glob: .github/SUPPORT.md
+    owner: admin
+    freshness_window: 180d
+
+  # --- governance + instructions (binding agent behavior) ---
+  - glob: governance/**
+    owner: manager
+    freshness_window: 90d
+  - glob: instructions/**
+    owner: manager
+    freshness_window: 90d
+
+  # --- docs tree ( decisions/ADRs are archival; howto + workflow are live ) ---
+  - glob: docs/decisions.md
+    owner: consultant
+    freshness_window: none
+  - glob: docs/decisions/**
+    owner: consultant
+    freshness_window: none
+  - glob: docs/howto/**
+    owner: collaborator
+    freshness_window: 90d
+  - glob: docs/workflow/**
+    owner: manager
+    freshness_window: 90d
+  - glob: docs/**
+    owner: collaborator
+    freshness_window: 90d
+
+# Entrypoint/index docs are inbound-link roots: they legitimately have no inbound
+# .md reference, so they are NEVER flagged as orphans (would be false positives).
+orphan_exempt:
+  - README.md
+  - CLAUDE.md
+  - AGENTS.md
+  - .codex/AGENTS.md
+  - .github/copilot-instructions.md
+  - ARCHITECTURE.md
+  - WIKI.md
+  - CHANGELOG.md
+  - CHANGELOG-archive.md
+  - SECURITY.md
+  - SUPPORT.md
+  - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
+  - .github/CONTRIBUTING.md
+  - .github/SECURITY.md
+  - .github/SUPPORT.md
+  - governance/README.md
+  - docs/README.md

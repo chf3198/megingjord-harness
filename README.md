@@ -179,6 +179,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `docs:anchors` | `node scripts/global/docs-anchors.js` |
 | `docs:compile` | `node scripts/docs-compile.js` |
 | `docs:exec` | `node scripts/global/docs-exec.js` |
+| `docs:health` | `node scripts/global/docs-health-detector.js` |
 | `docs:lint` | `node scripts/docs-lint.js` |
 | `epic-3162:test` | `npx playwright test tests/resolve-inventory.spec.js tests/inventory-portability.spec.js tests/fleet-setup-handlers.spec.js tests/fleet-inventory-contract.spec.js` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
