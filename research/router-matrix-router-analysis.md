@@ -84,8 +84,8 @@ A simple policy shape is:
 ## Sources
 
 - [LLM Evaluation Matrix](model-compare/design-analysis/LLM-EVALUATION-MATRIX.md)
-- [Router agent](agents/router.agent.md)
-- [DevEnv Ops README](README.md)
+- [Router agent](../agents/router.agent.md)
+- [DevEnv Ops README](../README.md)
 - [OpenAI Cookbook](https://developers.openai.com/cookbook)
 - [Claude Platform Docs](https://platform.claude.com/docs/)
 - [LangChain Overview](https://docs.langchain.com/oss/python/langchain/overview)

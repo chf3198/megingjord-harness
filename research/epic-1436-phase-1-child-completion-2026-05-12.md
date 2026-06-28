@@ -9,7 +9,7 @@ Date: 2026-05-12
 | Synthetic recurrence regression test | Completed | New hook test exercises the in-session recurrence prompt and consultant decision prompt behavior. |
 
 ## Notes
-- The Phase-0 recommendation from [research/epic-1436-phase-0-design-2026-05-12.md](research/epic-1436-phase-0-design-2026-05-12.md) remains the design source of truth.
+- The Phase-0 recommendation from [research/epic-1436-phase-0-design-2026-05-12.md](epic-1436-phase-0-design-2026-05-12.md) remains the design source of truth.
 - The remaining Phase-1 follow-on is now reduced to implementation rollout and broader synthetic scenario expansion, not new design work.
 
 ## Last-updated

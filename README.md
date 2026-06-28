@@ -360,6 +360,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `prefix:cache-report` | `node scripts/global/prefix-cache.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `prompt-artifact:lint` | `node scripts/global/megalint/prompt-artifact-lint.js` |
+| `prose-link:check` | `node scripts/global/megalint/prose-link-check.js` |
 | `qa:cache` | `node scripts/global/governance-qa-cache.js` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
 | `rag:search` | `node scripts/global/rag-search.js` |

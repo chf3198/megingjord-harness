@@ -46,8 +46,8 @@
 
 ## Sources
 
-- [wiki/concepts/model-routing.md](../wiki/concepts/model-routing.md)
-- [wiki/concepts/context-flow.md](../wiki/concepts/context-flow.md)
-- [wiki/sources/devenv-fleet-topology.md](../wiki/sources/devenv-fleet-topology.md)
+- [wiki/concepts/model-routing.md](../wiki/wisdom/global/concepts/model-routing.md)
+- [wiki/concepts/context-flow.md](../wiki/wisdom/global/concepts/context-flow.md)
+- [wiki/sources/devenv-fleet-topology.md](../wiki/wisdom/global/sources/devenv-fleet-topology.md)
 - [scripts/global/task-router.js](../scripts/global/task-router.js)
 - [inventory/devices.json](../inventory/devices.json)

@@ -62,7 +62,7 @@ Epic #866 implementation (#868–#872) requires coordination between **Copilot T
 - No manual merges in worktrees; all merges occur in main repo CI/CD
 - Session reset via `bash scripts/worktree-session-start.sh <team> feat/<issue>` (force-updates launcher)
 
-See: [research/concurrent-agent-worktrees-2026-04-24.md](research/concurrent-agent-worktrees-2026-04-24.md)
+See: [research/concurrent-agent-worktrees-2026-04-24.md](concurrent-agent-worktrees-2026-04-24.md)
 
 ---
 
@@ -186,8 +186,8 @@ const rerank = async (candidates) => {
 
 ## References
 
-- Concurrent worktree pattern: [research/concurrent-agent-worktrees-2026-04-24.md](research/concurrent-agent-worktrees-2026-04-24.md)
-- Deployment model: [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- Concurrent worktree pattern: [research/concurrent-agent-worktrees-2026-04-24.md](concurrent-agent-worktrees-2026-04-24.md)
+- Deployment model: [.github/copilot-instructions.md](../.github/copilot-instructions.md)
 - Fleet topology: [scripts/global/fleet-config.js](scripts/global/fleet-config.js)
 - Child ticket details: #868–#872 body/comments
 

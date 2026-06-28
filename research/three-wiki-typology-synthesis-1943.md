@@ -9,7 +9,7 @@ Status: finalized — ready for Consultant peer-review + Phase-1 child authorshi
 
 ## Executive summary
 
-The operator's 2026-05-19 design discussion established a **three-Wiki typology** addressing G3 (Zero Cost) and G7 (Throughput) via local knowledge stores that eliminate redundant CLI/`gh` traversal. This synthesis integrates the Copilot Team's R1-R5 multi-wiki retrieval research ([`research/multi-wiki-retrieval-mechanisms-1858.md`](research/multi-wiki-retrieval-mechanisms-1858.md)) and demonstrates that the operator's typology + the Copilot Team's five-layer substrate are **compatible refinements of the same architecture**, not competing designs.
+The operator's 2026-05-19 design discussion established a **three-Wiki typology** addressing G3 (Zero Cost) and G7 (Throughput) via local knowledge stores that eliminate redundant CLI/`gh` traversal. This synthesis integrates the Copilot Team's R1-R5 multi-wiki retrieval research ([`research/multi-wiki-retrieval-mechanisms-1858.md`](multi-wiki-retrieval-mechanisms-1858.md)) and demonstrates that the operator's typology + the Copilot Team's five-layer substrate are **compatible refinements of the same architecture**, not competing designs.
 
 Concretely:
 - The operator's **Wiki A (Code-Base)** is the harness instantiation of Copilot's **structural index layer (R2)** plus a co-located code-bound **semantic layer (R1)**.
@@ -354,7 +354,7 @@ Phase-2 children (deferred): GraphRAG / Wiki-C graph layer (Copilot A2 controls 
 
 ## References
 
-- Adjacent research: [`research/multi-wiki-retrieval-mechanisms-1858.md`](research/multi-wiki-retrieval-mechanisms-1858.md) — Copilot Team R1-R5 + A1-A8 + F6-F8 (canonical source)
+- Adjacent research: [`research/multi-wiki-retrieval-mechanisms-1858.md`](multi-wiki-retrieval-mechanisms-1858.md) — Copilot Team R1-R5 + A1-A8 + F6-F8 (canonical source)
 - Parent Epic: #1942 (Three-Wiki typology + auto-update pipeline for G3/G7)
 - Sibling Epic: #1857 (multi-wiki retrieval — Copilot Team parent of #1858)
 - Existing primitives (catalog in #1943 body): #142, #864, #866, #1017, #1083, #1673, #743, #935
