@@ -1,0 +1,95 @@
+{
+  "description": "Eval fixtures for post-merge consultant audit (Refs #3293, Epic #3284)",
+  "fixtures": [
+    {
+      "id": "passing-audit",
+      "input": {
+        "mergedPr": { "number": 100, "title": "feat: add widget", "diff": "diff --git a/widget.js" },
+        "authorTeamModel": "claude-code:opus@claude-code-cli",
+        "dispatchResult": {
+          "verdict": "ACCEPT",
+          "score": 8,
+          "reviewer_model_family": "qwen",
+          "findings": []
+        }
+      },
+      "expected": {
+        "verdict": "ACCEPT",
+        "mergeBlocking": false,
+        "escalated": false
+      }
+    },
+    {
+      "id": "failing-audit-reject",
+      "input": {
+        "mergedPr": { "number": 101, "title": "fix: patch auth", "diff": "diff --git a/auth.js" },
+        "authorTeamModel": "claude-code:sonnet@claude-code-cli",
+        "dispatchResult": {
+          "verdict": "REJECT",
+          "score": 3,
+          "reviewer_model_family": "google",
+          "findings": ["Missing input validation on auth token"]
+        }
+      },
+      "expected": {
+        "verdict": "REJECT",
+        "mergeBlocking": false,
+        "escalated": true
+      }
+    },
+    {
+      "id": "low-score-audit",
+      "input": {
+        "mergedPr": { "number": 102, "title": "chore: update config", "diff": "diff --git a/config.json" },
+        "authorTeamModel": "copilot:gpt-5@github-copilot",
+        "dispatchResult": {
+          "verdict": "PARTIAL",
+          "score": 3,
+          "reviewer_model_family": "anthropic",
+          "findings": ["Config format not validated"]
+        }
+      },
+      "expected": {
+        "verdict": "PARTIAL",
+        "mergeBlocking": false,
+        "escalated": true
+      }
+    },
+    {
+      "id": "cross-family-violation",
+      "input": {
+        "mergedPr": { "number": 103, "title": "feat: add logging", "diff": "diff --git a/log.js" },
+        "authorTeamModel": "claude-code:opus@claude-code-cli",
+        "dispatchResult": {
+          "verdict": "ACCEPT",
+          "score": 9,
+          "reviewer_model_family": "anthropic",
+          "findings": []
+        }
+      },
+      "expected": {
+        "verdict": "FAMILY_VIOLATION",
+        "mergeBlocking": false,
+        "familyViolation": true
+      }
+    },
+    {
+      "id": "antigravity-author-openai-reviewer",
+      "input": {
+        "mergedPr": { "number": 104, "title": "feat: add panel", "diff": "diff --git a/panel.js" },
+        "authorTeamModel": "antigravity:gemini@google",
+        "dispatchResult": {
+          "verdict": "ACCEPT",
+          "score": 7,
+          "reviewer_model_family": "openai",
+          "findings": []
+        }
+      },
+      "expected": {
+        "verdict": "ACCEPT",
+        "mergeBlocking": false,
+        "escalated": false
+      }
+    }
+  ]
+}
