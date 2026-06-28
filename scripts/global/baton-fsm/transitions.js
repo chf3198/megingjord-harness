@@ -105,6 +105,11 @@ const TRANSITIONS = Object.freeze([
   { fromState: ST.TESTING,     event: EV.ADMIN_HANDOFF,        toState: ST.REVIEW,       requiredMask: EB.ADMIN_HANDOFF | EB.SIGNER_INDEPENDENT | EB.CI_GREEN | EB.WORKTREE_MERGE_OK },
   // merge authorization event (testing -> testing, state unchanged)
   { fromState: ST.TESTING,     event: EV.MERGE,                toState: ST.TESTING,      requiredMask: EB.ADMIN_HANDOFF | EB.CI_GREEN | EB.WORKTREE_MERGE_OK | EB.SIGNER_INDEPENDENT },
+  // review -> review: deferred-final merge authorization (#3315). The documented
+  // deferred-final flow merges from status:review after CONSULTANT_CLOSEOUT, pre
+  // terminal-close; without this row a required baton-authority/merge gate bricks
+  // every deferred-final PR. State unchanged; terminal close stays the next row.
+  { fromState: ST.REVIEW,      event: EV.MERGE,                toState: ST.REVIEW,       requiredMask: EB.CONSULTANT_CLOSEOUT | EB.CI_GREEN | EB.SIGNER_INDEPENDENT | EB.WORKTREE_MERGE_OK },
   // review -> done: Consultant closeout
   { fromState: ST.REVIEW,      event: EV.CONSULTANT_CLOSEOUT,  toState: ST.DONE,         requiredMask: EB.CONSULTANT_CLOSEOUT | EB.PR_MERGED },
   // baton_back: Admin returns to Collaborator (#3251)
