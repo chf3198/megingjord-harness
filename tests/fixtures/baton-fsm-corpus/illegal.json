@@ -1,0 +1,1102 @@
+[
+  {
+    "name": "illegal_backlog_manager_handoff",
+    "state": 0,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_pickup_collaborator",
+    "state": 0,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_collaborator_handoff",
+    "state": 0,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_admin_handoff",
+    "state": 0,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_consultant_closeout",
+    "state": 0,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_merge",
+    "state": 0,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_baton_back",
+    "state": 0,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_epic_pause",
+    "state": 0,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_epic_defer",
+    "state": 0,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_backlog_resume",
+    "state": 0,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_manager_handoff",
+    "state": 1,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_pickup_collaborator",
+    "state": 1,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_collaborator_handoff",
+    "state": 1,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_admin_handoff",
+    "state": 1,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_consultant_closeout",
+    "state": 1,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_merge",
+    "state": 1,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_baton_back",
+    "state": 1,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_epic_pause",
+    "state": 1,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_epic_defer",
+    "state": 1,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_queued_resume",
+    "state": 1,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_pickup_manager",
+    "state": 2,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_pickup_collaborator",
+    "state": 2,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_collaborator_handoff",
+    "state": 2,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_admin_handoff",
+    "state": 2,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_consultant_closeout",
+    "state": 2,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_merge",
+    "state": 2,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_baton_back",
+    "state": 2,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_epic_pause",
+    "state": 2,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_epic_defer",
+    "state": 2,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_triage_resume",
+    "state": 2,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_pickup_manager",
+    "state": 3,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_manager_handoff",
+    "state": 3,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_collaborator_handoff",
+    "state": 3,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_admin_handoff",
+    "state": 3,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_consultant_closeout",
+    "state": 3,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_merge",
+    "state": 3,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_baton_back",
+    "state": 3,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_epic_pause",
+    "state": 3,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_epic_defer",
+    "state": 3,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_ready_resume",
+    "state": 3,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_pickup_manager",
+    "state": 4,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_manager_handoff",
+    "state": 4,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_pickup_collaborator",
+    "state": 4,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_admin_handoff",
+    "state": 4,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_consultant_closeout",
+    "state": 4,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_merge",
+    "state": 4,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_baton_back",
+    "state": 4,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_in-progress_resume",
+    "state": 4,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_pickup_manager",
+    "state": 5,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_manager_handoff",
+    "state": 5,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_pickup_collaborator",
+    "state": 5,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_collaborator_handoff",
+    "state": 5,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_consultant_closeout",
+    "state": 5,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_epic_pause",
+    "state": 5,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_epic_defer",
+    "state": 5,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_testing_resume",
+    "state": 5,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_pickup_manager",
+    "state": 6,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_manager_handoff",
+    "state": 6,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_pickup_collaborator",
+    "state": 6,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_collaborator_handoff",
+    "state": 6,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_admin_handoff",
+    "state": 6,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_merge",
+    "state": 6,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_baton_back",
+    "state": 6,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_epic_pause",
+    "state": 6,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_epic_defer",
+    "state": 6,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_review_resume",
+    "state": 6,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_pickup_manager",
+    "state": 7,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_manager_handoff",
+    "state": 7,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_pickup_collaborator",
+    "state": 7,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_collaborator_handoff",
+    "state": 7,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_admin_handoff",
+    "state": 7,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_consultant_closeout",
+    "state": 7,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_merge",
+    "state": 7,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_cancel",
+    "state": 7,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_baton_back",
+    "state": 7,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_epic_pause",
+    "state": 7,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_epic_defer",
+    "state": 7,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_done_resume",
+    "state": 7,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_pickup_manager",
+    "state": 8,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_manager_handoff",
+    "state": 8,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_pickup_collaborator",
+    "state": 8,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_collaborator_handoff",
+    "state": 8,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_admin_handoff",
+    "state": 8,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_consultant_closeout",
+    "state": 8,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_merge",
+    "state": 8,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_cancel",
+    "state": 8,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_baton_back",
+    "state": 8,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_epic_pause",
+    "state": 8,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_epic_defer",
+    "state": 8,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_cancelled_resume",
+    "state": 8,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_pickup_manager",
+    "state": 9,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_manager_handoff",
+    "state": 9,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_pickup_collaborator",
+    "state": 9,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_collaborator_handoff",
+    "state": 9,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_admin_handoff",
+    "state": 9,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_consultant_closeout",
+    "state": 9,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_merge",
+    "state": 9,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_baton_back",
+    "state": 9,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_epic_pause",
+    "state": 9,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_dormant_epic_defer",
+    "state": 9,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_pickup_manager",
+    "state": 10,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_manager_handoff",
+    "state": 10,
+    "event": 1,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_pickup_collaborator",
+    "state": 10,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_collaborator_handoff",
+    "state": 10,
+    "event": 3,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_admin_handoff",
+    "state": 10,
+    "event": 4,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_consultant_closeout",
+    "state": 10,
+    "event": 5,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_merge",
+    "state": 10,
+    "event": 6,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_baton_back",
+    "state": 10,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_epic_pause",
+    "state": 10,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "illegal_deferred_epic_defer",
+    "state": 10,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  }
+]

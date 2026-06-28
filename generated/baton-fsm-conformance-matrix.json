@@ -1,0 +1,302 @@
+{
+  "generated_at": "2026-06-28T04:39:33.351Z",
+  "schema_version": "1.0.0",
+  "conformance_summary": {
+    "total_cases": 163,
+    "js_wasm_byte_identical": true,
+    "all_passed": true
+  },
+  "agents": [
+    "claude-code",
+    "copilot",
+    "codex",
+    "antigravity",
+    "cursor"
+  ],
+  "runtimes_executed": [
+    "js",
+    "wasm"
+  ],
+  "runtimes_pending": [
+    "python",
+    "go",
+    "rust"
+  ],
+  "cells": [
+    {
+      "agent": "claude-code",
+      "runtime": "js",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "claude-code",
+      "runtime": "wasm",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "claude-code",
+      "runtime": "python",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Python kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "claude-code",
+      "runtime": "go",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Go kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "claude-code",
+      "runtime": "rust",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Rust kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "copilot",
+      "runtime": "js",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "copilot",
+      "runtime": "wasm",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "copilot",
+      "runtime": "python",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Python kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "copilot",
+      "runtime": "go",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Go kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "copilot",
+      "runtime": "rust",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Rust kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "codex",
+      "runtime": "js",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "codex",
+      "runtime": "wasm",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "codex",
+      "runtime": "python",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Python kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "codex",
+      "runtime": "go",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Go kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "codex",
+      "runtime": "rust",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Rust kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "antigravity",
+      "runtime": "js",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "antigravity",
+      "runtime": "wasm",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "antigravity",
+      "runtime": "python",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Python kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "antigravity",
+      "runtime": "go",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Go kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "antigravity",
+      "runtime": "rust",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Rust kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "cursor",
+      "runtime": "js",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "cursor",
+      "runtime": "wasm",
+      "status": "executed",
+      "total": 163,
+      "passed": 163,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "pass",
+      "note": "All agents consume the same shared baton-fsm core; JS and WASM verdicts are byte-identical by construction."
+    },
+    {
+      "agent": "cursor",
+      "runtime": "python",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Python kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "cursor",
+      "runtime": "go",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Go kernel port not yet implemented; toolchain pending."
+    },
+    {
+      "agent": "cursor",
+      "runtime": "rust",
+      "status": "pending-toolchain",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "mismatches": 0,
+      "verdict": "not-executed",
+      "note": "Rust kernel port not yet implemented; toolchain pending."
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+[
+  {
+    "name": "legal_backlog_pickup_manager",
+    "state": 0,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 2
+    }
+  },
+  {
+    "name": "legal_queued_pickup_manager",
+    "state": 1,
+    "event": 0,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 2
+    }
+  },
+  {
+    "name": "legal_triage_manager_handoff",
+    "state": 2,
+    "event": 1,
+    "evidence": 1,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 3
+    }
+  },
+  {
+    "name": "legal_ready_pickup_collaborator",
+    "state": 3,
+    "event": 2,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 4
+    }
+  },
+  {
+    "name": "legal_in-progress_collaborator_handoff",
+    "state": 4,
+    "event": 3,
+    "evidence": 18,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "legal_testing_admin_handoff",
+    "state": 5,
+    "event": 4,
+    "evidence": 356,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 6
+    }
+  },
+  {
+    "name": "legal_testing_merge",
+    "state": 5,
+    "event": 6,
+    "evidence": 356,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 5
+    }
+  },
+  {
+    "name": "legal_review_consultant_closeout",
+    "state": 6,
+    "event": 5,
+    "evidence": 136,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 7
+    }
+  },
+  {
+    "name": "legal_testing_baton_back",
+    "state": 5,
+    "event": 8,
+    "evidence": 1024,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 4
+    }
+  },
+  {
+    "name": "legal_backlog_cancel",
+    "state": 0,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_queued_cancel",
+    "state": 1,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_triage_cancel",
+    "state": 2,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_ready_cancel",
+    "state": 3,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_in-progress_cancel",
+    "state": 4,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_testing_cancel",
+    "state": 5,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_review_cancel",
+    "state": 6,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_dormant_cancel",
+    "state": 9,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_deferred_cancel",
+    "state": 10,
+    "event": 7,
+    "evidence": 512,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 8
+    }
+  },
+  {
+    "name": "legal_in-progress_epic_pause",
+    "state": 4,
+    "event": 9,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 9
+    }
+  },
+  {
+    "name": "legal_in-progress_epic_defer",
+    "state": 4,
+    "event": 10,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 10
+    }
+  },
+  {
+    "name": "legal_dormant_resume",
+    "state": 9,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 2
+    }
+  },
+  {
+    "name": "legal_deferred_resume",
+    "state": 10,
+    "event": 11,
+    "evidence": 0,
+    "expected": {
+      "decision": 1,
+      "reason": "none",
+      "required_next": 4
+    }
+  }
+]

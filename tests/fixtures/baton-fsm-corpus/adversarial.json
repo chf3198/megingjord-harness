@@ -1,0 +1,82 @@
+[
+  {
+    "name": "adversarial_force_close_no_pr_merged",
+    "state": 6,
+    "event": 5,
+    "evidence": 8,
+    "expected": {
+      "decision": 2,
+      "reason": "pr_merged"
+    }
+  },
+  {
+    "name": "adversarial_cancel_no_disposition",
+    "state": 4,
+    "event": 7,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "disposition_recorded"
+    }
+  },
+  {
+    "name": "adversarial_signer_collision",
+    "state": 5,
+    "event": 4,
+    "evidence": 324,
+    "expected": {
+      "decision": 2,
+      "reason": "signer_independent"
+    }
+  },
+  {
+    "name": "adversarial_spoofed_terminal_done",
+    "state": 7,
+    "event": 0,
+    "evidence": 2047,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "adversarial_spoofed_terminal_cancelled",
+    "state": 8,
+    "event": 11,
+    "evidence": 2047,
+    "expected": {
+      "decision": 2,
+      "reason": "illegal-transition"
+    }
+  },
+  {
+    "name": "adversarial_missing_acs_pass",
+    "state": 4,
+    "event": 3,
+    "evidence": 2,
+    "expected": {
+      "decision": 2,
+      "reason": "all_acs_pass"
+    }
+  },
+  {
+    "name": "adversarial_stale_merge_partial_evidence",
+    "state": 5,
+    "event": 6,
+    "evidence": 100,
+    "expected": {
+      "decision": 2,
+      "reason": "worktree_merge_ok"
+    }
+  },
+  {
+    "name": "adversarial_baton_back_no_reason",
+    "state": 5,
+    "event": 8,
+    "evidence": 0,
+    "expected": {
+      "decision": 2,
+      "reason": "baton_back_reason"
+    }
+  }
+]
