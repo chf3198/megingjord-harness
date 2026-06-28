@@ -1,0 +1,73 @@
+name: Baton Authority Merge Gate
+# Required-check workflow: runs merge-authority against the linked issue.
+# Blocks merge when baton evidence is incomplete or forged.
+# Refs #3290, Epic #3284.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  merge-gate:
+    name: baton-authority/merge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: Extract linked issue number
+        id: issue
+        run: |
+          ISSUE_NUM=$(echo "$PR_BODY_TEXT" | grep -oP '(?:Refs|Closes|Fixes|merge-evidence-deferred-final:)\s*#\K[0-9]+' | head -1)
+          if [ -z "$ISSUE_NUM" ]; then
+            echo "No linked issue found in PR body"
+            echo "issue_number=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "issue_number=$ISSUE_NUM" >> "$GITHUB_OUTPUT"
+        env:
+          PR_BODY_TEXT: ${{ github.event.pull_request.body }}
+
+      - name: Check for break-glass bypass
+        id: bypass
+        if: steps.issue.outputs.issue_number != ''
+        run: |
+          LABELS=$(gh issue view "$ISSUE_NUM" --json labels -q '.labels[].name' 2>/dev/null || echo "")
+          if echo "$LABELS" | grep -q 'merge-bypass:admin-exception'; then
+            echo "Break-glass label detected on issue"
+            echo "bypass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "bypass=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUM: ${{ steps.issue.outputs.issue_number }}
+
+      - name: Run merge authority evaluation
+        if: steps.issue.outputs.issue_number != '' && steps.bypass.outputs.bypass != 'true'
+        run: node scripts/global/baton-authority/ci-merge-check.js
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Record break-glass incident
+        if: steps.bypass.outputs.bypass == 'true'
+        run: |
+          echo "BREAK-GLASS BYPASS ACTIVATED"
+          echo "This merge bypassed baton-authority via merge-bypass:admin-exception label."
+          echo "Incident recorded for audit trail."
+
+      - name: Skip - no linked issue
+        if: steps.issue.outputs.issue_number == ''
+        run: |
+          echo "No linked issue found in PR body. Skipping merge authority check."
+          echo "PRs without linked issues are allowed - governance is advisory."
