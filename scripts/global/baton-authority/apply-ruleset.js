@@ -1,17 +1,77 @@
 // apply-ruleset.js -- Idempotent GitHub ruleset applier.
-// DRY-RUN default. Only mutates with explicit --apply flag.
-// Refs #3290, Epic #3284.
+// DRY-RUN default. Only mutates with explicit --apply flag, which performs a
+// real POST (create) / PUT (update-by-name) against the live repo via gh api.
+// Refs #3315, #3290, Epic #3284.
 'use strict';
 
-const { buildRulesetConfig, validateRulesetConfig, RULESET_NAME, OWNER, REPO } = require('./ruleset-config');
+const { execFileSync } = require('child_process');
+const {
+  buildRulesetConfig,
+  validateRulesetConfig,
+  RULESET_NAME,
+  OWNER,
+  REPO,
+} = require('./ruleset-config');
 
 /**
- * Build the API endpoint URL for rulesets.
+ * Build the API endpoint path for rulesets (gh api uses a repo-relative path).
  */
 function buildApiUrl(rulesetId) {
   const base = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/rulesets';
   if (rulesetId) return base + '/' + rulesetId;
   return base;
+}
+
+/**
+ * The gh api path (repo-relative) used by the live applier.
+ */
+function apiPath(rulesetId) {
+  const base = 'repos/' + OWNER + '/' + REPO + '/rulesets';
+  return rulesetId ? base + '/' + rulesetId : base;
+}
+
+/**
+ * Default gh executor. Injectable so tests never touch the network.
+ */
+function defaultRunGh(ghArgs, input) {
+  const opts = { encoding: 'utf8' };
+  if (input !== undefined) opts.input = input;
+  return execFileSync('gh', ghArgs, opts);
+}
+
+/**
+ * Find the id of an existing ruleset by name. Fail-soft: returns null when gh
+ * is unavailable or the lookup errors (offline / unauthenticated).
+ */
+function findExistingRulesetId(runGh) {
+  try {
+    const out = runGh(['api', apiPath()], undefined);
+    const list = JSON.parse(out);
+    const match = (list || []).find((rs) => rs && rs.name === RULESET_NAME);
+    return match ? match.id : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Perform the idempotent live apply: PUT when a ruleset of RULESET_NAME already
+ * exists, POST otherwise. Returns { method, path, id, response }.
+ */
+function applyRuleset(config, runGh) {
+  const existingId = findExistingRulesetId(runGh);
+  const method = existingId ? 'PUT' : 'POST';
+  const path = apiPath(existingId);
+  const body = JSON.stringify(config);
+  const out = runGh(['api', '-X', method, path, '--input', '-'], body);
+  let id = existingId;
+  try {
+    const parsed = JSON.parse(out);
+    if (parsed && parsed.id != null) id = parsed.id;
+  } catch (err) {
+    // response not JSON (or empty) -- keep the discovered id
+  }
+  return { method, path, id, response: out };
 }
 
 /**
@@ -23,7 +83,7 @@ function formatDryRun(config, existingId) {
   const lines = [
     '=== BATON AUTHORITY RULESET — DRY RUN ===',
     '',
-    'Method: ' + method,
+    'Method: ' + method + (existingId ? ' (update existing)' : ' (create)'),
     'URL: ' + url,
     'Ruleset name: ' + config.name,
     'Enforcement: ' + config.enforcement,
@@ -42,20 +102,25 @@ function formatDryRun(config, existingId) {
   lines.push('');
   lines.push('Non-fast-forward: enforced');
   lines.push('');
-  lines.push('Bypass actors: ' + config.bypass_actors.length);
+  lines.push('Bypass actors: ' + config.bypass_actors.length +
+    (config.bypass_actors.length === 0
+      ? ' (empty — admins enforced; break-glass via merge-bypass:admin-exception label)'
+      : ''));
   for (const actor of config.bypass_actors) {
     lines.push('  - ' + (actor.description || 'unnamed'));
   }
   lines.push('');
-  lines.push('To apply: node apply-ruleset.js --apply');
+  lines.push('To apply (idempotent create/update-by-name): node apply-ruleset.js --apply');
   lines.push('To remove: gh api -X DELETE ' + buildApiUrl('<RULESET_ID>'));
   return lines.join('\n');
 }
 
 /**
- * Main entry point. Parses CLI args and runs dry-run or apply.
+ * Main entry point. Parses CLI args and runs dry-run or a real apply.
+ * deps.runGh is injectable for hermetic tests.
  */
-function main(args) {
+function main(args, deps) {
+  const runGh = (deps && deps.runGh) || defaultRunGh;
   const config = buildRulesetConfig();
   const validation = validateRulesetConfig(config);
   if (!validation.valid) {
@@ -72,20 +137,24 @@ function main(args) {
     console.log(output);
     return { action: 'dry-run', config, output };
   }
-  // --apply mode: print the gh api command
-  const body = JSON.stringify(config, null, 2);
-  const cmd = 'gh api -X POST ' + buildApiUrl() + ' --input=-';
-  console.log('Applying ruleset via: ' + cmd);
-  console.log('Request body:');
-  console.log(body);
-  console.log('');
-  console.log('Run the above gh api command manually to apply.');
-  console.log('To remove: gh api -X DELETE ' + buildApiUrl('<RULESET_ID>'));
-  return { action: 'apply-instructions', config, cmd };
+  const result = applyRuleset(config, runGh);
+  const verb = result.method === 'POST' ? 'created' : 'updated';
+  console.log(
+    'Ruleset ' + verb + ' (id=' + result.id + ') via ' +
+    result.method + ' ' + result.path
+  );
+  return { action: 'applied', config, ...result };
 }
 
 if (require.main === module) {
   main(process.argv.slice(2));
 }
 
-module.exports = { main, formatDryRun, buildApiUrl };
+module.exports = {
+  main,
+  formatDryRun,
+  buildApiUrl,
+  apiPath,
+  findExistingRulesetId,
+  applyRuleset,
+};

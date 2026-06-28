@@ -39,3 +39,4 @@ one fact, one home, no duplicated prose. Each line points to its source ticket +
 ## 2026-06-28
 
 - #3290/#3284 — W2 keystone: the `baton-authority/merge` check re-derives the baton trail from GitHub truth (issue comments/labels/PR state) and Merkle-verifies the evidence digest; a stale local `admin_ops` cache can never authorize merge. See [[workflow-learnings]].
+- #3315/#3290 — config-as-code ruleset must require only contexts that are *actually reported*: requiring `baton-fsm-conformance` (an advisory, `continue-on-error`, paths-filtered job named `fsm-conformance-advisory`) under a strict policy bricks every PR ("Expected — waiting for status"). Anti-recurrence: a `KNOWN_REPORTING_CONTEXTS` allowlist in the validator now rejects unreportable required contexts before live apply. Break-glass belongs at the workflow level (`merge-bypass:admin-exception` label), not as a placeholder ruleset bypass actor. See [[workflow-learnings]].
