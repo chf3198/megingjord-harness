@@ -35,3 +35,7 @@ one fact, one home, no duplicated prose. Each line points to its source ticket +
 ## 2026-06-24
 
 - #3243/#3242 — file-editing tools on non-workspace worktree paths trigger VS Code auth dialogs on every call; use shell commands (sed -i, cat, patch) for paths outside registered workspace. See [[worktree-tool-boundary]].
+
+## 2026-06-28
+
+- #3290/#3284 — W2 keystone: the `baton-authority/merge` check re-derives the baton trail from GitHub truth (issue comments/labels/PR state) and Merkle-verifies the evidence digest; a stale local `admin_ops` cache can never authorize merge. See [[workflow-learnings]].
