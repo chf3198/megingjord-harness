@@ -62,11 +62,11 @@ A research-first Epic (label `type:epic` + `phase-gate:research-first`) MUST sat
 
 ### Operational semantics (normative)
 
-- Clause 1 score rule: `across all G1-G9` means `min(G1..G9) ≥ 7`; mean/median pass is insufficient. <!-- pending-enforcement: #1888 clause-1 -->
-- Clause 2 approval rule: `Consultant approval` means structured closeout fields include `verdict: approve_for_merge` and `rubric_rating: >=7`. <!-- pending-enforcement: #1888 clause-2 -->
+- Clause 1 score rule: `across all G1-G9` means `min(G1..G9) ≥ 7`; mean/median pass is insufficient. <!-- pending-enforcement: #3321 clause-1 -->
+- Clause 2 approval rule: `Consultant approval` means structured closeout fields include `verdict: approve_for_merge` and `rubric_rating: >=7`. <!-- pending-enforcement: #3321 clause-2 -->
 - Clause 3 transition guard: on any Epic status leaving `status:in-progress`, absence of an `EPIC_RESCOPE` marker is a gate violation. <!-- enforced-by: scripts/global/megalint/research-first-phase-gate.js -->
 - Clause 4 source citation: each Phase-1 child carries label `phase-gate:phase-1` and MUST include at least one `Refs #N` Phase-0 source child in body. <!-- enforced-by: scripts/global/megalint/manager-handoff.js -->
-- Clause 5 re-arm trigger: a Phase-0 child `issues.reopened` event pauses Phase-1 by posting `EPIC_PHASE_GATE_PAUSE`; resumption requires child re-close plus Manager `EPIC_RESCOPE` refresh. <!-- pending-enforcement: #1888 clause-5 -->
+- Clause 5 re-arm trigger: a Phase-0 child `issues.reopened` event pauses Phase-1 by posting `EPIC_PHASE_GATE_PAUSE`; resumption requires child re-close plus Manager `EPIC_RESCOPE` refresh. <!-- pending-enforcement: #3321 clause-5 -->
 - Clause 6 promotion gate: `phase0GreenComplete(epicNumber)` is the deterministic predicate; on a green Phase-0 with zero `phase-gate:phase-1` children it returns `missingPhase1Children: true`. `phase1-auto-materialize` then seeds one Phase-1 child, and `phase0-closure-guard` posts a structured `EPIC_PHASE_GATE_PAUSE` / `BLOCKER_NOTE`, emits an `incidents.jsonl` event (`pattern_id: phase0-complete-no-phase1`), reopens the Epic, and fails the run (non-zero exit). This is BLOCKING (per Epic #2678 AC3/AC6, not advisory); `PHASE0_GATE_BYPASS=1` downgrades to an advisory comment plus an audit warning (G6 escape hatch, never silent). The enforcement core is runtime-agnostic — one shared module set is the single path for Copilot / Codex / Claude Code / Antigravity. <!-- enforced-by: scripts/global/megalint/phase0-promotion-gate.js + scripts/global/phase0-closure-guard.js + scripts/global/phase1-auto-materialize.js + .github/workflows/phase0-promotion-gate.yml -->
 
 ## Epic Progress Comment Protocol

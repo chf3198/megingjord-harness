@@ -2,26 +2,42 @@
 
 ## Getting Help
 
-This is a private development workbench — not a public product.
+### 🐛 Bug Reports
 
-### Self-Service
+Found a bug? [Open an issue](https://github.com/chf3198/megingjord-harness/issues/new?template=bug-report.yml)
+using the bug report template.
 
-- **Dashboard**: `npm start` → http://localhost:8090/dashboard/
-- **Fleet health**: `npm run health`
-- **Lint check**: `npm run lint`
-- **Deploy to runtime**: `npm run deploy:apply`
+### 💡 Feature Requests
 
-### Architecture
+Have an idea? [Open a feature request](https://github.com/chf3198/megingjord-harness/issues/new?template=feature_request.md).
 
-- See [README.md](../README.md) for repo structure and commands
-- See [research/adr/](../research/adr/) for architectural decisions
-- See [instructions/](../instructions/) for global governance rules
+### ❓ Questions
 
-### Troubleshooting
+For general questions about using Megingjord Harness as an Agent Plugin:
 
-| Symptom | Fix |
-|---------|-----|
-| Dashboard shows "Not Found" | Navigate to `/dashboard/` (with trailing slash) |
-| `npm start` EADDRINUSE | Kill existing process: `lsof -ti:8090 \| xargs kill` |
-| Fleet health fails | Check Tailscale: `tailscale status` |
-| Deploy fails on hooks | Install rsync: `sudo apt install rsync` |
+1. Check the [README](README.md) for install and usage instructions
+2. Check [CONTRIBUTING](CONTRIBUTING.md) for development workflow
+3. Search [existing issues](https://github.com/chf3198/megingjord-harness/issues)
+4. If still stuck, [open a discussion](https://github.com/chf3198/megingjord-harness/discussions)
+
+## Plugin Installation Help
+
+```
+VS Code → Chat: Install Plugin From Source → paste Git URL
+```
+
+This gives you 24 governance skills, 8 custom agents, and wiki
+seed content. No build step or configuration required.
+
+## Useful Commands
+
+```bash
+npm run validate:triage   # Verify skill triage integrity
+npm run validate:compat   # Cross-tool plugin validation
+npm run lint              # ≤100 line file check
+```
+
+## Maintainer
+
+This project is maintained by
+[Curtis Franks](https://curtisfranks.com).
