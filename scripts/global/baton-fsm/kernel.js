@@ -56,6 +56,17 @@ function unpack(packed) {
  * @param {number} evidenceMask - OR of EVIDENCE_BITS present.
  * @returns {number} Packed i32 verdict.
  */
+/**
+ * Find the index of the lowest set bit in a bitmask.
+ * Used to identify the first missing evidence requirement.
+ */
+function findFirstSetBit(mask) {
+  for (let bitIdx = 0; bitIdx < EVIDENCE_BIT_COUNT; bitIdx++) {
+    if (mask & (1 << bitIdx)) return bitIdx;
+  }
+  return 0;
+}
+
 function decide(stateCode, eventCode, evidenceMask) {
   // Terminal states are sinks: no outgoing transitions
   if (TERMINAL_STATES.has(stateCode)) {
@@ -78,16 +89,9 @@ function decide(stateCode, eventCode, evidenceMask) {
   if ((evidenceMask & required) === required) {
     return pack(DECISIONS.ALLOW, REASON_NONE, matchedRow.toState);
   }
-  // Find the first missing required bit (lowest bit index)
+  // First missing required bit (lowest bit index)
   const missing = required & ~evidenceMask;
-  let firstMissingBit = 0;
-  for (let bitIdx = 0; bitIdx < EVIDENCE_BIT_COUNT; bitIdx++) {
-    if (missing & (1 << bitIdx)) {
-      firstMissingBit = bitIdx;
-      break;
-    }
-  }
-  return pack(DECISIONS.DENY, firstMissingBit, matchedRow.toState);
+  return pack(DECISIONS.DENY, findFirstSetBit(missing), matchedRow.toState);
 }
 
 module.exports = {

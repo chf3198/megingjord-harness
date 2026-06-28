@@ -52,6 +52,24 @@ function readLog(logPath) {
 }
 
 /**
+ * Generate a unique nonce not colliding with any existing nonce.
+ * @param {Set<string>} existingNonces - Nonces already in the log.
+ * @returns {string} A unique 32-char hex nonce.
+ */
+function generateUniqueNonce(existingNonces) {
+  let nonce = randomBytes(16).toString("hex");
+  let attempts = 0;
+  while (existingNonces.has(nonce) && attempts < 100) {
+    nonce = randomBytes(16).toString("hex");
+    attempts++;
+  }
+  if (existingNonces.has(nonce)) {
+    throw new Error("nonce-collision-after-100-attempts");
+  }
+  return nonce;
+}
+
+/**
  * Append a verdict to the hash-chained log.
  * Enforces MONOTONIC sequence and rejects duplicate/out-of-order seq or reused nonce.
  * G4: verdict is redacted BEFORE hashing so the chain covers the redacted form.
@@ -65,29 +83,14 @@ function appendVerdict(logPath, verdict) {
   const prevHash = lastEntry ? lastEntry.hash : '0'.repeat(64);
   const prevSeq = lastEntry ? lastEntry.seq : -1;
   const nextSeq = prevSeq + 1;
-  // Collect all existing nonces for replay protection
   const existingNonces = new Set(entries.map((entry) => entry.nonce));
-  // Generate a unique nonce
-  let nonce = randomBytes(16).toString('hex');
-  // Extremely unlikely collision, but guard against it
-  let attempts = 0;
-  while (existingNonces.has(nonce) && attempts < 100) {
-    nonce = randomBytes(16).toString('hex');
-    attempts++;
-  }
-  if (existingNonces.has(nonce)) {
-    throw new Error('nonce-collision-after-100-attempts');
-  }
+  const nonce = generateUniqueNonce(existingNonces);
   // G4: redact verdict BEFORE hashing — chain covers the redacted form
   const redactedVerdict = redactVerdict(verdict);
   const hash = computeEntryHash(prevHash, redactedVerdict, nextSeq, nonce);
   const entry = {
-    seq: nextSeq,
-    nonce,
-    hash,
-    prev_hash: prevHash,
-    verdict: redactedVerdict,
-    ts: new Date().toISOString(),
+    seq: nextSeq, nonce, hash, prev_hash: prevHash,
+    verdict: redactedVerdict, ts: new Date().toISOString(),
   };
   const line = JSON.stringify(entry) + '\n';
   writeFileSync(logPath, line, { flag: 'a' });

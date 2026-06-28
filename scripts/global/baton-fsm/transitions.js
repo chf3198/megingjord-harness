@@ -52,9 +52,9 @@ const EVIDENCE_BITS = Object.freeze({
   ALL_ACS_PASS:          1 << 4,  // 16
   SIGNER_INDEPENDENT:    1 << 5,  // 32
   CI_GREEN:              1 << 6,  // 64
-  PR_MERGED:             1 << 7,  // 128
-  WORKTREE_MERGE_OK:     1 << 8,  // 256
-  DISPOSITION_RECORDED:  1 << 9,  // 512
+  PR_MERGED:             1 << 7,  // bit 7
+  WORKTREE_MERGE_OK:     1 << 8,  // bit 8
+  DISPOSITION_RECORDED:  1 << 9,  // bit 9
   BATON_BACK_REASON:     1 << 10, // 1024
 });
 
