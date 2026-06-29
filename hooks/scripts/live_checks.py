@@ -171,3 +171,27 @@ def check_merged_pr(branch: str, cwd: str) -> int | None:
         return None
     except Exception:
         return None  # fail-open — never block on API error
+
+
+def open_pr_for_ref(pr_ref, cwd: str):
+    """Return True if pr_ref resolves to an OPEN PR, False if it resolves to a
+    non-open/absent PR, None on an indeterminate gh error. Refs #3344.
+
+    Used by the pretool_guard merge gate: when the cwd-keyed admin_ops.pr_create
+    flag is lost to cwd-churn, the gate verifies a *real* OPEN PR exists for the
+    merge ref before blocking. Fail-CLOSED — callers allow ONLY on True; both a
+    genuine 'no PR' (False) and an indeterminate gh failure (None) keep the block.
+    """
+    if not pr_ref:
+        return None
+    try:
+        r = subprocess.run(
+            ["gh", "pr", "view", str(pr_ref), "--json", "state,number"],
+            capture_output=True, text=True, cwd=cwd, timeout=20,
+        )
+        if r.returncode != 0:
+            return False  # gh exits non-zero when no PR is found for the ref
+        data = json.loads(r.stdout or "{}")
+        return data.get("state") == "OPEN"
+    except Exception:
+        return None  # timeout / gh absent / parse error -> indeterminate (fail-closed)

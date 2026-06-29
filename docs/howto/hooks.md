@@ -29,3 +29,18 @@ Stale historical handoffs without `worktree_branch:` no longer satisfy the gate.
 | `baton_handoff_checks.py` | Branch-scoped MANAGER_HANDOFF authority |
 
 See [pre-push-gates.md](pre-push-gates.md) for push/merge gate ordering.
+
+## Merge gate — real-PR verification (#3344)
+
+The `pretool_guard.py` admin-merge gate keys `admin_ops.pr_create` by
+`sha1(cwd)+session`. Under cwd-churn (session cwd on `main` while the work lives
+in a linked worktree) that flag can be lost, which previously produced a false
+"PR creation not recorded" block on a genuine, CI-green PR.
+
+The gate now degrades safely: when `pr_create` is unrecorded it extracts the PR
+ref from the merge command and verifies a **real OPEN PR** via a read-only
+`live_checks.open_pr_for_ref()` lookup. The merge is allowed **only** on a
+confirmed-OPEN PR; it **fails closed** (retains the block) when no PR exists or
+the lookup is indeterminate (gh non-zero / timeout / absent). The gate stays
+honest — it still blocks a merge that truly has no PR — while no longer
+stranding a legitimate Admin merge on lost session state.

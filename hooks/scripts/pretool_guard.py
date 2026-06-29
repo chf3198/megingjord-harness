@@ -16,7 +16,7 @@ from session_anomaly import (
 from governance_state import ensure_state, save_state
 from baton_handoff_checks import linked_issue_has_authoritative_manager_handoff
 from one_ticket_per_worktree import check_one_ticket_per_worktree
-from live_checks import ci_gate_status, ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr
+from live_checks import ci_gate_status, ci_gate_status_stable, linked_issue_has_collab_handoff, linked_issue_has_manager_handoff, linked_issue_has_planning_consensus, check_merged_pr, open_pr_for_ref
 from runtime_paths import runtime_hook_paths
 RE_ISSUE_REF = re.compile(r"#\d+")
 RE_BRANCH_TICKET = re.compile(r"^(feat|fix|hotfix)/(\d+)-")
@@ -389,7 +389,16 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
             return emit("deny", "Admin-override merge blocked (#2706): record the Epic #2517 exception "
                         "FIRST - add the 'merge-bypass:admin-exception' label (or a BLOCKER_NOTE with "
                         "bypass_reason: + approver:), THEN re-run the override merge.")
-        if not ops.get("pr_create"): return emit("deny","Merge blocked: PR creation not recorded.")
+        if not ops.get("pr_create"):
+            # #3344: the cwd-keyed admin_ops.pr_create flag is lost to cwd-churn,
+            # producing a false "PR creation not recorded" block on a genuine,
+            # CI-green PR. Before blocking, verify a real OPEN PR exists for the
+            # merge ref (read-only). Allow ONLY on a confirmed-OPEN PR; fail-CLOSED
+            # (retain the block) when there is no PR or gh is indeterminate.
+            pr_ref_for_verify = RE_PR_REF.search(joined)
+            pr_ref_value = pr_ref_for_verify.group(1) if pr_ref_for_verify else None
+            if open_pr_for_ref(pr_ref_value, cwd) is not True:
+                return emit("deny", "Merge blocked: PR creation not recorded and no open PR confirmed for the merge ref (read-only verify; fail-closed).")
         pr_m = RE_PR_REF.search(joined)
         if pr_m:
             ci_state = ci_gate_status_stable(pr_m.group(1), cwd)
