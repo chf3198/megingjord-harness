@@ -54,7 +54,9 @@ test('failover calls dispatchFreeCloud exactly once (AC7 idempotency)', async ()
 test('dispatchRedTeam: fleet AVAILABILITY failure fails over to free-cloud (AC1)', async () => {
   const out = await dispatchRedTeam({
     artifactType: 'collaborator-handoff', content: 'x', model: 'qwen2.5-coder:7b',
-    deps: { wrapProviderCall: downFleet, freeCloud: { dispatchFreeCloud: fcOk, recordTelemetry: noopRecord } },
+    // #3333: stub the bounded reachability probe as UP so this exercises the
+    // wrap-level availability-failure path (not the probe path) and stays hermetic in CI.
+    deps: { dispatchGet: async () => ({ ok: true }), wrapProviderCall: downFleet, freeCloud: { dispatchFreeCloud: fcOk, recordTelemetry: noopRecord } },
   });
   expect(out.hamrStats.substituted).toBe(true);
   expect(out.modelUsed).toBe('free-cloud:gemini');
@@ -63,7 +65,8 @@ test('dispatchRedTeam: fleet AVAILABILITY failure fails over to free-cloud (AC1)
 test('dispatchRedTeam: CAPABILITY failure does NOT fail over; fleet-up is unchanged (AC1/AC6)', async () => {
   const out = await dispatchRedTeam({
     artifactType: 'collaborator-handoff', content: 'x', model: 'qwen2.5-coder:7b',
-    deps: { wrapProviderCall: okFleet, freeCloud: { dispatchFreeCloud: async () => { throw new Error('must not be called'); } } },
+    // #3333: probe UP so capability-failure path is tested without a live fleet host.
+    deps: { dispatchGet: async () => ({ ok: true }), wrapProviderCall: okFleet, freeCloud: { dispatchFreeCloud: async () => { throw new Error('must not be called'); } } },
   });
   expect(out.hamrStats.ok).toBe(true);
   expect(out.hamrStats.substituted).toBeUndefined();

@@ -10,6 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { wrapProviderCall } = require('./hamr-provider-wrapper');
 const { residentModels } = require('./fleet-resident');
+const { dispatchGet } = require('./fleet-probe');
 
 const DEFAULT_HOST = 'http://100.91.113.16:11434';
 // #3167: routine reviews default to the fast 7b; 32b is high-stakes opt-in only.
@@ -28,6 +29,24 @@ function loadFleetTimeout(policyPath = DEFAULT_TIMEOUT_POLICY, fallbackMs = 600_
 }
 const REQUEST_TIMEOUT_MS = loadFleetTimeout();
 const DEFAULT_KEEP_ALIVE = '30m';
+// #3333 (G6): bounded reachability gate. A dead/unreachable fleet host must fail
+// over to the $0 free-cloud tier within this probe window — never block on the long
+// generation patience (REQUEST_TIMEOUT_MS up to 1500s x retries), the multi-minute
+// preflight hang observed during #3331. Env-tunable; reuses the fleet-probe primitive.
+const FLEET_PROBE_TIMEOUT_MS = Number(process.env.FLEET_PROBE_TIMEOUT_MS) || 8000;
+
+// Strip the URL scheme so fleet-probe's host:port parser sees "host:port".
+function hostPort(host) { return String(host).replace(/^https?:\/\//, '').replace(/\/$/, ''); }
+
+// Bounded fleet reachability check (GET /api/version). True only on a real, parseable
+// response within FLEET_PROBE_TIMEOUT_MS; any network error/timeout returns false.
+async function fleetReachable(host, deps = {}) {
+  const get = deps.dispatchGet || dispatchGet;
+  try {
+    const res = await get({ host: hostPort(host), path: '/api/version', timeoutMs: FLEET_PROBE_TIMEOUT_MS });
+    return !!(res && res.ok === true);
+  } catch { return false; }
+}
 const TEMPLATES_PATH = path.join(__dirname, '..', '..', 'config', 'fleet-red-team-prompts.json');
 const MATRIX_PATH = path.join(__dirname, '..', '..', 'config', 'red-team-model-matrix.yml');
 const TOKEN_BUDGET_HEADROOM = 200;
@@ -204,6 +223,15 @@ async function dispatchRedTeam({
   const activeModel = resolved.modelId;
   const prompt = buildPrompt(template, content);
   const numPredict = Math.min(template.expected_token_range[1] + TOKEN_BUDGET_HEADROOM, MAX_NUM_PREDICT);
+  // #3333: gate the long generate behind a bounded reachability probe so an
+  // unreachable fleet host fails over to the $0 free-cloud tier in seconds, not the
+  // multi-minute generation patience window. Fail-over reuses onFleetUnavailable.
+  const reachable = await fleetReachable(host, { dispatchGet: deps.dispatchGet });
+  if (!reachable) {
+    const { onFleetUnavailable } = require('./review-dispatch-failover');
+    return onFleetUnavailable({ prompt, parseFindings, deps: deps.freeCloud,
+      fallbackModel: activeModel, elapsed: 0, error: 'fleet-unreachable-probe' });
+  }
   const start = Date.now();
   const envelope = await wrap(
     'ollama',
@@ -243,5 +271,6 @@ module.exports = {
   callWithRetry, callOllamaOnce, keepAliveValue, parseFindings,
   stripArxivHallucinations, detectRefusal,
   resolveKeepAlive, loadFleetTimeout,
-  TIER, RETRY_DELAYS_MS, MATRIX_PATH, REQUEST_TIMEOUT_MS,
+  fleetReachable, hostPort,
+  TIER, RETRY_DELAYS_MS, MATRIX_PATH, REQUEST_TIMEOUT_MS, FLEET_PROBE_TIMEOUT_MS,
 };
