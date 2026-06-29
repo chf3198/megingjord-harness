@@ -45,13 +45,39 @@ function resolveTestScope(argv, cwd = ROOT) {
   return deriveTestPaths(changed, cwd);
 }
 
+// #3333 AC2: the scoped runner uses `node --test`, which CANNOT execute
+// @playwright/test specs (the canonical baton-artifact spec format) — they were
+// reported as a false node:test miss. Partition the changed-spec set by content so
+// playwright specs dispatch via `npx playwright test` and are actually executed.
+// readFile is injected so the partition is unit-testable without disk.
+function partitionSpecs(relPaths, readFile) {
+  const playwright = [];
+  const node = [];
+  for (const rel of relPaths) {
+    let src = '';
+    try { src = readFile(rel); } catch (_) { src = ''; }
+    (/@playwright\/test/.test(src) ? playwright : node).push(rel);
+  }
+  return { node, playwright };
+}
+
 function runTests(cwd = ROOT, testPaths) {
   if (testPaths && testPaths.length) {
     const rel = testPaths.map(tp => path.relative(cwd, path.resolve(tp)));
-    const scoped = spawnSync('node', ['--test', ...rel], {
-      cwd, encoding: 'utf8',
-    });
-    return { ok: scoped.status === 0, output: scoped.stderr || scoped.stdout };
+    const { node: nodeSpecs, playwright: pwSpecs } = partitionSpecs(
+      rel, p => fs.readFileSync(path.resolve(cwd, p), 'utf8'));
+    let output = '';
+    if (nodeSpecs.length) {
+      const scoped = spawnSync('node', ['--test', ...nodeSpecs], { cwd, encoding: 'utf8' });
+      output += scoped.stderr || scoped.stdout || '';
+      if (scoped.status !== 0) return { ok: false, output };
+    }
+    if (pwSpecs.length) {
+      const pw = spawnSync('npx', ['playwright', 'test', ...pwSpecs], { cwd, encoding: 'utf8' });
+      output += pw.stderr || pw.stdout || '';
+      if (pw.status !== 0) return { ok: false, output };
+    }
+    return { ok: true, output };
   }
   const full = spawnSync('npm', ['test'], { cwd, encoding: 'utf8' });
   return { ok: full.status === 0, output: full.stderr || full.stdout };
@@ -160,4 +186,5 @@ if (require.main === module) {
 module.exports = {
   run, runLint, runTests, checkChangelogFragment,
   deriveTestPaths, resolveTestScope, interpretReview, runFleetReview,
+  partitionSpecs,
 };
