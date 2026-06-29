@@ -340,7 +340,10 @@
     "hamr:offload-kpi:test": "npx playwright test tests/hamr-offload-kpi.spec.js tests/hamr-epic-parity.spec.js",
     "hamr:epic-3008:test": "npx playwright test tests/hamr-tool-policy.spec.js tests/governance-evidence-bridge.spec.js tests/hamr-offload-kpi.spec.js tests/cascade-context-integration.spec.js tests/hamr-epic-parity.spec.js",
     "doc-coverage:replay-eval": "node scripts/global/megalint/doc-coverage-diff-replay-eval.js",
-    "doc-coverage:replay-eval:test": "node --test tests/doc-coverage-diff-replay-eval.spec.js tests/doc-coverage-diff-wiring.spec.js tests/doc-coverage-diff-stress.spec.js"
+    "doc-coverage:replay-eval:test": "node --test tests/doc-coverage-diff-replay-eval.spec.js tests/doc-coverage-diff-wiring.spec.js tests/doc-coverage-diff-stress.spec.js",
+    "ac-suggest": "node scripts/global/ac-suggest.js",
+    "ac-suggest:replay-eval": "node scripts/global/ac-suggest-replay-eval.js",
+    "ac-suggest:test": "node --test tests/ac-suggest.spec.js"
   },
   "keywords": [
     "devops",
