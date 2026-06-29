@@ -223,6 +223,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `governance:duplicate-check:test` | `node --test tests/ticket-duplicate-guard.spec.js` |
 | `governance:epic` | `node scripts/global/epic-evidence.js` |
 | `governance:epic-auto-tick:test` | `node --test tests/epic-task-list-auto-tick.spec.js` |
+| `governance:epic-parent-resolve:test` | `node --test tests/epic-parent-resolve.spec.js` |
 | `governance:epics` | `node scripts/global/epic-close-validator.js` |
 | `governance:escalation-coverage` | `node scripts/global/escalation-coverage-gate.js` |
 | `governance:escalation-coverage:test` | `node --test tests/escalation-coverage-gate.spec.js` |
