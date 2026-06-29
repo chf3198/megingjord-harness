@@ -22,6 +22,9 @@ function runWith(issueJson, branch, prBody) {
 const MANAGER_HANDOFF_FIXTURE =
   'MANAGER_HANDOFF\nscope: fix pre-push\nlane: lane:code-change\ntest_strategy: tdd-pyramid\n'
   + 'acceptance: pass/fail\ngates: CI\nrelated_tickets: #3008\noverlap_decision: none\n'
+  // #3328: worktree_branch is required by manager-handoff (wtGate.checkManager) for
+  // lane:code-change; the fixture predates that requirement and was failing on main.
+  + 'worktree_branch: fix/1566-closeout-preflight\n'
   + 'Signed-by: Orla Mason\nTeam&Model: claude-code:opus@anthropic\nRole: manager';
 
 const CONSULTANT_CLOSEOUT_FIXTURE =
@@ -29,6 +32,9 @@ const CONSULTANT_CLOSEOUT_FIXTURE =
   + 'verification-timestamp: 2026-06-21T00:00:00Z\n'
   + 'rubric_rating: G1:9 G2:9 G3:9 G4:9 G5:9 G6:9 G7:9 G8:9 G9:9 -> min(G1..G9)=9, rubric 9/10\n'
   + 'anneal_tickets_filed: none\nmid_flight_flaws: none\n'
+  // #3328: worktree_residual_risk is required by consultant-closeout; the fixture
+  // predates that requirement and was failing on main.
+  + 'worktree_residual_risk: none\n'
   + 'Signed-by: Orla Vale\nTeam&Model: claude-code:opus@anthropic\nRole: consultant';
 
 test('closeout-preflight passes when linked issue has a valid consultant closeout', () => {
