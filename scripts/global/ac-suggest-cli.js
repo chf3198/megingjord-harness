@@ -10,11 +10,11 @@ const core = require('./ac-suggest');
 function parseArgs(argv) {
   const opts = { json: false, problem: '' };
   for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === '--json') opts.json = true;
-    else if (a === '--problem') opts.problem = argv[++i] || '';
-    else if (a === '--problem-file') opts.problem = require('fs').readFileSync(argv[++i], 'utf8');
-    else if (!opts.problem) opts.problem = a;
+    const arg = argv[i];
+    if (arg === '--json') opts.json = true;
+    else if (arg === '--problem') opts.problem = argv[++i] || '';
+    else if (arg === '--problem-file') opts.problem = require('fs').readFileSync(argv[++i], 'utf8');
+    else if (!opts.problem) opts.problem = arg;
   }
   return opts;
 }
@@ -40,11 +40,11 @@ async function runInteractive(opts) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   const approved = [];
   process.stdout.write(`\nSuggested ACs (source: ${source}). Backstop = epic-ac-reconcile.js measurability.\n`);
-  for (const v of verdicts) {
-    const flag = v.accepted ? 'MEASURABLE' : `REJECTED (${v.classifier && v.classifier.reason || 'unmeasurable'})`;
-    process.stdout.write(`\n[${v.ac_id}] ${v.text}\n  backstop: ${flag} | evidence: ${(v.evidence_refs || []).join(',') || 'none'}\n`);
+  for (const verdict of verdicts) {
+    const flag = verdict.accepted ? 'MEASURABLE' : `REJECTED (${verdict.classifier && verdict.classifier.reason || 'unmeasurable'})`;
+    process.stdout.write(`\n[${verdict.ac_id}] ${verdict.text}\n  backstop: ${flag} | evidence: ${(verdict.evidence_refs || []).join(',') || 'none'}\n`);
     const ans = (await ask(rl, '  (a)ccept / (e)dit / (r)eject [r if rejected by backstop]: ')).trim().toLowerCase();
-    if (ans === 'a' && v.accepted) approved.push({ text: v.text });
+    if (ans === 'a' && verdict.accepted) approved.push({ text: verdict.text });
     else if (ans === 'e') {
       const edited = (await ask(rl, '  new text: ')).trim();
       if (edited && core.classifyMeasurability(edited).measurable) approved.push({ text: edited });

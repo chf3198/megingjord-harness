@@ -17,13 +17,13 @@ const FP_RATE_BAR = 0.05; // AC5: <5% false-positive rate
 function score(samples) {
   let tp = 0, fp = 0, tn = 0, fn = 0;
   const errors = [];
-  for (const s of samples) {
-    const predicted = classifyMeasurability(s.text).measurable;
-    const actual = !!s.measurable;
+  for (const sample of samples) {
+    const predicted = classifyMeasurability(sample.text).measurable;
+    const actual = !!sample.measurable;
     if (predicted && actual) tp++;
-    else if (predicted && !actual) { fp++; errors.push({ type: 'FP', text: s.text }); }
+    else if (predicted && !actual) { fp++; errors.push({ type: 'FP', text: sample.text }); }
     else if (!predicted && !actual) tn++;
-    else { fn++; errors.push({ type: 'FN', text: s.text }); }
+    else { fn++; errors.push({ type: 'FN', text: sample.text }); }
   }
   const predictedPositive = tp + fp;
   const fpRate = predictedPositive ? fp / predictedPositive : 0; // FP among accepted (AC5 metric)
@@ -49,13 +49,13 @@ module.exports = { score, run, loadCorpus, FP_RATE_BAR, CORPUS };
 
 if (require.main === module) {
   const json = process.argv.includes('--json');
-  const r = run();
-  if (json) { process.stdout.write(JSON.stringify(r, null, 2) + '\n'); }
+  const result = run();
+  if (json) { process.stdout.write(JSON.stringify(result, null, 2) + '\n'); }
   else {
-    process.stdout.write(`ac-suggest replay-eval: ${r.total} samples\n` +
-      `  precision=${r.precision} recall=${r.recall} TN-rate=${r.trueNegativeRate}\n` +
-      `  FP-rate=${r.fpRate} (bar <${r.fpRateBar}) → ${r.meetsBar ? 'PASS' : 'FAIL'}\n`);
-    if (r.errors.length) process.stdout.write('  misses: ' + JSON.stringify(r.errors) + '\n');
+    process.stdout.write(`ac-suggest replay-eval: ${result.total} samples\n` +
+      `  precision=${result.precision} recall=${result.recall} TN-rate=${result.trueNegativeRate}\n` +
+      `  FP-rate=${result.fpRate} (bar <${result.fpRateBar}) → ${result.meetsBar ? 'PASS' : 'FAIL'}\n`);
+    if (result.errors.length) process.stdout.write('  misses: ' + JSON.stringify(result.errors) + '\n');
   }
-  process.exit(r.meetsBar ? 0 : 1);
+  process.exit(result.meetsBar ? 0 : 1);
 }

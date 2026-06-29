@@ -17,26 +17,28 @@ const EVIDENCE_SOURCES = ['native_github_api', 'closed_child', 'file_existence',
 const MEASURE_LOG = process.env.AC_SUGGEST_LOG ||
   path.join(process.env.HOME || '/tmp', '.megingjord', 'ac-suggest-measurements.jsonl');
 
+const DISPATCH_TIMEOUT_MS = 30000; // fleet/free-cloud suggestion call budget
+
 // --- Measurability classifier (the heuristic side of the backstop) ---------------------------
 // Maps free-text AC phrasing to a reconciler evidence source, or null when nothing measurable is
 // referenced. Order matters: most specific anchor first.
 function classifyMeasurability(text) {
-  const t = String(text || '');
-  if (/#\d+/.test(t)) {
-    return { measurable: true, evidence_source: 'closed_child', anchor: (t.match(/#\d+/) || [])[0] };
+  const value = String(text || '');
+  if (/#\d+/.test(value)) {
+    return { measurable: true, evidence_source: 'closed_child', anchor: (value.match(/#\d+/) || [])[0] };
   }
-  const file = t.match(/\b[\w./-]+\.(?:js|ts|py|md|json|ya?ml|sh|css|html)\b/);
+  const file = value.match(/\b[\w./-]+\.(?:js|ts|py|md|json|ya?ml|sh|css|html)\b/);
   if (file) return { measurable: true, evidence_source: 'file_existence', anchor: file[0] };
   // sensor_output requires an actual NUMBER — a metric word alone ("improve latency") is
   // aspirational, not measurable (cross-family review concern, #1302). Honest FP-avoidance.
-  const numericMetric = /(?:\d+\s?%|[<>]=?\s?\d|\bp\d{2}\b|\b\d+\s?(?:ms|s|x|tokens|files|lines|chars|kb|mb)\b)/i.test(t);
-  const metricWordWithNumber = /\b(?:rate|ratio|coverage|latency|throughput|score|threshold|budget|count)\b/i.test(t) && /\d/.test(t);
+  const numericMetric = /(?:\d+\s?%|[<>]=?\s?\d|\bp\d{2}\b|\b\d+\s?(?:ms|s|x|tokens|files|lines|chars|kb|mb)\b)/i.test(value);
+  const metricWordWithNumber = /\b(?:rate|ratio|coverage|latency|throughput|score|threshold|budget|count)\b/i.test(value) && /\d/.test(value);
   if (numericMetric || metricWordWithNumber) {
     return { measurable: true, evidence_source: 'sensor_output', anchor: 'metric' };
   }
   // native_github_api: tightened to git/GitHub-specific tokens — avoids matching the common word
   // "check" in "double-check the logic" (would be a false positive).
-  if (/(?:\blabel(?:l?ed|s)?\b|pull request|\bmerged\b|issue (?:closed|state|open)|\bCI\b|status:[\w-]+|required check|workflow run)/i.test(t)) {
+  if (/(?:\blabel(?:l?ed|s)?\b|pull request|\bmerged\b|issue (?:closed|state|open)|\bCI\b|status:[\w-]+|required check|workflow run)/i.test(value)) {
     return { measurable: true, evidence_source: 'native_github_api', anchor: 'github-state' };
   }
   return { measurable: false, evidence_source: null, anchor: null,
@@ -91,10 +93,10 @@ Problem statement:
 ${problem}`;
 
 function parseSuggestionJson(raw) {
-  const m = String(raw || '').match(/\[[\s\S]*\]/);
-  if (!m) return null;
+  const arrayMatch = String(raw || '').match(/\[[\s\S]*\]/);
+  if (!arrayMatch) return null;
   try {
-    const arr = JSON.parse(m[0]);
+    const arr = JSON.parse(arrayMatch[0]);
     if (!Array.isArray(arr) || !arr.length) return null;
     return arr.slice(0, 7).map((s, i) => ({
       id: s.id || 'AC' + (i + 1), text: String(s.text || '').trim(),
@@ -122,8 +124,10 @@ function fallbackSuggest(problem) {
 async function defaultDispatch(prompt) {
   try {
     const { dispatchFreeCloud } = require('./free-cloud-dispatch');
-    const r = await dispatchFreeCloud(prompt, { timeoutMs: 30000 });
-    if (r && r.ok) return { ok: true, content: r.content, provider: r.provider };
+    const dispatched = await dispatchFreeCloud(prompt, { timeoutMs: DISPATCH_TIMEOUT_MS });
+    if (dispatched && dispatched.ok) {
+      return { ok: true, content: dispatched.content, provider: dispatched.provider };
+    }
   } catch { /* fleet/free-cloud unreachable → fallback */ }
   return { ok: false };
 }

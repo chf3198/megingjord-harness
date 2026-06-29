@@ -10,9 +10,9 @@ measurable ACs from a problem statement, then runs each through the **measurabil
 
 The backstop verifies an AC is **measurable** — computable from a concrete evidence source — **not
 that it is the correct requirement.** Per [Microsoft Research 2026 — Intent Formalization](https://www.microsoft.com/en-us/research/publication/intent-formalization-a-grand-challenge-for-reliable-coding-in-the-age-of-ai-agents/):
-*"There is no oracle for spec correctness."* Measurability is **necessary, not sufficient**. The
+_"There is no oracle for spec correctness."_ Measurability is **necessary, not sufficient**. The
 **Manager remains the intent oracle** via the human-in-the-loop step. This tool's job is narrow and
-honest: reduce *aspirational* ACs ("improve quality", "make it robust"), not auto-validate intent.
+honest: reduce _aspirational_ ACs ("improve quality", "make it robust"), not auto-validate intent.
 
 ## Evidence sources (the reconciler taxonomy)
 
@@ -25,7 +25,7 @@ An AC is measurable iff its text anchors to one of:
 | `sensor_output` | a **numeric** metric / threshold | "p99 latency `<200ms`", "coverage `>= 80%`" |
 | `native_github_api` | observable GitHub state | "PR merged", "`status:done` label", "CI green" |
 
-A metric *word* without a number ("improve latency", "good coverage") is treated as **aspirational**
+A metric _word_ without a number ("improve latency", "good coverage") is treated as **aspirational**
 — the backstop is deliberately conservative (favors precision over recall): better to reject a
 vaguely-phrased measurable AC than accept an aspirational one. Re-phrase with a concrete anchor.
 
