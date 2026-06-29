@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SKIP = ['node_modules', '.git', 'test-results', 'alpine.min.js'];
 const MAX_FUNCTION_LINES = 30;
+const BASE_REF_CANDIDATES = ['origin/main', 'main'];
 
 function walkJS(dir) {
   const files = [];
@@ -18,23 +20,16 @@ function walkJS(dir) {
   return files;
 }
 
-function checkFile(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
+function checkNaming(lines, rel) {
   const warnings = [];
-  const rel = path.relative(ROOT, filePath);
   const singleLetterRe = /\b(?:const|let|var)\s+([a-df-hln-zA-Z])\b/;
   const magicRe = /(?<![\w.])\b(\d{3,})\b(?![\w])/;
   const allowedNumbers = new Set(['100', '1000', '1024']);
-
   lines.forEach((line, idx) => {
     const match = line.match(singleLetterRe);
     if (match) {
-      warnings.push({
-        line: idx + 1,
-        rule: 'naming',
-        msg: `Single-letter variable '${match[1]}' — use a descriptive name`,
-      });
+      warnings.push({ file: rel, line: idx + 1, rule: 'naming',
+        msg: `Single-letter variable '${match[1]}' — use a descriptive name` });
     }
     if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
     if (/const\s+[A-Z_]+/.test(line)) return;
@@ -42,14 +37,15 @@ function checkFile(filePath) {
     const strippedLine = line.replace(/['"`][^'"`]*#\d{2,4}[^'"`]*['"`]/g, '""');
     const magic = strippedLine.match(magicRe);
     if (magic && !allowedNumbers.has(magic[1])) {
-      warnings.push({
-        line: idx + 1,
-        rule: 'magic-number',
-        msg: `Magic number ${magic[1]} — extract to a named constant`,
-      });
+      warnings.push({ file: rel, line: idx + 1, rule: 'magic-number',
+        msg: `Magic number ${magic[1]} — extract to a named constant` });
     }
   });
+  return warnings;
+}
 
+function checkFunctionLength(lines, rel) {
+  const warnings = [];
   let start = null;
   let name = '';
   let depth = 0;
@@ -66,30 +62,109 @@ function checkFile(filePath) {
     if (depth <= 0) {
       const length = idx - start + 1;
       if (length > MAX_FUNCTION_LINES) {
-        warnings.push({
-          line: start + 1,
-          rule: 'func-length',
-          msg: `Function '${name}' is ${length} lines (max ${MAX_FUNCTION_LINES})`,
-        });
+        warnings.push({ file: rel, line: start + 1, rule: 'func-length',
+          msg: `Function '${name}' is ${length} lines (max ${MAX_FUNCTION_LINES})` });
       }
       start = null;
     }
   });
-
-  return warnings.map(w => ({ file: rel, ...w }));
+  return warnings;
 }
 
-function run(args = process.argv.slice(2)) {
-  const outputJson = args.includes('--json');
-  const maxArg = args.find(a => a.startsWith('--max-warnings='));
-  const maxWarnings = maxArg ? Number(maxArg.split('=')[1]) : null;
+function checkContent(content, rel) {
+  const lines = content.split('\n');
+  return [...checkNaming(lines, rel), ...checkFunctionLength(lines, rel)];
+}
+
+function checkFile(filePath) {
+  const rel = path.relative(ROOT, filePath);
+  return checkContent(fs.readFileSync(filePath, 'utf8'), rel);
+}
+
+function collectAllFiles() {
   const dashboardJS = walkJS(path.join(ROOT, 'dashboard', 'js'));
   const scriptJS = walkJS(path.join(ROOT, 'scripts')).filter(f => !f.includes('lint-readability'));
-  const allFiles = [...dashboardJS, ...scriptJS];
-  const warnings = allFiles.flatMap(checkFile);
+  return [...dashboardJS, ...scriptJS];
+}
 
-  if (outputJson) {
-    console.log(JSON.stringify({ scannedFiles: allFiles.length, warningCount: warnings.length, warnings }));
+function verifyRef(ref) {
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: ROOT, stdio: 'pipe' });
+    return true;
+  } catch (err) {
+    void err; // ref absent in this checkout (e.g. shallow CI, bogus base)
+    return false;
+  }
+}
+
+function resolveBaseRef(explicitBase) {
+  const candidates = explicitBase ? [explicitBase] : BASE_REF_CANDIDATES;
+  for (const ref of candidates) {
+    if (verifyRef(ref)) return ref;
+  }
+  return null;
+}
+
+function isScannedJs(rel) {
+  if (!rel.endsWith('.js') || rel.endsWith('.spec.js')) return false;
+  if (rel.includes('lint-readability')) return false;
+  return rel.startsWith('dashboard/js/') || rel.startsWith('scripts/');
+}
+
+function gitChangedPaths(baseRef) {
+  const committed = execFileSync('git',
+    ['diff', '--name-only', '--diff-filter=ACMR', `${baseRef}...HEAD`],
+    { cwd: ROOT, encoding: 'utf8' });
+  const working = execFileSync('git',
+    ['diff', '--name-only', '--diff-filter=ACMR', 'HEAD'],
+    { cwd: ROOT, encoding: 'utf8' });
+  const merged = `${committed}\n${working}`.split('\n').map(s => s.trim()).filter(Boolean);
+  return Array.from(new Set(merged)).filter(isScannedJs);
+}
+
+function baseWarningCount(baseRef, rel) {
+  try {
+    const content = execFileSync('git', ['show', `${baseRef}:${rel}`], { cwd: ROOT, encoding: 'utf8' });
+    return checkContent(content, rel).length;
+  } catch (err) {
+    void err; // path absent at base (new or renamed file) — baseline of zero
+    return 0;
+  }
+}
+
+function sumNetNew(entries) {
+  const regressions = [];
+  let netNew = 0;
+  for (const entry of entries) {
+    const delta = entry.current - entry.base;
+    if (delta > 0) {
+      netNew += delta;
+      regressions.push({ file: entry.file, current: entry.current, delta });
+    }
+  }
+  return { netNew, regressions };
+}
+
+function computeRegressions(baseRef) {
+  const entries = [];
+  for (const rel of gitChangedPaths(baseRef)) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) continue; // deleted in working tree
+    entries.push({
+      file: rel,
+      current: checkContent(fs.readFileSync(abs, 'utf8'), rel).length,
+      base: baseWarningCount(baseRef, rel),
+    });
+  }
+  return sumNetNew(entries);
+}
+
+function runAbsolute(opts) {
+  const allFiles = collectAllFiles();
+  const warnings = allFiles.flatMap(checkFile);
+  if (opts.outputJson) {
+    console.log(JSON.stringify({ mode: 'absolute', scannedFiles: allFiles.length,
+      warningCount: warnings.length, warnings }));
   } else if (warnings.length) {
     console.log(`\n⚠️  ${warnings.length} readability warnings:\n`);
     warnings.forEach(w => console.log(`  ${w.file}:${w.line} [${w.rule}] ${w.msg}`));
@@ -97,11 +172,63 @@ function run(args = process.argv.slice(2)) {
   } else {
     console.log(`✅ ${allFiles.length} JS files pass readability checks.`);
   }
-
-  if (maxWarnings !== null && warnings.length > maxWarnings) {
-    console.error(`❌ Readability gate failed: ${warnings.length} > ${maxWarnings}`);
+  if (opts.maxWarnings !== null && warnings.length > opts.maxWarnings) {
+    console.error(`❌ Readability gate failed: ${warnings.length} > ${opts.maxWarnings}`);
     process.exit(1);
   }
 }
 
-module.exports = { run, checkFile };
+function reportChanged(netNew, regressions, baseRef, outputJson) {
+  if (outputJson) {
+    console.log(JSON.stringify({ mode: 'changed-only', base: baseRef, netNew, regressions }));
+  } else if (netNew > 0) {
+    console.log(`\n⚠️  ${netNew} NET-NEW readability warning(s) vs ${baseRef}:\n`);
+    regressions.forEach(r => console.log(`  ${r.file} (+${r.delta}, now ${r.current})`));
+  } else {
+    console.log(`✅ No net-new readability regressions vs ${baseRef}.`);
+  }
+}
+
+function runChangedOnly(opts) {
+  const baseRef = resolveBaseRef(opts.base);
+  if (!baseRef) {
+    console.error('⚠️  diff-aware readability: base ref unavailable — falling back to absolute gate.');
+    runAbsolute(opts);
+    return;
+  }
+  let result;
+  try {
+    result = computeRegressions(baseRef);
+  } catch (err) {
+    console.error(`⚠️  diff-aware readability: git diff failed (${err.message}) — falling back to absolute gate.`);
+    runAbsolute(opts);
+    return;
+  }
+  reportChanged(result.netNew, result.regressions, baseRef, opts.outputJson);
+  if (result.netNew > 0) {
+    console.error(`❌ Readability gate failed: ${result.netNew} net-new warning(s) introduced.`);
+    process.exit(1);
+  }
+}
+
+function parseArgs(args) {
+  const changedArg = args.find(a => a === '--changed-only' || a.startsWith('--changed-only='));
+  const maxArg = args.find(a => a.startsWith('--max-warnings='));
+  return {
+    changedOnly: Boolean(changedArg),
+    base: changedArg && changedArg.includes('=') ? changedArg.split('=')[1] : null,
+    maxWarnings: maxArg ? Number(maxArg.split('=')[1]) : null,
+    outputJson: args.includes('--json'),
+  };
+}
+
+function run(args = process.argv.slice(2)) {
+  const opts = parseArgs(args);
+  if (opts.changedOnly) runChangedOnly(opts);
+  else runAbsolute(opts);
+}
+
+module.exports = {
+  run, checkFile, checkContent, resolveBaseRef, computeRegressions,
+  isScannedJs, sumNetNew, verifyRef,
+};

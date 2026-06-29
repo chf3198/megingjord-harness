@@ -48,3 +48,23 @@ applyTo: "dashboard/**/*.js,scripts/**/*.js,tests/**/*.js,hooks/scripts/**/*.sh"
 - **JavaScript**: exported functions/classes require JSDoc with params/returns when applicable.
 - **Shell**: include intent comments before destructive operations and retries.
 - **Markdown**: prefer concise sections, explicit action items, and no stale TODO lists.
+
+## Diff-Aware Enforcement (#1434)
+
+Stage 2 of the rollout model ("block regressions on touched files") is implemented by the
+**diff-aware readability gate**. Rather than failing on an absolute repo-wide warning count —
+which drifts upward and forces the threshold to be ratcheted until any unrelated PR re-breaks it —
+the gate compares each changed JS file against its base revision and fails only on **net-new**
+warnings.
+
+- Command: `npm run lint:readability:diff` (= `lint-readability.js --changed-only --max-warnings=486`).
+- Scope: files changed versus the merge-base with `main` (`<base>...HEAD` plus working tree),
+  filtered to `dashboard/js/**` and `scripts/**` `.js` files.
+- Gate: fails when the summed per-file positive delta (current warnings − base warnings) is `> 0`.
+  An improvement in one file never offsets a regression in another.
+- New files count against a base of zero; renamed/absent base paths are treated as new (no crash).
+- Resilience (G6): if the base ref is unavailable (shallow CI checkout, bogus base), the gate emits
+  an advisory and falls back to the absolute `--max-warnings` ceiling — never a silent fail-open.
+- Surfaces: local pre-push (`lefthook.yml`) and CI (`.github/workflows/lint.yml`, `fetch-depth: 0`).
+- The absolute gate (`npm run lint:readability:ci`) is retained as the fallback ceiling and for
+  explicit whole-repo audits.

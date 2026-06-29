@@ -209,6 +209,8 @@
     "lint:py": "ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/",
     "lint:readability": "node scripts/lint-readability.js",
     "lint:readability:ci": "node scripts/lint-readability.js --max-warnings=486",
+    "lint:readability:diff": "node scripts/lint-readability.js --changed-only --max-warnings=486",
+    "readability:diff:test": "node --test tests/readability-diff-gate.spec.js",
     "lint:router": "node scripts/lint-router.js",
     "lint:sh": "find scripts -name '*.sh' -exec shellcheck --severity=warning {} +",
     "mailbox:flush": "node scripts/global/mailbox-outbox.js flush",

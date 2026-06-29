@@ -12,7 +12,7 @@ pre-push:
     lint-line-cap:
       run: npm run lint
     lint-readability:
-      run: npm run lint:readability:ci
+      run: npm run lint:readability:diff
     lint-js:
       run: npm run lint:js
     lint-md:
