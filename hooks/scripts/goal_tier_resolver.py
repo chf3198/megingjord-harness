@@ -4,14 +4,16 @@ Reads ~/.megingjord/goal-tier-state.json (written by actuator-engine.js A1)
 and resolves the effective tier for the current session, combining:
   - state-derived tier (B / B+ / B++ / B+++ / B++++) from GHS thresholds
   - role-minimum (Consultant role floor at B+ per D-009 #1123 hybrid)
-Extracted from goal_lens.py to keep the hook under the 100-line cap.
+#3342: stale GHS telemetry decays to baseline B (no false elevation).
 """
+import datetime
 import json
+import os
 import pathlib
-
 
 TIER_STATE_PATH = pathlib.Path.home() / ".megingjord" / "goal-tier-state.json"
 TIER_ORDER = ["B", "B+", "B++", "B+++", "B++++"]
+GHS_FRESHNESS_SECONDS = int(os.environ.get("GHS_FRESHNESS_SECONDS", str(7 * 24 * 3600)))
 
 DEFINITIONS_TIER_B_PLUS = (
     "Goal definitions: "
@@ -39,12 +41,32 @@ TIER_B_QUAD_PLUS_NOTE = (
 )
 
 
+def ghs_is_stale(data, now=None):
+    """#3342: True when GHS telemetry is absent or older than the freshness window."""
+    ref = now or datetime.datetime.now(datetime.timezone.utc)
+    newest = None
+    for entry in (data or {}).get("ghs_history") or []:
+        try:
+            dt = datetime.datetime.fromisoformat(
+                str((entry or {}).get("ts")).replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            continue
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        if newest is None or dt > newest:
+            newest = dt
+    return newest is None or (ref - newest).total_seconds() > GHS_FRESHNESS_SECONDS
+
+
 def read_tier_from_state(state_path=TIER_STATE_PATH) -> str:
-    """Read tier from goal-tier-state.json; default B on miss or parse error."""
+    """Read tier; default B. #3342: decay a stale elevation to B (GHS_DECAY_DISABLED=1 to opt out)."""
     try:
         data = json.loads(pathlib.Path(state_path).read_text(encoding="utf8"))
         tier = (((data or {}).get("actuators") or {}).get("A1") or {}).get("tier")
         if isinstance(tier, str) and tier in TIER_ORDER:
+            if (tier != "B" and os.environ.get("GHS_DECAY_DISABLED") != "1"
+                    and ghs_is_stale(data)):
+                return "B"
             return tier
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         pass
