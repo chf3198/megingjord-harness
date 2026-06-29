@@ -120,6 +120,9 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 <!-- docs packageScripts -->
 | Script | Command |
 |---|---|
+| `ac-suggest` | `node scripts/global/ac-suggest.js` |
+| `ac-suggest:replay-eval` | `node scripts/global/ac-suggest-replay-eval.js` |
+| `ac-suggest:test` | `node --test tests/ac-suggest.spec.js` |
 | `adr:build` | `log4brains build` |
 | `adr:new` | `log4brains adr new` |
 | `adr:preview` | `log4brains preview` |
