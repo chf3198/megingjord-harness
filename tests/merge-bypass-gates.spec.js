@@ -14,8 +14,31 @@ test('detectAdminBypass: merged + all green + approved → false (no bypass)', (
 test('detectAdminBypass: merged with a non-green required check → true', () => {
   assert.strictEqual(ame.detectAdminBypass({ merged: true, requiredChecksAllGreen: false, reviewApproved: true }), true);
 });
-test('detectAdminBypass: merged without review approval → true', () => {
-  assert.strictEqual(ame.detectAdminBypass({ merged: true, requiredChecksAllGreen: true, reviewApproved: false }), true);
+// #3347: a clean self-merge (no GitHub review approval, but review is NOT required by
+// branch protection) is the normal harness path and must NOT be flagged as a bypass.
+test('detectAdminBypass: merged, green, unapproved, review NOT required → false (#3347)', () => {
+  assert.strictEqual(ame.detectAdminBypass({ merged: true, requiredChecksAllGreen: true, reviewApproved: false, reviewRequired: false }), false);
+});
+test('detectAdminBypass: merged, green, unapproved, review REQUIRED → true (#3347)', () => {
+  assert.strictEqual(ame.detectAdminBypass({ merged: true, requiredChecksAllGreen: true, reviewApproved: false, reviewRequired: true }), true);
+});
+test('detectAdminBypass: reviewRequired omitted defaults to not-a-bypass on missing approval (#3347)', () => {
+  assert.strictEqual(ame.detectAdminBypass({ merged: true, requiredChecksAllGreen: true, reviewApproved: false }), false);
+});
+test('computeRequiredChecksGreen: no required contexts → true (nothing to bypass) (#3347)', () => {
+  assert.strictEqual(ame.computeRequiredChecksGreen([{ name: 'advisory', conclusion: 'failure' }], []), true);
+});
+test('computeRequiredChecksGreen: only required contexts count; red advisory ignored (#3347)', () => {
+  const runs = [
+    { name: 'baton-authority/merge', conclusion: 'success' },
+    { name: 'merge-bypass-gates', conclusion: 'failure' },
+    { name: 'prose-link-check (advisory)', conclusion: 'failure' },
+  ];
+  assert.strictEqual(ame.computeRequiredChecksGreen(runs, ['baton-authority/merge']), true);
+});
+test('computeRequiredChecksGreen: a red REQUIRED context → false (#3347)', () => {
+  const runs = [{ name: 'baton-authority/merge', conclusion: 'failure' }];
+  assert.strictEqual(ame.computeRequiredChecksGreen(runs, ['baton-authority/merge']), false);
 });
 test('hasException: label present → true', () => {
   assert.strictEqual(ame.hasException([ame.EXCEPTION_LABEL], ''), true);

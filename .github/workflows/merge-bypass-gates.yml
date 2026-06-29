@@ -29,8 +29,35 @@ jobs:
             const violations = [];
 
             // ---- AC1: admin-bypass merge requires an exception marker ----
+            // Resolve the base branch's REQUIRED contexts + whether review is required.
+            // The repo governs `main` via a ruleset, so try the rules endpoint first and
+            // fall back to classic branch protection; either failure -> nothing required.
+            let requiredContexts = [];
+            let reviewRequired = false;
+            try {
+              const rules = await github.request('GET /repos/{owner}/{repo}/rules/branches/{branch}', { owner, repo, branch: pr.base.ref });
+              for (const rule of rules.data) {
+                if (rule.type === 'required_status_checks') {
+                  requiredContexts.push(...(rule.parameters?.required_status_checks || []).map(c => c.context));
+                }
+                if (rule.type === 'pull_request') {
+                  reviewRequired = (rule.parameters?.required_approving_review_count || 0) > 0;
+                }
+              }
+            } catch (e) {
+              try {
+                const prot = await github.rest.repos.getBranchProtection({ owner, repo, branch: pr.base.ref });
+                requiredContexts = prot.data.required_status_checks?.contexts || [];
+                reviewRequired = !!prot.data.required_pull_request_reviews;
+              } catch (e2) {
+                // Neither rulesets nor classic protection were readable. Fail-open
+                // (no required contexts -> not a bypass) but make it visible (G8) so
+                // a silent empty result is never mistaken for "protection satisfied".
+                core.warning(`merge-bypass-gates: could not resolve required checks for '${pr.base.ref}' (rules: ${e.message}; protection: ${e2.message}) — treating as no required contexts.`);
+              }
+            }
             const checks = await github.rest.checks.listForRef({ owner, repo, ref: pr.merge_commit_sha || pr.head.sha });
-            const requiredChecksAllGreen = checks.data.check_runs.every(c => c.conclusion === 'success' || c.conclusion === 'skipped' || c.conclusion === 'neutral');
+            const requiredChecksAllGreen = ame.computeRequiredChecksGreen(checks.data.check_runs, requiredContexts);
             const reviews = await github.rest.pulls.listReviews({ owner, repo, pull_number: pr.number });
             const reviewApproved = reviews.data.some(r => r.state === 'APPROVED');
             const refMatch = (pr.body || '').match(/Refs\s+#(\d+)/i);
@@ -39,7 +66,7 @@ jobs:
               const issue = await github.rest.issues.get({ owner, repo, issue_number: Number(refMatch[1]) });
               labels = issue.data.labels.map(l => (typeof l === 'string' ? l : l.name));
             }
-            const bypassDetected = ame.detectAdminBypass({ merged: true, requiredChecksAllGreen, reviewApproved });
+            const bypassDetected = ame.detectAdminBypass({ merged: true, requiredChecksAllGreen, reviewApproved, reviewRequired });
             violations.push(...ame.adminMergeExceptionCheck({ bypassDetected, labels, prBody: pr.body || '' }).violations);
 
             // ---- AC2: batch-cancel requires per-issue CANCELLATION ----
