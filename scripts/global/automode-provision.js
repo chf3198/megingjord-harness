@@ -64,10 +64,10 @@ function targetFor() {
 }
 
 function check() {
-  const t = targetFor();
-  if (!t) return { ok: false, reason: 'no-writable-settings-path',
+  const dest = targetFor();
+  if (!dest) return { ok: false, reason: 'no-writable-settings-path',
     hint: 'Read-only/container FS: bake the drop-in into the image or pass --settings <path> at launch.' };
-  return { ok: true, target: t.path, scope: t.scope };
+  return { ok: true, target: dest.path, scope: dest.scope };
 }
 
 // Owner-configuration audit record (event_type distinct from any merge-approval).
@@ -87,13 +87,13 @@ function audit(action, target, scope) {
 }
 
 function apply() {
-  const t = targetFor();
-  if (!t) return { ok: false, reason: 'no-writable-settings-path' };
-  const merged = mergeAutoMode(readJson(t.path) || {});
-  fs.mkdirSync(path.dirname(t.path), { recursive: true });
-  fs.writeFileSync(t.path, JSON.stringify(merged, null, 2) + '\n');
-  audit('apply', t.path, t.scope);
-  return { ok: true, target: t.path, scope: t.scope };
+  const dest = targetFor();
+  if (!dest) return { ok: false, reason: 'no-writable-settings-path' };
+  const merged = mergeAutoMode(readJson(dest.path) || {});
+  fs.mkdirSync(path.dirname(dest.path), { recursive: true });
+  fs.writeFileSync(dest.path, JSON.stringify(merged, null, 2) + '\n');
+  audit('apply', dest.path, dest.scope);
+  return { ok: true, target: dest.path, scope: dest.scope };
 }
 
 function verify() {
