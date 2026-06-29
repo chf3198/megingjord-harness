@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "purpose": "Labeled corpus for ac-suggest measurability backstop replay-eval (Epic #1299 AC5, #3329).",
+    "label": "measurable=true means the AC is verifiable from a concrete evidence source (file / #child / numeric metric / GitHub state); false means aspirational with no computable anchor.",
+    "note": "Includes true negatives (aspirational phrasings) per cross-family review #1302. The backstop is intentionally conservative — it favors precision (reject aspirational) over recall (one hard measurable case is a known FN)."
+  },
+  "samples": [
+    { "text": "scripts/global/ac-suggest.js exists and exports suggestACs", "measurable": true },
+    { "text": "Child #1302 closed with consultant approval", "measurable": true },
+    { "text": "Reduce p99 latency to <200ms", "measurable": true },
+    { "text": "Test coverage >= 80% on the new module", "measurable": true },
+    { "text": ".github/workflows/epic-ac-reconcile.yml present in main", "measurable": true },
+    { "text": "PR merged to main with all CI checks green", "measurable": true },
+    { "text": "Issue closed with status:done label applied", "measurable": true },
+    { "text": "tests/ac-suggest.spec.js passes under npm test", "measurable": true },
+    { "text": "Emit at most 7 ACs (count <= 7)", "measurable": true },
+    { "text": "False-positive rate < 5% on the corpus", "measurable": true },
+    { "text": "docs/howto/ai-suggested-acs.md documents the flow", "measurable": true },
+    { "text": "Add the role:manager label to the epic", "measurable": true },
+    { "text": "Workflow run completes in under 30s", "measurable": true },
+    { "text": "Reconciler returns truth_status for #1299", "measurable": true },
+    { "text": "Parser handles 100 ACs without error", "measurable": true },
+    { "text": "config/redaction-patterns.json includes the new pattern", "measurable": true },
+    { "text": "All acceptance criteria reconcile without UNKNOWN status", "measurable": true },
+    { "text": "Improve overall code quality", "measurable": false },
+    { "text": "Make the system more robust", "measurable": false },
+    { "text": "Ensure a better user experience", "measurable": false },
+    { "text": "Clean up the codebase", "measurable": false },
+    { "text": "Improve latency", "measurable": false },
+    { "text": "The tool should be reliable", "measurable": false },
+    { "text": "Optimize performance where possible", "measurable": false },
+    { "text": "Make the documentation clearer", "measurable": false },
+    { "text": "Refactor for maintainability", "measurable": false },
+    { "text": "Handle edge cases gracefully", "measurable": false },
+    { "text": "Increase developer happiness", "measurable": false },
+    { "text": "Strengthen the design", "measurable": false },
+    { "text": "Reduce technical debt", "measurable": false },
+    { "text": "Be more consistent across modules", "measurable": false },
+    { "text": "Provide good test coverage", "measurable": false },
+    { "text": "Ensure high throughput", "measurable": false }
+  ]
+}
