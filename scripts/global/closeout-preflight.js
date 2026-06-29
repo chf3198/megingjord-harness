@@ -67,8 +67,23 @@ function hasCloseoutComment(comments) {
   return (comments || []).some((c) => CLOSEOUT_ARTIFACT_RE.test(c.body || ''));
 }
 
-function selectPreflightValidators(prExists, closeoutAlreadyPosted) {
+// #3328: a posted COLLABORATOR_HANDOFF *artifact* (header on its own line), not a
+// prose mention inside another artifact. Anchored like CLOSEOUT_ARTIFACT_RE so a
+// MANAGER_HANDOFF that names "COLLABORATOR_HANDOFF" in its scope text never trips it.
+const COLLAB_HANDOFF_ARTIFACT_RE = /(?:^|\n)\s*(?:\*\*|##\s*)?COLLABORATOR_HANDOFF\b/i;
+function hasCollaboratorHandoff(comments) {
+  return (comments || []).some((c) => COLLAB_HANDOFF_ARTIFACT_RE.test(c.body || ''));
+}
+
+// #3328: the local pre-push preflight now runs `doc-coverage` with the SAME strictness
+// as CI's collaborator-gate — but ONLY once a COLLABORATOR_HANDOFF is actually posted.
+// The doc-coverage validator falls back to the issue body when no handoff is present,
+// which would false-fail every legitimate pre-handoff push ("missing doc-coverage
+// block"). Gating on handoff presence keeps ordering relaxed while closing the
+// format-parity gap (#3315 recurrence) the moment the artifact exists.
+function selectPreflightValidators(prExists, closeoutAlreadyPosted, collaboratorHandoffPosted) {
   const validators = ['manager-handoff'];
+  if (collaboratorHandoffPosted) validators.push('doc-coverage');
   const enforceCloseoutNow = prExists || closeoutAlreadyPosted;
   if (enforceCloseoutNow) validators.push('consultant-closeout');
   if (prExists) validators.push('merge-evidence-pr-gate');
@@ -97,7 +112,8 @@ async function run(opts = {}) {
   const prBody = await fetchPrBody(branch, opts);
   if (prBody !== null) input.prBody = prBody;
   const { validators, closeoutDeferred } = selectPreflightValidators(
-    prBody !== null, hasCloseoutComment(input.comments));
+    prBody !== null, hasCloseoutComment(input.comments),
+    hasCollaboratorHandoff(input.comments));
   if (closeoutDeferred) {
     console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
   }
@@ -116,4 +132,4 @@ async function run(opts = {}) {
 if (require.main === module) run().then((code) => process.exit(code));
 
 module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run,
-  hasCloseoutComment, selectPreflightValidators, batonBackGateBlocks };
+  hasCloseoutComment, hasCollaboratorHandoff, selectPreflightValidators, batonBackGateBlocks };
