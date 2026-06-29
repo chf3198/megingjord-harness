@@ -246,6 +246,7 @@
     "stress:evidence-check": "node scripts/global/stress-evidence-check.js",
     "stress:evidence-check:test": "node --test tests/stress-evidence-check.spec.js",
     "stress:full": "MEGINGJORD_STRESS_TIER=D node scripts/global/stress-orchestrator.js",
+    "stress:epic-close": "node --test tests/stress-epic-close-guard.spec.js",
     "stress:load-local-env": "node --test tests/stress-load-local-env.spec.js",
     "stress:post-merge-sweep": "node --test tests/stress-post-merge-sweep.spec.js",
     "stress:realism": "MEGINGJORD_STRESS_TIER=B node scripts/global/stress-orchestrator.js",

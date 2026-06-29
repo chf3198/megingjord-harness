@@ -301,6 +301,19 @@ def _check_role_tool_allowlist(joined: str, state: dict) -> int | None:
     return None
 
 
+def _check_epic_close_guard(joined: str, cwd: str) -> int | None:
+    """#3350 AC3: block closing a type:epic issue that still has open children."""
+    try:
+        from epic_close_guard import check_command as _epic_close_check
+        result = _epic_close_check(joined, cwd)
+        if result is not None:
+            allowed, reason = result
+            return emit("allow", reason) if allowed else emit("deny", reason)
+    except Exception:
+        pass
+    return None
+
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     auth_result = _check_auth_profile(joined)
     if auth_result is not None:
@@ -308,6 +321,9 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     role_result = _check_role_tool_allowlist(joined, state)
     if role_result is not None:
         return role_result
+    epic_close_result = _check_epic_close_guard(joined, cwd)
+    if epic_close_result is not None:
+        return epic_close_result
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
     repo_type = state.get("repo_type", "generic")
     # #2967: one-ticket-per-worktree — refuse a baton artifact for a second,
