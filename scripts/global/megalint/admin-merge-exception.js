@@ -13,9 +13,25 @@ const BYPASS_REASON_RE = /bypass_reason\s*:/i;
 const APPROVER_RE = /approver\s*:/i;
 
 // A bypass = the PR merged WITHOUT satisfying branch protection (admin override).
+// `reviewApproved` only signals a bypass when review is ACTUALLY required by branch
+// protection — this single-operator harness governs via baton artifacts + required
+// status checks, not GitHub PR-review approvals, so a missing approval is the normal
+// state and must not be read as a bypass (#3347).
 function detectAdminBypass(prData = {}) {
   if (!prData.merged) return false;
-  return prData.requiredChecksAllGreen === false || prData.reviewApproved === false;
+  if (prData.requiredChecksAllGreen === false) return true;
+  return prData.reviewRequired === true && prData.reviewApproved === false;
+}
+
+// Pure helper: are the REQUIRED checks all green on a SHA? Scoped to the branch's
+// required contexts so advisory / non-required check_runs (incl. this gate's own
+// run) never count as an override. No required contexts -> nothing to bypass (#3347).
+function computeRequiredChecksGreen(checkRuns = [], requiredContexts = []) {
+  if (!requiredContexts.length) return true;
+  const required = new Set(requiredContexts);
+  return (checkRuns || [])
+    .filter((run) => required.has(run.name))
+    .every((run) => ['success', 'skipped', 'neutral'].includes(run.conclusion));
 }
 
 function hasException(labels = [], prBody = '') {
@@ -43,4 +59,7 @@ const validate = (input = {}) => adminMergeExceptionCheck({
   prBody: input.prBody || '',
 });
 
-module.exports = { detectAdminBypass, adminMergeExceptionCheck, hasException, validate, EXCEPTION_LABEL };
+module.exports = {
+  detectAdminBypass, computeRequiredChecksGreen, adminMergeExceptionCheck,
+  hasException, validate, EXCEPTION_LABEL,
+};
