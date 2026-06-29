@@ -400,6 +400,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress` | `MEGINGJORD_STRESS_TIER=A node scripts/global/stress-orchestrator.js` |
 | `stress:anneal` | `node --test tests/stress-anneal-decision.spec.js` |
 | `stress:bounded` | `MEGINGJORD_STRESS_TIER=C node scripts/global/stress-orchestrator.js` |
+| `stress:epic-close` | `node --test tests/stress-epic-close-guard.spec.js` |
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
 | `stress:evidence-check:test` | `node --test tests/stress-evidence-check.spec.js` |
 | `stress:full` | `MEGINGJORD_STRESS_TIER=D node scripts/global/stress-orchestrator.js` |

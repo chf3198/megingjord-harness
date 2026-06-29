@@ -94,6 +94,31 @@ An epic may close **only when ALL of these are true**:
 4. Epic-level resolution label applied (`resolution:released` or `resolution:cancelled`)
 5. Evidence-integrity verification passes or has an explicit Manager-approved emergency override
 
+### Close-time enforcement (#3350 — blocking, not advisory)
+
+Condition 1 (all children terminal) is enforced at close time, not only by a
+periodic advisory drift report:
+
+- **Backstop (all surfaces, incl. GitHub UI / all four teams):** an
+  `issues.closed` Action (`epic-close-readiness-check.js`) re-derives the open-
+  child set as the **union** of {task-list edge, native Sub-issue parent,
+  `Parent:` text, **and a cross-ref child whose own body asserts parentage**
+  (`Refs Epic #N | Epic: #N | Parent: #N`)}. The cross-ref edge — added in
+  #3350 — is the class that let #3021/#2891 close with open children; it is
+  child-side and evaluated over live open issues only, so it does NOT
+  reintroduce the #1306 epic-body prose false-positive class. On a violation the
+  Epic is auto-reopened (once per close event, after an eventual-consistency
+  re-check — no close↔reopen flapping), a structured blocker-note is posted, and
+  a schema-v3 `incidents.jsonl` event is emitted
+  (`pattern_id: epic-closed-with-open-children`).
+- **Closeout reconciliation:** `epic-close-validator.js` compares the
+  `CONSULTANT_CLOSEOUT` children-terminal assertion against live child state; a
+  closeout present while any child is open fails (the #3021 false-claim class).
+- **Local pre-close guard (prevention-first):** `hooks/scripts/epic_close_guard.py`
+  blocks the operator close path on an Epic with open children before it reaches
+  GitHub. Audited escape hatch for the children-already-re-homed case:
+  `EPIC_CLOSE_OVERRIDE=1` or the literal `[epic-close-ok]` marker.
+
 ## Re-scope-before-close rule
 
 - If original epic ACs cannot be completed, Manager must publish an explicit re-scope artifact (deferred scope + follow-on child tickets) before review/close.
