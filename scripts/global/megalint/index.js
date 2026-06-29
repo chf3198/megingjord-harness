@@ -5,6 +5,10 @@
 
 const manager = require('./manager-handoff.js');
 const collaborator = require('./collaborator-handoff.js');
+// #3328: doc-coverage exposed as a first-class validator so the local pre-push
+// closeout-preflight can enforce the COLLABORATOR_HANDOFF doc-coverage block
+// (N/A enum reason + bare `doc-coverage:` header) with the SAME strictness as CI.
+const docCoverage = require('./doc-coverage.js');
 const admin = require('./admin-handoff.js');
 const consultant = require('./consultant-closeout.js');
 const signer = require('./signer-fidelity.js');
@@ -45,6 +49,7 @@ const parityValidatorAdapter = {
 const VALIDATORS = {
   'manager-handoff': manager,
   'collaborator-handoff': collaborator,
+  'doc-coverage': docCoverage,
   'admin-handoff': admin,
   'consultant-closeout': consultant,
   'signer-fidelity': signer,
