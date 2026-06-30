@@ -93,6 +93,7 @@ An epic may close **only when ALL of these are true**:
 3. CONSULTANT_CLOSEOUT comment posted on the epic
 4. Epic-level resolution label applied (`resolution:released` or `resolution:cancelled`)
 5. Evidence-integrity verification passes or has an explicit Manager-approved emergency override
+6. Every AC containing enforcement wording (enforce / required / block / fail-the-gate) reflects the shipped artifact's actual disposition — the artifact enforces (required-blocking), OR the AC text is rescoped to `ship advisory; promotion deferred` before ticking (#1617)
 
 ### Close-time enforcement (#3350 — blocking, not advisory)
 
@@ -118,6 +119,21 @@ periodic advisory drift report:
   blocks the operator close path on an Epic with open children before it reaches
   GitHub. Audited escape hatch for the children-already-re-homed case:
   `EPIC_CLOSE_OVERRIDE=1` or the literal `[epic-close-ok]` marker.
+
+### AC wording vs shipped disposition (#1617 — advisory)
+
+Path D (advisory-first, then replay-eval-gated promotion to required-blocking) is a
+valid rollout, but it creates a closure-language trap: an Epic AC worded `enforce X`
+ticked as shipped when only the advisory (non-blocking) phase landed. Before close,
+for every AC containing enforce / required / block / fail-the-gate wording, the Manager
+MUST verify the shipped artifact actually enforces, OR rescope the AC text to
+`ship advisory; promotion deferred`. The advisory validator
+`scripts/global/megalint/epic-ac-disposition-check.js` (workflow
+`epic-ac-disposition-lint.yml`, on `issues.closed`) detects the mismatch and posts an
+advisory comment; it never blocks (promotion is replay-eval-gated, not calendar-gated).
+This is the wording-vs-disposition axis — distinct from `body-ac-truthfulness`
+(checkbox state) and `epic-ac-traceability` (child refs).
+<!-- enforced-by: scripts/global/megalint/epic-ac-disposition-check.js + .github/workflows/epic-ac-disposition-lint.yml -->
 
 ## Re-scope-before-close rule
 

@@ -1,0 +1,77 @@
+name: Epic AC Disposition Lint
+# Advisory: flags an Epic closed with an enforce-worded AC ticked while the
+# shipped artifact is advisory-only. Ticket #1617 (Tier-2 anneal).
+# Uses scripts/global/megalint/epic-ac-disposition-check.js. Advisory mode
+# (core.warning) — mirrors the body-ac-truthfulness-lint soak pattern.
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  epic-ac-disposition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const { validate } = require('./scripts/global/megalint/epic-ac-disposition-check.js');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNum = context.payload.issue.number;
+            const marker = '<!-- megalint-epic-ac-disposition -->';
+
+            const issue = (await github.rest.issues.get({
+              owner, repo, issue_number: issueNum,
+            })).data;
+
+            const labels = issue.labels.map(l => l.name);
+            if (!labels.includes('type:epic')) {
+              console.log(`Issue #${issueNum}: not an Epic, skipping`);
+              return;
+            }
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issueNum, per_page: 100,
+            });
+
+            const result = validate({
+              body: issue.body || '', labels, state: issue.state, comments,
+            });
+
+            const lintComment = comments.find(c => (c.body || '').includes(marker));
+
+            if (result.ok) {
+              if (lintComment) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: lintComment.id });
+              }
+              console.log(`Issue #${issueNum}: epic-AC disposition OK`);
+              return;
+            }
+
+            const body = [
+              marker, '',
+              '## ⚠️ Epic AC Disposition Mismatch (advisory)', '',
+              `Epic #${issueNum} closed with an enforce-worded acceptance-criterion ticked, but the closeout evidence reads advisory-only.`,
+              '',
+              '**Violations**:', '',
+              result.violations.map(v => `- \`${v.rule}\` — ${v.detail}`).join('\n'),
+              '',
+              '**Fix**: ship required-blocking mode before close, OR rescope the AC text to `ship advisory; promotion deferred` before ticking.',
+              '',
+              '_Posted by epic-ac-disposition-lint (advisory — promotion replay-eval-gated). Ticket #1617._',
+            ].join('\n');
+
+            if (lintComment) {
+              if (lintComment.body !== body) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: lintComment.id, body });
+              }
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issueNum, body });
+            }
+            core.warning(`Epic-AC disposition mismatch on #${issueNum}: ${result.violations.length} rule(s)`);
