@@ -303,6 +303,17 @@ calendar-gated.
   groq Cloudflare-1010 block.
 - **G7 Throughput:** model calls are bounded by a per-run candidate cap + content-hash memoization over
   the dormant subset (§2), not by total backlog size.
+- **G8 Observability:** every flag, advisory, and auto-correction-task emission writes a schema-v3
+  `~/.megingjord/incidents.jsonl` event (`pattern_id: backlog-semantic-supersession` / `inbound-reference-orphan`)
+  and the sweep extends `governance-drift-sweep.js`'s existing `logs/governance-drift-sweep.json` report —
+  drift becomes a tracked, queryable signal, never a silent accrual.
+- **G9 Interoperability:** the guardrail's outputs are plain GitHub artifacts (a triage-seed Issue + a
+  JSONL event), so all four runtimes (Claude Code / Copilot / Codex / Antigravity) consume them through
+  the same baton with no per-team adapter — the enforcement core stays runtime-agnostic like
+  `epic-close-readiness-check.js`.
+- **G10 Maintainability:** extending the **single** #2981 sweeper (one drift surface, one ticket-list +
+  classify + report scaffold) instead of forking a parallel skill is the deliberate maintainability
+  choice — it prevents two drift surfaces from themselves drifting apart.
 
 ---
 
