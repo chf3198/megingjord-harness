@@ -83,7 +83,6 @@ all four teams. Promotion of the memory-write guard from advisory to blocking is
 precision ≥ 0.85 against `tests/fixtures/friction-corpus.json` (`friction-classifier-replay-eval.js`),
 **never a calendar threshold**. Operator guide: `docs/howto/guardrail-first-anneal.md`.
 
-
 ### Tier 3 — Consultant goal-failure escalation
 
 Authority: Consultant only. Triggered when consultant rubric finds G1–G9 goal violation post-implementation. Effect: invoke Manager to (a) reopen failed AC/ticket via baton, (b) file new self-anneal Epic for systemic patterns.
