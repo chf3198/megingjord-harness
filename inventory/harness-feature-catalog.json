@@ -1,0 +1,5098 @@
+{
+  "$schema": "./harness-feature-catalog.schema.json",
+  "catalogVersion": "3e9329a9f718ca4e",
+  "generatedFrom": "research/cross-orchestrator-parity-phase0-3412.md (Phase-0 #3412, merged PR #3436)",
+  "ssotAnchor": "governance/README.md",
+  "extends": "inventory/governance-manifest (Epic #1701 adapter-emit/drift chain) — this catalog EXTENDS, does not fork",
+  "runtimes": [
+    "claude-code",
+    "copilot",
+    "codex",
+    "cursor",
+    "antigravity"
+  ],
+  "layers": [
+    "L1-identity-signing",
+    "L2-baton-contract-artifacts",
+    "L3-hook-gate-enforcement",
+    "L4-ticket-github-governance",
+    "L5-validators-ci-workflows",
+    "L6-routing-cost-hamr",
+    "L7-knowledge-wiki-docs-memory",
+    "L8-deploy-sync-registries",
+    "L9-skills-agents-commands",
+    "L10-observability-dashboard",
+    "L11-resilience-anneal-coordination",
+    "L12-goal-constitution-decision-lens",
+    "L13-adaptive-goal-health-actuator",
+    "L14-lefthook-local-pre-push-commit",
+    "L15-repo-type-governance-profile",
+    "L16-edd-gate-subsystem",
+    "L17-authorization-profile-subsystem",
+    "L18-operator-ownership-client-arbitration",
+    "L19-policy-rubric-review-ssot"
+  ],
+  "metadata": {
+    "layerCount": 19,
+    "featureCount": 223,
+    "parityFlaggedCount": 117,
+    "nonParityCount": 102,
+    "runtimeNACount": 4,
+    "note": "Counts are derived programmatically by scripts/global/harness-feature-catalog.js, never hand-asserted. perRuntime cells are seeded 'unverified'; the T1.3 reconciler (#3441) populates them from live state and the T3.1 matrix (#3451) probes them."
+  },
+  "features": [
+    {
+      "id": "runtime-detector",
+      "name": "Runtime detector",
+      "layer": "L1-identity-signing",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/detect-runtime.js"
+      ],
+      "purpose": "distinct PRIMARY env markers per runtime; Copilot has none",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "Copilot: add PRIMARY marker (T2.5)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "team-model-signature-registry",
+      "name": "Team/model signature registry",
+      "layer": "L1-identity-signing",
+      "parity": "yes",
+      "ssotFiles": [
+        "inventory/team-model-signatures.json"
+      ],
+      "purpose": "per-team aliasSeed, per-role ed25519 keys; cursor has aliasSeed only (no per-role keys)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "cursor: add per-role keys or file signed waiver",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "agent-signature-emitter",
+      "name": "Agent signature emitter",
+      "layer": "L1-identity-signing",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/agent-signature.js"
+      ],
+      "purpose": "resolution order branches on runtime env markers",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "depends on detect-runtime fix",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "canonical-signer-alias-deriver",
+      "name": "Canonical signer-alias deriver",
+      "layer": "L1-identity-signing",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/signer-alias.js"
+      ],
+      "purpose": "substrate-first; auto-corrects Copilot Auto-mode",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "registry-integrity-hash-guard",
+      "name": "Registry integrity hash guard",
+      "layer": "L1-identity-signing",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/registry-version.js"
+      ],
+      "purpose": "shared; `MEGINGJORD_SKIP_REGISTRY_INTEGRITY=1` escape",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "governance-artifact-crypto-signer-verifier",
+      "name": "Governance artifact crypto signer/verifier",
+      "layer": "L1-identity-signing",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/governance-artifact-signature.js"
+      ],
+      "purpose": "pure ed25519 lib",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-baton-dpop-signer",
+      "name": "HAMR baton DPoP signer",
+      "layer": "L1-identity-signing",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-signing.js"
+      ],
+      "purpose": "key-tier probe T1→T4; availability per-runtime not inventoried",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "github-actor-team-map",
+      "name": "GitHub actor→team map",
+      "layer": "L1-identity-signing",
+      "parity": "yes",
+      "ssotFiles": [
+        "inventory/github-actor-team-map.json"
+      ],
+      "purpose": "only chf3198/cursoragent/github-actions mapped; codex+antigravity absent",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "T1.4: add codex+antigravity actor entries",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "accountable-team-resolver-backfill",
+      "name": "Accountable-team resolver + backfill",
+      "layer": "L1-identity-signing",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/accountable-team.js",
+        "accountable-team-backfill.js"
+      ],
+      "purpose": "4 enrolled teams; cursor absent from ACCOUNTABLE_TEAMS",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "antigravity-signer-advisory-guard",
+      "name": "Antigravity signer advisory guard",
+      "layer": "L1-identity-signing",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/antigravity_signer_guard.py"
+      ],
+      "purpose": "advisory; feature-flagged `MEGINGJORD_ANTIGRAVITY_GUARD`; not a full gate",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "promote to non-advisory after Phase-1 parity",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "role-taxonomy-11-state-lifecycle",
+      "name": "Role taxonomy + 11-state lifecycle",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/role-baton-routing.instructions.md"
+      ],
+      "purpose": "substantive contract identical; enforcement mechanism differs",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "fsm-transition-table",
+      "name": "FSM transition table",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/transitions.js"
+      ],
+      "purpose": "pure data; shared",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "fsm-js-wasm-kernels",
+      "name": "FSM JS + WASM kernels",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/kernel.js",
+        "kernel.wasm"
+      ],
+      "purpose": "byte-identical; Py/Go/Rust ports pending toolchain",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "fsm-host-layer-public-api",
+      "name": "FSM host layer / public API",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/index.js"
+      ],
+      "purpose": "baton-signing optional fallback",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "baton-artifact-grammar-canonicalizer",
+      "name": "Baton artifact grammar/canonicalizer",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/grammar.js"
+      ],
+      "purpose": "parallel to evidence-loader regex (drift surface)",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "evidence-provenance-signing",
+      "name": "Evidence provenance signing",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/provenance.js"
+      ],
+      "purpose": "ephemeral ed25519 fallback",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "deterministic-artifact-builder-schema",
+      "name": "Deterministic artifact builder + schema",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/baton-artifact-builder.js",
+        "baton-artifact-schema.js"
+      ],
+      "purpose": "pure, but env-invariance is the parity invariant (cross-runtime byte-identical test)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "baton-comment-build-cli",
+      "name": "Baton comment build CLI",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/baton-comment-build.js"
+      ],
+      "purpose": "requires `--team-model` per runtime",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "pr-commit-changelog-builders",
+      "name": "PR/commit/changelog builders",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/baton-pr-builders.js"
+      ],
+      "purpose": "Refs-first ordering; signer alias is runtime-sensitive",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "comment-trail-analyzer",
+      "name": "Comment-trail analyzer",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-artifact-governance.js"
+      ],
+      "purpose": "last-of-each-type; epic-forbidden artifacts",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "slot-contract-builder-mode",
+      "name": "Slot contract / builder mode",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-slot-contract.js",
+        "baton-builder-mode.js"
+      ],
+      "purpose": "3 free-text slots; env-flag rollback",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "signer-independence-progression-parity",
+      "name": "Signer independence / progression parity",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-independence.js",
+        "baton-progression-parity.js"
+      ],
+      "purpose": "route-invariant (defeats Copilot Auto-mode #2940)",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "model-diversity-rotation-v1-v2",
+      "name": "Model-diversity rotation v1/v2",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-team-model.js",
+        "baton-team-model-v2.js"
+      ],
+      "purpose": "family rotation; waiver labels",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "collaborator-handoff-schema",
+      "name": "Collaborator-handoff schema (shift-left)",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/collaborator-handoff-schema.js"
+      ],
+      "purpose": "mirrors megalint server rules",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "server-authoritative-merge-evaluator",
+      "name": "Server-authoritative merge evaluator",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-authority/merge-authority.js",
+        "evidence-loader.js",
+        "merkle.js"
+      ],
+      "purpose": "GitHub-derived only; never local cache",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "fsm-model-checker",
+      "name": "FSM model checker (7 invariants)",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/verify/model-checker.js"
+      ],
+      "purpose": "formal proof",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "verdict-event-log-terminal-reconciler-role-drift-janitor-outage-",
+      "name": "Verdict event-log / terminal-reconciler / role-drift-janitor / outage WAL+replica / break-glass / env-flag classifier",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-fsm/*",
+        "baton-bypass/*"
+      ],
+      "purpose": "injected IO; orchestrator-agnostic",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "branch-scoped-manager-handoff-authority-checks",
+      "name": "Branch-scoped MANAGER_HANDOFF authority checks",
+      "layer": "L2-baton-contract-artifacts",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/baton_handoff_checks.py"
+      ],
+      "purpose": "reads live issue comments via gh CLI; wired pretool_guard",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "antigravity/cursor: verify hook wiring",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "per-runtime-hook-config",
+      "name": "Per-runtime hook config",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        ".claude/settings.json",
+        "hooks/global-standards.json",
+        ".codex/runtime-hooks.json",
+        ".antigravity/hooks.json",
+        ".cursor/hooks.json"
+      ],
+      "purpose": "event names not standardized: PascalCase (claude/copilot/codex) vs camelCase (cursor/antigravity); Codex `PermissionRequest`; Copilot `PreCompact`+`SubagentStart`; Cursor `beforeMCPExecution`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "Cursor: extend hooks.json event coverage via T2.3 scaffold",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cursor-hooks-adapter",
+      "name": "Cursor hooks adapter",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/cursor-hooks-emit.js"
+      ],
+      "purpose": "maps camelCase → harness taxonomy; known gaps (afterFileEdit ≠ full PostToolUse; subagentStart→session_context not subagent_inject; no PreCompact)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "full PostToolUse coverage requires Cursor platform support",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature",
+      "name": "`session_context.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "session_context.py"
+      ],
+      "purpose": "Inject governance context, wiki snippets, goal tier, routing hints",
+      "hookEvent": "SessionStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wired claude/copilot/codex/cursor; antigravity unconfirmed → `advisory-backstop-exists` (User-Rules system prompt carries static context)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-2",
+      "name": "`session_start_rotate.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "session_start_rotate.py"
+      ],
+      "purpose": "Rotate state files; begin new session epoch",
+      "hookEvent": "SessionStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wired claude/codex; copilot/cursor/antigravity status unconfirmed",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-3",
+      "name": "`hamr_activation_check.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "hamr_activation_check.py"
+      ],
+      "purpose": "Advisory gate: confirm HAMR activation on session start (5-runtime config-path map)",
+      "hookEvent": "SessionStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wired 5 runtimes nominally; per-runtime activation-state may differ",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-4",
+      "name": "`session_end_archive.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "session_end_archive.py"
+      ],
+      "purpose": "Archive completed session state",
+      "hookEvent": "Stop",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wiring unconfirmed cursor/antigravity",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-5",
+      "name": "`prune_file_history.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "runtime-NA",
+      "ssotFiles": [
+        "prune_file_history.py"
+      ],
+      "purpose": "Prune `.claude/file-history/` entries older than `CLAUDE_HISTORY_PRUNE_DAYS` (default 7)",
+      "hookEvent": "SessionStart",
+      "substituteTest": null,
+      "promotionPath": "Claude Code only (file-history is Claude-native); promotionPath: skip for other runtimes, add advisory backstop",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-6",
+      "name": "`zombie_cleanup.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "zombie_cleanup.py"
+      ],
+      "purpose": "SIGTERM/SIGKILL orphaned playwright/node workers with >80% CPU for >5 min; logs to `~/.megingjord/zombie-cleanup.jsonl`",
+      "hookEvent": "SessionStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "Linux-only (`/proc`); exits 0 quietly on non-Linux (G6)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-7",
+      "name": "`canonical_main_wip_check.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "canonical_main_wip_check.py"
+      ],
+      "purpose": "Advisory check for stranded tracked WIP in canonical main checkout; non-blocking; auto-quarantine opt-in via `MEGINGJORD_CANONICAL_MAIN_ENFORCE=1`",
+      "hookEvent": "SessionStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "all runtimes",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-8",
+      "name": "`wiki_wisdom.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "wiki_wisdom.py"
+      ],
+      "purpose": "Read governance wisdom pages from wiki/wisdom/; imported by other hook scripts; falls back to short defaults if pages missing",
+      "hookEvent": "(shared library)",
+      "promotionPath": "shared library, no direct hook wiring",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "canonical-main-ro-enforcer",
+      "name": "Canonical-main RO enforcer",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Block writes to tracked files in `~/devenv-ops/` main checkout; shell-write blind spot documented",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "canonical-main-wip-check",
+      "name": "Canonical-main WIP check",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Advisory stranded-WIP detector (SessionStart + PreToolUse path)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "commit-ticket-gate",
+      "name": "Commit ticket gate",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Deny `git commit` without `#N` reference; branch-scope check",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "manager-ticket-gate",
+      "name": "Manager ticket gate",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Deny tool calls when no MANAGER_HANDOFF on active branch ticket",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "baton-handoff-checks",
+      "name": "Baton handoff checks",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Branch-scoped MANAGER_HANDOFF authority verification",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "blast-radius-cap",
+      "name": "Blast-radius cap",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Config-driven cap on files edited per session",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "planning-consensus-gate",
+      "name": "Planning consensus gate",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Fail-closed: deny tool call if linked issue lacks planning consensus (requires Node in hook env)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "auth-profile-enforcer",
+      "name": "Auth profile enforcer",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Cap tool calls to `owner/guarded/restricted` profile capability set",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "role-tool-allowlist-enforcer",
+      "name": "Role tool allowlist enforcer",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Per-active-role allowlist of permitted tools; config-driven; fail-open",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "one-ticket-per-worktree",
+      "name": "One-ticket-per-worktree",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Deny if >1 active ticket in current worktree",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "epic-close-guard",
+      "name": "Epic close guard",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Block issue-close of Epic while any child is open; audited escape hatch `EPIC_CLOSE_OVERRIDE=1`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "worktree-push-gate",
+      "name": "Worktree push gate",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Block push until commit step recorded in state file",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "injection-guard",
+      "name": "Injection guard",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "PostToolUse: scan tool outputs against `prompt-injection-patterns.json`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "session-anomaly-detector",
+      "name": "Session anomaly detector",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Detect anomalous session patterns (high blast-radius, repeated auth failures)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-fleet-direct-block",
+      "name": "HAMR fleet direct block",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Block raw `:11434` Ollama curl; redirect to dispatch scripts",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "worktree-ticket-resolver",
+      "name": "Worktree ticket resolver",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Path-derived worktree→ticket resolution (fixes #2586/#2587 active-ticket gate keying on main cwd)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "repo-scope-guard",
+      "name": "Repo scope guard",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Runtime-ordered candidate paths; scope-restrict hook enforcement",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "live-ci-checks",
+      "name": "Live CI checks",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "GitHub API: classify CI checks as pending-only/failing/green/unknown; used by pretool merge gate",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "it-bypass-emitter",
+      "name": "IT bypass emitter",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Emit IT-ops bypass event to `~/.megingjord/it-bypass-usage.jsonl` (telemetry for §5 anneal threshold)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "task-router-routing-context",
+      "name": "Task router / routing context",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "purpose": "Fleet cascade execution + route-context message building for userprompt_gate",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-9",
+      "name": "`userprompt_gate.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "userprompt_gate.py"
+      ],
+      "purpose": "Route user prompt through fleet cascade; inject routing context",
+      "hookEvent": "UserPromptSubmit",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-10",
+      "name": "`goal_lens.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "goal_lens.py"
+      ],
+      "purpose": "Apply G1-G10 goal lens to prompt; inject tier-scaled reminders",
+      "hookEvent": "UserPromptSubmit",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-11",
+      "name": "`semantic_router.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "semantic_router.py"
+      ],
+      "purpose": "Zero-ML, <1ms keyword-density pre-classifier across 7 intent categories (trivial-lookup, log-analysis, config-gen, …); routes to free/fleet/haiku/premium before fleet cascade runs",
+      "hookEvent": "UserPromptSubmit",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-12",
+      "name": "`tool_activity.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "tool_activity.py"
+      ],
+      "purpose": "Track admin_ops (commit/push/pr_create/merge) activity via `mark_tool_activity`; feeds stop-hook admin-completion check",
+      "hookEvent": "PostToolUse",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-13",
+      "name": "`posttool_reminders.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "posttool_reminders.py"
+      ],
+      "purpose": "Post-tool governance reminders (baton state, uncommitted changes)",
+      "hookEvent": "PostToolUse",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-14",
+      "name": "`baton_event_emitter.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "baton_event_emitter.py"
+      ],
+      "purpose": "Emit baton transition events to `dashboard/events.jsonl` and `~/.megingjord/incidents.jsonl`",
+      "hookEvent": "PostToolUse",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-15",
+      "name": "`subagent_inject.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "subagent_inject.py"
+      ],
+      "purpose": "Inject governance context into subagent sessions",
+      "hookEvent": "SubagentStart",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-16",
+      "name": "`visual_qa_record.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "visual_qa_record.py"
+      ],
+      "purpose": "Record visual QA completion (URL, mode, verdict) into governance state `admin_ops.visual_qa`",
+      "hookEvent": "PostToolUse",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-17",
+      "name": "`stop_reminder.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "stop_reminder.py"
+      ],
+      "purpose": "Orchestrates stop-hook logic: admin completion check, uncommitted changes, wiki pending, client-arbitration detection",
+      "hookEvent": "Stop",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-18",
+      "name": "`stop_checks.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "stop_checks.py"
+      ],
+      "purpose": "Admin completion verification (`check_admin_ops`), uncommitted code detection, post-merge messages, wiki pending messages",
+      "hookEvent": "Stop (library)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-19",
+      "name": "`client_arbitration_guard.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "client_arbitration_guard.py"
+      ],
+      "purpose": "Detect client-arbitration leakage (assistant text requesting human approval for operator-scope decisions); emits incident",
+      "hookEvent": "Stop",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-20",
+      "name": "`anneal_decision_session_end.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "anneal_decision_session_end.py"
+      ],
+      "purpose": "Audit session transcript for unrecorded anneal decisions; emits Tier-1 event if flaw recognized without decision",
+      "hookEvent": "Stop",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-21",
+      "name": "`precompact_anchor.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "runtime-NA",
+      "ssotFiles": [
+        "precompact_anchor.py"
+      ],
+      "purpose": "Re-inject governance anchor into conversation before compaction",
+      "hookEvent": "PreCompact",
+      "substituteTest": null,
+      "promotionPath": "Cursor/Antigravity have no PreCompact event; substitute: periodic anchor re-injection at configurable Bash interval (must be itself tested to count as `full` in parity matrix)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-22",
+      "name": "`state_store.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "state_store.py"
+      ],
+      "purpose": "Read/write per-runtime governance state JSON; atomic IO; `reset_on_branch_change`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-23",
+      "name": "`governance_state.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "governance_state.py"
+      ],
+      "purpose": "`ensure_state()` / `save_state()` helpers; state schema definition",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-24",
+      "name": "`atomic_io.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "atomic_io.py"
+      ],
+      "purpose": "`flock`-based atomic read/write; concurrency-safe",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-25",
+      "name": "`runtime_paths.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "runtime_paths.py"
+      ],
+      "purpose": "Per-runtime state-root, hook-scripts, wiki-candidates path resolution",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-26",
+      "name": "`runtime_session_register.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "runtime_session_register.py"
+      ],
+      "purpose": "Register active session in runtime session registry (only claude-code wires SessionStart registration)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-27",
+      "name": "`github_role_resolver.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "github_role_resolver.py"
+      ],
+      "purpose": "Derive active baton role from live GitHub issue labels; feature-flagged `MEGINGJORD_DERIVE_ROLES_FROM_GH=1`; stale-cache fallback 300s",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-28",
+      "name": "`antigravity_signer_guard.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "antigravity_signer_guard.py"
+      ],
+      "purpose": "Advisory: detect Antigravity-team signer commits landing on main; feature-flagged `MEGINGJORD_ANTIGRAVITY_GUARD`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-29",
+      "name": "`load_local_env.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "load_local_env.py"
+      ],
+      "purpose": "Python parity of `load-local-env.js`: fill-don't-override `.env` hydration; `require_keys()` fail-closed assertion; G4 names-only audit",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-30",
+      "name": "`ticket_helpers.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "ticket_helpers.py"
+      ],
+      "purpose": "`extract_issue_num()`, `extract_from_branch()`, `validate_ticket_linkage()` — shared by commit/baton gates",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-31",
+      "name": "`wiki_router.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "wiki_router.py"
+      ],
+      "purpose": "Task-adaptive wiki context snippets for SessionStart: resolves local `cwd/wiki` then global wiki candidates; injects relevant snippets",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "imported by session_context.py",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-32",
+      "name": "`admin_patterns.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "admin_patterns.py"
+      ],
+      "purpose": "`required_admin_ops(flags, repo_type)` — canonical list of admin completion ops; consumed by `tool_activity.py` stop-hook and `check_admin_ops`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-33",
+      "name": "`git_checks.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "no",
+      "ssotFiles": [
+        "git_checks.py"
+      ],
+      "purpose": "`detect_session_signals()`, `detect_uncommitted_changes()` — git state detection for stop-hook",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-34",
+      "name": "`merged-branch-guard.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "merged-branch-guard.py"
+      ],
+      "purpose": "Block pushes to already-merged branches (#2878)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-35",
+      "name": "`merge_claim_client.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "merge_claim_client.py"
+      ],
+      "purpose": "HAMR merge-claim Python client; feature-flagged off",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-36",
+      "name": "`validate-branch-name.sh`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "validate-branch-name.sh"
+      ],
+      "purpose": "Deny push if branch name does not match `feat/fix/hotfix/chore/skill/<N>-slug`",
+      "hookEvent": "pre-push (lefthook)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-37",
+      "name": "`pre-push-readability.sh`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "pre-push-readability.sh"
+      ],
+      "purpose": "Run diff-aware readability gate",
+      "hookEvent": "pre-push (lefthook via `lint:readability:diff`)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-38",
+      "name": "`detect-secrets-precommit.sh`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "detect-secrets-precommit.sh"
+      ],
+      "purpose": "detect-secrets baseline scan",
+      "hookEvent": "pre-commit (optional)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-39",
+      "name": "`goal_tier_resolver.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "goal_tier_resolver.py"
+      ],
+      "purpose": "Resolve effective tier from `goal-tier-state.json` + role-minimum floor; stale GHS decays to baseline B",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "feature-40",
+      "name": "`friction_event.py`",
+      "layer": "L3-hook-gate-enforcement",
+      "parity": "yes",
+      "ssotFiles": [
+        "friction_event.py"
+      ],
+      "purpose": "Python sibling of `scripts/global/friction-event.js`; emit schema-v3 `governance.friction` events to `~/.megingjord/incidents.jsonl` with G4 redaction",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "ticket-first-label-taxonomy",
+      "name": "Ticket-first + label taxonomy",
+      "layer": "L4-ticket-github-governance",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/ticket-driven-work.instructions.md",
+        "github-governance.instructions.md"
+      ],
+      "purpose": "hook-enforced where supported; label-lint universal backstop",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "label-rules-evaluator-manifest",
+      "name": "Label rules evaluator + manifest",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/label-rules.js",
+        "label-manifest.json"
+      ],
+      "purpose": "shared by label-lint + label-scan",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "status-cardinality-close-protection-optimistic-transition",
+      "name": "Status cardinality / close-protection / optimistic-transition",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/label-lint-*.js"
+      ],
+      "purpose": "server-side Action",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "deterministic-pr-linkage-resolver",
+      "name": "Deterministic PR linkage resolver",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/linkage-resolver.js"
+      ],
+      "purpose": "precedence Closes→deferred-final→Refs",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "epic-governance",
+      "name": "Epic governance (phase gate, close-readiness, dormancy)",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "instructions/epic-governance.instructions.md",
+        "epic-close-readiness-check.js",
+        "phase0-*.js",
+        "epic-dormancy-detector.js"
+      ],
+      "purpose": "CI backstop fires regardless of orchestrator; `epic_close_guard.py` local",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "conventional-commits-enum-lane-enum",
+      "name": "Conventional-commits enum + lane enum",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/conventional-commits-enum.js",
+        "lane-enum.js"
+      ],
+      "purpose": "SSoT for branch/PR/lane validators",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "ruleset-config-as-code",
+      "name": "Ruleset config-as-code",
+      "layer": "L4-ticket-github-governance",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/baton-authority/ruleset-config.js",
+        "apply-ruleset.js"
+      ],
+      "purpose": "repo-level ruleset (id 18234114 live)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "github-ruleset-capability-ops-skills",
+      "name": "GitHub ruleset / capability / ops skills",
+      "layer": "L4-ticket-github-governance",
+      "parity": "yes",
+      "ssotFiles": [
+        "skills/github-*"
+      ],
+      "purpose": "per-runtime command adapter coverage varies",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "megalint-orchestrator",
+      "name": "Megalint orchestrator",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/megalint/index.js"
+      ],
+      "purpose": "VALIDATORS map must be identical; deployed copilot/codex/claude; not antigravity/cursor today (closed by §2.4 artifactClass)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "49-megalint-validators",
+      "name": "49 megalint validators (handoff schemas, signer fidelity, doc-coverage, merge-evidence, flaw-emission, parity-validator, chain-integrity, edd-required, admin-merge-exception, batch-cancel-evidence, batch-evidence, closeout-schema, collaborator-handoff, consultant-closeout, cross-team-response-fidelity, doc-coverage, fleet-review-required, linkage-resolver, manager-handoff, phase0-promotion-gate, prompt-artifact-lint, prose-link-check, red-team-evidence-quality, registry-tuple-coverage, signer-fidelity, test-discoverability, tier-tag-lint, worktree-naming-advisory, etc.)",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/megalint/*.js"
+      ],
+      "purpose": "many CI-invoked outside `runAll()`; see dispatch-gap list",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "95-ci-workflows",
+      "name": "95 CI workflows (baton-gates, closeout-lint, label-lint, test-evidence, edd-required, quality-gates, baton-authority-merge, baton-fsm-proof, orchestrator-governance-parity, parity-guard, phase0-promotion-gate, etc.)",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "no",
+      "ssotFiles": [
+        ".github/workflows/*.yml"
+      ],
+      "purpose": "server-side universal backstop; many advisory→blocking replay-eval-gated",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "config-schema-validator",
+      "name": "Config schema validator",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/validate-config-schemas.js",
+        "config/*.schema.json"
+      ],
+      "purpose": "validates `.claude/`/`.codex/` config authored by any team",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "prompt-artifact-prose-link-docs-health-linters",
+      "name": "Prompt-artifact / prose-link / docs-health linters",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/megalint/prompt-artifact-lint.js",
+        "prose-link-check.js",
+        "docs-health-detector.js"
+      ],
+      "purpose": "advisory; replay-eval-gated promotion",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "validator-dispatch-gap",
+      "name": "Validator dispatch gap (orphaned non-`runAll()` validators)",
+      "layer": "L5-validators-ci-workflows",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/megalint/{fleet-review-required,registry-tuple-coverage,sub-issue-preference,worktree-naming-advisory}.js"
+      ],
+      "purpose": "any runtime invoking `runAll()` silently misses these; close via T3.3 dispatch contract",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lane-policy-provider-adapters",
+      "name": "Lane policy + provider adapters",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/model-routing-policy.json",
+        "routing-provider-adapters.json"
+      ],
+      "purpose": "shared policy; cursor absent from runtimeKinds",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "model-routing-engine-per-role-lane-prefs",
+      "name": "Model routing engine + per-role lane prefs",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/model-routing-engine.js"
+      ],
+      "purpose": "caller must pass `opts.role`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "semantic-pre-classifier",
+      "name": "Semantic pre-classifier (zero-ML, Layer-0 router)",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/semantic_router.py"
+      ],
+      "purpose": "~80% routing accuracy, <1ms; Python-hook side; JS side is `scripts/global/task-router.js`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cascade-dispatch",
+      "name": "Cascade dispatch (fleet→free-cloud→paid)",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/cascade-dispatch.js",
+        "free-cloud-dispatch.js"
+      ],
+      "purpose": "shared; key availability per-runtime",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-provider-wrapper",
+      "name": "HAMR provider wrapper",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/hamr-provider-wrapper.js"
+      ],
+      "purpose": "4 config paths; antigravity not covered (reachable via §2.4 artifactClass)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-activation-sync-verify",
+      "name": "HAMR activation + sync-verify",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/hamr-activate.sh",
+        "hamr-sync-verify.js"
+      ],
+      "purpose": "sync-verify TARGETS = copilot+codex only; antigravity not a HAMR_TEAM value",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "sticky-route-header-spillover",
+      "name": "Sticky-route / header-spillover",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/sticky-route.js",
+        "header-spillover.js"
+      ],
+      "purpose": "pure",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cache-stats-emit-gate-telemetry-fallback-emit",
+      "name": "Cache-stats emit/gate, telemetry, fallback emit",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/cache-stats-emit.js",
+        "cache-hit-gate.js",
+        "model-routing-telemetry.js"
+      ],
+      "purpose": "shared `~/.megingjord/` surfaces; routing-telemetry is per-checkout `logs/`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-cloudflare-worker-entry-scheduled-routes",
+      "name": "HAMR Cloudflare Worker — entry + scheduled + routes",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "no",
+      "ssotFiles": [
+        "cloudflare/hamr/worker.ts",
+        "cloudflare/hamr/scheduled.ts",
+        "cloudflare/hamr/routes/*",
+        "cloudflare/hamr/wrangler.toml"
+      ],
+      "purpose": "single shared deploy; per-team DPoP + `x-hamr-team` header. The hamr Worker is EXACTLY `{worker.ts, scheduled.ts, routes/*}` + its own `wrangler.toml`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "separate-top-level-worker",
+      "name": "Separate top-level (non-hamr) Worker",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "no",
+      "ssotFiles": [
+        "cloudflare/worker.ts",
+        "cloudflare/durable-object.ts",
+        "cloudflare/state-tools.ts",
+        "cloudflare/wrangler.toml"
+      ],
+      "purpose": "`durable-object.ts` + `state-tools.ts` live at `cloudflare/` ROOT and belong to a distinct Worker, not the hamr Worker. (Corrects iter-1's `cloudflare/hamr/durable-object.ts` / `cloudflare/hamr/state-tools.ts` — those paths DO NOT EXIST.)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "merge-claim-fleet-claim-mailbox-mcp-dispatch-governance-bundle",
+      "name": "Merge-claim / fleet-claim / mailbox / mcp-dispatch / governance-bundle",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "cloudflare/hamr/routes/*"
+      ],
+      "purpose": "only Python clients for fleet/merge claim (no JS binding)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-bypass-detector-fleet-direct-block",
+      "name": "HAMR bypass detector + fleet-direct block (JS + 2 Py twins)",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/hamr-bypass-detector.js",
+        "hooks/scripts/hamr_bypass_detector.py",
+        "hooks/scripts/hamr_fleet_direct_block.py"
+      ],
+      "purpose": "three twins that must stay in detection parity: the JS detector (CI/lint side), the Python bypass detector (`hamr_bypass_detector.py`, detects `hamr-bypass-ok:` markers + raw provider calls in tool input), and the Python fleet-direct block (`hamr_fleet_direct_block.py`, denies raw `:11434` Ollama curl and redirects to dispatch scripts). Cross-ref L3: `hamr_bypass_detector.py` (verified present) is a 64-script-corpus member not individually named in the L3 enumeration; it is the Python detector twin of `hamr-bypass-detector.js`, distinct from the `hamr_fleet_direct_block.py` PreToolUse guard already listed in the `pretool_guard.py` sub-guard table.",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "tool-policy-proxy-utilization-sensor-offload-kpi-doctor-rotation",
+      "name": "Tool-policy proxy / utilization sensor / offload KPI / doctor / rotation",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/hamr-tool-*.js",
+        "hamr-utilization-sensor.js",
+        "hamr-doctor.js"
+      ],
+      "purpose": "role-scoped; doctor capPath claude-specific",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "friction-event-js-twin",
+      "name": "Friction event JS twin",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/friction-event.js",
+        "friction-recurrence.js"
+      ],
+      "purpose": "must stay in parity with `hooks/scripts/friction_event.py`; both emit schema-v3 `governance.friction` to `incidents.jsonl`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "ide-proxy",
+      "name": "IDE proxy (11437)",
+      "layer": "L6-routing-cost-hamr",
+      "parity": "runtime-NA",
+      "ssotFiles": [
+        "instructions/ide-proxy.instructions.md"
+      ],
+      "purpose": "Claude Code only (Epic #1020); promotionPath: intentional platform limitation; substitute: none structurally possible",
+      "substituteTest": null,
+      "promotionPath": "structural-NA: requires documented tested substitute (T3.1)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "three-wiki-typology",
+      "name": "Three-wiki typology (A/B/C)",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/wiki-knowledge.instructions.md",
+        "wiki/WIKI*.md"
+      ],
+      "purpose": "claude/copilot/antigravity read `~/.copilot/wiki/`; codex `~/.codex/devenv-ops/wiki/`; cursor absent",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "wiki-ingest-backfill-mirror-reconcile-auto-update-pipeline",
+      "name": "Wiki ingest / backfill / mirror / reconcile / auto-update pipeline",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/wiki/*"
+      ],
+      "purpose": "Megingjord/CI-only producers",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "wiki-frontmatter-schema-signing",
+      "name": "Wiki frontmatter schema + signing",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/wiki/validate-frontmatter.js",
+        "sign-frontmatter.js",
+        "config/wiki-frontmatter.schema.json"
+      ],
+      "purpose": "single impl",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "wiki-drift-gate-health-detector-lint-anneal",
+      "name": "Wiki drift gate / health detector / lint / anneal",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/wiki/drift-detector.js",
+        "wiki-health-detector.js",
+        "lint.js",
+        "anneal.js"
+      ],
+      "purpose": "advisory; replay-eval-gated",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "retrieval-router-vs-deployed-keyword-search",
+      "name": "Retrieval router (BM25+RRF) vs deployed keyword search",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/wiki/retrieval-router.js",
+        "scripts/global/wiki-search.js"
+      ],
+      "purpose": "search script deployed copilot/codex only; claude/antigravity null; cursor absent",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "wiki-runtime-parity-check",
+      "name": "Wiki runtime parity check",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/wiki-parity-check.js"
+      ],
+      "purpose": "WIKI_PATHS map; cursor missing",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "wisdom-project-a4-isolation",
+      "name": "Wisdom/project A4 isolation",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "yes",
+      "ssotFiles": [
+        "wiki/wisdom/project/"
+      ],
+      "purpose": "deploy.sh ships full tree incl. project/ — A4 leak (fixed §5.4/T1.5)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "doc-coverage-matrix-n-a-enum-gate",
+      "name": "Doc-coverage matrix + N/A enum + gate",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "yes",
+      "ssotFiles": [
+        "config/doc-coverage-matrix*.yml",
+        "doc-coverage-na-reasons.json",
+        "megalint/doc-coverage.js"
+      ],
+      "purpose": "all Collaborators must emit doc-coverage block",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "docs-howto-corpus",
+      "name": "docs/howto corpus (77 runbooks)",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "no",
+      "ssotFiles": [
+        "docs/howto/*"
+      ],
+      "purpose": "not deployed to runtime paths",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "changelog-fragment-system",
+      "name": "Changelog fragment system",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/changelog-aggregate.js",
+        "changelog-fragment-validator.js"
+      ],
+      "purpose": "repo-local",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "operator-memory-model",
+      "name": "Operator memory model",
+      "layer": "L7-knowledge-wiki-docs-memory",
+      "parity": "runtime-NA",
+      "ssotFiles": [
+        "~/.claude/projects/.../memory/"
+      ],
+      "purpose": "Claude Code only; no cross-orchestrator promotion path; promotionPath: wiki/wisdom/project/ is the intended cross-orchestrator analogue (formal, not session-local)",
+      "substituteTest": null,
+      "promotionPath": "structural-NA: requires documented tested substitute (T3.1)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "multi-target-deploy-dispatcher",
+      "name": "Multi-target deploy dispatcher",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/deploy.sh"
+      ],
+      "purpose": "copilot most complete; claude missing skills/agents/wiki; antigravity/cursor narrowest; `deploy:apply` default = `both` (copilot+codex) only; +`scripts` artifactClass added (§2.4) ships scripts/global to all five",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "codex-deploy-sync-adapter",
+      "name": "Codex deploy/sync adapter (managed-block merge)",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/codex-runtime.js"
+      ],
+      "purpose": "Codex-unique managed-block pattern; skills→`~/.agents/skills/`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "multi-target-reverse-sync",
+      "name": "Multi-target reverse sync",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/sync.sh"
+      ],
+      "purpose": "no sync:antigravity / sync:cursor (added by scaffold); canonical-main guard #2355",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "xteam-mcp-register-server",
+      "name": "xteam MCP register + server",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/xteam-mcp-register.js",
+        "scripts/xteam-mcp/*",
+        "scripts/xteam-mcp/leader-election.js"
+      ],
+      "purpose": "5 JSON/TOML merge paths; cursor absent from `scripts/xteam-mcp/leader-election.js` VALID_TEAMS (leader-election lives under `scripts/xteam-mcp/`, NOT `scripts/global/`)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "atomic-deploy-manifest-verify",
+      "name": "Atomic deploy + manifest + verify",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/deploy-atomic.js",
+        "deploy-manifest.js",
+        "verify-deploy.js"
+      ],
+      "purpose": "5 targets; no manifest/verify npm variant for antigravity/cursor (added); not chained from deploy:apply",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "runtime-session-registry",
+      "name": "Runtime session registry",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/runtime-session-registry.js",
+        "runtime_session_register.py"
+      ],
+      "purpose": "only claude-code wires SessionStart registration",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hook-parity-check",
+      "name": "Hook parity check (3-way diff)",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/hook-parity-check.js"
+      ],
+      "purpose": "8 TRACKED scripts; claude-code absent from DEPLOY_TARGETS (reads ~/.copilot)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "orchestrator-governance-parity-checker",
+      "name": "Orchestrator governance parity checker",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/orchestrator-governance-parity.js",
+        "inventory/orchestrator-governance-parity.json"
+      ],
+      "purpose": "checks copilot/codex/claude only; antigravity/cursor documented-not-parsed",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "state-store-parity-check",
+      "name": "State-store parity check",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/state-store-parity-check.js"
+      ],
+      "purpose": "KNOWN_STATE_ROOTS map",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "runtime-side-effect-guard",
+      "name": "Runtime side-effect guard",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/runtime-side-effect-guard.js"
+      ],
+      "purpose": "ALLOWLIST = vscode-extension/codex/claude-code only; copilot/antigravity/cursor denied (phantom vscode-extension entry — §5.3)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "inventory-config-registries",
+      "name": "Inventory + config registries",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "inventory/orchestrator-governance-parity.json",
+        "inventory/team-model-signatures.json",
+        "inventory/harness-self-test-registry.json",
+        "inventory/governance-manifest.schema.json",
+        "config/runtime-compatibility-matrix.yml",
+        "config/governance-rules.yaml"
+      ],
+      "purpose": "the de-facto multi-file parity registry (target for AC-R1 consolidation). `runtime-compatibility-matrix.yml` lives under `config/`, NOT `inventory/` (reconciles §4 surface-10); `governance-rules.yaml` is also under `config/`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cross-team-perspective-registry",
+      "name": "Cross-team perspective registry",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "inventory/team-perspectives.json"
+      ],
+      "purpose": "per-team `lens` + `strengths` for `claude-code`, `codex`, `copilot`, `antigravity`; feeds cross-family review / multi-judge dispatch (which non-Anthropic family reviews a claude-code author). `cursor` absent from `teams{}` — under uniform-full-parity this is an `absent` gap to close (add a `cursor` perspective entry); it is also a §4 onboarding fan-out surface (a new runtime must register its lens or it is invisible to perspective-aware review routing)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "auxiliary-subdirectory-corpus",
+      "name": "Auxiliary `scripts/` subdirectory corpus",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/fleet/",
+        "36gbwinresource/",
+        "windows-laptop/",
+        "scripts/hooks/",
+        "hooks/scripts/",
+        "scripts/regression/",
+        "fleet-hamr-replay.js",
+        "scripts/tools/",
+        "sse-load-test.js",
+        "scripts/windows-laptop/",
+        "install-litellm-service.ps1",
+        "start-litellm.ps1"
+      ],
+      "purpose": "Repo-local / IT-fleet / CI surfaces; not per-runtime adapter targets. The full `scripts/` corpus is 8 subdirectories (`fleet`, `global`, `hooks`, `regression`, `tools`, `wiki`, `windows-laptop`, `xteam-mcp`); `global`+`wiki`+`xteam-mcp` are cataloged elsewhere (L5/L6/L8, L7, xteam MCP row). `scripts/regression/` is the replay-eval governance-test surface (canonical example `fleet-hamr-replay.js` replays HAMR fleet traffic), in-scope for the \"promotion is replay-eval-gated, not calendar-gated\" pattern recurring across §5. Disambiguation: `scripts/hooks/` (git-side `.sh` audit scripts) is distinct from `hooks/scripts/` (the 64-script runtime hook corpus in L3) — must not be conflated.",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "npm-deploy-sync-verify-script-surface",
+      "name": "npm deploy/sync/verify script surface",
+      "layer": "L8-deploy-sync-registries",
+      "parity": "yes",
+      "ssotFiles": [
+        "package.json"
+      ],
+      "purpose": "uneven coverage across runtimes",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "canonical-skill-per-runtime-adapter-deploy",
+      "name": "Canonical skill → per-runtime adapter deploy",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        "skills/*/SKILL.md",
+        ".claude/commands/",
+        ".antigravity/commands/",
+        ".codex/commands/",
+        "~/.copilot/skills/"
+      ],
+      "purpose": "Copilot 42/42; Claude 45 (3 claude-only no canonical); Antigravity 5/45; Cursor 0",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "42-canonical-skills",
+      "name": "42 canonical skills (role-*, github-*, repo-*, wiki, fleet, etc.)",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        "skills/*/SKILL.md"
+      ],
+      "purpose": "Claude adapters: some stubs with diverged argument-hints",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "3-claude-only-commands",
+      "name": "3 Claude-only commands (anneal-trigger-router, fleet-review, cross-team-consult-pickup)",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        ".claude/commands/*.md"
+      ],
+      "purpose": "no canonical SKILL.md — promotionPath: create canonical SKILL.md for each",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "2-antigravity-only-commands",
+      "name": "2 Antigravity-only commands (baton-comment-build, worktree-status)",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        ".antigravity/commands/*.md"
+      ],
+      "purpose": "no canonical SKILL.md — promotionPath: same",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "install-global-md-per-skill-install-metadata",
+      "name": "INSTALL-GLOBAL.md per-skill install metadata",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        "~/.copilot/skills/*/INSTALL-GLOBAL.md"
+      ],
+      "purpose": "Copilot-only (subset, criterion undocumented)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "agent-roster-8-canonical-personas-and-exist-only-as-adapters-wit",
+      "name": "Agent roster — 8 canonical `*.agent.md` personas: `architect`, `governance-auditor`, `implementer`, `planner`, `quick`, `release-reviewer`, `router`, `security-scanner`. `red-team` and `IT` exist ONLY as `.claude/agents` adapters (`it.md`, `red-team.md`) with no `*.agent.md` source; `router-policy.md` is a third adapter-only file.",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        "agents/*.agent.md",
+        ".claude/agents/*.md",
+        ".antigravity/agents/*.md"
+      ],
+      "purpose": "Claude 11 adapters (8 canonical + 3 adapter-only: `it.md`, `red-team.md`, `router-policy.md`); Copilot 8 (canonical via rsync); Antigravity 3; Codex 0 (script-layer router only); cursor via Copilot rsync. promotionPath: add `*.agent.md` canonical source for `it`/`red-team`/`router-policy` so the 3 adapter-only files are not orphaned",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "pre-merge-sub-agent-orchestrator-fragments",
+      "name": "Pre-merge sub-agent orchestrator + fragments",
+      "layer": "L9-skills-agents-commands",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/pre-merge-review-orchestrator.js",
+        "agents/pre-merge-review/*.md"
+      ],
+      "purpose": "CI-hosted, scaffolded/inert",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "prompt-artifact-structural-linter",
+      "name": "Prompt-artifact structural linter",
+      "layer": "L9-skills-agents-commands",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/megalint/prompt-artifact-lint.js"
+      ],
+      "purpose": "scans skills/agents/.claude commands; excludes these from doc-audit surfaces (per memory `doc_audit_excludes_prompt_artifacts`)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "programmatic-task-router",
+      "name": "Programmatic task router (script layer)",
+      "layer": "L9-skills-agents-commands",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/task-router.js",
+        "task-router-policy.json"
+      ],
+      "purpose": "Codex substitute for router agent",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "agent-deploy-pipeline",
+      "name": "Agent deploy pipeline",
+      "layer": "L9-skills-agents-commands",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/deploy.sh",
+        "deploy-manifest.js"
+      ],
+      "purpose": "Codex no agents/ deploy path",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "unified-event-schema-v3-otel-genai",
+      "name": "Unified event schema v3 + OTel GenAI",
+      "layer": "L10-observability-dashboard",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/event-schema-v3.js",
+        "event-schema-otel-genai.js"
+      ],
+      "purpose": "not deployed to cursor/antigravity today (reachable via §2.4 artifactClass)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lifecycle-event-emitter-events-jsonl-surface",
+      "name": "Lifecycle event emitter + events.jsonl surface",
+      "layer": "L10-observability-dashboard",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/emit-event.js",
+        "dashboard/events.jsonl"
+      ],
+      "purpose": "cursor/antigravity have no write path until §2.4 ships scripts/global",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "incidents-jsonl-cache-stats-jsonl-surfaces",
+      "name": "incidents.jsonl / cache-stats.jsonl surfaces",
+      "layer": "L10-observability-dashboard",
+      "parity": "yes",
+      "ssotFiles": [
+        "~/.megingjord/*.jsonl"
+      ],
+      "purpose": "shared cross-runtime; Python `open('a')` bypasses canonical enforcer",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "log-rotation-redaction",
+      "name": "Log rotation / redaction",
+      "layer": "L10-observability-dashboard",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/log-rotation.js",
+        "log-redaction.js"
+      ],
+      "purpose": "SURFACES omits events.jsonl (gap)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-coverage-api-panel",
+      "name": "Goal-coverage API + panel",
+      "layer": "L10-observability-dashboard",
+      "parity": "no",
+      "ssotFiles": [
+        "dashboard/api/goal-coverage-handlers.js",
+        "dashboard/js/goal-coverage-panel.js"
+      ],
+      "purpose": "server-side (Copilot context)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-health-score-panel",
+      "name": "Goal-health score + panel",
+      "layer": "L10-observability-dashboard",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/goal-health-score.js",
+        "dashboard/js/goal-health.js"
+      ],
+      "purpose": "two snapshot paths (anneal-sensor.json vs /tmp/governance-audit.json)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "sse-pipeline-jsonl-tail-transport",
+      "name": "SSE pipeline + jsonl-tail + transport",
+      "layer": "L10-observability-dashboard",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/sse-handler.js",
+        "jsonl-tail.js",
+        "dashboard/js/transport*.js"
+      ],
+      "purpose": "HOST_ENV demo/vscode/local; no adapter for codex/claude CLI",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "multi-agent-sessions-vendor-icons",
+      "name": "Multi-agent sessions + VENDOR_ICONS",
+      "layer": "L10-observability-dashboard",
+      "parity": "yes",
+      "ssotFiles": [
+        "dashboard/js/multi-agent-sessions.js"
+      ],
+      "purpose": "recognizes copilot/claude/codex/antigravity/cursor/cline; needs `window.__AGENT_VENDOR`",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "dashboard-http-server",
+      "name": "Dashboard HTTP server",
+      "layer": "L10-observability-dashboard",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/dashboard-server.js"
+      ],
+      "purpose": "Copilot context only; deployed `~/.copilot/dashboard/` only",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "15-dashboard-panels",
+      "name": "~15 dashboard panels",
+      "layer": "L10-observability-dashboard",
+      "parity": "no",
+      "ssotFiles": [
+        "dashboard/js/*.js"
+      ],
+      "purpose": "browser-only, Copilot-deployed",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "three-tier-self-anneal",
+      "name": "Three-tier self-anneal",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/workflow-resilience.instructions.md",
+        "anneal-tier1-aggregator.js",
+        "anneal-tier2-autofile.js"
+      ],
+      "purpose": "incidents.jsonl shared; tier-2 needs GitHub",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "active-session-exclusive-lock",
+      "name": "Active-session exclusive lock",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/worktree-active-session-lock.js"
+      ],
+      "purpose": "shared `~/.megingjord/active-session.lock`; no auto-acquire hook",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cross-team-lease-registry-gate-heartbeat",
+      "name": "Cross-team lease registry + gate + heartbeat",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/cross-team-lease-registry.js",
+        "cross-team-lease-gate.js",
+        "worktree-lease-heartbeat.js"
+      ],
+      "purpose": "path discrepancy: `.dashboard/` vs `~/.megingjord/` (fixed §5.4/T1.5)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cross-runtime-injection-guard",
+      "name": "Cross-runtime injection guard",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/cross-runtime-injection-guard.js"
+      ],
+      "purpose": "not wired as blocking gate; knownTeams enrollment",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "hamr-mailbox-client-github-native-mailbox",
+      "name": "HAMR mailbox client (Tier-2) + GitHub-native mailbox (Tier-1)",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/mailbox-client.js",
+        "github-mailbox.js",
+        "mailbox-outbox.js"
+      ],
+      "purpose": "substrate-selected by `MEGINGJORD_HAMR_ENABLED`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "merge-claim-client",
+      "name": "Merge-claim client",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/merge_claim_client.py"
+      ],
+      "purpose": "Python only; feature-flagged off",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "breaking-change-recovery",
+      "name": "Breaking-change recovery",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "no",
+      "ssotFiles": [
+        "instructions/breaking-change-recovery.instructions.md"
+      ],
+      "purpose": "6-phase, runtime-agnostic",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "worktree-governance-sandbox-tool-boundary",
+      "name": "Worktree governance / sandbox / tool-boundary",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/sandbox-worktree-governance.instructions.md",
+        "worktree-tool-boundary.instructions.md",
+        "worktree-governance-audit.js"
+      ],
+      "purpose": "per-runtime launcher branches + tool API names",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "resource-tier-portability-tier-assert",
+      "name": "Resource-tier portability + tier-assert",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "no",
+      "ssotFiles": [
+        "instructions/resource-tier-portability.instructions.md",
+        "tier-assert.js"
+      ],
+      "purpose": "`MEGINGJORD_MINIMUM_TIER` future enforcement",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "credential-prompt-guard",
+      "name": "Credential prompt guard",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/credential-prompt-guard.instructions.md",
+        "scripts/global/credential-availability.js"
+      ],
+      "purpose": "instructional + helper",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "friction-event-system",
+      "name": "Friction event system (JS+Py twins)",
+      "layer": "L11-resilience-anneal-coordination",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/friction-event.js",
+        "friction-recurrence.js",
+        "hooks/scripts/friction_event.py"
+      ],
+      "purpose": "JS and Py twins must stay in schema parity; both emit `governance.friction` schema-v3 to `~/.megingjord/incidents.jsonl`; recurrence model feeds tier-2 autofile",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "g1-g10-harness-goal-constitution",
+      "name": "G1–G10 Harness Goal Constitution",
+      "layer": "L12-goal-constitution-decision-lens",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/harness-goals.instructions.md"
+      ],
+      "purpose": "Loaded into every runtime system prompt that processes `instructions/`; G1-G10 priority order is the universal decision lens",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "tier-graceful-degradation-pattern",
+      "name": "Tier-graceful degradation pattern",
+      "layer": "L12-goal-constitution-decision-lens",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/harness-goals.instructions.md"
+      ],
+      "purpose": "Cross-cutting G5+G6 pattern binding all runtimes",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "cursor/antigravity: confirm instruction-load coverage",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "g10-edd-100-line-cap-cyclomatic-complexity-floor",
+      "name": "G10 EDD / 100-line cap / cyclomatic complexity floor",
+      "layer": "L12-goal-constitution-decision-lens",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/harness-goals.instructions.md",
+        "edd-required.yml",
+        "lint.js"
+      ],
+      "purpose": "CI-enforced universal; local lefthook also runs line-cap",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-lens-decision-lint",
+      "name": "Goal-lens decision lint (G1>G2>…>G10 priority chain)",
+      "layer": "L12-goal-constitution-decision-lens",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/global-standards.instructions.md"
+      ],
+      "purpose": "Instructional binding for all governed decisions",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "resource-tier-vocabulary",
+      "name": "Resource-tier vocabulary (T0–T5)",
+      "layer": "L12-goal-constitution-decision-lens",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/resource-tier-portability.instructions.md"
+      ],
+      "purpose": "Operator-specific baseline; G5 cross-cuts all features",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-health-score-computation",
+      "name": "Goal-Health Score (GHS) computation",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/goal-health-score.js"
+      ],
+      "purpose": "Pure computation over governance signals; shared snapshot",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "actuator-engine",
+      "name": "Actuator engine (7-actuator tier governance)",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/actuator-engine.js"
+      ],
+      "purpose": "Reads GHS → writes `~/.megingjord/goal-tier-state.json`; pure function `runActuators()`",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "actuator-transitions",
+      "name": "Actuator transitions (hysteresis + cooldown)",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/actuator-transitions.js"
+      ],
+      "purpose": "`applyTransition()` shared by all 7 actuators",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "actuator-epic-sync",
+      "name": "Actuator epic sync",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/actuator-epic-sync.js"
+      ],
+      "purpose": "Sync actuator state to Epic ticket comments for cross-team visibility",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-tier-state-file",
+      "name": "Goal-tier state file",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "yes",
+      "ssotFiles": [
+        "~/.megingjord/goal-tier-state.json"
+      ],
+      "purpose": "Written by actuator-engine; shared across runtimes via shared `~/.megingjord/` path",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-tier-resolver",
+      "name": "Goal-tier resolver (hook-side)",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/goal_tier_resolver.py"
+      ],
+      "purpose": "Reads `goal-tier-state.json`; resolves effective tier for current session; stale GHS decays to B; role-minimum floor (Consultant floor B+)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wired via `goal_lens.py`; antigravity/cursor: confirm hook wiring",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "goal-tier-override",
+      "name": "Goal-tier override",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/goal-tier-override.js"
+      ],
+      "purpose": "Manual override path for operator-supervised tier adjustments",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "actuator-behavior-matrix",
+      "name": "Actuator behavior matrix (A1–A7)",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "yes",
+      "ssotFiles": [
+        "actuator-engine.js"
+      ],
+      "purpose": "A1: test coverage tier (B→B++++); A2: cross-family review required→advisory; A3: handoff block required; A4: consultant mandatory; A5: operator notification; A6: session reminder; A7: anneal auto-trigger",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "all runtimes see tier effects via shared state file",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "ghs-dashboard-panel",
+      "name": "GHS dashboard panel",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "dashboard/js/goal-health.js"
+      ],
+      "purpose": "Copilot-only dashboard; no adapter for other runtimes",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "anneal-sensor-snapshot",
+      "name": "Anneal-sensor snapshot",
+      "layer": "L13-adaptive-goal-health-actuator",
+      "parity": "no",
+      "ssotFiles": [
+        "generated/anneal-sensor.json"
+      ],
+      "purpose": "Snapshot written by GHS computation; consumed by dashboard and `/api/goal-coverage`",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lefthook-pre-commit-suite",
+      "name": "lefthook pre-commit suite",
+      "layer": "L14-lefthook-local-pre-push-commit",
+      "parity": "yes",
+      "ssotFiles": [
+        "lefthook.yml"
+      ],
+      "purpose": "`docs-check-on-package-json` (runs `pre-commit-docs-check.js` when `package.json` changes)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "human developers: activated by `npx lefthook install`; AI agents: wired via PostToolUse git-commit hooks",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lefthook-pre-push-suite",
+      "name": "lefthook pre-push suite (15 commands)",
+      "layer": "L14-lefthook-local-pre-push-commit",
+      "parity": "yes",
+      "ssotFiles": [
+        "lefthook.yml"
+      ],
+      "purpose": "Parallel: `branch-name-regex`, `lint-line-cap`, `lint-readability`, `lint-js`, `lint-md`, `lint-py`, `lint-sh`, `megalint`, `hydration-lint`, `closeout-preflight`, `closeout-presence-check`, `git-freshness`, `merged-branch-guard`, `cross-team-lease-gate`, `collaborator-self-check` (`scripts/global/collaborator-self-check.js` — the #2907 hard gate). (`docs-check-on-package-json` is pre-commit, not pre-push; `worktree-teardown-actuate` is post-merge.)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "AI agents: wired via `worktree_push_gate.py` hook which validates these run before push",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lefthook-post-merge",
+      "name": "lefthook post-merge (squash-aware teardown)",
+      "layer": "L14-lefthook-local-pre-push-commit",
+      "parity": "no",
+      "ssotFiles": [
+        "lefthook.yml"
+      ],
+      "purpose": "`worktree-teardown-actuate` — runs `worktree-teardown-actuate.js --apply` after `git pull`/merge to clean up merged worktrees",
+      "promotionPath": "human developer only; AI agents use `npm run worktree:teardown` manually",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "lefthook-install-path",
+      "name": "Lefthook install path",
+      "layer": "L14-lefthook-local-pre-push-commit",
+      "parity": "yes",
+      "ssotFiles": [
+        "npm run lefthook:install",
+        "npx lefthook install"
+      ],
+      "purpose": "Must be re-run after repo clone and after `deploy:apply` for each AI agent runtime's local checkout",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "cursor/antigravity: unconfirmed whether lefthook is installed in their worktrees",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "governance-profiles-registry",
+      "name": "Governance profiles registry",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "no",
+      "ssotFiles": [
+        "hooks/governance-profiles.json"
+      ],
+      "purpose": "4 named profiles: `web-app`, `vscode-extension`, `cli-library`, `governance-harness`; each declares commit/PR/release gates and per-layer lint sets",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "repo-type-detector",
+      "name": "Repo type detector",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/repo_detection.py"
+      ],
+      "purpose": "Detects repo type from file fingerprints (package.json scripts, manifest keys, directory structure); outputs profile name",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "all runtimes should call this; wiring unconfirmed for antigravity/cursor",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "repo-standards-router-skill",
+      "name": "Repo-standards router skill",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "yes",
+      "ssotFiles": [
+        "skills/repo-standards-router/SKILL.md"
+      ],
+      "purpose": "Operator-invoked: routes governance setup decisions to the correct per-profile gate set",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "Claude 45/Copilot 42 adapters; antigravity partial; cursor absent",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "repo-scope-guard-2",
+      "name": "Repo-scope guard",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/repo_scope.py",
+        "hooks/repo-scope.json"
+      ],
+      "purpose": "Restrict hook enforcement to configured repo paths; runtime-ordered candidate list",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "all runtimes nominally covered",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "profile-keyed-lint-sets",
+      "name": "Profile-keyed lint sets",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "no",
+      "ssotFiles": [
+        "hooks/governance-profiles.json"
+      ],
+      "purpose": "`agnostic` (line-limit, readability, secret-scan) + `language` (eslint/stylelint/ruff) + `project` (lighthouse/vsce/api-extractor)",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "profile-keyed-pr-release-gates",
+      "name": "Profile-keyed PR/release gates",
+      "layer": "L15-repo-type-governance-profile",
+      "parity": "no",
+      "ssotFiles": [
+        "hooks/governance-profiles.json"
+      ],
+      "purpose": "`web-app`: visual_qa+lighthouse; `vscode-extension`: extension_test+version_bump+vsce_publish; `cli-library`: unit_tests+api_compat+semver_check",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "edd-contract-definition",
+      "name": "EDD contract definition (GOV-009)",
+      "layer": "L16-edd-gate-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/harness-goals.instructions.md",
+        "instructions/global-standards.instructions.md"
+      ],
+      "purpose": "All runtimes must produce an `## EDD` comment block on `lane:code-change` tickets",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "edd-validator",
+      "name": "EDD validator (megalint)",
+      "layer": "L16-edd-gate-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/megalint/edd-required.js"
+      ],
+      "purpose": "CI-invoked; validates: `scope:`, `acceptance:`, `risk:`, `implementation-plan:` fields present; exempt lanes: trivial, config-only, docs-research, no-code-remediation",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "edd-ci-gate",
+      "name": "EDD CI gate",
+      "layer": "L16-edd-gate-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        ".github/workflows/edd-required.yml"
+      ],
+      "purpose": "Universal CI backstop; reads PR body for `Refs #N`, fetches linked issue comments, calls `edd-required.js`; fails PR if EDD absent on non-exempt lane",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "edd-comment-contract",
+      "name": "EDD comment contract (`## EDD` marker)",
+      "layer": "L16-edd-gate-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "## EDD"
+      ],
+      "purpose": "Operator (any runtime) must post the `## EDD` comment on the linked issue before pushing; `edd-required.js` re-runs after posting resolves the gate",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "edd-local-pre-push-check",
+      "name": "EDD local pre-push check",
+      "layer": "L16-edd-gate-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "lefthook.yml",
+        "node scripts/global/megalint/index.js"
+      ],
+      "purpose": "Local megalint run during pre-push catches EDD absence before CI; depends on `CLOSEOUT_CHECK_BLOCK` / `COLLABORATOR_SELF_CHECK_INPUT` env vars",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-schema",
+      "name": "Authorization profile schema",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        "config/authorization-profiles.json"
+      ],
+      "purpose": "3 named profiles: `owner`, `guarded`, `restricted`; 5 required capability fields: `install`, `upgrade`, `privileged`, `execute_local`, `execute_remote`",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-resolver",
+      "name": "Authorization profile resolver (JS)",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/authorization-profile.js"
+      ],
+      "purpose": "Resolution order: CLI flag > env var > config file > default; `parseActiveProfile()` validates schema",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-context",
+      "name": "Authorization profile context (JS)",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/authorization-profile-context.js"
+      ],
+      "purpose": "Builds operator context string injected into session context",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-enforcer",
+      "name": "Authorization profile enforcer (Python hook)",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "hooks/scripts/auth_profile_enforcer.py"
+      ],
+      "purpose": "PreToolUse: cap tool calls to active profile's capability set; config-driven; fail-open",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "wired pretool_guard; antigravity/cursor wiring unconfirmed",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-enforcer-2",
+      "name": "Authorization profile enforcer (JS)",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/auth-profile-enforcer.js"
+      ],
+      "purpose": "JS parity of Python enforcer; consumed by megalint / CI context",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "must stay in behavioral parity with Python hook",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "authorization-profile-instruction",
+      "name": "Authorization-profile instruction",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "yes",
+      "ssotFiles": [
+        "instructions/authorization-profile-context.instructions.md"
+      ],
+      "purpose": "Loaded into system prompt; governs operator-level capability declaration",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "all runtimes that load `instructions/`",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "conformance-spec",
+      "name": "Conformance spec",
+      "layer": "L17-authorization-profile-subsystem",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/authorization-profile-conformance.spec.js"
+      ],
+      "purpose": "Contract test: JS resolver + enforcer must agree on all 3 profiles × 5 capabilities",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "operator-ownership-rule-registry",
+      "name": "Operator-ownership rule registry",
+      "layer": "L18-operator-ownership-client-arbitration",
+      "parity": "no",
+      "ssotFiles": [
+        "inventory/operator-ownership-rules.json"
+      ],
+      "purpose": "`scopedFiles` (`instructions/operator-identity-context.instructions.md`) + 3 assertion sets: `operator-owned-execution`, `user-client-design-uat`, `no-manual-delegation`, each a literal-pattern list",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "operator-ownership-rule-loader",
+      "name": "Operator-ownership rule loader",
+      "layer": "L18-operator-ownership-client-arbitration",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/operator-ownership-rules.js"
+      ],
+      "purpose": "Loads + exposes the JSON assertion registry; shared pure module",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "operator-ownership-evaluator",
+      "name": "Operator-ownership evaluator",
+      "layer": "L18-operator-ownership-client-arbitration",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/operator-ownership-eval.js"
+      ],
+      "purpose": "Evaluates a text surface against the assertion patterns; deterministic; consumed by lint/CI",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "delegation-phrase-lint",
+      "name": "Delegation-phrase lint",
+      "layer": "L18-operator-ownership-client-arbitration",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/delegation-phrase-lint.js"
+      ],
+      "purpose": "Flags client-arbitration leakage (\"you will need to…\", \"please manually…\", \"the user must…\") in operator output / artifacts; the JS twin of the `client_arbitration_guard.py` Stop-hook (L3)",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "antigravity/cursor: confirm the JS lint is wired into their deployed `scripts/global` corpus (reachable via the §2.4 `scripts` artifactClass)",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cedar-policy-corpus",
+      "name": "Cedar policy corpus",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "inventory/cedar-policies/*.cedar",
+        "signer-alias-canonical.cedar"
+      ],
+      "purpose": "Declarative Cedar authorization policies; pilot scope",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "cedar-pilot-evaluator",
+      "name": "Cedar pilot evaluator",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/cedar-pilot.js"
+      ],
+      "purpose": "Loads + evaluates the `.cedar` corpus; experimental policy-as-code spike",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "ms-toolkit-pilot",
+      "name": "MS-toolkit pilot (comparative)",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/ms-toolkit-pilot.js"
+      ],
+      "purpose": "Sibling policy-engine spike evaluated alongside Cedar",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "g1-g10-rubric-ssot",
+      "name": "G1–G10 rubric SSoT (current)",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "inventory/rubric-g1-g10-v3.json"
+      ],
+      "purpose": "`version: g1-g10-v3`; `score_formula: (boxes_checked / boxes_total) * 10`; per-goal box list with deterministic `evidence_command` DSL (`contains\\",
+      "promotionPath": "regex\\",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "g1-g9-rubric-ssot",
+      "name": "G1–G9 rubric SSoT (legacy, valid in transition)",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "inventory/rubric-g1-g9-v2.json"
+      ],
+      "purpose": "predecessor schema; scorer accepts both v2 and v3 until replay-eval promotion (#1967)",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "deterministic-rubric-scorer",
+      "name": "Deterministic rubric scorer",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "yes",
+      "ssotFiles": [
+        "scripts/global/rubric-score.js"
+      ],
+      "purpose": "Reads the rubric SSoT; emits 0–10 per goal + 0–10 mean; the verifiable-scoring path of `instructions/review-score-contract.instructions.md`; consumed by Consultant closeout + cross-family review",
+      "perRuntime": {
+        "claude-code": {
+          "status": "unverified"
+        },
+        "copilot": {
+          "status": "unverified"
+        },
+        "codex": {
+          "status": "unverified"
+        },
+        "cursor": {
+          "status": "unverified"
+        },
+        "antigravity": {
+          "status": "unverified"
+        }
+      },
+      "promotionPath": "antigravity/cursor: ship via §2.4 `scripts` artifactClass so the scorer runs on those runtimes' Consultant/review paths",
+      "sources": [
+        "phase0-3412"
+      ]
+    },
+    {
+      "id": "multi-judge-prompt-templates",
+      "name": "Multi-judge prompt templates",
+      "layer": "L19-policy-rubric-review-ssot",
+      "parity": "no",
+      "ssotFiles": [
+        "scripts/global/multi-judge-prompts.js"
+      ],
+      "purpose": "Prompt templates for the cross-family / multi-judge LLM scoring lane that layers on top of the deterministic scorer",
+      "promotionPath": "—",
+      "sources": [
+        "phase0-3412"
+      ]
+    }
+  ]
+}

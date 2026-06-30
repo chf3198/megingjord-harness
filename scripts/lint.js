@@ -50,6 +50,9 @@ const IGNORE_FILES = [
   'governance-decision-policy.json',
   // Adapter emit manifest — grows with runtimes × governance units (#3103)
   'governance-manifest.sample.json',
+  // Canonical harness feature catalog SSoT — grows with layers × features × runtimes by design (#3439, Epic #3411 T1.1)
+  'harness-feature-catalog.json',
+  'harness-feature-catalog.schema.json',
 ];
 
 const EXTS = ['.js', '.html', '.css', '.md', '.sh', '.json'];

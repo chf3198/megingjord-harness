@@ -140,6 +140,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `auth:profile:context` | `node scripts/global/authorization-profile-context.js` |
 | `capability:probe` | `node scripts/global/capability-probe.js` |
 | `capability:show` | `node scripts/global/capability-show.js` |
+| `catalog:check` | `node scripts/global/harness-feature-catalog.js` |
+| `catalog:check:test` | `node --test tests/harness-feature-catalog.spec.js` |
 | `catch-empty` | `bash scripts/global/catch-empty-lint.sh .github/workflows` |
 | `check:closeout` | `node scripts/global/open-pr-closeout-check.js` |
 | `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |

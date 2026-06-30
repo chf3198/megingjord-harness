@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://megingjord/harness-feature-catalog.schema.json",
+  "title": "Canonical Harness Feature Catalog",
+  "description": "Single source of truth for every harness feature/surface and its per-orchestrator parity contract (Epic #3411 T1.1). Onboarding (T2) and the parity matrix (T3) derive from this catalog. EXTENDS the #1701 governance/README.md -> governance-manifest chain; does not fork it.",
+  "type": "object",
+  "required": ["catalogVersion", "ssotAnchor", "runtimes", "layers", "features", "metadata"],
+  "additionalProperties": true,
+  "properties": {
+    "catalogVersion": { "type": "string", "pattern": "^[0-9a-f]{16}$" },
+    "ssotAnchor": { "const": "governance/README.md" },
+    "runtimes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "layers": { "type": "array", "minItems": 19, "items": { "type": "string", "pattern": "^L[0-9]+-" } },
+    "metadata": { "type": "object",
+      "required": ["layerCount", "featureCount", "parityFlaggedCount"],
+      "properties": {
+        "layerCount": { "type": "integer", "minimum": 19 },
+        "featureCount": { "type": "integer", "minimum": 1 },
+        "parityFlaggedCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "features": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/feature" } }
+  },
+  "$defs": {
+    "parityStatus": { "enum": ["full", "partial", "absent", "structural-NA", "waived", "advisory-backstop-exists", "unverified"] },
+    "parityCell": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "$ref": "#/$defs/parityStatus" },
+        "evidence": { "type": ["string", "null"] },
+        "advisoryBackstop": { "type": ["string", "null"] },
+        "substituteTest": { "type": ["string", "null"] },
+        "promotionPath": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["structural-NA", "waived"] } } },
+          "then": { "required": ["substituteTest"],
+            "properties": { "substituteTest": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "feature": {
+      "type": "object",
+      "required": ["id", "name", "layer", "parity"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "layer": { "type": "string", "pattern": "^L[0-9]+-" },
+        "purpose": { "type": "string" },
+        "parity": { "enum": ["yes", "no", "runtime-NA"] },
+        "ssotFiles": { "type": "array", "items": { "type": "string" } },
+        "perRuntime": { "type": "object", "additionalProperties": { "$ref": "#/$defs/parityCell" } },
+        "substituteTest": { "type": ["string", "null"] },
+        "promotionPath": { "type": ["string", "null"] },
+        "sources": { "type": "array", "items": { "type": "string" } }
+      },
+      "allOf": [
+        { "if": { "properties": { "parity": { "const": "yes" } } }, "then": { "required": ["perRuntime"] } }
+      ]
+    }
+  }
+}
