@@ -337,9 +337,13 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if is_raw_fleet_curl(joined):
         _emit_fleet_bypass_incident(cwd)
-        return emit("ask", "Raw fleet/ollama curl detected (#2192 vector 2): prefer dispatchRedTeam / "
-                    "cascade-dispatch so HAMR records cost+observability. Add '# hamr-bypass-ok: <reason>' "
-                    "for an audited diagnostic bypass.", "Bypasses HAMR cost/observability layer.")
+        # Epic #3392 AC2 (S1): self-resolvable REDIRECT, not a client prompt. The operator
+        # uses the dispatch wrappers (cascade-dispatch / free-cloud-dispatch) so HAMR records
+        # cost+observability, or adds the documented '# hamr-bypass-ok: <reason>' carve-out for an
+        # audited diagnostic. The deny + bypass-incident are PRESERVED (anti-goal §6) — only ask->deny.
+        return emit("deny", "Raw fleet/ollama curl (#2192 vector 2): use cascade-dispatch or "
+                    "free-cloud-dispatch (HAMR cost+observability), or add '# hamr-bypass-ok: <reason>' "
+                    "for an audited diagnostic bypass. Operator-resolvable — no client prompt.")
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     if is_main_checkout(cwd):
         sw = RE_BRANCH_SWITCH.search(joined)
@@ -440,15 +444,30 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
         if "gh issue edit" not in joined and "--remove-label" not in joined:
-            return emit("ask","Issue close should normalize labels first.","Remove execution role labels before close.")
+            # Epic #3392 AC2 (S2): self-resolvable REDIRECT, not a client prompt. Normalize the
+            # execution-role labels first, then close — fully operator-automatable. The
+            # label-normalization governance intent is PRESERVED (anti-goal §6); only ask->deny.
+            return emit("deny", "Issue close: remove execution role labels first "
+                        "(gh issue edit #N --remove-label role:<X>), then close. "
+                        "Operator-resolvable — no client prompt.")
     if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined) and not ops.get("commit"):
         if not linked_issue_has_collab_handoff(cwd):
             return emit("deny","PR creation blocked: COLLABORATOR_HANDOFF not found on linked issue.")
-        return emit("ask","PR creation before commit. Confirm intentional.")
+        # Epic #3392 AC2 (S3): state-derive instead of prompting. The session admin_ops.commit flag
+        # is often lost to cwd-churn / worktrees (#3344), so confirm a REAL commit ahead of base in
+        # the pushed branch's worktree. Allow on a confirmed commit-ahead; else redirect to commit.
+        from worktree_push_gate import branch_has_commit_ahead, resolve_push_cwd
+        if branch_has_commit_ahead(resolve_push_cwd(joined, cwd)):
+            return emit("allow", "PR creation: a real commit exists ahead of base (state-derived; no client prompt).")
+        return emit("deny", "PR creation: commit step first (Admin sequencing). Operator-resolvable — no client prompt.")
     if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):
-        return emit("ask","CI checks before PR creation. Confirm intentional.")
+        # Epic #3392 AC2 (S4): checking CI status is READ-ONLY and harmless before PR creation (the
+        # operator routinely polls checks on an existing PR). Allow with an advisory; no client prompt.
+        return emit("allow", "CI checks before PR creation: read-only status poll — proceeding (no client prompt).")
     if RE_RELEASE_INTEGRITY.search(joined) and repo_type == "vscode-extension" and not ops.get("publish"):
-        return emit("ask","Integrity check before publish. Confirm intentional.")
+        # Epic #3392 AC2 (S5): a release-integrity check is READ-ONLY verification; running it before
+        # publish is a harmless precondition check. Allow with an advisory; no client prompt.
+        return emit("allow", "Integrity check before publish: read-only verification — proceeding (no client prompt).")
     if RE_GIT_TAG.search(joined) and flags.get("ui_touched") and not ops.get("visual_qa"):
         return emit("deny","Tag blocked: visual QA not recorded for UI change.")
     return None
