@@ -28,6 +28,10 @@ applyTo: "**"
     authority and closes via `gh issue close #N` after `CONSULTANT_CLOSEOUT`.
   - **Backward-compat**: `Closes #N` (or `Fixes #N` / `Resolves #N`) — still accepted;
     triggers GitHub auto-close on merge.
+  - Author the linkage on its own lines per the canonical block; gates resolve the accountable
+    ticket via `scripts/global/linkage-resolver.js` (prefer Closes / deferred-final, then the
+    first line-anchored `Refs #N`; `Refs Epic #N` is excluded). See
+    `docs/howto/canonical-linkage-block.md` (#1614).
 - Issues must include: problem/objective, expected outcome, acceptance criteria.
 - Large work is decomposed with sub-issues and `blocked by` / `blocking` dependencies.
 - Templates required: at minimum bug, task, and epic forms. `blank_issues_enabled: false` in config.yml.

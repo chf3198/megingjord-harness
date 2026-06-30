@@ -4,13 +4,17 @@
 // fragment exists OR the PR description carries [skip-changelog].
 // Refs #2157.
 
+const { resolveLinkedTicket } = require('../linkage-resolver');
+
 const SKIP_MARKER = '[skip-changelog]';
 const FRAGMENT_RE = /^\.changes\/unreleased\/(\d+)\.md$/;
 
+// Deterministic linkage (Refs #1614 AC1): prefer the auto-close / deferred-final
+// target, then the first line-anchored `Refs #N`; `Refs Epic #N` is excluded.
+// Replaces a first-match `Refs` scan that picked the wrong issue when a non-ticket
+// reference led the PR body.
 function extractRefsTicket(prBody) {
-  if (!prBody) return null;
-  const match = String(prBody).match(/(?:^|\n)\s*Refs\s+#(\d+)\b/i);
-  return match ? Number(match[1]) : null;
+  return resolveLinkedTicket(prBody).ticket;
 }
 
 function findFragment(prFiles, ticket) {

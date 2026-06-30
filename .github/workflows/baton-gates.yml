@@ -18,7 +18,11 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) {
               core.setFailed(
                 'No linked issue found. Add "Refs #N" to PR body so the baton trail can be verified.'
@@ -82,7 +86,11 @@ jobs:
             const { analyzeComments } =
               require('./scripts/global/baton-artifact-governance.js');
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
             const linkedIssue = parseInt(refsMatch[1]);
             const { data: issue } = await github.rest.issues.get({
@@ -133,7 +141,11 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) { core.setFailed('No Refs #N in PR body.'); return; }
             const linkedIssue = parseInt(refsMatch[1]);
             const { data: issue } = await github.rest.issues.get({
@@ -194,7 +206,11 @@ jobs:
           script: |
             const { validate } = require('./scripts/global/megalint/changelog-fragment-presence.js');
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
             const { data: issue } = await github.rest.issues.get({
               owner: context.repo.owner, repo: context.repo.repo,
@@ -219,7 +235,11 @@ jobs:
           script: |
             // #2912: hard-blocking gate (promoted from advisory after soak completion).
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) { console.log('No Refs #N; skipping cross-team-response-fidelity.'); return; }
             const linkedIssue = parseInt(refsMatch[1]);
             const { data: comments } = await github.rest.issues.listComments({
