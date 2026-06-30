@@ -55,3 +55,22 @@ For behavior/config changes, confirm all applicable docs are updated:
 If any item is intentionally N/A, state N/A + reason explicitly.
 
 Never claim "feature complete" with uncommitted worktree changes.
+
+## Platform merge-authority bridge (#3336)
+
+The platform-recognized grant of **Admin autonomous-merge** and **Consultant
+autonomous-close** authority is the committed `automode-provision` autoMode bridge
+(`scripts/global/automode-provision.js`), installed at host provisioning by
+`npm run hamr:activate` (#3346). A `permissions.allow` rule does **not** suppress the
+Claude Code auto-mode classifier; the `autoMode` prose block is the documented override,
+and it is the portable, test-guarded (`tests/automode-provision-bridge-3336.spec.js`)
+home of the grant. The grant is **scoped** — it authorizes a merge only when the linked
+issue carries a `CONSULTANT_CLOSEOUT` and required CI is green, and the independent
+`baton-authority/merge` gate remains the mechanical precondition (it is not a blanket
+self-merge license).
+
+**The client is NEVER a merge approver.** Merge authority is the Admin baton role and
+close authority is the Consultant baton role — both AI-agent roles. Asking the client to
+authorize a routine merge or issue close is a governance misalignment (operator-identity
+contract: client = design + UAT only). Per-machine permission-prompt allows belong in the
+gitignored `.claude/settings.local.json`, never in committed shared settings.
