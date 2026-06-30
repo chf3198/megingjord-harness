@@ -4,6 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const wikiCheck = require('./wiki-parity-check');
+const stateCheck = require('./state-store-parity-check');
 const ROOT = path.resolve(__dirname, '..', '..');
 const MANIFEST = path.join(ROOT, 'inventory', 'orchestrator-governance-parity.json');
 
@@ -85,8 +86,10 @@ function run() {
     'Generate adapters or record per-skill waivers in the parity manifest.');
   const wikiParity = manifest.wikiDocsParity || {};
   const wiki = wikiCheck.run({ digestManifest: wikiParity.digestManifest, runtimeTiers: wikiParity.runtimeTiers });
+  const stateStore = stateCheck.run({ stateStore: manifest.stateStoreParity, runtimes: manifest.runtimes });
+  for (const stateFinding of stateStore.findings) findings.push(stateFinding);
   return { ok: findings.length === 0, manifest: path.relative(ROOT, MANIFEST),
-    checkedAt: new Date().toISOString(), observations: { copilot, codex, wiki },
+    checkedAt: new Date().toISOString(), observations: { copilot, codex, wiki, stateStore },
     findings };
 }
 

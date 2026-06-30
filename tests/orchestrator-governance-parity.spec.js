@@ -58,3 +58,27 @@ test('run() includes wiki_docs_memory observations in result', () => {
   assert.ok(result.observations.wiki, 'wiki observation present');
   assert.equal(result.observations.wiki.surface, 'wiki_docs_memory');
 });
+
+test('run() includes state_store observations (#1934)', () => {
+  const result = parity.run();
+  assert.ok(result.observations.stateStore, 'state_store observation present');
+  assert.equal(result.observations.stateStore.surface, 'state_store');
+});
+
+test('state_store parity maps every declared runtime (no unmapped finding)', () => {
+  const ids = parity.run().findings.map(f => f.id);
+  assert.equal(ids.some(id => id.startsWith('state-store-unmapped-')), false);
+});
+
+const stateCheck = require('../scripts/global/state-store-parity-check');
+test('state-store check flags an unmapped runtime (#1934)', () => {
+  const r = stateCheck.run({ stateStore: { runtimes: { copilot: { statePath: 'x', status: 'full' } } },
+    runtimes: ['copilot', 'newrt'] });
+  assert.equal(r.findings.some(f => f.id === 'state-store-unmapped-newrt'), true);
+});
+
+test('state-store check flags a full runtime with no statePath (#1934)', () => {
+  const r = stateCheck.run({ stateStore: { runtimes: { codex: { statePath: null, status: 'full' } } },
+    runtimes: ['codex'] });
+  assert.equal(r.findings.some(f => f.id === 'state-store-path-missing-codex'), true);
+});
