@@ -4,7 +4,8 @@ judgment/preference notes write frictionlessly. Ships ADVISORY (warns, allows); 
 blocking is replay-eval-gated per Phase-0 #3381 Q6. Fail-open: any error -> allow.
 
 Runtime-agnostic shim: reads the SAME shared lexicon as scripts/global/friction-classifier.js
-(config/friction-lexicon.json), so all four teams route identically (G5)."""
+(config/friction-lexicon.json), so all four teams route identically (G5).
+"""
 import json
 import os
 import re
