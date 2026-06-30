@@ -87,9 +87,9 @@ function collectAllFiles() {
   return [...dashboardJS, ...scriptJS];
 }
 
-function verifyRef(ref) {
+function verifyRef(ref, root = ROOT) {
   try {
-    execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: ROOT, stdio: 'pipe' });
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', ref], { cwd: root, stdio: 'pipe' });
     return true;
   } catch (err) {
     void err; // ref absent in this checkout (e.g. shallow CI, bogus base)
@@ -97,10 +97,10 @@ function verifyRef(ref) {
   }
 }
 
-function resolveBaseRef(explicitBase) {
+function resolveBaseRef(explicitBase, root = ROOT) {
   const candidates = explicitBase ? [explicitBase] : BASE_REF_CANDIDATES;
   for (const ref of candidates) {
-    if (verifyRef(ref)) return ref;
+    if (verifyRef(ref, root)) return ref;
   }
   return null;
 }
@@ -111,20 +111,20 @@ function isScannedJs(rel) {
   return rel.startsWith('dashboard/js/') || rel.startsWith('scripts/');
 }
 
-function gitChangedPaths(baseRef) {
+function gitChangedPaths(baseRef, root = ROOT) {
   const committed = execFileSync('git',
     ['diff', '--name-only', '--diff-filter=ACMR', `${baseRef}...HEAD`],
-    { cwd: ROOT, encoding: 'utf8' });
+    { cwd: root, encoding: 'utf8' });
   const working = execFileSync('git',
     ['diff', '--name-only', '--diff-filter=ACMR', 'HEAD'],
-    { cwd: ROOT, encoding: 'utf8' });
+    { cwd: root, encoding: 'utf8' });
   const merged = `${committed}\n${working}`.split('\n').map(s => s.trim()).filter(Boolean);
   return Array.from(new Set(merged)).filter(isScannedJs);
 }
 
-function baseWarningCount(baseRef, rel) {
+function baseWarningCount(baseRef, rel, root = ROOT) {
   try {
-    const content = execFileSync('git', ['show', `${baseRef}:${rel}`], { cwd: ROOT, encoding: 'utf8' });
+    const content = execFileSync('git', ['show', `${baseRef}:${rel}`], { cwd: root, encoding: 'utf8' });
     return checkContent(content, rel).length;
   } catch (err) {
     void err; // path absent at base (new or renamed file) — baseline of zero
@@ -145,15 +145,15 @@ function sumNetNew(entries) {
   return { netNew, regressions };
 }
 
-function computeRegressions(baseRef) {
+function computeRegressions(baseRef, root = ROOT) {
   const entries = [];
-  for (const rel of gitChangedPaths(baseRef)) {
-    const abs = path.join(ROOT, rel);
+  for (const rel of gitChangedPaths(baseRef, root)) {
+    const abs = path.join(root, rel);
     if (!fs.existsSync(abs)) continue; // deleted in working tree
     entries.push({
       file: rel,
       current: checkContent(fs.readFileSync(abs, 'utf8'), rel).length,
-      base: baseWarningCount(baseRef, rel),
+      base: baseWarningCount(baseRef, rel, root),
     });
   }
   return sumNetNew(entries);

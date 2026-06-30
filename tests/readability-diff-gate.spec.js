@@ -91,3 +91,64 @@ test('CLI falls back to absolute mode when the base ref is unavailable', () => {
   const parsed = JSON.parse(out.trim().split('\n').pop());
   assert.equal(parsed.mode, 'absolute', 'unavailable base degrades to the absolute gate');
 });
+
+// Integration: exercise computeRegressions over REAL git history (#1434, AC1/AC3 end-to-end).
+// Addresses the cross-family (qwen-32b) finding that only the pure sumNetNew helper and the
+// CLI fallback path were covered — never the gitChangedPaths/baseWarningCount git layer against
+// a real base revision. Builds a throwaway repo and injects it as `root`.
+test('computeRegressions detects net-new over real git history, ignores baseline drift', () => {
+  const fs2 = require('node:fs');
+  const os = require('node:os');
+  const { computeRegressions } = require('../scripts/global/lint-readability-core');
+  const git = (repo, args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8' });
+
+  const repo = fs2.mkdtempSync(path.join(os.tmpdir(), 'rd-gate-'));
+  try {
+    git(repo, ['init', '-q']);
+    git(repo, ['config', 'user.email', 'gate@test.local']);
+    git(repo, ['config', 'user.name', 'gate-test']);
+    fs2.mkdirSync(path.join(repo, 'scripts'), { recursive: true });
+    // base commit: clean.js (0 warnings), drift.js (1 pre-existing warning)
+    fs2.writeFileSync(path.join(repo, 'scripts', 'clean.js'), 'const itemCount = 1;\n');
+    fs2.writeFileSync(path.join(repo, 'scripts', 'drift.js'), 'const y = 2;\n');
+    git(repo, ['add', '-A']);
+    git(repo, ['commit', '-q', '-m', 'base']);
+    const base = git(repo, ['rev-parse', 'HEAD']).trim();
+    // HEAD commit: clean.js gains a net-new warning; drift.js touched but warning count unchanged;
+    // new.js is brand-new with a warning (base absent -> baseline 0).
+    fs2.writeFileSync(path.join(repo, 'scripts', 'clean.js'), 'const x = 1;\n');
+    fs2.writeFileSync(path.join(repo, 'scripts', 'drift.js'), 'const y = 2;\n// touched, still one warning\n');
+    fs2.writeFileSync(path.join(repo, 'scripts', 'new.js'), 'const z = 3;\n');
+    git(repo, ['add', '-A']);
+    git(repo, ['commit', '-q', '-m', 'head']);
+
+    const { netNew, regressions } = computeRegressions(base, repo);
+    assert.equal(netNew, 2, 'clean.js (+1) and new.js (+1) are net-new; drift.js (+0) is ignored');
+    const files = regressions.map(r => r.file).sort();
+    assert.deepEqual(files, ['scripts/clean.js', 'scripts/new.js']);
+    assert.equal(regressions.some(r => r.file === 'scripts/drift.js'), false,
+      'pre-existing baseline drift must not be flagged');
+  } finally {
+    fs2.rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('resolveBaseRef honours an injected root (origin/main|main candidates resolved per-repo)', () => {
+  const fs2 = require('node:fs');
+  const os = require('node:os');
+  const { resolveBaseRef } = require('../scripts/global/lint-readability-core');
+  const git = (repo, args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8' });
+  const repo = fs2.mkdtempSync(path.join(os.tmpdir(), 'rd-base-'));
+  try {
+    git(repo, ['init', '-q', '-b', 'main']);
+    git(repo, ['config', 'user.email', 'gate@test.local']);
+    git(repo, ['config', 'user.name', 'gate-test']);
+    fs2.writeFileSync(path.join(repo, 'f.txt'), 'x\n');
+    git(repo, ['add', '-A']);
+    git(repo, ['commit', '-q', '-m', 'init']);
+    assert.equal(resolveBaseRef(null, repo), 'main', 'falls through candidates to local main');
+    assert.equal(resolveBaseRef('no-such-ref', repo), null, 'unverifiable explicit base -> null');
+  } finally {
+    fs2.rmSync(repo, { recursive: true, force: true });
+  }
+});
