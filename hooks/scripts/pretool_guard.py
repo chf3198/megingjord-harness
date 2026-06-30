@@ -479,6 +479,19 @@ def main() -> int:
                 return emit("deny",
                     "Write to /memories/ blocked: use the memory tool for memory operations. "
                     "Raw file writes to /memories/ are a governance injection vector (G-07, #2903).")
+        # #3383 Epic #3380: guardrail-first memory-write poka-yoke (ADVISORY; never denies).
+        # A deterministic-friction note SHOULD become a guardrail, not a context-growing memory
+        # note. Warns (does not block); promotion to blocking is replay-eval-gated. Fail-open.
+        try:
+            from memory_write_guard import check_memory_write
+            _note_body = "\n".join(values)
+            for _mpath in iter_paths(payload.get("tool_input", {})):
+                _decision, _why = check_memory_write(str(_mpath), _note_body)
+                if _decision == "advise":
+                    sys.stderr.write("[memory-guard advisory #3383] " + _why + "\n")
+                    break
+        except Exception:
+            pass
         if active_ticket_is_no_code_lane(state, cwd):
             return emit("deny", "File edit blocked: lane:no-code-remediation is issue-only. Re-route ticket to lane:code-change.")
         # Canonical-main write guard: block writes whether cwd is main checkout
