@@ -462,6 +462,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `worktree:lifecycle` | `node scripts/global/worktree-lifecycle-gate.js --session-diagnosis` |
 | `worktree:provision` | `node scripts/global/worktree-provision.js` |
 | `worktree:start` | `bash scripts/worktree-session-start.sh` |
+| `worktree:teardown` | `node scripts/global/worktree-teardown-actuate.js` |
 <!-- /docs -->
 ## Token telemetry reconciliation configuration
 

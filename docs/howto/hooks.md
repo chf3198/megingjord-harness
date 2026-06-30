@@ -44,3 +44,12 @@ confirmed-OPEN PR; it **fails closed** (retains the block) when no PR exists or
 the lookup is indeterminate (gh non-zero / timeout / absent). The gate stays
 honest — it still blocks a merge that truly has no PR — while no longer
 stranding a legitimate Admin merge on lost session state.
+
+## Post-merge worktree teardown actuation (#3357, Epic #3352)
+
+A `post-merge` lefthook runs `scripts/global/worktree-teardown-actuate.js --apply` so that when a
+squash-merge lands on `main` locally, any now merged-and-clean worktree is torn down automatically.
+It executes `git worktree remove` **without `--force`** — git's own dirty-guard is the authoritative
+final gate, so a worktree with uncommitted or unmerged work is refused, never force-removed. Each
+teardown emits a redacted v3 audit record (decision + `git worktree remove` exit code/stderr) to the
+observability surface. Preview without removing via `npm run worktree:teardown` (dry-run default).
