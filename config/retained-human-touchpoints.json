@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "_doc": "Epic #3392 AC3 — the bounded, enumerated set of human touchpoints the harness retains. EVERYTHING ELSE is operator-or-cross-model territory (route to the #3401 adjudication-guardrail, never a bare client prompt). A new client-prompt surface absent from `sanctioned_ask_surfaces` is flagged by scripts/global/megalint/client-prompt-surface-check.js (advisory; promotion replay-eval-gated).",
+  "carve_outs": [
+    {
+      "id": "design-direction",
+      "class": "design",
+      "description": "New architecture / scope expansion / visual design direction — the client's correct role (operator-identity contract)."
+    },
+    {
+      "id": "uat-confirmation",
+      "class": "uat",
+      "description": "UAT visual confirmation that shipped behavior matches user expectation — the client's correct role."
+    },
+    {
+      "id": "irreversible-destruction",
+      "class": "irreversible",
+      "description": "Irreversible / destructive real-world action (e.g. permanent deletion, force-push to main, dropping a production database)."
+    },
+    {
+      "id": "security-policy-weakening",
+      "class": "security-weakening",
+      "description": "Deliberate weakening of a security/governance control, or genuine secret-exposure — never auto-executed (anti-goal §6)."
+    }
+  ],
+  "sanctioned_ask_surfaces": [
+    {
+      "file": "hooks/scripts/pretool_guard.py",
+      "marker": "Direct ungoverned hook-script mutation",
+      "carve_out": "security-policy-weakening",
+      "ticket": "#3403"
+    },
+    {
+      "file": "hooks/scripts/pretool_guard.py",
+      "marker": "Sensitive (tracked/committable) secret-file path",
+      "carve_out": "security-policy-weakening",
+      "ticket": "#3403"
+    }
+  ]
+}
