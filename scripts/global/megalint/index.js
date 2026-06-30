@@ -33,6 +33,7 @@ const fleetCallLint = require('./fleet-call-lint.js');
 const workLogSync = require('./work-log-sync.js');
 const batonTransition = require('./baton-transition.js');
 const authorTeam = require('./author-team-check.js');
+const epicAcDisposition = require('./epic-ac-disposition-check.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -74,6 +75,7 @@ const VALIDATORS = {
   'work-log-sync': workLogSync,
   'baton-transition': batonTransition,
   'author-team-check': authorTeam,
+  'epic-ac-disposition-check': epicAcDisposition,
 };
 
 function runAll(input) {
