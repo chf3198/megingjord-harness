@@ -34,6 +34,8 @@ jobs:
       issues: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0 # diff-aware readability gate needs base history (#1434)
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
@@ -58,8 +60,8 @@ jobs:
         run: npm run governance:sync-check
       - name: Governance compatibility matrix
         run: npm run governance:compatibility:matrix
-      - name: Readability gate
-        run: npm run lint:readability:ci
+      - name: Readability gate (diff-aware; #1434)
+        run: npm run lint:readability:diff
       - name: Ticket reconciliation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

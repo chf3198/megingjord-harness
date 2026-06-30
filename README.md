@@ -349,6 +349,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `lint:py` | `ruff check --config lint-configs/ruff.devenv.toml hooks/scripts/` |
 | `lint:readability` | `node scripts/lint-readability.js` |
 | `lint:readability:ci` | `node scripts/lint-readability.js --max-warnings=486` |
+| `lint:readability:diff` | `node scripts/lint-readability.js --changed-only --max-warnings=486` |
 | `lint:router` | `node scripts/lint-router.js` |
 | `lint:sh` | `find scripts -name '*.sh' -exec shellcheck --severity=warning {} +` |
 | `mailbox:flush` | `node scripts/global/mailbox-outbox.js flush` |
@@ -368,6 +369,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `qa:cache` | `node scripts/global/governance-qa-cache.js` |
 | `quality:parity` | `node scripts/global/quality-parity-report.js --json` |
 | `rag:search` | `node scripts/global/rag-search.js` |
+| `readability:diff:test` | `node --test tests/readability-diff-gate.spec.js` |
 | `readability:snapshot` | `bash scripts/readability-snapshot.sh` |
 | `repo:scope` | `node scripts/global/repo-scope.js` |
 | `resident:budget` | `node scripts/global/resident-budget.js` |
