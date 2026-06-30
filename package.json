@@ -345,7 +345,8 @@
     "doc-coverage:replay-eval:test": "node --test tests/doc-coverage-diff-replay-eval.spec.js tests/doc-coverage-diff-wiring.spec.js tests/doc-coverage-diff-stress.spec.js",
     "ac-suggest": "node scripts/global/ac-suggest.js",
     "ac-suggest:replay-eval": "node scripts/global/ac-suggest-replay-eval.js",
-    "ac-suggest:test": "node --test tests/ac-suggest.spec.js"
+    "ac-suggest:test": "node --test tests/ac-suggest.spec.js",
+    "worktree:teardown": "node scripts/global/worktree-teardown-actuate.js"
   },
   "keywords": [
     "devops",

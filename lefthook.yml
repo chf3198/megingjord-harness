@@ -49,3 +49,11 @@ pre-push:
     # server-side). Bypass: COLLABORATOR_SELF_CHECK_SKIP=1 (emits advisory warning).
     collaborator-self-check:
       run: node scripts/global/collaborator-self-check.js
+
+# Epic 3352 C2 (ticket 3357): post-merge teardown actuation. When a squash-merge lands on
+# main locally (git pull / merge), tear down any now merged-and-clean worktree. Never --force;
+# git worktree remove's dirty-guard is the authoritative final gate. Dry-run via npm run worktree:teardown.
+post-merge:
+  commands:
+    worktree-teardown-actuate:
+      run: node scripts/global/worktree-teardown-actuate.js --apply
