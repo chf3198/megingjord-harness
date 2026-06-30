@@ -10,6 +10,11 @@ const Rules = require('./collaborator-self-check-rules.js');
 
 const OVERRIDE_LABEL = 'collaborator-self-check:waived';
 
+// NOTE (#1580): `mcpLoadCheck` (in collaborator-self-check-rules.js) is an
+// available, unit-tested ADVISORY rule that is intentionally NOT in this
+// dispatcher set — its narrow fail path (opt-out env set but rationale missing)
+// must not newly-block the hard gate. Call it directly when an advisory MCP
+// signal is wanted; the 10 checks below are the blocking pre-handoff set.
 const CHECKS = [
   { id: 'branch-name-prefix', fn: i => Rules.branchNamePrefix(i.branchName) },
   { id: 'refs-this-ticket-first', fn: i => Rules.refsThisTicketFirst(i.prBody, i.ticketNumber) },

@@ -6,6 +6,11 @@ const BRANCH_RE = /^(feat|fix|hotfix)\/[0-9]+-|^(chore|skill)\/[a-z0-9]|^main$|^
 const FLAW_RE = /\b(flaw|bug|failure|incident)\b|side-?effect|worked around|I had to/i;
 const CITE_RE = /#\d+|incidents\.jsonl|pattern_id\s*:|anneal_tickets_filed\s*:|memory\//i;
 
+// #1580: structured-field format rules delegate to the single-source schema module
+// (collaborator-handoff-schema.js) so the local self-check and the server-side
+// megalint gate validate the same field contract and cannot drift apart.
+const Schema = require('./collaborator-handoff-schema.js');
+
 function ok(id, evidence = '') { return { id, ok: true, evidence }; }
 function fail(id, evidence) { return { id, ok: false, evidence }; }
 
@@ -41,18 +46,13 @@ const tddSpecInDiffWhenRequired = (testStrategy, prFiles) => {
 };
 
 const noProseColonCollision = handoffBody => {
-  const lines = (handoffBody || '').split('\n');
-  const violators = [];
-  for (const line of lines) {
-    if (/Team&Model:\s*(.+)$/.test(line) && !/^Team&Model:/.test(line)) violators.push(line.trim());
-    if (/test_strategy:\s*(.+)$/.test(line) && !/^test_strategy:/.test(line) && !/^\*\*test_strategy/.test(line)) violators.push(line.trim());
-  }
-  return violators.length === 0
-    ? ok('no-prose-colon-collision', 'clean')
-    : fail('no-prose-colon-collision', violators.join('; '));
+  const { collision, violators } = Schema.detectProseColonCollision(handoffBody);
+  return collision
+    ? fail('no-prose-colon-collision', violators.join('; '))
+    : ok('no-prose-colon-collision', 'clean');
 };
 
-const noMarkdownBoldOnTestStrategy = handoffBody => /\*\*test_strategy/.test(handoffBody || '')
+const noMarkdownBoldOnTestStrategy = handoffBody => Schema.testStrategyMarkdownBold(handoffBody)
   ? fail('no-markdown-bold-on-test-strategy', 'wrapped in markdown bold')
   : ok('no-markdown-bold-on-test-strategy', 'plain');
 

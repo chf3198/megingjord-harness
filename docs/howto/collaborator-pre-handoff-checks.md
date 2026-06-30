@@ -44,3 +44,30 @@ Apply label `collaborator-self-check:waived` on the PR (or linked issue) to skip
 ## CI advisory
 
 `.github/workflows/collaborator-self-check-advisory.yml` runs on every PR open/sync, reads the linked issue's `COLLABORATOR_HANDOFF`, and posts a structured advisory comment if the `Pre-handoff verification` section is missing. **Does not block merge during the soak window** — promotion to required-blocking is a separate follow-on after 7 days zero false-positives (Epic #1486 Path D pattern, parity with #1554, #1555, #1572).
+
+## Structured-field schema (`collaborator-handoff-schema.js`, #1580)
+
+The structured-field format contract for `COLLABORATOR_HANDOFF` lives in one place:
+`scripts/global/collaborator-handoff-schema.js`. It is the single source of truth that both
+the local pre-handoff self-check and the server-side `megalint/collaborator-handoff.js` gate
+share, so the two parsers cannot drift apart.
+
+```js
+const Schema = require('./scripts/global/collaborator-handoff-schema.js');
+Schema.parseHandoff(body);     // → { signedBy, teamModel, role, testStrategy,
+                               //     crossFamily:{reviewer,rating,findings,receipt},
+                               //     preHandoffVerification: 'PASS'|'FAIL'|'SKIPPED'|null }
+Schema.validateStructure(body); // → { ok, violations:[{field, rule, detail}] } — format
+                                //   checks for PRESENT fields (line-anchored Role #2921,
+                                //   16-hex cross_family_receipt #2904, no markdown-bold
+                                //   test_strategy, no prose-colon collision)
+```
+
+- `FIELD_SCHEMA` is the declarative descriptor of each field (label, requiredness, format).
+- The `no-prose-colon-collision` and `no-markdown-bold-on-test-strategy` self-checks now delegate
+  to `Schema.detectProseColonCollision` / `Schema.testStrategyMarkdownBold` rather than inline regex.
+- **Prose-content checks stay heuristic:** `flaw-marker-citations` and `all-acceptance-criteria-ticked`
+  inspect free text with no structured field to validate against, so they remain in
+  `collaborator-self-check-rules.js` as documented heuristics (not part of this schema).
+- Stress coverage (untrusted-input parser): `tests/stress-collaborator-handoff-schema.spec.js`
+  (fault-injection + p99 latency budget).
