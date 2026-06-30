@@ -168,6 +168,16 @@ filter-recall audit:
 3. **Override:** a `--force-scan` flag bypasses the D5/D6 filter and rates the full open-backlog set
    (bounded by the §2 candidate cap) for the rare audit where the filter itself is suspect.
 
+**Dormancy signal — velocity-relative, NOT calendar (counsel R1, adapted).** Two experts recommended a
+fixed "no updates for 30+ days" dormancy threshold to catch mislabeled-but-stale tickets (e.g. a stale
+`status:in-progress`). The *intent* is right — a label-independent activity signal hardens the candidate
+filter — but a hardcoded N-day threshold is the calendar-threshold anti-pattern this harness explicitly
+rejects (velocity changes; 30 days means different things in a busy vs. quiet week). So the dormancy
+signal is **activity-rank-relative**: a ticket is "dormant" if its `updatedAt` falls in the bottom
+quantile of *currently-open* tickets' recency (e.g. least-recently-touched quintile), recomputed each
+run — no absolute day count. This catches stale-labelled tickets the D5/D6 label filter misses, while
+staying velocity-relative per the replay-eval-over-calendar discipline.
+
 This makes the candidate set falsifiable rather than assumed-exhaustive.
 
 ---
@@ -334,6 +344,13 @@ gate) + `cross-family-review`/#2511 (0.15) + `megalint/*` (0.10) → Σ = 1.0 �
 contribution cited. A ticket summing to 0.7 would be flagged **PARTIAL** → re-scope to the 0.3 remainder,
 never a blind cancel — the safety-asymmetric default (§5 axiom) holds at the evidence layer too.
 
+**Transitive evidence validation (counsel R2).** A cited artifact may *itself* depend on something now
+deprecated — e.g. a skill built atop a CI gate that was later removed. Before a Σ≥1.0 supersede is
+honored, each cited artifact's own liveness is recursively validated (is the skill still deployed? is
+the gate still wired into CI?). Any dead link in the evidence chain **downgrades the contribution to 0**
+and re-sums — a once-satisfying chain that has rotted no longer cancels a ticket. This closes the
+"evidence looks complete but is stale" false-supersede path.
+
 ---
 
 ## 6. AC-R6 — Consensus + closeout
@@ -346,18 +363,22 @@ Cross-model consensus result and Consultant closeout are recorded in the #3399 c
 
 ## 7. Phase-1 child decomposition (recommendation — Manager authors after this closes ≥93)
 
+**Sequencing (counsel R3): C2 is a hard precondition of C1.** The original decomposition treated C1 and
+C2 as independent. But flagging a ticket `superseded` without first checking who points *at* it would
+let the sweep **create the very orphans the Epic exists to prevent**. So C2 ships first, and C1's
+supersede path calls C2's inbound check: a ticket with **live inbound pointers can only be flagged
+PARTIAL** (re-home the pointers first), never `superseded`. The dependency is now explicit.
+
 | Child | Deliverable | Class | Lane | Cost |
 |---|---|---|---|---|
-| **C1** | `backlog-relevance-sweep` — opt-in `--semantic` lane on `governance-drift-sweep.js`; PB1/PB3s flags w/ shipped-artifact evidence | PB1, PB3s | code-change | fleet-first $0 |
-| **C2** | `inbound-reference-integrity` — `issues.closed` sibling Action + auto-correction-task | PB2 | code-change | $0 deterministic |
-| **C3** | auto-route flagged items into baton (Manager-triage seed + Tier-2 anneal), not report-only | all | code-change | $0 |
+| **C1** *(inbound-orphan)* | `inbound-reference-integrity` — `issues.closed` sibling Action + auto-correction-task; folds in $0 `D10` PB4 dependency-rot (counsel R7) | PB2, PB4 | code-change | $0 deterministic |
+| **C2** *(relevance, dep: C1)* | `backlog-relevance-sweep` — opt-in `--semantic` lane on `governance-drift-sweep.js`; PB1/PB3s flags w/ evidence; **must call C1's inbound check before any `superseded` flag** | PB1, PB3s | code-change | fleet-first $0 |
+| **C3** | auto-route flagged items into baton (Manager-triage seed + Tier-2 anneal), not report-only; tag re-triage tasks `type:correction` (counsel R8) | all | code-change | $0 |
 | **C4** | Wiki-B mirror refresh on **non-PR** state changes (the stale `wiki/work-log/tickets/1899.md` casualty) | — | code-change | $0 |
-| **C5** | promotion path advisory→blocking, replay-eval-gated against a labeled backlog-drift corpus | — | code-change | $0 |
+| **C5** | promotion advisory→blocking, replay-eval-gated; **tracks false-supersede *rate* (not just precision), requires ≤5% safety margin + human review for any P1/Epic flag until the margin is met** (counsel R4) | — | code-change | $0 |
 
-Plus a $0 deterministic `D10` dependency-rot (PB4) folded into C2's scan.
-
-**Advisory→blocking promotion** for the whole Epic is replay-eval-gated at precision ≥0.85, never
-calendar-gated.
+**Advisory→blocking promotion** for the whole Epic is replay-eval-gated at precision ≥0.85 **and**
+false-supersede-rate ≤0.05, never calendar-gated.
 
 ---
 
@@ -412,7 +433,27 @@ self-consistency §5). Web-research-grounded mapping:
 calibrated LLM-judging + KG existence-dependency checks + replay-eval promotion — applied to the
 **pre-baton dormant-backlog** surface that none of the existing harness tools (#2981/#3235/#3350) cover.
 
-## 10. References
+## 10. Evolution log — cross-model counsel → plan changes
+
+This deliverable was evolved across rounds of cross-family expert counsel; the rating rose as a
+*consequence* of plan changes, not as a target. Each row is a recommendation that materially changed
+the design or the Phase-1 plan.
+
+| Round | Expert counsel | Plan change it drove |
+|---|---|---|
+| R1 | Mistral flagged G4/G7/G5 gaps | §2 explicit `log-redaction` precondition (G4); candidate-cap + content-hash memoization bound (G7); tier-graceful fleet→free-cloud→deterministic-floor fallback (G5/G6) |
+| R2 | "goal-lens incomplete" | §8 explicit G8/G9/G10 coverage |
+| R3 | "what makes it a 95" | §2.1 D5/D6 candidate-filter recall audit + `--force-scan`; §5.1 replay-eval corpus + worked median-of-N verdict; §5.2 evidence-binding decision tree |
+| R4 | web-research SOTA | embedding pre-filter for PB1 (dedup literature); minority-veto + self-consistency + conformal calibration (LLM-judge literature); §9 prior-art map (12 cites) |
+| R5 | "evolve the *plan*, not the score" | §5.2 **transitive evidence validation** (rotted-chain → contribution 0); §2.1 **velocity-relative dormancy** signal (adapted from experts' calendar form, which this harness rejects); §7 **C1↔C2 re-sequence** (inbound check precedes any supersede → the sweep can't create orphans); §7 **C5 false-supersede-rate ≤5% margin** + P1/Epic human gate |
+| meta | client flagged operator "rating-shopping" | filed self-anneal **#3416** (fixed-panel + counsel-driven + honest-escalation guardrail); loop refocused from chasing a number to evolving the plan |
+
+**Honest consensus record:** unanimous cross-family ACCEPT, zero blocking gaps, per-goal min 8–9.4/10;
+overall spread 87 (gpt-4o, harsh) → 92 (llama-3.3-70b ×2) → 95 (mistral-large, frontier); median ~92.
+The SOTA reasoning-judge class (o1/o3/DeepSeek-R1) was unavailable (GitHub-Models 4k-token input cap).
+Per #3416, the panel was **not** expanded to move the median; the value taken was the counsel above.
+
+## 11. References
 
 - Origin: #1899 (cancelled 2026-06-30) · casualties #2093, #3069 (orphaned pointers, corrected)
 - Extends: #2981 `governance-drift-sweep.js` (deterministic structural sweep — adds the excluded semantic layer)
