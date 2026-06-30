@@ -51,6 +51,39 @@ Append a drift event to `~/.megingjord/incidents.jsonl` (schema v2). No threshol
 
 Triggers when `severity ≥ medium` AND (recurrence ≥ 2 in 7d OR `trigger_type == manual-pull`) AND no active session-pivot AND no matching suppression entry. Effect: orchestrator pauses current baton step, snapshots state, runs the protocol above, files Manager ticket(s) to backlog, restores baton.
 
+#### Guardrail-first disposition (Epic #3380)
+
+A Tier-2 friction is, by default, an opportunity to build a **guardrail that prevents that friction for
+every team** — not a workaround note that enlarges always-resident memory and re-bills its token cost
+every session. Before a friction is recorded as a memory note, route it through the deterministic
+classifier `scripts/global/friction-classifier.js` (`classifyFriction(record)`), which maps it to one of
+four destinations:
+
+| Destination | When | Action |
+|---|---|---|
+| `guardrail-candidate` | mechanical surface named (gate / hook / validator / regex / state-file / parser / enforcer) AND recurrence ≥ 2 AND severity ≥ medium AND reproducible | file a guardrail ticket; build a **hook → validator → test → CI backstop** (prevention-first ladder) |
+| `skill` | a correct, reusable multi-step procedure (≥ 3 ordered steps), not a defect | promote to a skill / runbook |
+| `semantic-memory` | judgment / preference / client directive / external fact | keep a memory note — this is memory's *correct* use |
+| `forget` | one-off below the recurrence floor | let it decay in `incidents.jsonl`; do not promote to memory |
+
+**Anti-over-route (binding):** judgment/preference **wins on collision** — a record that names a mechanical
+surface *and* hits the judgment lexicon (or `trigger_role: client`) routes to `semantic-memory`, never to a
+guardrail. Unknown/low-confidence inputs **fail open** to `semantic-memory`. A preference is never
+auto-converted into a blocking guardrail.
+
+**Consolidation / forgetting policy:** on the 2nd in-window recurrence of a `guardrail-candidate` pattern,
+file (or de-dupe onto) a guardrail ticket and link the note to it. When that guardrail ships
+(`resolution:released`), **delete the originating note(s) and its MEMORY.md index line** — the guardrail now
+prevents the recurrence, so the note's job is done. `forget`-class records decay under `log-rotation.js`;
+they are never promoted to MEMORY.md.
+
+**Cross-team & promotion:** the classifier + lexicon live in `scripts/global/` and `config/` (the shared,
+runtime-agnostic surface mirrored to claude-code / copilot / codex / antigravity) — one guardrail protects
+all four teams. Promotion of the memory-write guard from advisory to blocking is gated on replay-eval
+precision ≥ 0.85 against `tests/fixtures/friction-corpus.json` (`friction-classifier-replay-eval.js`),
+**never a calendar threshold**. Operator guide: `docs/howto/guardrail-first-anneal.md`.
+
+
 ### Tier 3 — Consultant goal-failure escalation
 
 Authority: Consultant only. Triggered when consultant rubric finds G1–G9 goal violation post-implementation. Effect: invoke Manager to (a) reopen failed AC/ticket via baton, (b) file new self-anneal Epic for systemic patterns.
