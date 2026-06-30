@@ -114,6 +114,34 @@ flowchart TD
   (per `consensus_rater_noise_aggregation`). Estimated paid-$ avoided vs. the recurring premium-lane
   human audit it replaces is the G3 win — logged like `free-cloud-usage-report.js` does.
 
+#### G7 Throughput — scalability bound (candidate-set is the lever)
+
+The cross-model cost is **not** O(all backlog). Only PB1/PB3s (the needs-cross-model classes) ever
+call a model, and only over the **dormant-backlog subset** the #2981 classifier already isolates
+(D5/D6) — PB2/PB4 are deterministic $0 and carry the structural majority. For a backlog that grows
+unexpectedly large, the sweep applies (a) a per-run candidate **cap** (`--max-candidates N`, oldest-
+first), (b) **content-hash memoization** so an unchanged dormant ticket is not re-rated until its body
+or the shipped-artifact set changes, and (c) batched dispatch. So per-run model calls stay bounded by
+the cap, not by total backlog size — the median-of-N panel never becomes the bottleneck.
+
+#### G4 Privacy — redaction before dispatch (mandatory)
+
+Every candidate's text (title + body only — never diffs, tokens, or secrets) is passed through
+`scripts/global/log-redaction.js#redactString` (Anthropic/OpenAI keys, GitHub PAT, JWT, email, IPv4
+patterns) **before** any fleet or free-cloud dispatch. The dispatch payload is the redacted goal
+statement + the shipped-artifact identifiers, not raw ticket internals. This is a hard precondition of
+the `--semantic` lane, not an afterthought.
+
+#### G5 Portability / G6 Resilience — tier-graceful degradation (no hard fail)
+
+Substrate availability is not assumed. The lane degrades, never crashes: fleet down →
+free-cloud $0 panel → **if ALL model substrates are unavailable or blocked, the semantic lane
+silently degrades to deterministic-only** (PB2/PB4 still run at $0; PB1/PB3s simply emit no new flags
+that run). Evidence this is real, not hypothetical: **this session's own consensus run hit a live
+`groq` Cloudflare-1010 UA block and free-tier TPM limits** — the fleet local path was the resilient
+fallback. No single vendor (or the fleet host) is a hard dependency; the deterministic floor always
+remains.
+
 ---
 
 ## 3. AC-R3 — Inbound-reference integrity check
@@ -267,8 +295,14 @@ calendar-gated.
   audit).
 - **G8 Observability:** flagged drift becomes a tracked baton item + `incidents.jsonl` event, not an
   invisible accrual.
-- **G4 Privacy:** cross-model dispatch sends ticket titles/bodies (already in GitHub) to the fleet/
-  free-cloud panel; no secrets — reuse `log-redaction.js` before any dispatch.
+- **G4 Privacy:** cross-model dispatch sends only redacted ticket titles/bodies (already in GitHub);
+  `log-redaction.js#redactString` is a hard precondition of the `--semantic` lane (§2) — no secrets/
+  diffs/tokens leave the host.
+- **G5 Portability / G6 Resilience:** no single vendor or the fleet host is a hard dependency — the
+  lane degrades fleet → free-cloud → deterministic-only floor (§2), proven against this session's live
+  groq Cloudflare-1010 block.
+- **G7 Throughput:** model calls are bounded by a per-run candidate cap + content-hash memoization over
+  the dormant subset (§2), not by total backlog size.
 
 ---
 
