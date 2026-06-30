@@ -279,3 +279,13 @@ as either `UPDATED/DONE: <path>` or `N/A — <reason>` where `<reason>` is from 
 enum (e.g. `no-user-visible-change`, `covered-by-sibling-pr`, `docs-only-no-functional-change`).
 Freeform N/A reasons fail the gate. A genuine legacy bypass requires `LEGACY_DOC_SKIP` set
 **and** a `BLOCKER_NOTE` on the linked issue.
+
+## Per-review-point flaw capture: `flaws_recognized:` (#3428, Epic #3425)
+
+Every baton artifact (MANAGER / COLLABORATOR / ADMIN / CONSULTANT) carries a `flaws_recognized:`
+block — a bare `none` or one entry per disposed candidate (`decision:` ∈ the `judgment-gate.js`
+`FLAW_DECISIONS` enum; `artifact:` decision-typed: `#N` / `pattern_id` / memory-path / rationale).
+This generalizes the Consultant-only `mid_flight_flaws` to every role so flaw recognition is captured
+at each review-point, not only at closeout. Validator `scripts/global/megalint/flaws-recognized.js`
+ships **ADVISORY** (warns, never blocks) until the replay-eval promotion gate (#3434). See
+`instructions/role-baton-routing.instructions.md` §"Flaw-recognition anneal decision".

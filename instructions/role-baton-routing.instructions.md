@@ -202,6 +202,27 @@ When any active role recognizes a flaw/error during execution, it must record on
 This decision must be cited in baton artifacts and summarized in `CONSULTANT_CLOSEOUT` under:
 - `mid_flight_flaws: [<flaw>, decision=<...>, artifact=<...>]`
 
+### `flaws_recognized:` block — per review-point (Epic #3425 P1-a, #3428)
+
+The discretion-dependent prose contract above is being made programmatic. Every baton artifact
+(MANAGER / COLLABORATOR / ADMIN / CONSULTANT) now carries a `flaws_recognized:` block — either a
+bare `none` or one entry per disposed candidate:
+
+```
+flaws_recognized:
+  - flaw: <short description>
+    detected_by: <F1..F8 | manual>
+    decision: file-ticket | log-incident-only | memory-note-only | no-action-justified
+    artifact: #<N> | incidents.jsonl:<pattern_id> | <memory-path> | <rationale>
+```
+
+`decision` reuses the `judgment-gate.js` `FLAW_DECISIONS` enum; `artifact` is decision-typed. The
+Consultant's `mid_flight_flaws` + `anneal_tickets_filed` remain the required closeout-aggregation
+fields; `flaws_recognized` is the per-review-point superset the other three roles gain. Validator:
+`scripts/global/megalint/flaws-recognized.js` — **ADVISORY** (warns, never blocks) until the
+replay-eval promotion gate (#3434) flips it. The field is `block` (not required) in
+`baton-artifact-schema.js` so the historical replay corpus and cross-runtime invariant are preserved.
+
 ## Enforcement Points
 
 | Rule | Enforcement |

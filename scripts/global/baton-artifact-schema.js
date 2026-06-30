@@ -32,6 +32,16 @@ const MANAGER = [
   f('phase_gate_satisfied'),
   f('phase_0_sources'),
   f('goal_lens'),
+  // #3428 (Epic #3425 P1-a): per-review-point flaw capture. `flaws_recognized`
+  // generalizes the Consultant-only `mid_flight_flaws` to every role. It is a
+  // `block` field (multi-line per-candidate list OR bare `none`) but DELIBERATELY
+  // NOT `req` — making it required would throw buildArtifact on the 17 historical
+  // replay-corpus entries (which predate the field) and break the cross-runtime
+  // byte-identity invariant. This mirrors the worktree-field precedent above
+  // (kept OPTIONAL for corpus back-compat). Requiredness on LIVE artifacts is
+  // enforced by the ADVISORY validator megalint/flaws-recognized.js, the real
+  // enforcement surface. Free cross-model consensus 3/3 (OPTION B) on #3428.
+  f('flaws_recognized', { block: true }),
 ];
 
 // COLLABORATOR_HANDOFF — per-AC verification narrative + cross-family preflight.
@@ -57,6 +67,8 @@ const COLLABORATOR = [
   f('worktree_branch'),
   f('worktree_behind_main'),
   f('Pre-handoff verification', { block: true }),
+  // #3428 (Epic #3425 P1-a): see MANAGER spec note. Block, not req (corpus back-compat).
+  f('flaws_recognized', { block: true }),
 ];
 
 // ADMIN_HANDOFF — branch/commit + signer-independence + deploy-sync impact.
@@ -65,6 +77,8 @@ const ADMIN = [
   f('commit', { req: true }),
   f('signer-independence-check', { req: true }),
   f('deploy-runtime-impact', { req: true }),
+  // #3428 (Epic #3425 P1-a): see MANAGER spec note. Block, not req (corpus back-compat).
+  f('flaws_recognized', { block: true }),
 ];
 
 // CONSULTANT_CLOSEOUT — verdict + rubric + anneal/flaw accounting.
@@ -79,6 +93,10 @@ const CONSULTANT = [
   // (none | <details>) on non-lightweight lanes. OPTIONAL for back-compat; ALLOWED
   // so the builder can emit it unaided.
   f('worktree_residual_risk'),
+  // #3428 (Epic #3425 P1-a): the Consultant gains `flaws_recognized` as the
+  // per-review-point SUPERSET of its existing `mid_flight_flaws` (which stays the
+  // required closeout-aggregation field). Block, not req (corpus back-compat).
+  f('flaws_recognized', { block: true }),
 ];
 
 // EPIC_RESCOPE — single narrative synthesis slot (irreducible per #2038).
