@@ -233,6 +233,8 @@ function validate(input) {
 module.exports = {
   validate,
   findConsultantCloseout,
+  // flawFieldState reused by megalint/flaws-recognized.js (line-anchored field parser). Epic #3425.
+  flawFieldState,
   checkCrossFamilyVerdict,
   checkFleetBundleProvenance,
   checkRequiredFlawFields,

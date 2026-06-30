@@ -82,7 +82,18 @@ function emitBuildDecision(input = {}, file, now) {
   } catch {
     // catch-empty: best-effort observability; a failed emit must never block a build.
   }
-  return event;
+  // Epic #3425 P1-b: the post-build seam IS the review-point. Run the flaw-capture checkpoint
+  // here so detected friction is surfaced for the role to dispose of in flaws_recognized:.
+  // Best-effort + advisory: a failed/disabled checkpoint must never affect the build.
+  let checkpoint = null;
+  try {
+    const { maybeRunCheckpoint } = require('./review-point-checkpoint');
+    checkpoint = maybeRunCheckpoint({ role: input.role, transition: input.role,
+      now: event.ts, team: input.team, runtime: input.runtime });
+  } catch {
+    // catch-empty: checkpoint is advisory observability; never blocks a build.
+  }
+  return { ...event, checkpoint };
 }
 
 module.exports = { buildArtifact, deriveSigner, emitBuildDecision };

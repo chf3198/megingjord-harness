@@ -34,6 +34,8 @@ const workLogSync = require('./work-log-sync.js');
 const batonTransition = require('./baton-transition.js');
 const authorTeam = require('./author-team-check.js');
 const epicAcDisposition = require('./epic-ac-disposition-check.js');
+// flaws-recognized: per-review-point flaw-capture validator (advisory). Epic #3425 P1-a.
+const flawsRecognized = require('./flaws-recognized.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -76,6 +78,7 @@ const VALIDATORS = {
   'baton-transition': batonTransition,
   'author-team-check': authorTeam,
   'epic-ac-disposition-check': epicAcDisposition,
+  'flaws-recognized': flawsRecognized,
 };
 
 function runAll(input) {
