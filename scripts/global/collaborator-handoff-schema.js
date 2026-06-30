@@ -109,41 +109,42 @@ function parseHandoff(body) {
   };
 }
 
+// Per-field format checks — each returns a violation object or null. Kept as small
+// named helpers so validateStructure stays short and each rule reads independently.
+function roleAnchorViolation(text) {
+  if (!/(?:^|\n)\s*Role\s*:/i.test(text) || ROLE_ANCHORED.test(text)) return null;
+  return { field: 'Role', rule: 'role-not-line-anchored',
+    detail: 'Role field must be on its own line with value collaborator (#2921)' };
+}
+
+function receiptFormatViolation(text) {
+  if (!/cross_family_receipt\s*:/i.test(text) || RECEIPT_HEX16.test(text)) return null;
+  return { field: 'cross_family_receipt', rule: 'cross-family-receipt-format',
+    detail: 'cross_family_receipt must be a 16-char hex sha256 prefix (#2904)' };
+}
+
+function markdownBoldViolation(text) {
+  if (!testStrategyMarkdownBold(text)) return null;
+  return { field: 'test_strategy', rule: 'test-strategy-markdown-bold',
+    detail: 'test_strategy must not be wrapped in markdown bold' };
+}
+
+function proseCollisionViolation(text) {
+  const prose = detectProseColonCollision(text);
+  if (!prose.collision) return null;
+  return { field: 'structured', rule: 'prose-colon-collision', detail: prose.violators.join('; ') };
+}
+
 // Format checks for PRESENT fields only. Mirrors the server-side megalint format
 // rules so a malformed structured field is caught locally before the PR is opened.
 function validateStructure(body) {
   const text = asBody(body);
-  const violations = [];
-
-  if (/(?:^|\n)\s*Role\s*:/i.test(text) && !ROLE_ANCHORED.test(text)) {
-    violations.push({
-      field: 'Role', rule: 'role-not-line-anchored',
-      detail: 'Role field must be on its own line with value collaborator (#2921)',
-    });
-  }
-
-  if (/cross_family_receipt\s*:/i.test(text) && !RECEIPT_HEX16.test(text)) {
-    violations.push({
-      field: 'cross_family_receipt', rule: 'cross-family-receipt-format',
-      detail: 'cross_family_receipt must be a 16-char hex sha256 prefix (#2904)',
-    });
-  }
-
-  if (testStrategyMarkdownBold(text)) {
-    violations.push({
-      field: 'test_strategy', rule: 'test-strategy-markdown-bold',
-      detail: 'test_strategy must not be wrapped in markdown bold',
-    });
-  }
-
-  const prose = detectProseColonCollision(text);
-  if (prose.collision) {
-    violations.push({
-      field: 'structured', rule: 'prose-colon-collision',
-      detail: prose.violators.join('; '),
-    });
-  }
-
+  const violations = [
+    roleAnchorViolation(text),
+    receiptFormatViolation(text),
+    markdownBoldViolation(text),
+    proseCollisionViolation(text),
+  ].filter(Boolean);
   return { ok: violations.length === 0, violations };
 }
 
