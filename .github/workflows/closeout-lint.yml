@@ -46,7 +46,11 @@ jobs:
             };
 
             const body = context.payload.pull_request.body || '';
-            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            // Refs #1614 AC1: deterministic linkage (prefer Closes/deferred-final,
+            // then first line-anchored Refs; Refs Epic excluded) over first-match.
+            const { resolveLinkedTicket } = require(`${process.env.GITHUB_WORKSPACE}/scripts/global/linkage-resolver`);
+            const _linkedTicket = resolveLinkedTicket(body).ticket;
+            const refsMatch = _linkedTicket ? [null, String(_linkedTicket)] : null;
             if (!refsMatch) {
               core.setFailed('No Refs #N in PR body — cannot resolve linked issue.');
               return;

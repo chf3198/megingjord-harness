@@ -1,0 +1,92 @@
+'use strict';
+// Adversarial stress harness for the linked-ticket resolver. Refs #1614 AC3.
+// PR/issue bodies are untrusted external input, so per the test-methodology
+// matrix this parser ships tdd-pyramid + stress-test. Asserts:
+//   G6 (chaos / fault-injection): never throws and always returns a valid shape
+//       on hostile, malformed, huge, and pathological inputs.
+//   G7 (p99 latency budget): resolution stays well under budget at scale.
+//
+// Exotic fuzz characters are written as \u escapes (not literal bytes) so this
+// source file stays reviewable text and carries no literal bidi-override /
+// trojan-source characters.
+
+const test = require('node:test');
+const assert = require('node:assert');
+const { resolveLinkedTicket } = require('../scripts/global/linkage-resolver');
+
+const VALID_SOURCES = new Set(['close-keyword', 'deferred-final', 'refs', 'none']);
+const P99_BUDGET_MS = 5; // generous; pure regex on bounded input
+const CHAOS_ITERATIONS = 2000;
+const RTL_OVERRIDE = '\u202E';
+const POP_DIRECTIONAL = '\u202C';
+
+function assertShape(r) {
+  assert.ok(r && typeof r === 'object', 'returns an object');
+  assert.ok(r.ticket === null || Number.isInteger(r.ticket), 'ticket is null or int');
+  assert.ok(VALID_SOURCES.has(r.source), `source in enum (${r.source})`);
+}
+
+// deterministic pseudo-random so the run is reproducible (no Math.random reliance)
+function* fuzzCorpus(n) {
+  const frags = [
+    'Closes #', 'Fixes #', 'Resolves #', 'Refs #', 'Refs Epic #',
+    'merge-evidence-deferred-final: #', '`Closes #', '**Refs #', '> Closes #',
+    'fix the thing #', 'random prose ', '\n', '\t', '#', 'Epic ', '   ',
+    String.fromCharCode(0), '\u{1F985}', '#'.repeat(50), ' ' + RTL_OVERRIDE, 'Refs#',
+  ];
+  let seed = 1469598103;
+  const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  for (let i = 0; i < n; i++) {
+    const parts = [];
+    const len = 1 + Math.floor(rnd() * 12);
+    for (let j = 0; j < len; j++) {
+      let frag = frags[Math.floor(rnd() * frags.length)];
+      if (frag.endsWith('#') || frag.endsWith('# ')) frag += Math.floor(rnd() * 1e6);
+      parts.push(frag);
+    }
+    yield parts.join('');
+  }
+}
+
+test('G6 chaos: hostile / malformed bodies never throw and keep a valid shape', () => {
+  const edge = [
+    '', null, undefined, 0, NaN, {}, [], '#'.repeat(10000),
+    'Refs #'.repeat(5000), 'Closes #\n'.repeat(3000),
+    'Refs #' + '9'.repeat(400), RTL_OVERRIDE + 'Closes #1' + POP_DIRECTIONAL,
+    'Refs Epic #1\nRefs Epic #2\nRefs Epic #3',
+  ];
+  for (const b of edge) {
+    let r;
+    assert.doesNotThrow(() => { r = resolveLinkedTicket(b); }, `threw on ${String(b).slice(0, 20)}`);
+    assertShape(r);
+  }
+  for (const body of fuzzCorpus(CHAOS_ITERATIONS)) {
+    let r;
+    assert.doesNotThrow(() => { r = resolveLinkedTicket(body); });
+    assertShape(r);
+  }
+});
+
+test('G7 p99: resolution stays under the latency budget at scale', () => {
+  const bodies = [...fuzzCorpus(1000)];
+  const samples = [];
+  for (const body of bodies) {
+    const t0 = process.hrtime.bigint();
+    resolveLinkedTicket(body);
+    const t1 = process.hrtime.bigint();
+    samples.push(Number(t1 - t0) / 1e6);
+  }
+  samples.sort((a, b) => a - b);
+  const p99 = samples[Math.floor(samples.length * 0.99)];
+  assert.ok(p99 < P99_BUDGET_MS, `p99 ${p99.toFixed(3)}ms exceeds ${P99_BUDGET_MS}ms budget`);
+});
+
+test('G6: catastrophic-backtrack resistance on pathological repeated anchors', () => {
+  // Guards against ReDoS -- a 50k-line near-match body must resolve quickly.
+  const body = ('Refs Epic #1\n'.repeat(50000)) + 'Closes #777';
+  const t0 = process.hrtime.bigint();
+  const r = resolveLinkedTicket(body);
+  const elapsed = Number(process.hrtime.bigint() - t0) / 1e6;
+  assert.strictEqual(r.ticket, 777);
+  assert.ok(elapsed < 100, `pathological input took ${elapsed.toFixed(1)}ms`);
+});
