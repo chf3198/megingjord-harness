@@ -142,6 +142,23 @@ that run). Evidence this is real, not hypothetical: **this session's own consens
 fallback. No single vendor (or the fleet host) is a hard dependency; the deterministic floor always
 remains.
 
+### 2.1 Candidate-filter validation (the D5/D6 subset is an assumption — audit it)
+
+Using the #2981 D5/D6 dormant subset as the PB1 candidate filter is an **assumption**, not a proof: a
+ticket mis-labeled `status:in-progress` (stale), or whose parentage is mis-asserted, would be a **false
+negative** — a genuinely-dormant superseded ticket the sweep never examines. C1 therefore ships a
+filter-recall audit:
+
+1. **False-negative probe (deterministic):** `listOpenTickets()` filtered to `status:backlog`/`status:queued`
+   tickets **not** captured by D5/D6, plus tickets whose last activity (`updatedAt`) exceeds a dormancy
+   window — the candidate-leak set.
+2. **Recall target:** `D5/D6 filter recall ≥ 0.95` against a manual audit of a 20-ticket sample from the
+   leak set (is each truly active, or a mislabeled dormant?). Below target → widen the filter, don't ship.
+3. **Override:** a `--force-scan` flag bypasses the D5/D6 filter and rates the full open-backlog set
+   (bounded by the §2 candidate cap) for the rare audit where the filter itself is suspect.
+
+This makes the candidate set falsifiable rather than assumed-exhaustive.
+
 ---
 
 ## 3. AC-R3 — Inbound-reference integrity check
@@ -257,6 +274,44 @@ Four layered safeties:
    rule the auto-mode classifier enforces for irreversible local deletion ([[epic_3352_worktree_teardown]]).
 4. **Precision calibration** — promotion advisory→blocking is **replay-eval-gated** against a labeled
    backlog-drift corpus at precision ≥0.85 (no calendar threshold, per `soak_language_default`).
+
+### 5.1 Replay-eval corpus + worked median-of-N verdict
+
+C5's precision gate needs a concrete artifact: `tests/fixtures/backlog-drift-corpus.jsonl`, each row
+
+```json
+{"ticket_id": 1899, "goal_text": "cross-team adversarial red-team review skill",
+ "shipped_artifacts": ["role-red-team-critique", "cross-family-review#2511", "fleet-review-required.js#2192", "megalint/*"],
+ "ground_truth_superseded": true}
+```
+
+Seeded from prior manual audits (#1899 true-positive; plus true-negatives — dormant-but-still-needed
+tickets — so precision is measurable, not just recall). Target **precision ≥0.85** on a held-out 10%
+split (a wrong cancel is the costly error, so precision is gated, not recall). Worked **median-of-N**
+verdict on the #1899 row: raw overall scores `[fleet-qwen 0.94, llama-70b 0.90, mistral 0.93]` →
+median `0.93 ≥ 0.90 supersede-threshold` **and** evidence-bound (artifacts cited) → flag `superseded`;
+had the median fallen below threshold or evidence been absent, the row emits **advisory-only**, never a
+cancel. The corpus + this calibration live in Phase-1 child **C5**.
+
+### 5.2 Evidence-binding rules (partial / transitive / conflicting artifacts)
+
+A flag MUST cite shipped artifacts, but "is the goal satisfied?" is rarely all-or-nothing. The evidence
+payload is structured `{artifact_id, contribution_score (0-1), rationale}` and resolution follows:
+
+```mermaid
+flowchart TD
+    G[Goal of dormant ticket] --> C[sum of artifact contribution_scores]
+    C -->|">= 1.0 (fully covered)"| F[flag superseded — full evidence]
+    C -->|"0.5–1.0 (partial)"| P[flag PARTIAL — propose re-scope to the uncovered slice, NOT cancel]
+    C -->|"< 0.5"| N[no flag — goal still substantially open]
+    F --> T{conflicting artifacts?}
+    T -->|yes| TB[tie-break: prefer higher contribution_score, then newer shipped_at]
+```
+
+Worked #1899: `role-red-team-critique` (0.4, the skill) + `fleet-review-required.js`/#2192 (0.35, the CI
+gate) + `cross-family-review`/#2511 (0.15) + `megalint/*` (0.10) → Σ = 1.0 → **fully superseded**, every
+contribution cited. A ticket summing to 0.7 would be flagged **PARTIAL** → re-scope to the 0.3 remainder,
+never a blind cancel — the safety-asymmetric default (§5 axiom) holds at the evidence layer too.
 
 ---
 
