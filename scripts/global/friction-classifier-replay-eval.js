@@ -15,11 +15,11 @@ function evaluate(corpus, opts) {
   const target = "guardrail-candidate";
   let tp = 0, fp = 0, fn = 0;
   const misses = [];
-  for (const s of samples) {
-    const got = classifyFriction(s.record, opts).destination;
-    const want = s.expected;
+  for (const sample of samples) {
+    const got = classifyFriction(sample.record, opts).destination;
+    const want = sample.expected;
     if (got === want) correct += 1;
-    else misses.push({ id: s.id, want, got });
+    else misses.push({ id: sample.id, want, got });
     if (got === target && want === target) tp += 1;
     else if (got === target && want !== target) fp += 1;
     else if (got !== target && want === target) fn += 1;
