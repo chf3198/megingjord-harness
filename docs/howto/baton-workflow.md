@@ -289,3 +289,10 @@ This generalizes the Consultant-only `mid_flight_flaws` to every role so flaw re
 at each review-point, not only at closeout. Validator `scripts/global/megalint/flaws-recognized.js`
 ships **ADVISORY** (warns, never blocks) until the replay-eval promotion gate (#3434). See
 `instructions/role-baton-routing.instructions.md` §"Flaw-recognition anneal decision".
+
+The detection layer that *feeds* the block (Epic #3425, #3429/#3431/#3432): a per-review-point
+checkpoint (`review-point-checkpoint.js`) fires at each baton-artifact build, surfacing the friction
+candidates accumulated since the previous review-point so the role can dispose of them. Friction
+sensors (`friction-sensors.js`) emit F2 (retry loops) and F5 (revert/amend/discard) candidates; the
+SessionEnd audit from #1855 is now the **backstop** (`anneal-decision-backstop.js`) that catches
+review-points which crashed or bypassed the builder. All advisory.
