@@ -36,7 +36,7 @@ function computeVersion(catalog) {
 function deriveCounts(catalog) {
   const features = catalog.features || [];
   const byLayer = {};
-  for (const f of features) byLayer[f.layer] = (byLayer[f.layer] || 0) + 1;
+  for (const feature of features) byLayer[feature.layer] = (byLayer[feature.layer] || 0) + 1;
   return {
     layerCount: (catalog.layers || []).length,
     featureCount: features.length,
@@ -47,12 +47,40 @@ function deriveCounts(catalog) {
   };
 }
 
-function validate(catalog, opts) {
-  const options = opts || {};
-  const errors = [];
-  const layerSet = new Set(catalog.layers || []);
-  const runtimes = catalog.runtimes || [];
+// Validate one feature row's per-runtime parity cells, pushing any problems.
+function validatePerRuntime(feature, where, runtimes, errors) {
+  if (!feature.perRuntime || typeof feature.perRuntime !== 'object') {
+    errors.push(where + ': parity:yes requires a perRuntime block');
+    return;
+  }
+  for (const runtime of runtimes) {
+    const cell = feature.perRuntime[runtime];
+    if (!cell) { errors.push(where + ': perRuntime missing runtime "' + runtime + '"'); continue; }
+    if (!CELL_STATUS.has(cell.status)) errors.push(where + '.' + runtime + ': bad cell status "' + cell.status + '"');
+    if (SUBSTITUTE_REQUIRED.has(cell.status) && !(cell.substituteTest && String(cell.substituteTest).length)) {
+      errors.push(where + '.' + runtime + ': status "' + cell.status + '" requires a non-empty substituteTest');
+    }
+  }
+}
 
+// Validate one feature row's identity, layer membership, and parity contract.
+function validateFeature(feature, context, errors) {
+  const { layerSet, runtimes, seenIds } = context;
+  const where = feature && feature.id ? 'feature "' + feature.id + '"' : 'feature ' + JSON.stringify(feature).slice(0, 60);
+  if (!feature.id || !/^[a-z0-9-]+$/.test(feature.id)) errors.push(where + ': bad/missing id');
+  if (seenIds.has(feature.id)) errors.push(where + ': duplicate id');
+  seenIds.add(feature.id);
+  if (!feature.name) errors.push(where + ': missing name');
+  if (!layerSet.has(feature.layer)) errors.push(where + ': layer "' + feature.layer + '" not in catalog.layers');
+  if (!PARITY_ENUM.has(feature.parity)) errors.push(where + ': parity "' + feature.parity + '" not in {yes,no,runtime-NA}');
+  if (feature.parity === 'yes') validatePerRuntime(feature, where, runtimes, errors);
+  if (feature.parity === 'runtime-NA' && !('substituteTest' in feature) && !('promotionPath' in feature)) {
+    errors.push(where + ': runtime-NA requires a substituteTest or promotionPath');
+  }
+}
+
+// Validate the catalog top-level shape (anchor, layers).
+function validateHeader(catalog, options, errors) {
   if (catalog.ssotAnchor !== SSOT_ANCHOR) {
     errors.push('ssotAnchor must be "' + SSOT_ANCHOR + '" (extend-not-fork the #1701 chain); got "' + catalog.ssotAnchor + '"');
   }
@@ -63,35 +91,15 @@ function validate(catalog, opts) {
   if (!Array.isArray(catalog.layers) || catalog.layers.length < 19) {
     errors.push('layers must list at least 19 entries; got ' + (catalog.layers || []).length);
   }
+}
 
-  const ids = new Set();
-  for (const f of catalog.features || []) {
-    const where = f && f.id ? 'feature "' + f.id + '"' : 'feature ' + JSON.stringify(f).slice(0, 60);
-    if (!f.id || !/^[a-z0-9-]+$/.test(f.id)) errors.push(where + ': bad/missing id');
-    if (ids.has(f.id)) errors.push(where + ': duplicate id');
-    ids.add(f.id);
-    if (!f.name) errors.push(where + ': missing name');
-    if (!layerSet.has(f.layer)) errors.push(where + ': layer "' + f.layer + '" not in catalog.layers');
-    if (!PARITY_ENUM.has(f.parity)) errors.push(where + ': parity "' + f.parity + '" not in {yes,no,runtime-NA}');
+function validate(catalog, opts) {
+  const options = opts || {};
+  const errors = [];
+  validateHeader(catalog, options, errors);
 
-    if (f.parity === 'yes') {
-      if (!f.perRuntime || typeof f.perRuntime !== 'object') {
-        errors.push(where + ': parity:yes requires a perRuntime block');
-      } else {
-        for (const rt of runtimes) {
-          const cell = f.perRuntime[rt];
-          if (!cell) { errors.push(where + ': perRuntime missing runtime "' + rt + '"'); continue; }
-          if (!CELL_STATUS.has(cell.status)) errors.push(where + '.' + rt + ': bad cell status "' + cell.status + '"');
-          if (SUBSTITUTE_REQUIRED.has(cell.status) && !(cell.substituteTest && String(cell.substituteTest).length)) {
-            errors.push(where + '.' + rt + ': status "' + cell.status + '" requires a non-empty substituteTest');
-          }
-        }
-      }
-    }
-    if (f.parity === 'runtime-NA' && !('substituteTest' in f) && !('promotionPath' in f)) {
-      errors.push(where + ': runtime-NA requires a substituteTest or promotionPath');
-    }
-  }
+  const context = { layerSet: new Set(catalog.layers || []), runtimes: catalog.runtimes || [], seenIds: new Set() };
+  for (const feature of catalog.features || []) validateFeature(feature, context, errors);
 
   const versionExpected = computeVersion(catalog);
   if (catalog.catalogVersion !== versionExpected) {
@@ -135,8 +143,8 @@ if (require.main === module) {
   if (asJson) {
     console.log(JSON.stringify({ ok: res.ok, counts: res.counts, version: catalog.catalogVersion, errors: res.errors }, null, 2));
   } else if (res.ok) {
-    const c = res.counts;
-    console.log('catalog OK: ' + c.layerCount + ' layers, ' + c.featureCount + ' features (' + c.parityFlaggedCount + ' parity-flagged, ' + c.runtimeNACount + ' runtime-NA), version ' + catalog.catalogVersion);
+    const counts = res.counts;
+    console.log('catalog OK: ' + counts.layerCount + ' layers, ' + counts.featureCount + ' features (' + counts.parityFlaggedCount + ' parity-flagged, ' + counts.runtimeNACount + ' runtime-NA), version ' + catalog.catalogVersion);
   } else {
     console.error('catalog INVALID (' + res.errors.length + ' errors):');
     for (const e of res.errors.slice(0, 50)) console.error('  - ' + e);
