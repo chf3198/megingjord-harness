@@ -105,6 +105,51 @@ def shell_write_targets(joined: str) -> list[str]:
         return []
     return targets
 
+# Epic #3392 AC2/AC5 (#3403): adjudicate-first risk classifiers for the 2 security-sensitive
+# surfaces (S6 hook-mutation, S7 sensitive-path). Mirrors the #3401 adjudication-guardrail
+# risk-tiering — a FAST in-process decision (no synchronous network panel; G7), reserving the
+# human carve-out for genuine risk only. Both are FAIL-CLOSED: any error returns "ask" so a
+# classifier bug can never silently weaken G4. ("allow" means "benign — fall through to the other
+# gates", NOT short-circuit-allow.)
+# A GOVERNED deploy is ONLY `npm run deploy|sync[:variant]` or a deploy/sync shell script — NOT a
+# bare `deploy:word` token (a cross-family security review flagged that bare form as too permissive:
+# `echo deploy:malicious` alongside a hook write would have been mis-allowed). Tightened to fail
+# toward the carve-out: an unrecognized hook write reaches the human (ask), not allow.
+_DEPLOY_RE = re.compile(r"\bnpm\s+run\s+(?:deploy|sync)[:\w-]*|\b(?:deploy|sync)\.sh\b")
+
+def classify_hook_mutation(joined: str) -> str:
+    """S6: 'allow' a benign hook READ/inspect or a GOVERNED deploy that writes hooks; 'ask' on a
+    direct ungoverned hook MUTATION (policy-weakening risk). Fail-closed → 'ask'.
+    """
+    try:
+        hook_paths = runtime_hook_paths()
+        targets = shell_write_targets(joined)
+        mutates_hook = any(any(hp in target for hp in hook_paths) for target in targets)
+        if not mutates_hook:
+            return "allow"  # read / inspect only — benign
+        if _DEPLOY_RE.search(joined):
+            return "allow"  # governed deploy/sync writes hooks legitimately
+        return "ask"  # direct ungoverned hook mutation — human carve-out preserved (G4)
+    except Exception:
+        return "ask"  # fail-closed: never silently weaken the guard
+
+def classify_sensitive_path(values: list[str], cwd: str) -> str:
+    """S7: 'allow' read/source of a gitignored-LOCAL secret file (the operator's own .env); 'ask'
+    when a secret-file path is TRACKED/committable (secret-exposure risk). Fail-closed → 'ask'.
+    """
+    try:
+        secret_paths = [p for p in values
+                        if SECRET_FILE_RE.search(p) and not p.endswith(".env.example")]
+        if not secret_paths:
+            return "allow"
+        for path in secret_paths:
+            allowed, _ = evaluate_path(path, cwd)
+            if not allowed:
+                return "ask"  # tracked/committable secret-file path → exposure carve-out (G4)
+        return "allow"  # all are gitignored local config — benign local use
+    except Exception:
+        return "ask"  # fail-closed
+
 def current_branch(cwd: str) -> str | None:
     try:
         res = subprocess.run(["git", "branch", "--show-current"], cwd=cwd,
@@ -365,7 +410,12 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
     if any(marker in joined for marker in runtime_hook_paths()):
-        return emit("ask","Hook script mutation detected. Manual approval required.","Review for policy weakening.")
+        # Epic #3392 #3403 (S6): adjudicate-first. Benign hook read / governed deploy → fall
+        # through (proceed); only a direct ungoverned hook MUTATION reaches the human carve-out.
+        if classify_hook_mutation(joined) == "ask":
+            return emit("ask", "Direct ungoverned hook-script mutation detected. Manual approval "
+                        "required — review for policy weakening (Epic #3392 security carve-out).",
+                        "Review for policy weakening.")
     if RE_GIT_COMMIT.search(joined):
         bypass, marker = detect_it_ops_bypass(joined)
         if bypass:
@@ -581,7 +631,11 @@ def main() -> int:
         if result is not None: return result
     suspicious = [v for v in values if "/" in v or "." in v]
     if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example") for p in suspicious):
-        return emit("ask","Sensitive file path detected. Manual approval required.")
+        # Epic #3392 #3403 (S7): adjudicate-first. Reading/sourcing a gitignored-local secret file
+        # (own .env) → proceed; a tracked/committable secret-file path → ask (exposure carve-out).
+        if classify_sensitive_path(suspicious, cwd) == "ask":
+            return emit("ask", "Sensitive (tracked/committable) secret-file path detected. Manual "
+                        "approval required — possible secret exposure (Epic #3392 carve-out).")
     return 0
 
 if __name__ == "__main__":
