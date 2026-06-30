@@ -40,6 +40,9 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         with:
           node-version: '20'
+      - name: Install dependencies
+        if: steps.changes.outputs.changed == 'true'
+        run: npm ci --no-audit --no-fund
       - name: Validate catalog (derived counts + content hash + SSoT anchor)
         if: steps.changes.outputs.changed == 'true'
         run: npm run catalog:check

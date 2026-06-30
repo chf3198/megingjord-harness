@@ -79,6 +79,16 @@ test('feature ids are unique and slug-shaped', () => {
   }
 });
 
+test('catalog matches the committed golden fixture (counts + version)', () => {
+  const golden = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'tests', 'fixtures', 'harness-feature-catalog.golden.json'), 'utf8'));
+  const counts = cat.deriveCounts(catalog);
+  expect(catalog.catalogVersion).toBe(golden.catalogVersion);
+  expect(counts.layerCount).toBe(golden.layerCount);
+  expect(counts.featureCount).toBe(golden.featureCount);
+  expect(counts.parityFlaggedCount).toBe(golden.parityFlaggedCount);
+  expect(counts.runtimeNACount).toBe(golden.runtimeNACount);
+});
+
 test('catalog JSON validates against the committed JSON Schema shape', () => {
   const schema = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'inventory', 'harness-feature-catalog.schema.json'), 'utf8'));
   // structural sanity: schema is draft 2020-12 and declares the parityCell + feature defs
