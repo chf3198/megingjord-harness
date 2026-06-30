@@ -1,0 +1,57 @@
+{
+  "_doc": "#1936 adversarial corpus — cross-runtime state-injection vectors left open by the #3021 LOCAL-only cluster. Each vector has >=1 forged (must be detected) + >=1 clean (must pass) case.",
+  "knownTeams": ["claude-code", "copilot", "codex", "antigravity", "cursor"],
+  "enrolledAliases": {
+    "claude-code/consultant": "Orla Vale",
+    "claude-code/admin": "Orla Reyes",
+    "copilot/consultant": "Copilot Vale"
+  },
+  "cases": [
+    {
+      "name": "lease-state: Team A authoritative lease invisible to Team B (forged)",
+      "vector": "lease-state", "forged": true,
+      "inputs": { "localLeases": [], "authoritativeLeases": [{ "ticket": "1936", "team": "copilot", "paths": ["scripts/global"] }] }
+    },
+    {
+      "name": "lease-state: authoritative lease present locally (clean)",
+      "vector": "lease-state", "forged": false,
+      "inputs": { "localLeases": [{ "ticket": "1936", "team": "copilot", "paths": ["scripts/global"] }], "authoritativeLeases": [{ "ticket": "1936", "team": "copilot", "paths": ["scripts/global"] }] }
+    },
+    {
+      "name": "hook-context: untrusted team in env (forged)",
+      "vector": "hook-context", "forged": true,
+      "inputs": { "env": { "HAMR_TEAM": "evil-team", "MEGINGJORD_SESSION_ID": "abc123" } },
+      "opts": { "knownTeams": ["claude-code", "copilot", "codex", "antigravity", "cursor"] }
+    },
+    {
+      "name": "hook-context: injected session id (forged)",
+      "vector": "hook-context", "forged": true,
+      "inputs": { "env": { "HAMR_TEAM": "claude-code", "MEGINGJORD_SESSION_ID": "x; rm -rf /" } },
+      "opts": { "knownTeams": ["claude-code", "copilot", "codex", "antigravity", "cursor"] }
+    },
+    {
+      "name": "hook-context: trusted team + safe session (clean)",
+      "vector": "hook-context", "forged": false,
+      "inputs": { "env": { "HAMR_TEAM": "claude-code", "MEGINGJORD_SESSION_ID": "sess-7907673a" } },
+      "opts": { "knownTeams": ["claude-code", "copilot", "codex", "antigravity", "cursor"] }
+    },
+    {
+      "name": "baton-artifact: artifact team != PR team (forged)",
+      "vector": "baton-artifact", "forged": true,
+      "inputs": { "artifact": { "team": "copilot", "role": "consultant", "signedBy": "Copilot Vale" } },
+      "opts": { "prTeam": "claude-code" }
+    },
+    {
+      "name": "baton-artifact: forged signer not enrolled for team/role (forged)",
+      "vector": "baton-artifact", "forged": true,
+      "inputs": { "artifact": { "team": "claude-code", "role": "consultant", "signedBy": "Mallory Forge" } },
+      "opts": { "prTeam": "claude-code" }
+    },
+    {
+      "name": "baton-artifact: matching team + enrolled signer (clean)",
+      "vector": "baton-artifact", "forged": false,
+      "inputs": { "artifact": { "team": "claude-code", "role": "consultant", "signedBy": "Orla Vale" } },
+      "opts": { "prTeam": "claude-code" }
+    }
+  ]
+}
