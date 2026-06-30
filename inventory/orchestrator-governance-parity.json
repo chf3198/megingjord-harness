@@ -194,5 +194,49 @@
       "cursor has no dedicated wiki home \u2014 reads Copilot runtime by design (#3086, mirror claude-code)",
       "antigravity has no dedicated wiki home \u2014 reads Copilot runtime by design (#3109, mirror claude-code)"
     ]
+  },
+  "stateStoreParity": {
+    "auditedAt": "2026-06-30",
+    "issue": 1934,
+    "runtimes": {
+      "copilot": {
+        "statePath": "~/.copilot/hooks/state/",
+        "status": "full",
+        "leasePath": "~/.megingjord/cross-team-leases.json",
+        "lockPath": "~/.megingjord/active-session.lock"
+      },
+      "codex": {
+        "statePath": "~/.codex/devenv-ops/state/",
+        "status": "full",
+        "leasePath": "~/.megingjord/cross-team-leases.json",
+        "lockPath": "~/.megingjord/active-session.lock"
+      },
+      "antigravity": {
+        "statePath": "~/.gemini/antigravity/state/",
+        "status": "full",
+        "leasePath": "~/.megingjord/cross-team-leases.json",
+        "lockPath": "~/.megingjord/active-session.lock"
+      },
+      "claude-code": {
+        "statePath": null,
+        "status": "not-deployed",
+        "note": "no state_store deployment target (runtime_paths.py has no claude branch)"
+      },
+      "cursor": {
+        "statePath": null,
+        "status": "not-deployed",
+        "note": "Phase-2 (#3086)"
+      }
+    },
+    "sharedCrossCuttingPaths": [
+      "~/.megingjord/cross-team-leases.json",
+      "~/.megingjord/active-session.lock",
+      "~/.megingjord/branch-ops-audit.log",
+      "~/.megingjord/authorization-audit.jsonl"
+    ],
+    "parityGaps": [
+      "claude-code: no state_store deployment target (intentional; recorded)",
+      "cursor: no state_store deployment target (Phase-2 #3086)"
+    ]
   }
 }
