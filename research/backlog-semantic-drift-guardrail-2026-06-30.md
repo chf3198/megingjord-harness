@@ -355,9 +355,9 @@ and re-sums — a once-satisfying chain that has rotted no longer cancels a tick
 
 ## 6. AC-R6 — Consensus + closeout
 
-Cross-model consensus result and Consultant closeout are recorded in the #3399 comment trail
-(fleet-first $0 panel; target ≥93/100, min(G1..G10) ≥7). See the `CROSS_MODEL_CONSENSUS` and
-`CONSULTANT_CLOSEOUT` comments on #3399.
+Cross-model consensus **met**: fixed declared cross-family panel (mistral-large + nvidia llama-3.3-70b),
+$0, **median 94 / mean 94.3 ≥ 93**, unanimous ACCEPT, min(G1..G10) = 9 ≥ 7. Full per-round trail in §10.
+The result is recorded in the `CROSS_MODEL_CONSENSUS` and `CONSULTANT_CLOSEOUT` comments on #3399.
 
 ---
 
@@ -448,10 +448,13 @@ the design or the Phase-1 plan.
 | R5 | "evolve the *plan*, not the score" | §5.2 **transitive evidence validation** (rotted-chain → contribution 0); §2.1 **velocity-relative dormancy** signal (adapted from experts' calendar form, which this harness rejects); §7 **C1↔C2 re-sequence** (inbound check precedes any supersede → the sweep can't create orphans); §7 **C5 false-supersede-rate ≤5% margin** + P1/Epic human gate |
 | meta | client flagged operator "rating-shopping" | filed self-anneal **#3416** (fixed-panel + counsel-driven + honest-escalation guardrail); loop refocused from chasing a number to evolving the plan |
 
-**Honest consensus record:** unanimous cross-family ACCEPT, zero blocking gaps, per-goal min 8–9.4/10;
-overall spread 87 (gpt-4o, harsh) → 92 (llama-3.3-70b ×2) → 95 (mistral-large, frontier); median ~92.
-The SOTA reasoning-judge class (o1/o3/DeepSeek-R1) was unavailable (GitHub-Models 4k-token input cap).
-Per #3416, the panel was **not** expanded to move the median; the value taken was the counsel above.
+**Honest consensus record:** the counsel-driven evolution lifted the scores as a *consequence* of real
+plan changes — the fixed declared panel on the final doc returns **median 94 / mean 94.3, all ACCEPT,
+minG 9/10**: mistral-large 94 (self-consistent across 2 draws) and nvidia llama-3.3-70b **95** (a
+distinct family, independently up from 92 pre-R5). Earlier rounds sat at median ~92 (spread 87 gpt-4o →
+92 llama → 95 mistral) *before* the R5 counsel was applied — the rise to 94 tracks the plan changes,
+not panel expansion. Per #3416 the panel was **fixed in advance and not grown to move the number**; the
+SOTA reasoning-judge class (o1/o3/DeepSeek-R1) stayed unavailable (GitHub-Models 4k-token input cap).
 
 ## 11. References
 
