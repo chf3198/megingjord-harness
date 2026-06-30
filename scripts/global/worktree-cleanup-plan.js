@@ -15,7 +15,7 @@ function leaseFor(entry, leases) {
   return leases.find(lease => lease.branch === entry.branch || lease.ticket === ticket) || null;
 }
 
-// Five-state taxonomy per #2249 research. #2552 needed for squash-merge detection (AC5).
+// Five-state taxonomy per #2249 research. Squash-merge detection shipped in #2552; openPr guard #2691/#3356.
 function classify(entry, lease) {
   if (lease) return 'preserve';
   if (entry.locked) return 'preserve';
@@ -23,6 +23,8 @@ function classify(entry, lease) {
   if (entry.branch && entry.branch !== 'main' && !ticketFrom(entry.branch)) return 'needs-review';
   if (entry.dirtyCount > 0 || entry.untrackedCount > 0) return 'quarantine';
   if (!entry.branch) return 'quarantine'; // detached HEAD: no branch to delete
+  // merged-with-open-pr is not safe to remove (open-PR guard).
+  if (entry.openPr) return 'quarantine';
   if (entry.mergedToMain) return 'remove'; // check before aheadOfMain: squash-merged branches have mainAhead > 0
   const aheadOfMain = entry.mainAhead ?? entry.ahead ?? 0;
   if (aheadOfMain > 0) return 'quarantine';
