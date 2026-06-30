@@ -114,6 +114,17 @@ flowchart TD
   (per `consensus_rater_noise_aggregation`). Estimated paid-$ avoided vs. the recurring premium-lane
   human audit it replaces is the G3 win — logged like `free-cloud-usage-report.js` does.
 
+#### Embedding pre-filter — cheap candidate ranking before any cross-model verdict
+
+Grounded in duplicate-bug-report SOTA (siamese/triplet semantic-embedding nets; LLM-embedding
+recall@k 68–74%; the `GitBugs` benchmark and `Cupid`/ChatGPT-assisted dedup — §9), PB1 does **not**
+spend a cross-model verdict on every dormant ticket. It first ranks the candidate set by **embedding
+cosine similarity** between the ticket's goal text and the descriptions of recently-shipped artifacts
+(closed PRs / merged skills / new gates). Only the top-similarity shortlist — likely-superseded by an
+embedding signal — escalates to the (more expensive) cross-model relevance verdict. Embedding compare
+is ~$0 and local, so it sharply bounds cross-model call volume (G3/G7) — the same "embed into a
+low-dimensional space, then judge" pattern the dedup literature established.
+
 #### G7 Throughput — scalability bound (candidate-set is the lever)
 
 The cross-model cost is **not** O(all backlog). Only PB1/PB3s (the needs-cross-model classes) ever
@@ -177,7 +188,10 @@ This makes the candidate set falsifiable rather than assumed-exhaustive.
 `epic-close-readiness-check.js` already fires on `issues.closed` and validates **outbound** edges
 (are my children terminal?). It does **zero inbound** scanning. The inbound check is a structurally
 identical sibling that, on the same event, runs an inbound scan: *"who points at the ticket being
-closed, and is that pointer now dangling?"*
+closed, and is that pointer now dangling?"* This is the **existence-dependency** relation from current
+knowledge-graph work (§9) — a `merge into #N` note is an edge asserting the pointer cannot validly
+exist without #N surviving; reference-rot studies put dangling/orphaned references at ~23% (≈50% with
+content drift), so this is a measurable, recurring class — not an edge case.
 
 ```mermaid
 sequenceDiagram
@@ -267,13 +281,20 @@ flowchart TD
 Four layered safeties:
 1. **Evidence-binding** — a flag MUST cite the specific shipped artifact(s) that satisfy the dormant
    ticket's goal (the #1899 evidence = the red-team skills + #2192 gate). No evidence → no flag.
-2. **Consensus threshold** — `>=93/100` cross-model + `min(G1..G10) >= 7`, median-of-N draws to
-   damp rater noise. Below threshold → advisory only, never an action.
+2. **Consensus threshold + minority-veto** — `>=93/100` cross-model + `min(G1..G10) >= 7`, with
+   **median-of-N self-consistency draws** to damp single-draw rater noise (the LLM-as-judge stability
+   protocol — §9). Crucially, supersession uses **minority-veto, not majority-vote**: a single capable
+   model voting REJECT (goal NOT superseded) **vetoes** the flag. The LLM-judge calibration literature
+   shows minority-veto lowers maximum error under class imbalance — and false-supersede is exactly the
+   rare, high-cost class, so the asymmetry is principled, not ad-hoc. Below threshold → advisory only.
 3. **Reversibility tier** — reversible actions (file a re-triage task, post an advisory) are
    autonomous; **irreversible** actions (cancel of a P1/Epic item) require a **human gate**, the same
    rule the auto-mode classifier enforces for irreversible local deletion ([[epic_3352_worktree_teardown]]).
 4. **Precision calibration** — promotion advisory→blocking is **replay-eval-gated** against a labeled
-   backlog-drift corpus at precision ≥0.85 (no calendar threshold, per `soak_language_default`).
+   backlog-drift corpus at precision ≥0.85 (no calendar threshold, per `soak_language_default`). This
+   mirrors the "frozen regression suite + evidence-coverage PROMOTE/ROLLBACK gate" pattern from current
+   LLM-quality-gate work (§9), and optionally adopts **conformal-prediction** judge-uncertainty
+   intervals so a low-confidence verdict is auto-demoted to advisory rather than acted on.
 
 ### 5.1 Replay-eval corpus + worked median-of-N verdict
 
@@ -372,7 +393,26 @@ calendar-gated.
 
 ---
 
-## 9. References
+## 9. Prior art & external SOTA alignment (web-research-grounded)
+
+This design is not invented in a vacuum — each core mechanism aligns with current (2025–2026)
+literature, and two mechanisms were *sharpened* by it (the embedding pre-filter §2; minority-veto +
+self-consistency §5). Web-research-grounded mapping:
+
+| Design element | External SOTA it draws on |
+|---|---|
+| PB1 semantic-supersession (LLM judges "same goal?") | LLM-for-SE survey (AwesomeLLM4SE, SCIS 2025); LLM-guided issue relevance + confidence scoring (arXiv 2501.11709, MSR'25) |
+| Embedding pre-filter for candidate ranking (§2) | Duplicate-bug-report dedup: siamese/triplet embedding nets, LLM-embedding recall@k 68–74%; `GitBugs` benchmark (arXiv 2504.09651); `Cupid` ChatGPT-assisted dedup; "Does DL improve dup detection?" (ScienceDirect S016412122300002X) |
+| Median-of-N + minority-veto + consensus threshold (§5) | LLM-as-judge calibration: conformal-prediction uncertainty intervals (arXiv 2509.18658); linear-probe judge calibration (2512.22245); ensemble-across-families + minority-veto under class imbalance; self-consistency stability |
+| Inbound-orphan as existence-dependency edge (§3) | KG existence-dependencies (KGCW'25); dangling-dependency BFS resolution + orphan allocation (arXiv 2310.14093); reference-rot ≈23% / content-drift ≈50% |
+| Replay-eval precision gate, advisory→blocking (§5, C5) | Replay-based continual eval (IEEE 10675906); evidence-driven quality gate with PROMOTE/ROLLBACK on coverage threshold + frozen regression suite (arXiv 2603.15676) |
+| Tracking GenAI-era bug/issue workflows | "Past, Present, and Future of Bug Tracking in the Generative AI Era" (arXiv 2510.08005) |
+
+**Net effect:** the guardrail is a domain-specific composition of proven methods — embedding dedup +
+calibrated LLM-judging + KG existence-dependency checks + replay-eval promotion — applied to the
+**pre-baton dormant-backlog** surface that none of the existing harness tools (#2981/#3235/#3350) cover.
+
+## 10. References
 
 - Origin: #1899 (cancelled 2026-06-30) · casualties #2093, #3069 (orphaned pointers, corrected)
 - Extends: #2981 `governance-drift-sweep.js` (deterministic structural sweep — adds the excluded semantic layer)
