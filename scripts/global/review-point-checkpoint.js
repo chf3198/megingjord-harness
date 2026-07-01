@@ -43,6 +43,16 @@ function collectCandidates(opts = {}) {
   return candidates;
 }
 
+// Epic #3425 P1-c: run the F6 asserted-vs-observed probes against the artifact body, if one was
+// provided. Returns F6 contradiction candidates ([] when no body / probes unavailable / error).
+function runArtifactProbes(input = {}) {
+  if (!input.artifactBody) return [];
+  try {
+    const { runProbes } = require('./asserted-vs-observed-probes');
+    return runProbes(input.artifactBody, { mainRef: input.mainRef, cwd: input.cwd }).candidates;
+  } catch { return []; } // probes are advisory; never block the checkpoint
+}
+
 // Run the checkpoint for a review-point: collect candidates (feed + any injected probe candidates),
 // emit one run-event, and return the surfaced set for the role to dispose of. Never throws.
 function runCheckpoint(input = {}) {
@@ -50,7 +60,10 @@ function runCheckpoint(input = {}) {
   const surface = `review-point:${transition}`;
   const feed = collectCandidates({ incidentsPath: input.incidentsPath, sinceTs: input.sinceTs });
   const probeCandidates = Array.isArray(input.probeCandidates) ? input.probeCandidates : [];
-  const candidates = [...feed, ...probeCandidates];
+  // Epic #3425 P1-c: when the artifact body is available, run the asserted-vs-observed (F6) probes
+  // and surface their contradiction candidates too. Best-effort + advisory: probe failure is ignored.
+  const probed = runArtifactProbes(input);
+  const candidates = [...feed, ...probeCandidates, ...probed];
   let event = null;
   try {
     event = emitFriction(CHECKPOINT_PATTERN_ID, {
