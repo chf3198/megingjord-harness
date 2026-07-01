@@ -90,5 +90,33 @@ class BranchChangeReset(unittest.TestCase):
         self.assertIn("active_branch", out)
 
 
+class BranchChangeResetCommitPreservation(BranchChangeReset):
+    """#3469: preserve admin_ops.commit across a branch change ONLY on real worktree evidence
+    (a rebase / cwd-churn must not wipe the commit signal when a worktree holds a commit)."""
+
+    def test_preserves_commit_when_worktree_ahead(self):
+        self._seed_dirty_state("feat/1000-prior")
+        with patch("worktree_push_gate.any_worktree_commit_ahead", return_value=True):
+            out = state_store.reset_on_branch_change(self.cwd, "fix/3469-rebased")
+        self.assertTrue(out["admin_ops"]["commit"], "commit signal preserved on real worktree evidence")
+        # all other transient state is still reset
+        self.assertFalse(out["flags"]["code_touched"])
+        self.assertFalse(out["roles"]["collaborator"])
+        self.assertEqual(out["active_branch"], "fix/3469-rebased")
+
+    def test_does_not_preserve_commit_without_worktree_evidence(self):
+        self._seed_dirty_state("feat/1000-prior")
+        with patch("worktree_push_gate.any_worktree_commit_ahead", return_value=False):
+            out = state_store.reset_on_branch_change(self.cwd, "fix/3469-other")
+        self.assertFalse(out["admin_ops"]["commit"])
+
+    def test_import_error_fails_safe_to_reset(self):
+        # if worktree_push_gate cannot be imported, preservation is skipped (commit resets).
+        self._seed_dirty_state("feat/1000-prior")
+        with patch.dict("sys.modules", {"worktree_push_gate": None}):
+            out = state_store.reset_on_branch_change(self.cwd, "fix/3469-noimport")
+        self.assertFalse(out["admin_ops"]["commit"])
+
+
 if __name__ == "__main__":
     unittest.main()

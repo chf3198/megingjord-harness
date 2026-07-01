@@ -93,5 +93,42 @@ class PushGateIntegration(unittest.TestCase):
         self.assertEqual(self._decide(False), "deny")
 
 
+class WorktreeEnumerationFallback(unittest.TestCase):
+    """#3469: a real commit ahead in ANY linked worktree authorizes the push even when the
+    hook cwd is the main checkout and resolve_push_cwd falls back to it (no manual patch)."""
+
+    def test_any_worktree_commit_ahead_true(self):
+        with patch.object(wpg, "_worktree_paths", return_value=["/wt-a", "/wt-b"]), \
+             patch.object(wpg, "branch_has_commit_ahead",
+                          side_effect=lambda p, b=("origin/main", "main"): p == "/wt-b"):
+            self.assertTrue(wpg.any_worktree_commit_ahead("/main"))
+
+    def test_any_worktree_commit_ahead_false(self):
+        with patch.object(wpg, "_worktree_paths", return_value=["/wt-a"]), \
+             patch.object(wpg, "branch_has_commit_ahead", return_value=False):
+            self.assertFalse(wpg.any_worktree_commit_ahead("/main"))
+
+    def test_worktree_paths_git_error_returns_empty(self):
+        with patch("subprocess.run", side_effect=FileNotFoundError):
+            self.assertEqual(wpg._worktree_paths("/main"), [])
+
+    def test_rebase_reset_flag_but_worktree_ahead_allows_push(self):
+        # session flag False (reset by a rebase), push_cwd falls back to main (no -C/cd),
+        # main is not ahead, but a sibling worktree IS -> satisfied via the worktree fallback.
+        with patch.object(wpg, "branch_has_commit_ahead",
+                          side_effect=lambda p, b=("origin/main", "main"): p != "/main"), \
+             patch.object(wpg, "_worktree_paths", return_value=["/main", "/wt-3469"]):
+            satisfied, used_wt = wpg.commit_step_satisfied(
+                "git push --force-with-lease", "/main", False, lambda c: {})
+        self.assertEqual((satisfied, used_wt), (True, True))
+
+    def test_no_worktree_ahead_still_blocks(self):
+        with patch.object(wpg, "branch_has_commit_ahead", return_value=False), \
+             patch.object(wpg, "_worktree_paths", return_value=["/main", "/wt"]):
+            satisfied, used_wt = wpg.commit_step_satisfied(
+                "git push", "/main", False, lambda c: {})
+        self.assertEqual((satisfied, used_wt), (False, False))
+
+
 if __name__ == "__main__":
     unittest.main()
