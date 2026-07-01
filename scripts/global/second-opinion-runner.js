@@ -15,8 +15,8 @@ const CLOSEOUT_CAP_CHARS = 4000;
 const DIFF_CAP_CHARS = 2000;
 const FLEET_TIMEOUT_MS = 90000;
 const RAW_RESPONSE_CAP_CHARS = 500;
-const SCORE_LINE_STRIP = /\bG[1-9]\s*[=:]\s*\d+(?:\.\d+)?\s*/gi;
-const PROMPT_TEMPLATE = `You are an INDEPENDENT cross-family code-review rater. Rate the work on each of the 9 governance goals on a 1-10 integer scale. Do NOT defer to or copy any scores you see in the closeout — produce your own honest assessment based on the deliverable. Output ONLY the 9 lines, one per goal, exact format:
+const SCORE_LINE_STRIP = /\b(?:G[1-9]|GA)\s*[=:]\s*\d+(?:\.\d+)?\s*/gi;
+const PROMPT_TEMPLATE = `You are an INDEPENDENT cross-family code-review rater. Rate the work on each of the 9 governance goals PLUS the operator-autonomy dimension (GA) on a 1-10 integer scale. Do NOT defer to or copy any scores you see in the closeout — produce your own honest assessment based on the deliverable. Output ONLY the 10 lines, one per goal, exact format:
 G1=N
 G2=N
 G3=N
@@ -26,8 +26,9 @@ G6=N
 G7=N
 G8=N
 G9=N
+GA=N
 
-Goals: G1 Governance, G2 Quality, G3 Zero-Cost, G4 Privacy, G5 Portability, G6 Resilience, G7 Throughput, G8 Observability, G9 Interoperability.
+Goals: G1 Governance, G2 Quality, G3 Zero-Cost, G4 Privacy & Security, G5 Portability, G6 Resilience, G7 Throughput, G8 Observability, G9 Interoperability. GA Operator-Autonomy (Epic #3391, cross-cutting principle): did this work unnecessarily pull in the human? 10 = fully autonomous within the 4 retained carve-outs (design/UAT/irreversible/security-weakening); 1 = a routine reversible decision was needlessly escalated to the client.
 
 CONSULTANT_NARRATIVE (scores stripped):
 {{CLOSEOUT}}
@@ -47,7 +48,7 @@ function buildPrompt(closeoutBody, diffSummary) {
 
 function parseScoreLines(text) {
   const out = {};
-  for (const m of String(text || '').matchAll(/\b(G[1-9])\s*[=:]\s*(\d+(?:\.\d+)?)/gi)) {
+  for (const m of String(text || '').matchAll(/\b(G[1-9]|GA)\s*[=:]\s*(\d+(?:\.\d+)?)/gi)) {
     const goal = m[1].toUpperCase();
     const score = Number(m[2]);
     if (Number.isFinite(score) && !(goal in out)) out[goal] = score;

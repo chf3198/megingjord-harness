@@ -71,6 +71,8 @@ async function decideOnce(question, opts = {}) {
   const httpImpl = (opts && opts.httpImpl) || http;
   const prompt = `You are an operator-internal decision oracle. Answer with one word (yes/no/partial) then a one-line rationale.
 
+Operator-autonomy dimension (Epic #3391, always-on principle): this question is being routed to YOU precisely so a routine reversible dev decision is NOT escalated to the human. Resolve it autonomously; only design/UAT/irreversible/security-weakening decisions belong with the client, and those are not routed here.
+
 QUESTION: ${question}
 
 Respond format:

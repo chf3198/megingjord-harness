@@ -19,6 +19,8 @@ const FAST_TTL_MS = Number(process.env.GOVERNANCE_BUNDLE_FAST_TTL_MS || 300000);
 const FIELD_KEYS = [
   'checks_run', 'checks_failed', 'drift_score',
   'fleet_utilization', 'rubric_rating', 'wiki_health',
+  // Epic #3391 B3: operator-autonomy dimension (cross-cutting principle scored on closeouts).
+  'autonomy_score',
 ];
 
 function canonicalFields(fields) {

@@ -19,7 +19,10 @@ const HOOK = path.join(ROOT, 'hooks/scripts/goal_lens.py');
 function extractCanonical(text) {
   // Strip Python string-concat artifacts (`"` chars) and collapse whitespace
   const flat = text.replace(/["\n]/g, ' ').replace(/\s+/g, ' ');
-  const match = flat.match(/G1 Governance[^"]*?Interoperability/);
+  // Epic #3391 B2: anchor on the TRUE last ranked goal (G10 Maintainability), not
+  // G9 Interoperability. The old G9 anchor silently truncated G10 and would hide any
+  // dimension appended after Interoperability from the byte-identity check.
+  const match = flat.match(/G1 Governance[^"]*?Maintainability/);
   return match ? match[0].trim() : null;
 }
 
