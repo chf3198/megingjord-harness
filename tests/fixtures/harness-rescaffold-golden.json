@@ -1,27 +1,27 @@
 {
   "antigravity": {
-    "planContentHash": "bd3f9ca6b39f73986a89554db35e996a1b167960f5cab0afa540aa196391968a",
+    "planContentHash": "042a2574a382be2d6787c63e0c3615de3384a4bc164231325719d78367dc22bb",
     "pendingSurfaces": [],
-    "actionCount": 11
+    "actionCount": 17
   },
   "claude-code": {
-    "planContentHash": "cbaca67f4637efd0afcff1175650a7bc7fdf03ff63d67043ca519ccfe452efa8",
+    "planContentHash": "9c763e4db4d22186d0652ca1d72c3eb81bce4608e7bcb1402a8fb3f11c39961e",
     "pendingSurfaces": [],
-    "actionCount": 11
+    "actionCount": 17
   },
   "codex": {
-    "planContentHash": "b8382c7ab3700a237ec62be263d3955d0308007581329d6b5a3fc21e5efd9567",
+    "planContentHash": "25a4ba0a41fbe29eab5a09516bb3053322d6e2e5a26f0cf1d1809c8ac73673d5",
     "pendingSurfaces": [],
-    "actionCount": 11
+    "actionCount": 17
   },
   "copilot": {
-    "planContentHash": "c0f0ab1a6cf81410c569f24f79cbcee9c4cc3a8e109f510292ee58aa4754facf",
+    "planContentHash": "23271f2c3416e3ced8433b2572b396674450b7f56251913f4d47c2fc0d7e237b",
     "pendingSurfaces": [],
-    "actionCount": 11
+    "actionCount": 17
   },
   "cursor": {
-    "planContentHash": "c0855fbc8db7d2f191c7fc169c0ae76df1ee2028e3accd8f39cb84940042d86c",
+    "planContentHash": "da2976c6ff39c2b985cf60628437aa5cf292e287b86ac370207a7e5153aef0b0",
     "pendingSurfaces": [],
-    "actionCount": 11
+    "actionCount": 17
   }
 }
