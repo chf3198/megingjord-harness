@@ -328,6 +328,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `hamr:teardown` | `bash scripts/global/hamr-teardown.sh` |
 | `hamr:tool-policy:test` | `npx playwright test tests/hamr-tool-policy.spec.js` |
 | `hamr:tool-proxy` | `node scripts/global/hamr-tool-proxy.js` |
+| `harness:add-runtime` | `node scripts/global/harness-add-runtime.js` |
 | `harness:doctor` | `node scripts/global/harness-fleet-doctor.js` |
 | `harness:self-test` | `node scripts/global/harness-self-test.js` |
 | `harness:self-test:capability` | `node scripts/global/harness-self-test.js --capability` |
