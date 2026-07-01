@@ -36,6 +36,11 @@ const authorTeam = require('./author-team-check.js');
 const epicAcDisposition = require('./epic-ac-disposition-check.js');
 // flaws-recognized: per-review-point flaw-capture validator (advisory). Epic #3425 P1-a.
 const flawsRecognized = require('./flaws-recognized.js');
+// #3456: wire previously-orphaned validators into runAll dispatch set.
+const fleetReviewRequired = require('./fleet-review-required.js');
+const registryTupleCoverage = require('./registry-tuple-coverage.js');
+const subIssuePreference = require('./sub-issue-preference.js');
+const worktreeNamingAdvisory = require('./worktree-naming-advisory.js');
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -46,6 +51,52 @@ const parityValidatorAdapter = {
       detail: `${c.rule_id}: ${c.id} [${c.severity}]`,
     }));
     return { ok: violations.length === 0, violations };
+  },
+};
+
+// registry-tuple-coverage exposes checkCoverage() not validate(); wrap to standard interface.
+// Advisory-only: unmapped tuples warn but do not block (promotion is replay-eval-gated).
+const registryTupleAdapter = {
+  validate: (input) => {
+    const registryOverride = (input || {}).registry;
+    const result = registryTupleCoverage.checkCoverage(registryOverride);
+    if (!result.ok && result.reason === 'registry-unreadable') {
+      return { ok: true, violations: [{ rule: 'registry-unreadable', severity: 'advisory',
+        detail: 'registry-tuple-coverage: registry unreadable; skipping' }] };
+    }
+    const violations = (result.unmapped || []).map(unmapped => ({
+      rule: 'registry-tuple-unmapped',
+      severity: 'advisory',
+      detail: `${unmapped.team}:${unmapped.model} resolves to ${unmapped.resolvedTo}`
+        + (unmapped.wildcardSeed ? ` (${unmapped.wildcardSeed})` : ''),
+    }));
+    return { ok: true, violations };
+  },
+};
+
+// sub-issue-preference is a utility (no validate()); wrap to emit an advisory when
+// a child issue body uses prose Refs instead of the Sub-issue marker. Input: { body }.
+const subIssueAdapter = {
+  validate: (input) => {
+    const body = String((input || {}).body || '');
+    if (!body) return { ok: true, violations: [] };
+    const detected = subIssuePreference.detectParent(body);
+    if (detected.source === 'prose-refs') {
+      return { ok: true, violations: [{ rule: 'sub-issue-prefer-marker', severity: 'advisory',
+        detail: `parent #${detected.parent} detected via prose Refs; `
+          + 'prefer Sub-issue native link (<!-- sub-issue-linked: parent=N -->)' }] };
+    }
+    return { ok: true, violations: [] };
+  },
+};
+
+// worktree-naming-advisory exposes lintBranchName() not validate(); wrap to standard interface.
+// Always advisory (never blocking) per the validator's own contract.
+const worktreeNamingAdapter = {
+  validate: (input) => {
+    const branch = String((input || {}).branch || '');
+    const result = worktreeNamingAdvisory.lintBranchName(branch);
+    return { ok: true, violations: (result.advisories || []) };
   },
 };
 
@@ -79,6 +130,11 @@ const VALIDATORS = {
   'author-team-check': authorTeam,
   'epic-ac-disposition-check': epicAcDisposition,
   'flaws-recognized': flawsRecognized,
+  // #3456: previously-orphaned validators now wired to megalint-runAll dispatch surface.
+  'fleet-review-required': fleetReviewRequired,
+  'registry-tuple-coverage': registryTupleAdapter,
+  'sub-issue-preference': subIssueAdapter,
+  'worktree-naming-advisory': worktreeNamingAdapter,
 };
 
 function runAll(input) {
