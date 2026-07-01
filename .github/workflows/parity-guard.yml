@@ -1,0 +1,23 @@
+name: parity-lowering-guard
+# Advisory-first self-dev parity guardrail (Epic #3411 T3.2 #3452).
+# Blocks (in --strict) any net cross-orchestrator parity regression vs the committed baseline.
+on:
+  pull_request:
+    paths:
+      - 'inventory/harness-feature-catalog.json'
+      - 'inventory/runtimes/*.json'
+      - 'scripts/global/**'
+      - 'tests/fixtures/parity-baseline.json'
+permissions:
+  contents: read
+jobs:
+  parity-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Parity-lowering guard (advisory)
+        run: npm run parity:guard
