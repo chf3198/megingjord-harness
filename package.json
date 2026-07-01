@@ -83,6 +83,8 @@
     "governance:cross-team-check:test": "node --test tests/cross-team-contract-check.spec.js",
     "catalog:check": "node scripts/global/harness-feature-catalog.js",
     "catalog:check:test": "node --test tests/harness-feature-catalog.spec.js",
+    "runtime-descriptor:check": "node scripts/global/runtime-descriptor.js",
+    "runtime-descriptor:check:test": "node --test tests/runtime-descriptor.spec.js",
     "governance:cross-team-lease-dispatch:test": "node --test tests/cross-team-lease-dispatch.spec.js",
     "governance:delegation-lint": "node scripts/global/delegation-phrase-lint.js",
     "governance:dispatcher-set-labels:test": "node --test tests/github-dispatcher-set-labels.spec.js",

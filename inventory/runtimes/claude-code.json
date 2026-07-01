@@ -1,0 +1,46 @@
+{
+  "runtime": "claude-code",
+  "detection": {
+    "primaryEnvMarkers": [
+      "CLAUDECODE",
+      "CLAUDE_CODE_ENTRYPOINT"
+    ],
+    "aiAgentValue": "claude-code",
+    "signal": "CLAUDECODE/CLAUDE_CODE_ENTRYPOINT",
+    "deltaKind": "env-marker"
+  },
+  "signing": {
+    "team": "claude-code",
+    "substrates": [
+      "claude-code-cli"
+    ]
+  },
+  "deploy": {
+    "home": "~/.claude",
+    "artifactClasses": [
+      "settings",
+      "instructions",
+      "skills",
+      "agents",
+      "commands",
+      "scripts"
+    ]
+  },
+  "hooks": {
+    "configPath": ".claude/settings.json",
+    "eventCase": "PascalCase",
+    "events": [
+      "SessionStart",
+      "UserPromptSubmit",
+      "PreToolUse",
+      "PostToolUse",
+      "Stop"
+    ]
+  },
+  "capabilities": {
+    "ghAuth": "available via gh auth login",
+    "hookExecution": "lefthook runs in integrated terminal",
+    "fallback": "none \u2014 full support expected"
+  },
+  "parityWaivers": []
+}
