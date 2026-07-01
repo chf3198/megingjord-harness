@@ -3,7 +3,7 @@
 'use strict';
 
 const TEAM_NAMESPACE = 'xteam-lead:';
-const VALID_TEAMS = ['claude-code', 'codex', 'copilot', 'antigravity'];
+const VALID_TEAMS = ['antigravity', 'claude-code', 'codex', 'copilot', 'cursor'];
 
 function leadLabel(team) {
   if (!VALID_TEAMS.includes(team)) {

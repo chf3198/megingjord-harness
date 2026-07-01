@@ -2,7 +2,9 @@
   "actors": {
     "chf3198": "claude-code",
     "cursoragent": "cursor",
-    "github-actions": "copilot"
+    "github-actions": "copilot",
+    "codex-agent": "codex",
+    "antigravity-agent": "antigravity"
   },
-  "_note": "Maps GitHub logins to harness team slugs for author-team verification (#3032). Unmapped authors fail-open (advisory)."
+  "_note": "Maps GitHub logins to harness team slugs for author-team verification (#3032). Unmapped authors fail-open (advisory). codex-agent and antigravity-agent entries added for 5-runtime parity (#3442)."
 }

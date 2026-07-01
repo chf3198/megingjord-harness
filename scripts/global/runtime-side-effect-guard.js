@@ -6,8 +6,11 @@ const fs = require('node:fs');
 const HIGH = new Set(['delete-file', 'deploy-apply', 'git-push', 'shell-destructive']);
 const ALLOWLIST = {
   'vscode-extension': ['megingjord.openDashboard', 'megingjord.showPolicyHint'],
+  // N/A: copilot operates via github-actions runner; no local commandId surface
   codex: ['codex.openHelp', 'codex.showPolicy'],
   'claude-code': ['claude.showPolicy', 'claude.help'],
+  cursor: ['cursor.showPolicy', 'cursor.help'],
+  antigravity: ['antigravity.showPolicy', 'antigravity.help'],
 };
 const SPOOF = [/\b(ignore\s+policy|system\s+override|admin\s+bypass)\b/i,
   /\bmanager\s+approved\s+offline\b/i, /\bjust\s+run\s+it\s+now\b/i];
