@@ -27,9 +27,14 @@
   },
   "hooks": {
     "configPath": ".antigravity/hooks.json",
+    "emitScript": "scripts/global/antigravity-hooks-emit.js",
+    "hookDir": "~/.gemini/antigravity/hooks/scripts",
     "eventCase": "camelCase",
     "events": [
+      "sessionStart",
+      "userPromptSubmit",
       "preToolUse",
+      "postToolUse",
       "stop"
     ]
   },
@@ -43,11 +48,6 @@
       "surface": "scripts",
       "reason": "scripts/global gate corpus not yet deployed to this camelCase runtime",
       "promotionPath": "T2.3 (#3446) ships the scripts artifactClass via deploy.sh + the scaffold"
-    },
-    {
-      "surface": "hook-wiring",
-      "reason": "PreToolUse/Stop enforcement wiring unconfirmed; advisory-backstop only",
-      "promotionPath": "T2.5 (#3448) wires .antigravity/hooks.json and verifies gates FIRE"
     }
   ]
 }

@@ -1,0 +1,63 @@
+{
+  "runtimeId": "cursor",
+  "description": "Golden snapshot of the cursor scaffold dry-run (T2.4 / #3447). All 11 surfaces must be already-present — zero pending actions is the completeness proof. Regenerate with: node tests/cursor-onboarding-complete.spec.js --update-fixture",
+  "pendingCount": 0,
+  "actionCount": 11,
+  "surfaces": [
+    {
+      "surface": "runtime-descriptor",
+      "op": "already-present",
+      "detail": "runtime descriptor inventory/runtimes/cursor.json already exists"
+    },
+    {
+      "surface": "github-actor-team-map",
+      "op": "already-present",
+      "detail": "team \"cursor\" already in actors map"
+    },
+    {
+      "surface": "routing-provider-adapters",
+      "op": "already-present",
+      "detail": "\"cursor\" already in runtimeKinds"
+    },
+    {
+      "surface": "leader-election",
+      "op": "already-present",
+      "detail": "\"cursor\" already in VALID_TEAMS"
+    },
+    {
+      "surface": "detect-runtime",
+      "op": "already-present",
+      "detail": "\"cursor\" already in KNOWN + PRIMARY"
+    },
+    {
+      "surface": "team-model-signatures",
+      "op": "already-present",
+      "detail": "\"cursor\" already in teamValues + substrateTeamMap + autoModeCoverage"
+    },
+    {
+      "surface": "harness-self-test-registry",
+      "op": "already-present",
+      "detail": "\"cursor\" already in adapter_exemptions"
+    },
+    {
+      "surface": "orchestrator-governance-parity",
+      "op": "already-present",
+      "detail": "\"cursor\" already in runtimes[] + stateStoreParity.runtimes"
+    },
+    {
+      "surface": "deploy-sh",
+      "op": "already-present",
+      "detail": "\"cursor\" already a deploy target in deploy.sh"
+    },
+    {
+      "surface": "package-json-deploy",
+      "op": "already-present",
+      "detail": "\"deploy:cursor\" already in package.json scripts"
+    },
+    {
+      "surface": "package-json-harness-script",
+      "op": "already-present",
+      "detail": "\"harness:add-runtime\" already in package.json scripts"
+    }
+  ]
+}
