@@ -167,13 +167,17 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `deploy:cursor` | `bash scripts/deploy.sh --target cursor && node scripts/global/xteam-mcp-register.js --target cursor --root .` |
 | `deploy:cursor:apply` | `bash scripts/deploy.sh --apply --target cursor && node scripts/global/xteam-mcp-register.js --target cursor --root . --apply` |
 | `deploy:manifest` | `node scripts/global/deploy-manifest.js` |
+| `deploy:manifest:antigravity` | `node scripts/global/deploy-manifest.js antigravity` |
 | `deploy:manifest:claude` | `node scripts/global/deploy-manifest.js claude` |
 | `deploy:manifest:codex` | `node scripts/global/deploy-manifest.js codex` |
 | `deploy:manifest:copilot` | `node scripts/global/deploy-manifest.js copilot` |
+| `deploy:manifest:cursor` | `node scripts/global/deploy-manifest.js cursor` |
 | `deploy:verify` | `node scripts/global/verify-deploy.js` |
+| `deploy:verify:antigravity` | `node scripts/global/verify-deploy.js antigravity` |
 | `deploy:verify:claude` | `node scripts/global/verify-deploy.js claude` |
 | `deploy:verify:codex` | `node scripts/global/verify-deploy.js codex` |
 | `deploy:verify:copilot` | `node scripts/global/verify-deploy.js copilot` |
+| `deploy:verify:cursor` | `node scripts/global/verify-deploy.js cursor` |
 | `deps:aggregate` | `node scripts/global/dep-graph-aggregate.js` |
 | `deps:augment` | `node scripts/global/dep-graph-augment.js` |
 | `deps:render` | `node scripts/global/dep-graph-render.js` |
@@ -200,6 +204,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `fsm:wasm:build` | `node scripts/global/baton-fsm/build-wasm.js` |
 | `fsm:wasm:check` | `node scripts/global/baton-fsm/build-wasm.js --check` |
 | `fsm:wasm:test` | `node --test tests/baton-fsm-wasm-integrity.spec.js` |
+| `gate-corpus:verify` | `node scripts/global/gate-corpus-deploy-plan.js` |
 | `git-state:drift` | `node scripts/global/git-state-drift-sensor.js` |
 | `git:conflict-predict` | `node scripts/global/git-conflict-predict.js` |
 | `git:conflict-predict:test` | `node --test tests/git-conflict-predict.spec.js` |
@@ -432,12 +437,16 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |
 | `sync:all:dry` | `bash scripts/sync.sh --dry-run --target all` |
+| `sync:antigravity` | `bash scripts/deploy.sh --target antigravity` |
+| `sync:antigravity:apply` | `bash scripts/deploy.sh --apply --target antigravity` |
 | `sync:both` | `bash scripts/sync.sh --target both` |
 | `sync:both:dry` | `bash scripts/sync.sh --dry-run --target both` |
 | `sync:claude` | `bash scripts/sync.sh --target claude` |
 | `sync:claude:dry` | `bash scripts/sync.sh --dry-run --target claude` |
 | `sync:codex` | `bash scripts/sync.sh --target codex` |
 | `sync:codex:dry` | `bash scripts/sync.sh --dry-run --target codex` |
+| `sync:cursor` | `bash scripts/deploy.sh --target cursor` |
+| `sync:cursor:apply` | `bash scripts/deploy.sh --apply --target cursor` |
 | `sync:dry` | `bash scripts/sync.sh --dry-run` |
 | `synthesis:init` | `node scripts/global/synthesis-init.js` |
 | `synthesis:snapshot` | `node scripts/global/synthesis-snapshot.js` |
