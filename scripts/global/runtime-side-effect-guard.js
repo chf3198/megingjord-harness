@@ -4,9 +4,13 @@
 const fs = require('node:fs');
 
 const HIGH = new Set(['delete-file', 'deploy-apply', 'git-push', 'shell-destructive']);
+// Exact runtime set: copilot, codex, claude-code, cursor, antigravity.
+// 'vscode-extension' was a phantom entry — this project has no vscode-extension
+// runtime. Removed in #3455 (phantom allowlist fix). If a vscode-extension
+// runtime is added in future, add it here with its real commandIds.
+// Note: copilot operates via github-actions runner; no local commandId surface.
 const ALLOWLIST = {
-  'vscode-extension': ['megingjord.openDashboard', 'megingjord.showPolicyHint'],
-  // N/A: copilot operates via github-actions runner; no local commandId surface
+  copilot: [],
   codex: ['codex.openHelp', 'codex.showPolicy'],
   'claude-code': ['claude.showPolicy', 'claude.help'],
   cursor: ['cursor.showPolicy', 'cursor.help'],

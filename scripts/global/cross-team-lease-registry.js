@@ -1,11 +1,23 @@
 #!/usr/bin/env node
 'use strict';
+// cross-team-lease-registry.js — canonical lease store.
+// Canonical path: ~/.megingjord/cross-team-leases.json (home-dir state root,
+// consistent with incidents.jsonl and other Megingjord state). Tickets #3455.
+//
+// Previously DEFAULT_PATH pointed at .dashboard/cross-team-leases.json (cwd-relative).
+// That path was wrong: it varied by cwd and conflicted with the ~/.megingjord/ state root.
+// Migration: legacyPathFor() detects a lease file at the old path and reports it.
+// Read falls back to the old path when the new one is absent (backward-compat).
+// Write always targets the canonical path only.
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { readJson, writeJsonAtomic, mutateJson } = require('./atomic-json-store');
 
-const DEFAULT_PATH = path.join(process.cwd(), '.dashboard', 'cross-team-leases.json');
+const DEFAULT_PATH = path.join(os.homedir(), '.megingjord', 'cross-team-leases.json');
+// Legacy path that was used before #3455. Kept for migration detection only.
+const LEGACY_PATH = path.join(process.cwd(), '.dashboard', 'cross-team-leases.json');
 const TTL_HOURS = 24;
 const HOUR_MS = 3600000;
 
@@ -18,12 +30,50 @@ function listArg(value) {
   if (!value) return [];
   return String(value).split(',').map(s => s.trim()).filter(Boolean);
 }
-function read(file = DEFAULT_PATH) {
-  if (!fs.existsSync(file)) return empty();
-  return readJson(file, empty);
+
+/**
+ * Migration validator: detects a lease file at the old cwd-relative path.
+ * Returns { stale: true, legacyPath, canonicalPath } when stale file found,
+ * or { stale: false } when clean. Never throws.
+ * @param {string} [legacyPath] - path to check; defaults to LEGACY_PATH.
+ * @returns {{ stale: boolean, legacyPath?: string, canonicalPath?: string }}
+ */
+function checkLegacyPath(legacyPath = LEGACY_PATH) {
+  if (!fs.existsSync(legacyPath)) return { stale: false };
+  return {
+    stale: true,
+    legacyPath,
+    canonicalPath: DEFAULT_PATH,
+    message: `Stale cross-team lease file found at legacy path ${legacyPath}. ` +
+      `Move it to ${DEFAULT_PATH} (canonical). The legacy path will not be written to.`,
+  };
 }
-function write(registry, file = DEFAULT_PATH) {
-  writeJsonAtomic(registry, file);
+
+/**
+ * Read lease registry. Reads from canonicalFile; falls back to legacyPath
+ * when canonical is absent (backward-compat). Always writes to canonical only.
+ * @param {string} [canonicalFile]
+ * @returns {{ version: number, leases: Array }}
+ */
+function read(canonicalFile = DEFAULT_PATH) {
+  if (fs.existsSync(canonicalFile)) return readJson(canonicalFile, empty);
+  const legacyCheck = checkLegacyPath();
+  if (legacyCheck.stale) {
+    process.stderr.write(`[cross-team-lease-registry] ${legacyCheck.message}\n`);
+    return readJson(legacyCheck.legacyPath, empty);
+  }
+  return empty();
+}
+
+/**
+ * Write lease registry to the canonical path only. Never writes to legacy path.
+ * @param {{ version: number, leases: Array }} registry
+ * @param {string} [canonicalFile]
+ */
+function write(registry, canonicalFile = DEFAULT_PATH) {
+  const dir = path.dirname(canonicalFile);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  writeJsonAtomic(registry, canonicalFile);
 }
 function mutateRegistry(file, mutator) {
   return mutateJson(file, mutator, empty);
@@ -87,5 +137,7 @@ function commentBlock(event, lease) {
   ];
   return rows.join('\n');
 }
-module.exports = { read, write, mutateRegistry, createLease, refreshLease, expireLeases,
-  closeLease, active, commentBlock, DEFAULT_PATH };
+module.exports = {
+  read, write, mutateRegistry, createLease, refreshLease, expireLeases,
+  closeLease, active, commentBlock, checkLegacyPath, DEFAULT_PATH, LEGACY_PATH,
+};
