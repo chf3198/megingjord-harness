@@ -34,7 +34,7 @@ function assertAllAlreadyPresent(runtimeId, plan) {
   assert.deepEqual(
     pending,
     [],
-    `Runtime "${runtimeId}": expected all 11 surfaces already-present but found pending: [${pending.join(', ')}]. ` +
+    `Runtime "${runtimeId}": expected all 17 surfaces already-present but found pending: [${pending.join(', ')}]. ` +
     'This means the committed wiring diverges from what the scaffold generator expects. ' +
     'Fix: wire the missing surfaces into the registry files or update the descriptor.'
   );
