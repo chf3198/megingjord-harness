@@ -54,15 +54,16 @@ deploy_files() {
   echo "  Total: $count"
   echo ""
 }
-
 if [[ "$TARGET" == "codex" || "$TARGET" == "both" || "$TARGET" == "all" ]]; then
   node "$ROOT/scripts/global/codex-runtime.js" deploy "${CODEX_ARGS[@]}"
 fi
 [[ "$TARGET" == "codex" ]] && exit 0
 if [[ "$TARGET" == "claude" || "$TARGET" == "all" ]]; then $APPLY && rsync -a --exclude='*.local*' "$ROOT/.claude/" "$HOME/.claude/" && echo "✅ .claude/ → ~/.claude/" || echo "(dry run) Would deploy .claude/ → ~/.claude/"
   [[ "$TARGET" == "claude" ]] && exit 0; fi
-if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.antigravity"; rsync -a --exclude='*.local*' "$ROOT/.antigravity/" "$HOME/.antigravity/" 2>/dev/null || true; echo "ok .antigravity/ -> ~/.antigravity/"; } || echo "(dry run) Would deploy .antigravity/ -> ~/.antigravity/"; [[ "$TARGET" == "antigravity" ]] && exit 0; fi
-if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.cursor"; rsync -a --exclude='*.local*' "$ROOT/.cursor/" "$HOME/.cursor/" 2>/dev/null || true; rsync -a --exclude='__pycache__' --exclude='state/' "$ROOT/hooks/" "$HOME/.cursor/hooks/" 2>/dev/null || true; mkdir -p "$HOME/.cursor/agents"; rsync -a "$ROOT/agents/" "$HOME/.cursor/agents/" 2>/dev/null || true; echo "ok .cursor/ -> ~/.cursor/ (+ hooks/ -> ~/.cursor/hooks/ + agents/ -> ~/.cursor/agents/ for #1912 parity)"; } || echo "(dry run) Would deploy .cursor/ -> ~/.cursor/ and hooks/ -> ~/.cursor/hooks/ and agents/ -> ~/.cursor/agents/"; [[ "$TARGET" == "cursor" ]] && exit 0; fi
+# shellcheck source=scripts/deploy-gate-corpus.sh
+source "$ROOT/scripts/deploy-gate-corpus.sh"
+if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then deploy_antigravity "$ROOT" "$APPLY"; [[ "$TARGET" == "antigravity" ]] && exit 0; fi
+if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then deploy_cursor "$ROOT" "$APPLY"; [[ "$TARGET" == "cursor" ]] && exit 0; fi
 echo "Source: $ROOT → $COPILOT"
 if ! $APPLY; then
   echo "=== DRY RUN (pass --apply to deploy) ==="; echo ""
@@ -75,7 +76,6 @@ if ! $APPLY; then
   echo "── Dashboard ── Would deploy: index.html + css/ + js/"
   echo "Re-run with --apply to deploy changes."; exit 0
 fi
-
 echo "Backing up $COPILOT → $BACKUP"
 cp -r "$COPILOT" "$BACKUP"; echo ""
 deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
