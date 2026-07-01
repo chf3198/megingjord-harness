@@ -28,6 +28,8 @@ async function chatComplete(prompt, opts = {}) {
     messages: [{ role: 'user', content: prompt }],
     stream: false,
     options: { num_predict: opts.maxTokens || 512 },
+    // #3484: pin a hot model resident (keep_alive) so the common path isn't a cold load.
+    ...(opts.keepAlive ? { keep_alive: opts.keepAlive } : {}),
   });
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(new Error('ollama timeout')), TIMEOUT_MS);
