@@ -257,6 +257,7 @@
     "state:offload": "node scripts/global/state-offload-client.js",
     "stress": "MEGINGJORD_STRESS_TIER=A node scripts/global/stress-orchestrator.js",
     "stress:anneal": "node --test tests/stress-anneal-decision.spec.js",
+    "stress:baton-e2e": "node --test tests/baton-e2e.spec.js",
     "stress:bounded": "MEGINGJORD_STRESS_TIER=C node scripts/global/stress-orchestrator.js",
     "stress:evidence-check": "node scripts/global/stress-evidence-check.js",
     "stress:evidence-check:test": "node --test tests/stress-evidence-check.spec.js",
