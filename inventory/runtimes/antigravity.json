@@ -20,8 +20,10 @@
     "artifactClasses": [
       "settings",
       "hooks",
-      "agents"
-    ]
+      "agents",
+      "scripts"
+    ],
+    "gateCorpusHome": "~/.antigravity/scripts/global"
   },
   "hooks": {
     "configPath": ".antigravity/hooks.json",

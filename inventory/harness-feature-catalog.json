@@ -1,6 +1,6 @@
 {
   "$schema": "./harness-feature-catalog.schema.json",
-  "catalogVersion": "3e9329a9f718ca4e",
+  "catalogVersion": "bf0896487a879adf",
   "generatedFrom": "research/cross-orchestrator-parity-phase0-3412.md (Phase-0 #3412, merged PR #3436)",
   "ssotAnchor": "governance/README.md",
   "extends": "inventory/governance-manifest (Epic #1701 adapter-emit/drift chain) — this catalog EXTENDS, does not fork",
@@ -2126,14 +2126,19 @@
           "status": "unverified"
         },
         "cursor": {
-          "status": "unverified"
+          "status": "partial",
+          "evidence": "T1.6 (#3443): 'scripts' artifactClass declared in cursor descriptor + gateCorpusHome=~/.cursor/scripts/global; gate corpus make-reachable encoded. Actual deploy.sh wiring deferred to T2.3 (#3446).",
+          "promotionPath": "T2.3 (#3446) wires scripts/global deploy to ~/.cursor/scripts/global via deploy.sh scaffold"
         },
         "antigravity": {
-          "status": "unverified"
+          "status": "partial",
+          "evidence": "T1.6 (#3443): 'scripts' artifactClass declared in antigravity descriptor + gateCorpusHome=~/.antigravity/scripts/global; gate corpus make-reachable encoded. Actual deploy.sh wiring deferred to T2.3 (#3446).",
+          "promotionPath": "T2.3 (#3446) wires scripts/global deploy to ~/.antigravity/scripts/global via deploy.sh scaffold"
         }
       },
       "sources": [
-        "phase0-3412"
+        "phase0-3412",
+        "t1.6-3443"
       ]
     },
     {
