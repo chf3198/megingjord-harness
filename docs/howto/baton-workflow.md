@@ -299,4 +299,7 @@ review-points which crashed or bypassed the builder. F6 asserted-vs-observed pro
 (`asserted-vs-observed-probes.js`) falsify artifact claims with cheap read-only probes — including a
 squash-aware worktree probe (content-equivalence via `git cherry`, so a squash-merged branch is never a
 false positive); only high-confidence (pure-local) probes are blocking-eligible, network probes stay
-advisory. All advisory.
+advisory. The none-vs-candidate reconciler (`none-vs-candidate-reconciler.js`) closes checkbox-fatigue: a
+`flaws_recognized: none` is valid only against a zero (or un-escalated-low-severity) candidate feed — a
+`none` contradicted by a medium/high candidate is a violation (3+ same-`pattern_id` low-sev escalate to
+medium; medium-confidence F6 never blocks). All advisory until the P1-g replay-eval promotion gate.
