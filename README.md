@@ -190,6 +190,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `docs:lint` | `node scripts/docs-lint.js` |
 | `epic-3162:test` | `npx playwright test tests/resolve-inventory.spec.js tests/inventory-portability.spec.js tests/fleet-setup-handlers.spec.js tests/fleet-inventory-contract.spec.js` |
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
+| `flaw-capture:replay-eval` | `node scripts/global/flaw-capture-replay-eval.js` |
 | `fleet:backend-select:test` | `node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js` |
 | `fleet:escalation-policy:test` | `node --test tests/fleet-escalation-policy.spec.js tests/stress-escalation-premium-guard.spec.js` |
 | `format` | `prettier --write .prettierrc.json package.json CONTRIBUTING.md .github/workflows/lint.yml lint-configs/README.md lint-configs/ci-lint.yml lint-configs/eslint.config.devenv.js scripts/lint-readability.js scripts/global/install-readability-toolchain.js` |
