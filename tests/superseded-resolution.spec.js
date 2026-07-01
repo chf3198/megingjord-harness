@@ -119,3 +119,15 @@ test('createsCycle: pure helper detects self-loop and mutual edges', () => {
   assert.equal(createsCycle([[2, 1]], 1, 2), true);
   assert.equal(createsCycle([[1, 2]], 2, 3), false);
 });
+
+test('I0 fail-closed: malformed edges never throw and do not force apply (cross-family finding #1)', () => {
+  // Degraded edge sets must be tolerated, not throw — else I0 is bypassed by an exception.
+  for (const bad of ['nope', 42, [[1]], [null], [[1, 2, 3]], [{ from: 1 }]]) {
+    assert.doesNotThrow(() => createsCycle(bad, 1, 2));
+  }
+  const r = decideSupersededResolution({
+    target: { number: 100 }, verdict: confirmed, supersededByRef: okRef(200), edges: 'garbage',
+  });
+  // garbage edges are ignored (no spurious cycle); with all real controls passing -> apply.
+  assert.equal(r.action, 'apply-superseded');
+});

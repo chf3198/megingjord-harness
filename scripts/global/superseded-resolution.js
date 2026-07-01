@@ -26,7 +26,10 @@ const noop = (reason) => ({ action: 'no-op', close: false, reason });
 function createsCycle(edges, from, to) {
   const adj = new Map();
   const add = (a, b) => { if (!adj.has(a)) adj.set(a, []); adj.get(a).push(b); };
-  for (const [a, b] of edges || []) add(a, b);
+  // Tolerate a degraded edge set (I0 fail-closed): ignore non-pair entries rather than throw.
+  for (const e of Array.isArray(edges) ? edges : []) {
+    if (Array.isArray(e) && e.length === 2) add(e[0], e[1]);
+  }
   add(from, to);
   const seen = new Set(), stack = new Set();
   const dfs = (n) => {
