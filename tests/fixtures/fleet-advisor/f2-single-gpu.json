@@ -1,0 +1,23 @@
+{
+  "label": "F2 — single discrete GPU, 32B CPU-offloaded on hot path, host-B down",
+  "expectTier": "F2",
+  "probe": {
+    "hosts": [
+      { "id": "host-a", "url": "http://a:11434", "reachable": true,
+        "engine": { "name": "ollama", "version": "0.30.4", "minorReleasesBehind": 0 },
+        "gpu": { "vramTotalMb": 12000, "vramFreeMb": 3000 },
+        "models": [
+          { "name": "qwen2.5-coder:7b", "quant": "Q4_K_M", "sizeBytes": 4700000000, "sizeVramBytes": 4700000000 },
+          { "name": "qwen2.5-coder:32b", "quant": "Q4_K_M", "sizeBytes": 20000000000, "sizeVramBytes": 8000000000 }
+        ],
+        "ps": [ { "name": "qwen2.5-coder:32b", "sizeBytes": 20000000000, "sizeVramBytes": 8000000000 } ],
+        "recentFaults": [] }
+    ],
+    "dispatch": { "keepAliveSet": true, "stakesGate": false, "hotPathModels": ["qwen2.5-coder:32b"], "hostList": ["host-a"] },
+    "policy": { "hosts": ["host-a", "host-b"], "loadBalanceImplied": true },
+    "toolUse": { "configured": true, "healthy": true },
+    "telemetry": { "lastEmitMs": 1000 },
+    "cloud": { "freeProvidersWired": true }
+  },
+  "expectFindings": ["L-OFFLOAD-01", "L-HOST-01", "L-STAKES-01", "L-QUANT-01", "L-HOST-02"]
+}

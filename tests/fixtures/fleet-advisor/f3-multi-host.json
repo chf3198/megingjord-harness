@@ -1,0 +1,25 @@
+{
+  "label": "F3 — two-host mesh, vLLM installed but unused for agentic load",
+  "expectTier": "F3",
+  "probe": {
+    "hosts": [
+      { "id": "host-a", "url": "http://a:11434", "reachable": true,
+        "engine": { "name": "ollama", "version": "0.30.4", "minorReleasesBehind": 0 },
+        "gpu": { "vramTotalMb": 12000, "vramFreeMb": 6000 },
+        "models": [ { "name": "qwen2.5-coder:32b", "quant": "Q4_K_M", "sizeBytes": 12000000000, "sizeVramBytes": 12000000000 } ],
+        "ps": [ { "name": "qwen2.5-coder:32b", "sizeBytes": 12000000000, "sizeVramBytes": 12000000000 } ],
+        "recentFaults": [] },
+      { "id": "host-b", "url": "http://b:11434", "reachable": true,
+        "engine": { "name": "vllm", "version": "0.8.5", "minorReleasesBehind": 0 },
+        "gpu": { "vramTotalMb": 12000, "vramFreeMb": 12000 },
+        "models": [ { "name": "qwen2.5-coder:7b", "quant": "Q4_K_M", "sizeBytes": 4700000000, "sizeVramBytes": 4700000000 } ],
+        "ps": [], "recentFaults": [] }
+    ],
+    "dispatch": { "keepAliveSet": true, "stakesGate": true, "usesBatchingEngine": false, "hostList": ["host-a", "host-b"] },
+    "policy": { "hosts": ["host-a", "host-b"] },
+    "toolUse": { "configured": true, "healthy": true },
+    "telemetry": { "lastEmitMs": 1000 },
+    "cloud": { "freeProvidersWired": true }
+  },
+  "expectFindings": ["L-ENGINE-02"]
+}
