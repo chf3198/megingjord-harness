@@ -1,0 +1,19 @@
+{
+  "description": "Labeled tool-call outputs for the fleet tool-use reliability eval (Epic #3414 #3487).",
+  "reliability_bar": 0.9,
+  "schema": { "required": ["tool", "args"], "properties": { "tool": "string" } },
+  "samples": [
+    { "id": "clean", "output": "{\"tool\":\"read_file\",\"args\":{\"path\":\"a.js\"}}", "shouldParse": true },
+    { "id": "fenced", "output": "```json\n{\"tool\":\"grep\",\"args\":{\"q\":\"x\"}}\n```", "shouldParse": true },
+    { "id": "prose-wrapped", "output": "Sure! Here is the call: {\"tool\":\"ls\",\"args\":{}} done.", "shouldParse": true },
+    { "id": "trailing-note", "output": "{\"tool\":\"edit\",\"args\":{\"f\":\"b\"}}\nLet me know if you need more.", "shouldParse": true },
+    { "id": "multi-field", "output": "{\"tool\":\"run\",\"args\":{\"cmd\":\"npm test\"},\"why\":\"verify\"}", "shouldParse": true },
+    { "id": "nested", "output": "{\"tool\":\"call\",\"args\":{\"nested\":{\"a\":1}}}", "shouldParse": true },
+    { "id": "unicode", "output": "{\"tool\":\"say\",\"args\":{\"msg\":\"héllo\"}}", "shouldParse": true },
+    { "id": "spaced", "output": "  {\n  \"tool\": \"x\",\n  \"args\": {}\n}  ", "shouldParse": true },
+    { "id": "wrong-type", "output": "{\"tool\":123,\"args\":{}}", "shouldParse": false },
+    { "id": "missing-field", "output": "{\"tool\":\"x\"}", "shouldParse": false },
+    { "id": "not-json", "output": "I cannot do that.", "shouldParse": false },
+    { "id": "truncated", "output": "{\"tool\":\"x\",\"args\":{", "shouldParse": false }
+  ]
+}
