@@ -1,0 +1,100 @@
+{
+  "input": {
+    "tier": "F2",
+    "findings": [
+      {
+        "id": "L-WARM-01",
+        "severity": "high",
+        "class": "IT-actionable",
+        "title": "no keep_alive",
+        "recommendation": "set keep_alive",
+        "source": "lint"
+      },
+      {
+        "id": "L-STAKES-01",
+        "severity": "high",
+        "class": "IT-actionable",
+        "title": "no stakes gate",
+        "recommendation": "add gate",
+        "source": "lint"
+      },
+      {
+        "id": "L-ENGINE-02",
+        "severity": "low",
+        "class": "IT-actionable",
+        "title": "vLLM unused",
+        "recommendation": "review",
+        "source": "lint"
+      },
+      {
+        "id": "AI-spec",
+        "severity": "med",
+        "class": "IT-actionable",
+        "title": "speculative decoding",
+        "recommendation": "pair draft",
+        "source": "ai-research",
+        "aiOnly": true
+      },
+      {
+        "id": "L-OFFLOAD-01",
+        "severity": "high",
+        "class": "client",
+        "title": "add VRAM",
+        "recommendation": "24GB GPU",
+        "source": "lint"
+      }
+    ]
+  },
+  "report": {
+    "version": "1.0",
+    "tier": "F2",
+    "classA": [
+      {
+        "id": "L-WARM-01",
+        "severity": "high",
+        "class": "IT-actionable",
+        "title": "no keep_alive",
+        "recommendation": "set keep_alive",
+        "source": "lint"
+      },
+      {
+        "id": "L-STAKES-01",
+        "severity": "high",
+        "class": "IT-actionable",
+        "title": "no stakes gate",
+        "recommendation": "add gate",
+        "source": "lint"
+      }
+    ],
+    "classB": [
+      {
+        "id": "L-ENGINE-02",
+        "severity": "low",
+        "class": "IT-actionable",
+        "title": "vLLM unused",
+        "recommendation": "review",
+        "source": "lint"
+      },
+      {
+        "id": "AI-spec",
+        "severity": "med",
+        "class": "IT-actionable",
+        "title": "speculative decoding",
+        "recommendation": "pair draft",
+        "source": "ai-research",
+        "aiOnly": true
+      }
+    ],
+    "classC": [
+      {
+        "id": "L-OFFLOAD-01",
+        "severity": "high",
+        "class": "client",
+        "title": "add VRAM",
+        "recommendation": "24GB GPU",
+        "source": "lint"
+      }
+    ],
+    "generatedAtMs": 0
+  }
+}

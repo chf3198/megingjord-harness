@@ -105,11 +105,37 @@ function classDisposition(report) {
   };
 }
 
+/**
+ * Reduce a fleet fingerprint to the HARDWARE-ONLY fields safe to send to the AI-research panel (AC3).
+ * Strips host ids/urls/IPs and any non-hardware metadata — the AI pass only needs the capability shape
+ * (engine, VRAM bucket, tier), never addressing or secrets (G4 hardware-only redaction).
+ */
+function hardwareOnlyView(fingerprint = {}, tier = 'F0') {
+  const hosts = Array.isArray(fingerprint.hosts) ? fingerprint.hosts : [];
+  return {
+    tier,
+    hardware: hosts.map((host) => ({ engine: host.engine, vramBucket: host.vramBucket })),
+  };
+}
+
+
+/** CLI: build an advisory report from an injected/empty probe via the Layer-1 lint (deterministic). */
+function main() {
+  const { runLint } = require('./fleet-advisor-lint');
+  const probe = process.env.FLEET_ADVISOR_PROBE ? JSON.parse(process.env.FLEET_ADVISOR_PROBE) : { hosts: [] };
+  const lint = runLint(probe, {});
+  const report = buildAdvisoryReport(lint, {});
+  process.stdout.write(`${renderReportMarkdown(report)}\n\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\`\n`);
+}
+
+if (require.main === module) main();
+
 module.exports = {
   buildAdvisoryReport,
   classifyAction,
   renderReportMarkdown,
   executeClassA,
   classDisposition,
+  hardwareOnlyView,
   REPORT_VERSION,
 };

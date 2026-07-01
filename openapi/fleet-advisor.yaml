@@ -1,0 +1,38 @@
+# Fleet Advisor advisory-report payload — versioned OpenAPI schema (Epic #3414 #3482 AC2, G9).
+# Cross-runtime contract: Claude Code / Codex / Copilot / Antigravity all validate a report against
+# THIS schema identically (see tests/fleet-advisor-report-contract.spec.js). Single source of truth.
+openapi: 3.1.0
+info:
+  title: Fleet Advisor advisory report
+  version: "1.0"
+  description: The class-partitioned advisory report emitted by scripts/global/fleet-advisor-report.js.
+paths: {}
+components:
+  schemas:
+    Finding:
+      type: object
+      required: [id, severity, title]
+      properties:
+        id: { type: string }
+        severity: { type: string, enum: [high, med, low, informational] }
+        class: { type: string, enum: [IT-actionable, client, informational] }
+        title: { type: string }
+        recommendation: { type: string }
+        source: { type: string, enum: [lint, ai-research] }
+    AdvisoryReport:
+      type: object
+      required: [version, tier, classA, classB, classC]
+      additionalProperties: true
+      properties:
+        version: { type: string }
+        tier: { type: string, enum: [F0, F1, F2, F3, F4] }
+        classA:
+          type: array
+          items: { $ref: '#/components/schemas/Finding' }
+        classB:
+          type: array
+          items: { $ref: '#/components/schemas/Finding' }
+        classC:
+          type: array
+          items: { $ref: '#/components/schemas/Finding' }
+        generatedAtMs: { type: integer }

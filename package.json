@@ -381,7 +381,9 @@
     "fleet-tool-use:eval": "node --test tests/fleet-tool-use-harness.spec.js",
     "fleet-tool-use:stress": "node --test tests/stress-fleet-tool-use-harness.spec.js",
     "fleet-advisor:obs:test": "node --test tests/fleet-advisor-observability.spec.js tests/fleet-advisor-throughput-contract.spec.js",
-    "fleet-advisor:throughput-bench": "node --test tests/fleet-advisor-throughput-contract.spec.js"
+    "fleet-advisor:throughput-bench": "node --test tests/fleet-advisor-throughput-contract.spec.js",
+    "fleet-advisor:report": "node scripts/global/fleet-advisor-report.js",
+    "fleet-advisor:contract:test": "node --test tests/fleet-advisor-report.spec.js tests/fleet-advisor-report-contract.spec.js"
   },
   "keywords": [
     "devops",
