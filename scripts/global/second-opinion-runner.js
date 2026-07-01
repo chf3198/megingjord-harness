@@ -28,7 +28,7 @@ G8=N
 G9=N
 GA=N
 
-Goals: G1 Governance, G2 Quality, G3 Zero-Cost, G4 Privacy & Security, G5 Portability, G6 Resilience, G7 Throughput, G8 Observability, G9 Interoperability. GA Operator-Autonomy (Epic #3391, cross-cutting principle): did this work unnecessarily pull in the human? 10 = fully autonomous within the 4 retained carve-outs (design/UAT/irreversible/security-weakening); 1 = a routine reversible decision was needlessly escalated to the client.
+Goals: G1 Governance, G2 Quality, G3 Zero-Cost, G4 Privacy & Security, G5 Portability, G6 Resilience, G7 Throughput, G8 Observability, G9 Interoperability. GA Operator-Autonomy (cross-cutting principle): did this work unnecessarily pull in the human? 10 = fully autonomous within the 4 retained carve-outs (design/UAT/irreversible/security-weakening); 1 = a routine reversible decision was needlessly escalated to the client.
 
 CONSULTANT_NARRATIVE (scores stripped):
 {{CLOSEOUT}}
