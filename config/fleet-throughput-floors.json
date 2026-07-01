@@ -1,0 +1,9 @@
+{
+  "description": "Quantified tokens/sec floors per model@tier for the Fleet Advisor CI throughput benchmark (Epic #3414 #3485 AC2/G7). A measured value below its floor fails the build.",
+  "floors": {
+    "qwen2.5-coder:7b@F2": 20,
+    "qwen2.5-coder:7b@F4": 40,
+    "qwen2.5-coder:32b@F2": 2,
+    "qwen2.5-coder:32b@F4": 25
+  }
+}

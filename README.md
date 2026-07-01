@@ -196,9 +196,11 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `flaw-capture:replay-eval` | `node scripts/global/flaw-capture-replay-eval.js` |
 | `fleet-advisor:lint:test` | `node --test tests/fleet-advisor-lint.spec.js tests/fleet-advisor-rule-coverage.spec.js` |
+| `fleet-advisor:obs:test` | `node --test tests/fleet-advisor-observability.spec.js tests/fleet-advisor-throughput-contract.spec.js` |
 | `fleet-advisor:rules-doc` | `node scripts/global/fleet-advisor-rules-doc.js` |
 | `fleet-advisor:rules-doc:check` | `node scripts/global/fleet-advisor-rules-doc.js --check` |
 | `fleet-advisor:stress` | `node --test tests/stress-fleet-advisor-lint.spec.js` |
+| `fleet-advisor:throughput-bench` | `node --test tests/fleet-advisor-throughput-contract.spec.js` |
 | `fleet-tool-use:eval` | `node --test tests/fleet-tool-use-harness.spec.js` |
 | `fleet-tool-use:stress` | `node --test tests/stress-fleet-tool-use-harness.spec.js` |
 | `fleet:backend-select:test` | `node --test tests/fleet-backend-select.spec.js tests/stress-fleet-fallback.spec.js` |

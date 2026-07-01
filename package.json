@@ -379,7 +379,9 @@
     "fleet-advisor:stress": "node --test tests/stress-fleet-advisor-lint.spec.js",
     "parity:replay-eval": "node scripts/global/harness-parity-replay-eval.js",
     "fleet-tool-use:eval": "node --test tests/fleet-tool-use-harness.spec.js",
-    "fleet-tool-use:stress": "node --test tests/stress-fleet-tool-use-harness.spec.js"
+    "fleet-tool-use:stress": "node --test tests/stress-fleet-tool-use-harness.spec.js",
+    "fleet-advisor:obs:test": "node --test tests/fleet-advisor-observability.spec.js tests/fleet-advisor-throughput-contract.spec.js",
+    "fleet-advisor:throughput-bench": "node --test tests/fleet-advisor-throughput-contract.spec.js"
   },
   "keywords": [
     "devops",
