@@ -350,8 +350,65 @@ function main() {
   });
 }
 
+// ---- Check mode: byte-identity check without overwriting committed wasm ----
+// Rebuilds from source into memory, compares byte-for-byte against committed
+// kernel.wasm. Exits 0 on identical; exits 1 on mismatch.
+// No external toolchain required — builder is pure JS. Refs #3457, Epic #3411.
+// Avoids requiring conformance-runner to prevent circular dependency
+// (conformance-runner -> build-wasm -> conformance-runner).
+
+function checkWasmIdentity() {
+  const committedPath = join(__dirname, 'kernel.wasm');
+  const { existsSync, readFileSync } = require('node:fs');
+
+  if (!existsSync(committedPath)) {
+    console.log('SKIP: committed kernel.wasm not found at ' + committedPath);
+    console.log('Run `npm run fsm:wasm:build` to generate it first.');
+    return { skip: true };
+  }
+
+  const committedBytes = readFileSync(committedPath);
+  const rebuiltBytes = buildWasm();
+  const committedSize = committedBytes.length;
+  const rebuiltSize = rebuiltBytes.length;
+
+  if (committedSize !== rebuiltSize) {
+    return { pass: false, reason: 'size-mismatch', committedSize, rebuiltSize };
+  }
+  if (!committedBytes.equals(rebuiltBytes)) {
+    let diffAt = -1;
+    for (let idx = 0; idx < committedBytes.length; idx++) {
+      if (committedBytes[idx] !== rebuiltBytes[idx]) { diffAt = idx; break; }
+    }
+    return { pass: false, reason: 'byte-mismatch at offset ' + diffAt, committedSize, rebuiltSize };
+  }
+  return { pass: true, reason: 'byte-identical', committedSize, rebuiltSize };
+}
+
+function mainCheck() {
+  const result = checkWasmIdentity();
+  if (result.skip) { process.exit(0); }
+
+  if (result.pass) {
+    console.log('PASS: kernel.wasm is byte-identical to a fresh rebuild');
+    console.log('  committed=' + result.committedSize + ' bytes  rebuilt=' + result.rebuiltSize + ' bytes');
+    process.exit(0);
+  }
+
+  console.error('FAIL: kernel.wasm does not match a fresh rebuild');
+  console.error('  reason: ' + result.reason);
+  console.error('  committed=' + result.committedSize + ' bytes  rebuilt=' + result.rebuiltSize + ' bytes');
+  console.error('Run `npm run fsm:wasm:build` to regenerate, then commit the updated kernel.wasm.');
+  process.exit(1);
+}
+
 if (require.main === module) {
-  main();
+  const checkFlag = process.argv.includes('--check');
+  if (checkFlag) {
+    mainCheck();
+  } else {
+    main();
+  }
 }
 
 module.exports = { buildWasm };

@@ -44,6 +44,11 @@ Every OA risk maps to one or more G1-G10 goals:
 - G8 Observability: OA9
 - G9 Interoperability: OA6
 
+**Operator autonomy (cross-cutting principle — Epic #3391):** the autonomy principle is
+HARD-subordinate to G1 and G4, so it never relaxes an OWASP-Agentic control. Autonomy may not
+auto-weaken a security/permission policy (C-G4) to avoid a human prompt — deliberate
+security-policy weakening is one of the 4 retained human carve-outs, not operator territory.
+
 ## Sources
 
 - Research: `research/goal-enforcement-2026-05-19.md` §2 (Phase-0 R1, Refs #1963 AC3)
