@@ -353,7 +353,8 @@
     "ac-suggest": "node scripts/global/ac-suggest.js",
     "ac-suggest:replay-eval": "node scripts/global/ac-suggest-replay-eval.js",
     "ac-suggest:test": "node --test tests/ac-suggest.spec.js",
-    "worktree:teardown": "node scripts/global/worktree-teardown-actuate.js"
+    "worktree:teardown": "node scripts/global/worktree-teardown-actuate.js",
+    "flaw-capture:replay-eval": "node scripts/global/flaw-capture-replay-eval.js"
   },
   "keywords": [
     "devops",
