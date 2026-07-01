@@ -1,0 +1,236 @@
+{
+  "_comment": "Machine-readable dispatch contract for all governance validators. Every validator must have at least one dispatchedBy surface. Refs #3456 (Epic #3411 Carve-out 2).",
+  "_version": "1.0.0",
+  "_validator_dir": "scripts/global/megalint",
+  "_helper_files": [
+    "scripts/global/megalint/doc-coverage-helpers.js",
+    "scripts/global/megalint/work-log-sync-helpers.js",
+    "scripts/global/megalint/artifact-field-extract.js",
+    "scripts/global/megalint/epic-parent-resolve.js",
+    "scripts/global/megalint/doc-coverage-diff-replay-eval.js",
+    "scripts/global/megalint/doc-coverage-diff-verify.js",
+    "scripts/global/megalint/signer-registry-check.js"
+  ],
+  "validators": [
+    {
+      "validator": "admin-handoff",
+      "file": "scripts/global/megalint/admin-handoff.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:admin-gate", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "admin-merge-exception",
+      "file": "scripts/global/megalint/admin-merge-exception.js",
+      "dispatchedBy": ["megalint-runAll", "ci:merge-bypass-gates.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "author-team-check",
+      "file": "scripts/global/megalint/author-team-check.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "batch-cancel-evidence",
+      "file": "scripts/global/megalint/batch-cancel-evidence.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "batch-evidence",
+      "file": "scripts/global/megalint/batch-evidence.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "baton-transition",
+      "file": "scripts/global/megalint/baton-transition.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "body-ac-truthfulness",
+      "file": "scripts/global/megalint/body-ac-truthfulness.js",
+      "dispatchedBy": ["megalint-runAll", "ci:body-ac-truthfulness-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "chain-integrity",
+      "file": "scripts/global/megalint/chain-integrity.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "changelog-fragment-presence",
+      "file": "scripts/global/megalint/changelog-fragment-presence.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:changelog-fragment", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "client-prompt-surface-check",
+      "file": "scripts/global/megalint/client-prompt-surface-check.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "collaborator-handoff",
+      "file": "scripts/global/megalint/collaborator-handoff.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:collaborator-gate", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "consultant-closeout",
+      "file": "scripts/global/megalint/consultant-closeout.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:consultant-gate", "ci:closeout-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "consultant-rubric-consistency",
+      "file": "scripts/global/megalint/consultant-rubric-consistency.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "cross-checkout-destructive",
+      "file": "scripts/global/megalint/cross-checkout-destructive.js",
+      "dispatchedBy": ["megalint-runAll", "ci:closeout-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "cross-team-response-fidelity",
+      "file": "scripts/global/megalint/cross-team-response-fidelity.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:cross-team-response-fidelity", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "doc-coverage",
+      "file": "scripts/global/megalint/doc-coverage.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:collaborator-gate", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "edd-required",
+      "file": "scripts/global/megalint/edd-required.js",
+      "dispatchedBy": ["megalint-runAll", "ci:edd-required.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "epic-ac-disposition-check",
+      "file": "scripts/global/megalint/epic-ac-disposition-check.js",
+      "dispatchedBy": ["megalint-runAll", "ci:epic-ac-disposition-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "epic-ac-traceability",
+      "file": "scripts/global/megalint/epic-ac-traceability.js",
+      "dispatchedBy": ["megalint-runAll", "ci:epic-traceability-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "flaw-emission",
+      "file": "scripts/global/megalint/flaw-emission.js",
+      "dispatchedBy": ["megalint-runAll", "ci:closeout-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "flaws-recognized",
+      "file": "scripts/global/megalint/flaws-recognized.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "fleet-call-lint",
+      "file": "scripts/global/megalint/fleet-call-lint.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "fleet-review-required",
+      "file": "scripts/global/megalint/fleet-review-required.js",
+      "dispatchedBy": ["megalint-runAll", "ci:baton-gates.yml:consultant-gate-fleet-review", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "goal-failure-emission",
+      "file": "scripts/global/megalint/goal-failure-emission.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "lint-as-ac",
+      "file": "scripts/global/megalint/lint-as-ac.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "manager-handoff",
+      "file": "scripts/global/megalint/manager-handoff.js",
+      "dispatchedBy": ["megalint-runAll", "ci:closeout-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "merge-evidence",
+      "file": "scripts/global/megalint/merge-evidence.js",
+      "dispatchedBy": ["megalint-runAll", "ci:merge-evidence-check.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "merge-evidence-pr-gate",
+      "file": "scripts/global/megalint/merge-evidence-pr-gate.js",
+      "dispatchedBy": ["megalint-runAll", "ci:closeout-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "parity-validator",
+      "file": "scripts/global/megalint/parity-validator.js",
+      "dispatchedBy": ["megalint-runAll", "ci:parity-validator-nightly.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "phase0-promotion-gate",
+      "file": "scripts/global/megalint/phase0-promotion-gate.js",
+      "dispatchedBy": ["megalint-runAll", "ci:phase0-promotion-gate.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "prompt-artifact-lint",
+      "file": "scripts/global/megalint/prompt-artifact-lint.js",
+      "dispatchedBy": ["megalint-runAll", "ci:prompt-artifact-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "prose-link-check",
+      "file": "scripts/global/megalint/prose-link-check.js",
+      "dispatchedBy": ["megalint-runAll", "ci:prose-link-check.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "red-team-evidence-quality",
+      "file": "scripts/global/megalint/red-team-evidence-quality.js",
+      "dispatchedBy": ["megalint-runAll", "ci:red-team-evidence-quality-advisory.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "registry-tuple-coverage",
+      "file": "scripts/global/megalint/registry-tuple-coverage.js",
+      "dispatchedBy": ["megalint-runAll", "ci:validate-config-schemas.yml:registry-tuple-coverage", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "research-first-phase-gate",
+      "file": "scripts/global/megalint/research-first-phase-gate.js",
+      "dispatchedBy": ["megalint-runAll", "ci:research-first-phase-gate-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "signer-fidelity",
+      "file": "scripts/global/megalint/signer-fidelity.js",
+      "dispatchedBy": ["megalint-runAll", "ci:signer-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "signer-format-canonical",
+      "file": "scripts/global/megalint/signer-format-canonical.js",
+      "dispatchedBy": ["megalint-runAll", "ci:signer-lint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "soak-language-guard",
+      "file": "scripts/global/megalint/soak-language-guard.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "sub-issue-preference",
+      "file": "scripts/global/megalint/sub-issue-preference.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "test-discoverability",
+      "file": "scripts/global/megalint/test-discoverability.js",
+      "dispatchedBy": ["megalint-runAll", "ci:test-evidence.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "tier-tag-lint",
+      "file": "scripts/global/megalint/tier-tag-lint.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "workflow-sha-pin",
+      "file": "scripts/global/megalint/workflow-sha-pin.js",
+      "dispatchedBy": ["megalint-runAll", "ci:actionlint.yml", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "work-log-sync",
+      "file": "scripts/global/megalint/work-log-sync.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:megalint"]
+    },
+    {
+      "validator": "worktree-naming-advisory",
+      "file": "scripts/global/megalint/worktree-naming-advisory.js",
+      "dispatchedBy": ["megalint-runAll", "lefthook:pre-push:worktree-naming-advisory", "lefthook:pre-push:megalint"]
+    }
+  ]
+}

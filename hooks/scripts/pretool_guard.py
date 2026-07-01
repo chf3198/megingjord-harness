@@ -63,7 +63,7 @@ _SHELL_DEV_SINKS = {"/dev/null", "/dev/stdout", "/dev/stderr", "/dev/tty"}
 # matched and over-blocked. fd-dup forms (`2>&1`, `>&2`) are excluded because the
 # capture class rejects a leading `&`. (Residual: `&>file` all-output redirect is not
 # matched — uncommon; tee/redirect/dd cover the usual writers.)
-_REDIRECT_RE = re.compile(r"(?:^|\s)\d*>>?\s*([^\s;&|<>()`]+)")
+_REDIRECT_RE = re.compile(r"(?:^|\s)\d*>>?(?!=)\s*([^\s;&|<>()`]+)")
 _TEE_RE = re.compile(r"\btee\b\s+(?:-{1,2}\S+\s+)*([^\s;&|<>()`]+)")
 # sed in-place: take the last bare token of the sed command segment as the target.
 # (Multi-file `sed -i s f1 f2` checks the last file only — a documented residual.)
@@ -72,6 +72,68 @@ _SED_I_RE = re.compile(r"\bsed\b\s+[^|;&\n]*?-i\S*\s+[^|;&\n]*?\s([^\s;&|<>()`]+
 _CP_MV_RE = re.compile(r"\b(?:cp|mv|install)\b\s+[^|;&\n]*?\s([^\s;&|<>()`]+)(?=\s|$|;|\||&)")
 # dd of=PATH (#2995 cross-family review): a common non-redirect file writer.
 _DD_RE = re.compile(r"\bdd\b[^|;&\n]*?\bof=([^\s;&|<>()`]+)")
+
+# #3471: quote/here-doc-aware sanitization so a `>` / `>=` that is PROSE (inside a quoted
+# string, a here-doc body, or a description field) is not parsed as a shell redirect and
+# false-blocked as a write. Real redirects to UNQUOTED targets survive and are still caught.
+_QUOTE_SENTINEL = "\x00"
+_HEREDOC_RE = re.compile(r"<<-?\s*(['\"]?)(\w+)\1")
+
+
+def _strip_heredoc_bodies(cmd: str) -> str:
+    """Drop here-doc body lines (data, not shell) so a `>`/`>=` in the body is not a redirect.
+    Keeps the `<<DELIM` opening line (its own redirect, if any, stays detectable). Handles
+    <<EOF, <<'EOF', <<-EOF; the terminator is a line whose stripped text equals the delimiter.
+    """
+    lines = cmd.split("\n")
+    kept: list[str] = []
+    index = 0
+    while index < len(lines):
+        kept.append(lines[index])
+        match = _HEREDOC_RE.search(lines[index])
+        if match:
+            delimiter = match.group(2)
+            index += 1
+            while index < len(lines) and lines[index].strip() != delimiter:
+                index += 1  # skip body line
+            # skip the terminator line too (the trailing increment moves past it)
+        index += 1
+    return "\n".join(kept)
+
+
+def _mask_quoted(cmd: str) -> str:
+    """Replace the CONTENT of single/double/backtick-quoted spans with a NUL sentinel so a
+    `>` inside a quoted string vanishes while quote structure (and a quoted redirect-target
+    POSITION) is preserved. Respects backslash-escapes outside single quotes.
+    """
+    out: list[str] = []
+    index, length = 0, len(cmd)
+    while index < length:
+        char = cmd[index]
+        if char in "'\"`":
+            quote = char
+            index += 1
+            while index < length and cmd[index] != quote:
+                if cmd[index] == "\\" and quote != "'":
+                    index += 1
+                index += 1
+            out.append(_QUOTE_SENTINEL)
+            index += 1  # consume the closing quote (or past end if unterminated)
+        else:
+            out.append(char)
+            index += 1
+    return "".join(out)
+
+
+def _sanitize_for_redirect_scan(cmd: str) -> str:
+    """Here-doc bodies stripped + quoted spans masked before the redirect regex scan (#3471).
+    Fail-open: any error returns the original command (never brick the hook).
+    """
+    try:
+        return _mask_quoted(_strip_heredoc_bodies(cmd))
+    except Exception:
+        return cmd
+
 
 def shell_write_targets(joined: str) -> list[str]:
     """Best-effort extraction of file-write targets from a shell command.
@@ -93,11 +155,14 @@ def shell_write_targets(joined: str) -> list[str]:
     """
     targets: list[str] = []
     try:
+        cleaned = _sanitize_for_redirect_scan(joined)
         for regex in (_REDIRECT_RE, _TEE_RE, _SED_I_RE, _CP_MV_RE, _DD_RE):
-            for match in regex.finditer(joined):
+            for match in regex.finditer(cleaned):
                 token = match.group(1).strip().strip("\"'")
                 if not token or token.startswith("-") or token.startswith("&"):
                     continue
+                if _QUOTE_SENTINEL in token:
+                    continue  # #3471: quoted redirect target — documented residual (not path-evaluated)
                 if token in _SHELL_DEV_SINKS:
                     continue
                 targets.append(token)
@@ -522,6 +587,18 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny","Tag blocked: visual QA not recorded for UI change.")
     return None
 
+def _command_string(tool_input) -> str:
+    """The executable command text only — never the tool `description`/metadata (#3471 AC3).
+    Falls back to all string values when no explicit command field is present (fail-open).
+    """
+    if isinstance(tool_input, dict):
+        for key in ("command", "cmd", "script", "commandLine", "shellCommand", "input"):
+            value = tool_input.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+    return "\n".join(iter_strings(tool_input))
+
+
 def main() -> int:
     try: payload = json.load(sys.stdin)
     except Exception: return 0
@@ -627,7 +704,7 @@ def main() -> int:
                 print(f"[review-bypass-advisory] {_rev['message']}", file=sys.stderr)
         except Exception:
             pass  # detector failure must not break pre-tool flow
-        result = check_terminal("\n".join(values), state, cwd)
+        result = check_terminal(_command_string(payload.get("tool_input", {})), state, cwd)
         if result is not None: return result
     suspicious = [v for v in values if "/" in v or "." in v]
     if any(SECRET_FILE_RE.search(p) and not p.endswith(".env.example") for p in suspicious):
