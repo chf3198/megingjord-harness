@@ -21,8 +21,10 @@
     "artifactClasses": [
       "settings",
       "hooks",
-      "agents"
-    ]
+      "agents",
+      "scripts"
+    ],
+    "gateCorpusHome": "~/.cursor/scripts/global"
   },
   "hooks": {
     "configPath": ".cursor/hooks.json",
