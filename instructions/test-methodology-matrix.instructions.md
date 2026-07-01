@@ -93,6 +93,8 @@ not flagged for missing the JS `stress-test` strategy.)
 
 When matrix recommends a strategy other than `none` and Manager declares `none`, justify per goal-lens priority order (G1 Governance > G2 Quality > G3 Zero Cost > …). Justification goes in `MANAGER_HANDOFF` as a one-line note. `test-evidence` gate emits an advisory comment but does not block — Consultant authority on whether the override is acceptable.
 
+The cross-cutting **operator autonomy** principle (Epic #3391, always-on, not a ranked goal) applies here too: pick the test strategy and resolve the override autonomously via the goal-lens / free cross-model panel — this is a reversible dev decision, never a client prompt (the client is design + UAT only).
+
 ## Soft default
 
 Legacy / pre-rollout tickets without `test_strategy` are treated as `none`. Gate emits a Manager-warning advisory comment but does not fail the lane:trivial / docs path. For lanes requiring evidence, gate fails with link to this matrix.
