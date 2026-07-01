@@ -17,7 +17,9 @@
         "aiAgentValue": { "type": "string" },
         "signal": { "type": "string" },
         "deltaKind": { "enum": ["env-marker", "ai-agent-value", "state-root", "config-path", "adapter-surface", "alias", "pure", "server-side", "none"] }
-      }
+      },
+      "if": { "properties": { "deltaKind": { "const": "ai-agent-value" } }, "required": ["deltaKind"] },
+      "then": { "required": ["aiAgentValue"] }
     },
     "signing": {
       "type": "object",
