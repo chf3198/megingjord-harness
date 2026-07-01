@@ -31,7 +31,7 @@
             "minItems": 1,
             "items": {
               "type": "string",
-              "enum": ["copilot", "cline", "claude-code", "continue", "antigravity"]
+              "enum": ["antigravity", "cline", "claude-code", "codex", "continue", "copilot", "cursor"]
             }
           },
           "tags": {

@@ -1,0 +1,48 @@
+{
+  "_note": "Golden fixture for #3442 enum/registry 5-runtime parity. Each key names a registry surface; value is the expected full membership set (sorted). Structural-N/A exceptions are documented inline.",
+  "github-actor-team-map": {
+    "description": "inventory/github-actor-team-map.json actors values — the team slugs that appear as values",
+    "expectedTeamSlugs": ["antigravity", "claude-code", "codex", "copilot", "cursor"],
+    "structuralNANote": "Actor login keys are env-specific (e.g. cursoragent, codex-agent); only the team-slug values are validated for parity"
+  },
+  "routing-runtimeKinds": {
+    "description": "scripts/global/routing-provider-adapters.json runtimeKinds array",
+    "expectedMembers": ["antigravity", "claude-code", "codex", "copilot", "cursor"]
+  },
+  "leader-election-VALID_TEAMS": {
+    "description": "scripts/xteam-mcp/leader-election.js VALID_TEAMS array",
+    "expectedMembers": ["antigravity", "claude-code", "codex", "copilot", "cursor"]
+  },
+  "governance-manifest-schema-targets-enum": {
+    "description": "inventory/governance-manifest.schema.json targets items enum — the harness runtimes plus legacy cline/continue entries",
+    "expectedIncludes": ["antigravity", "claude-code", "codex", "copilot", "cursor"],
+    "structuralNANote": "cline and continue remain in the enum for backward compat with existing sample units; parity check only verifies the 5 canonical runtimes are present"
+  },
+  "governance-rules-cursor-applicability": {
+    "description": "config/governance-rules.yaml — rules with explicit runtime lists must include cursor",
+    "rulesRequiringCursor": [
+      "refs-not-closes-in-pr",
+      "lane-enum-values",
+      "signer-independence-admin-vs-collaborator",
+      "branch-name-prefix-enum",
+      "test-strategy-enum-values",
+      "four-baton-artifacts-before-pr",
+      "lane-trivial-diff-size",
+      "cross-runtime-writes-gate"
+    ],
+    "structuralNANote": "Rules using cross_runtime_applicability: [all] (single-status-invariant, client-identity-never-signer, ticket-first, dormant-deferred-epic-only) already cover all runtimes via the all sentinel"
+  },
+  "self-test-adapter-exemptions": {
+    "description": "inventory/harness-self-test-registry.json adapter_exemptions keys",
+    "expectedMembers": ["antigravity", "claude-code", "codex", "copilot", "cursor"]
+  },
+  "runtime-side-effect-guard-ALLOWLIST": {
+    "description": "scripts/global/runtime-side-effect-guard.js ALLOWLIST keys — runtimes with a commandId surface",
+    "expectedMembers": ["antigravity", "claude-code", "codex", "cursor", "vscode-extension"],
+    "structuralNANote": "copilot operates via github-actions runner and has no local commandId surface; vscode-extension is a legacy non-runtime key retained for backward compat"
+  },
+  "orchestrator-compatibility-KNOWN": {
+    "description": "tests/orchestrator-compatibility.spec.js KNOWN array",
+    "expectedMembers": ["antigravity", "claude-code", "codex", "copilot", "cursor"]
+  }
+}
