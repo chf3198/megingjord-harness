@@ -1,0 +1,559 @@
+[
+  {
+    "id": "F6-ticket3424-worktree-residual",
+    "friction_class": "F6",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "confidence": "high",
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F6-ticket3424-squash-equivalence",
+    "friction_class": "F6",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "confidence": "high",
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F1-seed-0",
+    "friction_class": "F1",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F1-seed-1",
+    "friction_class": "F1",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F1-seed-2",
+    "friction_class": "F1",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F1-seed-3",
+    "friction_class": "F1",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F1-seed-4",
+    "friction_class": "F1",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F1-seed-5",
+    "friction_class": "F1",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F1-seed-6",
+    "friction_class": "F1",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F1-seed-7",
+    "friction_class": "F1",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F1-seed-8",
+    "friction_class": "F1",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F2-seed-0",
+    "friction_class": "F2",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F2-seed-1",
+    "friction_class": "F2",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F2-seed-2",
+    "friction_class": "F2",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F2-seed-3",
+    "friction_class": "F2",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F2-seed-4",
+    "friction_class": "F2",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F2-seed-5",
+    "friction_class": "F2",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F3-seed-0",
+    "friction_class": "F3",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F3-seed-1",
+    "friction_class": "F3",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F3-seed-2",
+    "friction_class": "F3",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F3-seed-3",
+    "friction_class": "F3",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F3-seed-4",
+    "friction_class": "F3",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F3-seed-5",
+    "friction_class": "F3",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F3-seed-6",
+    "friction_class": "F3",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F3-seed-7",
+    "friction_class": "F3",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F3-seed-8",
+    "friction_class": "F3",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F4-seed-0",
+    "friction_class": "F4",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F4-seed-1",
+    "friction_class": "F4",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F4-seed-2",
+    "friction_class": "F4",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F4-seed-3",
+    "friction_class": "F4",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F4-seed-4",
+    "friction_class": "F4",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F4-seed-5",
+    "friction_class": "F4",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F4-seed-6",
+    "friction_class": "F4",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F4-seed-7",
+    "friction_class": "F4",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F5-seed-0",
+    "friction_class": "F5",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F5-seed-1",
+    "friction_class": "F5",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F5-seed-2",
+    "friction_class": "F5",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F5-seed-3",
+    "friction_class": "F5",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F5-seed-4",
+    "friction_class": "F5",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F5-seed-5",
+    "friction_class": "F5",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F6-seed-0",
+    "friction_class": "F6",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl",
+    "confidence": "high"
+  },
+  {
+    "id": "F6-seed-1",
+    "friction_class": "F6",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl",
+    "confidence": "medium"
+  },
+  {
+    "id": "F6-seed-2",
+    "friction_class": "F6",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker",
+    "confidence": "high"
+  },
+  {
+    "id": "F6-seed-3",
+    "friction_class": "F6",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail",
+    "confidence": "medium"
+  },
+  {
+    "id": "F6-seed-4",
+    "friction_class": "F6",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl",
+    "confidence": "high"
+  },
+  {
+    "id": "F6-seed-5",
+    "friction_class": "F6",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl",
+    "confidence": "medium"
+  },
+  {
+    "id": "F7-seed-0",
+    "friction_class": "F7",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F7-seed-1",
+    "friction_class": "F7",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F7-seed-2",
+    "friction_class": "F7",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F7-seed-3",
+    "friction_class": "F7",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F7-seed-4",
+    "friction_class": "F7",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F7-seed-5",
+    "friction_class": "F7",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F7-seed-6",
+    "friction_class": "F7",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F7-seed-7",
+    "friction_class": "F7",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F8-seed-0",
+    "friction_class": "F8",
+    "role": "manager",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F8-seed-1",
+    "friction_class": "F8",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F8-seed-2",
+    "friction_class": "F8",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "session-bypass-tracker"
+  },
+  {
+    "id": "F8-seed-3",
+    "friction_class": "F8",
+    "role": "consultant",
+    "surfaced": true,
+    "is_real_flaw": false,
+    "label_source": "consultant",
+    "source": "closed-ticket-trail"
+  },
+  {
+    "id": "F8-seed-4",
+    "friction_class": "F8",
+    "role": "manager",
+    "surfaced": false,
+    "is_real_flaw": false,
+    "label_source": "auto",
+    "source": "incidents.jsonl"
+  },
+  {
+    "id": "F8-seed-5",
+    "friction_class": "F8",
+    "role": "collaborator",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "auto",
+    "source": "baton-builds.jsonl"
+  },
+  {
+    "id": "F8-seed-6",
+    "friction_class": "F8",
+    "role": "admin",
+    "surfaced": true,
+    "is_real_flaw": true,
+    "label_source": "consultant",
+    "source": "session-bypass-tracker"
+  }
+]

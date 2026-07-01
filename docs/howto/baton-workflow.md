@@ -302,4 +302,8 @@ false positive); only high-confidence (pure-local) probes are blocking-eligible,
 advisory. The none-vs-candidate reconciler (`none-vs-candidate-reconciler.js`) closes checkbox-fatigue: a
 `flaws_recognized: none` is valid only against a zero (or un-escalated-low-severity) candidate feed — a
 `none` contradicted by a medium/high candidate is a violation (3+ same-`pattern_id` low-sev escalate to
-medium; medium-confidence F6 never blocks). All advisory until the P1-g replay-eval promotion gate.
+medium; medium-confidence F6 never blocks). The whole system is **advisory** until the replay-eval
+promotion gate (`flaw-capture-replay-eval.js`, `npm run flaw-capture:replay-eval`) flips it — per friction
+class, requiring aggregate precision ≥0.85 and no class below 0.70 over a floor-satisfying labelled corpus
+(≥200 total / ≥15 per class / ≥30 per role), auto-revoking on regression. Never calendar-gated; the seed
+corpus ships below the floor, so nothing blocks yet.
