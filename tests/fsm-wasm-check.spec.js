@@ -110,4 +110,14 @@ describe('fsm-wasm --check mode (golden byte-identity gate)', function () {
       'Run `npm run fsm:wasm:build` and commit the result.');
   });
 
+  it('committed kernel.wasm matches the golden sha256 fixture', function () {
+    const crypto = require('crypto');
+    const goldenLine = readFileSync(join(__dirname, 'fixtures', 'fsm-wasm-kernel.golden.sha256'), 'utf8').trim();
+    const goldenHash = goldenLine.split(/\s+/)[0];
+    const committedBytes = readFileSync(COMMITTED_WASM_PATH);
+    const actualHash = crypto.createHash('sha256').update(committedBytes).digest('hex');
+    assert.equal(actualHash, goldenHash,
+      'kernel.wasm sha256 drifted from tests/fixtures/fsm-wasm-kernel.golden.sha256');
+  });
+
 });
