@@ -30,6 +30,7 @@
     "inventory:history-scrub:verify": "node scripts/global/inventory-history-scrub.js --verify",
     "epic-3162:test": "npx playwright test tests/resolve-inventory.spec.js tests/inventory-portability.spec.js tests/fleet-setup-handlers.spec.js tests/fleet-inventory-contract.spec.js",
     "catalog:reconcile": "node scripts/global/harness-catalog-reconciler.js",
+    "parity:matrix": "node scripts/global/harness-parity-matrix.js",
     "catch-empty": "bash scripts/global/catch-empty-lint.sh .github/workflows",
     "cleanup:branches": "node scripts/global/branch-cleanup-plan.js",
     "cost-report": "node scripts/global/cost-report.js",
