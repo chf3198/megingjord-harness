@@ -295,4 +295,8 @@ checkpoint (`review-point-checkpoint.js`) fires at each baton-artifact build, su
 candidates accumulated since the previous review-point so the role can dispose of them. Friction
 sensors (`friction-sensors.js`) emit F2 (retry loops) and F5 (revert/amend/discard) candidates; the
 SessionEnd audit from #1855 is now the **backstop** (`anneal-decision-backstop.js`) that catches
-review-points which crashed or bypassed the builder. All advisory.
+review-points which crashed or bypassed the builder. F6 asserted-vs-observed probes
+(`asserted-vs-observed-probes.js`) falsify artifact claims with cheap read-only probes — including a
+squash-aware worktree probe (content-equivalence via `git cherry`, so a squash-merged branch is never a
+false positive); only high-confidence (pure-local) probes are blocking-eligible, network probes stay
+advisory. All advisory.
