@@ -20,10 +20,32 @@ function walkJS(dir) {
   return files;
 }
 
+function stripInlineComment(line) {
+  // Remove an inline trailing `//` comment that sits OUTSIDE any string literal,
+  // so a `#NNNN` ticket ref in a comment is not scanned as a magic number, while
+  // `https://host` inside a string and backslash-escaped quotes are preserved (#3470).
+  let quote = null;
+  for (let i = 0; i < line.length; i += 1) {
+    const ch = line[i];
+    if (quote) {
+      if (ch === '\\') { i += 1; continue; }
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+    } else if (ch === '/' && line[i + 1] === '/') {
+      return line.slice(0, i);
+    }
+  }
+  return line;
+}
+
 function checkNaming(lines, rel) {
   const warnings = [];
   const singleLetterRe = /\b(?:const|let|var)\s+([a-df-hln-zA-Z])\b/;
-  const magicRe = /(?<![\w.])\b(\d{3,})\b(?![\w])/;
+  // A magic number is a STANDALONE numeric literal. Reject a digit run adjacent to a
+  // word char, dot, hyphen, or underscore on either side so a hyphenated/underscored
+  // ticket-or-identifier token (F6-3424, ticket3424, 3424-worktree) is not flagged (#3470).
+  const magicRe = /(?<![\w.\-])(\d{3,})(?![\w\-])/;
   const allowedNumbers = new Set(['100', '1000', '1024']);
   lines.forEach((line, idx) => {
     const match = line.match(singleLetterRe);
@@ -33,8 +55,10 @@ function checkNaming(lines, rel) {
     }
     if (line.trim().startsWith('//') || line.trim().startsWith('*')) return;
     if (/const\s+[A-Z_]+/.test(line)) return;
-    // A6 fix (#991): strip GitHub issue refs (#NNN inside string literals) before scan.
-    const strippedLine = line.replace(/['"`][^'"`]*#\d{2,4}[^'"`]*['"`]/g, '""');
+    // Strip an inline trailing `//` comment (outside strings), then GitHub #NNN refs
+    // inside string literals, before the magic-number scan (#3470 extends #991 A6 fix).
+    const code = stripInlineComment(line);
+    const strippedLine = code.replace(/['"`][^'"`]*#\d{2,4}[^'"`]*['"`]/g, '""');
     const magic = strippedLine.match(magicRe);
     if (magic && !allowedNumbers.has(magic[1])) {
       warnings.push({ file: rel, line: idx + 1, rule: 'magic-number',
