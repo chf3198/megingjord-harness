@@ -1,0 +1,58 @@
+{
+  "runtime": "cursor",
+  "detection": {
+    "primaryEnvMarkers": [
+      "CURSOR_AGENT",
+      "CURSOR_TRACE_ID",
+      "CURSOR_WORKSPACE"
+    ],
+    "aiAgentValue": "cursor",
+    "signal": "CURSOR_*",
+    "deltaKind": "env-marker"
+  },
+  "signing": {
+    "team": "cursor",
+    "substrates": [
+      "cursor-ide"
+    ]
+  },
+  "deploy": {
+    "home": "~/.cursor",
+    "artifactClasses": [
+      "settings",
+      "hooks",
+      "agents"
+    ]
+  },
+  "hooks": {
+    "configPath": ".cursor/hooks.json",
+    "eventCase": "camelCase",
+    "events": [
+      "sessionStart",
+      "beforeSubmitPrompt",
+      "preToolUse",
+      "beforeShellExecution",
+      "beforeMCPExecution",
+      "afterFileEdit",
+      "stop",
+      "subagentStart"
+    ]
+  },
+  "capabilities": {
+    "ghAuth": "undocumented \u2014 varies by configuration",
+    "hookExecution": "varies \u2014 no documented hook contract",
+    "fallback": "graceful skip with advisory (G6)"
+  },
+  "parityWaivers": [
+    {
+      "surface": "scripts",
+      "reason": "scripts/global gate corpus not yet deployed to this camelCase runtime",
+      "promotionPath": "T2.3 (#3446) ships the scripts artifactClass via deploy.sh + the scaffold"
+    },
+    {
+      "surface": "skills-commands",
+      "reason": "skills/commands adapter dir not yet deployed (#3086)",
+      "promotionPath": "T2.4 (#3447) runs the scaffold to add the adapter dir"
+    }
+  ]
+}
