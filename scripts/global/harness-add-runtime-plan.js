@@ -7,6 +7,37 @@ const fs = require('node:fs');
 const path = require('node:path');
 const surfaces = require('./harness-add-runtime-surfaces');
 
+// DEPLOY_SH_ALIAS maps runtime-id → the actual target token used in deploy.sh.
+// Used ONLY for already-present detection on the deploy-sh surface.
+// New runtimes without an alias fall back to the runtime-id (correct default).
+//
+// Rationale (T2.2 #3445): claude-code's deploy.sh target is "claude" not
+// "claude-code". Copilot's target is "copilot" (the implicit default in the
+// case-statement regex on line 17 of deploy.sh).
+const DEPLOY_SH_ALIAS = {
+  'claude-code': 'claude',
+};
+
+// PKG_DEPLOY_ALIAS maps runtime-id → the package.json script key suffix used
+// for the deploy script. Used ONLY for already-present detection.
+// New runtimes without an alias fall back to the runtime-id.
+//
+// Rationale (T2.2 #3445): claude-code uses "deploy:claude" not
+// "deploy:claude-code". Copilot has no standalone "deploy:copilot" key —
+// it is deployed via "deploy:apply" (the shared copilot+codex default target).
+const PKG_DEPLOY_ALIAS = {
+  'claude-code': 'claude',
+  'copilot': 'apply',
+};
+
+function deployShToken(runtimeId) {
+  return DEPLOY_SH_ALIAS[runtimeId] || runtimeId;
+}
+
+function pkgDeployToken(runtimeId) {
+  return PKG_DEPLOY_ALIAS[runtimeId] || runtimeId;
+}
+
 function descriptorAction(runtimeId, repoRoot) {
   const filePath = path.join(repoRoot, 'inventory', 'runtimes', `${runtimeId}.json`);
   const alreadyPresent = fs.existsSync(filePath);
@@ -114,27 +145,31 @@ function orcParityAction(runtimeId, repoRoot, orcRuntimes) {
 
 function deployShAction(runtimeId, repoRoot, deployTargets) {
   const filePath = path.join(repoRoot, 'scripts', 'deploy.sh');
-  const alreadyPresent = (deployTargets || []).includes(runtimeId);
+  const token = deployShToken(runtimeId);
+  const alreadyPresent = (deployTargets || []).includes(token);
+  const note = token !== runtimeId ? ` (via alias "${token}")` : '';
   return {
     surface: surfaces.SURFACE_DEPLOY_SH,
     file: filePath,
     op: alreadyPresent ? 'already-present' : 'add-deploy-target',
     detail: alreadyPresent
-      ? `"${runtimeId}" already a deploy target in deploy.sh`
+      ? `"${token}" already a deploy target in deploy.sh${note}`
       : `Add --target ${runtimeId} branch to deploy.sh and TARGET_DIRS`,
   };
 }
 
 function packageDeployAction(runtimeId, repoRoot, pkgScripts) {
   const filePath = path.join(repoRoot, 'package.json');
-  const deployKey = `deploy:${runtimeId}`;
+  const token = pkgDeployToken(runtimeId);
+  const deployKey = `deploy:${token}`;
   const alreadyPresent = Boolean(pkgScripts && pkgScripts[deployKey]);
+  const note = token !== runtimeId ? ` (via alias "${token}")` : '';
   return {
     surface: surfaces.SURFACE_PKG_DEPLOY,
     file: filePath,
     op: alreadyPresent ? 'already-present' : 'add-npm-script',
     detail: alreadyPresent
-      ? `"${deployKey}" already in package.json scripts`
+      ? `"${deployKey}" already in package.json scripts${note}`
       : `Add "deploy:${runtimeId}" and "deploy:${runtimeId}:apply" npm scripts`,
   };
 }
