@@ -1,0 +1,27 @@
+{
+  "antigravity": {
+    "planContentHash": "bd3f9ca6b39f73986a89554db35e996a1b167960f5cab0afa540aa196391968a",
+    "pendingSurfaces": [],
+    "actionCount": 11
+  },
+  "claude-code": {
+    "planContentHash": "cbaca67f4637efd0afcff1175650a7bc7fdf03ff63d67043ca519ccfe452efa8",
+    "pendingSurfaces": [],
+    "actionCount": 11
+  },
+  "codex": {
+    "planContentHash": "b8382c7ab3700a237ec62be263d3955d0308007581329d6b5a3fc21e5efd9567",
+    "pendingSurfaces": [],
+    "actionCount": 11
+  },
+  "copilot": {
+    "planContentHash": "c0f0ab1a6cf81410c569f24f79cbcee9c4cc3a8e109f510292ee58aa4754facf",
+    "pendingSurfaces": [],
+    "actionCount": 11
+  },
+  "cursor": {
+    "planContentHash": "c0855fbc8db7d2f191c7fc169c0ae76df1ee2028e3accd8f39cb84940042d86c",
+    "pendingSurfaces": [],
+    "actionCount": 11
+  }
+}
