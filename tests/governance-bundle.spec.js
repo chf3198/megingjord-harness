@@ -8,6 +8,7 @@ const T0 = 1_700_000_000_000; // fixed epoch (no Date.now in assertions)
 const FIELDS = {
   checks_run: '15/16', checks_failed: 1, drift_score: '8 (events 8/expected 10)',
   fleet_utilization: '1/2', rubric_rating: '9/10', wiki_health: '163→163',
+  autonomy_score: '9/10', // Epic #3391 B3: operator-autonomy dimension in the allow-list
   extra_secret: 'sk-ant-LEAKZ', // must be dropped by the allow-list
 };
 

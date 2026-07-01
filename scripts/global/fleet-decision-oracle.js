@@ -69,7 +69,10 @@ async function decideOnce(question, opts = {}) {
   const model = pickModel({ ...opts, question });
   const host = (opts && opts.host) || DEFAULT_HOST;
   const httpImpl = (opts && opts.httpImpl) || http;
+  // Epic #3391 (Option B): the autonomy line below keeps routine reversible decisions off the client.
   const prompt = `You are an operator-internal decision oracle. Answer with one word (yes/no/partial) then a one-line rationale.
+
+Operator-autonomy dimension (always-on principle): this question is being routed to YOU precisely so a routine reversible dev decision is NOT escalated to the human. Resolve it autonomously; only design/UAT/irreversible/security-weakening decisions belong with the client, and those are not routed here.
 
 QUESTION: ${question}
 
