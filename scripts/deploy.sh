@@ -65,33 +65,33 @@ if [[ "$TARGET" == "antigravity" || "$TARGET" == "all" ]]; then $APPLY && { mkdi
 if [[ "$TARGET" == "cursor" || "$TARGET" == "all" ]]; then $APPLY && { mkdir -p "$HOME/.cursor"; rsync -a --exclude='*.local*' "$ROOT/.cursor/" "$HOME/.cursor/" 2>/dev/null || true; rsync -a --exclude='__pycache__' --exclude='state/' "$ROOT/hooks/" "$HOME/.cursor/hooks/" 2>/dev/null || true; mkdir -p "$HOME/.cursor/agents"; rsync -a "$ROOT/agents/" "$HOME/.cursor/agents/" 2>/dev/null || true; echo "ok .cursor/ -> ~/.cursor/ (+ hooks/ -> ~/.cursor/hooks/ + agents/ -> ~/.cursor/agents/ for #1912 parity)"; } || echo "(dry run) Would deploy .cursor/ -> ~/.cursor/ and hooks/ -> ~/.cursor/hooks/ and agents/ -> ~/.cursor/agents/"; [[ "$TARGET" == "cursor" ]] && exit 0; fi
 echo "Source: $ROOT → $COPILOT"
 if ! $APPLY; then
-  echo "=== DRY RUN (pass --apply to deploy) ==="
-  echo ""
+  echo "=== DRY RUN (pass --apply to deploy) ==="; echo ""
   deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
   deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
   deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
   deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
-  deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
+  # A4 (#3455): wiki/wisdom/project/ is project-scoped; MUST NOT ship cross-project.
+  echo "── Wiki (read-only) ── (dry run) rsync wiki/ → ~/.copilot/wiki/ (A4: wisdom/project/ excluded)"
   echo "── Dashboard ── Would deploy: index.html + css/ + js/"
-  echo "Re-run with --apply to deploy changes."
-  exit 0
+  echo "Re-run with --apply to deploy changes."; exit 0
 fi
 
 echo "Backing up $COPILOT → $BACKUP"
-cp -r "$COPILOT" "$BACKUP"
-echo ""
+cp -r "$COPILOT" "$BACKUP"; echo ""
 deploy_dir "$ROOT/skills" "$COPILOT/skills" "Skills"
 deploy_files "$ROOT/instructions" "$COPILOT/instructions" "Instructions"
 deploy_files "$ROOT/scripts/global" "$COPILOT/scripts" "Global Scripts"
 deploy_files "$ROOT/agents" "$COPILOT/agents" "Agents"
-deploy_dir "$ROOT/wiki" "$COPILOT/wiki" "Wiki (read-only)"
+echo "── Wiki (read-only) ──" # A4 (#3455): wisdom/project/ excluded — MUST NOT ship cross-project
+mkdir -p "$COPILOT/wiki"
+rsync -a --exclude='wisdom/project' "$ROOT/wiki/" "$COPILOT/wiki/"
+echo "  ✅ Wiki deployed (wisdom/project/ excluded — A4 isolation)"; echo ""
 echo "── Dashboard ──"
 mkdir -p "$COPILOT/dashboard/css" "$COPILOT/dashboard/js"
 cp "$ROOT/dashboard/index.html" "$COPILOT/dashboard/"
 cp "$ROOT"/dashboard/css/*.css "$COPILOT/dashboard/css/"
 cp "$ROOT"/dashboard/js/*.js "$COPILOT/dashboard/js/"
-echo "  ✅ Dashboard deployed"
-echo ""
+echo "  ✅ Dashboard deployed"; echo ""
 for wf in "$ROOT/wiki/index.md" "$ROOT/wiki/log.md" "$ROOT/WIKI.md"; do
   [[ -f "$wf" ]] && cp "$wf" "$COPILOT/wiki/$(basename "$wf")"
 done
