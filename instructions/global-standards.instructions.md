@@ -55,7 +55,12 @@ any issue **as cancelled** requires a per-issue `CANCELLATION: <reason>` comment
 ## Goal-lens decision lint (required)
 
 - Apply this priority order to all governed decisions:
-	`G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy > G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability`.
+	`G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy & Security > G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability`.
+- **Operator autonomy (cross-cutting, always-on principle — Epic #3391, not a ranked goal):** resolve
+	reversible / low-risk decisions autonomously (free cross-model panel, never a bare client prompt);
+	reach the human only at the 4 retained carve-outs (design / UAT / irreversible / security-weakening,
+	per `config/retained-human-touchpoints.json`); autonomy is HARD-subordinate to C-G1 (Governance) and
+	C-G4 (Privacy & Security); log the autonomy-vs-escalate decision (G8).
 - When tradeoffs occur, explicitly justify why a lower-priority goal overrides a higher one.
 - Keep the justification short and evidence-based in ticket comments, PR body, or closeout notes.
 

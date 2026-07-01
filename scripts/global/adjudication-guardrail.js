@@ -90,7 +90,10 @@ function classifyDecision(decision) {
 /** Build the goal-lens scoring prompt for one panelist. */
 function buildPanelPrompt(question, options, groundingContext) {
   const lens = 'Goal-lens (priority order): G1 Governance > G2 Quality > G3 Zero-Cost > G4 Privacy/Security '
-    + '> G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability.';
+    + '> G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability. '
+    + 'Plus the cross-cutting Operator-Autonomy principle (Epic #3391): prefer options that keep the harness '
+    + 'autonomous (resolve reversibly without a human); reaching the client is only correct for the 4 retained '
+    + 'carve-outs (design/UAT/irreversible/security-weakening) and never overrides C-G1/C-G4.';
   const optsBlock = options.map((o, i) => `OPTION ${i + 1}: ${typeof o === 'string' ? o : o.label || JSON.stringify(o)}`).join('\n');
   const grounding = groundingContext ? `\nCURRENT BEST-PRACTICE CONTEXT (websearch-grounded):\n${groundingContext}\n` : '';
   return `You are one panelist in a cross-model adjudication jury. Score each option against the goal-lens.

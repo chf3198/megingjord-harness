@@ -3,14 +3,16 @@
 // into governed provider calls via wrapProviderCall opts.
 // Refs Epic #2029 #2221. Mirrors goal_lens.py priority sentence at provider layer.
 
-const PRIORITY_SENTENCE = 'Goal priority: G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy > G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability.';
+const PRIORITY_SENTENCE = 'Goal priority: G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy & Security > G5 Portability > G6 Resilience > G7 Throughput > G8 Observability > G9 Interoperability > G10 Maintainability.';
 const DECISION_CHECK = 'Decision check: justify any lower-priority override with explicit evidence.';
+// Epic #3391 (Option B): operator autonomy is a cross-cutting, always-on PRINCIPLE (not a ranked goal).
+const AUTONOMY_PRINCIPLE = 'Operator autonomy (always-on principle): resolve reversible/low-risk work autonomously (free cross-model panel, never a bare client prompt); reach the human only at the 4 retained carve-outs (design/UAT/irreversible/security-weakening); never override C-G1 or C-G4; log the autonomy-vs-escalate decision (G8).';
 
 const GOAL_DEFINITIONS = {
   G1: 'Governance: policy, role, provenance, ticket controls non-negotiable.',
   G2: 'Quality: maximize correctness and engineering value.',
   G3: 'Zero Cost: prefer local/fleet/free lanes before paid providers.',
-  G4: 'Privacy: keep sensitive context local unless explicit override.',
+  G4: 'Privacy & Security: keep sensitive context local unless explicit override.',
   G5: 'Portability: avoid user-specific coupling; settings-driven.',
   G6: 'Resilience: graceful degradation; fallback paths.',
   G7: 'Throughput: acceptable speed after higher-priority goals met.',
@@ -73,7 +75,7 @@ function shouldInject(opts) {
 }
 
 function buildPrefix({ includeDefinitions } = {}) {
-  const lines = [PRIORITY_SENTENCE, DECISION_CHECK];
+  const lines = [PRIORITY_SENTENCE, AUTONOMY_PRINCIPLE, DECISION_CHECK];
   if (includeDefinitions) {
     lines.push('Goal definitions:');
     for (const [key, def] of Object.entries(GOAL_DEFINITIONS)) {
@@ -104,4 +106,5 @@ function estimateOverheadTokens({ includeDefinitions } = {}) {
 }
 
 module.exports = { injectGoalContext, shouldInject, buildPrefix, expandKeywords,
-  estimateOverheadTokens, PRIORITY_SENTENCE, DECISION_CHECK, GOAL_DEFINITIONS, GOAL_KEYWORDS };
+  estimateOverheadTokens, PRIORITY_SENTENCE, AUTONOMY_PRINCIPLE, DECISION_CHECK,
+  GOAL_DEFINITIONS, GOAL_KEYWORDS };

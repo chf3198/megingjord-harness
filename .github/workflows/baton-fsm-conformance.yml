@@ -1,6 +1,6 @@
 name: Baton FSM Conformance
-# ADVISORY gate — promotion to blocking is gated on replay-eval precision
-# >= 0.85 (auto-revoking, not calendar). Refs #3288, Epic #3284.
+# fsm-wasm-integrity is a REQUIRED blocking job (Refs #3457, Epic #3411).
+# fsm-conformance-advisory remains advisory (replay-eval gated, Refs #3288, Epic #3284).
 
 on:
   pull_request:
@@ -10,11 +10,35 @@ on:
       - 'tests/fixtures/baton-fsm-corpus/**'
       - 'tests/baton-fsm-conformance.spec.js'
       - 'tests/baton-fsm-wasm-integrity.spec.js'
+      - 'tests/fsm-wasm-check.spec.js'
 
 permissions:
   contents: read
 
 jobs:
+  # BLOCKING — byte-identity check: committed kernel.wasm must match fresh rebuild.
+  # Runs on every PR touching the FSM source, build script, grammar, or transitions.
+  # Refs #3457, Epic #3411. Do NOT add continue-on-error: true to this job.
+  fsm-wasm-integrity:
+    name: fsm-wasm-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - name: WASM byte-identity check (--check mode)
+        run: npm run fsm:wasm:check
+
+      - name: WASM integrity spec
+        run: node --test tests/baton-fsm-wasm-integrity.spec.js
+
+      - name: WASM check-mode spec
+        run: node --test tests/fsm-wasm-check.spec.js
+
+  # ADVISORY — full conformance + matrix generation (replay-eval gated promotion).
   conformance:
     name: fsm-conformance-advisory
     runs-on: ubuntu-latest
