@@ -83,3 +83,19 @@ in Projects v2 fields if the harness chooses to surface it.
 - #1630 — Projects v2 (live state overlay)
 - #1628 — G5 Portability contract
 - #1624 — research source (F10)
+
+## 2026-07-01 — D-0002: Additive resurfacing signals use `signal:*`, not `status:*`
+
+- **Status**: accepted
+- **Decided-by**: Orla Mason (claude-code:claude-opus@local, Manager)
+- **Team-context**: claude-code
+- **Surface**: Issue #3525 / Epic #3517 (ADR-020 §D1/§D2/§D3 label naming)
+- **Decision**: The three additive closure-readiness signals defined by ADR-020 are named `signal:close-eligible`, `signal:exempt-review`, and `signal:contested-superseded` — a dedicated `signal:*` namespace — rather than the ADR's literal `status:*` names. `resolution:superseded` (a terminal reason, applied once at close) keeps its `resolution:*` namespace.
+- **Why**: ADR-010 / Epic #1828 AC6 enforces exactly ONE `status:*` label per issue, and lifecycle statuses are mutually-exclusive transitions (e.g. `status:in-progress` → `status:dormant` REPLACES, per `epic-dormancy-detector.js`). These three signals are ADDITIVE — an epic stays `status:in-progress` while ALSO being flagged close-eligible/exempt-review/contested — so naming them `status:*` would violate the one-status cardinality invariant enforced by `label-lint-status-cardinality.js`. A separate namespace preserves G1 governance (no rule weakening) and matches industry convention (status vs. signal/needs labels).
+- **Alternatives considered**:
+  - Keep `status:*` and exempt these three in the cardinality rule — weakens the #1828 invariant and expands ADR-010's scope from an implementation ticket; rejected.
+  - Make them lifecycle transitions that replace the current status — semantically wrong (a close-eligible epic is still active/open); rejected.
+- **Evidence**: resolved autonomously per the operator-autonomy principle (reversible, low-risk label naming; no client touch — client is design/UAT only). Cross-family panel (llama3.1:8b + qwen2.5:7b-instruct, both non-Anthropic, $0 local fleet) + web research (GitHub label-convention best practice) were unanimous on a separate signal namespace.
+- **Consequences**:
+  - ADR-020's `status:*` label literals are superseded by this decision for implementation; the ADR text is annotated in the #3525/#3519/#3526 PRs rather than rewritten (research artifact immutability).
+  - `signal:*` becomes a new label group in `label-manifest.json`; `signal:contested-superseded` lands in #3525, `signal:close-eligible` in #3519, `signal:exempt-review` in #3526.
