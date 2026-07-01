@@ -58,7 +58,9 @@
     { "name": "resolution:completed",         "color": "0075ca", "description": "Work completed successfully",           "group": "resolution" },
     { "name": "resolution:released",          "color": "0075ca", "description": "Work shipped to production/main",       "group": "resolution" },
     { "name": "resolution:research-delivered","color": "ededed", "description": "Research findings posted on ticket",   "group": "resolution" },
-    { "name": "resolution:superseded",        "color": "ededed", "description": "Superseded by a follow-on ticket",      "group": "resolution" },
+    { "name": "resolution:superseded",        "color": "ededed", "description": "Overtaken by events: scope moot as capability shipped elsewhere; distinct from duplicate (not identical) and completed (not performed)", "group": "resolution" },
+
+    { "name": "signal:contested-superseded",  "color": "d93f0b", "description": "Superseded-close verdict is contested; routed to the #2990 propose-only queue for Manager adjudication (never auto-closes)", "group": "signal" },
 
     { "name": "phase-gate:phase-1",        "color": "5319e7", "description": "Phase-1 implementation child of a research-first Epic","group": "phase-gate" },
     { "name": "phase-gate:research-first", "color": "5319e7", "description": "Research-first Epic; Phase 0 must complete before Phase 1","group": "phase-gate" },
