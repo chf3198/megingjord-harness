@@ -5,7 +5,7 @@ const path = require('node:path');
 const os = require('node:os');
 
 const ROOT = path.join(__dirname, '..');
-const KNOWN = ['claude-code', 'codex', 'copilot', 'antigravity'];
+const KNOWN = ['antigravity', 'claude-code', 'codex', 'copilot', 'cursor'];
 const TARGET = (process.env.ORCHESTRATOR ? [process.env.ORCHESTRATOR] : KNOWN);
 
 function loadJson(rel) {
