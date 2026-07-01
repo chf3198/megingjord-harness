@@ -45,34 +45,34 @@ function createsCycle(edges, from, to) {
 // input: { target:{number, descendants?:[N]}, verdict:{confirmed:bool, contested?:bool},
 //          supersededByRef:{number, exists:bool}|null, edges?:[[from,to]] }
 function decideSupersededResolution(input) {
-  const t = input && input.target;
-  const v = input && input.verdict;
+  const item = input && input.target;
+  const verdict = input && input.verdict;
   // Fail-closed: malformed/degraded input -> no signal (I0).
-  if (!t || typeof t.number !== 'number' || !v || typeof v.confirmed !== 'boolean') {
+  if (!item || typeof item.number !== 'number' || !verdict || typeof verdict.confirmed !== 'boolean') {
     return noop('degraded-input: missing target/verdict — fail closed');
   }
   // Control 5: explicit contest -> appeals path (never auto-close).
-  if (v.contested === true) return contested('verdict flagged contested by detector/appeal');
+  if (verdict.contested === true) return contested('verdict flagged contested by detector/appeal');
   // #3398 verdict not confirmed -> nothing to apply.
-  if (v.confirmed !== true) return noop('semantic verdict not confirmed');
+  if (verdict.confirmed !== true) return noop('semantic verdict not confirmed');
   // Control 1 + 2: two-signal rule / evidence guard. Apply requires a resolvable
   // SUPERSEDED_BY:#M that actually exists; missing/unresolvable -> contested (never close).
   const ref = input.supersededByRef;
   if (!ref || typeof ref.number !== 'number' || ref.exists !== true) {
     return contested('evidence-guard: SUPERSEDED_BY reference missing or unresolvable');
   }
-  const m = ref.number;
+  const supersededBy = ref.number;
   // Control 3: self-supersession block (#M is the item itself or a descendant).
-  const descendants = new Set((t.descendants || []).map(Number));
-  if (m === t.number || descendants.has(m)) {
+  const descendants = new Set((item.descendants || []).map(Number));
+  if (supersededBy === item.number || descendants.has(supersededBy)) {
     return contested('self-supersession: #M is the item itself or a descendant');
   }
   // Control 6: acyclic/DAG guard — the SUPERSEDED_BY chain must not form a cycle.
-  if (createsCycle(input.edges, t.number, m)) {
+  if (createsCycle(input.edges, item.number, supersededBy)) {
     return contested('acyclic-guard: SUPERSEDED_BY chain would form a cycle');
   }
   // All controls pass -> apply superseded reason + close (with reversibility metadata).
-  return apply(m);
+  return apply(supersededBy);
 }
 
 module.exports = {
