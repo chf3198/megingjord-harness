@@ -1,0 +1,27 @@
+name: Harness Parity Matrix (Advisory)
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'inventory/**'
+      - 'scripts/global/**'
+
+permissions:
+  contents: read
+
+jobs:
+  parity-matrix:
+    name: parity-matrix (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run parity matrix (advisory)
+        run: npm run parity:matrix
