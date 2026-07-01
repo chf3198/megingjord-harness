@@ -26,15 +26,15 @@ function renderDoc(ruleset) {
   lines.push('');
   lines.push('| Rule | Severity | Class | Tiers | Signal | Title |');
   lines.push('|---|---|---|---|---|---|');
-  for (const r of ruleset.rules) {
-    const tiers = Array.isArray(r.tiers) ? r.tiers.join(' ') : r.tiers || '*';
-    lines.push(`| \`${r.id}\` | ${r.severity} | ${r.class} | ${tiers} | \`${r.signal}\` | ${r.title} |`);
+  for (const rule of ruleset.rules) {
+    const tiers = Array.isArray(rule.tiers) ? rule.tiers.join(' ') : rule.tiers || '*';
+    lines.push(`| \`${rule.id}\` | ${rule.severity} | ${rule.class} | ${tiers} | \`${rule.signal}\` | ${rule.title} |`);
   }
   lines.push('');
   lines.push('## Recommendations');
   lines.push('');
-  for (const r of ruleset.rules) {
-    lines.push(`- **${r.id}** — ${r.recommendation}`);
+  for (const rule of ruleset.rules) {
+    lines.push(`- **${rule.id}** — ${rule.recommendation}`);
   }
   lines.push('');
   return lines.join('\n');

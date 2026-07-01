@@ -25,6 +25,8 @@ const SMALL_GPU_MB = 6000;
 const RESIDENT_32B_MB = 24000;
 const ENGINE_STALE_MINOR_RELEASES = 3;
 const TELEMETRY_STALE_MS = 7 * 24 * 60 * 60 * 1000;
+const BATCHING_ENGINES = ['vllm', 'tgi', 'text-generation-inference'];
+const STRONG_MODEL_RE = /(-32b|-70b|:32b|:70b|coder:32b)/i;
 const TIER_ORDER = ['F0', 'F1', 'F2', 'F3', 'F4'];
 
 /** Load + parse the YAML rule table. Returns { version, rules: [...] }. */
@@ -62,16 +64,16 @@ function isCpuOffloaded(model) {
  */
 function buildFingerprint(probe) {
   const hosts = Array.isArray(probe && probe.hosts) ? probe.hosts : [];
-  const hostPrints = hosts.map((h) => {
-    const roster = (Array.isArray(h.models) ? h.models : [])
-      .map((m) => `${m.name}:${m.quant || '?'}:${m.sizeBytes || 0}`)
+  const hostPrints = hosts.map((host) => {
+    const roster = (Array.isArray(host.models) ? host.models : [])
+      .map((model) => `${model.name}:${model.quant || '?'}:${model.sizeBytes || 0}`)
       .sort()
       .join(',');
     return {
-      id: h.id || h.url || 'unknown',
-      reachable: Boolean(h.reachable),
-      engine: h.engine ? `${h.engine.name || '?'}@${h.engine.version || '?'}` : 'none',
-      vramBucket: vramBucket(h.gpu && h.gpu.vramTotalMb),
+      id: host.id || host.url || 'unknown',
+      reachable: Boolean(host.reachable),
+      engine: host.engine ? `${host.engine.name || '?'}@${host.engine.version || '?'}` : 'none',
+      vramBucket: vramBucket(host.gpu && host.gpu.vramTotalMb),
       rosterDigest: digest(roster || 'empty'),
     };
   });
@@ -97,23 +99,21 @@ function buildFingerprint(probe) {
  */
 function classifyTier(probe) {
   const hosts = Array.isArray(probe && probe.hosts) ? probe.hosts : [];
-  const reachable = hosts.filter((h) => h && h.reachable);
+  const reachable = hosts.filter((host) => host && host.reachable);
   if (reachable.length === 0) return { tier: 'F0', ambiguous: false, note: 'no reachable host — pure-cloud posture' };
 
-  const gpuCapable = reachable.filter((h) => h.gpu && (h.gpu.vramTotalMb || 0) >= SMALL_GPU_MB);
-  const vramUnknown = reachable.some((h) => !h.gpu || typeof h.gpu.vramTotalMb !== 'number');
+  const gpuCapable = reachable.filter((host) => host.gpu && (host.gpu.vramTotalMb || 0) >= SMALL_GPU_MB);
+  const vramUnknown = reachable.some((host) => !host.gpu || typeof host.gpu.vramTotalMb !== 'number');
   if (gpuCapable.length === 0) {
     return { tier: 'F1', ambiguous: vramUnknown, note: 'reachable host(s) but no GPU-resident-capable VRAM detected' };
   }
-  const maxVram = Math.max(...gpuCapable.map((h) => h.gpu.vramTotalMb || 0));
+  const maxVram = Math.max(...gpuCapable.map((host) => host.gpu.vramTotalMb || 0));
   const dedicated = maxVram >= RESIDENT_32B_MB;
-
   let tier;
   if (reachable.length >= 2) tier = dedicated ? 'F4' : 'F3';
   else tier = dedicated ? 'F4' : 'F2';
 
-  // Degrade-safe: if VRAM is estimated (unknown on any reachable host) and we'd otherwise claim
-  // the dedicated F4 tier, step down one tier and flag the ambiguity.
+  // Degrade-safe: if VRAM is estimated and we'd otherwise claim the dedicated F4 tier, step down.
   if (vramUnknown && tier === 'F4') {
     tier = reachable.length >= 2 ? 'F3' : 'F2';
     return { tier, ambiguous: true, note: 'VRAM estimated; stepped down from F4 (degrade-safe under-claim)' };
@@ -127,73 +127,69 @@ function readSignal(signals, dotPath) {
 }
 
 /**
- * Compute the flat signal map the rule table keys on. Every value is derived deterministically from
- * the probe; a missing probe field yields a safe default (no false-positive finding).
+ * Collect the intermediate fleet facts the signal map is derived from. Kept separate from
+ * `computeSignals` so each stays small and independently testable (G10).
  */
-function computeSignals(probe, tierInfo, opts = {}) {
+function collectFleetFacts(probe, opts) {
   const now = typeof opts.now === 'number' ? opts.now : Date.parse((probe && probe.now) || '') || 0;
   const hosts = Array.isArray(probe && probe.hosts) ? probe.hosts : [];
-  const reachable = hosts.filter((h) => h && h.reachable);
+  const reachable = hosts.filter((host) => host && host.reachable);
   const dispatch = (probe && probe.dispatch) || {};
-  const policy = (probe && probe.policy) || {};
-  const toolUse = (probe && probe.toolUse) || {};
-  const telemetry = (probe && probe.telemetry) || {};
-  const cloud = (probe && probe.cloud) || {};
-
-  const allModels = reachable.flatMap((h) => (Array.isArray(h.models) ? h.models : []));
-  const residentModels = reachable.flatMap((h) => (Array.isArray(h.ps) ? h.ps : []));
+  const allModels = reachable.flatMap((host) => (Array.isArray(host.models) ? host.models : []));
+  const residentModels = reachable.flatMap((host) => (Array.isArray(host.ps) ? host.ps : []));
   const hotPathModels = dispatch.hotPathModels || [];
-  const hotPathSpill = residentModels.concat(allModels)
-    .filter((m) => hotPathModels.length === 0 || hotPathModels.includes(m.name))
-    .some(isCpuOffloaded);
-  const maxVram = Math.max(0, ...reachable.map((h) => (h.gpu && h.gpu.vramTotalMb) || 0));
-  const hasStrongResident = allModels.some(
-    (m) => /(-32b|-70b|:32b|:70b|coder:32b)/i.test(m.name) && !isCpuOffloaded(m),
-  );
-  const enginesInstalled = new Set(reachable.map((h) => h.engine && h.engine.name).filter(Boolean));
-  const batchingEngineInstalled = ['vllm', 'tgi', 'text-generation-inference'].some((e) => enginesInstalled.has(e));
-  const usingBatchingForAgentic = Boolean(dispatch.usesBatchingEngine);
-
+  const enginesInstalled = new Set(reachable.map((host) => host.engine && host.engine.name).filter(Boolean));
   return {
-    dispatch: {
-      keepAliveMissing: dispatch.keepAliveSet === false || dispatch.keepAliveSet === undefined,
-    },
-    warm: {
-      hotModelNotResident: hotPathModels.length > 0 && !residentModels.some((m) => hotPathModels.includes(m.name)),
-    },
-    offload: { hotPathCpuSpill: hotPathSpill },
+    now,
+    reachable,
+    dispatch,
+    policy: (probe && probe.policy) || {},
+    toolUse: (probe && probe.toolUse) || {},
+    telemetry: (probe && probe.telemetry) || {},
+    cloud: (probe && probe.cloud) || {},
+    allModels,
+    residentModels,
+    hotPathModels,
+    maxVram: Math.max(0, ...reachable.map((host) => (host.gpu && host.gpu.vramTotalMb) || 0)),
+    hotPathSpill: residentModels.concat(allModels)
+      .filter((model) => hotPathModels.length === 0 || hotPathModels.includes(model.name))
+      .some(isCpuOffloaded),
+    hasStrongResident: allModels.some((model) => STRONG_MODEL_RE.test(model.name) && !isCpuOffloaded(model)),
+    batchingEngineInstalled: BATCHING_ENGINES.some((engine) => enginesInstalled.has(engine)),
+  };
+}
+
+/**
+ * Compute the flat signal map the rule table keys on. Every value is derived deterministically from
+ * the collected fleet facts; a missing probe field yields a safe default (no false-positive finding).
+ */
+function computeSignals(probe, tierInfo, opts = {}) {
+  const facts = collectFleetFacts(probe, opts);
+  const { dispatch, policy, toolUse, telemetry, cloud, reachable, residentModels, allModels, hotPathModels } = facts;
+  const isCloudTier = tierInfo.tier === 'F0' || tierInfo.tier === 'F1';
+  return {
+    dispatch: { keepAliveMissing: dispatch.keepAliveSet === false || dispatch.keepAliveSet === undefined },
+    warm: { hotModelNotResident: hotPathModels.length > 0 && !residentModels.some((model) => hotPathModels.includes(model.name)) },
+    offload: { hotPathCpuSpill: facts.hotPathSpill },
     hosts: {
-      policyHostUnreachable: (policy.hosts || []).some(
-        (ph) => !reachable.some((h) => h.id === ph || h.url === ph),
-      ),
+      policyHostUnreachable: (policy.hosts || []).some((ph) => !reachable.some((host) => host.id === ph || host.url === ph)),
       singleHostButLoadBalanceImplied: reachable.length === 1 && Boolean(policy.loadBalanceImplied),
     },
-    roster: { noGpuResidentStrongModel: maxVram >= RESIDENT_32B_MB && !hasStrongResident },
+    roster: { noGpuResidentStrongModel: facts.maxVram >= RESIDENT_32B_MB && !facts.hasStrongResident },
     quant: {
       largerThanBestFit: allModels.some(
-        (m) => isCpuOffloaded(m) && maxVram > 0 && (m.sizeBytes || 0) > maxVram * 1024 * 1024,
+        (model) => isCpuOffloaded(model) && facts.maxVram > 0 && (model.sizeBytes || 0) > facts.maxVram * 1024 * 1024,
       ),
     },
-    stakes: {
-      noGateThirtyTwoBOnCommonPath:
-        tierInfo.tier !== 'F0' && tierInfo.tier !== 'F1' && dispatch.stakesGate !== true,
-    },
-    tool: {
-      agenticDisabledOrUnhealthy: toolUse.configured !== true || toolUse.healthy === false,
-    },
+    stakes: { noGateThirtyTwoBOnCommonPath: !isCloudTier && dispatch.stakesGate !== true },
+    tool: { agenticDisabledOrUnhealthy: toolUse.configured !== true || toolUse.healthy === false },
     engine: {
-      versionStale: reachable.some((h) => ((h.engine && h.engine.minorReleasesBehind) || 0) >= ENGINE_STALE_MINOR_RELEASES),
-      higherThroughputEngineUnused: batchingEngineInstalled && !usingBatchingForAgentic,
+      versionStale: reachable.some((host) => ((host.engine && host.engine.minorReleasesBehind) || 0) >= ENGINE_STALE_MINOR_RELEASES),
+      higherThroughputEngineUnused: facts.batchingEngineInstalled && !dispatch.usesBatchingEngine,
     },
-    obs: {
-      noTelemetrySevenDays: !telemetry.lastEmitMs || (now > 0 && now - telemetry.lastEmitMs > TELEMETRY_STALE_MS),
-    },
-    fault: {
-      recentTransient: reachable.some((h) => Array.isArray(h.recentFaults) && h.recentFaults.length > 0),
-    },
-    cloud: {
-      noFreeProvidersWired: (tierInfo.tier === 'F0' || tierInfo.tier === 'F1') && cloud.freeProvidersWired !== true,
-    },
+    obs: { noTelemetrySevenDays: !telemetry.lastEmitMs || (facts.now > 0 && facts.now - telemetry.lastEmitMs > TELEMETRY_STALE_MS) },
+    fault: { recentTransient: reachable.some((host) => Array.isArray(host.recentFaults) && host.recentFaults.length > 0) },
+    cloud: { noFreeProvidersWired: isCloudTier && cloud.freeProvidersWired !== true },
   };
 }
 
@@ -215,8 +211,7 @@ function evaluateRules(signals, tierInfo, rules) {
   for (const rule of rules) {
     if (!ruleAppliesToTier(rule, tierInfo.tier)) continue;
     const expect = Object.prototype.hasOwnProperty.call(rule, 'expect') ? rule.expect : true;
-    const actual = readSignal(signals, rule.signal);
-    if (actual === expect) {
+    if (readSignal(signals, rule.signal) === expect) {
       findings.push({
         id: rule.id,
         severity: rule.severity,
@@ -282,6 +277,7 @@ module.exports = {
   buildFingerprint,
   classifyTier,
   computeSignals,
+  collectFleetFacts,
   evaluateRules,
   loadRules,
   vramBucket,
