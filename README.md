@@ -380,6 +380,8 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `memory:route` | `node scripts/global/memory-write-router.js` |
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `output:clip` | `node scripts/global/output-clipper.js` |
+| `parity:baseline:update` | `node scripts/global/megalint/parity-lowering-guard.js --update-baseline` |
+| `parity:guard` | `node scripts/global/megalint/parity-lowering-guard.js` |
 | `parity:matrix` | `node scripts/global/harness-parity-matrix.js` |
 | `parity:replay-eval` | `node scripts/global/harness-parity-replay-eval.js` |
 | `prefix:cache-report` | `node scripts/global/prefix-cache.js` |
