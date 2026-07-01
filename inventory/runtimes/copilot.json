@@ -1,0 +1,49 @@
+{
+  "runtime": "copilot",
+  "detection": {
+    "primaryEnvMarkers": [],
+    "aiAgentValue": "copilot",
+    "signal": "AI_AGENT=copilot* (COPILOT_OTEL_* is workspace-injected, not a runtime signal)",
+    "deltaKind": "ai-agent-value"
+  },
+  "signing": {
+    "team": "copilot",
+    "substrates": [
+      "github-copilot"
+    ]
+  },
+  "deploy": {
+    "home": "~/.copilot",
+    "artifactClasses": [
+      "settings",
+      "instructions",
+      "skills",
+      "agents",
+      "commands",
+      "scripts",
+      "wiki"
+    ]
+  },
+  "hooks": {
+    "configPath": "hooks/global-standards.json",
+    "eventCase": "PascalCase",
+    "events": [
+      "SessionStart",
+      "PreToolUse",
+      "PostToolUse",
+      "Stop"
+    ]
+  },
+  "capabilities": {
+    "ghAuth": "available via GitHub session",
+    "hookExecution": "lefthook runs in integrated terminal",
+    "fallback": "none \u2014 full support expected"
+  },
+  "parityWaivers": [
+    {
+      "surface": "detect-runtime-primary-marker",
+      "reason": "no dedicated primary env marker; relies on the AI_AGENT convention (#3041)",
+      "promotionPath": "T2.6 (#3449) encodes deltaKind ai-agent-value + parity-validator recognition"
+    }
+  ]
+}

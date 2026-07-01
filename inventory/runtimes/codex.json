@@ -1,0 +1,48 @@
+{
+  "runtime": "codex",
+  "detection": {
+    "primaryEnvMarkers": [
+      "CODEX_HOME",
+      "CODEX_SANDBOX",
+      "CODEX_CLI"
+    ],
+    "aiAgentValue": "codex",
+    "signal": "CODEX_*",
+    "deltaKind": "env-marker"
+  },
+  "signing": {
+    "team": "codex",
+    "substrates": [
+      "codex-cli",
+      "codex-vscode-ide"
+    ]
+  },
+  "deploy": {
+    "home": "~/.codex",
+    "artifactClasses": [
+      "runtime-hooks",
+      "instructions",
+      "skills",
+      "agents",
+      "commands",
+      "scripts"
+    ]
+  },
+  "hooks": {
+    "configPath": ".codex/runtime-hooks.json",
+    "eventCase": "PascalCase",
+    "events": [
+      "SessionStart",
+      "PreToolUse",
+      "PostToolUse",
+      "Stop",
+      "PermissionRequest"
+    ]
+  },
+  "capabilities": {
+    "ghAuth": "may be absent in sandbox environments",
+    "hookExecution": "hooks run but API calls may fail",
+    "fallback": "graceful skip with advisory (G6)"
+  },
+  "parityWaivers": []
+}

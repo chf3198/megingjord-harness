@@ -1,0 +1,51 @@
+{
+  "runtime": "antigravity",
+  "detection": {
+    "primaryEnvMarkers": [
+      "ANTIGRAVITY_AGENT",
+      "ANTIGRAVITY_HOME"
+    ],
+    "aiAgentValue": "antigravity",
+    "signal": "ANTIGRAVITY_*",
+    "deltaKind": "env-marker"
+  },
+  "signing": {
+    "team": "antigravity",
+    "substrates": [
+      "google"
+    ]
+  },
+  "deploy": {
+    "home": "~/.antigravity",
+    "artifactClasses": [
+      "settings",
+      "hooks",
+      "agents"
+    ]
+  },
+  "hooks": {
+    "configPath": ".antigravity/hooks.json",
+    "eventCase": "camelCase",
+    "events": [
+      "preToolUse",
+      "stop"
+    ]
+  },
+  "capabilities": {
+    "ghAuth": "available via stored credentials",
+    "hookExecution": "lefthook runs in integrated terminal",
+    "fallback": "graceful skip with advisory (G6)"
+  },
+  "parityWaivers": [
+    {
+      "surface": "scripts",
+      "reason": "scripts/global gate corpus not yet deployed to this camelCase runtime",
+      "promotionPath": "T2.3 (#3446) ships the scripts artifactClass via deploy.sh + the scaffold"
+    },
+    {
+      "surface": "hook-wiring",
+      "reason": "PreToolUse/Stop enforcement wiring unconfirmed; advisory-backstop only",
+      "promotionPath": "T2.5 (#3448) wires .antigravity/hooks.json and verifies gates FIRE"
+    }
+  ]
+}
