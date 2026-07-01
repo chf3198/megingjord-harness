@@ -52,6 +52,29 @@ function composeResearchPrompt(lintReport) {
 }
 
 /**
+ * Decide the trust-controlled severity/trust/title for a raw finding given its age. Returns null when
+ * the finding is past hard max-staleness (2× the tier window) and must be dropped entirely.
+ */
+function decideTrust(finding, ageMs, window) {
+  if (ageMs > 2 * window) return null;
+  const isFrontier = FRONTIER_CLAIM_RE.test(`${finding.title || ''} ${finding.recommendation || ''}`);
+  const hasCitation = Boolean(finding.citation);
+  const quantified = Boolean(finding.expectedGain);
+  let severity = finding.severity && SEV_RANK[finding.severity] != null ? finding.severity : 'informational';
+  let trust = 'high';
+  let title = finding.title || '';
+  const notes = [];
+  if (isFrontier && !hasCitation) { trust = 'low'; severity = 'informational'; notes.push('uncited frontier claim → informational'); }
+  if (isFrontier && !quantified) { severity = 'informational'; notes.push('no quantified gain → informational'); }
+  if (ageMs > window) {
+    severity = 'informational';
+    title = `STALE: ${title} (as_of ${Number.isFinite(ageMs) ? Math.floor(ageMs / DAY_MS) : '∞'}d old)`;
+    notes.push('stale → informational');
+  }
+  return { severity, trust, title, notes };
+}
+
+/**
  * Apply the trust controls to a raw AI finding, returning a normalized finding or null if it must be
  * dropped (past hard max-staleness). `now` is injected for determinism.
  */
@@ -59,50 +82,20 @@ function applyTrustControls(finding, now) {
   const tier = finding.freshness_tier || DEFAULT_TIER;
   const asOf = Date.parse(finding.as_of || '') || 0;
   const ageMs = asOf > 0 ? now - asOf : Infinity;
-  const window = tierWindowMs(tier);
-
-  // Hard max-staleness: past 2× the tier window a cached/old claim is dropped, never shown.
-  if (ageMs > 2 * window) return null;
-
-  const hasCitation = Boolean(finding.citation);
-  const isFrontier = FRONTIER_CLAIM_RE.test(`${finding.title || ''} ${finding.recommendation || ''}`);
-  const quantified = Boolean(finding.expectedGain);
-
-  let severity = finding.severity && SEV_RANK[finding.severity] != null ? finding.severity : 'informational';
-  let trust = 'high';
-  const notes = [];
-
-  // Citation-or-low-trust: an uncited frontier claim cannot rise above informational.
-  if (isFrontier && !hasCitation) {
-    trust = 'low';
-    severity = 'informational';
-    notes.push('uncited frontier claim → informational');
-  }
-  // Quantified-gain: a performance recommendation without a magnitude is capped at informational.
-  if (isFrontier && !quantified) {
-    severity = 'informational';
-    notes.push('no quantified gain → informational');
-  }
-  // Freshness: past the tier window (but within 2×) the claim is demoted to informational + STALE-tagged.
-  let title = finding.title || '';
-  if (ageMs > window) {
-    severity = 'informational';
-    const ageDays = Number.isFinite(ageMs) ? Math.floor(ageMs / DAY_MS) : '∞';
-    title = `STALE: ${title} (as_of ${ageDays}d old)`;
-    notes.push('stale → informational');
-  }
+  const verdict = decideTrust(finding, ageMs, tierWindowMs(tier));
+  if (!verdict) return null;
   return {
-    id: finding.id || `AI-${(title || 'finding').slice(0, 24)}`,
-    title,
+    id: finding.id || `AI-${(verdict.title || 'finding').slice(0, 24)}`,
+    title: verdict.title,
     recommendation: finding.recommendation || '',
-    severity,
+    severity: verdict.severity,
     class: finding.class || 'informational',
     source: 'ai-research',
     as_of: finding.as_of || null,
     citation: finding.citation || null,
     expectedGain: finding.expectedGain || null,
-    trust,
-    trustNotes: notes,
+    trust: verdict.trust,
+    trustNotes: verdict.notes,
   };
 }
 
@@ -122,8 +115,7 @@ function mergeFindings(lintReport, aiFindings) {
       overlap.aiCitation = ai.citation || null;
       continue;
     }
-    // AI-only: never auto-high — demote a claimed `high` to `med`.
-    const severity = ai.severity === 'high' ? 'med' : ai.severity;
+    const severity = ai.severity === 'high' ? 'med' : ai.severity; // AI-only: never auto-high.
     merged.push({ ...ai, severity, aiOnly: true });
   }
   merged.sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9) || String(a.id).localeCompare(String(b.id)));
@@ -136,51 +128,47 @@ function defaultSleep(ms) {
 }
 
 /**
- * Run the AI pass. `dispatch(prompt)` must resolve to `{ findings: [...] }` (or throw on outage).
- * Bounded retry/backoff across attempts; on total failure, fall back to `opts.cachedFindings`
- * (STALE-tagged, subject to the same max-staleness drop) and finally to lint-only. Never throws.
+ * Dispatch the research prompt with bounded retry/backoff across attempts (cross-family failover lives
+ * inside the injected dispatch). Returns { raw, status }; raw is null when every attempt failed.
+ */
+async function dispatchWithRetry(lintReport, opts) {
+  const dispatch = opts.dispatch;
+  if (typeof dispatch !== 'function') return { raw: null, status: 'no-dispatch' };
+  const maxAttempts = opts.maxAttempts || 3;
+  const sleep = opts.sleep || defaultSleep;
+  let status = 'ok';
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const result = await dispatch(composeResearchPrompt(lintReport), { attempt });
+      return { raw: (result && Array.isArray(result.findings)) ? result.findings : [], status: 'ok' };
+    } catch (err) {
+      status = `retry:${err.message}`;
+      if (attempt < maxAttempts) await sleep(opts.backoffMs ? opts.backoffMs * attempt : 0);
+    }
+  }
+  return { raw: null, status: `unavailable:${status}` };
+}
+
+/**
+ * Run the AI pass. On total dispatch failure, fall back to `opts.cachedFindings` (STALE-tagged,
+ * subject to the same max-staleness drop) and finally to lint-only. Never throws; never blocks.
  */
 async function runAiPass(lintReport, opts = {}) {
   const now = typeof opts.now === 'number' ? opts.now : 0;
-  const maxAttempts = opts.maxAttempts || 3;
-  const sleep = opts.sleep || defaultSleep;
-  const dispatch = opts.dispatch;
-
-  let raw = null;
-  let aiStatus = 'ok';
-  if (typeof dispatch === 'function') {
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const result = await dispatch(composeResearchPrompt(lintReport), { attempt });
-        raw = (result && Array.isArray(result.findings)) ? result.findings : [];
-        break;
-      } catch (err) {
-        aiStatus = `retry:${err.message}`;
-        if (attempt < maxAttempts) await sleep(opts.backoffMs ? opts.backoffMs * attempt : 0);
-      }
-    }
-  } else {
-    aiStatus = 'no-dispatch';
-  }
-
-  // Degrade path: use cached findings (STALE) when the live pass produced nothing.
+  let { raw, status } = await dispatchWithRetry(lintReport, opts);
   let usedCache = false;
-  if (raw === null) {
-    if (Array.isArray(opts.cachedFindings) && opts.cachedFindings.length) {
-      raw = opts.cachedFindings;
-      usedCache = true;
-      aiStatus = 'unavailable-using-cache';
-    } else {
-      raw = [];
-      aiStatus = aiStatus === 'ok' ? 'no-dispatch' : `unavailable:${aiStatus}`;
-    }
+  if (raw === null && Array.isArray(opts.cachedFindings) && opts.cachedFindings.length) {
+    raw = opts.cachedFindings;
+    usedCache = true;
+    status = 'stale-cache';
+  } else if (raw === null) {
+    raw = [];
   }
-
   const aiFindings = raw.map((f) => applyTrustControls(f, now)).filter(Boolean);
   return {
     ...lintReport,
     findings: mergeFindings(lintReport, aiFindings),
-    aiPass: { status: usedCache ? 'stale-cache' : (aiFindings.length || aiStatus === 'ok' ? 'ok' : aiStatus), usedCache, aiFindingCount: aiFindings.length },
+    aiPass: { status, usedCache, aiFindingCount: aiFindings.length },
   };
 }
 
@@ -188,7 +176,9 @@ module.exports = {
   runAiPass,
   composeResearchPrompt,
   applyTrustControls,
+  decideTrust,
   mergeFindings,
+  dispatchWithRetry,
   tierWindowMs,
   FRESHNESS_TIER_DAYS,
 };
