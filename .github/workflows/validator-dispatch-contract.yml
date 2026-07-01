@@ -1,0 +1,38 @@
+name: Validator Dispatch Contract
+# Refs #3456 (Epic #3411 Carve-out 2) — makes it impossible for a governance
+# validator to be silently undispatched. Fails when any discovered validator
+# has an empty dispatchedBy in inventory/validator-dispatch-contract.json.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/global/megalint/**'
+      - 'scripts/global/validator-dispatch-contract.js'
+      - 'inventory/validator-dispatch-contract.json'
+      - '.github/workflows/validator-dispatch-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/global/megalint/**'
+      - 'scripts/global/validator-dispatch-contract.js'
+      - 'inventory/validator-dispatch-contract.json'
+      - '.github/workflows/validator-dispatch-contract.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validator-dispatch-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validator-dispatch-contract:
+    name: validator-dispatch-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Check validator dispatch contract (zero orphans)
+        run: node scripts/global/validator-dispatch-contract.js
