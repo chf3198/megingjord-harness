@@ -3,6 +3,11 @@ pre-commit:
   commands:
     docs-check-on-package-json:
       run: node scripts/global/pre-commit-docs-check.js
+    # #2686 (Epic #2399 AC5): advisory — flags newly-added operator-memory
+    # feedback_*.md files so the operator considers promotion to canonical
+    # instructions/. Non-blocking (always exit 0); bypass FEEDBACK_MEMORY_CHECK_BYPASS=1.
+    feedback-memory-promotion-advisory:
+      run: node scripts/global/feedback-memory-promotion-check.js
 
 pre-push:
   parallel: true

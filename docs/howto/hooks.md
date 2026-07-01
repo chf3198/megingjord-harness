@@ -45,6 +45,19 @@ the lookup is indeterminate (gh non-zero / timeout / absent). The gate stays
 honest — it still blocks a merge that truly has no PR — while no longer
 stranding a legitimate Admin merge on lost session state.
 
+## Pre-commit: operator-memory promotion advisory (#2686, Epic #2399 AC5)
+
+A `pre-commit` lefthook runs `scripts/global/feedback-memory-promotion-check.js`.
+When a commit **adds** a new operator-memory `feedback_*.md` file (git `A` status,
+matched by basename under a `memory` directory segment incl. `.claude/**/memory`),
+the check prints an advisory prompting the operator to consider promoting the
+rule-of-thumb to canonical `instructions/` (or `wiki/wisdom/global/concepts/`) per
+the Epic #2399 pattern.
+
+It is **advisory only** — it always exits 0 and never blocks a commit — and
+**idempotent**: it fires only on new additions, never on modified or pre-existing
+files. Bypass with `FEEDBACK_MEMORY_CHECK_BYPASS=1`.
+
 ## Post-merge worktree teardown actuation (#3357, Epic #3352)
 
 A `post-merge` lefthook runs `scripts/global/worktree-teardown-actuate.js --apply` so that when a
