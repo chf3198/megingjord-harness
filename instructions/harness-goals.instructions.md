@@ -48,6 +48,39 @@ G10 Maintainability.
 - G10 Maintainability: files <=100 lines; cyclomatic complexity <=10 per function;
   no dead code at merge; changes documented via GOV-009 EDD before implementation.
 
+## Operator Autonomy (cross-cutting principle — always-on, proportional)
+
+The harness is built to DECREASE human interaction, not increase it. Operator autonomy is a
+**cross-cutting, always-on principle** — NOT a ranked goal tradeable against G7 Throughput, and
+NOT a sub-clause of one goal (Epic #3391 Phase-0 #3394: unanimous Option B). It binds into G1 (a
+governed decision that needlessly pulls in the human is a governance defect) and the
+operator-identity contract (the client is design + UAT only). Because it is a principle and not a
+ranked goal, the priority sentence G1..G10 above is unchanged; autonomy is scored as its own
+dimension (see below), not inserted into the rank order.
+
+- **Default = resolve it yourself (reversible-fast-path).** For any reversible / low-risk decision
+  or action, the operator resolves it end-to-end — directly, or via the free cross-model
+  adjudication panel (`scripts/global/adjudication-guardrail.js`) — with NO escalation delay.
+  Routine dev decisions route to the panel / `fleet-decision-oracle`, never to a bare client prompt.
+- **Human ONLY at the 4 retained carve-outs** — the bounded, enumerated set; everything else is
+  operator-or-cross-model territory: (a) design direction, (b) UAT confirmation, (c) irreversible /
+  destructive real-world action, (d) deliberate weakening of a security/governance control. The
+  authoritative, **versioned + baton-governed** list is `config/retained-human-touchpoints.json`
+  (#3404); a new client-prompt surface absent from it is flagged by the surface validator.
+- **HARD-subordinate to two non-negotiable constraints:**
+  - **C-G1** — autonomy may not override G1 Governance: never fabricate/skip a ticket, baton step,
+    or provenance to avoid human contact.
+  - **C-G4** — autonomy may not override G4 Privacy & Security: never auto-weaken a
+    security/permission policy, exfiltrate, or bypass a credential control to avoid a prompt.
+  The seeding case is normative: refusing to auto-delete a security guard just to stop a prompt is
+  CORRECT and stays correct. Autonomy is never a license to skip safety or governance.
+- **Proportional.** The bar for reaching a human scales with irreversibility × blast-radius, not
+  operator convenience. Higher stakes → cross-model panel at a higher diversity floor, not a prompt.
+- **Observable (G8).** Every autonomy-vs-escalate decision is logged — route, risk tier, panel
+  scores, reversibility/rollback handle — via `scripts/global/client-prompt-rate.js`
+  (`logAdjudication`, #3405). The client-prompt-rate (non-carve-out prompts / total decisions)
+  targets zero.
+
 ## Tier-graceful degradation (cross-cutting pattern between G5 and G6)
 
 Every feature that can benefit from a higher-tier resource SHOULD use that
@@ -88,6 +121,12 @@ under Epic #2398 AC3 (per-script tier audit + frontmatter tags); until that
 validator ships, the rule is reviewer-enforced.
 
 ## Decision Lens (lightweight, required)
+
+**Autonomy check (always first, before the ranked checks):** Can the operator resolve this without
+the human? If the decision is reversible / low-risk, YES — resolve it directly or via the free
+cross-model panel, never a bare client prompt. Reach the client ONLY if it falls in one of the 4
+retained carve-outs (design / UAT / irreversible / security-weakening). Log the autonomy-vs-escalate
+decision (G8). This check is subordinate only to C-G1 and C-G4.
 
 For any design/routing/tooling decision, briefly verify in this order:
 1) Is it governance-compliant? 2) Does it improve or preserve quality?

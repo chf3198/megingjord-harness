@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""UserPromptSubmit hook: inject G1-G9 decision lens context.
+"""UserPromptSubmit hook: inject G1-G10 decision lens + operator-autonomy context.
 
 Per Epic #1113 AC5 (extends D-009 #1123 hybrid): full tier ladder
 B / B+ / B++ / B+++ / B++++ resolved from goal-tier-state.json + role.
 Tier ladder strings + resolver live in goal_tier_resolver.py.
+Epic #3391: also injects the cross-cutting operator-autonomy principle (Option B).
 """
 import json
 import os
@@ -15,9 +16,18 @@ from goal_tier_resolver import (
 )
 
 GOALS = (
-    "G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy > "
+    "G1 Governance > G2 Quality > G3 Zero Cost > G4 Privacy & Security > "
     "G5 Portability > G6 Resilience > G7 Throughput > "
     "G8 Observability > G9 Interoperability > G10 Maintainability"
+)
+
+# Epic #3391 (Option B): operator autonomy is a cross-cutting, always-on PRINCIPLE
+# (not a ranked goal). Injected alongside the priority sentence on every prompt.
+AUTONOMY = (
+    "Operator autonomy (always-on principle): resolve reversible/low-risk work autonomously "
+    "(free cross-model panel, never a bare client prompt); reach the human only at the 4 retained "
+    "carve-outs (design/UAT/irreversible/security-weakening); never override C-G1 or C-G4; log the "
+    "autonomy-vs-escalate decision (G8)."
 )
 
 ANNEAL_RE = re.compile(
@@ -68,7 +78,7 @@ def main() -> int:
     if not prompt:
         return 0
 
-    base = f"Goal lens: {GOALS}."
+    base = f"Goal lens: {GOALS}. {AUTONOMY}"
     if DECISION_RE.search(prompt):
         base += " Decision check: justify any lower-priority override with explicit evidence."
     if ANNEAL_RE.search(prompt):
