@@ -49,6 +49,32 @@ def branch_has_commit_ahead(push_cwd, bases=("origin/main", "main")):
     return False
 
 
+
+
+def _worktree_paths(cwd=None):
+    """Linked worktree paths from `git worktree list --porcelain` (best-effort; [] on error).
+    Scoped to the repo at `cwd` when given, so a non-repo cwd yields [] (no cross-repo leak).
+    """
+    cmd = ["git"] + (["-C", cwd] if cwd else []) + ["worktree", "list", "--porcelain"]
+    try:
+        out = subprocess.run(
+            cmd, check=False, capture_output=True, text=True, timeout=5)
+    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        return []
+    if out.returncode != 0:
+        return []
+    return [line[len("worktree "):].strip()
+            for line in (out.stdout or "").splitlines() if line.startswith("worktree ")]
+
+
+def any_worktree_commit_ahead(cwd=None, bases=("origin/main", "main")):
+    """True when ANY linked worktree's branch has a commit ahead of base -- a cwd-independent
+    proof the Admin commit step ran, robust to cwd-churn / rebase state resets (#3469).
+    Fails closed (False) on any git error so the session-state check still governs.
+    """
+    return any(branch_has_commit_ahead(path, bases) for path in _worktree_paths(cwd))
+
+
 def commit_step_satisfied(joined, cwd, session_committed, load_state):
     """Decide whether the Admin commit-step is satisfied for a push.
 
@@ -65,5 +91,11 @@ def commit_step_satisfied(joined, cwd, session_committed, load_state):
         if (worktree_state.get("admin_ops") or {}).get("commit"):
             return True, True
     if branch_has_commit_ahead(push_cwd):
+        return True, True
+    # #3469: resolve_push_cwd fell back to the main checkout (no `-C`/`cd` in the push
+    # command) and/or a rebase reset the session commit flag. Re-derive the signal from
+    # live git across ALL linked worktrees so a real commit ahead of base authorizes the
+    # push with no manual hook-state patch.
+    if any_worktree_commit_ahead(cwd):
         return True, True
     return False, False
