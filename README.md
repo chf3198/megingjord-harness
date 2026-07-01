@@ -398,7 +398,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `routing:report` | `node scripts/global/routing-baseline-report.js --days 7` |
 | `routing:telemetry` | `node scripts/global/token-telemetry-report.js --json` |
 | `runtime-descriptor:check` | `node scripts/global/runtime-descriptor.js` |
-| `runtime-descriptor:check:test` | `node --test tests/runtime-descriptor.spec.js` |
+| `runtime-descriptor:check:test` | `node --test tests/runtime-descriptor-contract.spec.js` |
 | `runtime:worktree` | `bash scripts/agent-worktree.sh` |
 | `setup` | `npm install && echo '✅ megingjord ready — run: npm start'` |
 | `signing:bootstrap` | `node scripts/global/crypto-signing-bootstrap.js` |
