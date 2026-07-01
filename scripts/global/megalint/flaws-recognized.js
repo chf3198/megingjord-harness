@@ -80,7 +80,9 @@ function checkEntries(name, block) {
 }
 
 // Validate one artifact's flaws_recognized block. Returns raw findings (severity set by caller).
-function checkArtifact(name, body) {
+// candidates (optional): the checkpoint-surfaced feed for this artifact's review-point, enabling the
+// P1-f none-vs-candidate reconciler. opts.incidentsPath feeds the recurrence-escalation read.
+function checkArtifact(name, body, candidates, opts = {}) {
   const state = flawFieldState(body, 'flaws_recognized');
   if (state === 'missing') {
     return [{ rule: 'flaws-recognized-missing',
@@ -90,18 +92,34 @@ function checkArtifact(name, body) {
     return [{ rule: 'flaws-recognized-empty', detail: `${name} flaws_recognized: has no value.` }];
   }
   const block = extractBlock(body) || '';
-  // A bare `none` is a valid disposition; the none-vs-candidate rule is the P1-f reconciler.
-  if (/flaws_recognized\s*:\s*none\b/i.test(block)) return [];
+  // A bare `none` is a valid disposition by itself; the none-vs-candidate rule (P1-f #3433) checks it
+  // against the surfaced candidate feed when one is supplied (candidates), else stays lenient (back-compat).
+  if (/flaws_recognized\s*:\s*none\b/i.test(block)) {
+    if (Array.isArray(candidates) && candidates.length) {
+      const { validateArtifact } = require('../none-vs-candidate-reconciler');
+      return validateArtifact(name, body, candidates, opts);
+    }
+    return [];
+  }
   return checkEntries(name, block);
 }
 
+// Map an artifact name to the review-point surface its candidate feed is keyed under.
+const SURFACE_FOR = {
+  MANAGER_HANDOFF: 'review-point:manager', COLLABORATOR_HANDOFF: 'review-point:collaborator',
+  ADMIN_HANDOFF: 'review-point:admin', CONSULTANT_CLOSEOUT: 'review-point:consultant',
+};
+
 function validate(input) {
   const comments = (input && input.comments) || [];
+  const bySurface = (input && input.candidatesBySurface) || {};
   const violations = [];
   for (const spec of ARTIFACTS) {
     const found = findArtifact(comments, spec.re);
     if (!found) continue; // only check artifacts actually present on the issue
-    for (const finding of checkArtifact(spec.name, found.body || '')) {
+    const candidates = bySurface[SURFACE_FOR[spec.name]] || null;
+    for (const finding of checkArtifact(spec.name, found.body || '', candidates,
+      { incidentsPath: input && input.incidentsPath })) {
       violations.push({ ...finding, severity: ADVISORY });
     }
   }
