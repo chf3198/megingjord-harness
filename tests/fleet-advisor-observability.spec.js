@@ -73,3 +73,10 @@ test('emitReport writes a valid v3 line to an injected file', () => {
     if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
   }
 });
+
+test('panel — host/model names are HTML-escaped (G4, no XSS injection)', () => {
+  const ev = obs.buildReportEvent({ tier: 'F2', fleetCalls: 1, perHost: [{ host: '<img src=x onerror=alert(1)>', model: 'a"b', tokensPerSec: 1, coldLoadRate: 0, vramPressure: 0 }] }, { ts: '2026-07-01T00:00:00Z' });
+  const html = panel.renderFleetAdvisorPanel(ev);
+  assert.doesNotMatch(html, /<img src=x/);
+  assert.match(html, /&lt;img/);
+});

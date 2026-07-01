@@ -3,6 +3,16 @@
 // the headline dollars-saved metric plus per-{host,model} tokens/sec, cold-load, and VRAM pressure.
 // Pure view-model logic (summarize/render) is node-testable; the DOM wiring is browser-guarded.
 
+/** Escape a string for safe HTML interpolation (host/model names come from the fleet probe — G4). */
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 /** Transform a fleet-advisor.report event into a panel view-model (defensive against missing fields). */
 function summarizeReport(event) {
   const e = event || {};
@@ -27,9 +37,9 @@ function summarizeReport(event) {
 function renderFleetAdvisorPanel(event) {
   const vm = summarizeReport(event);
   const rows = vm.hosts.map((h) =>
-    `<tr><td>${h.host}</td><td>${h.model}</td><td>${h.tokensPerSec}</td>`
+    `<tr><td>${escapeHtml(h.host)}</td><td>${escapeHtml(h.model)}</td><td>${Number(h.tokensPerSec) || 0}</td>`
     + `<td>${(h.coldLoadRate * 100).toFixed(0)}%</td><td>${(h.vramPressure * 100).toFixed(0)}%</td></tr>`).join('');
-  return `<section class="fleet-advisor-panel" data-tier="${vm.tier}">`
+  return `<section class="fleet-advisor-panel" data-tier="${escapeHtml(vm.tier)}">`
     + `<h3>Fleet Advisor throughput &amp; pressure</h3>`
     + `<p class="headline">$${vm.dollarsSaved} saved &middot; ${vm.tokensPerSec} tok/s avg &middot; tier ${vm.tier}</p>`
     + `<table><thead><tr><th>Host</th><th>Model</th><th>tok/s</th><th>cold-load</th><th>VRAM</th></tr></thead>`
@@ -50,5 +60,5 @@ function initFleetAdvisorPanel(win) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { summarizeReport, renderFleetAdvisorPanel, initFleetAdvisorPanel };
+  module.exports = { summarizeReport, renderFleetAdvisorPanel, initFleetAdvisorPanel, escapeHtml };
 }
