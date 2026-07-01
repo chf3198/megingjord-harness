@@ -152,3 +152,29 @@ test('resolveBaseRef honours an injected root (origin/main|main candidates resol
     fs2.rmSync(repo, { recursive: true, force: true });
   }
 });
+
+test('checkNaming does not flag GitHub ticket refs in comments or hyphenated identifiers (#3470)', () => {
+  const inlineRef = checkContent('const enabled = true; // #3428 Epic #3425 P1-a\n', 'scripts/s.js');
+  assert.equal(inlineRef.some(w => w.rule === 'magic-number'), false, 'inline // #N ref is not a magic number');
+
+  const fullLineRef = checkContent('// Refs #3428 tracks this\nconst enabled = true;\n', 'scripts/s.js');
+  assert.equal(fullLineRef.some(w => w.rule === 'magic-number'), false, 'full-line // ref clean');
+
+  const quotedId = checkContent("const patternId = 'F6-3424-worktree-residual';\n", 'scripts/s.js');
+  assert.equal(quotedId.some(w => w.rule === 'magic-number'), false, 'hyphenated quoted identifier clean');
+
+  const wordAdjacent = checkContent('const ref = ticket3424;\n', 'scripts/s.js');
+  assert.equal(wordAdjacent.some(w => w.rule === 'magic-number'), false, 'word-adjacent digit run clean');
+
+  // anti-over-suppress: a genuine STANDALONE magic number MUST still flag.
+  const genuine = checkContent('const timeout = 5000;\n', 'scripts/s.js');
+  assert.equal(genuine.some(w => w.rule === 'magic-number'), true, 'genuine magic number still flagged');
+
+  // panel edge case: punctuation-adjacent standalone literal still flags.
+  const punct = checkContent('callWith(5000, base);\n', 'scripts/s.js');
+  assert.equal(punct.some(w => w.rule === 'magic-number'), true, 'paren/comma-adjacent literal still flagged');
+
+  // panel edge case: a `//` INSIDE a string literal must not truncate a later magic number.
+  const urlThenMagic = checkContent("const url = 'https://h'; const httpTimeout = 6000;\n", 'scripts/s.js');
+  assert.equal(urlThenMagic.some(w => w.rule === 'magic-number'), true, 'string // does not hide a later magic number');
+});
