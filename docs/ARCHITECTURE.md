@@ -47,6 +47,7 @@ Codex                          policy.json          OR Cloud (Claude /       + s
 | **Dashboard**            | `dashboard/index.html`               | [architecture-governance.md](architecture-governance.md) |
 | **Fleet**                | `resolve-inventory.js` + `*.example.json` | [architecture-routing.md](architecture-routing.md)       |
 | **Deployment**           | `scripts/deploy.sh`                  | [architecture-deployment.md](architecture-deployment.md) |
+| **Runtime onboarding**   | `scripts/global/harness-add-runtime.js` | Scaffold generator (Epic #3411 T2.1): derives every per-runtime artifact plan from the feature catalog + descriptor; dry-run default, transactional apply |
 
 ## Key quality attributes
 
