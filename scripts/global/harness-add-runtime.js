@@ -56,6 +56,31 @@ function loadRegistryContext(repoRoot) {
   return { actorMap, routingAdapters, signatures, selfTest, orcParity, pkgJson };
 }
 
+function loadDescriptorDeployHome(runtimeId, repoRoot) {
+  const descriptorPath = path.join(repoRoot, 'inventory', 'runtimes', `${runtimeId}.json`);
+  if (!fs.existsSync(descriptorPath)) return null;
+  try {
+    const descriptor = loadJson(descriptorPath);
+    return (descriptor.deploy && descriptor.deploy.home) || null;
+  } catch (_err) {
+    return null;
+  }
+}
+
+// buildExtendedSurfaceActions builds the T2.7 (#3450) six new onboarding surface actions.
+// Extracted to keep buildAllActions within the 30-line readability limit.
+function buildExtendedSurfaceActions(runtimeId, repoRoot) {
+  const deployHome = loadDescriptorDeployHome(runtimeId, repoRoot);
+  return [
+    planBuilders.lefthookAction(runtimeId, repoRoot),
+    planBuilders.governanceProfilesAction(runtimeId, repoRoot),
+    planBuilders.instructionSetAction(runtimeId, repoRoot),
+    planBuilders.authProfileAction(runtimeId, repoRoot),
+    planBuilders.goalTierAction(runtimeId, repoRoot),
+    planBuilders.configDirAction(runtimeId, repoRoot, deployHome),
+  ];
+}
+
 function buildAllActions(runtimeId, repoRoot, registryCtx) {
   const {
     actorMap, routingAdapters, signatures, selfTest, orcParity, pkgJson,
@@ -65,7 +90,7 @@ function buildAllActions(runtimeId, repoRoot, registryCtx) {
   const knownRuntimes = loadDetectRuntimeKnown(repoRoot);
   const deployTargets = loadDeployShTargets(repoRoot);
 
-  return [
+  const coreActions = [
     planBuilders.descriptorAction(runtimeId, repoRoot),
     planBuilders.githubActorMapAction(runtimeId, repoRoot, actorMap.actors),
     planBuilders.routingAdaptersAction(runtimeId, repoRoot, routingAdapters.runtimeKinds),
@@ -78,6 +103,7 @@ function buildAllActions(runtimeId, repoRoot, registryCtx) {
     planBuilders.packageDeployAction(runtimeId, repoRoot, pkgJson.scripts),
     planBuilders.packageHarnessScriptAction(runtimeId, repoRoot, pkgJson.scripts),
   ];
+  return [...coreActions, ...buildExtendedSurfaceActions(runtimeId, repoRoot)];
 }
 
 function sortPlanBySurface(actions) {

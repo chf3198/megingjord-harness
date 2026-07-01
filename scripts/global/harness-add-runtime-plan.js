@@ -189,6 +189,94 @@ function packageHarnessScriptAction(runtimeId, repoRoot, pkgScripts) {
   };
 }
 
+// ── T2.7 (#3450) — six new onboarding surfaces ────────────────────────────────
+// Already-present detection strategy:
+//   - shared-file surfaces (lefthook, governance-profiles, auth-profile, goal-tier):
+//     already-present when the shared file exists — all committed runtimes qualify.
+//   - instruction-set: already-present when runtime descriptor exists (descriptor
+//     presence means the runtime is registered and its instruction path is trackable).
+//   - config-dir: already-present when descriptor.deploy.home is non-empty.
+//   This ensures all 5 committed runtimes show already-present (choice A per spec).
+
+function lefthookAction(runtimeId, repoRoot) {
+  const filePath = path.join(repoRoot, 'lefthook.yml');
+  const alreadyPresent = fs.existsSync(filePath);
+  return {
+    surface: surfaces.SURFACE_LEFTHOOK,
+    file: filePath,
+    op: alreadyPresent ? 'already-present' : 'create-file',
+    detail: alreadyPresent
+      ? `lefthook.yml already exists — shared pre-push wiring covers ${runtimeId}`
+      : `Create lefthook.yml with pre-push hook commands for ${runtimeId}`,
+  };
+}
+
+function governanceProfilesAction(runtimeId, repoRoot) {
+  const filePath = path.join(repoRoot, 'hooks', 'governance-profiles.json');
+  const alreadyPresent = fs.existsSync(filePath);
+  return {
+    surface: surfaces.SURFACE_GOVERNANCE_PROFILES,
+    file: filePath,
+    op: alreadyPresent ? 'already-present' : 'create-file',
+    detail: alreadyPresent
+      ? `governance-profiles.json already exists — ${runtimeId} covered by repo-type profiles`
+      : `Create hooks/governance-profiles.json with repo-type governance profiles for ${runtimeId}`,
+  };
+}
+
+function instructionSetAction(runtimeId, repoRoot) {
+  const descriptorPath = path.join(repoRoot, 'inventory', 'runtimes', `${runtimeId}.json`);
+  const alreadyPresent = fs.existsSync(descriptorPath);
+  return {
+    surface: surfaces.SURFACE_INSTRUCTION_SET,
+    file: path.join(repoRoot, 'inventory', 'runtimes', `${runtimeId}.json`),
+    op: alreadyPresent ? 'already-present' : 'create-file',
+    detail: alreadyPresent
+      ? `runtime descriptor for ${runtimeId} exists — instruction-set path is tracked via deploy.home`
+      : `Create runtime descriptor for ${runtimeId} and wire instruction-set path under deploy.home`,
+  };
+}
+
+function authProfileAction(runtimeId, repoRoot) {
+  const filePath = path.join(repoRoot, 'config', 'authorization-profiles.json');
+  const alreadyPresent = fs.existsSync(filePath);
+  return {
+    surface: surfaces.SURFACE_AUTH_PROFILE,
+    file: filePath,
+    op: alreadyPresent ? 'already-present' : 'create-file',
+    detail: alreadyPresent
+      ? `authorization-profiles.json already exists — shared auth profile covers ${runtimeId}`
+      : `Create config/authorization-profiles.json with default authorization profile for ${runtimeId}`,
+  };
+}
+
+function goalTierAction(runtimeId, repoRoot) {
+  const filePath = path.join(repoRoot, 'scripts', 'global', 'model-routing-policy.json');
+  const alreadyPresent = fs.existsSync(filePath);
+  return {
+    surface: surfaces.SURFACE_GOAL_TIER,
+    file: filePath,
+    op: alreadyPresent ? 'already-present' : 'insert-registry-member',
+    detail: alreadyPresent
+      ? `model-routing-policy.json already exists — per-role lane preferences cover ${runtimeId}`
+      : `Add ${runtimeId} per-role lane/goal-tier preferences to model-routing-policy.json`,
+  };
+}
+
+function configDirAction(runtimeId, repoRoot, descriptorDeployHome) {
+  const descriptorPath = path.join(repoRoot, 'inventory', 'runtimes', `${runtimeId}.json`);
+  const alreadyPresent = Boolean(descriptorDeployHome) || fs.existsSync(descriptorPath);
+  const deployHome = descriptorDeployHome || `~/.${runtimeId}`;
+  return {
+    surface: surfaces.SURFACE_CONFIG_DIR,
+    file: descriptorPath,
+    op: alreadyPresent ? 'already-present' : 'create-file',
+    detail: alreadyPresent
+      ? `config-dir ${deployHome} declared for ${runtimeId} via runtime descriptor`
+      : `Declare config-dir path ~/.${runtimeId} in runtime descriptor for ${runtimeId}`,
+  };
+}
+
 module.exports = {
   descriptorAction,
   githubActorMapAction,
@@ -201,4 +289,10 @@ module.exports = {
   deployShAction,
   packageDeployAction,
   packageHarnessScriptAction,
+  lefthookAction,
+  governanceProfilesAction,
+  instructionSetAction,
+  authProfileAction,
+  goalTierAction,
+  configDirAction,
 };
