@@ -140,5 +140,58 @@ class CheckTerminalShellWriteGuard(unittest.TestCase):
         self.assertNotEqual(captured.get("decision"), "deny")
 
 
+class RedirectFalsePositiveGuard(unittest.TestCase):
+    """#3471: PROSE `>`/`>=` (quoted, here-doc body, or a comparison) is NOT a redirect,
+    while a genuine redirect to an unquoted target is still caught (anti-over-suppress)."""
+
+    def test_quoted_gt_prose_not_redirect(self):
+        self.assertEqual(pretool_guard.shell_write_targets("echo 'G2 > G3'"), [])
+
+    def test_double_quoted_gt_prose_not_redirect(self):
+        self.assertEqual(pretool_guard.shell_write_targets('echo "score > 90"'), [])
+
+    def test_gte_comparison_not_redirect(self):
+        self.assertEqual(pretool_guard.shell_write_targets("echo aggregate >= 0.85"), [])
+
+    def test_gt_and_gte_literal_not_redirect(self):
+        self.assertEqual(pretool_guard.shell_write_targets("echo '> and >='"), [])
+
+    def test_heredoc_body_gt_not_redirect(self):
+        cmd = "gh issue comment 1 --body-file - <<EOF\nG1 > G2 > G10\nEOF"
+        self.assertEqual(pretool_guard.shell_write_targets(cmd), [])
+
+    def test_heredoc_quoted_delim_body_not_redirect(self):
+        cmd = "cat <<'EOF'\nrubric >= 0.85 and G1 > G2\nEOF"
+        self.assertEqual(pretool_guard.shell_write_targets(cmd), [])
+
+    def test_genuine_redirect_beside_quoted_prose_still_caught(self):
+        # AC4: a real redirect OUTSIDE quotes is still detected even next to quoted prose.
+        self.assertIn("out.js", pretool_guard.shell_write_targets("echo 'a > b' > out.js"))
+
+    def test_append_after_prose_still_caught(self):
+        self.assertIn("t.js", pretool_guard.shell_write_targets("printf 'x >= y' >> t.js"))
+
+    def test_unterminated_quote_failopen(self):
+        # never raise on malformed input; a masked span is harmless.
+        self.assertIsInstance(pretool_guard.shell_write_targets("echo 'oops > x"), list)
+
+
+class CommandStringScoping(unittest.TestCase):
+    """#3471 AC3: only the command field is scanned, never the description metadata field."""
+
+    def test_command_field_extracted(self):
+        self.assertEqual(
+            pretool_guard._command_string({"command": "ls -l", "description": "writes >> nothing"}),
+            "ls -l")
+
+    def test_description_gt_not_scanned(self):
+        tool_input = {"command": "ls", "description": "this tool writes > to a file, uses >="}
+        scanned = pretool_guard.shell_write_targets(pretool_guard._command_string(tool_input))
+        self.assertEqual(scanned, [])
+
+    def test_fallback_joins_when_no_command_field(self):
+        self.assertIn("hello", pretool_guard._command_string({"foo": "hello"}))
+
+
 if __name__ == "__main__":
     unittest.main()
