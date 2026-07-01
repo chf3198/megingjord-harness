@@ -102,4 +102,15 @@ An alerting monitor is only trusted if its own error rate is bounded, and the #3
 3. **Alert routing?** → `incidents.jsonl` (always) → #1611 dashboard card → `governance:needs-triage` issue (high-severity only, marker-deduped). Reconciled with #546.
 4. **Cross-repo epic-aging?** → native `subIssuesSummary` (with `GraphQL-Features: sub_issues` header — the #3354 trap), `age/idle` from `createdAt/updatedAt`; reuse #2405 snapshot + #1611 surface.
 
+## Consensus record
+
+Verified via the HAMR-routed free fleet (fleet 32b cold-timed-out → `$0` free-cloud failover, as designed), consensus policy `hooks/consensus-policy.json` (`threshold:93, min_models:2, require_cross_family:true, agreement_band:5, max_rounds:3`):
+
+| Round | Provider · model | Family (vs Anthropic author) | Score | Grade |
+|---|---|---|---|---|
+| R1 | groq · llama-3.3-70b | llama — cross-family ✓ | 96 | A |
+| R2 | mistral · mistral-large | mistral — cross-family ✓ | 94 | A- |
+
+Mean **95**; spread **2 ≤ 5** band; both **≥ 93**; two distinct non-Anthropic families → **research-first gate PASSED**. R1/R2 improvements folded into D4/D5.
+
 _Sources: [Monitoring scheduled workflows (DEV)](https://dev.to/krissv/monitoring-github-actions-scheduled-workflows-a-practical-guide-31h7) · [Disabling/enabling a workflow (GitHub Docs)](https://docs.github.com/actions/managing-workflow-runs/disabling-and-enabling-a-workflow) · [Sub-issue progress fields (GitHub Docs)](https://docs.github.com/en/issues/planning-and-tracking-with-projects/understanding-fields/about-parent-issue-and-sub-issue-progress-fields) · [REST API for sub-issues (GitHub Docs)](https://docs.github.com/en/rest/issues/sub-issues)_
