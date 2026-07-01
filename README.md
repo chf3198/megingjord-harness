@@ -381,6 +381,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `merge-evidence:snapshot` | `node scripts/global/merge-evidence-snapshot.js` |
 | `output:clip` | `node scripts/global/output-clipper.js` |
 | `parity:matrix` | `node scripts/global/harness-parity-matrix.js` |
+| `parity:replay-eval` | `node scripts/global/harness-parity-replay-eval.js` |
 | `prefix:cache-report` | `node scripts/global/prefix-cache.js` |
 | `prepare` | `bash scripts/install-git-hooks.sh` |
 | `prompt-artifact:lint` | `node scripts/global/megalint/prompt-artifact-lint.js` |

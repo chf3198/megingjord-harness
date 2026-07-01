@@ -373,7 +373,8 @@
     "fleet-advisor:rules-doc": "node scripts/global/fleet-advisor-rules-doc.js",
     "fleet-advisor:rules-doc:check": "node scripts/global/fleet-advisor-rules-doc.js --check",
     "fleet-advisor:lint:test": "node --test tests/fleet-advisor-lint.spec.js tests/fleet-advisor-rule-coverage.spec.js",
-    "fleet-advisor:stress": "node --test tests/stress-fleet-advisor-lint.spec.js"
+    "fleet-advisor:stress": "node --test tests/stress-fleet-advisor-lint.spec.js",
+    "parity:replay-eval": "node scripts/global/harness-parity-replay-eval.js"
   },
   "keywords": [
     "devops",

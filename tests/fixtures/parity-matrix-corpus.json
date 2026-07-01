@@ -1,0 +1,186 @@
+[
+  {
+    "id": "pm-001",
+    "description": "Feature declared full, ssotFile missing — genuine parity gap",
+    "cell": {
+      "featureId": "baton-signing",
+      "runtime": "claude-code",
+      "declaredStatus": "full",
+      "ssotFiles": ["scripts/global/__nonexistent_baton_signing__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-002",
+    "description": "Feature declared unverified, ssotFile missing — probe still flags",
+    "cell": {
+      "featureId": "hook-dispatch",
+      "runtime": "codex",
+      "declaredStatus": "unverified",
+      "ssotFiles": ["scripts/global/__nonexistent_hook_dispatch__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-003",
+    "description": "Feature structural-NA but no substituteTest declared — na-without-substitute",
+    "cell": {
+      "featureId": "visual-qa",
+      "runtime": "codex",
+      "declaredStatus": "structural-NA",
+      "ssotFiles": ["scripts/global/__nonexistent_visual_qa__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-004",
+    "description": "Feature waived, no substituteTest — na-without-substitute verdict",
+    "cell": {
+      "featureId": "playwright-browser",
+      "runtime": "copilot",
+      "declaredStatus": "waived",
+      "ssotFiles": ["scripts/global/__nonexistent_playwright__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-005",
+    "description": "Feature declared partial, ssotFile missing — genuine lowering",
+    "cell": {
+      "featureId": "fleet-routing",
+      "runtime": "antigravity",
+      "declaredStatus": "partial",
+      "ssotFiles": ["scripts/global/__nonexistent_fleet_routing__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-006",
+    "description": "Feature declared advisory-backstop-exists, ssotFile absent — probe flags",
+    "cell": {
+      "featureId": "anneal-signal",
+      "runtime": "cursor",
+      "declaredStatus": "advisory-backstop-exists",
+      "ssotFiles": ["scripts/global/__nonexistent_anneal_signal__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  },
+  {
+    "id": "pm-007",
+    "description": "Feature wired and ssotFile present — ok verdict, not a gap",
+    "cell": {
+      "featureId": "detect-runtime",
+      "runtime": "claude-code",
+      "declaredStatus": "full",
+      "ssotFiles": ["scripts/global/detect-runtime.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "legit-NA"
+  },
+  {
+    "id": "pm-008",
+    "description": "Feature declared absent — ok verdict by design (not a wiring claim)",
+    "cell": {
+      "featureId": "hamr-bundle",
+      "runtime": "codex",
+      "declaredStatus": "absent",
+      "ssotFiles": ["scripts/global/__nonexistent_hamr_bundle__.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "legit-NA"
+  },
+  {
+    "id": "pm-009",
+    "description": "Feature parity:no — excluded by the parity gate before probeCell runs; excluded from scoring",
+    "cell": {
+      "featureId": "enterprise-sso",
+      "runtime": "claude-code",
+      "declaredStatus": "structural-NA",
+      "ssotFiles": [],
+      "hasSubstituteTest": false,
+      "parityFlag": "no"
+    },
+    "label": "legit-waiver-excluded"
+  },
+  {
+    "id": "pm-010",
+    "description": "No ssotFiles declared at all — allPresent is true (fail-open), ok verdict",
+    "cell": {
+      "featureId": "meta-feature-no-ssot",
+      "runtime": "copilot",
+      "declaredStatus": "unverified",
+      "ssotFiles": [],
+      "hasSubstituteTest": false
+    },
+    "label": "legit-NA"
+  },
+  {
+    "id": "pm-011",
+    "description": "Structural-NA with valid substituteTest and wired ssotFile — ok-na, waiver is tested",
+    "cell": {
+      "featureId": "playwright-ui",
+      "runtime": "codex",
+      "declaredStatus": "structural-NA",
+      "ssotFiles": ["scripts/global/detect-runtime.js"],
+      "hasSubstituteTest": true,
+      "substituteTest": "tests/harness-parity-matrix.spec.js"
+    },
+    "label": "legit-waiver-excluded"
+  },
+  {
+    "id": "pm-012",
+    "description": "Waived cell with valid substituteTest and wired ssotFile — ok-na, legitimate tested waiver",
+    "cell": {
+      "featureId": "browser-automation",
+      "runtime": "antigravity",
+      "declaredStatus": "waived",
+      "ssotFiles": ["scripts/global/detect-runtime.js"],
+      "hasSubstituteTest": true,
+      "substituteTest": "tests/harness-parity-matrix.spec.js"
+    },
+    "label": "legit-waiver-excluded"
+  },
+  {
+    "id": "pm-013",
+    "description": "Structural-NA with substituteTest on cursor runtime — tested waiver, excluded",
+    "cell": {
+      "featureId": "dashboard-render",
+      "runtime": "cursor",
+      "declaredStatus": "structural-NA",
+      "ssotFiles": ["scripts/global/detect-runtime.js"],
+      "hasSubstituteTest": true,
+      "substituteTest": "tests/harness-parity-matrix.spec.js"
+    },
+    "label": "legit-waiver-excluded"
+  },
+  {
+    "id": "pm-014",
+    "description": "Feature fully wired on copilot runtime, ssotFile present — ok, not a gap",
+    "cell": {
+      "featureId": "role-signing",
+      "runtime": "copilot",
+      "declaredStatus": "unverified",
+      "ssotFiles": ["scripts/global/agent-signature.js"],
+      "hasSubstituteTest": false
+    },
+    "label": "legit-NA"
+  },
+  {
+    "id": "pm-015",
+    "description": "Feature declared full but ssotFile is HOME-relative (not probeable) — genuine gap",
+    "cell": {
+      "featureId": "goal-tier-state",
+      "runtime": "claude-code",
+      "declaredStatus": "full",
+      "ssotFiles": ["~/.megingjord/goal-tier-state.json"],
+      "hasSubstituteTest": false
+    },
+    "label": "genuine-lowering"
+  }
+]
