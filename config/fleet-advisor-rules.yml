@@ -1,0 +1,120 @@
+# Fleet Advisor — Layer-① deterministic rule table (data, not code).
+# Source design: research/fleet-advisor-capability-3414.md §3.1 (Epic #3414, Phase-0 #3415).
+#
+# Each rule is DATA. The engine (scripts/global/fleet-advisor-lint.js) computes a flat
+# `signals` map from the fleet fingerprint; a rule fires when signals[<signal>] === <expect>.
+# No arbitrary code lives in this file — only rule metadata + the named signal a rule keys on.
+version: 1
+rules:
+  - id: L-WARM-01
+    signal: dispatch.keepAliveMissing
+    expect: true
+    severity: high
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: Dispatch issues no keep_alive; models cold-evict between calls
+    recommendation: Set a per-model keep_alive in cascade-dispatch so hot-path models stay resident (eliminates the cold-load stall).
+  - id: L-WARM-02
+    signal: warm.hotModelNotResident
+    expect: true
+    severity: med
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: Hot-path model not resident at session start
+    recommendation: Warm the hot-path model on SessionStart so the first dispatch is not a cold load.
+  - id: L-OFFLOAD-01
+    signal: offload.hotPathCpuSpill
+    expect: true
+    severity: high
+    class: IT-actionable
+    tiers: [F2, F3, F4]
+    title: A routinely-dispatched model is CPU-offloaded (size_vram < size) on the hot path
+    recommendation: Route the hot path to a GPU-resident model; reserve the offloaded model for high-stakes only (or add VRAM — client gate).
+  - id: L-HOST-01
+    signal: hosts.policyHostUnreachable
+    expect: true
+    severity: high
+    class: IT-actionable
+    tiers: [F2, F3, F4]
+    title: A policy-listed fleet host is unreachable
+    recommendation: Diagnose + repair the unreachable host (network/mesh/engine); until then load-balance across the reachable hosts.
+  - id: L-HOST-02
+    signal: hosts.singleHostButLoadBalanceImplied
+    expect: true
+    severity: low
+    class: informational
+    tiers: [F2]
+    title: Only one host reachable but policy implies load-balancing
+    recommendation: Either bring a second host online (F3) or remove the load-balance assumption from policy.
+  - id: L-ROSTER-01
+    signal: roster.noGpuResidentStrongModel
+    expect: true
+    severity: med
+    class: IT-actionable
+    tiers: [F2, F3, F4]
+    title: No GPU-resident-capable strong model installed for the detected VRAM
+    recommendation: Pull a strong model that fits GPU-resident at the detected VRAM (throughput-per-watt best fit).
+  - id: L-QUANT-01
+    signal: quant.largerThanBestFit
+    expect: true
+    severity: low
+    class: IT-actionable
+    tiers: [F2, F3, F4]
+    title: A model's quant is larger than the best fit for available VRAM
+    recommendation: Re-pull the model at a quant that fits GPU-resident (e.g. Q4_K_M) to avoid CPU spill.
+  - id: L-STAKES-01
+    signal: stakes.noGateThirtyTwoBOnCommonPath
+    expect: true
+    severity: high
+    class: IT-actionable
+    tiers: [F2, F3, F4]
+    title: No deterministic 7B/32B stakes gate; 32B is on the common path
+    recommendation: Add a deterministic stakes gate — routine coding to the GPU-resident 7B, 32B reserved for genuine high-stakes.
+  - id: L-TOOL-01
+    signal: tool.agenticDisabledOrUnhealthy
+    expect: true
+    severity: med
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: Fleet agentic tool-use disabled/unhealthy while the panel is the only reviewer
+    recommendation: Enable + health-check fleet tool-use (grammar-constrained output) so agentic calls are dependable.
+  - id: L-ENGINE-01
+    signal: engine.versionStale
+    expect: true
+    severity: low
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: Inference engine version is stale beyond N minor releases
+    recommendation: Upgrade the engine to pick up throughput + correctness fixes (review release notes first).
+  - id: L-OBS-01
+    signal: obs.noTelemetrySevenDays
+    expect: true
+    severity: low
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: No fleet telemetry emitted in the last 7 days
+    recommendation: Wire the fleet-advisor observability signal so tokens/sec + cold-load + fallback rate are measured.
+  - id: L-FAULT-01
+    signal: fault.recentTransient
+    expect: true
+    severity: med
+    class: IT-actionable
+    tiers: [F1, F2, F3, F4]
+    title: A one-off GPU OOM / driver reset / engine crash in the recent log window
+    recommendation: Surface the transient fault to IT for review; never cache/suppress it (it may recur under load).
+  - id: L-ENGINE-02
+    signal: engine.higherThroughputEngineUnused
+    expect: true
+    severity: low
+    class: IT-actionable
+    tiers: [F3, F4]
+    title: A higher-throughput engine (vLLM/TGI) is installed but unused for concurrent agentic load
+    recommendation: Review moving concurrent agentic load to the continuous-batching engine already installed.
+  - id: L-CLOUD-01
+    signal: cloud.noFreeProvidersWired
+    expect: true
+    severity: med
+    class: IT-actionable
+    tiers: [F0, F1]
+    title: No free-cloud providers wired and no local fleet to fall back on
+    recommendation: Wire the $0 free-cloud providers (keys) so there is a zero-cost substrate; note the break-even point where a local fleet would pay off.
