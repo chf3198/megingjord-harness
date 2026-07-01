@@ -68,3 +68,15 @@ test('parseToolCall never throws and rejects non-string / empty', () => {
     assert.doesNotThrow(() => h.parseToolCall(bad, CORPUS.schema));
   }
 });
+
+test('robust extraction — a throwaway brace group before the real object is skipped (schema-valid wins)', () => {
+  const out = 'thinking {maybe:later} final: {"tool":"run","args":{"cmd":"x"}}';
+  const r = h.parseToolCall(out, CORPUS.schema);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.tool, 'run');
+});
+
+test('robust extraction — braces inside string literals do not break candidate scanning', () => {
+  const out = '{"tool":"say","args":{"msg":"use { and } carefully"}}';
+  assert.equal(h.parseToolCall(out, CORPUS.schema).ok, true);
+});

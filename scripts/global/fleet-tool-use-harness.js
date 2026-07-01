@@ -21,31 +21,70 @@ const RELIABILITY_BAR = 0.9;
 const DEFAULT_MAX_RETRIES = 2;
 
 /**
- * Extract the first JSON object from model output (models often wrap JSON in prose/code fences) and
- * validate it against a minimal schema ({ required: [...], properties: { k: 'string'|'number'|... } }).
- * Returns { ok, value } or { ok:false, reason }. Never throws.
+ * Scan text for every top-level BALANCED {...} substring. Models routinely wrap JSON in prose or emit a
+ * throwaway brace group before the real object, so we collect all candidates rather than a naive
+ * first-brace-to-last-brace slice (which fails on sibling groups). String-literal aware.
+ */
+function extractJsonCandidates(text) {
+  const candidates = [];
+  let depth = 0;
+  let startIndex = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') { inString = true; continue; }
+    if (ch === '{') { if (depth === 0) startIndex = i; depth += 1; }
+    else if (ch === '}' && depth > 0) {
+      depth -= 1;
+      if (depth === 0 && startIndex !== -1) candidates.push(text.slice(startIndex, i + 1));
+    }
+  }
+  return candidates;
+}
+
+/** Validate a parsed object against a minimal schema ({ required, properties }). */
+function matchesSchema(value, schema) {
+  for (const key of schema.required || []) {
+    if (value[key] === undefined || value[key] === null) return `missing-field:${key}`;
+  }
+  for (const [key, type] of Object.entries(schema.properties || {})) {
+    if (value[key] !== undefined && typeof value[key] !== type) return `wrong-type:${key}`;
+  }
+  return null;
+}
+
+/**
+ * Extract + validate a tool call from model output against a minimal schema
+ * ({ required: [...], properties: { k: 'string'|'number'|... } }). Tries every balanced JSON candidate
+ * and returns the FIRST that both parses and satisfies the schema. Returns { ok, value } or
+ * { ok:false, reason }. Never throws.
  */
 function parseToolCall(text, schema = {}) {
   if (typeof text !== 'string') return { ok: false, reason: 'non-string-output' };
   const fenced = text.replace(/```(?:json)?/gi, '');
-  const start = fenced.indexOf('{');
-  const end = fenced.lastIndexOf('}');
-  if (start === -1 || end <= start) return { ok: false, reason: 'no-json-found' };
-  let value;
-  try {
-    value = JSON.parse(fenced.slice(start, end + 1));
-  } catch (err) {
-    return { ok: false, reason: `invalid-json:${err.message}` };
-  }
-  for (const key of schema.required || []) {
-    if (value[key] === undefined || value[key] === null) return { ok: false, reason: `missing-field:${key}` };
-  }
-  for (const [key, type] of Object.entries(schema.properties || {})) {
-    if (value[key] !== undefined && typeof value[key] !== type) {
-      return { ok: false, reason: `wrong-type:${key}` };
+  const candidates = extractJsonCandidates(fenced);
+  if (candidates.length === 0) return { ok: false, reason: 'no-json-found' };
+  let lastReason = 'invalid-json';
+  for (const candidate of candidates) {
+    let value;
+    try {
+      value = JSON.parse(candidate);
+    } catch (err) {
+      lastReason = `invalid-json:${err.message}`;
+      continue;
     }
+    const schemaError = matchesSchema(value, schema);
+    if (schemaError) { lastReason = schemaError; continue; }
+    return { ok: true, value };
   }
-  return { ok: true, value };
+  return { ok: false, reason: lastReason };
 }
 
 /** Build the deterministic re-prompt appended after a malformed response (schema reinforcement). */
@@ -123,6 +162,8 @@ function measureReliability(samples, opts = {}) {
 
 module.exports = {
   parseToolCall,
+  extractJsonCandidates,
+  matchesSchema,
   reinforcePrompt,
   constrainedToolDispatch,
   routeToolChain,
