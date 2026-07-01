@@ -11,7 +11,7 @@ const path = require('node:path');
 const { scoreCorpus, detectDrift, PROMOTION_PRECISION } = require('./harness-parity-replay-eval-score');
 const { auditRecord, isDisabled } = require('./harness-parity-replay-eval-audit');
 
-const DEFAULT_CORPUS = path.join(__dirname, '..', '..', 'tests', 'fixtures', 'parity-matrix-corpus.json');
+const DEFAULT_CORPUS = path.join(__dirname, '..', '..', 'tests', 'eval', 'parity-matrix-corpus.json');
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 
 function loadCorpus(filePath) {

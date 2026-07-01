@@ -1,6 +1,6 @@
 'use strict';
 // tests/parity-replay-eval.spec.js — eval-harness for #3454 (Epic #3411 T3.4)
-// The fixture under tests/fixtures/parity-matrix-corpus.json IS the eval-harness evidence.
+// The fixture under tests/eval/parity-matrix-corpus.json IS the eval-harness evidence.
 // node --test
 
 const { test } = require('node:test');
@@ -12,7 +12,7 @@ const { auditRecord, isDisabled, AUDIT_SCHEMA } = require('../scripts/global/har
 const { loadCorpus, runCli } = require('../scripts/global/harness-parity-replay-eval');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const CORPUS_PATH = path.join(__dirname, 'fixtures', 'parity-matrix-corpus.json');
+const CORPUS_PATH = path.join(__dirname, 'eval', 'parity-matrix-corpus.json');
 
 // ---------------------------------------------------------------------------
 // scoreCorpus: committed corpus returns numeric precision/recall + boolean promotionEligible
