@@ -93,8 +93,21 @@ def reset_on_branch_change(cwd: str, current_branch: str | None) -> dict[str, An
     state = load_state(cwd)
     if current_branch and state.get("active_branch") != current_branch:
         defaults = _default_state(cwd)
+        # #3469: a rebase / cwd-churn (branch movement, not a real switch) must not wipe the
+        # Admin commit signal when a linked worktree still holds a genuine commit ahead of
+        # base. Preserve admin_ops.commit ONLY on that real-git evidence (fail-safe: no
+        # preservation on import/lookup error; all other #1975 reset behavior is unchanged).
+        preserve_commit = bool((state.get("admin_ops") or {}).get("commit"))
+        if preserve_commit:
+            try:
+                from worktree_push_gate import any_worktree_commit_ahead
+                preserve_commit = any_worktree_commit_ahead(cwd)
+            except Exception:
+                preserve_commit = False
         for k in ("roles", "flags", "admin_ops"):
             state[k] = defaults[k]
+        if preserve_commit:
+            state["admin_ops"]["commit"] = True
         state["current_phase"] = defaults["current_phase"]
         state["active_branch"] = current_branch
         save_state(state)
