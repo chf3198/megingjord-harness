@@ -16,6 +16,7 @@ const { loadLocalEnvOnce } = require('./load-local-env');
 // (#2842 / Epic #2926 C2) progress observability so the operator sees the free fleet working
 const { withProgress } = require('./dispatch-progress');
 const { buildContextualPrompt } = require('./fleet-context-dispatch');
+const { resolveFleetRoute } = require('./fleet-stakes-router'); // #3484 stakes gate + keep_alive
 
 const HEARTBEAT_MS = 30_000;
 
@@ -50,19 +51,19 @@ function assessQuality(content, h) {
   return { pass: true, reason: 'ok' };
 }
 
-async function tryOllama(prompt, model, attempt = 0) {
+async function tryOllama(prompt, model, attempt = 0, keepAlive) {
   // #2929 C3: probe-first dispatch — a down/slow LiteLLM gateway falls straight to direct Ollama
   // (no 120s hang); the LiteLLM→Ollama switch is emitted to stderr + telemetry.
   // #2842: wrapped in withProgress for the tier-start + 30s heartbeat (G3>>G7 patience).
   const result = await withProgress(
     `fleet inference (${model})`,
-    () => dispatchFleet(prompt, { model, maxTokens: 1024 }),
+    () => dispatchFleet(prompt, { model, maxTokens: 1024, keepAlive }),
     { intervalMs: HEARTBEAT_MS }
   );
   if (!result.ok) {
     if (isRateLimitError(result) && attempt < 3) {
       await backoff(attempt);
-      return tryOllama(prompt, model, attempt + 1);
+      return tryOllama(prompt, model, attempt + 1, keepAlive);
     }
     // #2973 (F3): preserve dispatchFleet's fallback_reason (e.g. gateway-unhealthy) so the true
     // outage signal survives — not just the last attempt's result.error.
@@ -84,7 +85,11 @@ function resolvePrompt(prompt, opts = {}) {
 async function cascade(prompt, opts = {}) {
   // (#2645) G3: hydrate provider keys for the free-cloud fallback
   if (!opts.env) loadLocalEnvOnce();
-  const model = opts.model || 'qwen2.5:7b-instruct';
+  // #3484: deterministic stakes gate — routine → resident hot model (keep_alive-pinned), high-stakes → 32B.
+  // The existing default is preserved as the hot model so routine dispatch behavior is unchanged.
+  const route = resolveFleetRoute(prompt, { ...opts, hotModel: opts.hotModel || 'qwen2.5:7b-instruct' });
+  const model = opts.model || route.model;
+  const keepAlive = opts.keepAlive || route.keepAlive;
   prompt = resolvePrompt(prompt, opts);
   const h = hints(prompt); const start = Date.now(); const nowMs = start;
   // #2930 C4: if the fleet breaker is open (known-down), skip the fleet attempt entirely and fail
@@ -92,7 +97,7 @@ async function cascade(prompt, opts = {}) {
   const breakerBlocksFleet = !cb.canPass(fleetBreaker, nowMs);
   const local = breakerBlocksFleet
     ? { ok: false, reason: 'circuit-open', tier: 'local' }
-    : await tryOllama(prompt, model);
+    : await tryOllama(prompt, model, 0, keepAlive);
   const latency = Date.now() - start;
   if (local.ok) cb.recordSuccess(fleetBreaker); // fleet answered → reset the breaker.
 

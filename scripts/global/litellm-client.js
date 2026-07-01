@@ -42,6 +42,8 @@ async function litellmChat(prompt, opts = {}) {
     model,
     messages: [{ role: 'user', content: prompt }],
     max_tokens: opts.maxTokens || 512,
+    // #3484: forward keep_alive so the fleet keeps the hot model resident (LiteLLM passes it through).
+    ...(opts.keepAlive ? { keep_alive: opts.keepAlive } : {}),
   });
   try {
     const res = await fetch(`${url}/chat/completions`, {
