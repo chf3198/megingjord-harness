@@ -27,6 +27,8 @@ const TEAM_CONFIG_PATHS = [
   path.join(os.homedir(), '.copilot', 'hamr-config.json'),
   path.join(os.homedir(), '.codex', 'devenv-ops', 'hamr-config.json'),
   path.join(os.homedir(), '.cursor', 'hamr-config.json'),
+  // Antigravity runtime (#3448 T2.5 — five-runtime HAMR parity)
+  path.join(os.homedir(), '.antigravity', 'hamr-config.json'),
 ];
 
 /** Read the first available HAMR activation config across team runtimes.
