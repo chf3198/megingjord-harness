@@ -14,7 +14,7 @@
 
 // A prompt is high-stakes when it needs multi-hop reasoning / carries real blast radius. These are the
 // same classes the router policy sends direct-to-premium; here they pick the 32B over the 7B.
-const HIGH_STAKES_MARKERS = /\b(security|vulnerab|exploit|threat|architect|incident|proof|concurren|migration|cross-system|deadlock|race condition)\b/i;
+const HIGH_STAKES_MARKERS = /\b(security|vulnerab|exploit|threat|architect|incident|proof|concurren|migrat|cross-system|deadlock|race[ -]condition)/i;
 const HIGH_STAKES_ROLES = new Set(['manager', 'consultant']);
 
 const DEFAULT_HOT_MODEL = 'qwen2.5-coder:7b';
