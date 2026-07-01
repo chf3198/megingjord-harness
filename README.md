@@ -425,6 +425,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `state:offload` | `node scripts/global/state-offload-client.js` |
 | `stress` | `MEGINGJORD_STRESS_TIER=A node scripts/global/stress-orchestrator.js` |
 | `stress:anneal` | `node --test tests/stress-anneal-decision.spec.js` |
+| `stress:baton-e2e` | `node --test tests/baton-e2e.spec.js` |
 | `stress:bounded` | `MEGINGJORD_STRESS_TIER=C node scripts/global/stress-orchestrator.js` |
 | `stress:epic-close` | `node --test tests/stress-epic-close-guard.spec.js` |
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
