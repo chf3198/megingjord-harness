@@ -369,7 +369,11 @@
     "ac-suggest:replay-eval": "node scripts/global/ac-suggest-replay-eval.js",
     "ac-suggest:test": "node --test tests/ac-suggest.spec.js",
     "worktree:teardown": "node scripts/global/worktree-teardown-actuate.js",
-    "flaw-capture:replay-eval": "node scripts/global/flaw-capture-replay-eval.js"
+    "flaw-capture:replay-eval": "node scripts/global/flaw-capture-replay-eval.js",
+    "fleet-advisor:rules-doc": "node scripts/global/fleet-advisor-rules-doc.js",
+    "fleet-advisor:rules-doc:check": "node scripts/global/fleet-advisor-rules-doc.js --check",
+    "fleet-advisor:lint:test": "node --test tests/fleet-advisor-lint.spec.js tests/fleet-advisor-rule-coverage.spec.js",
+    "fleet-advisor:stress": "node --test tests/stress-fleet-advisor-lint.spec.js"
   },
   "keywords": [
     "devops",

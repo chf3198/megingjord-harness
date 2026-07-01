@@ -1,0 +1,20 @@
+{
+  "label": "F4 — dedicated 48GB host but no GPU-resident strong model installed",
+  "expectTier": "F4",
+  "probe": {
+    "hosts": [
+      { "id": "host-gpu", "url": "http://gpu:11434", "reachable": true,
+        "engine": { "name": "vllm", "version": "0.8.5", "minorReleasesBehind": 0 },
+        "gpu": { "vramTotalMb": 48000, "vramFreeMb": 40000 },
+        "models": [ { "name": "qwen2.5-coder:7b", "quant": "Q4_K_M", "sizeBytes": 4700000000, "sizeVramBytes": 4700000000 } ],
+        "ps": [ { "name": "qwen2.5-coder:7b", "sizeBytes": 4700000000, "sizeVramBytes": 4700000000 } ],
+        "recentFaults": [] }
+    ],
+    "dispatch": { "keepAliveSet": true, "stakesGate": true, "usesBatchingEngine": true, "hostList": ["host-gpu"] },
+    "policy": { "hosts": ["host-gpu"] },
+    "toolUse": { "configured": true, "healthy": true },
+    "telemetry": { "lastEmitMs": 1000 },
+    "cloud": { "freeProvidersWired": true }
+  },
+  "expectFindings": ["L-ROSTER-01"]
+}

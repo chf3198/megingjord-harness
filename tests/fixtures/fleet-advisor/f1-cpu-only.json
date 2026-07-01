@@ -1,0 +1,19 @@
+{
+  "label": "F1 — single CPU-only host, cold + unhealthy tooling",
+  "expectTier": "F1",
+  "probe": {
+    "hosts": [
+      { "id": "host-a", "url": "http://a:11434", "reachable": true,
+        "engine": { "name": "ollama", "version": "0.30.4", "minorReleasesBehind": 4 },
+        "gpu": { "vramTotalMb": 2000, "vramFreeMb": 1500 },
+        "models": [ { "name": "qwen2.5:7b", "quant": "Q4_K_M", "sizeBytes": 4700000000, "sizeVramBytes": 0 } ],
+        "ps": [],
+        "recentFaults": ["engine crash at 03:14"] }
+    ],
+    "dispatch": { "keepAliveSet": false, "hotPathModels": ["qwen2.5:7b"] },
+    "toolUse": { "configured": false },
+    "telemetry": {},
+    "cloud": { "freeProvidersWired": false }
+  },
+  "expectFindings": ["L-WARM-01", "L-WARM-02", "L-TOOL-01", "L-ENGINE-01", "L-OBS-01", "L-FAULT-01", "L-CLOUD-01"]
+}

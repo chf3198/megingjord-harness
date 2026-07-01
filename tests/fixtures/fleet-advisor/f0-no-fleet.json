@@ -1,0 +1,6 @@
+{
+  "label": "F0 — no fleet, no free providers wired",
+  "expectTier": "F0",
+  "probe": { "hosts": [], "cloud": { "freeProvidersWired": false } },
+  "expectFindings": ["L-CLOUD-01"]
+}
