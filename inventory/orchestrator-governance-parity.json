@@ -126,10 +126,10 @@
     },
     "digestManifest": {
       "copilot": {
-        "indexMd": "c9079d21adc5676771965428c507e802ba37489870e27ca344849745aa729efe"
+        "indexMd": "57fe64597a602eb52fd6403c394f2d184b0073c4a53493c1cc97059213c470eb"
       },
       "codex": {
-        "indexMd": "c9079d21adc5676771965428c507e802ba37489870e27ca344849745aa729efe"
+        "indexMd": "57fe64597a602eb52fd6403c394f2d184b0073c4a53493c1cc97059213c470eb"
       }
     },
     "runtimeTiers": {
@@ -193,7 +193,9 @@
       "codex wiki missing sources/ and syntheses/ (ingest-only artifacts; expected)",
       "cursor has no dedicated wiki home \u2014 reads Copilot runtime by design (#3086, mirror claude-code)",
       "antigravity has no dedicated wiki home \u2014 reads Copilot runtime by design (#3109, mirror claude-code)"
-    ]
+    ],
+    "_lastReconciled": "2026-07-01T00:00:00Z",
+    "_reconciliationNote": "Hashes updated to deployed ~/.copilot/wiki/index.md content (#3540). Root cause: deploy:apply updates wiki content but does not refresh digestManifest hashes. Use npm run wiki:verify-digest to check hash freshness."
   },
   "stateStoreParity": {
     "auditedAt": "2026-06-30",
