@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 20
       - name: Self-test (fixture) — fail fast if the monitor itself is broken
-        run: node scripts/global/watcher-health.spec.js
+        run: node tests/watcher-health.spec.js
       - name: Run watcher-health monitor
         run: node scripts/global/watcher-health.js
         env:

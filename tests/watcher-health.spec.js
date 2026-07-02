@@ -5,7 +5,7 @@
 // allow-list suppression, stale-allowlist orphan). Pure — no network. Guards the monitor against
 // silently breaking (the copilot-global-skills#1 failure mode this Epic exists to eliminate).
 const assert = require('node:assert');
-const { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport } = require('./watcher-health');
+const { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport } = require('../scripts/global/watcher-health');
 
 const NOW = Date.UTC(2026, 6, 1, 12, 0, 0); // fixed clock — deterministic
 const F = c => ({ conclusion: c, created_at: new Date(NOW - 3600e3).toISOString() });
