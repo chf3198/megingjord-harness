@@ -1,0 +1,36 @@
+name: Epic Aging Rollup
+# Fleet-wide open-epic aging report (#3527, Epic #3520, ADR-020 §D2/D3/D4/D5).
+# Surfaces every open type:epic across all chf3198 repos with age, idle-days, and child-completion %,
+# flagging silently-parked epics (100%-complete-yet-open, or idle >30d). 6-hourly snapshot (#2405 shape)
+# + workflow_dispatch. Reuses native subIssuesSummary with the sub_issues GraphQL feature header.
+on:
+  schedule:
+    - cron: '47 */6 * * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/epic-aging-rollup.yml', 'scripts/global/epic-aging-rollup.js']
+  workflow_dispatch:
+
+concurrency:
+  group: epic-aging-rollup
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  epic-aging-rollup:
+    name: epic-aging-rollup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+      - name: Self-test (fixture) — fail fast if the rollup itself is broken
+        run: node tests/epic-aging-rollup.spec.js
+      - name: Run epic-aging rollup
+        run: node scripts/global/epic-aging-rollup.js
+        env:
+          GH_TOKEN: ${{ github.token }}
