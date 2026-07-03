@@ -5,7 +5,7 @@
 // #2510: cross-family independence check using COLLABORATOR_HANDOFF fields.
 
 const path = require('path');
-const { roleIdentity } = require(path.join(__dirname, '..', 'baton-independence.js'));
+const { roleIdentity, checkAdminIndependence } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const { extractAIFamily } = require('./signer-fidelity.js');
 const wtGate = require('../worktree-lifecycle-gate');
@@ -18,11 +18,6 @@ function findAdminHandoff(comments) {
 function findCollaboratorHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?COLLABORATOR_HANDOFF\b/;
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
-}
-
-function nameOnly(commentBody) {
-  const match = (commentBody || '').match(/Signed-by\s*:\s*([^·,\n]+?)(?=\s*[·,\n]|$)/i);
-  return match ? match[1].trim().toLowerCase() : null;
 }
 
 function checkSignerFields(body) {
@@ -39,16 +34,21 @@ function checkSignerFields(body) {
   return violations;
 }
 
-function checkIndependence(adminBody, collaboratorHandoff) {
-  if (!collaboratorHandoff) return [];
-  const collabName = nameOnly(collaboratorHandoff.body);
-  const adminName = nameOnly(adminBody);
-  if (collabName && adminName && collabName === adminName) {
-    return [{ rule: 'admin-signer-not-independent',
-      detail: `ADMIN_HANDOFF signer "${adminName}" matches COLLABORATOR_HANDOFF signer`
-        + ` — independent verification requires a distinct identity` }];
-  }
-  return [];
+// #3532: independence is now delegated to the single source of truth
+// (baton-independence.checkAdminIndependence) — Team&Model TEAM segment OR a
+// VERIFIED cross-family consensus receipt. Persona-surname comparison is retired.
+// When a receipt is present but this posting-time validator lacks issue context
+// to verify it against the ledger, the finding is advisory — the authoritative
+// baton-authority/merge + consensus-receipt-check CI gates (which have the issue
+// number) do the blocking verification. A same-team split with NO receipt is a
+// hard block here too (the #3518/#3521 loophole case).
+function checkIndependence(comments, issueNumber) {
+  const res = checkAdminIndependence(comments, { issueNumber });
+  if (res.ok) return [];
+  const receiptPresent = res.receiptReason && res.receiptReason !== 'no-receipt';
+  const violation = { rule: 'admin-signer-not-independent', detail: res.message || res.reason };
+  if (receiptPresent && issueNumber == null) violation.severity = 'advisory';
+  return [violation];
 }
 
 function checkCrossFamily(adminBody, collaboratorHandoff) {
@@ -88,7 +88,7 @@ function validate(input) {
   const collabHandoff = findCollaboratorHandoff(comments);
   const violations = [
     ...checkSignerFields(handoff.body || ''),
-    ...checkIndependence(handoff.body, collabHandoff),
+    ...checkIndependence(comments, input.issueNumber),
   ];
   if (input.lane === 'lane:code-change') {
     violations.push(...checkCrossFamily(handoff.body || '', collabHandoff));

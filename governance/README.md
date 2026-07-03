@@ -27,7 +27,7 @@ Each entry-point file is short (≤100 lines) and references this contract. The 
 
 All four entry-point files MUST mention each invariant. `cross-team-contract-check.js` verifies presence:
 
-1. **Team&Model signing** — every governed artifact carries `Signed-by:` + `Team&Model:` + `Role:` per `instructions/team-model-signing.instructions.md`.
+1. **Team&Model signing** — every governed artifact carries `Signed-by:` + `Team&Model:` + `Role:` per `instructions/team-model-signing.instructions.md`. Admin-vs-Collaborator **independence** (#3532) is decided by the `Team&Model` **TEAM segment** or a verified cross-family consensus receipt — never by persona surname alone (see `docs/howto/cross-family-consensus-independence.md`).
 2. **Baton order** — Manager → Collaborator → Admin → Consultant single-thread per `instructions/role-baton-routing.instructions.md`.
 3. **Ticket-first workflow** — no governed work without a linked GitHub issue, and manager handoffs must carry overlap-boundary fields for related tickets and decisions per `instructions/ticket-driven-work.instructions.md`.
 4. **Dedicated-worktree protocol** — one live worktree per agent per `research/concurrent-agent-worktrees-2026-04-24.md`.

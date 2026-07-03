@@ -11,6 +11,9 @@ const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-e
 const docCoverage = require('./doc-coverage.js');
 const wtGate = require('../worktree-lifecycle-gate');
 const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
+// #3532 reconciliation: one shared receipt format for both the collaborator review
+// receipt (#2904, kind=review) and the admin merge-consensus receipt.
+const { RECEIPT_FIELD_RE } = require('../cross-family-receipt.js');
 // #2907: hard-gate promotion — require self-check evidence in COLLABORATOR_HANDOFF.
 const { checkHandoffHasVerification } = require('../collaborator-self-check.js');
 
@@ -51,7 +54,7 @@ function checkCrossFamily(body) {
   if (!/cross_family_rating:/i.test(body)) violations.push(block('cross-family-rating'));
   if (!/cross_family_findings:/i.test(body)) violations.push(block('cross-family-findings'));
   if (!/cross_family_receipt:/i.test(body)) violations.push(block('cross-family-receipt'));
-  const rm = (body || '').match(/cross_family_receipt\s*:\s*([0-9a-f]{16})/i);
+  const rm = (body || '').match(RECEIPT_FIELD_RE);
   if (/cross_family_receipt:/i.test(body) && !rm) {
     violations.push({ rule: 'cross-family-receipt-format',
       detail: 'cross_family_receipt must be a 16-char hex sha256 prefix' });
