@@ -264,7 +264,8 @@ def active_ticket_is_research_lane(state: dict, cwd: str) -> bool:
     """#3266: True when the active ticket is lane:research (report-only, PR-less and
     merge-less by design). Mirrors active_ticket_is_no_code_lane; consumed by the
     issue-close carve-out here and by the Stop-hook Admin-op gate (stop_reminder ->
-    stop_checks.check_admin_ops -> admin_patterns.required_admin_ops)."""
+    stop_checks.check_admin_ops -> admin_patterns.required_admin_ops).
+    """
     return "lane:research" in _active_ticket_labels(state, cwd)
 
 CONSENSUS_OVERRIDE_ENV = "MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE"
