@@ -1,8 +1,10 @@
 {
   "runtimeId": "cursor",
-  "description": "Golden snapshot of the cursor scaffold dry-run (T2.4 / #3447). All 11 surfaces must be already-present — zero pending actions is the completeness proof. Regenerate with: node tests/cursor-onboarding-complete.spec.js --update-fixture",
+  "description": "Golden snapshot of the cursor scaffold dry-run (T2.4 / #3447). All surfaces must be already-present — zero pending actions is the completeness proof. Regenerate with: npm run fixtures:regen:cursor",
+  "generated_at": "2026-07-02T22:41:37.168Z",
+  "source_sha": "c0bf92621502f28d",
   "pendingCount": 0,
-  "actionCount": 11,
+  "actionCount": 17,
   "surfaces": [
     {
       "surface": "runtime-descriptor",
@@ -58,6 +60,36 @@
       "surface": "package-json-harness-script",
       "op": "already-present",
       "detail": "\"harness:add-runtime\" already in package.json scripts"
+    },
+    {
+      "surface": "lefthook",
+      "op": "already-present",
+      "detail": "lefthook.yml already exists — shared pre-push wiring covers cursor"
+    },
+    {
+      "surface": "governance-profiles",
+      "op": "already-present",
+      "detail": "governance-profiles.json already exists — cursor covered by repo-type profiles"
+    },
+    {
+      "surface": "instruction-set",
+      "op": "already-present",
+      "detail": "runtime descriptor for cursor exists — instruction-set path is tracked via deploy.home"
+    },
+    {
+      "surface": "auth-profile",
+      "op": "already-present",
+      "detail": "authorization-profiles.json already exists — shared auth profile covers cursor"
+    },
+    {
+      "surface": "goal-tier",
+      "op": "already-present",
+      "detail": "model-routing-policy.json already exists — per-role lane preferences cover cursor"
+    },
+    {
+      "surface": "config-dir",
+      "op": "already-present",
+      "detail": "config-dir ~/.cursor declared for cursor via runtime descriptor"
     }
   ]
 }
