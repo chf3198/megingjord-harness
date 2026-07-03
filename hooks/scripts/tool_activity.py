@@ -76,6 +76,42 @@ def _bash_mutated_tracked_paths(command: str) -> list[str]:
         return []
 
 
+def _repo_root() -> str | None:
+    """#3266: absolute path of the tracked repo working tree, or None when unresolved.
+    Runs in the hook cwd (same convention as _bash_mutated_tracked_paths). Never raises.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=os.getcwd(), capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode != 0:
+            return None
+        return result.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def _path_in_repo(path: str, repo_root: str | None) -> bool:
+    """#3266: True when `path` resolves INSIDE the tracked repo working tree.
+
+    Fail-SAFE (denylist philosophy, mirrors #2978): repo_root None → True, i.e. keep
+    flagging when git cannot resolve the root — a false-positive nag is safer than a
+    silently-missed mutation. A path OUTSIDE the repo (scratchpad / /tmp / ~/.claude /
+    any other absolute tree) returns False, so non-repo execution no longer flips a touch
+    flag. Only a real in-repo file change may flip code_touched/docs_touched/etc.
+    """
+    if not repo_root:
+        return True
+    try:
+        base = (os.path.normpath(path) if os.path.isabs(path)
+                else os.path.normpath(os.path.join(os.getcwd(), path)))
+        root = os.path.normpath(repo_root)
+        return base == root or base.startswith(root + os.sep)
+    except Exception:
+        return True
+
+
 def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
     """Update governance state based on tool usage."""
     tool = str(payload.get("tool_name", ""))
@@ -113,9 +149,15 @@ def mark_tool_activity(state: dict[str, Any], payload: dict[str, Any]) -> None:
             if "***" in value and "File:" in value:
                 candidate_paths.extend(m.strip() for m in PATCH_FILE_RE.findall(value))
 
+    # #3266: resolve the repo root ONCE (only when there is something to classify) so a
+    # scratchpad / non-repo write cannot flip a touch flag. Read-only tools leave
+    # candidate_paths empty, so no git call is made for them.
+    repo_root = _repo_root() if candidate_paths else None
     for value in candidate_paths:
         if "/" not in value and "." not in value:
             continue
+        if not _path_in_repo(value, repo_root):
+            continue  # #3266: mutation outside the tracked repo — nothing to merge, do not flag
         kind = classify_path(value)
         if kind == "docs":
             flags["docs_touched"] = True

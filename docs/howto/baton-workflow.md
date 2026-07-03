@@ -169,7 +169,19 @@ Role: consultant
 [independent review — Team&Model must differ from Collaborator's]
 ```
 
-Then merge the PR:
+**Signer independence (#3532):** before the Admin merge, `ADMIN_HANDOFF` must be independent
+of `COLLABORATOR_HANDOFF` — satisfied by a different `Team&Model` **TEAM segment** OR a
+**verified cross-family consensus receipt**. When all four roles run under one team (a
+single-agent baton), generate the receipt first so the merge is genuinely authorized:
+
+```bash
+# runs a $0 panel of >=2 non-authoring families (each able to REJECT), logs their
+# actual responses to the hash-chained ledger, and prints the cross_family_receipt
+npm run consensus:panel -- --ticket N --summary "<one-line change description>"
+# cite the printed cross_family_receipt: <16hex> in ADMIN_HANDOFF; commit the ledger.
+```
+
+See `docs/howto/cross-family-consensus-independence.md`. Then merge the PR:
 
 ```bash
 gh pr merge N --squash --delete-branch

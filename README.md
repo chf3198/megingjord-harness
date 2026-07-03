@@ -147,6 +147,9 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `check:closeout` | `node scripts/global/open-pr-closeout-check.js` |
 | `cleanup:branches` | `node scripts/global/branch-cleanup-plan.js` |
 | `collaborator:preflight` | `node scripts/global/collaborator-preflight.js` |
+| `consensus:panel` | `node scripts/global/cross-family-consensus.js` |
+| `consensus:receipt-check` | `node scripts/global/baton-authority/consensus-receipt-check.js` |
+| `consensus:test` | `node --test tests/signer-independence-cross-family-3532.spec.js tests/stress-cross-family-receipt-3532.spec.js` |
 | `cost-report` | `node scripts/global/cost-report.js` |
 | `cost:baseline` | `node scripts/global/cost-baseline.js` |
 | `cost:token-report` | `node scripts/global/token-spend-report.js` |

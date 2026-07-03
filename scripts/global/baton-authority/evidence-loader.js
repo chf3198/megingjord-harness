@@ -4,6 +4,9 @@
 'use strict';
 
 const { EVIDENCE_BITS } = require('../baton-fsm/transitions');
+// #3532: team-segment + verified cross-family consensus receipt decide independence.
+const { teamSegmentOf, familyOfModel, verifyReceipt, RECEIPT_FIELD_RE } = require('../cross-family-receipt');
+const RECEIPT_RE = RECEIPT_FIELD_RE;
 
 // Artifact header patterns (mirrors grammar.js canonical patterns)
 const ARTIFACT_HEADERS = Object.freeze({
@@ -81,18 +84,34 @@ function deriveStateFromLabels(labels) {
 }
 
 /**
- * Check signer independence between collaborator and admin.
- * Returns true only when both signers exist and differ.
+ * Check signer independence via Team&Model TEAM segment (#3532).
+ * Persona-surname difference is NO LONGER independence. Returns true only when
+ * both signers exist AND sign under genuinely different teams. The cross-family
+ * consensus-receipt path is layered on separately in deriveTrailFromGitHub.
  */
 function checkSignerIndependence(commentSigners) {
-  let collabSigner = null;
-  let adminSigner = null;
+  let collab = null;
+  let admin = null;
   for (const entry of commentSigners) {
-    if (entry.role === 'collaborator') collabSigner = entry.signedBy;
-    if (entry.role === 'admin') adminSigner = entry.signedBy;
+    if (entry.role === 'collaborator') collab = entry;
+    if (entry.role === 'admin') admin = entry;
   }
-  if (!collabSigner || !adminSigner) return false;
-  return collabSigner !== adminSigner;
+  if (!collab || !admin) return false;
+  const collabTeam = teamSegmentOf(collab.teamModel);
+  const adminTeam = teamSegmentOf(admin.teamModel);
+  if (!collabTeam || !adminTeam) return false;
+  return collabTeam !== adminTeam;
+}
+
+/**
+ * Resolve the cross-family consensus receipt cited in the ADMIN_HANDOFF, if any.
+ * Returns the 16-hex receipt string or null.
+ */
+function extractMergeReceipt(comments) {
+  const admin = [...(comments || [])].reverse().find(
+    (c) => /ADMIN_HANDOFF/.test(c.body || '') && RECEIPT_RE.test(c.body || '')
+  );
+  return admin ? (admin.body.match(RECEIPT_RE) || [])[1] : null;
 }
 
 /**
@@ -120,7 +139,7 @@ function buildEvidenceMask(facts) {
  * ghClient interface: { getIssue, listComments, getPR, listChecks }
  * Returns { facts, mask, state, labels, signers, error? }
  */
-async function deriveTrailFromGitHub(issueNumber, ghClient) {
+async function deriveTrailFromGitHub(issueNumber, ghClient, opts = {}) {
   const issue = await ghClient.getIssue(issueNumber);
   if (!issue) {
     return { facts: null, mask: 0, state: null, error: 'issue-not-found' };
@@ -143,7 +162,20 @@ async function deriveTrailFromGitHub(issueNumber, ghClient) {
     const signers = extractSigners(body);
     allSigners.push(...signers);
   }
-  const signerIndependent = checkSignerIndependence(allSigners);
+  // #3532: independence = different team (a) OR a VERIFIED cross-family receipt (b).
+  const teamIndependent = checkSignerIndependence(allSigners);
+  const crossFamilyReceipt = extractMergeReceipt(comments);
+  let signerIndependent = teamIndependent;
+  let receiptStatus = teamIndependent ? 'independent-team' : 'no-receipt';
+  if (!teamIndependent && crossFamilyReceipt) {
+    const adminSigner = allSigners.find((s) => s.role === 'admin');
+    const authoringFamily = familyOfModel(adminSigner && adminSigner.teamModel);
+    const verify = opts.verifyReceipt || verifyReceipt;
+    const res = verify(issueNumber, crossFamilyReceipt, authoringFamily,
+      { kind: 'merge-consensus', ledger: opts.ledger });
+    signerIndependent = res.ok;
+    receiptStatus = res.reason;
+  }
   // Build facts from GitHub-derived data only
   const facts = {
     issueNumber,
@@ -154,6 +186,8 @@ async function deriveTrailFromGitHub(issueNumber, ghClient) {
     hasConsultantCloseout: Boolean(artifacts.CONSULTANT_CLOSEOUT),
     allAcsPass: Boolean(signals.ALL_ACS_PASS),
     signerIndependent,
+    signerIndependenceBasis: receiptStatus,
+    crossFamilyReceipt: crossFamilyReceipt || null,
     ciGreen: Boolean(signals.CI_GREEN),
     prMerged: false,
     worktreeMergeOk: Boolean(signals.WORKTREE_MERGE_OK),
@@ -173,4 +207,5 @@ module.exports = {
   extractSigners,
   deriveStateFromLabels,
   checkSignerIndependence,
+  extractMergeReceipt,
 };
