@@ -1,7 +1,7 @@
 'use strict';
 // cursor-onboarding-complete.spec.js — T2.4 (#3447) regression anchor.
 // Asserts that the cursor scaffold dry-run produces ZERO pending actions across
-// all 11 onboarding surfaces. A pending action means a #3086 gap has re-opened.
+// all onboarding surfaces. A pending action means a #3086 gap has re-opened.
 // The generated diff being empty IS the completeness proof — nothing left to apply.
 //
 // Golden fixture: tests/fixtures/cursor-onboarding-golden.json
@@ -41,8 +41,10 @@ if (process.argv.includes('--update-fixture')) {
   const fixture = {
     runtimeId: RUNTIME_ID,
     description: 'Golden snapshot of the cursor scaffold dry-run (T2.4 / #3447). ' +
-      'All 11 surfaces must be already-present — zero pending actions is the completeness proof. ' +
-      'Regenerate with: node tests/cursor-onboarding-complete.spec.js --update-fixture',
+      'All surfaces must be already-present — zero pending actions is the completeness proof. ' +
+      'Regenerate with: npm run fixtures:regen:cursor --confirm',
+      // Note: actionCount updated 11→17 in #3537 (6 new surfaces added: lefthook, governance-profiles,
+      // instruction-set, auth-profile, goal-tier, config-dir).
     pendingCount: pendingActions.length,
     actionCount: plan.length,
     surfaces: plan.map(action => ({ surface: action.surface, op: action.op, detail: action.detail })),
@@ -70,7 +72,7 @@ describe('cursor onboarding completeness (T2.4 / #3447)', () => {
       );
     });
 
-    test('all 11 expected surfaces are covered', () => {
+    test('all expected surfaces are covered (actionCount matches golden fixture)', () => {
       const plan = buildPlan(RUNTIME_ID, { repoRoot: REPO_ROOT });
       assert.equal(
         plan.length,
