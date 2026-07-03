@@ -1,6 +1,6 @@
 {
   "name": "megingjord-harness",
-  "version": "3.3.8",
+  "version": "3.4.1",
   "description": "Megingjord: Governance-first AI agent harness for Copilot, Claude Code, and Codex — multi-runtime skills, hooks, agents, wiki, and install tooling",
   "private": true,
   "scripts": {
@@ -386,7 +386,8 @@
     "fleet-advisor:obs:test": "node --test tests/fleet-advisor-observability.spec.js tests/fleet-advisor-throughput-contract.spec.js",
     "fleet-advisor:throughput-bench": "node --test tests/fleet-advisor-throughput-contract.spec.js",
     "fleet-advisor:report": "node scripts/global/fleet-advisor-report.js",
-    "fleet-advisor:contract:test": "node --test tests/fleet-advisor-report.spec.js tests/fleet-advisor-report-contract.spec.js"
+    "fleet-advisor:contract:test": "node --test tests/fleet-advisor-report.spec.js tests/fleet-advisor-report-contract.spec.js",
+    "fixtures:regen:cursor": "node scripts/global/fixtures-regen-cursor.js"
   },
   "keywords": [
     "devops",
