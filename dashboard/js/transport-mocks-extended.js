@@ -44,6 +44,22 @@ if (window.IS_DEMO) (function () {
     ];
   };
 
+  /* fetchCoordinationState — cross-team coordination (refs ticket) */
+  const COORD_CC_TICKET = 3037;
+  const COORD_CC_PR = 3038;
+  const COORD_AG_TICKET = 2800;
+  const COORD_CODEX_PR = 2813;
+  const MS_35MIN = 35 * 60000;
+  window.fetchCoordinationState = async function () {
+    const now = Date.now();
+    return [
+      { team: 'copilot', ticket: DEMO_TICKET, branch: 'feat/' + DEMO_TICKET + '-dashboard-demo', batonRole: 'collaborator', claimStatus: 'active', prNumber: null, files: ['dashboard/js/transport.js', 'dashboard/js/fixture-runner.js'], updatedMs: now - MS_2S },
+      { team: 'codex', ticket: DEMO_PREV, branch: 'feat/' + DEMO_PREV + '-scenario-jsonl', batonRole: 'admin', claimStatus: 'active', prNumber: COORD_CODEX_PR, files: ['dashboard/fixtures/meta.json'], updatedMs: now - MS_5S },
+      { team: 'claude-code', ticket: COORD_CC_TICKET, branch: 'feat/' + COORD_CC_TICKET + '-logging-attribution', batonRole: 'consultant', claimStatus: 'active', prNumber: COORD_CC_PR, files: ['scripts/global/agent-signature.js'], updatedMs: now - MS_8S },
+      { team: 'antigravity', ticket: COORD_AG_TICKET, branch: 'fix/' + COORD_AG_TICKET + '-fleet-observability', batonRole: null, claimStatus: 'expired', prNumber: null, files: ['dashboard/js/transport.js'], updatedMs: now - MS_35MIN, state: 'expired' },
+    ];
+  };
+
   /* getRouterLog — synchronous; fallback for buildBatonState when getBatonState absent. */
   window.getRouterLog = function () {
     if (window.demoConfig && window.demoConfig.routerLog && window.demoConfig.routerLog.length) return window.demoConfig.routerLog;
