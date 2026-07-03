@@ -10,8 +10,10 @@
 const { execSync } = require('node:child_process');
 const rc = require('../cross-family-receipt');
 
+const GH_TIMEOUT_MS = 15000;
+
 function ghComments(issue) {
-  const raw = execSync(`gh issue view ${issue} --json comments`, { encoding: 'utf8', timeout: 15000 });
+  const raw = execSync(`gh issue view ${issue} --json comments`, { encoding: 'utf8', timeout: GH_TIMEOUT_MS });
   return (JSON.parse(raw).comments || []).map((c) => c.body || '');
 }
 
@@ -20,9 +22,9 @@ function field(body, name) {
   return m ? m[1].trim() : null;
 }
 function teamModelForRole(bodies, role) {
-  const b = [...bodies].reverse().find((x) => new RegExp(`Role:\\s*${role}`, 'i').test(x)
+  const found = [...bodies].reverse().find((x) => new RegExp(`Role:\\s*${role}`, 'i').test(x)
     && /Team&Model:/i.test(x));
-  return b ? field(b, 'Team&Model') : null;
+  return found ? field(found, 'Team&Model') : null;
 }
 
 function evaluate(issue, bodies, opts = {}) {

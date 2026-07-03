@@ -12,10 +12,13 @@ require('./load-local-env').loadLocalEnvOnce();
 const { callProvider, providerOrder, PROVIDERS } = require('./free-cloud-dispatch');
 const rc = require('./cross-family-receipt');
 
+const MAX_RESPONSE_CHARS = 4000;
+const DEFAULT_FAMILIES = 2;
+
 function parseArgs(argv) {
-  const o = {};
-  for (let i = 0; i < argv.length; i += 2) if (argv[i]?.startsWith('--')) o[argv[i].slice(2)] = argv[i + 1] || '';
-  return o;
+  const parsed = {};
+  for (let i = 0; i < argv.length; i += 2) if (argv[i]?.startsWith('--')) parsed[argv[i].slice(2)] = argv[i + 1] || '';
+  return parsed;
 }
 
 // Candidate providers with a key present, ordered (policy first, then the rest),
@@ -40,33 +43,38 @@ function parseVerdict(text) {
   return m ? m[1].toUpperCase() : 'REJECT'; // fail-safe: unparseable != authorization
 }
 
-async function run(opts) {
-  const ticket = Number(opts.ticket);
-  const kind = opts.kind || 'merge-consensus';
-  const want = Number(opts.minFamilies) || 2;
-  const authoringFamily = rc.familyOfModel(`${process.env.HAMR_TEAM || 'claude-code'}:${process.env.HAMR_MODEL || 'claude'}@local`);
-  const prompt = PROMPT({ ticket, text: opts.summary || `ticket #${ticket} governance change` });
-  const promptSha = rc.sha(prompt);
-  // One LIVE provider per distinct family, until >=want families or candidates exhaust.
+// One LIVE provider per distinct family, until `want` families (or candidates exhaust).
+// Dead providers (429/404) are skipped so a transient outage never blocks a family.
+async function collectPanel(prompt, authoringFamily, want) {
   const byFamily = new Map();
   const attempts = [];
   for (const name of candidates(authoringFamily)) {
     const fam = rc.PROVIDER_FAMILY[name];
     if (byFamily.has(fam)) continue;
-    const r = await callProvider(name, prompt, {});
-    attempts.push(`${name}:${r.ok ? 'ok' : r.reason}`);
-    if (!r.ok) continue; // skip dead providers — real responses only in the receipt
-    byFamily.set(fam, { provider: name, family: fam, verdict: parseVerdict(r.content), content: r.content });
+    const attempt = await callProvider(name, prompt, {});
+    attempts.push(`${name}:${attempt.ok ? 'ok' : attempt.reason}`);
+    if (!attempt.ok) continue; // real responses only enter the receipt
+    byFamily.set(fam, { provider: name, family: fam, verdict: parseVerdict(attempt.content), content: attempt.content });
     if (byFamily.size >= want) break;
   }
-  const members = [...byFamily.values()];
+  return { members: [...byFamily.values()], attempts };
+}
+
+async function run(opts) {
+  const ticket = Number(opts.ticket);
+  const kind = opts.kind || 'merge-consensus';
+  const want = Number(opts.minFamilies) || DEFAULT_FAMILIES;
+  const authoringFamily = rc.familyOfModel(`${process.env.HAMR_TEAM || 'claude-code'}:${process.env.HAMR_MODEL || 'claude'}@local`);
+  const prompt = PROMPT({ ticket, text: opts.summary || `ticket #${ticket} governance change` });
+  const promptSha = rc.sha(prompt);
+  const { members, attempts } = await collectPanel(prompt, authoringFamily, want);
   if (members.length < want) {
     return { ok: false, reason: 'insufficient-live-families', authoringFamily, want, got: members.length, attempts };
   }
   for (const m of members) {
     rc.appendEntry({ ticket, kind, provider: m.provider, family: m.family, verdict: m.verdict,
       ts: new Date().toISOString(), prompt_sha256: promptSha, response_sha256: rc.sha(m.content),
-      response: m.content.slice(0, 4000) });
+      response: m.content.slice(0, MAX_RESPONSE_CHARS) });
   }
   const receipt = rc.computeReceipt(rc.readLedger().filter((e) => e.ticket === ticket && e.kind === kind));
   const consensus = members.every((m) => m.verdict === 'PASS') ? 'PASS' : 'REJECT';

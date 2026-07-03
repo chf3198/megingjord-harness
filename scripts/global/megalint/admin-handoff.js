@@ -46,9 +46,9 @@ function checkIndependence(comments, issueNumber) {
   const res = checkAdminIndependence(comments, { issueNumber });
   if (res.ok) return [];
   const receiptPresent = res.receiptReason && res.receiptReason !== 'no-receipt';
-  const v = { rule: 'admin-signer-not-independent', detail: res.message || res.reason };
-  if (receiptPresent && issueNumber == null) v.severity = 'advisory';
-  return [v];
+  const violation = { rule: 'admin-signer-not-independent', detail: res.message || res.reason };
+  if (receiptPresent && issueNumber == null) violation.severity = 'advisory';
+  return [violation];
 }
 
 function checkCrossFamily(adminBody, collaboratorHandoff) {
