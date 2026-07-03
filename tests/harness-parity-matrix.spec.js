@@ -47,8 +47,8 @@ function makeCatalog(features, runtimes) {
 }
 
 // ---------------------------------------------------------------------------
-// probeCell: ok verdict for a real wired cell
-// detect-runtime.js exists in the repo and is declared unverified (FULL_STATUSES)
+// probeCell: unverified-advisory for an unverified cell even when ssotFile exists
+// unverified status means "not yet confirmed" — always advisory regardless of file presence.
 // ---------------------------------------------------------------------------
 test('probeCell returns ok for a wired cell (ssotFile exists, status unverified)', () => {
   const feature = makeFeature({
@@ -59,22 +59,48 @@ test('probeCell returns ok for a wired cell (ssotFile exists, status unverified)
   const result = probeCell(feature, 'claude-code', REPO_ROOT);
   assert.strictEqual(result.featureId, 'runtime-detector');
   assert.strictEqual(result.runtime, 'claude-code');
+  // unverified is advisory-only: ssotFile presence doesn't upgrade to ok
+  assert.strictEqual(result.verdict, VERDICT.UNVERIFIED_ADVISORY, `Expected unverified-advisory, got ${result.verdict}`);
+  assert.strictEqual(result.probed, 'present');
+});
+
+// probeCell: ok verdict for a genuinely confirmed (status:full) cell
+test('probeCell returns ok for a wired cell with status:full and present ssotFile', () => {
+  const feature = makeFeature({
+    id: 'runtime-detector-full',
+    ssotFiles: ['scripts/global/detect-runtime.js'],
+    perRuntime: { 'claude-code': { status: 'full' } },
+  });
+  const result = probeCell(feature, 'claude-code', REPO_ROOT);
   assert.strictEqual(result.verdict, VERDICT.OK, `Expected ok, got ${result.verdict}`);
   assert.strictEqual(result.probed, 'present');
 });
 
 // ---------------------------------------------------------------------------
-// probeCell: declared-full-but-missing when ssotFile absent
+// probeCell: unverified-advisory (not declared-full-but-missing) when ssotFile absent + status:unverified
 // ---------------------------------------------------------------------------
 test('probeCell returns declared-full-but-missing for missing ssotFile', () => {
   const feature = makeFeature({
     id: 'synthetic-missing',
     ssotFiles: ['scripts/global/__nonexistent_probe_test__.js'],
-    perRuntime: { 'claude-code': { status: 'unverified' } },
+    // status:full is what triggers declared-full-but-missing; unverified is advisory-only
+    perRuntime: { 'claude-code': { status: 'full' } },
   });
   const result = probeCell(feature, 'claude-code', REPO_ROOT);
   assert.strictEqual(result.verdict, VERDICT.DECLARED_FULL_BUT_MISSING);
   assert.strictEqual(result.probed, 'missing');
+});
+
+// probeCell: unverified + missing ssotFile → unverified-advisory (not declared-full-but-missing)
+test('probeCell returns unverified-advisory for missing ssotFile when status is unverified', () => {
+  const feature = makeFeature({
+    id: 'unverified-missing',
+    ssotFiles: ['scripts/global/__nonexistent_unverified__.js'],
+    perRuntime: { 'claude-code': { status: 'unverified' } },
+  });
+  const result = probeCell(feature, 'claude-code', REPO_ROOT);
+  assert.strictEqual(result.verdict, VERDICT.UNVERIFIED_ADVISORY,
+    `unverified cells are advisory even with missing ssotFiles; got ${result.verdict}`);
 });
 
 // ---------------------------------------------------------------------------
@@ -210,25 +236,40 @@ test('buildMatrix over real catalog: report failure count (real parity findings)
 
 // ---------------------------------------------------------------------------
 // buildMatrix: failures array contains only the two FAIL verdicts
+// status:full with missing ssotFile → declared-full-but-missing (hard failure)
+// status:unverified with missing ssotFile → unverified-advisory (advisory, not failure)
 // ---------------------------------------------------------------------------
 test('buildMatrix failures array contains only declared-full-but-missing and na-without-substitute', () => {
   const features = [
     makeFeature({
       id: 'missing-feat',
       ssotFiles: ['__nonexistent_probe_test_x__.js'],
-      perRuntime: { 'claude-code': { status: 'unverified' } },
+      // status:full is required to trigger declared-full-but-missing
+      perRuntime: { 'claude-code': { status: 'full' } },
     }),
     makeFeature({
       id: 'ok-feat',
       ssotFiles: ['scripts/global/detect-runtime.js'],
+      perRuntime: { 'claude-code': { status: 'full' } },
+    }),
+    makeFeature({
+      id: 'advisory-feat',
+      ssotFiles: ['__nonexistent_advisory__.js'],
+      // unverified: advisory only, should NOT appear in failures
       perRuntime: { 'claude-code': { status: 'unverified' } },
     }),
   ];
   const catalog = makeCatalog(features, ['claude-code']);
-  const { failures } = buildMatrix(catalog, { repoRoot: REPO_ROOT });
+  const { failures, advisories } = buildMatrix(catalog, { repoRoot: REPO_ROOT });
+  // Only the status:full missing cell is a hard failure
   assert.strictEqual(failures.length, 1);
   assert.strictEqual(failures[0].featureId, 'missing-feat');
   assert.strictEqual(failures[0].verdict, VERDICT.DECLARED_FULL_BUT_MISSING);
+  // The unverified cell with missing ssotFile is advisory, not failure
+  assert.ok(advisories.length >= 1, 'Expected at least one advisory cell');
+  const advisoryFeat = advisories.find(a => a.featureId === 'advisory-feat');
+  assert.ok(advisoryFeat, 'advisory-feat should appear in advisories');
+  assert.strictEqual(advisoryFeat.verdict, VERDICT.UNVERIFIED_ADVISORY);
 });
 
 // ---------------------------------------------------------------------------
@@ -284,7 +325,8 @@ test('probeCell ok for bare-filename ssotFile that exists under a source root', 
     id: 'bare-name-resolution',
     // Pass bare filename — should be found at scripts/global/detect-runtime.js
     ssotFiles: ['detect-runtime.js'],
-    perRuntime: { 'claude-code': { status: 'unverified' } },
+    // status:full so that presence of ssotFile yields VERDICT.OK
+    perRuntime: { 'claude-code': { status: 'full' } },
   });
   const result = probeCell(feature, 'claude-code', REPO_ROOT);
   assert.strictEqual(result.verdict, VERDICT.OK,
@@ -296,9 +338,39 @@ test('probeCell declared-full-but-missing for truly nonexistent ssotFile', () =>
   const feature = makeFeature({
     id: 'truly-missing',
     ssotFiles: ['__totally_nonexistent_xyz_abc__.js'],
-    perRuntime: { 'claude-code': { status: 'unverified' } },
+    // status:full is required for declared-full-but-missing; unverified is advisory-only
+    perRuntime: { 'claude-code': { status: 'full' } },
   });
   const result = probeCell(feature, 'claude-code', REPO_ROOT);
   assert.strictEqual(result.verdict, VERDICT.DECLARED_FULL_BUT_MISSING,
     `Expected declared-full-but-missing, got ${result.verdict}`);
+});
+
+// probeCell: UNVERIFIED_ADVISORY verdict exports correctly
+test('VERDICT.UNVERIFIED_ADVISORY is exported and has correct string value', () => {
+  assert.strictEqual(VERDICT.UNVERIFIED_ADVISORY, 'unverified-advisory');
+});
+
+// probeCell: brace-expansion ssotFile is non-probeable — yields unverified-advisory for unverified cell
+test('probeCell treats brace-expansion ssotFile as non-probeable and returns unverified-advisory', () => {
+  const feature = makeFeature({
+    id: 'brace-expansion-test',
+    ssotFiles: ['scripts/global/megalint/{fleet-review-required,worktree-naming-advisory}.js'],
+    perRuntime: { 'claude-code': { status: 'unverified' } },
+  });
+  const result = probeCell(feature, 'claude-code', REPO_ROOT);
+  assert.strictEqual(result.verdict, VERDICT.UNVERIFIED_ADVISORY,
+    `brace-expansion ssotFile + unverified status should be advisory; got ${result.verdict}`);
+});
+
+// probeCell: npm command ssotFile is non-probeable
+test('probeCell treats npm-command ssotFile as non-probeable for unverified cell', () => {
+  const feature = makeFeature({
+    id: 'npm-cmd-test',
+    ssotFiles: ['npm run lefthook:install'],
+    perRuntime: { 'claude-code': { status: 'unverified' } },
+  });
+  const result = probeCell(feature, 'claude-code', REPO_ROOT);
+  assert.strictEqual(result.verdict, VERDICT.UNVERIFIED_ADVISORY,
+    `npm command ssotFile + unverified status should be advisory; got ${result.verdict}`);
 });
