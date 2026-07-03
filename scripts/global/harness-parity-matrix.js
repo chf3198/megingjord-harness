@@ -30,10 +30,15 @@ const VERDICT = {
   DECLARED_FULL_BUT_MISSING: 'declared-full-but-missing',
   NA_WITHOUT_SUBSTITUTE: 'na-without-substitute',
   MAKE_REACHABLE_REQUIRED: 'make-reachable-required',
+  // Advisory: cell declared as unverified — reported but does not fail the gate
+  UNVERIFIED_ADVISORY: 'unverified-advisory',
 };
 
 // Statuses that assert "this runtime is expected to have the feature"
-const FULL_STATUSES = new Set(['full', 'partial', 'advisory-backstop-exists', 'unverified']);
+const FULL_STATUSES = new Set(['full', 'partial', 'advisory-backstop-exists']);
+
+// Statuses indicating a cell has not yet been confirmed — advisory, not a hard failure
+const ADVISORY_STATUSES = new Set(['unverified']);
 
 // Statuses that assert "this runtime is structurally excluded"
 const NA_STATUSES = new Set(['structural-NA', 'waived']);
@@ -46,7 +51,9 @@ const NA_STATUSES = new Set(['structural-NA', 'waived']);
 // ---------------------------------------------------------------------------
 function resolveSsotFile(ssotFile, repoRoot) {
   if (!ssotFile || typeof ssotFile !== 'string') return null;
+  // Not-probeable patterns: HOME-relative, globs, brace-expansion, npm/npx commands
   if (ssotFile.startsWith('~/') || ssotFile.includes('*')) return null;
+  if (ssotFile.includes('{') || ssotFile.startsWith('npm ') || ssotFile.startsWith('npx ')) return null;
   const basename = path.basename(ssotFile);
   for (const root of SOURCE_ROOTS) {
     const candidate = root
@@ -96,8 +103,12 @@ function probeCellNA(feature, runtime, declared, cellData, probeResult) {
 
 // ---------------------------------------------------------------------------
 // probeCellFull: verdict logic for full/partial/unverified/absent cells.
+// unverified cells are advisory: reported but never fail the gate.
 // ---------------------------------------------------------------------------
 function probeCellFull(feature, runtime, declared, probeResult) {
+  if (ADVISORY_STATUSES.has(declared)) {
+    return { featureId: feature.id, runtime, declared, probed: probeResult.allPresent ? 'present' : 'unknown', verdict: VERDICT.UNVERIFIED_ADVISORY };
+  }
   if (FULL_STATUSES.has(declared) && !probeResult.allPresent) {
     return { featureId: feature.id, runtime, declared, probed: 'missing', verdict: VERDICT.DECLARED_FULL_BUT_MISSING };
   }
@@ -126,13 +137,16 @@ function probeCell(feature, runtime, repoRoot) {
 function accumulateVerdicts(cells) {
   const verdictCounts = {};
   const failures = [];
+  const advisories = [];
   for (const cell of cells) {
     verdictCounts[cell.verdict] = (verdictCounts[cell.verdict] || 0) + 1;
     const isFail = cell.verdict === VERDICT.DECLARED_FULL_BUT_MISSING
       || cell.verdict === VERDICT.NA_WITHOUT_SUBSTITUTE;
+    const isAdvisory = cell.verdict === VERDICT.UNVERIFIED_ADVISORY;
     if (isFail) failures.push(cell);
+    if (isAdvisory) advisories.push(cell);
   }
-  return { verdictCounts, failures };
+  return { verdictCounts, failures, advisories };
 }
 
 // ---------------------------------------------------------------------------
@@ -158,8 +172,8 @@ function buildMatrix(catalog, opts) {
     }
   }
 
-  const { verdictCounts, failures } = accumulateVerdicts(cells);
-  return { cells, failures, summary: { totalCells: cells.length, failureCount: failures.length, verdictCounts } };
+  const { verdictCounts, failures, advisories } = accumulateVerdicts(cells);
+  return { cells, failures, advisories, summary: { totalCells: cells.length, failureCount: failures.length, advisoryCount: advisories.length, verdictCounts } };
 }
 
 // ---------------------------------------------------------------------------
@@ -182,12 +196,15 @@ function printGateSummary(matrix, strict) {
   for (const fail of failures) {
     process.stdout.write(`  [${fail.verdict}] feature=${fail.featureId} runtime=${fail.runtime} declared=${fail.declared}\n`);
   }
+  if (summary.advisoryCount > 0) {
+    process.stdout.write(`[ADVISORY] ${summary.advisoryCount} unverified-advisory cell(s). Status=unverified means evidence not yet confirmed; not a hard failure.\n`);
+  }
   if (summary.failureCount > 0) {
     const prefix = strict ? '' : '[ADVISORY] ';
     const suffix = strict ? 'Exiting non-zero (--strict).\n' : 'Pass --strict to fail the gate.\n';
     process.stdout.write(`\n${prefix}${summary.failureCount} parity cell(s) failed probe. ${suffix}`);
   } else {
-    process.stdout.write('\nAll probed cells pass.\n');
+    process.stdout.write('\nAll probed cells pass (hard failures: 0).\n');
   }
 }
 
