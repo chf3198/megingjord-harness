@@ -86,7 +86,18 @@ def main() -> int:
         )
 
     if not block_reason:
-        block_reason, msg = check_admin_ops(flags, ops, roles, repo_type, uncommitted)
+        # #3266: a clean lane:research session is PR-less/merge-less by design — require ZERO
+        # Admin ops so a lingering code_touched flag cannot manufacture a phantom Admin nag.
+        # A dirty tree removes the exemption (nothing-to-merge is the whole justification).
+        research_clean_exempt = False
+        try:
+            from pretool_guard import active_ticket_is_research_lane
+            research_clean_exempt = (
+                bool(active_ticket_is_research_lane(state, cwd)) and not uncommitted)
+        except Exception:
+            research_clean_exempt = False  # fail-safe: fall back to the standard Admin-op gate
+        block_reason, msg = check_admin_ops(
+            flags, ops, roles, repo_type, uncommitted, research_clean_exempt)
         if msg:
             messages.append(msg)
 
