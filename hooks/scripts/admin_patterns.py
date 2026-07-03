@@ -129,17 +129,18 @@ def is_countable_push(cmd: str, tool_response: Any = None) -> bool:
 
 
 def required_admin_ops(flags: dict, repo_type: str,
-                       research_clean_exempt: bool = False) -> list[str]:
+                       report_only_clean_exempt: bool = False) -> list[str]:
     """Admin op keys required for completion. Stays in sync with
     stop_checks.check_admin_ops base/ext logic (#2444).
 
-    #3266: `research_clean_exempt` is True only for a lane:research ticket whose working
-    tree is clean — a report-only lane produces no PR/merge/publish by design, so ZERO
-    Admin ops are required (suppresses the phantom "Admin baton incomplete" nag even when a
-    stale code_touched flag lingers). The lane is resolved by the caller (stop_reminder);
-    this function stays pure (flags, repo_type[, exempt]) and never reads the ticket lane.
+    #3266/#3569: `report_only_clean_exempt` is True only for a report-only ticket
+    (lane:research / lane:docs-research / lane:docs-only) whose working tree is clean — these
+    lanes produce no PR/merge/publish by design, so ZERO Admin ops are required (suppresses the
+    phantom "Admin baton incomplete" nag even when a stale code_touched flag lingers). The lane is
+    resolved by the caller (stop_reminder); this function stays pure (flags, repo_type[, exempt])
+    and never reads the ticket lane.
     """
-    if research_clean_exempt:
+    if report_only_clean_exempt:
         return []
     base = (["commit", "push", "pr_create", "ci_green", "merge"]
             if flags.get("code_touched") else [])

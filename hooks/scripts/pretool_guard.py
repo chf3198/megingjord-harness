@@ -268,6 +268,19 @@ def active_ticket_is_research_lane(state: dict, cwd: str) -> bool:
     """
     return "lane:research" in _active_ticket_labels(state, cwd)
 
+DOCS_LANE_LABELS = ("lane:docs-research", "lane:docs-only")
+
+def active_ticket_is_docs_lane(state: dict, cwd: str) -> bool:
+    """#3569: True when the active ticket is lane:docs-research or lane:docs-only — report-only
+    "Manager+Consultant" reduced batons that are PR-less/merge-less by design. Sibling to
+    active_ticket_is_research_lane (left unchanged per #3569 D1); consumed by the same issue-close
+    carve-out here and the Stop-hook Admin-op gate. NOTE: the caller's clean-tree condition is
+    load-bearing for docs lanes — docs work often DOES produce a tracked docs diff, and such a
+    real diff must still deny + re-route to lane:code-change; only a genuinely-empty tree is exempt.
+    """
+    labels = _active_ticket_labels(state, cwd)
+    return any(label in labels for label in DOCS_LANE_LABELS)
+
 CONSENSUS_OVERRIDE_ENV = "MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE"
 
 def _emit_planning_consensus_override_incident(cwd: str, ticket: int | None) -> None:
@@ -452,6 +465,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny", one_ticket_deny)
     no_code_lane = active_ticket_is_no_code_lane(state, cwd)
     research_lane = active_ticket_is_research_lane(state, cwd)  # #3266
+    docs_lane = active_ticket_is_docs_lane(state, cwd)  # #3569
     if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if is_raw_fleet_curl(joined):
@@ -557,24 +571,29 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     if RE_GH_RELEASE_CREATE.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("publish"): return emit("deny","Release blocked: publish not recorded.")
     if RE_GH_ISSUE_CLOSE.search(joined):
-        # #3266: research/no-code lanes are PR-less and merge-less BY DESIGN. When the tree is
-        # clean there is genuinely nothing to merge, so the merge-precondition is skipped. But a
-        # REAL repo diff means there IS something to merge — do NOT exempt; re-route to the full
-        # code-change baton (anti-abuse guardrail C, mirrors the no-code-remediation diff-guard).
-        research_clean_exempt = False
-        if no_code_lane or research_lane:
+        # #3266/#3569: report-only lanes (research, docs-research, docs-only, no-code-remediation)
+        # are PR-less and merge-less BY DESIGN. When the tree is clean there is genuinely nothing
+        # to merge, so the merge-precondition is skipped. But a REAL repo diff means there IS
+        # something to merge — do NOT exempt; re-route to the full code-change baton (anti-abuse
+        # guardrail C, mirrors the no-code-remediation diff-guard). The clean-tree condition is
+        # load-bearing for docs lanes, which often DO produce a legitimate tracked docs diff.
+        report_only_clean_exempt = False
+        if no_code_lane or research_lane or docs_lane:
             dirty = subprocess.run(
                 ["git", "status", "--porcelain"],
                 cwd=cwd, check=False, capture_output=True, text=True,
             ).stdout.strip()
             if dirty:
-                if research_lane and not no_code_lane:
+                if no_code_lane:
+                    return emit("deny", "No-code remediation lane invalid: repository diff detected. Move ticket to lane:code-change before closeout.")
+                if research_lane:
                     return emit("deny", "lane:research invalid: repository diff detected. "
                                 "Re-route ticket to lane:code-change before closeout.")
-                return emit("deny", "No-code remediation lane invalid: repository diff detected. Move ticket to lane:code-change before closeout.")
-            if research_lane:
-                research_clean_exempt = True  # #3266: clean lane:research — nothing to merge
-        if not research_clean_exempt and flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
+                return emit("deny", "lane:docs-research/lane:docs-only invalid: repository diff "
+                            "detected. Re-route ticket to lane:code-change before closeout.")
+            if research_lane or docs_lane:
+                report_only_clean_exempt = True  # #3266/#3569: clean report-only lane — nothing to merge
+        if not report_only_clean_exempt and flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
         if "gh issue edit" not in joined and "--remove-label" not in joined:
