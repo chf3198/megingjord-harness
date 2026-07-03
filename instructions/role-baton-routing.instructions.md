@@ -187,7 +187,7 @@ See `docs/howto/accountable-team-schema.md`.
 - Terminal and waiting states (`backlog`, `queued`, `ready`, `done`, `cancelled`) carry no execution `role:*` label, except Epic role exceptions documented in this file.
 - No concurrent role execution on a single ticket.
 - Emit the named handoff artifact before transitioning to the next role.
-- `ADMIN_HANDOFF` signer identity must differ from `COLLABORATOR_HANDOFF`.
+- `ADMIN_HANDOFF` must be **independent** of `COLLABORATOR_HANDOFF` (#3532, Client design decision): independence PASSES iff EITHER (a) the two sign under different `Team&Model` **TEAM segments** (genuine cross-team signing), OR (b) the `ADMIN_HANDOFF` cites a **VERIFIED cross-family consensus receipt** (`cross_family_receipt:`). A same-team persona-split (differing surnames, one agent) with **no** valid receipt **FAILS** — persona-surname difference alone is no longer independence. Enforced by `baton-independence.checkAdminIndependence`, `baton-authority/evidence-loader.checkSignerIndependence`, and the `consensus-receipt-check` CI validator (receipt = sha256 over provider responses in the append-only hash-chained ledger `governance/cross-family-consensus.jsonl`; panel ≥2 families distinct from the authoring family, each able to REJECT). See `docs/howto/cross-family-consensus-independence.md`.
 - All governed work requires a GitHub issue and `Refs #N` in the PR body; workflow identity resolution follows `instructions/team-model-in-workflows.instructions.md`.
 - Skip baton only for: single Q&A, read-only lookup, no file edits, no state-changing tool calls.
 
@@ -227,7 +227,7 @@ replay-eval promotion gate (#3434) flips it. The field is `block` (not required)
 
 | Rule | Enforcement |
 |------|-------------|
-| Collaborator/Admin signer independence | `baton-gates.yml` admin-gate blocks identical signer identity |
+| Collaborator/Admin signer independence (#3532) | `baton-gates.yml` admin-gate + `baton-authority/merge` (`SIGNER_INDEPENDENT` bit) require a different `Team&Model` TEAM segment OR a verified `cross_family_receipt`; `consensus-receipt-check.yml` step re-verifies the receipt from the committed ledger. Persona-surname difference alone no longer passes. |
 | Test strategy declared per matrix | `test-evidence.yml` gate consumes `test_strategy` from `MANAGER_HANDOFF` |
 | `roles.admin` auto-emission on full baton (#2444) | `hooks/scripts/tool_activity.py` `mark_tool_activity` flips `roles["admin"] = True` when every key returned by `admin_patterns.required_admin_ops(flags, repo_type)` is set in `admin_ops`. Stop-hook `check_admin_ops` consumes the same helper. No manual state patching required. |
 

@@ -59,6 +59,18 @@ jobs:
           ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
+      # #3532: re-verify the cross-family consensus receipt PURELY from committed
+      # evidence (hash-chained ledger) + the ADMIN_HANDOFF receipt. When Admin/Collab
+      # sign under different TEAM segments, independence is met by genuine cross-team
+      # signing and no receipt is required. A same-team persona-split needs a VERIFIED
+      # receipt (>=2 distinct non-authoring families, unanimous PASS) or this fails.
+      - name: Verify cross-family consensus receipt
+        if: steps.issue.outputs.issue_number != '' && steps.bypass.outputs.bypass != 'true'
+        run: node scripts/global/baton-authority/consensus-receipt-check.js
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ steps.issue.outputs.issue_number }}
+
       - name: Record break-glass incident
         if: steps.bypass.outputs.bypass == 'true'
         run: |
