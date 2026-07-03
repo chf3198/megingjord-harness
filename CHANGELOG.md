@@ -4098,6 +4098,19 @@ Verified: `npm run governance:verify` and `npm run governance:weekly` now exit 0
 ### Notes
 - `lint:readability:ci` threshold bumped 400 → 420 to absorb upstream baseline drift from #774 telemetry work landed in main. Zero added warnings from this PR's new files; the bump is acceptance-of-baseline-state, not new debt. Lower the threshold again once #774's reconcile/dashboard scripts are tightened.
 
+## [3.4.1] — 2026-05-04 — Release bookkeeping realignment (#3570)
+
+### Fixed
+- Realigned release-please bookkeeping (`.release-please-manifest.json`, `package.json`, `plugin.json`)
+  to the highest published tag **v3.4.1**. Versions **3.3.9 / 3.4.0 / 3.4.1** were published on
+  2026-05-04 as manual GitHub releases on ordinary feature/docs commits — without CHANGELOG entries,
+  a `chore(main): release` commit, or a manifest/package bump — leaving release-please stuck at 3.3.8
+  and its release PR (#845) proposing a regressive 3.4.0. This entry consolidates those orphan releases
+  so release-please resumes cutting correct, monotonic versions (next: > 3.4.1). No release or tag was
+  deleted. Orphan release notes remain on GitHub Releases: 3.3.9 (#856 — governance verify/weekly
+  tickets-dir ENOENT guard), 3.4.0 (#852 — dashboard closed-state hygiene research), 3.4.1 (#854 —
+  dashboard layout density research).
+
 ## [3.3.8] — 2026-05-03 — Token Telemetry Reconciliation + Drift Alerting (#774)
 
 ### Added
