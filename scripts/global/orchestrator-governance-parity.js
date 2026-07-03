@@ -88,6 +88,13 @@ function run() {
   const wiki = wikiCheck.run({ digestManifest: wikiParity.digestManifest, runtimeTiers: wikiParity.runtimeTiers });
   const stateStore = stateCheck.run({ stateStore: manifest.stateStoreParity, runtimes: manifest.runtimes });
   for (const stateFinding of stateStore.findings) findings.push(stateFinding);
+  // Promote high/medium-severity wiki findings to top-level findings so ok:false is set correctly.
+  // Low-severity wiki findings remain in observations.wiki.findings for informational drill-in only.
+  for (const wf of (wiki.findings || [])) {
+    if (wf.severity === 'high' || wf.severity === 'medium') {
+      findings.push({ ...wf, id: `[wiki] ${wf.id}`, summary: `[wiki] ${wf.summary}` });
+    }
+  }
   return { ok: findings.length === 0, manifest: path.relative(ROOT, MANIFEST),
     checkedAt: new Date().toISOString(), observations: { copilot, codex, wiki, stateStore },
     findings };
