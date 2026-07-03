@@ -86,18 +86,22 @@ def main() -> int:
         )
 
     if not block_reason:
-        # #3266: a clean lane:research session is PR-less/merge-less by design — require ZERO
-        # Admin ops so a lingering code_touched flag cannot manufacture a phantom Admin nag.
-        # A dirty tree removes the exemption (nothing-to-merge is the whole justification).
-        research_clean_exempt = False
+        # #3266/#3569: a clean report-only session (lane:research / lane:docs-research /
+        # lane:docs-only) is PR-less/merge-less by design — require ZERO Admin ops so a lingering
+        # code_touched flag cannot manufacture a phantom Admin nag. A dirty tree removes the
+        # exemption (nothing-to-merge is the whole justification).
+        report_only_clean_exempt = False
         try:
-            from pretool_guard import active_ticket_is_research_lane
-            research_clean_exempt = (
-                bool(active_ticket_is_research_lane(state, cwd)) and not uncommitted)
+            from pretool_guard import (
+                active_ticket_is_research_lane, active_ticket_is_docs_lane)
+            report_only_lane = (
+                bool(active_ticket_is_research_lane(state, cwd))
+                or bool(active_ticket_is_docs_lane(state, cwd)))  # #3569
+            report_only_clean_exempt = report_only_lane and not uncommitted
         except Exception:
-            research_clean_exempt = False  # fail-safe: fall back to the standard Admin-op gate
+            report_only_clean_exempt = False  # fail-safe: fall back to the standard Admin-op gate
         block_reason, msg = check_admin_ops(
-            flags, ops, roles, repo_type, uncommitted, research_clean_exempt)
+            flags, ops, roles, repo_type, uncommitted, report_only_clean_exempt)
         if msg:
             messages.append(msg)
 

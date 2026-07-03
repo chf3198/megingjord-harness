@@ -89,14 +89,14 @@ def check_uncommitted(
 def check_admin_ops(
     flags: dict, ops: dict, roles: dict, repo_type: str,
     uncommitted: list[str] | None = None,
-    research_clean_exempt: bool = False,
+    report_only_clean_exempt: bool = False,
 ) -> tuple[str | None, str | None]:
     """Check admin op completion. Returns (block_reason, message).
 
-    #3266: `research_clean_exempt` (a clean lane:research session, resolved by the caller)
-    requires ZERO Admin ops and suppresses the code-session Admin-role gate — the lane is
-    PR-less/merge-less by design, so a lingering code_touched flag must not manufacture a
-    phantom Admin obligation.
+    #3266/#3569: `report_only_clean_exempt` (a clean report-only session — lane:research,
+    lane:docs-research, or lane:docs-only — resolved by the caller) requires ZERO Admin ops and
+    suppresses the code-session Admin-role gate. These lanes are PR-less/merge-less by design, so
+    a lingering code_touched flag must not manufacture a phantom Admin obligation.
     """
     # Phase guard (#1798 F2): Admin ops only meaningful after Collaborator completes.
     if not roles.get("collaborator", False):
@@ -104,12 +104,12 @@ def check_admin_ops(
     # #1960: clean tree + no commit = code was reverted; AC#1 clean-tree pass.
     if uncommitted is not None and not uncommitted and not ops.get("commit"):
         return None, None
-    required = required_admin_ops(flags, repo_type, research_clean_exempt)
+    required = required_admin_ops(flags, repo_type, report_only_clean_exempt)
     missing = [k for k in required if not ops.get(k)]
     if missing:
         reason = f"Stop blocked: missing Admin steps ({', '.join(missing)})."
         return reason, f"Hard governance gate. Missing: {', '.join(missing)}."
-    if not research_clean_exempt and flags.get("code_touched") and not roles.get("admin"):
+    if not report_only_clean_exempt and flags.get("code_touched") and not roles.get("admin"):
         return (
             "Stop blocked: Admin role not complete for code session.",
             "Admin role not marked complete in governance state.",
