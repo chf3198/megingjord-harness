@@ -83,3 +83,14 @@ in Projects v2 fields if the harness chooses to surface it.
 - #1630 — Projects v2 (live state overlay)
 - #1628 — G5 Portability contract
 - #1624 — research source (F10)
+
+## 2026-07-01 — D-0002: Additive resurfacing signals use `signal:*`, not `status:*`
+
+- **Status**: accepted
+- **Decided-by**: Orla Mason (claude-code:claude-opus@local, Manager)
+- **Team-context**: claude-code
+- **Surface**: Issue #3525 / Epic #3517 (ADR-020 label naming)
+- **Decision**: ADR-020's three additive signals are named `signal:close-eligible`, `signal:exempt-review`, and `signal:contested-superseded` (a new `signal:*` group), not the ADR's `status:*` names. `resolution:superseded` keeps its `resolution:*` group.
+- **Why**: #1828 / ADR-010 enforces exactly one `status:*` label per issue, and lifecycle statuses replace each other on transition. These signals are additive — an epic stays `status:in-progress` while also flagged — so `status:*` names would break the one-status cardinality rule. A separate `signal:*` group avoids that and matches label convention (status vs. signal).
+- **Alternatives**: exempt them in the cardinality rule (weakens #1828; rejected); or make them replace the status (wrong — a close-eligible epic is still open; rejected).
+- **Evidence**: resolved autonomously (reversible, no client touch); a cross-family panel (llama3.1 + qwen2.5, non-Anthropic, $0) plus web research agreed on a separate signal group. `signal:contested-superseded` lands in #3525; the other two in #3519 / #3526.

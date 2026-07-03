@@ -177,7 +177,14 @@ async function evaluateMergeAuthority(issueNumber, prNumber, ghClient, claimedDi
   const transition = findTransition(stateCode, EVENTS.MERGE);
   const requiredMask = transition ? transition.requiredMask : 0;
   const missingNames = identifyMissingEvidence(mask, requiredMask);
-  return buildDenial('fsm-denied: ' + unpacked.reasonName, missingNames, facts);
+  // #3532: when independence is the blocker, name WHY (team-split w/o valid receipt)
+  // so the denial is actionable rather than an opaque missing-bit.
+  let reason = 'fsm-denied: ' + unpacked.reasonName;
+  if (missingNames.includes('SIGNER_INDEPENDENT')) {
+    reason += ' (signer-independence: ' + (facts.signerIndependenceBasis || 'unknown')
+      + '; requires a different signing TEAM or a verified cross-family consensus receipt)';
+  }
+  return buildDenial(reason, missingNames, facts);
 }
 
 module.exports = {
