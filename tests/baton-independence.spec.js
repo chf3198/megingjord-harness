@@ -9,13 +9,18 @@ const gate = require(path.join(
   'baton-independence.js'
 ));
 
+// #3532 (Client design decision): independence is decided by the Team&Model TEAM
+// segment OR a verified cross-family consensus receipt — NOT by persona surname.
+// Tests 3 & 4 below previously asserted the self-satisfiable persona loophole
+// (#3518/#3521); they now assert the hardened contract (same-team split FAILS).
+
 test('admin gate fails when collaborator and admin use same Team&Model', () => {
   const result = gate.checkAdminIndependence([
     { body: 'COLLABORATOR_HANDOFF\nAI-Team-Model: codex:gpt-5@openai' },
     { body: 'ADMIN_HANDOFF\nAI-Team-Model: codex:gpt-5@openai' },
   ]);
   expect(result.ok).toBe(false);
-  expect(result.reason).toBe('same-signer');
+  expect(result.reason).toBe('same-team-no-valid-receipt');
 });
 
 test('admin gate passes when collaborator and admin use different teams', () => {
@@ -24,27 +29,25 @@ test('admin gate passes when collaborator and admin use different teams', () => 
     { body: 'ADMIN_HANDOFF\nAI-Team-Model: codex:gpt-5@openai' },
   ]);
   expect(result.ok).toBe(true);
-  expect(result.reason).toBe('independent');
+  expect(result.reason).toBe('independent-team');
 });
 
-test('signer alias takes precedence over shared Team&Model provenance', () => {
+test('persona-surname difference alone NO LONGER satisfies independence (#3518)', () => {
   const result = gate.checkAdminIndependence([
     { body: 'COLLABORATOR_HANDOFF\nAI-Signature: Cora\nAI-Team-Model: codex:gpt-5@openai' },
     { body: 'ADMIN_HANDOFF\nAI-Signature: Nia\nAI-Team-Model: codex:gpt-5@openai' },
   ]);
-  expect(result.ok).toBe(true);
-  expect(result.collaboratorId).toBe('Cora');
-  expect(result.adminId).toBe('Nia');
+  expect(result.ok).toBe(false);
+  expect(result.reason).toBe('same-team-no-valid-receipt');
 });
 
-test('role marker matching ignores prose mentions in later comments', () => {
+test('distinct aliases with no parseable team also fail (no receipt)', () => {
   const result = gate.checkAdminIndependence([
     { body: 'COLLABORATOR_HANDOFF\nAI-Signature: Cora' },
     { body: 'ADMIN_HANDOFF\nAI-Signature: Nolan\nOpened after COLLABORATOR_HANDOFF aged past the gate.' },
   ]);
-  expect(result.ok).toBe(true);
-  expect(result.collaboratorId).toBe('Cora');
-  expect(result.adminId).toBe('Nolan');
+  expect(result.ok).toBe(false);
+  expect(result.reason).toBe('no-independent-team-no-receipt');
 });
 
 test('role identity accepts legacy Team&Model and Signed-by fields', () => {

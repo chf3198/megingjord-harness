@@ -10,3 +10,4 @@
 | [015](015-model-routing-agents.md) | Model routing via custom agents (renumbered from ADR-004) | Accepted | 2025-07-13 |
 | [006](006-visual-qa-gate.md) | Visual QA gate for web releases | Accepted | 2025-07-16 |
 | [007](007-llm-wiki-adoption.md) | LLM Wiki knowledge system adoption | Accepted | 2026-04-13 |
+| [020](020-closure-readiness-resurfacing.md) | Closure-readiness resurfacing + superseded-resolution taxonomy | Proposed | 2026-07-01 |

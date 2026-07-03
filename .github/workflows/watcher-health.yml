@@ -1,0 +1,37 @@
+name: Watcher Health Monitor
+# Fleet-wide scheduled-workflow health monitor (#3522, Epic #3520, ADR-020 §D1/D3/D4/D5).
+# Watches the watchers: detects failed-since-inception / N-consecutive-failure /
+# auto-disabled-inactivity / stale-heartbeat across all chf3198 scheduled governance workflows.
+# Off-peak cadence + workflow_dispatch so it is manually testable and self-exempt from the very
+# inactivity-disable it detects (a run every 6h keeps it active).
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/watcher-health.yml', 'scripts/global/watcher-health.js']
+  workflow_dispatch:
+
+concurrency:
+  group: watcher-health
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watcher-health:
+    name: watcher-health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+      - name: Self-test (fixture) — fail fast if the monitor itself is broken
+        run: node tests/watcher-health.spec.js
+      - name: Run watcher-health monitor
+        run: node scripts/global/watcher-health.js
+        env:
+          GH_TOKEN: ${{ github.token }}

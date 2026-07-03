@@ -117,7 +117,10 @@ jobs:
             const independence = checkAdminIndependence(comments.map(c => ({
               body: c.body,
               author: c.user && c.user.login,
-            })));
+            // #3532: pass linkedIssue so the cross-family consensus receipt binds +
+            // verifies against the committed ledger. Same-team persona-split alone no
+            // longer satisfies independence; it requires a VERIFIED receipt.
+            })), { issueNumber: linkedIssue });
             if (!independence.ok) core.setFailed(independence.message);
             const signerGov = analyzeComments(comments);
             if (!signerGov.ok) {
