@@ -1,0 +1,43 @@
+name: Epic Close-Eligible Signal
+# F1 of Epic #3517 (ADR-020 §D1): weekly POSITIVE close-eligibility signal that complements
+# the #3350 close-time veto. Surface-only — applies signal:close-eligible + pings the owner;
+# NEVER closes an epic. Fails closed on any sub_issues/REST detection degradation (#3354 trap).
+# Kill-switch: set repo/env var CLOSE_ELIGIBLE_DISABLED=1 for an instant no-op rollback.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # weekly, Monday 09:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only (log decisions; no label/comment)'
+        type: boolean
+        default: true
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: epic-close-eligible
+  cancel-in-progress: false
+
+jobs:
+  epic-close-eligible:
+    name: epic-close-eligible
+    runs-on: ubuntu-latest
+    env:
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+      CLOSE_ELIGIBLE_DISABLED: ${{ vars.CLOSE_ELIGIBLE_DISABLED }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Surface close-eligible epics (fail-closed; never closes)
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { run } = require('./scripts/global/epic-close-eligible.js');
+            await run({ github, context, core });

@@ -1,0 +1,44 @@
+name: Exempt-Review Sweep
+# F3 of Epic #3517 (ADR-020 §D2): velocity-relative review sweep for exempt-but-idle epics that
+# sit in the stale.yml exemption blind zone (type:epic / milestoned; never reviewed). Surface-only
+# — applies signal:exempt-review + a #2990 queue entry; NEVER closes. Reuses the #2920 dormant
+# scaffold and defers to it for status:dormant epics. Ships SHADOW/report-only until enabled.
+# Kill-switch: EXEMPT_SWEEP_DISABLED=1. Enforcement: set repo var EXEMPT_SWEEP_SHADOW=0.
+
+on:
+  schedule:
+    - cron: '30 9 * * 1'   # weekly, Monday 09:30 UTC (after epic-close-eligible)
+  workflow_dispatch:
+    inputs:
+      shadow:
+        description: 'Report-only (log would-be targets; apply no label)'
+        type: boolean
+        default: true
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: exempt-review-sweep
+  cancel-in-progress: false
+
+jobs:
+  exempt-review-sweep:
+    name: exempt-review-sweep
+    runs-on: ubuntu-latest
+    env:
+      EXEMPT_SWEEP_SHADOW: ${{ github.event.inputs.shadow == 'false' && '0' || (vars.EXEMPT_SWEEP_SHADOW || '1') }}
+      EXEMPT_SWEEP_DISABLED: ${{ vars.EXEMPT_SWEEP_DISABLED }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Surface exempt-but-idle epics (velocity-relative; shadow-first; never closes)
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { run } = require('./scripts/global/exempt-review-sweep.js');
+            await run({ github, context, core });
