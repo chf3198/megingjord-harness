@@ -11,3 +11,4 @@
 | [006](006-visual-qa-gate.md) | Visual QA gate for web releases | Accepted | 2025-07-16 |
 | [007](007-llm-wiki-adoption.md) | LLM Wiki knowledge system adoption | Accepted | 2026-04-13 |
 | [020](020-closure-readiness-resurfacing.md) | Closure-readiness resurfacing + superseded-resolution taxonomy | Proposed | 2026-07-01 |
+| [021](021-operative-ruleset-working-tree.md) | Operative ruleset is the working tree; snapshot-first before harness mutation | Accepted | 2026-07-03 |
