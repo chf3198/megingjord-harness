@@ -3,8 +3,8 @@
 const { execSync } = require('child_process');
 
 const maxBehind = Number(process.env.SANDBOX_MAX_BEHIND || 0);
-const validTargets = ['copilot', 'codex', 'claude-code'];
-const sandboxRx = /^sandbox\/(copilot|codex|claude-code)$/;
+const validTargets = ['copilot', 'codex', 'claude-code', 'antigravity', 'cursor'];
+const sandboxRx = /^sandbox\/(copilot|codex|claude-code|antigravity|cursor)$/;
 
 function parseTarget(args = process.argv.slice(2), env = process.env) {
   const inline = args.find((arg) => arg.startsWith('--target='));
@@ -15,7 +15,7 @@ function parseTarget(args = process.argv.slice(2), env = process.env) {
   return value;
 }
 function helpText() {
-  return 'Usage: worktree-governance-audit.js [--json] [--target=<copilot|codex|claude-code>]\n'
+  return 'Usage: worktree-governance-audit.js [--json] [--target=<' + validTargets.join('|') + '>]\n'
     + 'Default audits every sandbox launcher. Target mode audits only one launcher.';
 }
 
