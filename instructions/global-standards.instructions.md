@@ -95,3 +95,32 @@ The main checkout (`${HOME}/devenv-ops/`) is canonical-only during sessions. Per
 	via `gh discussion view N --json` + `gh issue create`. Keep the Discussion
 	link in the Issue body so decisional rationale is preserved.
 - See `docs/howto/discussions-vs-issues.md` for category catalog and examples.
+
+## Codified rules-of-thumb (Epic #2399 AC3)
+
+Rules-of-thumb learned through real harness failures, promoted from operator-local
+memory to the canonical `instructions/` surface so **every** runtime (Copilot,
+Claude Code, Codex, Antigravity) inherits them — not just the operator holding the
+memory files. Each row points to the **verified** canonical home and its real
+disposition. `status` is honest per G1 (never claim "codified" for a rule that is
+still memory-only — the #1617 AC-wording-vs-shipped trap):
+
+- `codified` — the rule is stated in a resident/on-demand instruction file.
+- `documented-elsewhere` — the rule lives in a `docs/howto/` recipe or wiki page.
+- `memory-only` — promotion pending; the rule is still only in operator memory.
+
+| Rule-of-thumb | Canonical location | Status |
+|---|---|---|
+| Post all four baton artifacts **before** `gh pr create` | `role-baton-routing.instructions.md` §"Validation evidence — recent practice" | codified |
+| Consultant emits Tier-3 on a post-implementation G1–G9 goal violation | `workflow-resilience.instructions.md` §"Tier 3 — Consultant goal-failure escalation" | codified |
+| Signer aliases derive deterministically from team + model + role (never a default seed) | `team-model-signing.instructions.md` §"Alias derivation" | codified |
+| Client is design + UAT only — never route dev-flow questions to the client | `operator-identity-context.instructions.md` §"Core rules" (rules 2–3) | codified |
+| No calendar/"N-day soak" thresholds in agentic governance — use velocity-relative + replay-eval | `test-methodology-matrix.instructions.md` §"Stress promotion model"; `programmatic-governance.instructions.md` §Composition (Epic #1771) | codified |
+| `sync.sh` copies runtime **into** the checkout (inverse of `deploy.sh`); a stale runtime silently regresses tracked files | `global-standards.instructions.md` §"Canonical-main checkout policy" → Sync-direction trap (#2355) | codified |
+| Features use the optimal resource when available, fall back to the baseline tier when absent (optimal-with-fallback) | `harness-goals.instructions.md` §"Tier-graceful degradation" | codified |
+| Baton-governance regexes match the **first** `Team&Model:` / `role:NAME` / artifact string in a comment — prose usages pollute them; hyphenate in prose | operator memory (`feedback_*_prose_collision`); only a passing cross-ref in `programmatic-governance.instructions.md` §Composition — no canonical instruction home yet | memory-only |
+
+Source triage: `research/operator-memory-promotion-audit-2026-05-30.md` (Phase-0 #2413) —
+42 memory files scored on scope / type / incident-prevention; the 8 promotion candidates above
+plus 6 recovery recipes (routed to `docs/howto/`, not policy). When a `memory-only` row is
+promoted, flip its `status` here and update the originating memory file to point at the canonical location (Epic #2399 AC4).
