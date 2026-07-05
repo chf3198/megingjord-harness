@@ -12,7 +12,7 @@ const TEAM_COLORS = {
   cursor: 'coord-cursor', unknown: 'coord-unknown'
 };
 const STALE_CLAIM_MS = 30 * 60 * 1000;
-function safeInt(v) { const n = Number(v); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0; }
+function safeInt(v) { const num = Number(v); return Number.isFinite(num) && num > 0 ? Math.floor(num) : 0; }
 
 function classifyCoordEntries(entries) {
   const now = Date.now();
