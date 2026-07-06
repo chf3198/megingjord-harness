@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // worktree-active-session-lock (#1854) — flock-style session lock. Atomic via
 // writeFile→linkSync EEXIST (#1871 concurrency fix). PID + heartbeat liveness.
+// Lifecycle telemetry (#1860 concern #2) is best-effort and never affects results.
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const { emitLockEvent } = require('./worktree-lock-telemetry');
 
 const LOCK_REL = '.megingjord/active-session.lock';
 const STALE_MS = 30 * 60 * 1000;
@@ -63,7 +65,10 @@ function acquire(rootDir, team, ticket = null, opts = {}) {
   const now = opts.now ?? Date.now();
   const lock = buildLock(team, ticket, now);
   const payload = JSON.stringify(lock, null, 2);
-  if (tryExclusiveCreate(file, payload)) return { ok: true, acquired: true, lock };
+  if (tryExclusiveCreate(file, payload)) {
+    emitLockEvent('acquire', { team, ticket });
+    return { ok: true, acquired: true, lock };
+  }
   const existing = readLock(rootDir);
   if (existing && !isStale(existing, now)) {
     if (existing.team === team) {
@@ -71,12 +76,17 @@ function acquire(rootDir, team, ticket = null, opts = {}) {
       fs.writeFileSync(file, JSON.stringify(refreshed, null, 2), 'utf8');
       return { ok: true, refreshed: true, lock: refreshed };
     }
+    emitLockEvent('refuse', { team, ticket, held_by_team: existing.team });
     return { ok: false, reason: 'lock-held-by-other-team', held_by: existing };
   }
   try { fs.unlinkSync(file); } catch {}
-  if (tryExclusiveCreate(file, payload)) return { ok: true, acquired: true, lock, replaced_stale: true };
+  if (tryExclusiveCreate(file, payload)) {
+    emitLockEvent('replace_stale', { team, ticket, replaced_team: existing ? existing.team : null });
+    return { ok: true, acquired: true, lock, replaced_stale: true };
+  }
   const winner = readLock(rootDir);
   if (winner && winner.team === team) return { ok: true, refreshed: true, lock: winner };
+  emitLockEvent('refuse', { team, ticket, held_by_team: winner ? winner.team : null });
   return { ok: false, reason: 'lock-held-by-other-team', held_by: winner };
 }
 
@@ -93,6 +103,7 @@ function release(rootDir, team) {
   if (!existing) return { ok: true, noop: true };
   if (existing.team !== team) return { ok: false, reason: 'lock-not-held-by-this-team', held_by: existing };
   fs.unlinkSync(lockPath(rootDir));
+  emitLockEvent('release', { team });
   return { ok: true, released: true };
 }
 
