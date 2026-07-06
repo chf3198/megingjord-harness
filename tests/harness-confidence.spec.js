@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const {
-  buildEnvelope, deriveOverall, checkEnvHydration, SCHEMA_VERSION, REQUIRED_KEYS,
+  buildEnvelope, deriveOverall, checkEnvHydration, checkSkills, SCHEMA_VERSION, REQUIRED_KEYS,
 } = require('../scripts/global/harness-confidence');
 
 const SCHEMA = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/harness-confidence.schema.json'), 'utf8'));
@@ -64,6 +64,24 @@ test('AC2: env_hydration fails from a keyless dir and passes with keys present',
   } finally {
     for (const key of REQUIRED_KEYS) if (saved[key] !== undefined) process.env[key] = saved[key];
   }
+});
+
+test('skills: required availability resolves the NAMED skill, not "any registry has entries"', () => {
+  const savedHome = process.env.HOME;
+  try {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'hc-home-'));
+    // registry has entries + the named operator-identity-context, but NOT cross-family-review
+    const reg = path.join(home, '.agents/skills/operator-identity-context');
+    fs.mkdirSync(reg, { recursive: true });
+    fs.writeFileSync(path.join(reg, 'SKILL.md'), '# skill');
+    fs.mkdirSync(path.join(home, '.agents/skills/some-other-skill'), { recursive: true });
+    process.env.HOME = home;
+    const result = checkSkills();
+    assert.equal(result.registry_available, true);
+    assert.equal(result.required_skills['operator-identity-context'], 'available');
+    assert.equal(result.required_skills['cross-family-review'], 'missing'); // not falsely inferred
+    assert.equal(result.status, 'fail'); // a missing required skill fails, not a broad pass
+  } finally { process.env.HOME = savedHome; }
 });
 
 test('AC4 + derivation: deterministic overall; deploy_parity degraded is a warning, blocking only on rollout', () => {

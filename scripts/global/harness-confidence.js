@@ -52,7 +52,7 @@ function checkEnvHydration(root) {
   return { status: anyMissing ? 'fail' : 'pass', source, env_file_present: envFilePresent, required_keys: requiredKeys };
 }
 
-function checkHamr() {
+function checkHamr(smoke) {
   const candidates = [
     path.join(process.env.HOME || '', '.codex/devenv-ops/hamr-config.json'),
     path.join(process.env.HOME || '', '.copilot/hamr-config.json'),
@@ -60,10 +60,17 @@ function checkHamr() {
   ];
   const configPath = candidates.find((p) => fs.existsSync(p)) || null;
   const activated = !!configPath;
-  return {
-    status: activated ? 'degraded' : 'fail', // degraded until a live doctor probe confirms TIER2 healthy
-    activated, config_path: configPath, doctor_tier: 'unknown', worker_reachable: null, hook_health: 'unknown',
-  };
+  let hookHealth = 'unknown';
+  try { const { scanHookHealth } = require('./hook-symlink-health'); const scan = scanHookHealth();
+    hookHealth = scan && scan.broken && scan.broken.length ? 'degraded' : 'ok'; } catch { hookHealth = 'unknown'; }
+  if (!activated) return { status: 'fail', activated, config_path: null, doctor_tier: 'none', worker_reachable: null, hook_health: hookHealth };
+  if (!smoke) { // quick: local evidence only, no network — a healthy hook state can reach pass
+    return { status: hookHealth === 'degraded' ? 'degraded' : 'pass', activated, config_path: configPath, doctor_tier: 'skipped', worker_reachable: null, hook_health: hookHealth };
+  }
+  const out = sh('node scripts/global/hamr-doctor.js 2>/dev/null') || ''; // smoke: live tier from hamr:doctor
+  const tier = (/tier1-full|tier2-degraded|tier3-offline/i.exec(out) || ['unknown'])[0].toLowerCase();
+  const status = tier === 'tier1-full' ? 'pass' : tier === 'tier3-offline' ? 'fail' : tier === 'tier2-degraded' ? 'degraded' : 'degraded';
+  return { status, activated, config_path: configPath, doctor_tier: tier, worker_reachable: tier === 'tier3-offline' ? false : tier === 'unknown' ? null : true, hook_health: hookHealth };
 }
 
 function checkFreeCloudSmoke(smoke) {
@@ -84,12 +91,22 @@ function checkFreeCloudSmoke(smoke) {
 
 function checkFleetSmoke(smoke) {
   if (!smoke) return { status: 'skipped', inventory_reachable: null, dispatch_ok: null, route_attempted: null, reason: 'quick-mode', fallback_tier: null };
-  // Fleet dispatch is the slow/flaky path both teams reported; probe conservatively via cascade if present.
-  const hasCascade = fs.existsSync(path.join(__dirname, 'cascade-dispatch.js'));
-  return {
-    status: 'degraded', inventory_reachable: hasCascade, dispatch_ok: false,
-    route_attempted: 'cascade', reason: 'fleet dispatch is best-effort; free-cloud is the designed fallback', fallback_tier: 'free-cloud',
-  };
+  let cascade;
+  try { ({ cascade } = require('./cascade-dispatch')); }
+  catch (e) { return { status: 'fail', inventory_reachable: null, dispatch_ok: false, route_attempted: null, reason: `cascade-unavailable:${e.message}`, fallback_tier: null }; }
+  // Live dispatch: tier 'local' = fleet answered; 'free-cloud' = reachable-but-fell-back; else failed.
+  return cascade('reply with the single token OK', {}).then((result) => {
+    const fleetOk = !!(result && result.ok && result.tier === 'local');
+    const fellBack = !!(result && result.tier === 'free-cloud');
+    return {
+      status: fleetOk ? 'pass' : fellBack ? 'degraded' : 'fail',
+      inventory_reachable: fleetOk || fellBack ? true : null,
+      dispatch_ok: fleetOk,
+      route_attempted: result && result.tier === 'local' ? 'ollama' : 'ollama->free-cloud',
+      reason: fleetOk ? null : (result && result.reason) || 'fleet dispatch failed',
+      fallback_tier: fellBack ? 'free-cloud' : null,
+    };
+  }).catch((e) => ({ status: 'fail', inventory_reachable: null, dispatch_ok: false, route_attempted: 'ollama', reason: String((e && e.message) || e), fallback_tier: null }));
 }
 
 function checkGithub() {
@@ -108,14 +125,21 @@ function dirCount(dir) { try { return fs.readdirSync(dir).filter((f) => !f.start
 
 function checkSkills() {
   const home = process.env.HOME || '';
+  const registries = [path.join(home, '.agents/skills'), path.join(home, '.copilot/skills'), path.join(home, '.codex/skills')];
   const agentsCount = dirCount(path.join(home, '.agents/skills'));
   const codexDir = path.join(home, '.codex/skills');
-  const registryAvailable = agentsCount > 0 || dirCount(path.join(home, '.copilot/skills')) > 0;
+  const registryAvailable = registries.some((dir) => dirCount(dir) > 0);
   const required = ['operator-identity-context', 'cross-family-review'];
   const requiredSkills = {};
-  for (const name of required) requiredSkills[name] = registryAvailable ? 'available' : 'missing';
+  let anyMissing = false;
+  for (const name of required) {
+    // Resolve the NAMED skill's SKILL.md, not just "some registry has entries" (avoids false positives).
+    const found = registries.some((dir) => fs.existsSync(path.join(dir, name, 'SKILL.md')));
+    requiredSkills[name] = found ? 'available' : 'missing';
+    if (!found) anyMissing = true;
+  }
   return {
-    status: registryAvailable ? 'pass' : 'fail',
+    status: anyMissing ? 'fail' : 'pass',
     registry_available: registryAvailable, codex_skill_dir_present: fs.existsSync(codexDir),
     codex_skill_dir_count: dirCount(codexDir), agents_skill_dir_count: agentsCount, required_skills: requiredSkills,
   };
@@ -128,14 +152,15 @@ function checkTooling() {
 }
 
 function checkDeployParity() {
-  const home = process.env.HOME || '';
-  const per = {};
-  for (const team of ['codex', 'copilot', 'cursor', 'antigravity']) {
-    const skills = dirCount(path.join(home, team === 'antigravity' ? '.agents/skills' : `.${team}/skills`));
-    per[team] = skills > 0 ? 'pass' : 'missing-gate-corpus';
-  }
+  // Correct surface: the HAMR script + gate-corpus parity (hamr-sync-verify), NOT skill-dir counts.
+  let result;
+  try { result = require('./hamr-sync-verify').run(); }
+  catch (e) { return { status: 'degraded', reason: `sync-verify-unavailable:${e.message}`, copilot: 'unknown', codex: 'unknown', cursor: 'unknown', antigravity: 'unknown' }; }
+  const per = { copilot: 'unknown', codex: 'unknown', cursor: 'unknown', antigravity: 'unknown' };
+  for (const target of result.targets || []) per[target.team] = target.exists && !(target.missing || []).length ? 'pass' : 'missing-scripts';
+  for (const gate of (result.gate_corpus && result.gate_corpus.results) || []) per[gate.runtime] = gate.ok ? 'pass' : 'missing-gate-corpus';
   // Codex ruling: missing Cursor/Antigravity targets are degraded+warning, not blocking (outside rollout).
-  const anyMissing = Object.values(per).includes('missing-gate-corpus');
+  const anyMissing = Object.values(per).some((state) => state !== 'pass' && state !== 'unknown');
   return { status: anyMissing ? 'degraded' : 'pass', ...per };
 }
 
@@ -154,13 +179,22 @@ function deriveOverall(checks, rollout) {
   return { status, blocking, warnings };
 }
 
+/** Runtime identity + execution surface. @param {boolean} smoke @returns {object} */
+function runtimeInfo(smoke) {
+  return {
+    team: process.env.HAMR_TEAM || 'unknown', model: process.env.HAMR_MODEL || 'unknown',
+    host: process.env.HAMR_HOST || 'unknown',
+    execution_surface: { shell: true, node: true, network: smoke ? true : null, filesystem: 'full' },
+  };
+}
+
 function buildEnvelope(opts = {}) {
   const cwd = opts.cwd || process.cwd();
   const smoke = !!opts.smoke;
   const repo = repoInfo(cwd);
   const checks = {
     env_hydration: checkEnvHydration(repo.root),
-    hamr: checkHamr(),
+    hamr: checkHamr(smoke),
     free_cloud_smoke: checkFreeCloudSmoke(smoke),
     fleet_smoke: checkFleetSmoke(smoke),
     github: checkGithub(),
@@ -168,24 +202,24 @@ function buildEnvelope(opts = {}) {
     tooling: checkTooling(),
     deploy_parity: checkDeployParity(),
   };
-  return Promise.resolve(checks.free_cloud_smoke).then((freeCloud) => {
+  return Promise.all([Promise.resolve(checks.free_cloud_smoke), Promise.resolve(checks.fleet_smoke)]).then(([freeCloud, fleet]) => {
     checks.free_cloud_smoke = freeCloud;
+    checks.fleet_smoke = fleet;
     return {
       schema_version: SCHEMA_VERSION,
       generated_at: opts.now || null, // stamped by caller/CI; probe stays deterministic
       repo: { root: repo.root, branch: repo.branch, worktree_kind: repo.worktree_kind, dirty: repo.dirty },
-      runtime: {
-        team: process.env.HAMR_TEAM || 'unknown', model: process.env.HAMR_MODEL || 'unknown',
-        host: process.env.HAMR_HOST || 'unknown',
-        execution_surface: { shell: true, node: true, network: smoke ? true : null, filesystem: 'full' },
-      },
+      runtime: runtimeInfo(smoke),
       overall: deriveOverall(checks, !!opts.rollout),
       checks,
     };
   });
 }
 
-module.exports = { buildEnvelope, deriveOverall, checkEnvHydration, SCHEMA_VERSION, REQUIRED_KEYS };
+module.exports = {
+  buildEnvelope, deriveOverall, checkEnvHydration, checkSkills, checkHamr, checkDeployParity,
+  SCHEMA_VERSION, REQUIRED_KEYS,
+};
 
 if (require.main === module) {
   const argv = process.argv.slice(2);
