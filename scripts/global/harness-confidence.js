@@ -14,9 +14,11 @@ const SCHEMA_VERSION = 'harness-confidence/v1';
 const REQUIRED_KEYS = ['GROQ_API_KEY', 'CEREBRAS_API_KEY', 'MISTRAL_API_KEY', 'OPENROUTER_API_KEY'];
 // When a check is `fail`, is that fail blocking (stops governed work) or a warning (fallback exists)?
 const BLOCKS_WHEN_FAILED = new Set(['github', 'skills']);
+const SH_TIMEOUT_MS = 8000; // per-subprocess probe budget
+const SMOKE_TIMEOUT_MS = 20000; // per-provider budget for the --smoke free-cloud call
 
 function sh(command) {
-  try { return cp.execSync(command, { stdio: ['ignore', 'pipe', 'ignore'], timeout: 8000 }).toString().trim(); }
+  try { return cp.execSync(command, { stdio: ['ignore', 'pipe', 'ignore'], timeout: SH_TIMEOUT_MS }).toString().trim(); }
   catch { return null; }
 }
 function binStatus(bin) { return sh(`command -v ${bin}`) ? 'available' : 'missing'; }
@@ -69,7 +71,7 @@ function checkFreeCloudSmoke(smoke) {
   try {
     const { callProvider } = require('./free-cloud-dispatch');
     const started = Date.now();
-    return callProvider('groq', 'reply with the single token OK', { timeoutMs: 20000 })
+    return callProvider('groq', 'reply with the single token OK', { timeoutMs: SMOKE_TIMEOUT_MS })
       .then((r) => ({
         status: r && r.ok ? 'pass' : 'fail', provider: 'groq', reason: r && r.ok ? null : (r && r.reason) || 'no_response',
         latency_ms: Date.now() - started, content_matched: !!(r && r.ok && /ok/i.test(r.content || '')),
