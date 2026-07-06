@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "harness-confidence/v1",
+  "title": "harness-confidence/v1 envelope",
+  "type": "object",
+  "required": ["schema_version", "repo", "runtime", "overall", "checks"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "const": "harness-confidence/v1" },
+    "generated_at": { "type": ["string", "null"] },
+    "repo": {
+      "type": "object",
+      "required": ["root", "branch", "worktree_kind", "dirty"],
+      "properties": {
+        "root": { "type": "string" },
+        "branch": { "type": "string" },
+        "worktree_kind": { "enum": ["main", "ticket", "unknown"] },
+        "dirty": { "type": "boolean" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["team", "model", "host", "execution_surface"],
+      "properties": {
+        "execution_surface": {
+          "type": "object",
+          "required": ["shell", "node", "network", "filesystem"],
+          "properties": { "filesystem": { "enum": ["full", "workspace", "restricted", "unknown"] } }
+        }
+      }
+    },
+    "overall": {
+      "type": "object",
+      "required": ["status", "blocking", "warnings"],
+      "properties": {
+        "status": { "enum": ["pass", "degraded", "fail"] },
+        "blocking": { "type": "array", "items": { "type": "string" } },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "required": ["env_hydration", "hamr", "free_cloud_smoke", "fleet_smoke", "github", "skills", "tooling", "deploy_parity"],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status"],
+        "properties": { "status": { "enum": ["pass", "degraded", "fail", "skipped"] } }
+      },
+      "properties": {
+        "env_hydration": {
+          "type": "object",
+          "required": ["status", "source", "env_file_present", "required_keys"],
+          "properties": {
+            "source": { "enum": [".env", "process", "none"] },
+            "required_keys": {
+              "type": "object",
+              "additionalProperties": { "enum": ["present", "missing"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
