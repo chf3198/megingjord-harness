@@ -1,5 +1,4 @@
-// Baton Flow — Multi-ticket parallel agent baton (M→C→A→Consultant)
-/* global detectMissingEvents, getTicketTimeline, esc */ /* exported renderBatonFlow, buildBatonState */
+// Baton Flow — Multi-ticket parallel agent baton (M→C→A→Consultant) /* global detectMissingEvents, getTicketTimeline, esc */ /* exported renderBatonFlow, buildBatonState */
 
 const BATON_ROLES = [
   { id: 'manager', icon: '🎯', label: 'Mgr' },
@@ -14,8 +13,9 @@ function renderBatonFlow(batonState) {
     return `<div class="baton-flow"><div class="baton-empty">🎯 No active tickets<br>
       <small>Baton activates when issues are assigned to a role.</small></div></div>`;
   }
+  const ACTIVE_SET = new Set(['triage','ready','in-progress','testing','review']);
   const active = tickets.filter(t =>
-    !['done','cancelled','closed'].includes(t.status) && !t.closed);
+    ACTIVE_SET.has(t.status) && !t.closed);
   const html = active.length
     ? active.map(renderBatonRow).join('')
     : `<div class="baton-empty">✅ All active tickets completed — see Ticket Log</div>`;
@@ -41,7 +41,8 @@ function renderBatonRow(t) {
   const agent = t.agent ? `<span class="baton-agent">🎭 ${esc(t.agent)}</span>` : '';
   const model = t.model ? `<span class="baton-model">🤖 ${esc(t.model)}</span>` : '';
   const title = t.title ? `<span class="baton-title">${esc(t.title)}</span>` : '';
-  const epic = t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
+  const epicBadge = t.isEpic ? '<span class="baton-epic-badge">📋 Epic</span>' : '';
+  const epic = !t.isEpic && t.epic ? `<span class="baton-epic">Epic #${t.epic}</span>` : '';
   const gaps = typeof detectMissingEvents === 'function'
     ? detectMissingEvents(t.issue) : [];
   const gapWarn = gaps.length
@@ -51,6 +52,7 @@ function renderBatonRow(t) {
   const comment = buildCommentSnippet(t.lastComment);
   return `<div class="baton-row">
     <div class="baton-meta">
+      ${epicBadge}
       ${epic}
       <span class="baton-issue">#${t.issue || '?'}</span>
       ${title}
@@ -62,9 +64,8 @@ function renderBatonRow(t) {
     ${tl}
   </div>`;
 }
-
 function batonStatusBadge(s) {
-  return ({ 'in-progress': 'active', ready: 'degraded', done: 'healthy', idle: 'unknown', review: 'degraded' })[s] || 'unknown';
+  return ({ 'in-progress': 'active', 'testing': 'active', 'triage': 'degraded', ready: 'degraded', review: 'degraded', done: 'healthy', idle: 'unknown' })[s] || 'unknown';
 }
 function normalizeBaton(state) {
   if (!state) return [];
@@ -91,7 +92,6 @@ function buildCommentSnippet(lc) {
   const full = esc(lc), snippet = lc.length > 80 ? esc(lc.slice(0, 80)) + '…' : full;
   return `<div class="baton-comment" title="${full}" aria-label="Last comment: ${full}">💬 ${snippet}</div>`;
 }
-
 function buildBatonState(routerLog) {
   if (!routerLog || !routerLog.length) return [];
   const last = routerLog[0];

@@ -35,11 +35,12 @@ plain globals consumed by `app.js` (the Alpine root component).
 
 ## Baton State Filtering
 
-The Agent Baton panel displays only **active** tickets (v3.0.2+):
-- Shows tickets with status `in-progress` or `review` only
-- Filters out `backlog`, `done`, `cancelled`, `blocked`
-- GitHub issues without explicit `status:*` label default to `backlog`
-- Prevents flooding from 300+ untagged issues
+The Agent Baton panel displays only **active** tickets (v3.1.0+):
+- Shows tickets with status `triage`, `ready`, `in-progress`, `testing`, or `review`
+- Filters out `backlog`, `done`, `cancelled`, `blocked`, `dormant`, `deferred`, `queued`
+- Data sourced from `/api/github/summary` via `syncWithGitHub()` + `extractActiveBaton()`
+- Epic rows visually distinguished with 📋 badge; child tickets show parent Epic reference
+- Issues without explicit `status:*` label default to `backlog` (filtered out)
 - See [role-baton-routing.instructions.md](../instructions/role-baton-routing.instructions.md) for status lifecycle
 
 ## Context Flow Topology

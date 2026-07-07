@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // GitHub API module — async exec with background cache (never blocks event loop)
 const { exec } = require('child_process');
-const REPO = 'chf3198/devenv-ops';
+const REPO = 'chf3198/megingjord-harness';
 const GH = 'gh api --cache 60s';
 let _cache = null; let _refreshing = false; let _lastFetch = 0;
 const CACHE_TTL = 90000; // 90s

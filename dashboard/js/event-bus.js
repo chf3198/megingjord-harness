@@ -3,7 +3,7 @@ let _lastEventTs = null;
 const _batonTickets = {}, _batonHistory = {};
 const _ticketLog = {};
 const CLOSED_STATUSES = new Set(['done', 'cancelled']);
-const ACTIVE_STATUSES = new Set(['in-progress', 'review', 'testing', 'ready-for-testing']);
+const ACTIVE_STATUSES = new Set(['triage', 'ready', 'in-progress', 'testing', 'review']);
 const STATUS_ROLE_MAP = {
   backlog: null, todo: 'manager', ready: 'manager', 'in-progress': 'collaborator',
   'ready-for-testing': 'admin', testing: 'admin',
