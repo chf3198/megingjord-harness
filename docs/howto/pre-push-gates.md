@@ -62,6 +62,18 @@ Enforcement is preserved downstream regardless: the required CI `consultant-gate
 recorded before `gh issue close`) keep the closeout mandatory **before merge and before issue
 close**. The pre-push deferral only removes the baton-inverting pre-PR requirement.
 
+## Merge gate: required checks only (#3664)
+
+The `pretool_guard` merge gate classifies PR CI via
+`hooks/scripts/live_checks.py` `ci_gate_status()`. It fails a merge **only** on
+red checks in the base branch's branch-protection
+`required_status_checks/contexts` set — non-required advisory checks (e.g.
+`worktree-governance-required`, `Doc update required`) no longer block
+`gh pr merge`. The required set is resolved live from branch protection
+(`gh pr checks --json` exposes `name,state` only — no `isRequired` field); when
+it cannot be resolved the gate falls back to the legacy all-checks behavior
+(fail-closed), so required checks always stay enforced.
+
 ## Manual run
 
 - `npm run hooks:pre-push`
