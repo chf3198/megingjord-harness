@@ -5,7 +5,7 @@
 // allow-list suppression, stale-allowlist orphan). Pure — no network. Guards the monitor against
 // silently breaking (the copilot-global-skills#1 failure mode this Epic exists to eliminate).
 const assert = require('node:assert');
-const { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport } = require('../scripts/global/watcher-health');
+const { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport, markerFor, findExistingTriage } = require('../scripts/global/watcher-health');
 
 const NOW = Date.UTC(2026, 6, 1, 12, 0, 0); // fixed clock — deterministic
 const F = c => ({ conclusion: c, created_at: new Date(NOW - 3600e3).toISOString() });
@@ -66,4 +66,20 @@ assert.ok(coverage.skipped.some(s => String(s.reason).startsWith('allow:')), 'al
 assert.ok(coverage.staleAllow.some(o => o.key === 'gone/removed.yml' && o.reason === 'stale-allowlist'), 'orphan allow entry flagged');
 assert.ok(!coverage.staleAllow.some(o => o.key === '_note'), '_-prefixed meta key ignored (not an orphan)');
 
-process.stdout.write('watcher-health.spec: PASS (4 signatures + healthy + 3 edge cases + allow-list + stale-allowlist + coverage)\n');
+// --- findExistingTriage + markerFor (#3650: dedupe matches client-side, signature-independent) ---
+const mk = markerFor({ repo: 'copilot-handoff', workflow: 'CodeQL' });
+assert.strictEqual(mk, '<!-- watcher-health:copilot-handoff/CodeQL -->', 'marker is per-(repo,workflow), no signature');
+assert.ok(/:/.test(mk) && /-->/.test(mk), 'marker carries GitHub search operators that broke --search (regression anchor)');
+const openIssues = [
+  { number: 10, body: 'unrelated triage ticket' },
+  { number: 3648, body: mk + '\nScheduled workflow **CodeQL** ... auto-disabled-inactivity' },
+];
+assert.strictEqual(findExistingTriage(openIssues, mk), 3648, 'existing triage found by marker → comment, not create');
+assert.strictEqual(findExistingTriage([], mk), null, 'no open issues → null → create');
+assert.strictEqual(findExistingTriage([{ number: 1, body: 'no marker here' }], mk), null, 'no marker match → null → create');
+assert.strictEqual(findExistingTriage([{ number: 2 }], mk), null, 'missing body field tolerated → null');
+// AC2: signature change (body now says failed-since-inception) still resolves to the SAME ticket.
+const sigChanged = [{ number: 3648, body: mk + '\n... is `failed-since-inception`' }];
+assert.strictEqual(findExistingTriage(sigChanged, mk), 3648, 'signature change updates in place (marker is signature-independent)');
+
+process.stdout.write('watcher-health.spec: PASS (4 signatures + healthy + 3 edge cases + allow-list + stale-allowlist + coverage + #3650 dedupe)\n');

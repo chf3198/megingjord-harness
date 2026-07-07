@@ -75,12 +75,23 @@ const fetchRepoData = (repo, breaker) => {
     cb.recordSuccess(breaker); return { repo, archived: false, readable: true, workflows };
   } catch (e) { if (RATE_LIMIT_RE.test(e.message)) cb.recordFailure(breaker, Date.now()); return { repo, readable: false }; }
 };
+// Pure. marker = per-(repo,workflow) key, signature-independent so a signature change updates in place.
+const markerFor = (finding) => `<!-- watcher-health:${finding.repo}/${finding.workflow} -->`;
+// Pure. open governance:needs-triage issues [{number,body}] + marker → existing issue number, else null.
+// #3650: the marker carries GitHub search operators (':' reads as a qualifier, leading '-' in '-->' as
+// negation) so a free-text `--search ${marker}` never returned the prior issue → a new ticket every run.
+// A client-side exact body.includes is deterministic and operator-safe.
+const findExistingTriage = (issues, marker) => {
+  const hit = (issues || []).find(i => typeof i.body === 'string' && i.body.includes(marker));
+  return hit ? hit.number : null;
+};
 const routeTriage = (finding) => {
-  const marker = `<!-- watcher-health:${finding.repo}/${finding.workflow} -->`;
+  const marker = markerFor(finding);
   const body = `${marker}\nScheduled workflow **${finding.workflow}** in \`chf3198/${finding.repo}\` is \`${finding.signature}\` (ADR-020 §D1). Auto-filed by watcher-health (#3522).`;
   try {
-    const hit = JSON.parse(gh(`issue list -R chf3198/megingjord-harness --state open --label governance:needs-triage --search ${JSON.stringify(marker)} --json number`))[0];
-    if (hit) gh(`issue comment ${hit.number} -R chf3198/megingjord-harness --body ${JSON.stringify(body)}`);
+    const open = JSON.parse(gh(`issue list -R chf3198/megingjord-harness --state open --label governance:needs-triage --limit ${REPO_LIMIT} --json number,body`));
+    const existing = findExistingTriage(open, marker);
+    if (existing) gh(`issue comment ${existing} -R chf3198/megingjord-harness --body ${JSON.stringify(body)}`);
     else gh(`issue create -R chf3198/megingjord-harness --title ${JSON.stringify(`[WATCHER-HEALTH] ${finding.repo}/${finding.workflow}: ${finding.signature}`)} --label governance:needs-triage --body ${JSON.stringify(body)}`);
   } catch (e) { incidents.append({ pattern_id: 'watcher-health-triage-fail', timestamp: new Date().toISOString(), ...finding, error: e.message }); }
 };
@@ -96,5 +107,5 @@ const main = () => {
   incidents.append({ pattern_id: 'watcher-health-coverage', timestamp: ts, ...coverage, breaker: cb.status(breaker).state, findings: findings.length });
   console.log(`watcher-health: ${findings.length} finding(s), ${coverage.reposScanned} repos, ${coverage.workflowsScanned} scheduled workflows, breaker=${cb.status(breaker).state}`);
 };
-module.exports = { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport, TRIAGE_SIGS };
+module.exports = { scheduleIntervalMs, classifyRuns, classifyWorkflow, buildReport, markerFor, findExistingTriage, TRIAGE_SIGS };
 if (require.main === module) main();
