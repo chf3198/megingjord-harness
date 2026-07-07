@@ -1,10 +1,19 @@
 #!/usr/bin/env node
 /* eslint-disable jsdoc/require-jsdoc */
 const { execSync } = require('child_process');
+const { listRuntimes } = require('./runtime-descriptor');
 
 const maxBehind = Number(process.env.SANDBOX_MAX_BEHIND || 0);
-const validTargets = ['copilot', 'codex', 'claude-code'];
-const sandboxRx = /^sandbox\/(copilot|codex|claude-code)$/;
+// Valid sandbox launcher targets are the Epic #3411 runtime-catalog SSoT
+// (inventory/runtimes/*.json via listRuntimes()) so this allowlist can never
+// drift from the team taxonomy again (#3642). The fallback keeps the audit sane
+// if the catalog is unreadable (G6) instead of flagging every branch invalid.
+const catalogRuntimes = listRuntimes();
+const validTargets = catalogRuntimes.length
+  ? catalogRuntimes
+  : ['antigravity', 'claude-code', 'codex', 'copilot', 'cursor'];
+const escapeRe = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const sandboxRx = new RegExp(`^sandbox/(${validTargets.map(escapeRe).join('|')})$`);
 
 function parseTarget(args = process.argv.slice(2), env = process.env) {
   const inline = args.find((arg) => arg.startsWith('--target='));
@@ -15,7 +24,7 @@ function parseTarget(args = process.argv.slice(2), env = process.env) {
   return value;
 }
 function helpText() {
-  return 'Usage: worktree-governance-audit.js [--json] [--target=<copilot|codex|claude-code>]\n'
+  return `Usage: worktree-governance-audit.js [--json] [--target=<${validTargets.join('|')}>]\n`
     + 'Default audits every sandbox launcher. Target mode audits only one launcher.';
 }
 
@@ -120,4 +129,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { check, checkAllWorktrees, filterBranches, helpText, parseTarget, validTargets };
+module.exports = { check, checkAllWorktrees, filterBranches, helpText, parseTarget, validTargets, sandboxRx };
