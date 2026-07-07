@@ -55,6 +55,45 @@ def _exit_code_status(pr_ref: str, cwd: str) -> str:
         return "unknown"
 
 
+def filter_to_required(checks: list[dict], required) -> list[dict]:
+    """Keep only checks whose name is in the base branch's required set.
+
+    An unresolved required set (None/empty) falls back to the legacy all-checks
+    behavior (fail-closed): we cannot prove a red is advisory, so keep them all.
+    """
+    if not required:
+        return checks
+    return [c for c in checks if c.get("name") in required]
+
+
+def _required_contexts(pr_ref, cwd: str):
+    """Return the set of branch-protection required check contexts for pr_ref's
+    base branch, or None when it cannot be resolved (then callers keep every
+    check per the fail-closed contract). `gh pr checks --json` carries no
+    isRequired field, so we resolve the required set from branch protection.
+    """
+    try:
+        import json as _j, subprocess as _sp
+        base = (_j.loads(_sp.run(
+            ["gh", "pr", "view", str(pr_ref), "--json", "baseRefName"],
+            capture_output=True, text=True, cwd=cwd, timeout=15,
+        ).stdout or "{}") or {}).get("baseRefName") or "main"
+        slug = _sp.run(
+            ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
+            capture_output=True, text=True, cwd=cwd, timeout=15,
+        ).stdout.strip()
+        if not slug:
+            return None
+        data = _j.loads(_sp.run(
+            ["gh", "api",
+             "repos/%s/branches/%s/protection/required_status_checks/contexts" % (slug, base)],
+            capture_output=True, text=True, cwd=cwd, timeout=15,
+        ).stdout or "null")
+        return set(data) if isinstance(data, list) else None
+    except Exception:
+        return None
+
+
 def ci_gate_status(pr_ref: str, cwd: str) -> str:
     """Fetch and classify PR check status for merge gating."""
     try:
@@ -72,7 +111,7 @@ def ci_gate_status(pr_ref: str, cwd: str) -> str:
     # PR (observed #2595). An empty list would classify "unknown" and false-block
     # the merge — fall back to gh's plain exit code instead.
     if checks:
-        return classify_ci_checks(checks)
+        return classify_ci_checks(filter_to_required(checks, _required_contexts(pr_ref, cwd)))
     return _exit_code_status(pr_ref, cwd)
 
 
