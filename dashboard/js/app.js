@@ -1,5 +1,4 @@
-// Dashboard App — Alpine.js root component
-
+// Dashboard App — Alpine.js root component /* global syncWithGitHub, extractActiveBaton */
 function dashboardApp() {
   return {
     devices: [], services: [], quotas: [], liveQuotas: [],
@@ -61,7 +60,9 @@ function dashboardApp() {
         this.wikiHealth = await fetchWikiHealth(); if (typeof fetchWikiMetrics==='function') this.wikiMetrics=await fetchWikiMetrics();
         if (typeof pollGitHub === 'function') { this.githubData = await pollGitHub();
           if (this.githubData?.issues?.recent) pruneClosedFromGitHub(this.githubData.issues.recent); }
-        this.batonState = evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog()));
+        const ghBaton = this.githubData?.issues?.all && typeof syncWithGitHub === 'function'
+          ? extractActiveBaton(syncWithGitHub(this.githubData.issues.all)) : [];
+        this.batonState = ghBaton.length ? ghBaton : (evBaton.length ? evBaton : (typeof getBatonState==='function' ? getBatonState() : buildBatonState(getRouterLog())));
         if (typeof fetchFleetHealthLog === 'function') this.fleetHealthLog = await fetchFleetHealthLog();
         if (typeof fetchGovernanceState === 'function') this.governanceState = await fetchGovernanceState();
         if (typeof fetchCostTelemetry === 'function') this.costData = await fetchCostTelemetry(); if (typeof fetchTokenTelemetrySummary === 'function') this.tokenTelemetry = await fetchTokenTelemetrySummary(); if (typeof fetchQualityParitySummary === 'function') this.qualityParity = await fetchQualityParitySummary().catch(() => null); if (typeof fetchGoalHealthSummary === 'function') this.goalHealth = await fetchGoalHealthSummary().catch(() => null); if (typeof fetchTokenReconcileSummary === 'function') this.reconcileData = await fetchTokenReconcileSummary().catch(() => null);
@@ -93,8 +94,7 @@ function dashboardApp() {
     },
     setView(view) { setDashboardView(this, view); },
     isView(view) { return isDashboardView(this, view); },
-    toggleTips() { toggleDashboardTips(this); },
-    toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
+    toggleTips() { toggleDashboardTips(this); }, toggleHelpDevMode() { this.helpDevMode = !this.helpDevMode; },
     runQuickTest() { return runDashboardQuickTest(this); }
   };
 }
