@@ -4,6 +4,7 @@
 'use strict';
 
 const { read, write } = require('./cross-team-lease-registry');
+const { emitLockEvent } = require('./worktree-lock-telemetry');
 
 const STALE_THRESHOLD_HOURS = 24;
 const HOUR_MS = 60 * 60 * 1000;
@@ -54,6 +55,11 @@ function run(opts = {}) {
   const result = expireStale(registry, opts.now ?? Date.now());
   if (!opts.dryRun && result.expired.length > 0) {
     write(result.registry, opts.file);
+    // #1860 concern #2: best-effort observability for auto-expired leases (G8).
+    for (const lease of result.expired) {
+      emitLockEvent('lease_expire', { team: lease.team, ticket: lease.ticket,
+        branch: lease.branch, reason: 'heartbeat-timeout' });
+    }
   }
   return result;
 }

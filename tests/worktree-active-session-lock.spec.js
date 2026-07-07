@@ -1,5 +1,9 @@
 'use strict';
 
+// #1860: telemetry emits to a global sink; disable it here so these
+// lock-correctness / p99 specs stay byte-identical in behaviour and never touch HOME.
+process.env.MEGINGJORD_LOCK_TELEMETRY_DISABLED = '1';
+
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
