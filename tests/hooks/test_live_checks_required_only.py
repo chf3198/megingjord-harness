@@ -65,6 +65,26 @@ class CiGateStatusRequiredOnly(unittest.TestCase):
         self._patch_checks(checks, {"req-ci"})
         self.assertEqual(live_checks.ci_gate_status("3662", "."), "failing")
 
+    def test_real_gh_state_only_advisory_red_is_green(self):
+        # gh pr checks --json returns name,state (no conclusion). SUCCESS/FAILURE
+        # only. Advisory FAILURE filtered out -> required all SUCCESS -> green.
+        checks = (
+            '[{"name": "collaborator-gate", "state": "SUCCESS"},'
+            ' {"name": "admin-gate", "state": "SUCCESS"},'
+            ' {"name": "worktree-governance-required", "state": "FAILURE"},'
+            ' {"name": "Doc update required", "state": "FAILURE"}]'
+        )
+        self._patch_checks(checks, {"collaborator-gate", "admin-gate"})
+        self.assertEqual(live_checks.ci_gate_status("3662", "."), "green")
+
+    def test_real_gh_state_only_required_failure_is_failing(self):
+        checks = (
+            '[{"name": "collaborator-gate", "state": "FAILURE"},'
+            ' {"name": "admin-gate", "state": "SUCCESS"}]'
+        )
+        self._patch_checks(checks, {"collaborator-gate", "admin-gate"})
+        self.assertEqual(live_checks.ci_gate_status("3662", "."), "failing")
+
     def test_required_none_is_legacy_all_checks_behavior(self):
         # Unresolved required set -> fail-closed legacy: any red still fails.
         checks = (

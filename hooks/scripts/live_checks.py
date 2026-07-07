@@ -95,10 +95,18 @@ def _required_contexts(pr_ref, cwd: str):
 
 
 def ci_gate_status(pr_ref: str, cwd: str) -> str:
-    """Fetch and classify PR check status for merge gating."""
+    """Fetch and classify PR check status for merge gating.
+
+    Uses `name,state` only — `gh pr checks --json` has no `conclusion` field
+    (an invalid field makes gh exit non-zero with empty stdout, silently
+    dropping every classifier to the exit-code fallback). Reds are then
+    filtered to the base branch's branch-protection required set so advisory
+    checks (worktree-governance-required, Doc update required) do not block a
+    merge (#3664).
+    """
     try:
         r = subprocess.run(
-            ["gh", "pr", "checks", pr_ref, "--json", "name,state,conclusion"],
+            ["gh", "pr", "checks", pr_ref, "--json", "name,state"],
             capture_output=True, text=True, cwd=cwd, timeout=20,
         )
     except Exception:
