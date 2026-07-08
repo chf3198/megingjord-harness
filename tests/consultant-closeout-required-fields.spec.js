@@ -161,6 +161,7 @@ function minimalBody(overrides = '') {
     'Role: consultant',
     'anneal_tickets_filed: none',
     'mid_flight_flaws: none',
+    'worktree_residual_risk: none',
     overrides,
   ].join('\n');
 }
@@ -223,6 +224,7 @@ test('advisory-only violations do not flip ok to false', () => {
     'Role: consultant',
     'anneal_tickets_filed: none',
     'mid_flight_flaws: none',
+    'worktree_residual_risk: none',
   ].join('\n');
   const result = validate({ comments: makeComments(body) });
   const hardViols = (result.violations || []).filter(v => v.severity !== 'advisory');
