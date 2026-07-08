@@ -222,6 +222,8 @@ function isFailingConclusion(conclusion) {
 }
 
 // True only when `field:` carries the literal `none` value (not populated, not empty).
+// `field` is always an internal literal (mid_flight_flaws / anneal_tickets_filed), never
+// caller-supplied, so there is no regex-injection surface (cross-family L2 review #3674).
 function flawFieldIsNone(body, field) {
   if (typeof body !== 'string') return false;
   const match = body.match(new RegExp(`(?:^|\\n)[ \\t]*${field}[ \\t]*:[ \\t]*([^\\n\\r]*)`, 'i'));

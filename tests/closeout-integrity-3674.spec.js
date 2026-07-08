@@ -81,6 +81,9 @@ test('flawFieldIsNone distinguishes none / populated / empty / missing', () => {
   assert.strictEqual(flawFieldIsNone('mid_flight_flaws: [x]', 'mid_flight_flaws'), false);
   assert.strictEqual(flawFieldIsNone('mid_flight_flaws:', 'mid_flight_flaws'), false);
   assert.strictEqual(flawFieldIsNone('other: none', 'mid_flight_flaws'), false);
+  // cross-family L2 review (#3674): case-insensitive 'NONE' must also read as none.
+  assert.strictEqual(flawFieldIsNone('mid_flight_flaws: NONE', 'mid_flight_flaws'), true);
+  assert.strictEqual(flawFieldIsNone('mid_flight_flaws: None', 'mid_flight_flaws'), true);
 });
 
 test('advisory does not flip validate().ok on an otherwise-clean closeout', () => {
