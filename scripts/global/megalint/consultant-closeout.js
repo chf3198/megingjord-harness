@@ -205,6 +205,52 @@ function checkIssueOnlyEvidenceSchema(body, input) {
     });
 }
 
+// checkCloseoutIntegrity — #3674 (Epic #3669 C5). Flags a `mid_flight_flaws: none`
+// (or `anneal_tickets_filed: none`) integrity claim that is CONTRADICTED by >=1 red
+// branch-protection-REQUIRED check on the linked PR. Keys strictly on required-check
+// STATE, never on comment timing/latency: a fast closeout is explicitly NOT the signal
+// (AC2). Ships ADVISORY (never blocks); promotion to blocking is replay-eval-gated
+// (precision >= 0.85), never calendar-gated (AC3). The caller resolves the linked PR's
+// required-check state (mirroring hooks/scripts/live_checks.filter_to_required) and
+// injects it as input.prRequiredChecks = [{ name, conclusion, isRequired }]; absent or
+// empty -> no-op, so existing callers are unaffected until the CI workflow wires it.
+const CLOSEOUT_INTEGRITY_ADVISORY = 'advisory';
+
+function isFailingConclusion(conclusion) {
+  return /^(failure|timed_out|cancelled|action_required|startup_failure|stale)$/i
+    .test(String(conclusion || '').trim());
+}
+
+// True only when `field:` carries the literal `none` value (not populated, not empty).
+function flawFieldIsNone(body, field) {
+  if (typeof body !== 'string') return false;
+  const match = body.match(new RegExp(`(?:^|\\n)[ \\t]*${field}[ \\t]*:[ \\t]*([^\\n\\r]*)`, 'i'));
+  return match ? /^none\b/i.test((match[1] || '').trim()) : false;
+}
+
+function checkCloseoutIntegrity(body, input) {
+  const checks = input && Array.isArray(input.prRequiredChecks) ? input.prRequiredChecks : null;
+  if (!checks || !checks.length) return []; // no PR check state supplied -> advisory no-op
+  const redRequired = checks
+    .filter((c) => c && c.isRequired && isFailingConclusion(c.conclusion))
+    .map((c) => c.name).filter(Boolean);
+  if (!redRequired.length) return []; // every required check green -> clean claim is consistent
+  const violations = [];
+  for (const field of ['mid_flight_flaws', 'anneal_tickets_filed']) {
+    if (flawFieldIsNone(body, field)) {
+      violations.push({
+        rule: 'closeout-integrity-none-claim-vs-red-required',
+        severity: CLOSEOUT_INTEGRITY_ADVISORY,
+        detail: `CONSULTANT_CLOSEOUT declares ${field}: none while ${redRequired.length} `
+          + `branch-protection-required check(s) are RED on the linked PR `
+          + `(${redRequired.join(', ')}); the clean-integrity claim is contradicted by live `
+          + `required-check state (#3674). Keys on required-check state, not comment timing.`,
+      });
+    }
+  }
+  return violations;
+}
+
 function validate(input) {
   const closeout = findConsultantCloseout(input.comments || []);
   if (!closeout) {
@@ -226,6 +272,7 @@ function validate(input) {
     ...checkCrossRuntimeWritesPending(input.comments),
     ...checkIssueOnlyEvidenceSchema(body, input),
     ...wtGate.checkConsultant(body, input),
+    ...checkCloseoutIntegrity(body, input),
   ];
   return { ok: violations.filter(v => v.severity !== 'advisory').length === 0, violations, found: true };
 }
@@ -242,4 +289,6 @@ module.exports = {
   checkRubricVerdictConsistency,
   checkCrossRuntimeWritesPending,
   checkIssueOnlyEvidenceSchema,
+  checkCloseoutIntegrity,
+  flawFieldIsNone,
 };
