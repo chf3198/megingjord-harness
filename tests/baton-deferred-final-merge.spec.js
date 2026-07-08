@@ -21,6 +21,26 @@ const {
 const {
   STATES, EVENTS, EVIDENCE_BITS, findTransition,
 } = require('../scripts/global/baton-fsm/transitions');
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const rc = require('../scripts/global/cross-family-receipt');
+
+// #3672 (F3): a bare different-team admin no longer confers independence — it now needs a
+// VERIFIED cross-family receipt. Build a genuine 2-family ledger for this fixture's ticket
+// (#1) and cite its receipt in the non-drop admin body. The signer-drop deny case keeps NO
+// receipt + a collapsed same-team alias, so it stays correctly non-independent.
+function buildLedger() {
+  const p = path.join(os.tmpdir(), `dfm-${process.pid}.jsonl`);
+  fs.writeFileSync(p, '');
+  const mk = (family, provider) => ({ ticket: 1, kind: 'merge-consensus', provider, family,
+    verdict: 'PASS', ts: 't', prompt_sha256: 'p', response_sha256: `${provider}-1` });
+  rc.appendEntry(mk('google', 'gemini'), p);   // both != openai (copilot admin's authoring family)
+  rc.appendEntry(mk('meta', 'groq'), p);
+  return rc.readLedger(p);
+}
+const LEDGER = buildLedger();
+const RECEIPT = rc.computeReceipt(LEDGER.filter((e) => e.ticket === 1 && e.kind === 'merge-consensus'));
 
 // --- Fixture: a deferred-final trail at status:review ---
 // Each artifact body carries the signals evidence-loader scans for. `omit`
@@ -51,7 +71,9 @@ function reviewTrailComments(omit) {
     'Signed-by: ' + (drop.signer ? 'Orla Harper' : 'Astra Reyes'),
     'Team&Model: ' + (drop.signer
       ? 'claude-code:claude-opus-4-8@local' : 'copilot:gpt-4o@openai'),
-    'Role: admin',
+    // #3672: independence needs a verified receipt; the signer-drop case omits it so it
+    // stays non-independent (a same-team collapse with no receipt).
+    drop.signer ? 'Role: admin' : 'cross_family_receipt: ' + RECEIPT + '\nRole: admin',
   ].join('\n');
   const consultantBody = [
     '## CONSULTANT_CLOSEOUT', 'verdict: approve_for_merge', 'rubric_rating: 9/10',
@@ -81,7 +103,7 @@ function buildReviewClient(omit) {
 }
 
 async function digestFor(client) {
-  const trail = await deriveTrailFromGitHub(1, client);
+  const trail = await deriveTrailFromGitHub(1, client, { ledger: LEDGER });
   return buildEvidenceDigest(trail.facts);
 }
 
@@ -110,7 +132,7 @@ describe('Merge authority authorizes a deferred-final merge from review', () => 
   it('ALLOWS when the full deferred-final trail is present at status:review', async () => {
     const client = buildReviewClient();
     const digest = await digestFor(client);
-    const result = await evaluateMergeAuthority(1, 2, client, digest);
+    const result = await evaluateMergeAuthority(1, 2, client, digest, { ledger: LEDGER });
     assert.equal(result.allowed, true,
       'deferred-final review merge must be allowed; got ' + JSON.stringify(result));
     assert.equal(result.reason, 'all-evidence-present-and-verified');
@@ -126,7 +148,7 @@ describe('Merge authority authorizes a deferred-final merge from review', () => 
     it('DENIES when ' + label + ' is missing', async () => {
       const client = buildReviewClient(omit);
       const digest = await digestFor(client);
-      const result = await evaluateMergeAuthority(1, 2, client, digest);
+      const result = await evaluateMergeAuthority(1, 2, client, digest, { ledger: LEDGER });
       assert.equal(result.allowed, false,
         'missing ' + label + ' must deny; got ' + JSON.stringify(result));
       assert.ok(result.reason.includes('fsm-denied'),
