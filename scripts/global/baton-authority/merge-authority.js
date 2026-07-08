@@ -126,12 +126,15 @@ async function enrichWithPRData(facts, prNumber, ghClient) {
  * @param {number} prNumber - The PR number.
  * @param {object} ghClient - Injected GitHub client interface.
  * @param {string} claimedDigest - Agent-submitted evidence digest.
+ * @param {object} [opts] - Optional trail-derivation seam (#3672). Production passes
+ *   nothing so the committed cross-family ledger is read; tests inject `ledger` /
+ *   `verifyReceipt` / `verifyAttestation`. Never changes production behavior.
  * @returns {Promise<object>} Structured merge authority result.
  */
-async function evaluateMergeAuthority(issueNumber, prNumber, ghClient, claimedDigest) {
+async function evaluateMergeAuthority(issueNumber, prNumber, ghClient, claimedDigest, opts = {}) {
   let trail;
   try {
-    trail = await deriveTrailFromGitHub(issueNumber, ghClient);
+    trail = await deriveTrailFromGitHub(issueNumber, ghClient, opts);
   } catch (loadError) {
     return buildDenial(
       'github-load-failed: ' + (loadError.message || 'unknown'),

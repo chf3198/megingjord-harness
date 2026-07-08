@@ -156,20 +156,25 @@ function buildBreakGlassClient() {
 
 // --- Helper to derive digest from a client ---
 
-async function deriveDigest(issueNumber, client) {
-  const trail = await deriveTrailFromGitHub(issueNumber, client);
+async function deriveDigest(issueNumber, client, opts = {}) {
+  const trail = await deriveTrailFromGitHub(issueNumber, client, opts);
   if (trail.error) return { trail, digest: 'invalid' };
   return { trail, digest: buildEvidenceDigest(trail.facts) };
 }
+
+// #3672 (F3): a bare different-team admin no longer confers independence. This complete
+// trail proves independence via a cryptographic authorship attestation (injected here;
+// the registry-backed verifier is the #3682 deliverable) rather than by prose alone.
+const ATTESTED = { verifyAttestation: () => ({ ok: true, reason: 'test-authorship-attested' }) };
 
 // --- Tests ---
 
 describe('Merge Authority - complete trail allows merge (AC1)', () => {
   it('allows merge when all GitHub-derived evidence is present', async () => {
     const client = buildCompleteTrailClient();
-    const { trail, digest } = await deriveDigest(100, client);
+    const { trail, digest } = await deriveDigest(100, client, ATTESTED);
     assert.ok(!trail.error, 'trail should not have error');
-    const result = await evaluateMergeAuthority(100, 200, client, digest);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
     assert.equal(result.allowed, true, 'should be allowed with complete trail');
     assert.equal(result.reason, 'all-evidence-present-and-verified');
     assert.deepEqual(result.missing, []);

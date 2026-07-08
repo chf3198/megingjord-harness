@@ -28,6 +28,31 @@ const TEAM_FAMILY = Object.freeze({
 
 const sha = (s) => createHash('sha256').update(s, 'utf8').digest('hex');
 const teamSegmentOf = (tm) => (typeof tm === 'string' && tm.includes(':') ? tm.split(':')[0].trim().toLowerCase() : null);
+
+// #3672 (F2): a self-asserted "waived" / "N/A" / "not-applicable" independence
+// disposition is NEVER a pass — a signer cannot waive its own independence check.
+// Matches e.g. `signer-independence-check: PASS (... model-diversity waived ...)` or
+// `signer-independence-check: N/A` (the #1591 / PR#3668 case). Bounded to the field's
+// own line so unrelated prose elsewhere in the comment cannot trip it.
+const SELF_WAIVE_RE =
+  /signer[_-]independence[_-]check\s*:\s*[^\n]*\b(?:waiv\w*|n\s*\/?\s*a|not[-\s]?applicable)\b/i;
+const detectSelfWaive = (body) => SELF_WAIVE_RE.test(String(body || ''));
+
+// #3672 (F3): a bare "different Team&Model team" claim is FORGEABLE — a single agent
+// can mint a foreign-team signer (the #3673 / PR#3677 "perfect forgery"). Independence
+// therefore requires a VERIFIED cross-family receipt OR a cryptographic authorship
+// attestation proving the cross-team artifact was genuinely authored by the asserted
+// team. The attestation MECHANISM (a committed per-team public-key registry + ed25519
+// verify) is the deliverable of the #3682 research child; this hook is FAIL-CLOSED
+// today — present-but-unverifiable crypto fields do NOT pass. Real infra / tests inject
+// a verifier via opts.verifyAttestation(body, opts) -> { ok, reason }.
+const CRYPTO_ATTESTATION_RE = /Crypto-Signature\s*:/i;
+function verifyAuthorshipAttestation(body, opts = {}) {
+  if (typeof opts.verifyAttestation === 'function') return opts.verifyAttestation(String(body || ''), opts);
+  if (CRYPTO_ATTESTATION_RE.test(String(body || ''))) return { ok: false, reason: 'attestation-unverifiable-no-registry' };
+  return { ok: false, reason: 'no-attestation' };
+}
+
 function familyOfModel(teamModel) {
   if (!teamModel) return 'unknown';
   const team = teamSegmentOf(teamModel);
@@ -97,4 +122,5 @@ function verifyReceipt(ticket, receipt, authoringFamily, opts = {}) {
 module.exports = {
   LEDGER, RECEIPT_RE, RECEIPT_FIELD_RE, PROVIDER_FAMILY, TEAM_FAMILY, sha, teamSegmentOf,
   familyOfModel, entryBody, chainHash, computeReceipt, readLedger, verifyChain, appendEntry, verifyReceipt,
+  SELF_WAIVE_RE, detectSelfWaive, verifyAuthorshipAttestation,
 };

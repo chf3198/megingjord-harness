@@ -5,7 +5,11 @@
 
 const { EVIDENCE_BITS } = require('../baton-fsm/transitions');
 // #3532: team-segment + verified cross-family consensus receipt decide independence.
-const { teamSegmentOf, familyOfModel, verifyReceipt, RECEIPT_FIELD_RE } = require('../cross-family-receipt');
+// #3672 (F2+F3): a self-waived disposition and a bare different-team claim are NOT
+// independence — team-difference is a necessary-not-sufficient sub-signal; the operative
+// proof is a VERIFIED receipt or a cryptographic authorship attestation.
+const { teamSegmentOf, familyOfModel, verifyReceipt, RECEIPT_FIELD_RE,
+  detectSelfWaive, verifyAuthorshipAttestation } = require('../cross-family-receipt');
 const RECEIPT_RE = RECEIPT_FIELD_RE;
 
 // Artifact header patterns (mirrors grammar.js canonical patterns)
@@ -84,10 +88,13 @@ function deriveStateFromLabels(labels) {
 }
 
 /**
- * Check signer independence via Team&Model TEAM segment (#3532).
- * Persona-surname difference is NO LONGER independence. Returns true only when
- * both signers exist AND sign under genuinely different teams. The cross-family
- * consensus-receipt path is layered on separately in deriveTrailFromGitHub.
+ * Team-difference sub-signal (#3532). Persona-surname difference is NOT independence.
+ * Returns true only when both signers exist AND sign under genuinely different teams.
+ *
+ * #3672 (F3): team-difference is NECESSARY-NOT-SUFFICIENT — a single agent can forge a
+ * foreign-team signer, so a bare `true` here no longer authorizes merge. The operative
+ * `signerIndependent` fact is gated in deriveTrailFromGitHub on a VERIFIED cross-family
+ * receipt (or a cryptographic authorship attestation), for both same- and different-team.
  */
 function checkSignerIndependence(commentSigners) {
   let collab = null;
@@ -162,19 +169,34 @@ async function deriveTrailFromGitHub(issueNumber, ghClient, opts = {}) {
     const signers = extractSigners(body);
     allSigners.push(...signers);
   }
-  // #3532: independence = different team (a) OR a VERIFIED cross-family receipt (b).
-  const teamIndependent = checkSignerIndependence(allSigners);
+  // #3672 (F2+F3): independence is decided ONLY by a VERIFIED cross-family receipt OR a
+  // cryptographic authorship attestation — never by a bare team-difference (forgeable) nor
+  // a self-waived disposition. teamDiffers is retained solely for actionable messaging.
+  const teamDiffers = checkSignerIndependence(allSigners);
   const crossFamilyReceipt = extractMergeReceipt(comments);
-  let signerIndependent = teamIndependent;
-  let receiptStatus = teamIndependent ? 'independent-team' : 'no-receipt';
-  if (!teamIndependent && crossFamilyReceipt) {
-    const adminSigner = allSigners.find((s) => s.role === 'admin');
+  const adminComment = [...(comments || [])].reverse().find(
+    (c) => /##\s*ADMIN_HANDOFF|ADMIN_HANDOFF/.test(c.body || ''));
+  const adminBody = (adminComment && adminComment.body) || '';
+  const adminSigner = allSigners.find((s) => s.role === 'admin');
+  let signerIndependent = false;
+  let receiptStatus;
+  const att = verifyAuthorshipAttestation(adminBody, opts);
+  if (att.ok) {
+    signerIndependent = true;
+    receiptStatus = 'authorship-attested';
+  } else if (crossFamilyReceipt) {
     const authoringFamily = familyOfModel(adminSigner && adminSigner.teamModel);
     const verify = opts.verifyReceipt || verifyReceipt;
     const res = verify(issueNumber, crossFamilyReceipt, authoringFamily,
       { kind: 'merge-consensus', ledger: opts.ledger });
     signerIndependent = res.ok;
     receiptStatus = res.reason;
+  } else if (detectSelfWaive(adminBody)) {
+    receiptStatus = 'independence-self-waived';
+  } else if (teamDiffers) {
+    receiptStatus = 'unattested-cross-team-claim';
+  } else {
+    receiptStatus = 'no-receipt';
   }
   // Build facts from GitHub-derived data only
   const facts = {
