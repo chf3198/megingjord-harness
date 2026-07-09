@@ -236,6 +236,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `governance:baton-latency:test` | `node --test tests/baton-latency-report.spec.js` |
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
+| `governance:completion-claim-truth:test` | `node --test tests/completion-claim-truth.spec.js` |
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
 | `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
@@ -437,6 +438,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress:anneal` | `node --test tests/stress-anneal-decision.spec.js` |
 | `stress:baton-e2e` | `node --test tests/baton-e2e.spec.js` |
 | `stress:bounded` | `MEGINGJORD_STRESS_TIER=C node scripts/global/stress-orchestrator.js` |
+| `stress:completion-claim-truth` | `node --test tests/stress-completion-claim-truth.spec.js` |
 | `stress:epic-close` | `node --test tests/stress-epic-close-guard.spec.js` |
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
 | `stress:evidence-check:test` | `node --test tests/stress-evidence-check.spec.js` |

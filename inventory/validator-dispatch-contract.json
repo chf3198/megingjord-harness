@@ -106,6 +106,13 @@
       ]
     },
     {
+      "validator": "completion-claim-truth",
+      "file": "scripts/global/megalint/completion-claim-truth.js",
+      "dispatchedBy": [
+        "ci:completion-claim-truth.yml:check"
+      ]
+    },
+    {
       "validator": "consultant-closeout",
       "file": "scripts/global/megalint/consultant-closeout.js",
       "dispatchedBy": [
