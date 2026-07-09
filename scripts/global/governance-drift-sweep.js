@@ -98,12 +98,35 @@ function runPropose(issues, deps) {
   return true; // propose is read-only; always succeeds (the queue itself is the output)
 }
 
+// Opt-in cross-model supersession lane (#3420, Epic #3398 C2). The DEFAULT --scan
+// path never reaches here, so the deterministic sweep stays $0 (AC1). Fleet-first:
+// the lane cascades fleet → free-cloud → deterministic floor and NEVER escalates to
+// a paid tier. Recency for the velocity-relative candidate quantile is fetched
+// value-free (updatedAt only); panels default to the shipped $0 substrate.
+async function runSemantic(argv, issues, deps) {
+  const { runSemanticLane } = deps.runSemanticLane ? deps : require('./backlog-relevance-lane');
+  const { defaultPanels } = require('./backlog-verdict-panels');
+  const recencyMap = deps.recencyMap || (deps.fetchRecency ? deps.fetchRecency() : {});
+  const panels = deps.panels || defaultPanels();
+  const result = await (deps.runSemanticLane || runSemanticLane)(issues, {
+    classify: classifyIssue,
+    recencyOf: (i) => recencyMap[i.number] || 0,
+    quantile: deps.quantile, forceScan: argv.includes('--force-scan'),
+    fleetPanel: panels.fleetPanel, freeCloudPanel: panels.freeCloudPanel,
+    redactString: (deps.redactString || require('./log-redaction').redactString),
+    queryVec: deps.queryVec, embedOf: deps.embedOf,
+  });
+  console.log(JSON.stringify({ mode: 'semantic', route: 'cross-model', ...result }, null, 2));
+  return true; // detection is report/route-only; the sweep run itself always succeeds
+}
+
 async function run(argv = process.argv.slice(2), deps = {}) {
   loadLocalEnvOnce();
   if (argv.includes('--help')) {
     console.log('Usage: node scripts/global/governance-drift-sweep.js [--scan] [--json]\n'
       + '       [--fix [--apply] [--classes D4,D5,D8,D3]]   (dry-run unless --apply)\n'
       + '       [--propose]   (read-only review queue for D1,D2,D6,D7)\n'
+      + '       [--semantic [--force-scan]]   (opt-in cross-model supersession lane, #3420; fleet-first $0)\n'
       + '       [--rollback <run_id>]');
     return true;
   }
@@ -111,6 +134,7 @@ async function run(argv = process.argv.slice(2), deps = {}) {
   if (argv.includes('--rollback')) return runRollback(argv, deps);
   if (argv.includes('--fix')) return runFix(argv, getIssues(), deps);
   if (argv.includes('--propose')) return runPropose(getIssues(), deps);
+  if (argv.includes('--semantic')) return runSemantic(argv, getIssues(), deps);
 
   const issues = getIssues();
   const report = buildReport(issues);

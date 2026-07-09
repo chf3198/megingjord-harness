@@ -57,9 +57,15 @@ jobs:
             echo "Wiki B mirror: no change for issue #${ISSUE_NUMBER} (idempotent no-op)."
             exit 0
           fi
-          git commit -m "chore(it-ops): mirror issue #${ISSUE_NUMBER} to Wiki B [skip ci]" \
+          # --no-verify: this automated it-ops mirror commit must NOT run the dev
+          # pre-commit/pre-push git hooks (validate-branch-name + the lefthook
+          # lint-router). npm ci activates those hooks via `prepare`, and the
+          # runner has no `ruff`, so lint-py failed and the mirror never committed —
+          # leaving Wiki B stale on every non-PR state change (the #1899 casualty, #3422).
+          git commit --no-verify \
+            -m "chore(it-ops): mirror issue #${ISSUE_NUMBER} to Wiki B [skip ci]" \
             -m "Refs #${ISSUE_NUMBER}" \
             -m "AI-Signature: Megingjord Work-Log Mirror" \
             -m "AI-Team-Model: automation:github-actions@ci" \
             -m "AI-Role: admin"
-          git push
+          git push --no-verify
