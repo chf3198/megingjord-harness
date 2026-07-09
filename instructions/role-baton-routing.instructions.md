@@ -128,11 +128,35 @@ Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:
 | Lane         | Work type                      | Role sequence                     | N/A markers                    |
 |--------------|--------------------------------|-----------------------------------|--------------------------------|
 | code-change  | Code, infra, deploy (default)  | Manager→Collab→Admin→Consultant   | none                           |
-| research     | Analysis, wiki — no git branch | Manager→Collab(analyst)→Admin→Consultant | Admin = doc reviewer, not CI |
+| research     | Analysis, wiki synthesis — PR optional | Manager→Collab(synthesis)→Consultant | ADMIN_HANDOFF: N/A unless PR |
 | config-only  | Single-value config, no design | Manager→Admin→Consultant          | COLLABORATOR_HANDOFF: N/A      |
 | no-code-remediation | Issue-only drift normalization (no repo edits) | Manager→Consultant | COLLABORATOR_HANDOFF: N/A, ADMIN_HANDOFF: N/A |
 
 Lane set at ticket creation via `lane:*` label and `Lane` Project field. Default: **code-change**.
+
+### Research lane contract (Refs #2263)
+
+Eligibility:
+- Deliverable is analysis, wiki synthesis, or research artifact (`research/*.md`).
+- Collaborator produces substantive synthesis (deliverable path cited in COLLABORATOR_HANDOFF).
+- No PR required when deliverable is issue-body or wiki-only close.
+
+Role sequence:
+- Manager scopes AC + test_strategy (typically `peer-review`).
+- Collaborator authors synthesis; COLLABORATOR_HANDOFF cites deliverable path.
+- Consultant peer-reviews via CONSULTANT_CLOSEOUT rubric.
+
+N/A markers:
+- `ADMIN_HANDOFF: N/A — lane:docs-research; no PR` when no merge vehicle exists.
+- When research ships via PR, full Admin gate applies (branch, commit, signer-independence).
+
+Enforcement alignment:
+- `baton-gates.yml` lightweight lanes skip collaborator-gate and admin-gate for
+  `lane:docs-research` / `lane:research` — this contract matches CI, not ceremony.
+
+Escalation:
+- Tracked-file edits beyond research deliverable → reclassify to `lane:code-change`.
+- Issue-only metadata fixes → `lane:no-code-remediation`.
 
 ### No-code remediation lane contract (Refs #2258 #2268)
 
