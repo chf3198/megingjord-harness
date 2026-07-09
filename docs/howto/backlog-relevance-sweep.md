@@ -1,8 +1,8 @@
 # Backlog Relevance Sweep (`--semantic` lane)
 
 _Epic #3398 C2 (#3420). Extends the deterministic `governance-drift-sweep` (#2981) with an
-opt-in cross-model supersession lane. Sits **above** #2981's structural sweep and **before**
-#3235's active-baton Consultant gate — the pre-baton semantic-drift layer._
+opt-in cross-model supersession lane. Sits **above** the #2981 structural sweep and **before**
+the #3235 active-baton Consultant gate — the pre-baton semantic-drift layer._
 
 ## What it does
 
