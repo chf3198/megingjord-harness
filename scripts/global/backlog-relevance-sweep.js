@@ -49,24 +49,24 @@ function rankByEmbedding(candidates, queryVec, embedOf = () => null) {
 
 // --- Verdict aggregation (AC3): median-of-N + minority-veto -------------------
 function median(nums) {
-  const s = [...nums].sort((a, b) => a - b);
-  if (!s.length) return 0;
-  const m = Math.floor(s.length / 2);
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  const sorted = [...nums].sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 // verdicts: [{ superseded:bool, score:0..1 }]. Any non-superseded dissent VETOES the
 // superseded call (a wrong cancel is worse than a missed one — research §5). Empty/
 // degraded input fails closed to `relevant`.
 function aggregateVerdict(verdicts) {
-  const v = (Array.isArray(verdicts) ? verdicts : []).filter((x) => x && typeof x.score === 'number');
-  if (!v.length) return { label: 'relevant', medianScore: 0, n: 0, veto: false };
-  const medianScore = median(v.map((x) => x.score));
-  const allSuperseded = v.every((x) => x.superseded === true);
-  const anySuperseded = v.some((x) => x.superseded === true);
+  const votes = (Array.isArray(verdicts) ? verdicts : []).filter((x) => x && typeof x.score === 'number');
+  if (!votes.length) return { label: 'relevant', medianScore: 0, n: 0, veto: false };
+  const medianScore = median(votes.map((x) => x.score));
+  const allSuperseded = votes.every((x) => x.superseded === true);
+  const anySuperseded = votes.some((x) => x.superseded === true);
   const veto = anySuperseded && !allSuperseded;
   const label = allSuperseded ? 'superseded' : (anySuperseded ? 'partial' : 'relevant');
-  return { label, medianScore, n: v.length, veto };
+  return { label, medianScore, n: votes.length, veto };
 }
 
 // --- Evidence-binding validation (AC3) ---------------------------------------
@@ -81,13 +81,13 @@ function chainAcyclic(chain, terminal) {
 }
 
 function validateEvidence(payload) {
-  const p = payload || {};
-  if (p.artifact_id == null || String(p.artifact_id) === '') return { valid: false, reason: 'missing artifact_id' };
-  if (typeof p.contribution_score !== 'number' || p.contribution_score < 0 || p.contribution_score > 1) {
+  const ev = payload || {};
+  if (ev.artifact_id == null || String(ev.artifact_id) === '') return { valid: false, reason: 'missing artifact_id' };
+  if (typeof ev.contribution_score !== 'number' || ev.contribution_score < 0 || ev.contribution_score > 1) {
     return { valid: false, reason: 'contribution_score out of [0,1]' };
   }
-  if (!p.rationale || !String(p.rationale).trim()) return { valid: false, reason: 'missing rationale' };
-  if (!chainAcyclic(p.chain, p.artifact_id)) return { valid: false, reason: 'transitive-chain cyclic or non-terminal' };
+  if (!ev.rationale || !String(ev.rationale).trim()) return { valid: false, reason: 'missing rationale' };
+  if (!chainAcyclic(ev.chain, ev.artifact_id)) return { valid: false, reason: 'transitive-chain cyclic or non-terminal' };
   return { valid: true, reason: 'ok' };
 }
 

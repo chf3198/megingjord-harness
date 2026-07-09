@@ -11,12 +11,12 @@ const { scanInbound } = require('./inbound-reference-integrity');
 // Parse a model reply into the verdict + evidence-binding payload. Fail-safe:
 // an unparseable reply is a NON-superseded vote (a wrong cancel is the costly error).
 function parseModelVerdict(text) {
-  const t = String(text || '');
-  const superseded = /\bSUPERSEDED\b/i.test(t) && !/\bNOT[\s-]*SUPERSEDED\b/i.test(t);
-  const sm = t.match(/score[:\s]+([01](?:\.\d+)?)/i);
+  const reply = String(text || '');
+  const superseded = /\bSUPERSEDED\b/i.test(reply) && !/\bNOT[\s-]*SUPERSEDED\b/i.test(reply);
+  const sm = reply.match(/score[:\s]+([01](?:\.\d+)?)/i);
   const score = sm ? Math.min(Math.max(parseFloat(sm[1]), 0), 1) : 0;
-  const am = t.match(/artifact[_\s-]*id[:\s]+#?(\S+)/i);
-  const rm = t.match(/rationale[:\s]+(.+)/i);
+  const am = reply.match(/artifact[_\s-]*id[:\s]+#?(\S+)/i);
+  const rm = reply.match(/rationale[:\s]+(.+)/i);
   const evidence = am ? { artifact_id: am[1].replace(/[.,]$/, ''), contribution_score: score, rationale: rm ? rm[1].trim() : '' } : null;
   return { superseded, score, evidence };
 }

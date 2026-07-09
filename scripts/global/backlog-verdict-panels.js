@@ -11,6 +11,7 @@ const FLEET_HOST = '127.0.0.1';
 const FLEET_PORT = Number(process.env.OLLAMA_PORT) || 11434;
 const FLEET_MODEL = process.env.MEGINGJORD_FLEET_MODEL || 'qwen2.5:7b';
 const TIMEOUT_MS = 12000;
+const HTTP_OK = 200;
 
 // One local Ollama /api/generate call. Resolves to the reply string, or null on any
 // error / non-200 / timeout. Never rejects (loopback only — G4 zero-egress).
@@ -23,7 +24,7 @@ function ollamaGenerate(prompt) {
       let body = '';
       res.on('data', (d) => { body += d; });
       res.on('end', () => {
-        if (res.statusCode !== 200) return resolve(null);
+        if (res.statusCode !== HTTP_OK) return resolve(null);
         try { resolve(JSON.parse(body).response || null); } catch { resolve(null); }
       });
     });
@@ -48,8 +49,8 @@ async function freeCloudPanel(prompt, want = 3) {
   const replies = [];
   for (let i = 0; i < want; i += 1) {
     try {
-      const r = await dispatchFreeCloud(prompt, { tier: 'free-cloud' });
-      const content = r && (r.content || r.answer || r.text);
+      const res = await dispatchFreeCloud(prompt, { tier: 'free-cloud' });
+      const content = res && (res.content || res.answer || res.text);
       if (content) replies.push(content);
     } catch { /* provider down — try the next distinct provider */ }
   }
