@@ -15,6 +15,10 @@
 // an issue_comment feedback loop (our own comment re-triggering the workflow).
 const ADVISORY_MARKER = '<!-- completion-claim-truth:advisory -->';
 
+// GitHub REST returns 404 when a path is absent at a ref, or when #N is an
+// issue rather than a PR — both are "artifact not present as claimed" signals.
+const HTTP_NOT_FOUND = 404;
+
 // AC1: claim language. Two shapes: (a) strong standalone completion verbs, and
 // (b) mutation verbs (added/updated/created/...) that only assert truth when a
 // concrete artifact is cited alongside them. Matched per-clause below.
@@ -91,25 +95,25 @@ function classify(detection, resolved) {
   const violations = [];
   const pathPresence = (resolved && resolved.pathPresence) || {};
   const prMergedAt = (resolved && resolved.prMergedAt) || {};
-  for (const p of detection.paths || []) {
-    if (Object.prototype.hasOwnProperty.call(pathPresence, p) && pathPresence[p] === false) {
+  for (const citedPath of detection.paths || []) {
+    if (Object.prototype.hasOwnProperty.call(pathPresence, citedPath) && pathPresence[citedPath] === false) {
       violations.push({
         rule: 'dangling-path-claim',
-        detail: `Comment claims artifact \`${p}\` but it is absent from the default branch HEAD. `
+        detail: `Comment claims artifact \`${citedPath}\` but it is absent from the default branch HEAD. `
           + 'Push/merge the file or correct the claim.',
-        path: p,
+        path: citedPath,
       });
     }
   }
-  for (const n of detection.prs || []) {
-    const v = prMergedAt[n];
-    if (v === 'not-a-pr') continue; // #N was an issue, not a PR — out of scope
-    if (Object.prototype.hasOwnProperty.call(prMergedAt, n) && (v === null || v === undefined)) {
+  for (const prNumber of detection.prs || []) {
+    const mergedValue = prMergedAt[prNumber];
+    if (mergedValue === 'not-a-pr') continue; // #N was an issue, not a PR — out of scope
+    if (Object.prototype.hasOwnProperty.call(prMergedAt, prNumber) && (mergedValue === null || mergedValue === undefined)) {
       violations.push({
         rule: 'dangling-pr-claim',
-        detail: `Comment cites PR #${n} as a merge vehicle but its mergedAt is null (not merged). `
+        detail: `Comment cites PR #${prNumber} as a merge vehicle but its mergedAt is null (not merged). `
           + 'Cite the PR that actually merged, or defer the claim.',
-        pr: n,
+        pr: prNumber,
       });
     }
   }
@@ -138,6 +142,32 @@ function renderAdvisory(violations) {
 // PR's merged_at (pulls.get), then posts ONE structured advisory comment if any
 // claim is dangling. Never blocks. Idempotent-friendly: skips our own advisory
 // comments to avoid an issue_comment feedback loop.
+// Resolve each cited artifact against GitHub ground truth. 'unknown' (a non-404
+// fetch failure) is dropped so classify() fail-opens rather than fabricating a
+// violation from a transient API error.
+async function resolveCitations(github, owner, repo, ref, detection) {
+  const pathPresence = {};
+  for (const citedPath of detection.paths) {
+    try {
+      await github.rest.repos.getContent({ owner, repo, path: citedPath, ref });
+      pathPresence[citedPath] = true;
+    } catch (err) {
+      if (err && err.status === HTTP_NOT_FOUND) pathPresence[citedPath] = false;
+    }
+  }
+  const prMergedAt = {};
+  for (const prNumber of detection.prs) {
+    try {
+      const { data } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+      prMergedAt[prNumber] = data.merged_at || null;
+    } catch (err) {
+      // 404 → #N is an issue, not a PR → out of scope, not a violation.
+      if (err && err.status === HTTP_NOT_FOUND) prMergedAt[prNumber] = 'not-a-pr';
+    }
+  }
+  return { pathPresence, prMergedAt };
+}
+
 async function run({ github, context, core }) {
   if (!context || !context.payload || !context.payload.comment || !context.payload.issue) return;
   const body = context.payload.comment.body || '';
@@ -149,32 +179,8 @@ async function run({ github, context, core }) {
   const repo = context.repo.repo;
   const ref = (context.payload.repository && context.payload.repository.default_branch) || 'main';
 
-  const pathPresence = {};
-  for (const p of detection.paths) {
-    try {
-      await github.rest.repos.getContent({ owner, repo, path: p, ref });
-      pathPresence[p] = true;
-    } catch (e) {
-      pathPresence[p] = e && e.status === 404 ? false : 'unknown';
-    }
-  }
-  const prMergedAt = {};
-  for (const n of detection.prs) {
-    try {
-      const { data } = await github.rest.pulls.get({ owner, repo, pull_number: n });
-      prMergedAt[n] = data.merged_at || null;
-    } catch (e) {
-      // 404 → #N is not a PR (likely an issue ref) → out of scope, not a violation.
-      prMergedAt[n] = e && e.status === 404 ? 'not-a-pr' : 'unknown';
-    }
-  }
-  // Normalize 'unknown' presence to absent-from-map so classify() skips it.
-  const cleanPresence = {};
-  for (const [k, v] of Object.entries(pathPresence)) if (v !== 'unknown') cleanPresence[k] = v;
-  const cleanMerged = {};
-  for (const [k, v] of Object.entries(prMergedAt)) if (v !== 'unknown') cleanMerged[k] = v;
-
-  const result = classify(detection, { pathPresence: cleanPresence, prMergedAt: cleanMerged });
+  const resolved = await resolveCitations(github, owner, repo, ref, detection);
+  const result = classify(detection, resolved);
   if (result.ok) return;
 
   await github.rest.issues.createComment({
