@@ -1,0 +1,30 @@
+name: Inbound Reference Integrity
+# On issue close/cancel, scan live OPEN issues for dangling pointers TO the closing
+# ticket and route them into the baton (#3419, Epic #3398 C1). Sibling of
+# epic-close-readiness (outbound-only); this is the inbound check. Deterministic $0.
+on:
+  issues:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to scan inbound refs for'
+        required: true
+permissions:
+  issues: write
+  contents: read
+jobs:
+  inbound-reference-integrity:
+    name: inbound-reference-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { run } = require('./scripts/global/inbound-reference-integrity-check.js');
+            const ctx = context.eventName === 'workflow_dispatch'
+              ? { ...context, issue: { number: Number(context.payload.inputs.issue_number) } }
+              : context;
+            await run({ github, context: ctx, core });
