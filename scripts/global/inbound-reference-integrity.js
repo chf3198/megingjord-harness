@@ -14,6 +14,9 @@ const FORMS = [
   { id: 'parent-ref', cls: 'PB2', re: (n) => new RegExp(`(?:Refs\\s+Epic|Parent)\\s*:?\\s*#${n}\\b`, 'i'), why: 'structural parentage' },
 ];
 
+// Evidence line cap kept short so a correction task stays scannable.
+const MAX_LINE_CHARS = 200;
+
 /**
  * Return the first line of `text` matching `re`, trimmed and capped, else null.
  * @param {string} text - issue body/title blob to scan.
@@ -21,7 +24,7 @@ const FORMS = [
  * @returns {string|null} the matching evidence line, or null when none matches.
  */
 function firstMatchingLine(text, re) {
-  for (const line of String(text || '').split('\n')) if (re.test(line)) return line.trim().slice(0, 200);
+  for (const line of String(text || '').split('\n')) if (re.test(line)) return line.trim().slice(0, MAX_LINE_CHARS);
   return null;
 }
 
@@ -35,9 +38,9 @@ function scanInbound(closing, items) {
   const out = [];
   for (const it of Array.isArray(items) ? items : []) {
     if (!it || typeof it.number !== 'number' || it.number === closing) continue;
-    for (const f of FORMS) {
-      const line = firstMatchingLine(it.text, f.re(closing));
-      if (line) out.push({ from: it.number, form: f.id, cls: f.cls, why: f.why, line });
+    for (const form of FORMS) {
+      const line = firstMatchingLine(it.text, form.re(closing));
+      if (line) out.push({ from: it.number, form: form.id, cls: form.cls, why: form.why, line });
     }
   }
   return out;

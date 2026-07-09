@@ -17,14 +17,14 @@ const MARKER = '<!-- inbound-reference-integrity -->';
  * @returns {Promise<Array<{number:number,title:string,body:string}>>} open issue nodes.
  */
 async function listOpenIssues(github, owner, repo) {
-  const q = 'query($owner:String!,$repo:String!,$after:String){repository(owner:$owner,name:$repo)'
+  const gql = 'query($owner:String!,$repo:String!,$after:String){repository(owner:$owner,name:$repo)'
     + '{issues(first:100,states:OPEN,after:$after){nodes{number title body} pageInfo{hasNextPage endCursor}}}}';
   let after = null; const nodes = [];
   for (;;) {
-    const d = await github.graphql(q, { owner, repo, after });
-    const b = d.repository.issues; nodes.push(...b.nodes);
-    if (!b.pageInfo.hasNextPage) return nodes;
-    after = b.pageInfo.endCursor;
+    const data = await github.graphql(gql, { owner, repo, after });
+    const block = data.repository.issues; nodes.push(...block.nodes);
+    if (!block.pageInfo.hasNextPage) return nodes;
+    after = block.pageInfo.endCursor;
   }
 }
 
@@ -37,9 +37,9 @@ async function listOpenIssues(github, owner, repo) {
  * @returns {Promise<boolean>} true when a matching correction task exists.
  */
 async function alreadyFiled(github, owner, repo, closing) {
-  const q = `Re-home orphaned reference to #${closing} in:title repo:${owner}/${repo}`;
-  const r = await github.rest.search.issuesAndPullRequests({ q }).catch(() => ({ data: { total_count: 0 } }));
-  return (r.data.total_count || 0) > 0;
+  const searchQuery = `Re-home orphaned reference to #${closing} in:title repo:${owner}/${repo}`;
+  const result = await github.rest.search.issuesAndPullRequests({ q: searchQuery }).catch(() => ({ data: { total_count: 0 } }));
+  return (result.data.total_count || 0) > 0;
 }
 
 /**
