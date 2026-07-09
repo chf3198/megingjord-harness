@@ -19,7 +19,9 @@
 **Result:** items 1–5 are done (rebuilding them = redundant + conflict risk against canonical validators);
 items 6–8 are the genuine, non-redundant Phase-1.
 
-## 2. Phase-1 enforcement plan (the residual)
+## 2. Phase-1 enforcement plan (the residual) — SHIPPED (#3713)
+
+> **Status:** SHIPPED via `scripts/global/epic-scaffold.js` (+ `epic-scaffold-cli.js`), Epic #3255 Phase-1 (#3713). The composition acceptance gate below is enforced as a round-trip test.
 
 **One** implementation ticket (no sprawl), specified so Phase-1 is provably non-redundant:
 
