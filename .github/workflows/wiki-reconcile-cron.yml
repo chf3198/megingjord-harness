@@ -10,10 +10,11 @@ on:
     - cron: '30 7 * * *' # 07:30 UTC daily
   workflow_dispatch:
 
-# Least privilege: commit repairs + snapshot; read issue state for Wiki B truth.
+# Least privilege: commit repairs + snapshot; read issue state for Wiki B truth;
+# write issues only for the on-failure alert (#3718 AC3 — durable failure surface).
 permissions:
   contents: write
-  issues: read
+  issues: write
 
 concurrency:
   group: wiki-reconcile-cron
@@ -54,7 +55,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add wiki/ dashboard/events.jsonl
+          # Stage only tracked wiki mirrors. dashboard/events.jsonl is intentionally
+          # gitignored (.gitignore) runtime state — do NOT -f it into the repo; adding
+          # it under `bash -e` errored and aborted the whole reconcile daily (#3718).
+          git add wiki/
           if git diff --cached --quiet; then
             echo "wiki-reconcile: no drift to repair (clean)."
             exit 0
@@ -65,3 +69,25 @@ jobs:
             -m "AI-Team-Model: automation:github-actions@ci" \
             -m "AI-Role: admin"
           git push
+
+      # #3718 AC3 — CI-failure alerting. The daily reconcile is upkeep the whole
+      # work-log depends on; a silent failure froze 1170/1176 mirrors for 6 days
+      # because the health signal wrote to the same gitignored path that broke the
+      # commit. Surface any failure on a durable GitHub issue (deduped), not a
+      # gitignored runtime log, so the outage cannot hide again.
+      - name: Alert on reconcile failure (durable Tier-1 surface)
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="wiki-reconcile-cron failed — daily wiki upkeep frozen"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Recurrence: wiki-reconcile-cron failed again — $RUN_URL"
+          else
+            gh issue create --title "$title" \
+              --label "type:bug,priority:P1,area:knowledge,status:backlog" \
+              --body "$(printf 'wiki-reconcile-cron failed: %s\n\nThe daily Three-Wiki reconcile did not complete; work-log and code mirrors will freeze until fixed. Investigate promptly. Refs #3718 #3068 #3719.' "$RUN_URL")"
+          fi
