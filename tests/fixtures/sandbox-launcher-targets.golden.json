@@ -1,0 +1,11 @@
+{
+  "_comment": "Golden expected sandbox launcher set (#3734). Derived from the runtime-catalog SSoT (inventory/runtimes/*.json). If a launcher is added/removed from the catalog, update this fixture consciously — the sync workflow and the governance audit must both match it, and both derive from scripts/global/sandbox-launcher-targets.js.",
+  "targets": ["antigravity", "claude-code", "codex", "copilot", "cursor"],
+  "branches": [
+    "sandbox/antigravity",
+    "sandbox/claude-code",
+    "sandbox/codex",
+    "sandbox/copilot",
+    "sandbox/cursor"
+  ]
+}

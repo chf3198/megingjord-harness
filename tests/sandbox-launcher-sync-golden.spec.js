@@ -15,6 +15,15 @@ const audit = require('../scripts/global/worktree-governance-audit');
 
 const WORKFLOW = path.join(__dirname, '..', '.github', 'workflows', 'post-merge-sandbox-sync.yml');
 const workflowSrc = fs.readFileSync(WORKFLOW, 'utf8');
+const GOLDEN = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'fixtures', 'sandbox-launcher-targets.golden.json'), 'utf8'),
+);
+
+test('#3734: helper + audit both match the golden launcher fixture', () => {
+  // Golden file is the deliberate expected set; changing the catalog must update it.
+  expect(sandboxLauncherTargets()).toEqual(GOLDEN.targets);
+  expect(sandboxLauncherBranches()).toEqual(GOLDEN.branches);
+});
 
 test('#3734: sync list == audit validTargets (one SSoT, cannot drift)', () => {
   expect(sandboxLauncherTargets()).toEqual(audit.validTargets);
