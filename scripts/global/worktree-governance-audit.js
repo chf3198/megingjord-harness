@@ -1,17 +1,15 @@
 #!/usr/bin/env node
 /* eslint-disable jsdoc/require-jsdoc */
 const { execSync } = require('child_process');
-const { listRuntimes } = require('./runtime-descriptor');
+const { sandboxLauncherTargets } = require('./sandbox-launcher-targets');
 
 const maxBehind = Number(process.env.SANDBOX_MAX_BEHIND || 0);
 // Valid sandbox launcher targets are the Epic #3411 runtime-catalog SSoT
-// (inventory/runtimes/*.json via listRuntimes()) so this allowlist can never
-// drift from the team taxonomy again (#3642). The fallback keeps the audit sane
-// if the catalog is unreadable (G6) instead of flagging every branch invalid.
-const catalogRuntimes = listRuntimes();
-const validTargets = catalogRuntimes.length
-  ? catalogRuntimes
-  : ['antigravity', 'claude-code', 'codex', 'copilot', 'cursor'];
+// (inventory/runtimes/*.json), resolved through the shared sandbox-launcher-targets
+// helper so this allowlist can never drift from the team taxonomy (#3642) NOR from
+// the post-merge sync workflow's list (#3734) — both consumers derive from one place.
+// The helper's fallback keeps the audit sane if the catalog is unreadable (G6).
+const validTargets = sandboxLauncherTargets();
 const escapeRe = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const sandboxRx = new RegExp(`^sandbox/(${validTargets.map(escapeRe).join('|')})$`);
 

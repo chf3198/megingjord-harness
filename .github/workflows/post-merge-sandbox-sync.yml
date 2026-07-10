@@ -16,15 +16,19 @@ jobs:
     name: sync-sandbox-launchers
     runs-on: ubuntu-latest
     steps:
+      # Checkout so github-script can require() the shared launcher-targets helper,
+      # which derives the sync list from the same runtime-catalog SSoT the audit
+      # (worktree-governance-audit.js) validates. Without this the list was a
+      # hardcoded subset that omitted antigravity + cursor and bricked merges (#3734).
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const sha = context.sha;
-            const branches = [
-              'sandbox/copilot',
-              'sandbox/codex',
-              'sandbox/claude-code',
-            ];
+            // Single source of truth: same helper worktree-governance-audit.js reads,
+            // so the sync list can never drift from the audited launcher set (#3734).
+            const { sandboxLauncherBranches } = require('./scripts/global/sandbox-launcher-targets');
+            const branches = sandboxLauncherBranches();
             const results = [];
             for (const branch of branches) {
               try {
