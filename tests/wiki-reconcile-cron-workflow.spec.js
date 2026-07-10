@@ -70,3 +70,11 @@ test('on-failure alert step stays wired (AC3 — silent daily-cron failure surfa
   // The alert needs issue-write scope to reach a durable surface.
   expect(yaml).toMatch(/^\s*issues:\s*write\s*$/m);
 });
+
+test('git add pathspec matches the golden fixture exactly (golden-file)', () => {
+  const golden = fs.readFileSync(
+    path.join(REPO_ROOT, 'tests', 'fixtures', 'wiki-reconcile-cron', 'git-add-pathspec.golden'), 'utf8'
+  ).split('\n').map((l) => l.trim()).filter(Boolean);
+  const specs = gitAddPathspecs(fs.readFileSync(WORKFLOW, 'utf8'));
+  expect(specs).toEqual(golden);
+});
