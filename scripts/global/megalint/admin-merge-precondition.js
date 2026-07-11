@@ -30,8 +30,8 @@ function deriveFacts(input, adminBody) {
   let prMerged = facts.prMerged != null ? facts.prMerged : null;
   // Fallback: scan comment signals when facts not provided
   if (ciGreen == null) {
-    for (const c of (input.comments || [])) {
-      const sig = extractSignalsFromComment(c.body || '');
+    for (const comment of (input.comments || [])) {
+      const sig = extractSignalsFromComment(comment.body || '');
       if (sig.CI_GREEN) { ciGreen = true; break; }
     }
   }
