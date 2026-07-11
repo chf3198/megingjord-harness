@@ -86,6 +86,21 @@ def check_uncommitted(
     return "Stop blocked: uncommitted changes; Admin baton incomplete.", msg
 
 
+# #3054: documented merge exceptions that satisfy the merge precondition
+# without an actual gh pr merge. Mirrors merge-evidence-pr-gate exceptions.
+MERGE_EXCEPTION_KEYS = ("merge_evidence_override", "baseline_drift_override")
+
+
+def _merge_exception_active(ops: dict) -> bool:
+    """#3054: True when a documented merge exception is recorded in admin_ops.
+
+    Exceptions: merge-evidence-override (label on issue per Epic #2517),
+    baseline-drift (explicit labelled override). Offline-graceful: when
+    merge state is indeterminate, read local admin_ops only.
+    """
+    return any(ops.get(k) for k in MERGE_EXCEPTION_KEYS)
+
+
 def check_admin_ops(
     flags: dict, ops: dict, roles: dict, repo_type: str,
     uncommitted: list[str] | None = None,
@@ -97,6 +112,7 @@ def check_admin_ops(
     lane:docs-research, or lane:docs-only — resolved by the caller) requires ZERO Admin ops and
     suppresses the code-session Admin-role gate. These lanes are PR-less/merge-less by design, so
     a lingering code_touched flag must not manufacture a phantom Admin obligation.
+    #3054: merge coupled to ADMIN_HANDOFF — deny unless merged OR documented exception.
     """
     # Phase guard (#1798 F2): Admin ops only meaningful after Collaborator completes.
     if not roles.get("collaborator", False):
@@ -106,6 +122,9 @@ def check_admin_ops(
         return None, None
     required = required_admin_ops(flags, repo_type, report_only_clean_exempt)
     missing = [k for k in required if not ops.get(k)]
+    # #3054: merge exception — documented override satisfies the merge step
+    if missing and "merge" in missing and _merge_exception_active(ops):
+        missing = [k for k in missing if k != "merge"]
     if missing:
         reason = f"Stop blocked: missing Admin steps ({', '.join(missing)})."
         return reason, f"Hard governance gate. Missing: {', '.join(missing)}."
