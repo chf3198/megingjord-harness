@@ -187,12 +187,27 @@ function proseCollisionViolation(text) {
 
 // Format checks for PRESENT fields only. Mirrors the server-side megalint format
 // rules so a malformed structured field is caught locally before the PR is opened.
+// #3680 (Epic #3679): no review → no receipt. A cross_family_rating of UNAVAILABLE /
+// N/A / none / a failing/REJECT verdict alongside a cited cross_family_receipt is a
+// self-contradiction (the #3673 case: rating UNAVAILABLE + a fabricated receipt). Block it.
+const RATING_NONPASS_RE = /UNAVAILABLE|N\/A|\bnone\b|\bfail(?:ed)?\b|REJECT/i;
+function ratingReceiptContradiction(text) {
+  const rating = fieldValue(text, 'cross_family_rating');
+  const hasReceipt = RECEIPT_HEX16_CAPTURE.test(text);
+  if (!rating || !hasReceipt) return null;
+  if (!RATING_NONPASS_RE.test(rating)) return null;
+  return { field: 'cross_family_receipt', rule: 'cross-family-rating-receipt-contradiction',
+    detail: 'cross_family_rating is non-pass/UNAVAILABLE but a cross_family_receipt is cited — '
+      + 'no review means no receipt; the degraded path is a visible non-pass with NO receipt (#3680)' };
+}
+
 function validateStructure(body, opts = {}) {
   const text = asBody(body);
   const violations = [
     roleAnchorViolation(text),
     receiptFormatViolation(text),
     receiptLedgerViolation(text, opts),
+    ratingReceiptContradiction(text),
     markdownBoldViolation(text),
     proseCollisionViolation(text),
   ].filter(Boolean);
@@ -209,4 +224,5 @@ module.exports = {
   fieldHasProseCollision,
   receiptLedgerViolation,
   ledgerReceiptSet,
+  ratingReceiptContradiction,
 };

@@ -5,19 +5,23 @@ const { KNOWN_FAMILIES, normalizeFamily } = require('../scripts/global/megalint/
 const { validate: validateCollab } = require('../scripts/global/megalint/collaborator-handoff.js');
 const { validate: validateAdmin } = require('../scripts/global/megalint/admin-handoff.js');
 
-test('KNOWN_FAMILIES contains the 6 canonical families', () => {
-  expect(KNOWN_FAMILIES).toEqual(['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'unknown']);
+test('KNOWN_FAMILIES includes the canonical + free-cloud panel families (#3688)', () => {
+  // #3688: derived from the cross-family SSoT — must recognize the $0 panel families.
+  for (const f of ['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'unknown',
+    'meta', 'mistral', 'google']) {
+    expect(KNOWN_FAMILIES).toContain(f);
+  }
 });
 
-test('normalizeFamily returns canonical values for known families', () => {
-  for (const f of ['anthropic', 'openai', 'qwen', 'deepseek', 'granite']) {
+test('normalizeFamily returns canonical values for known families (incl. #3688 panel families)', () => {
+  for (const f of ['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'meta', 'mistral', 'google']) {
     expect(normalizeFamily(f)).toBe(f);
     expect(normalizeFamily(f.toUpperCase())).toBe(f);
   }
 });
 
-test('normalizeFamily returns unknown for unrecognised strings', () => {
-  expect(normalizeFamily('mistral')).toBe('unknown');
+test('normalizeFamily returns unknown for genuinely-unrecognised strings', () => {
+  expect(normalizeFamily('cohere')).toBe('unknown');
   expect(normalizeFamily('')).toBe('unknown');
   expect(normalizeFamily(null)).toBe('unknown');
 });
@@ -32,8 +36,16 @@ test('collaborator-handoff: known reviewer_family has no unknown-family advisory
   expect(unknown).toHaveLength(0);
 });
 
-test('collaborator-handoff: unknown reviewer_family triggers advisory', () => {
-  const result = validateCollab(makeCollab('mistral'));
+test('collaborator-handoff: a genuine free-cloud reviewer_family has no advisory (#3688)', () => {
+  for (const fam of ['mistral', 'meta', 'google']) {
+    const result = validateCollab(makeCollab(fam));
+    const unknown = (result.violations || []).filter(v => v.rule === 'unknown-reviewer-family');
+    expect(unknown, `${fam} must be recognized`).toHaveLength(0);
+  }
+});
+
+test('collaborator-handoff: a genuinely-unknown reviewer_family still triggers advisory', () => {
+  const result = validateCollab(makeCollab('cohere'));
   const unknown = (result.violations || []).filter(v => v.rule === 'unknown-reviewer-family');
   expect(unknown).toHaveLength(1);
   expect(unknown[0].severity).toBe('advisory');
