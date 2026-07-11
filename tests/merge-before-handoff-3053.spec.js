@@ -85,6 +85,17 @@ describe('merge-before-handoff predicate (#3053/#3058)', () => {
       'Red CI must NOT trigger merge-before-handoff');
   });
 
+  test('(d) CI-green but merge-state unknown → ADVISORY (no pre-merge deadlock)', () => {
+    // Dogfood (#3053): the pre-merge admin-gate must not hard-block, else the
+    // merge deadlocks (can't merge until admin-gate green; can't be green until
+    // merged). Blocking requires an explicit prMerged===false; unknown → advisory.
+    const input = makeInput({ rating: 95, facts: { ciGreen: true } });
+    const r = validate(input);
+    const v = r.violations.find(x => x.rule === 'admin-handoff-without-merge');
+    assert.ok(v && v.severity === 'advisory',
+      'merge-state unknown must be advisory, not blocking');
+  });
+
   test('rating below 93 → not flagged', () => {
     const input = makeInput({
       rating: 85,

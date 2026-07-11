@@ -50,17 +50,20 @@ function checkMergePrecondition(adminBody, input) {
   const rating = parseRating(adminBody);
   if (rating == null || rating < RATING_THRESHOLD) return [];
   const { ciGreen, prMerged } = deriveFacts(input, adminBody);
-  // Offline-graceful: facts unavailable → advisory only
-  if (ciGreen == null && prMerged == null) {
-    return [{ rule: 'admin-handoff-without-merge', severity: 'advisory',
-      detail: `admin_review_rating=${rating} (>=${RATING_THRESHOLD}) but merge/CI facts unavailable (offline-graceful advisory)` }];
-  }
-  // Red CI → NEVER flagged (no forced bypass)
+  // Red CI → NEVER flagged (no forced bypass).
   if (ciGreen === false) return [];
-  // CI green (or unknown) + not merged → blocking
-  if (prMerged !== true && ciGreen) {
+  // BLOCKING only when merge-state is DEFINITIVELY known: CI green AND confirmed
+  // unmerged (explicit facts). This is the stop-hook / post-merge-audit path.
+  if (ciGreen === true && prMerged === false) {
     return [{ rule: 'admin-handoff-without-merge',
       detail: `PR is CI-green and admin_review_rating=${rating} (>=${RATING_THRESHOLD}) but NOT merged. Admin must merge before ADMIN_HANDOFF.` }];
+  }
+  // Offline-graceful: rating>=93 but merge/CI state not both-known (the pre-merge
+  // posting-time validator, GitHub unreachable) → ADVISORY, never a merge deadlock.
+  // The authoritative blocking enforcement is the stop-hook merge coupling (#3054).
+  if (prMerged !== true) {
+    return [{ rule: 'admin-handoff-without-merge', severity: 'advisory',
+      detail: `admin_review_rating=${rating} (>=${RATING_THRESHOLD}); merge/CI state not definitively known at posting time — advisory (stop-hook enforces merge-before-handoff)` }];
   }
   return [];
 }
