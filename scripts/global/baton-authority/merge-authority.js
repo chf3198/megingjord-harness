@@ -6,6 +6,8 @@
 
 const { deriveTrailFromGitHub, buildEvidenceMask } = require('./evidence-loader');
 const { verifyDigest } = require('./merkle');
+// #3699: exclude the self-reporting merge-gate context(s) from the CI_GREEN rollup.
+const { KNOWN_REPORTING_CONTEXTS } = require('./ruleset-config');
 const { STATES, EVENTS } = require('../baton-fsm/transitions');
 const kernel = require('../baton-fsm/kernel');
 
@@ -106,8 +108,13 @@ async function enrichWithPRData(facts, prNumber, ghClient) {
     try {
       const checks = await ghClient.listChecks(prNumber);
       if (checks && Array.isArray(checks)) {
-        const hasChecks = checks.length !== 0;
-        const allPassed = hasChecks && checks.every(
+        // #3699: the merge-gate context(s) are in_progress while this evaluator runs,
+        // so counting them makes CI_GREEN unsatisfiable (self-referential deadlock).
+        const gatingChecks = checks.filter(
+          (chk) => !KNOWN_REPORTING_CONTEXTS.includes(chk.name)
+        );
+        const hasChecks = gatingChecks.length !== 0;
+        const allPassed = hasChecks && gatingChecks.every(
           (chk) => chk.conclusion === 'success'
         );
         if (allPassed) facts.ciGreen = true;

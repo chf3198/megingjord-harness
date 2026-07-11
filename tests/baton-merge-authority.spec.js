@@ -271,3 +271,33 @@ describe('Merge Authority - result structure', () => {
     assert.ok(Array.isArray(result.missing), 'missing must be an array');
   });
 });
+
+// #3699 (Epic #3679): the CI_GREEN rollup must EXCLUDE the self-reporting merge-gate
+// context(s) — they are in_progress while this evaluator runs, so counting them makes
+// CI_GREEN unsatisfiable (self-referential deadlock that manufactured bypass need).
+describe('Merge Authority - CI_GREEN excludes self-reporting context (#3699)', () => {
+  it('authorizes when only the baton-authority/merge self-context is non-terminal', async () => {
+    const client = buildCompleteTrailClient();
+    client.listChecks = async () => [
+      { name: 'unit-tests', conclusion: 'success' },
+      { name: 'lint-required', conclusion: 'success' },
+      { name: 'baton-authority/merge', conclusion: null }, // in_progress self-context
+    ];
+    const { digest } = await deriveDigest(100, client, ATTESTED);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
+    assert.equal(result.allowed, true, 'self-context must not block CI_GREEN');
+    assert.deepEqual(result.missing, []);
+  });
+
+  it('does not over-exclude: a normal all-green named check list still authorizes', async () => {
+    const client = buildCompleteTrailClient();
+    client.listChecks = async () => [
+      { name: 'unit-tests', conclusion: 'success' },
+      { name: 'lint-required', conclusion: 'success' },
+    ];
+    const { digest } = await deriveDigest(100, client, ATTESTED);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
+    assert.equal(result.allowed, true, 'normal green checks authorize');
+    assert.deepEqual(result.missing, []);
+  });
+});
