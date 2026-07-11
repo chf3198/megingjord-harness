@@ -113,7 +113,18 @@ ADVISORY in first ship (Epic #2148 C1 #2154); the-collaborator-handoff validator
 | Trigger artifact | `ADMIN_HANDOFF` comment posted on the linked issue. Must carry signing fields with `Role: admin`, plus `branch:`, `commit:`, `signer-independence-check: PASS`, and `deploy-runtime-impact:` (or `sync-verification: N/A` per `feature-completion-governance.instructions.md`). Validator: `scripts/global/megalint/admin-handoff.js`. |
 | Role-label transition | Remove `role:admin`; add `role:consultant`. |
 | Status-label transition | Remove `status:testing`; add `status:review`. |
-| Preconditions | (a) Signer-independence: Admin signer alias MUST differ from Collaborator signer alias — validator `scripts/global/megalint/signer-fidelity.js`. (b) ALL required CI checks PASS on the linked PR — observed via `gh pr checks <PR#>` or `live_checks.ci_all_pass()`; pre-merge gate `merge-evidence-pr-gate.js` enforces. (c) PR merged OR merge-evidence-override-approved label present on the linked issue per the merge-evidence batch contract. (d) For lane:code-change touching deployed runtime artifacts: `npm run sync:codex` + `npm run sync:claude` + `npm run hamr:sync-verify` outputs cited per `feature-completion-governance.instructions.md`. |
+| Preconditions | (a) Signer-independence: Admin signer alias MUST differ from Collaborator signer alias — validator `scripts/global/megalint/signer-fidelity.js`. (b) ALL required CI checks PASS on the linked PR — observed via `gh pr checks <PR#>` or `live_checks.ci_all_pass()`; pre-merge gate `merge-evidence-pr-gate.js` enforces. (c) PR merged OR merge-evidence-override-approved label present on the linked issue per the merge-evidence batch contract. (d) For lane:code-change touching deployed runtime artifacts: `npm run sync:codex` + `npm run sync:claude` + `npm run hamr:sync-verify` outputs cited per `feature-completion-governance.instructions.md`. (e) **Merge-before-handoff** (#3053, Epic #3051): for lane:code-change, when CI is green and `admin_review_rating >= 93`, the PR MUST be merged before ADMIN_HANDOFF — validator `scripts/global/megalint/admin-merge-precondition.js`. |
+
+### Merge-before-handoff predicate (Epic #3051, Refs #3053)
+
+For `lane:code-change`, when the linked PR is CI-green, the Admin `admin_review_rating` field is present and >= 93, and the PR is NOT yet merged, the `admin-handoff-without-merge` violation fires. Carve-outs:
+
+- **Red CI never bypassed**: a genuinely RED required-CI PR is NEVER flagged — the authoritative CI gate blocks independently; this predicate does not force a bypass.
+- **Baseline-drift override**: an explicit `baseline_drift_override` in admin_ops stays labelled and honoured (per Epic #2517).
+- **Merge-evidence-override**: the `merge-evidence-override-approved` label satisfies the merge step (backward-compat with the merge-evidence batch contract).
+- **Deferred-final honoured**: the deferred-final merge-evidence contract (Epic #2295) is compatible — the predicate checks the prMerged fact, which reflects actual merge state.
+- **Admin owns the merge**: merge authorization is NEVER routed to the client (principle #2578 / AC8). The Admin baton role and close authority are AI-agent roles.
+- **Offline-graceful**: when merge/CI facts are unavailable (GitHub unreachable), the finding degrades to `severity:'advisory'` — the authoritative CI gate blocks when online.
 
 ### Validation evidence — recent practice (memory-codified)
 
