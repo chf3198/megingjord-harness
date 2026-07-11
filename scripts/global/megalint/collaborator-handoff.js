@@ -16,7 +16,7 @@ const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
 const { RECEIPT_FIELD_RE } = require('../cross-family-receipt.js');
 // #3678 (F1, Epic #3679): ledger-verify a cited receipt at the server gate, reusing
 // the schema module's single-source rule so the gate and local self-check cannot drift.
-const { receiptLedgerViolation } = require('../collaborator-handoff-schema.js');
+const { receiptLedgerViolation, ratingReceiptContradiction } = require('../collaborator-handoff-schema.js');
 // #2907: hard-gate promotion — require self-check evidence in COLLABORATOR_HANDOFF.
 const { checkHandoffHasVerification } = require('../collaborator-self-check.js');
 
@@ -66,6 +66,9 @@ function checkCrossFamily(body, opts = {}) {
   // at the merge gate. Ledger-membership check over committed evidence (no network).
   const ledgerViol = receiptLedgerViolation(body, opts);
   if (ledgerViol) violations.push({ rule: ledgerViol.rule, detail: ledgerViol.detail });
+  // #3680: no review → no receipt; a non-pass/UNAVAILABLE rating with a cited receipt contradicts.
+  const contradiction = ratingReceiptContradiction(body);
+  if (contradiction) violations.push({ rule: contradiction.rule, detail: contradiction.detail });
   violations.push(...checkReviewerFamily(body));
   return violations;
 }

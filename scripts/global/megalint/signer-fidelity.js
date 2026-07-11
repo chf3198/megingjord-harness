@@ -150,7 +150,16 @@ function validate(input) {
   return { ok: unique.filter(v => v.severity !== 'advisory').length === 0, violations: unique };
 }
 
-const KNOWN_FAMILIES = ['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'unknown'];
+// #3688: derive from the cross-family receipt SSoT so the $0 free-cloud panel families
+// (meta = groq/llama/cerebras/nvidia/sambanova/openrouter-free, mistral, google = gemini)
+// are recognized — a genuine reviewer_family must not trip unknown-reviewer-family.
+const { PROVIDER_FAMILY, TEAM_FAMILY } = require(path.join(__dirname, '..', 'cross-family-receipt.js'));
+const KNOWN_FAMILIES = [...new Set([
+  ...Object.values(PROVIDER_FAMILY), // meta, mistral, google, openai
+  ...Object.values(TEAM_FAMILY),     // anthropic, openai, google
+  'qwen', 'deepseek', 'granite',     // model-heuristic families (extractAIFamily)
+  'unknown',
+])];
 const normalizeFamily = s => { const n = (s || '').toLowerCase().trim(); return KNOWN_FAMILIES.includes(n) ? n : 'unknown'; };
 
 module.exports = { validate, isClientIdentity, findSignerField, extractAIFamily,
