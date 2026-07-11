@@ -77,14 +77,13 @@ test('defaults are sane', () => {
 const cc = require('../scripts/global/megalint/consultant-closeout.js');
 const sigBlock = '\nSigned-by: Orla Vale\nTeam&Model: claude-code:opus-4-7@anthropic\nRole: consultant';
 
-test('closeout-schema accepts rubric_provisional:true as bridge until calibration corpus exists', () => {
+test('#3700: closeout-schema BLOCKS rubric_provisional:true (non-final rubric must not pass)', () => {
   const body = `## CONSULTANT_CLOSEOUT\nverification-timestamp: 2026-05-17T00:00:00Z\nverdict: approve\nrubric_provisional: true${sigBlock}`;
   const result = cc.validate({ comments: [{ body }] });
-  const missingRubric = result.violations.find(v => v.rule === 'missing-rubric');
-  assert.equal(missingRubric, undefined, 'missing-rubric should NOT fire when rubric_provisional:true present');
-  const advisory = result.violations.find(v => v.rule === 'rubric-provisional-advisory');
-  assert.ok(advisory, 'rubric-provisional-advisory should be emitted');
-  assert.equal(advisory.severity, 'advisory');
+  const notFinal = result.violations.find(v => v.rule === 'rubric-provisional-not-final');
+  assert.ok(notFinal, 'rubric-provisional-not-final must be emitted (#3700)');
+  assert.notEqual(notFinal.severity, 'advisory', 'rubric-provisional-not-final must be blocking');
+  assert.equal(result.ok, false, 'a provisional rubric must not pass the closeout gate');
 });
 
 test('closeout-schema still rejects missing rubric AND missing provisional flag', () => {
