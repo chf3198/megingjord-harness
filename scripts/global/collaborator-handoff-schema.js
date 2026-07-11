@@ -34,7 +34,10 @@ const FIELD_SCHEMA = [
   { key: 'crossFamilyReceipt', label: 'cross_family_receipt', required: false, format: 'sha256-hex16' },
 ];
 
+const rc = require('./cross-family-receipt');
+
 const RECEIPT_HEX16 = /cross_family_receipt\s*:\s*[0-9a-f]{16}\b/i;
+const RECEIPT_HEX16_CAPTURE = /cross_family_receipt\s*:\s*([0-9a-f]{16})\b/i;
 const ROLE_ANCHORED = /(?:^|\n)[ \t]*Role:[ \t]*collaborator[ \t]*(?:\n|$)/i;
 const MARKDOWN_BOLD_TEST_STRATEGY = /\*\*test_strategy/;
 
@@ -123,6 +126,53 @@ function receiptFormatViolation(text) {
     detail: 'cross_family_receipt must be a 16-char hex sha256 prefix (#2904)' };
 }
 
+// #3678 (F1, Epic #3679): the set of GENUINE cross-family receipts recoverable from
+// the hash-chained consensus ledger. A receipt is genuine iff it equals computeReceipt()
+// of a real ticket+kind slice produced by a >=2-distinct-family panel. Untargeted probe
+// entries (no ticket) and lone single-family appends never mint a passing receipt.
+// Full >=2-family/unanimous-PASS verification remains at the merge gate (defense-in-depth).
+function ledgerReceiptSet(ledger, minFamilies = 2) {
+  const byGroup = new Map();
+  for (const e of ledger) {
+    if (e.ticket === null || e.ticket === undefined) continue;
+    const k = `${e.ticket}::${e.kind}`;
+    if (!byGroup.has(k)) byGroup.set(k, []);
+    byGroup.get(k).push(e);
+  }
+  const set = new Set();
+  for (const slice of byGroup.values()) {
+    const families = new Set(slice.map((e) => e.family));
+    if (families.size >= minFamilies) set.add(rc.computeReceipt(slice));
+  }
+  return set;
+}
+
+// #3678 (F1): a CITED cross_family_receipt must be ledger-verified, not merely 16-hex.
+// Shift-left of the merge-gate ledger check so a fabricated-but-well-formed receipt
+// fails closed at COLLABORATOR_HANDOFF emission. Pure over committed evidence — no
+// network. `opts.ledger` injects a fixture; otherwise the real ledger is read.
+function receiptLedgerViolation(text, opts = {}) {
+  const m = text.match(RECEIPT_HEX16_CAPTURE);
+  if (!m) return null; // absent, or malformed — receiptFormatViolation owns malformed
+  const cited = m[1].toLowerCase();
+  let ledger;
+  try { ledger = opts.ledger || rc.readLedger(opts.ledgerPath); } catch { ledger = []; }
+  if (!ledger.length) {
+    return { field: 'cross_family_receipt', rule: 'cross-family-receipt-unledgered',
+      detail: 'cited cross_family_receipt cannot be verified: consensus ledger is empty (#3678 F1)' };
+  }
+  if (!rc.verifyChain(ledger)) {
+    return { field: 'cross_family_receipt', rule: 'cross-family-receipt-ledger-tampered',
+      detail: 'consensus ledger failed chain-integrity check; cited receipt cannot be trusted (#3678 F1)' };
+  }
+  if (!ledgerReceiptSet(ledger).has(cited)) {
+    return { field: 'cross_family_receipt', rule: 'cross-family-receipt-unledgered',
+      detail: 'cited cross_family_receipt is not a genuine computed receipt in '
+        + 'governance/cross-family-consensus.jsonl (fabricated, stale, or single-family) (#3678 F1)' };
+  }
+  return null;
+}
+
 function markdownBoldViolation(text) {
   if (!testStrategyMarkdownBold(text)) return null;
   return { field: 'test_strategy', rule: 'test-strategy-markdown-bold',
@@ -137,11 +187,12 @@ function proseCollisionViolation(text) {
 
 // Format checks for PRESENT fields only. Mirrors the server-side megalint format
 // rules so a malformed structured field is caught locally before the PR is opened.
-function validateStructure(body) {
+function validateStructure(body, opts = {}) {
   const text = asBody(body);
   const violations = [
     roleAnchorViolation(text),
     receiptFormatViolation(text),
+    receiptLedgerViolation(text, opts),
     markdownBoldViolation(text),
     proseCollisionViolation(text),
   ].filter(Boolean);
@@ -156,4 +207,6 @@ module.exports = {
   detectProseColonCollision,
   testStrategyMarkdownBold,
   fieldHasProseCollision,
+  receiptLedgerViolation,
+  ledgerReceiptSet,
 };

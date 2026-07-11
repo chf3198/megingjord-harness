@@ -89,7 +89,21 @@ test('testStrategyMarkdownBold true on **test_strategy wrap, false on plain fiel
 });
 
 test('validateStructure passes a fully valid handoff', () => {
-  const out = S.validateStructure(VALID);
+  // #3678 (F1): a cited cross_family_receipt is now ledger-verified, so a "fully
+  // valid" handoff must carry a GENUINE receipt present in the consensus ledger.
+  // Build a real 2-family ledger fixture and cite its computed receipt.
+  const rc = require(path.resolve(__dirname, '..', 'scripts', 'global', 'cross-family-receipt.js'));
+  const os = require('os');
+  const fs = require('fs');
+  const lp = path.join(os.tmpdir(), `xfr-valid-${process.pid}-${Date.now()}.jsonl`);
+  const base = { prompt_sha256: 'p'.repeat(64), response_sha256: 'r'.repeat(64) };
+  rc.appendEntry({ ticket: 7777, kind: 'review', provider: 'groq', family: 'meta', verdict: 'PASS', ts: '2026-07-11T00:00:00Z', ...base }, lp);
+  rc.appendEntry({ ticket: 7777, kind: 'review', provider: 'mistral', family: 'mistral', verdict: 'PASS', ts: '2026-07-11T00:00:01Z', ...base }, lp);
+  const ledger = rc.readLedger(lp);
+  fs.unlinkSync(lp);
+  const genuine = [...S.ledgerReceiptSet(ledger)][0];
+  const body = VALID.replace(/cross_family_receipt: [0-9a-f]{16}/, `cross_family_receipt: ${genuine}`);
+  const out = S.validateStructure(body, { ledger });
   expect(out.ok).toBe(true);
   expect(out.violations).toEqual([]);
 });
