@@ -97,11 +97,23 @@ test('cursor baton-handoff.mdc adapter exists with EDD + COLLABORATOR schema', (
 });
 
 test('cursor fixture COLLABORATOR_HANDOFF passes collaborator-handoff gate', () => {
+  // #3678 (F1): a cited cross_family_receipt is ledger-verified. Build a genuine
+  // 2-family fixture ledger, cite its receipt in the fixture body, and inject it.
+  const rc = require(path.join(__dirname, '..', 'scripts', 'global', 'cross-family-receipt.js'));
+  const lp = path.join(os.tmpdir(), `xfr-cursor-${process.pid}-${Date.now()}.jsonl`);
+  const b = { prompt_sha256: 'p'.repeat(64), response_sha256: 'r'.repeat(64) };
+  rc.appendEntry({ ticket: 3673, kind: 'review', provider: 'groq', family: 'meta', verdict: 'PASS', ts: '2026-07-11T00:00:00Z', ...b }, lp);
+  rc.appendEntry({ ticket: 3673, kind: 'review', provider: 'mistral', family: 'mistral', verdict: 'PASS', ts: '2026-07-11T00:00:01Z', ...b }, lp);
+  const ledger = rc.readLedger(lp);
+  fs.unlinkSync(lp);
+  const genuine = rc.computeReceipt(ledger.filter((e) => e.ticket === 3673 && e.kind === 'review'));
+  const body = CURSOR_FIXTURE.COLLABORATOR_HANDOFF.replace(/cross_family_receipt: [0-9a-f]{16}/, `cross_family_receipt: ${genuine}`);
   const result = collabValidate({
     lane: 'lane:code-change',
     labels: CURSOR_FIXTURE.labels,
     branch: 'feat/3673-cursor-baton-parity',
-    comments: [{ body: CURSOR_FIXTURE.COLLABORATOR_HANDOFF, user: { login: 'cursor' } }],
+    comments: [{ body, user: { login: 'cursor' } }],
+    ledger,
   });
   const blocking = (result.violations || []).filter((v) => v.severity !== 'advisory');
   expect(blocking, JSON.stringify(blocking)).toHaveLength(0);
