@@ -62,3 +62,16 @@ npm run consensus:receipt-check   # ISSUE_NUMBER=N — same check CI runs
 Both receipts share one algorithm/format (`cross-family-receipt.js`, `RECEIPT_FIELD_RE`), one
 ledger, two `kind`s: `review` (collaborator preflight, #2904) and `merge-consensus` (this Admin
 authorization path).
+
+## Shift-left ledger verification of the collaborator receipt (#3678, F1 · Epic #3679)
+
+A cited `cross_family_receipt` on a COLLABORATOR_HANDOFF is now **ledger-verified at handoff-emission
+time**, not merely format-checked. The gate (`megalint/collaborator-handoff.js`) and the local
+self-check (`collaborator-handoff-schema.js`) share one rule, `receiptLedgerViolation`, which fails
+closed when the cited receipt is not `computeReceipt()` of a genuine ≥2-family ledger slice
+(`cross-family-receipt-unledgered`) or when the ledger chain is tampered
+(`cross-family-receipt-ledger-tampered`). This closes the root F1 hole from #3673 / PR #3677, where a
+fabricated 16-hex receipt passed the collaborator gate and was caught only later at merge. The full
+≥2-distinct-family / unanimous-PASS verification remains at the merge gate (`consensus-receipt-check.js`)
+as defense-in-depth; the shift-left check proves the receipt is *real*, the merge gate proves it is
+*sufficient*.

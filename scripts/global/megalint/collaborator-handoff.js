@@ -14,6 +14,9 @@ const { KNOWN_FAMILIES, extractAIFamily } = require('./signer-fidelity.js');
 // #3532 reconciliation: one shared receipt format for both the collaborator review
 // receipt (#2904, kind=review) and the admin merge-consensus receipt.
 const { RECEIPT_FIELD_RE } = require('../cross-family-receipt.js');
+// #3678 (F1, Epic #3679): ledger-verify a cited receipt at the server gate, reusing
+// the schema module's single-source rule so the gate and local self-check cannot drift.
+const { receiptLedgerViolation } = require('../collaborator-handoff-schema.js');
 // #2907: hard-gate promotion — require self-check evidence in COLLABORATOR_HANDOFF.
 const { checkHandoffHasVerification } = require('../collaborator-self-check.js');
 
@@ -47,7 +50,7 @@ function checkSignerFields(body) {
   return violations;
 }
 
-function checkCrossFamily(body) {
+function checkCrossFamily(body, opts = {}) {
   const violations = [];
   const block = s => ({ rule: `missing-${s}`, detail: `COLLABORATOR_HANDOFF missing ${s}: field` });
   if (!/cross_family_reviewer:/i.test(body)) violations.push(block('cross-family-reviewer'));
@@ -59,6 +62,10 @@ function checkCrossFamily(body) {
     violations.push({ rule: 'cross-family-receipt-format',
       detail: 'cross_family_receipt must be a 16-char hex sha256 prefix' });
   }
+  // #3678 (F1): a well-formed but FABRICATED receipt must fail closed here, not only
+  // at the merge gate. Ledger-membership check over committed evidence (no network).
+  const ledgerViol = receiptLedgerViolation(body, opts);
+  if (ledgerViol) violations.push({ rule: ledgerViol.rule, detail: ledgerViol.detail });
   const fm = (body || '').match(/reviewer_family\s*:\s*(\S+)/i);
   if (fm && !KNOWN_FAMILIES.includes(fm[1].toLowerCase())) {
     violations.push({ rule: 'unknown-reviewer-family',
@@ -131,7 +138,7 @@ function validate(input) {
   const violations = checkSignerFields(body);
   if (lane === 'lane:code-change') {
     violations.push(...docCoverageViolations(body, input.labels, input.comments, input.prFiles));
-    violations.push(...checkCrossFamily(body));
+    violations.push(...checkCrossFamily(body, { ledger: input.ledger, ledgerPath: input.ledgerPath }));
     violations.push(...wtGate.checkCollaborator(body, { ...input, lane }));
     // #2907: require self-check evidence block (Pre-handoff verification) in COLLABORATOR_HANDOFF.
     const selfCheck = checkHandoffHasVerification(body);

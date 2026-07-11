@@ -3,10 +3,21 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { validate } = require('../scripts/global/megalint/collaborator-handoff.js');
 const { checkBlock, parseDocBlock, loadMatrix } = require('../scripts/global/megalint/doc-coverage.js');
+// #3678 (F1, Epic #3679): cited receipts are ledger-verified. Genuine 2-family fixture.
+const rc = require('../scripts/global/cross-family-receipt.js');
+const os = require('os');
+const fs = require('fs');
+const _lpath = os.tmpdir() + `/xfr-dc-${process.pid}-${Date.now()}.jsonl`;
+const _b = { prompt_sha256: 'p'.repeat(64), response_sha256: 'r'.repeat(64) };
+rc.appendEntry({ ticket: 2424, kind: 'review', provider: 'groq', family: 'meta', verdict: 'PASS', ts: '2026-07-11T00:00:00Z', ..._b }, _lpath);
+rc.appendEntry({ ticket: 2424, kind: 'review', provider: 'mistral', family: 'mistral', verdict: 'PASS', ts: '2026-07-11T00:00:01Z', ..._b }, _lpath);
+const FIXTURE_LEDGER = rc.readLedger(_lpath);
+fs.unlinkSync(_lpath);
+const GENUINE_RECEIPT = rc.computeReceipt(FIXTURE_LEDGER.filter(e => e.ticket === 2424 && e.kind === 'review'));
 
 const VERIFICATION_BLOCK = 'Pre-handoff verification (PASS)\n- [x] `branch-name-prefix` — pass\n';
 const HANDOFF_SIGNED = (extra) =>
-  `## COLLABORATOR_HANDOFF\n${extra}\n${VERIFICATION_BLOCK}worktree_branch: feat/test\nworktree_behind_main: 0\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\ncross_family_receipt: 0123456789abcdef\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
+  `## COLLABORATOR_HANDOFF\n${extra}\n${VERIFICATION_BLOCK}worktree_branch: feat/test\nworktree_behind_main: 0\ncross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\ncross_family_rating: 82/100\ncross_family_findings: none\ncross_family_receipt: ${GENUINE_RECEIPT}\nreviewer_family: Qwen\nSigned-by: Alex Harper\nTeam&Model: copilot:sonnet@anthropic\nRole: collaborator\n`;
 
 test('validate: blocking when doc-coverage: block missing on lane:code-change with governance label', () => {
   const matrix = loadMatrix();
@@ -26,6 +37,7 @@ test('validate: passes when doc-coverage: block has required surfaces', () => {
   const result = validate({
     lane: 'lane:code-change', labels: ['area:governance'],
     comments: [{ body, user: { login: 'alex' } }],
+    ledger: FIXTURE_LEDGER, // #3678: deterministic ledger for receipt verification
   });
   assert.equal(result.ok, true, JSON.stringify(result.violations));
 });
