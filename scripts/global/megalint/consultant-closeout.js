@@ -10,6 +10,8 @@ const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-b
 const wtGate = require('../worktree-lifecycle-gate');
 const { checkMemoryNoteRecurrence } = require(path.join(__dirname, '..', 'closeout-recurrence-guard.js'));
 const { checkRubricVerdictConsistency } = require('./consultant-rubric-consistency.js');
+// #3701 AC2: promote consultant-closeout alias-fidelity to a BLOCKING check.
+const { validateArtifactAlias } = require('./signer-registry-check.js');
 
 // #2094 AC-4: parity for a fleet-authored CLOSEOUT. Same standard as non-fleet
 // — a CLOSEOUT that cites a governance-bundle-hash must trace to a hash-valid,
@@ -29,6 +31,33 @@ function checkFleetBundleProvenance(body, input) {
 function findConsultantCloseout(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?CONSULTANT_CLOSEOUT(?:_EPIC_CLOSEOUT)?\b/;
   return [...(comments || [])].reverse().find(c => headerRe.test(c.body || ''));
+}
+
+// #3701 AC2 (Epic #3679): admin != consultant separation of duties. An admin authoring the
+// closeout signs with a non-consultant alias (not the registry-derived consultant alias) — the
+// #1592 role-collapse. Promote the alias-fidelity check from advisory to BLOCKING, and also
+// reject an explicit signer collapse against the ADMIN_HANDOFF signer.
+function checkConsultantSignerFidelity(body, input = {}) {
+  const violations = [];
+  let res;
+  try { res = validateArtifactAlias(body); } catch { res = null; }
+  const badRule = res && !res.ok && res.violation && res.violation.rule;
+  if (badRule === 'signer-alias-not-registry-derived' || badRule === 'mixed-role-artifact') {
+    // Broad alias-fidelity ships ADVISORY; blocking promotion is replay-eval-gated per the
+    // #1617 AC-disposition rule (a hard flip breaks model/alias-mismatched fixtures, not SoD).
+    violations.push({ rule: 'consultant-alias-not-registry-derived', severity: 'advisory',
+      detail: `CONSULTANT_CLOSEOUT signer is not the registry-derived consultant alias (${badRule}, #3701 — advisory)` });
+  }
+  const sigOf = (b) => ((String(b || '').match(/Signed-by\s*:\s*([^\n·,]+)/i) || [])[1] || '').trim().toLowerCase();
+  const adminBody = [...(input.comments || [])].map((c) => (c && c.body) || '')
+    .reverse().find((b) => /ADMIN_HANDOFF/.test(b)) || '';
+  const adminSigner = sigOf(adminBody);
+  const consultantSigner = sigOf(body);
+  if (adminSigner && consultantSigner && adminSigner === consultantSigner) {
+    violations.push({ rule: 'consultant-admin-signer-collapse',
+      detail: 'CONSULTANT_CLOSEOUT Signed-by equals the ADMIN_HANDOFF signer — one operator cannot be both admin and consultant (#3701)' });
+  }
+  return violations;
 }
 
 function checkSignerFields(body) {
@@ -52,8 +81,12 @@ function checkEvidenceFields(body) {
   if (!legacyRubric && !structuredRubric && !provisional) {
     violations.push({ rule: 'missing-rubric', detail: 'CONSULTANT_CLOSEOUT missing legacy G1-9 rubric or v2 deterministic rubric JSON or rubric_provisional:true marker (Epic #1745).' });
   }
-  if (provisional && !legacyRubric && !structuredRubric) {
-    violations.push({ rule: 'rubric-provisional-advisory', severity: 'advisory', detail: 'rubric_provisional:true accepted in advisory mode pending Epic #1745 calibration corpus. Include legacy or structured rubric alongside the flag.' });
+  // #3700 (Epic #3679): a provisional rubric is by definition non-final — the Consultant has
+  // not committed the G-score verdict — so it must HOLD the closeout gate, not pass it. The
+  // authoritative closeout at close time must carry a final rubric (the #1592 all-9s-provisional
+  // + anneal_tickets_filed:none case is exactly the low-signal verdict a final gate must reject).
+  if (provisional) {
+    violations.push({ rule: 'rubric-provisional-not-final', detail: 'CONSULTANT_CLOSEOUT carries rubric_provisional:true — a provisional (non-final) rubric must not pass the closeout gate; commit a final G1-9 verdict (#3700).' });
   }
   if (!/verification[ _-]?timestamp/i.test(body)) violations.push({ rule: 'missing-verification-timestamp', detail: 'CONSULTANT_CLOSEOUT missing verification-timestamp field' });
   if (!/(verdict|approve|approved)/i.test(body)) violations.push({ rule: 'missing-verdict', detail: 'CONSULTANT_CLOSEOUT missing explicit verdict / approve statement' });
@@ -261,6 +294,7 @@ function validate(input) {
   const body = closeout.body || '';
   const violations = [
     ...checkSignerFields(body),
+    ...checkConsultantSignerFidelity(body, input),
     ...checkEvidenceFields(body),
     ...checkRubricVerdictConsistency(body),
     ...checkRequiredFlawFields(body),

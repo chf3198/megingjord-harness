@@ -212,26 +212,22 @@ test('MUTATION: validate() ok:false when both flaw fields absent', () => {
 });
 
 test('advisory-only violations do not flip ok to false', () => {
-  // rubric_provisional + no structured rubric = advisory only; flaw fields present.
-  const body = [
-    'CONSULTANT_CLOSEOUT',
-    'verdict: approve_for_merge',
-    'rubric_provisional: true',
-    'G1: 8',
-    'verification-timestamp: 2026-06-14T12:00:00Z',
-    'Signed-by: Orla Vale',
-    'Team&Model: claude-code:claude-sonnet-4-6@anthropic',
-    'Role: consultant',
-    'anneal_tickets_filed: none',
-    'mid_flight_flaws: none',
-    'worktree_residual_risk: none',
-  ].join('\n');
-  const result = validate({ comments: makeComments(body) });
+  // A full rubric + only an advisory (cross_family_verdict missing) must keep ok:true.
+  // (#3700: rubric_provisional is no longer an advisory — it is now blocking; see below.)
+  const result = validate({ comments: makeComments(minimalBody()) });
   const hardViols = (result.violations || []).filter(v => v.severity !== 'advisory');
   assert.strictEqual(hardViols.length, 0,
     `unexpected hard violations: ${hardViols.map(v => v.rule).join(', ')}`);
   assert.strictEqual(result.ok, true,
     'advisory-only violations must not set ok:false');
+});
+
+test('#3700: a rubric_provisional:true closeout is BLOCKING (non-final rubric must not pass)', () => {
+  const body = minimalBody().replace(/G1: 8[^\n]*/, 'rubric_provisional: true');
+  const result = validate({ comments: makeComments(body) });
+  const rules = (result.violations || []).map(v => v.rule);
+  assert.ok(rules.includes('rubric-provisional-not-final'), `expected rubric-provisional-not-final: [${rules.join(', ')}]`);
+  assert.strictEqual(result.ok, false, 'a provisional (non-final) rubric must not pass the closeout gate');
 });
 
 // ---------------------------------------------------------------------------
@@ -254,4 +250,22 @@ test('batch-sibling closeout form still satisfies flaw fields if declared', () =
   ].join('\n');
   const viols = checkRequiredFlawFields(body);
   assert.strictEqual(viols.length, 0, 'batch sibling with flaw fields declared → no flaw violations');
+});
+
+test('#3701 AC2: admin==consultant signer collapse is BLOCKING', () => {
+  const admin = '## ADMIN_HANDOFF\nbranch: x\ncommit: y\nsigner-independence-check: PASS\nSigned-by: Orla Reyes\nTeam&Model: claude-code:claude-opus-4-8@anthropic\nRole: admin';
+  const closeout = minimalBody().replace('Signed-by: Orla Vale', 'Signed-by: Orla Reyes')
+    .replace('claude-sonnet-4-6', 'claude-opus-4-8');
+  const result = validate({ comments: [{ body: admin }, { body: closeout }] });
+  const rules = (result.violations || []).map(v => v.rule);
+  assert.ok(rules.includes('consultant-admin-signer-collapse'), `expected collapse: [${rules.join(', ')}]`);
+  assert.strictEqual(result.ok, false, 'one operator cannot be both admin and consultant');
+});
+
+test('#3701 AC2: distinct admin/consultant signers pass (no false positive)', () => {
+  const admin = '## ADMIN_HANDOFF\nSigned-by: Orla Reyes\nTeam&Model: claude-code:claude-opus-4-8@anthropic\nRole: admin';
+  const closeout = minimalBody().replace('claude-sonnet-4-6', 'claude-opus-4-8'); // Signed-by: Orla Vale
+  const result = validate({ comments: [{ body: admin }, { body: closeout }] });
+  const rules = (result.violations || []).map(v => v.rule);
+  assert.ok(!rules.includes('consultant-admin-signer-collapse'), 'distinct signers must not collapse');
 });
