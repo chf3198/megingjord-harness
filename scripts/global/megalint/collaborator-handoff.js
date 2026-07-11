@@ -66,6 +66,13 @@ function checkCrossFamily(body, opts = {}) {
   // at the merge gate. Ledger-membership check over committed evidence (no network).
   const ledgerViol = receiptLedgerViolation(body, opts);
   if (ledgerViol) violations.push({ rule: ledgerViol.rule, detail: ledgerViol.detail });
+  violations.push(...checkReviewerFamily(body));
+  return violations;
+}
+
+// reviewer_family recognition + Collaborator/reviewer same-family independence check.
+function checkReviewerFamily(body) {
+  const violations = [];
   const fm = (body || '').match(/reviewer_family\s*:\s*(\S+)/i);
   if (fm && !KNOWN_FAMILIES.includes(fm[1].toLowerCase())) {
     violations.push({ rule: 'unknown-reviewer-family',
