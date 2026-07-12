@@ -36,8 +36,16 @@ test('AC2 sufficiency: trivial/empty content is not a citation', async () => {
 });
 
 test('AC4 fail-safe: no api key returns null, never throws', async () => {
-  const g = await G.produceGrounding('q', { apiKey: '', fetchImpl: fakeFetch(OK) });
-  assert.equal(g, null);
+  // Deterministically remove the key (env may be hydrated from .env in a combined run / CI secret).
+  const saved = process.env.TAVILY_API_KEY; const savedNo = process.env.MEGINGJORD_NO_DOTENV;
+  delete process.env.TAVILY_API_KEY; process.env.MEGINGJORD_NO_DOTENV = '1';
+  try {
+    const g = await G.produceGrounding('q', { apiKey: '', fetchImpl: fakeFetch(OK) });
+    assert.equal(g, null);
+  } finally {
+    if (saved === undefined) delete process.env.TAVILY_API_KEY; else process.env.TAVILY_API_KEY = saved;
+    if (savedNo === undefined) delete process.env.MEGINGJORD_NO_DOTENV; else process.env.MEGINGJORD_NO_DOTENV = savedNo;
+  }
 });
 
 test('AC4 fail-safe: fetch throwing (outage) returns null, never throws', async () => {
