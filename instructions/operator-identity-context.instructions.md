@@ -46,3 +46,18 @@ Guest-Collaborator is reserved but not active.
 When reading baton artifacts: "operator" in prose refers to the AI agent entity,
 never to a baton-step role. Use the exact role name (e.g. "the admin role") when
 referring to a specific baton position.
+
+## Self-posting the approving CONSULTANT_CLOSEOUT is autonomously-resolvable (#3714)
+
+The operator owns all four baton roles (rule 1), so it authors the Consultant's
+`CONSULTANT_CLOSEOUT` itself. When that closeout carries a valid `cross_family_verdict`
+backed by a **verified** cross-family consensus receipt (`governance/cross-family-consensus.jsonl`,
+>=2 non-authoring families each able to REJECT), independence is satisfied by the receipt —
+**not** by asking the client. "May I self-post the approving closeout?" is therefore a
+**routine, autonomously-resolvable** decision (route the legitimacy question to the free
+cross-family panel / `fleet-decision-oracle`), NOT a design/UAT/irreversible/security-weakening
+carve-out. Escalating it to the client is the exact rule-2/rule-3 violation captured in the
+#1889 incident. A same-family closeout with **no** verified receipt still blocks
+(anti-self-approval preserved). Full contract: `feature-completion-governance.instructions.md`
+§"Self-posted CONSULTANT_CLOSEOUT — decision routing (#3714)".
+
