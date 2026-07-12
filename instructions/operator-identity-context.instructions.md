@@ -56,8 +56,6 @@ backed by a **verified** cross-family consensus receipt (`governance/cross-famil
 **not** by asking the client. "May I self-post the approving closeout?" is therefore a
 **routine, autonomously-resolvable** decision (route the legitimacy question to the free
 cross-family panel / `fleet-decision-oracle`), NOT a design/UAT/irreversible/security-weakening
-carve-out. Escalating it to the client is the exact rule-2/rule-3 violation captured in the
-#1889 incident. A same-family closeout with **no** verified receipt still blocks
+carve-out. Escalating it to the client is the exact rule-2/rule-3 violation captured in the #1889 incident. A same-family closeout with **no** verified receipt still blocks
 (anti-self-approval preserved). Full contract: `feature-completion-governance.instructions.md`
 §"Self-posted CONSULTANT_CLOSEOUT — decision routing (#3714)".
-
