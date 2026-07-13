@@ -48,6 +48,7 @@
     { "name": "area:skills",      "color": "1d76db", "description": "Copilot skills",                         "group": "area" },
 
     { "name": "lane:code-change",        "color": "0052cc", "description": "Full 4-role baton (code, deploy, infra)",             "group": "lane" },
+    { "name": "lane:security-surface",   "color": "b60205", "description": "Full 4-role baton + dark-launch verify-then-flip (security surfaces)","group": "lane" },
     { "name": "lane:config-only",        "color": "e4e669", "description": "Reduced baton: Admin+Consultant only (trivial config)","group": "lane" },
     { "name": "lane:docs-research",      "color": "5319e7", "description": "Reduced baton: Manager+Consultant only (docs/research)","group": "lane" },
     { "name": "lane:no-code-remediation","color": "e4e669", "description": "Issue-only drift normalization; no repo edits",        "group": "lane" },

@@ -279,7 +279,7 @@ this section only *describes* it (G8) — it does not carry the rule.
 
 Required fields on every `MANAGER_HANDOFF` comment:
 - `scope:` — what changes
-- `lane:` — `lane:code-change | lane:docs-research | lane:config-only | lane:no-code-remediation | lane:trivial`
+- `lane:` — `lane:code-change | lane:security-surface | lane:docs-research | lane:config-only | lane:no-code-remediation | lane:trivial`
 - `test_strategy:` — one of `tdd-pyramid | tdd-trophy | contract-test | golden-file | eval-harness | visual-regression | drift-lint | peer-review | manual-verify | none`
 - `acceptance:` — AC checklist
 - `gates:` — CI/governance gates that must pass
