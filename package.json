@@ -389,7 +389,8 @@
     "fleet-advisor:throughput-bench": "node --test tests/fleet-advisor-throughput-contract.spec.js",
     "fleet-advisor:report": "node scripts/global/fleet-advisor-report.js",
     "fleet-advisor:contract:test": "node --test tests/fleet-advisor-report.spec.js tests/fleet-advisor-report-contract.spec.js",
-    "fixtures:regen:cursor": "node scripts/global/fixtures-regen-cursor.js"
+    "fixtures:regen:cursor": "node scripts/global/fixtures-regen-cursor.js",
+    "stuck-state:replay-eval": "node scripts/global/stuck-state-replay-eval.js"
   },
   "keywords": [
     "devops",

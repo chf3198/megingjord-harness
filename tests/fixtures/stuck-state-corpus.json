@@ -1,0 +1,22 @@
+{
+  "schema": "stuck-state-corpus-v1",
+  "note": "Labeled corpus for #3748 replay-eval (bounds the false-positive rate; gates advisory->blocking at precision>=0.85). label=stuck means the detector SHOULD fire.",
+  "samples": [
+    {"id": "loop-3x", "label": "stuck", "signals": {"invocations": [{"tool": "Bash", "command": "npm test"}, {"tool": "Bash", "command": "npm test"}, {"tool": "Bash", "command": "npm test"}]}},
+    {"id": "loop-2x-below", "label": "not-stuck", "signals": {"invocations": [{"tool": "Bash", "command": "npm test"}, {"tool": "Bash", "command": "npm test"}]}},
+    {"id": "iteration-cap", "label": "stuck", "signals": {"iterationCount": 25}},
+    {"id": "iteration-under", "label": "not-stuck", "signals": {"iterationCount": 19}},
+    {"id": "token-cap", "label": "stuck", "signals": {"tokenBudgetFraction": 1.0}},
+    {"id": "token-under", "label": "not-stuck", "signals": {"tokenBudgetFraction": 0.7}},
+    {"id": "error-burst", "label": "stuck", "signals": {"toolErrorCount": 3}},
+    {"id": "error-single", "label": "not-stuck", "signals": {"toolErrorCount": 1}},
+    {"id": "divergence-high", "label": "stuck", "signals": {"sampledResolutions": ["A", "B", "C", "A"]}},
+    {"id": "divergence-consensus", "label": "not-stuck", "signals": {"sampledResolutions": ["A", "A", "A", "A"]}},
+    {"id": "explicit-stuck-pr", "label": "stuck", "signals": {"explicit": "stuck-pr"}},
+    {"id": "explicit-ambiguous-gate", "label": "stuck", "signals": {"explicit": "ambiguous-gate"}},
+    {"id": "explicit-novel-failure", "label": "stuck", "signals": {"explicit": "novel-failure"}},
+    {"id": "high-confidence-not-stuck", "label": "not-stuck", "signals": {"confidence": 0.99, "iterationCount": 3, "toolErrorCount": 0}},
+    {"id": "empty", "label": "not-stuck", "signals": {}},
+    {"id": "single-diverge-too-few", "label": "not-stuck", "signals": {"sampledResolutions": ["A"]}}
+  ]
+}
