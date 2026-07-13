@@ -42,13 +42,6 @@ function pageBody(result) {
   }
 }
 
-/**
- * Ground a critique artifact on retrieved wiki context + measure the token-cost reduction.
- * @param {string} artifact
- * @param {{topN?:number, queryClass?:string, wikiDir?:string, nowMs?:number}} [opts]
- * @returns {{groundingText:string, pages:Array, tokenCost:{baseline_tokens:number,
- *   retrieval_tokens:number, reduction_ratio:number, candidate_count:number, retrieved_count:number}, surface:string}}
- */
 // Token-cost of grounding: baseline = load EVERY candidate page (no-retrieval naive path),
 // retrieval = the top-N grounding excerpts only. Returns the grounding text + the cost record.
 function measureGrounding(results, candidateCount) {
@@ -69,6 +62,13 @@ function measureGrounding(results, candidateCount) {
   };
 }
 
+/**
+ * Ground a critique artifact on retrieved wiki context + measure the token-cost reduction.
+ * @param {string} artifact - the critique artifact whose text seeds the retrieval query
+ * @param {{topN?:number, queryClass?:string, wikiDir?:string, nowMs?:number}} [opts]
+ * @returns {{groundingText:string, pages:Array, surface:string, tokenCost:{baseline_tokens:number,
+ *   retrieval_tokens:number, reduction_ratio:number, candidate_count:number, retrieved_count:number}}}
+ */
 function groundArtifact(artifact, opts = {}) {
   const topN = opts.topN || DEFAULT_TOP_N;
   const queryClass = opts.queryClass || 'synthesis'; // wisdom-{global,project}: governance/research grounding
