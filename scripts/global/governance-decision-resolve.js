@@ -11,19 +11,30 @@ const TRANSITIONS = Object.freeze([
 ]);
 const STATUSES = new Set(['pass', 'fail', 'skip']);
 
-// Resolve the check-set NAME + ordered ids for (transition, lane). lane_overrides are
-// keyed `lane:<name>`; context.lane is the bare name. Fail-closed on unknown transition/set.
+/**
+ * Resolve the check-set NAME + ordered ids for (transition, lane). lane_overrides are
+ * keyed `lane:<name>`; context.lane is the bare name. Fail-closed on unknown transition/set.
+ * @param {object} policy - The governance decision policy.
+ * @param {string} transition - Baton transition key.
+ * @param {string} lane - Bare lane name (e.g. 'code-change').
+ * @returns {object} {name, ids[]} or {error, ...} on failure.
+ */
 function resolveCheckSet(policy, transition, lane) {
-  const t = policy && policy.transitions && policy.transitions[transition];
-  if (!t) return { error: 'unknown-transition', transition };
-  const name = (t.lane_overrides && t.lane_overrides[`lane:${lane}`]) || t.default_check_set;
+  const trans = policy && policy.transitions && policy.transitions[transition];
+  if (!trans) return { error: 'unknown-transition', transition };
+  const name = (trans.lane_overrides && trans.lane_overrides[`lane:${lane}`]) || trans.default_check_set;
   const ids = policy.check_sets && policy.check_sets[name];
   if (!Array.isArray(ids)) return { error: 'unknown-check-set', name };
   return { name, ids: ids.slice() };
 }
 
-// Ordered ids + runtime profile => [{id, blocking, skipped}]. all_checks_blocking (ci)
-// overrides the advisory_after downgrade; skip removes a check from execution.
+/**
+ * Apply a runtime profile to ordered check ids. all_checks_blocking (ci) overrides the
+ * advisory_after downgrade; skip removes a check from execution.
+ * @param {string[]} ids - Ordered check ids from the resolved set.
+ * @param {object} [profile] - {skip[], advisory_after[], all_checks_blocking}.
+ * @returns {Array<{id:string, blocking:boolean, skipped:boolean}>} Per-check execution plan.
+ */
 function applyProfile(ids, profile = {}) {
   const skip = new Set(profile.skip || []);
   const boundaries = (profile.advisory_after || []).map((b) => ids.indexOf(b)).filter((i) => i >= 0);
@@ -35,22 +46,31 @@ function applyProfile(ids, profile = {}) {
   });
 }
 
-// Normalize a raw input value to {status,reason,evidence_ref}, or null if unrecognized.
-// Accepts boolean, a bare status string, or a {status,reason,evidence_ref} object.
-function normStatus(v) {
-  if (typeof v === 'boolean') return { status: v ? 'pass' : 'fail', reason: null, evidence_ref: null };
-  if (typeof v === 'string' && STATUSES.has(v)) return { status: v, reason: null, evidence_ref: null };
-  if (v && typeof v === 'object' && STATUSES.has(v.status)) {
-    return { status: v.status, reason: v.reason || null, evidence_ref: v.evidence_ref || null };
+/**
+ * Normalize a raw input value to {status,reason,evidence_ref}, or null if unrecognized.
+ * Accepts boolean, a bare status string, or a {status,reason,evidence_ref} object.
+ * @param {*} v - Raw per-check input from context.inputs.
+ * @returns {?object} {status,reason,evidence_ref} or null when unrecognized.
+ */
+function normStatus(value) {
+  if (typeof value === 'boolean') return { status: value ? 'pass' : 'fail', reason: null, evidence_ref: null };
+  if (typeof value === 'string' && STATUSES.has(value)) return { status: value, reason: null, evidence_ref: null };
+  if (value && typeof value === 'object' && STATUSES.has(value.status)) {
+    return { status: value.status, reason: value.reason || null, evidence_ref: value.evidence_ref || null };
   }
   return null;
 }
 
-// Default fail-closed check: read context.inputs[id]. Missing/garbage => fail (consensus Q1=B).
+/**
+ * Default fail-closed check: read context.inputs[id]. Missing/garbage => fail (consensus Q1=B).
+ * @param {object} context - The evaluation context (uses context.inputs).
+ * @param {string} id - The check id to resolve.
+ * @returns {{id:string, status:string, reason:?string, evidence_ref:?string}} CheckResult.
+ */
 function defaultCheck(context, id) {
-  const v = context && context.inputs ? context.inputs[id] : undefined;
-  if (v === undefined) return { id, status: 'fail', reason: 'missing-input', evidence_ref: null };
-  const norm = normStatus(v);
+  const raw = context && context.inputs ? context.inputs[id] : undefined;
+  if (raw === undefined) return { id, status: 'fail', reason: 'missing-input', evidence_ref: null };
+  const norm = normStatus(raw);
   return norm ? { id, ...norm } : { id, status: 'fail', reason: 'unrecognized-input', evidence_ref: null };
 }
 
