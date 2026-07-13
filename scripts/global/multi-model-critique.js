@@ -7,6 +7,10 @@
 
 const fs = require('node:fs');
 const { fleetCall } = require('./fleet-via-hamr.js');
+// #3761 (Epic #3719): wiki-retrieval grounding for the Consultant pre-critique. Grounds the
+// critique on the top-N relevant wiki pages (plaintext) instead of the whole store + records
+// the measured token-cost reduction (G3). Optional/backward-compatible.
+const { groundArtifact, recordReduction } = require('../wiki/retrieval-baton.js');
 
 const DEFAULT_TIMEOUT_MS = 240000;
 const DEFAULT_RAW_CAP = 2000;
@@ -29,8 +33,15 @@ OVERALL: <one sentence verdict>
 ARTIFACT:
 {{ARTIFACT}}`;
 
-function buildPrompt(artifact) {
-  return PROMPT_TEMPLATE.replace('{{ARTIFACT}}', String(artifact || '').slice(0, ARTIFACT_CHAR_CAP));
+// #3761: `grounding` (optional) prepends retrieved wiki context so the critic is grounded on the
+// harness's own knowledge without loading the whole store. Backward-compatible: omitted → no block.
+function buildPrompt(artifact, grounding) {
+  const groundBlock = grounding && grounding.groundingText
+    ? `RELEVANT WIKI CONTEXT (retrieved; ${grounding.tokenCost.retrieved_count} of `
+      + `${grounding.tokenCost.candidate_count} pages, ${Math.round(grounding.tokenCost.reduction_ratio * 100)}% `
+      + `fewer tokens than loading the whole store):\n${grounding.groundingText}\n\n`
+    : '';
+  return groundBlock + PROMPT_TEMPLATE.replace('{{ARTIFACT}}', String(artifact || '').slice(0, ARTIFACT_CHAR_CAP));
 }
 
 async function critiqueOne(model, prompt, opts = {}) {
@@ -48,11 +59,21 @@ async function critiqueOne(model, prompt, opts = {}) {
 }
 
 async function critique(artifact, opts = {}) {
-  const prompt = buildPrompt(artifact);
+  // #3761: ground on retrieved wiki context by default (opts.ground === false opts out) + record
+  // the measured token-cost reduction (G3). Grounding failures degrade to an ungrounded critique.
+  let grounding = null;
+  if (opts.ground !== false) {
+    try {
+      grounding = groundArtifact(artifact, opts.groundOpts || {});
+      if (opts.recordReduction !== false) recordReduction(grounding);
+    } catch { grounding = null; }
+  }
+  const prompt = buildPrompt(artifact, grounding);
   const models = opts.models || MODELS;
   const results = await Promise.all(models.map(model => critiqueOne(model, prompt, opts)));
   return { artifact_chars: String(artifact || '').length, models: results.length,
-    families: [...new Set(results.map(r => r.family))], results };
+    families: [...new Set(results.map(r => r.family))], results,
+    grounding: grounding ? { pages: grounding.pages, tokenCost: grounding.tokenCost } : null };
 }
 
 if (require.main === module) {
