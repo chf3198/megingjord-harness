@@ -19,6 +19,7 @@ from stop_checks import (
     check_admin_ops, check_uncommitted, post_merge_messages, wiki_pending_message,
 )
 from client_arbitration_guard import (
+    adjudication_redirect,
     classify_internal_conflict,
     detect_client_arbitration,
     emit_incident,
@@ -57,12 +58,17 @@ def main() -> int:
     assistant_text = extract_assistant_text(payload)
     violations = detect_client_arbitration(assistant_text)
     if violations:
-        emit_incident("client-arbitration-output-leak", evidence=violations)
-        block_reason = "Stop blocked: client-arbitration leakage detected."
-        messages.append(
-            "CLIENT-ARBITRATION GUARDRAIL BLOCK — internal governance/worktree/team "
-            "conflicts must be resolved by the operator, not delegated to the client."
+        # #3749: ACTIVELY redirect a non-carve-out client-defer into the free
+        # cross-model panel instead of only logging a passive block.
+        redirect = adjudication_redirect(assistant_text, violations)
+        emit_incident(
+            "client-defer-routed-to-adjudication",
+            evidence=[redirect["subclass"], *violations],
         )
+        block_reason = (
+            "Stop blocked: non-carve-out client-defer — route to cross-model adjudication."
+        )
+        messages.append("CLIENT-DEFER GUARDRAIL — " + redirect["directive"])
 
     if not block_reason:
         block_reason, msg = check_uncommitted(uncommitted, roles)

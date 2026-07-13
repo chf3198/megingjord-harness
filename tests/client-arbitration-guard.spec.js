@@ -29,3 +29,14 @@ test('guard allows design-direction prompts', () => {
   ].join(';'));
   assert.strictEqual(out, '[]');
 });
+
+// #3749: broadened detection catches a non-conflict-keyworded defer the old narrow guard missed.
+test('guard flags a non-conflict client-defer (broadened #3749)', () => {
+  const out = runPython([
+    'import sys, json',
+    "sys.path.insert(0, 'hooks/scripts')",
+    'import client_arbitration_guard as g',
+    "print(json.dumps(g.detect_client_arbitration('Two viable approaches here. What should I do next?')))"
+  ].join(';'));
+  assert.match(out, /delegated-internal-conflict-decision-to-client/);
+});
