@@ -21,17 +21,17 @@ const PROOF_LOG = path.resolve(__dirname, '../../governance/wiki-sustained-proof
  * @returns {{sustained: boolean, recorded: number, needed: number, trailingPassing: number, anyFailingInWindow: boolean}}
  */
 function checkSustained(cycles, opts = {}) {
-  const n = opts.n || N_CYCLES;
+  const windowSize = opts.n || N_CYCLES;
   const floor = opts.coverageFloor ?? COVERAGE_FLOOR;
   const ceil = opts.stalenessCeil ?? STALE_CEILING;
   const list = Array.isArray(cycles) ? cycles : [];
   const passes = (c) => c && c.coverage_ratio >= floor && c.stale_ratio <= ceil;
-  const window = list.slice(-n);
+  const window = list.slice(-windowSize);
   let trailing = 0;
   for (let i = list.length - 1; i >= 0 && passes(list[i]); i--) trailing += 1;
   return {
-    sustained: list.length >= n && window.every(passes),
-    recorded: list.length, needed: n, trailingPassing: trailing,
+    sustained: list.length >= windowSize && window.every(passes),
+    recorded: list.length, needed: windowSize, trailingPassing: trailing,
     anyFailingInWindow: window.length > 0 && !window.every(passes),
   };
 }
@@ -40,10 +40,10 @@ function measureCycle(nowMs) {
   const wikiPath = ensureMirrorCache(); // fresh wiki-mirror surface (or null → local fallback)
   const base = wikiPath || path.resolve(__dirname, '../../wiki');
   const wlDirs = [path.join(base, 'work-log', 'tickets'), path.join(base, 'work-log', 'prs')];
-  const h = computeStoreHealth('B', { wlDirs, nowMs });
+  const health = computeStoreHealth('B', { wlDirs, nowMs });
   return {
-    coverage_ratio: h.coverage_ratio, stale_ratio: h.stale_ratio, entry_count: h.entry_count,
-    surface: wikiPath ? 'wiki-mirror' : 'local', ok: h.coverage_ratio >= COVERAGE_FLOOR && h.stale_ratio <= STALE_CEILING,
+    coverage_ratio: health.coverage_ratio, stale_ratio: health.stale_ratio, entry_count: health.entry_count,
+    surface: wikiPath ? 'wiki-mirror' : 'local', ok: health.coverage_ratio >= COVERAGE_FLOOR && health.stale_ratio <= STALE_CEILING,
   };
 }
 
