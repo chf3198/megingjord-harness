@@ -13,6 +13,8 @@ const { ensureMirrorCache } = require('./mirror-source');
 
 const DEFAULT_TOP_N = 5;
 const GROUNDING_CHAR_CAP = 1200; // per-page excerpt cap in the grounding block
+const QUERY_HEAD_CHARS = 400; // artifact-head window folded into the retrieval query
+const QUERY_MAX_CHARS = 500; // total retrieval-query cap
 const EVENTS_LOG = path.resolve(__dirname, '../../dashboard/events.jsonl');
 
 // Harness-documented estimator convention (~4 chars/token); the reduction RATIO is
@@ -25,8 +27,8 @@ function estimateTokens(text) {
 function deriveQuery(artifact) {
   const text = String(artifact || '');
   const heading = (text.match(/^#{1,3}\s+(.+)$/m) || [])[1] || '';
-  const head = text.slice(0, 400).replace(/\s+/g, ' ').trim();
-  return `${heading} ${head}`.trim().slice(0, 500);
+  const head = text.slice(0, QUERY_HEAD_CHARS).replace(/\s+/g, ' ').trim();
+  return `${heading} ${head}`.trim().slice(0, QUERY_MAX_CHARS);
 }
 
 // Plaintext consumption path: read the retrieved page file at its path and strip frontmatter.
@@ -47,38 +49,40 @@ function pageBody(result) {
  * @returns {{groundingText:string, pages:Array, tokenCost:{baseline_tokens:number,
  *   retrieval_tokens:number, reduction_ratio:number, candidate_count:number, retrieved_count:number}, surface:string}}
  */
-function groundArtifact(artifact, opts = {}) {
-  const topN = opts.topN || DEFAULT_TOP_N;
-  const queryClass = opts.queryClass || 'synthesis'; // wisdom-{global,project}: governance/research grounding
-  const mirror = opts.wikiDir || ensureMirrorCache();
-  const wikiDir = mirror ? (fs.existsSync(path.join(mirror, 'wiki')) ? path.join(mirror, 'wiki') : mirror) : undefined;
-  const query = deriveQuery(artifact);
-
-  let routed;
-  try { routed = route({ query, queryClass, topN, wikiDir }); }
-  catch { routed = { results: [], telemetry: { candidate_count: 0 } }; }
-  const results = routed.results || [];
-
-  // baseline = load EVERY candidate page for this query class (no-retrieval naive path).
-  const candidateCount = (routed.telemetry && routed.telemetry.candidate_count) || results.length;
+// Token-cost of grounding: baseline = load EVERY candidate page (no-retrieval naive path),
+// retrieval = the top-N grounding excerpts only. Returns the grounding text + the cost record.
+function measureGrounding(results, candidateCount) {
   const perPageBaseline = results.length
     ? Math.round(results.reduce((sum, r) => sum + estimateTokens(pageBody(r)), 0) / results.length)
     : 0;
   const baselineTokens = perPageBaseline * candidateCount;
-
-  const excerpts = results.map((r) => `### ${r.slug}\n${pageBody(r).slice(0, GROUNDING_CHAR_CAP)}`);
-  const groundingText = excerpts.join('\n\n');
+  const groundingText = results.map((r) => `### ${r.slug}\n${pageBody(r).slice(0, GROUNDING_CHAR_CAP)}`).join('\n\n');
   const retrievalTokens = estimateTokens(groundingText);
   const reduction = baselineTokens > 0 ? (baselineTokens - retrievalTokens) / baselineTokens : 0;
-
   return {
-    groundingText, pages: results.map((r) => ({ slug: r.slug, path: r.path, score: r.score })),
-    surface: mirror ? 'wiki-mirror' : 'local',
+    groundingText,
     tokenCost: {
       baseline_tokens: baselineTokens, retrieval_tokens: retrievalTokens,
       reduction_ratio: Math.max(0, Math.round(reduction * 1000) / 1000),
       candidate_count: candidateCount, retrieved_count: results.length,
     },
+  };
+}
+
+function groundArtifact(artifact, opts = {}) {
+  const topN = opts.topN || DEFAULT_TOP_N;
+  const queryClass = opts.queryClass || 'synthesis'; // wisdom-{global,project}: governance/research grounding
+  const mirror = opts.wikiDir || ensureMirrorCache();
+  const wikiDir = mirror ? (fs.existsSync(path.join(mirror, 'wiki')) ? path.join(mirror, 'wiki') : mirror) : undefined;
+  let routed;
+  try { routed = route({ query: deriveQuery(artifact), queryClass, topN, wikiDir }); }
+  catch { routed = { results: [], telemetry: { candidate_count: 0 } }; }
+  const results = routed.results || [];
+  const candidateCount = (routed.telemetry && routed.telemetry.candidate_count) || results.length;
+  const { groundingText, tokenCost } = measureGrounding(results, candidateCount);
+  return {
+    groundingText, tokenCost, surface: mirror ? 'wiki-mirror' : 'local',
+    pages: results.map((r) => ({ slug: r.slug, path: r.path, score: r.score })),
   };
 }
 
