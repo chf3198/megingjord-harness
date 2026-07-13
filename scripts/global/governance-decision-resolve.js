@@ -49,7 +49,7 @@ function applyProfile(ids, profile = {}) {
 /**
  * Normalize a raw input value to {status,reason,evidence_ref}, or null if unrecognized.
  * Accepts boolean, a bare status string, or a {status,reason,evidence_ref} object.
- * @param {*} v - Raw per-check input from context.inputs.
+ * @param {*} value - Raw per-check input from context.inputs.
  * @returns {?object} {status,reason,evidence_ref} or null when unrecognized.
  */
 function normStatus(value) {
