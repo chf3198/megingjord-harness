@@ -1,0 +1,54 @@
+# wiki-sustained-proof.yml — the Epic #3719 capstone proof loop (#3765). Each cycle it measures the FRESH
+# wiki-mirror work-log health (coverage>=0.95 & staleness<=0.10), appends a record to the committed
+# non-gitignored proof-log (persisted on the wiki-mirror branch so it accrues across runs), and asserts the
+# last N=5 cycles all hold. A FAILING cycle (real upkeep regression) hard-fails + files a deduped durable
+# issue. N=5 is a replay-eval count that accrues over cycles (anti-calendar) — not a wall-clock window.
+name: wiki-sustained-proof
+
+on:
+  schedule:
+    - cron: '45 8 * * *' # daily, after the 07:30 reconcile
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+
+concurrency:
+  group: wiki-sustained-proof
+  cancel-in-progress: false
+
+jobs:
+  proof:
+    name: sustained-proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Restore the accrued proof-log from wiki-mirror (accrual across cycles)
+        run: |
+          git fetch --quiet origin wiki-mirror:refs/remotes/origin/wiki-mirror || true
+          git show origin/wiki-mirror:governance/wiki-sustained-proof.jsonl > governance/wiki-sustained-proof.jsonl 2>/dev/null || true
+      - name: Measure the cycle, assert sustained, self-alert on a failing cycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/wiki/sustained-proof.js
+      - name: Persist the updated proof-log to wiki-mirror (non-protected)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add governance/wiki-sustained-proof.jsonl
+          git diff --cached --quiet && exit 0
+          git commit --no-verify -m "chore(it-ops): wiki sustained-proof cycle [skip ci]" -m "Refs #3765"
+          git push --no-verify --force origin HEAD:refs/heads/wiki-mirror
