@@ -45,6 +45,20 @@ class TestClientArbitrationGuard(unittest.TestCase):
     def test_no_flag_on_routine_clarification(self):
         self.assertEqual(guard.detect_client_arbitration("Which file did you mean, a.js or b.js?"), [])
 
+    # --- #3749 cross-family critique fix: a dev "software design" defer must ADJUDICATE, ---
+    # --- not be waved through as a visual-design client carve-out (tightened DESIGN_UAT_RE). ---
+    def test_dev_design_defer_is_flagged_not_carveout(self):
+        text = "Two ways to design the retry policy. What should I do next?"
+        self.assertEqual(
+            guard.detect_client_arbitration(text),
+            ["delegated-internal-conflict-decision-to-client"],
+        )
+        self.assertIsNone(guard.human_carveout("design the retry policy"))
+
+    def test_visual_design_direction_still_carveout(self):
+        self.assertEqual(guard.human_carveout("we need a design direction here"), "design-uat")
+        self.assertEqual(guard.human_carveout("which color palette"), "design-uat")
+
     # --- #3749 AC5: fail-safe — never raises, even on non-string / empty input ---
     def test_failsafe_on_bad_input(self):
         self.assertEqual(guard.detect_client_arbitration(""), [])

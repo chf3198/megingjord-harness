@@ -36,9 +36,12 @@ FORBIDDEN_ASK_RE = re.compile(
     re.IGNORECASE,
 )
 # --- 4 human carve-outs (mirror adjudication-guardrail.js HUMAN_CARVEOUT) ---
+# Deliberately NARROW (JS-parity): only genuine visual/UX-direction terms are a client
+# carve-out. Bare "design" is intentionally NOT here — a "software/API design" dev decision
+# must adjudicate, not be waved through as a client touchpoint (cross-family critique #3749).
 DESIGN_UAT_RE = re.compile(
-    r"\b(design\s+direction|visual\s+design|design|layout|theme|colou?r|typography|"
-    r"ux|ui|uat|user\s+acceptance|visual\s+confirmation|look\s+and\s+feel|brand|aesthetic)\b",
+    r"\b(design\s+direction|visual\s+design|colou?r\s+palette|UAT|user\s+acceptance|"
+    r"visual\s+confirmation|look\s+and\s+feel|brand|aesthetic)\b",
     re.IGNORECASE,
 )
 IRREVERSIBLE_RE = re.compile(
