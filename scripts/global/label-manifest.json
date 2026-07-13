@@ -71,6 +71,13 @@
     { "name": "consultant:cross-team-needed",     "color": "fbca04", "description": "Epic closeout requires cross-team Consultant signing","group": "consultant" },
     { "name": "consultant:cross-team-in-progress","color": "1d76db", "description": "Cross-team Consultant has claimed and is signing closeout","group": "consultant" },
     { "name": "merge-bypass:admin-exception",     "color": "b60205", "description": "Admin override of branch-protection bypass; requires justification","group": "merge-bypass" },
-    { "name": "merge-evidence-override:approved", "color": "f9d0c4", "description": "PR explicitly does not close the linked issue (e.g. multi-session slice)","group": "merge-evidence" }
+    { "name": "merge-evidence-override:approved", "color": "f9d0c4", "description": "PR explicitly does not close the linked issue (e.g. multi-session slice)","group": "merge-evidence" },
+
+    { "name": "baton-back:open",                          "color": "d93f0b", "description": "An open baton-back remediation marker exists on the timeline; close-gate blocks until cleared (Epic #3251)", "group": "baton-back" },
+    { "name": "review-coverage:cross-family-free",        "color": "0e8a16", "description": "Layer-B review by a free cross-family model (Epic #3251 graded disclosure)", "group": "review-coverage" },
+    { "name": "review-coverage:cross-family-paid",        "color": "1d76db", "description": "Layer-B review by a paid cross-family model (G2>G3 floor; Epic #3251)", "group": "review-coverage" },
+    { "name": "review-coverage:same-family-paid",         "color": "fbca04", "description": "Layer-B review by a paid same-family model (Epic #3251)", "group": "review-coverage" },
+    { "name": "review-coverage:same-model-grounded-paid", "color": "fbca04", "description": "Layer-B review by a paid same-model grounded red-team (Epic #3251)", "group": "review-coverage" },
+    { "name": "review-coverage:programmatic-only",        "color": "b60205", "description": "No semantic review reachable; programmatic gates only — raises a client UAT warning (Epic #3251)", "group": "review-coverage" }
   ]
 }

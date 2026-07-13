@@ -242,6 +242,39 @@ replay-eval promotion gate (#3434) flips it. The field is `block` (not required)
 | Test strategy declared per matrix | `test-evidence.yml` gate consumes `test_strategy` from `MANAGER_HANDOFF` |
 | `roles.admin` auto-emission on full baton (#2444) | `hooks/scripts/tool_activity.py` `mark_tool_activity` flips `roles["admin"] = True` when every key returned by `admin_patterns.required_admin_ops(flags, repo_type)` is set in `admin_ops`. Stop-hook `check_admin_ops` consumes the same helper. No manual state patching required. |
 
+## Baton-back review→remediation guardrail (Epic #3251 — enforced in code)
+
+When any review phase surfaces a blocking issue, the baton does not stall waiting for a
+human: it routes the issue to the remediating role and re-advances to closure
+**programmatically**. The rule lives in code (zero-token to enforce, context-loss-proof);
+this section only *describes* it (G8) — it does not carry the rule.
+
+- **Two-layer discovery, one router.** Layer A (≈40 validators + gate hooks) and Layer B
+  (a cross-model review that emits machine-readable findings) both terminate in the same
+  deterministic router. Layer B findings are parsed by
+  `scripts/global/cross-model-finding-router.js` and dispatched by
+  `scripts/global/cross-model-review-dispatch.js` (the operationalized
+  `post-merge-consultant-audit.yml` Layer-B Action); the router itself is the shipped
+  `scripts/global/baton-back.js#routeRemediation` (#3257) — no LLM, no prose.
+- **Deterministic routing rule.** Fix touches a tracked file → **Collaborator** (baton-back);
+  fix is the current role's own artifact/git-op → **current role** (block-in-place); fix is
+  issue-only governance metadata → **Manager** (hold); environmental → **override** (no
+  baton-back). Fault-owner is recorded separately from the file-editor (accountability, G8).
+- **Close-gate invariant.** A ticket cannot reach done/closed while a `## BATON_BACK` marker
+  is open on the timeline — enforced by `scripts/global/closeout-preflight.js`
+  (`batonBackGateBlocks` → `baton-back.anyOpen`), so an Epic cannot close around an open child
+  remediation. The marker also carries the finding as an actionable lesson and a bounded
+  cycle counter (default 3) that escalates to a non-blocking Tier-2 anneal.
+- **Marker persistence + disclosure labels.** `scripts/global/baton-back-set.js` posts the
+  authoritative `## BATON_BACK` timeline comment, applies the `baton-back:open` label, and a
+  metadata-only observability event is written per-ticket by
+  `scripts/global/baton-back-ledger.js` (redacted; not the consensus ledger).
+- **Graded review-coverage disclosure (G2>G3 floor).** Each review point resolves a coverage
+  rung via `scripts/global/review-coverage-resolver.js` and surfaces it as a
+  `review-coverage:{cross-family-free|cross-family-paid|same-family-paid|same-model-grounded-paid|programmatic-only}`
+  label + closeout field. `programmatic-only` (no semantic reviewer reachable) raises a client
+  UAT warning; it is the floor only under a free-only budget / no-network, never a silent skip.
+
 ## MANAGER_HANDOFF schema (with test_strategy)
 
 Required fields on every `MANAGER_HANDOFF` comment:
