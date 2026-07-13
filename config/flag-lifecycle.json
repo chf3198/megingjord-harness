@@ -1,15 +1,26 @@
 {
   "_doc": "Lifecycle registry for lane:security-surface dark-launch flags (Epic #3789 #3795). Every lane-created flag carries a lifecycle record from birth: created(ticket, default:off) -> canary -> flipped(100%, date) -> retire-by(flipped + N days). flag-lifecycle-lint fails CI when a flag past retire_by is still referenced; dark-not-flipped-inventory emits a standing G8 gauge over flags still dark/canary.",
-  "_states": ["dark", "canary", "flipped", "retired"],
+  "_states": [
+    "dark",
+    "canary",
+    "flipped",
+    "retired"
+  ],
   "retire_after_days": 30,
   "flags": {
     "MEGINGJORD_MCP_ADAPTER_ENABLED": {
-      "created": { "ticket": 3793, "date": "2026-07-13", "default": "off" },
-      "state": "dark",
-      "canary_date": null,
+      "created": {
+        "ticket": 3793,
+        "date": "2026-07-13",
+        "default": "off"
+      },
+      "state": "canary",
+      "canary_date": "2026-07-13",
       "flipped_date": null,
       "retire_by": null,
-      "owner_ticket": 3796
+      "owner_ticket": 3796,
+      "canary_scope": "copilot-agent-session-class:non-critical (one session class)",
+      "landed_dark_ticket": 3796
     }
   }
 }
