@@ -17,9 +17,10 @@ const mergeEvidence = require(path.join(
 
 // --- AC1: canonical lane set membership ---
 
-test('LANES exports all 7 canonical lane labels', () => {
+test('LANES exports all canonical lane labels', () => {
+  // #3792 (Epic #3789): lane:security-surface added as a full-severity lane.
   const expected = [
-    'lane:code-change', 'lane:docs-research', 'lane:docs-only',
+    'lane:code-change', 'lane:security-surface', 'lane:docs-research', 'lane:docs-only',
     'lane:config-only', 'lane:trivial', 'lane:research', 'lane:no-code-remediation',
   ];
   expect(laneEnum.LANES).toEqual(expected);
