@@ -11,27 +11,34 @@ const { detectStuckState } = require('./stuck-state-detector');
 const PROMOTION_PRECISION = 0.85;
 const DEFAULT_CORPUS = path.join(__dirname, '..', '..', 'tests', 'fixtures', 'stuck-state-corpus.json');
 
-// Score the detector over a corpus. Positive = detector fires (stuck===true); label 'stuck' = should fire.
+/**
+ * Score the detector over a labeled corpus. Positive = detector fires (stuck===true); label 'stuck'
+ * = it should fire. The confusion cell is selected without a 4-way branch (keeps complexity low).
+ * @param {Array} samples corpus rows ({signals, label})
+ * @param {object} [opts] threshold overrides forwarded to detectStuckState
+ * @returns {object} {total, tp, fp, fn, tn, precision, recall, falsePositiveRate, promotionEligible}
+ */
 function scoreCorpus(samples, opts = {}) {
-  let tp = 0, fp = 0, fn = 0, tn = 0;
-  for (const s of samples || []) {
-    const fired = detectStuckState(s.signals || {}, opts).stuck;
-    const should = s.label === 'stuck';
-    if (fired && should) tp += 1;
-    else if (fired && !should) fp += 1;
-    else if (!fired && should) fn += 1;
-    else tn += 1;
+  const cells = { tp: 0, fp: 0, fn: 0, tn: 0 };
+  for (const row of samples || []) {
+    const fired = detectStuckState(row.signals || {}, opts).stuck;
+    const should = row.label === 'stuck';
+    cells[fired ? (should ? 'tp' : 'fp') : (should ? 'fn' : 'tn')] += 1;
   }
-  const precision = tp + fp ? tp / (tp + fp) : 1;
-  const recall = tp + fn ? tp / (tp + fn) : 1;
-  const falsePositiveRate = fp + tn ? fp / (fp + tn) : 0;
+  const div = (numer, denom, dflt) => (denom ? numer / denom : dflt);
+  const precision = div(cells.tp, cells.tp + cells.fp, 1);
   return {
-    total: (samples || []).length, tp, fp, fn, tn,
-    precision, recall, falsePositiveRate,
+    total: (samples || []).length, ...cells,
+    precision, recall: div(cells.tp, cells.tp + cells.fn, 1), falsePositiveRate: div(cells.fp, cells.fp + cells.tn, 0),
     promotionEligible: precision >= PROMOTION_PRECISION,
   };
 }
 
+/**
+ * Load a corpus file (array form or {samples:[...]}).
+ * @param {string} [file] corpus path; defaults to DEFAULT_CORPUS
+ * @returns {Array} corpus rows
+ */
 function loadCorpus(file) {
   const parsed = JSON.parse(fs.readFileSync(file || DEFAULT_CORPUS, 'utf8'));
   return Array.isArray(parsed) ? parsed : parsed.samples || [];
