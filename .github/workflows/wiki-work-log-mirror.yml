@@ -68,4 +68,5 @@ jobs:
             -m "AI-Signature: Megingjord Work-Log Mirror" \
             -m "AI-Team-Model: automation:github-actions@ci" \
             -m "AI-Role: admin"
-          git push --no-verify
+          # #3729: push to the non-protected wiki-mirror branch (main ruleset requires status checks; GH013 otherwise).
+          git push --no-verify --force origin HEAD:refs/heads/wiki-mirror

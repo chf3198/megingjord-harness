@@ -63,12 +63,17 @@ jobs:
             echo "wiki-reconcile: no drift to repair (clean)."
             exit 0
           fi
-          git commit -m "chore(it-ops): daily wiki reconcile + Tier-0 archive [skip ci]" \
+          # --no-verify: the automation bot commit must NOT run developer lefthook hooks (#3723).
+          git commit --no-verify \
+            -m "chore(it-ops): daily wiki reconcile + Tier-0 archive [skip ci]" \
             -m "Refs #3067" \
             -m "AI-Signature: Megingjord Wiki Reconcile" \
             -m "AI-Team-Model: automation:github-actions@ci" \
             -m "AI-Role: admin"
-          git push
+          # #3729: push to the non-protected wiki-mirror branch (main's baton-authority-merge-gate ruleset
+          # requires 9 status checks with no bypass actors, so a [skip ci] push to main is GH013-rejected).
+          # wiki-mirror = main-HEAD + the repairs; force-update since it is a derived staging branch.
+          git push --no-verify --force origin HEAD:refs/heads/wiki-mirror
 
       # #3718 AC3 — CI-failure alerting. The daily reconcile is upkeep the whole
       # work-log depends on; a silent failure froze 1170/1176 mirrors for 6 days
