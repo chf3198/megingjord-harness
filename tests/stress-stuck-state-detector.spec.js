@@ -14,6 +14,8 @@ test('G6: adversarial + malformed signals never throw and never fabricate a stuc
     { invocations: [null, 42, { tool: {} }] },
     { iterationCount: NaN, tokenBudgetFraction: 'huge', toolErrorCount: -1 },
     { sampledResolutions: [null, undefined, {}, []] },
+    { sampledResolutions: 'not-an-array' },
+    { sampledResolutions: 42 },
     { explicit: { nested: 'object' } },
     { reversibility: 12345, blastRadius: ['x'] },
     Object.assign(Object.create(null), { iterationCount: Infinity }),

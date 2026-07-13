@@ -34,7 +34,7 @@ function hyst(value, fire, clear, priorActive) {
  * @returns {number} divergence ratio in [0,1); 0 when fewer than 2 samples
  */
 function divergenceRatio(samples) {
-  const labels = (samples || []).map((entry) => String(entry)).filter(Boolean);
+  const labels = (Array.isArray(samples) ? samples : []).map((entry) => String(entry)).filter(Boolean);
   if (labels.length < 2) return 0;
   const counts = new Map();
   for (const label of labels) counts.set(label, (counts.get(label) || 0) + 1);
