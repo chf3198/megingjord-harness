@@ -2,6 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const matter = require('gray-matter');
 const { REPO_WIKI_DIR, assertWikiDir } = require('./path-guard');
+const { redactSecrets } = require('./wiki-secret-scan');
+
+// #3772: prevent-at-write secret redaction. Any credential-class secret in wiki content is scrubbed to a
+// <REDACTED> placeholder before it can be written/committed; a G8 signal (pattern ids + path, no values)
+// surfaces that a redaction fired so a real leak is never silent.
+function redactForWrite(content, target) {
+  const { text, hits } = redactSecrets(String(content == null ? '' : content));
+  if (hits.length) {
+    const ids = [...new Set(hits.map((h) => h.id))].join(',');
+    try { process.stderr.write(`[wiki-secret-redaction] ${target}: redacted ${ids} (#3772)\n`); } catch { /* never break the write */ }
+  }
+  return text;
+}
 
 const WIKI_DIR = REPO_WIKI_DIR;
 const DATE_TOLERANCE_DAYS = 1;
@@ -46,7 +59,7 @@ function updateIndex(slug, title, type, wikiDir = WIKI_DIR, options = {}) {
   content = insertAt === -1 ? `${content}\n${entry}\n` : `${content.slice(0, insertAt)}\n${entry}\n${content.slice(insertAt)}`;
   const pages = countPages(root, options);
   content = content.replace(/\*\*Pages\*\*:.*$/m, `**Pages**: ${pages} | **Last updated**: ${new Date().toISOString().split('T')[0]}`);
-  fs.writeFileSync(indexPath, content);
+  fs.writeFileSync(indexPath, redactForWrite(content, indexPath));
 }
 
 function writePage(slug, type, content, wikiDir = WIKI_DIR, options = {}) {
@@ -54,8 +67,9 @@ function writePage(slug, type, content, wikiDir = WIKI_DIR, options = {}) {
   const dir = TYPE_DIR[type] || 'sources';
   const pagePath = path.join(root, dir, `${slug}.md`);
   fs.mkdirSync(path.dirname(pagePath), { recursive: true });
-  fs.writeFileSync(pagePath, content);
-  const { frontmatter } = parseFrontmatter(content);
+  const safeContent = redactForWrite(content, pagePath);
+  fs.writeFileSync(pagePath, safeContent);
+  const { frontmatter } = parseFrontmatter(safeContent);
   updateIndex(slug, frontmatter.title || slug, type, root, options);
   return pagePath;
 }

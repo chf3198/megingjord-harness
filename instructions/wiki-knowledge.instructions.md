@@ -98,6 +98,22 @@ impossible to miss (the 2026-06-16 both-stores-empty meta-failure). It computes 
 gated by replay-eval precision ≥ 0.85 against the historical-PR corpus (auto-revoking, NOT
 calendar) — the gate stays advisory until calibrated.
 
+## Secret Redaction on the Write-Path (ENFORCED — #3772)
+
+Credential-class secrets **cannot** be committed to the wiki. Two enforced layers (the contract the
+mirror headers long *claimed* but did not apply):
+- **Prevent-at-write:** `scripts/wiki/wiki-io.js#writePage`/`updateIndex` run `redactSecrets()`
+  (`scripts/wiki/wiki-secret-scan.js`) — any anthropic/openai/github-pat/github-fine-grained-pat/aws/jwt/
+  bearer token is scrubbed to a `<REDACTED>` placeholder before `writeFileSync`, with a G8 signal (pattern
+  ids + path, no values).
+- **Required CI backstop:** `.github/workflows/wiki-secret-scan.yml` scans changed `wiki/**/*.md` on every
+  PR (no-op green on non-wiki PRs) and **fails** on any credential-class secret — catching edits that bypass
+  `writePage`.
+- **Scope:** credential-class only. `email`/`ipv4` (PII) stay **advisory** so legitimate technical wiki
+  content (example IPs, contact addresses) is not corrupted. Project-specific confidential content is separately
+  protected by A4 isolation (`wiki/wisdom/project/` never distributed) and the path-guard (#3064, writes
+  confined to `wiki/**`).
+
 ## Rules
 
 - Wiki at `~/.copilot/wiki/` is **read-only** from non-Megingjord repos
