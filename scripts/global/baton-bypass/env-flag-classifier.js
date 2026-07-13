@@ -8,6 +8,9 @@
  * ux-local-only: may downgrade LOCAL hook behavior; CI ignores.
  * authority-affecting: was historically CI-authority-relaxing; that power
  *   is REMOVED. Must become a server-visible label + approver.
+ * opt-in-enabler: default-OFF flag that ENABLES a dark-launched feature when set
+ *   (NOT a bypass — it grants nothing and relaxes no gate; absence = fail-closed).
+ *   Registered so the allow-list documents the flag; ci_authority is always false.
  *
  * ci_authority: false means the flag has NO power to relax CI gates.
  */
@@ -82,6 +85,14 @@ const BYPASS_FLAG_REGISTRY = {
     classification: 'ux-local-only',
     ci_authority: false,
     description: 'Downgrade doc-coverage gate to advisory locally',
+  },
+  // -- Opt-in enablers (default-OFF; enable a dark-launched feature; not a bypass) --
+  MEGINGJORD_MCP_ADAPTER_ENABLED: {
+    classification: 'opt-in-enabler',
+    ci_authority: false,
+    description: 'Opt in to the HAMR MCP adapter (default-OFF, fail-closed). '
+      + 'Narrow, adapter-scoped; orthogonal to the global MEGINGJORD_HAMR_DISABLED '
+      + 'kill-switch (audit C-8, Epic #3789).',
   },
   // -- Authority-affecting flags (CI authority REMOVED) --
   SKIP_CLOSEOUT_PREFLIGHT: {
