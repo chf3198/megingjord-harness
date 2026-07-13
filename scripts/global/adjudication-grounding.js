@@ -19,9 +19,10 @@ const DEFAULT_MAX_RESULTS = 4;
 const MIN_SUFFICIENT_RESULTS = 1; // sufficiency floor — zero citable sources never clears
 const MIN_CONTENT_CHARS = 40;     // trivial/empty content is not a citation
 const SNIPPET_CHARS = 240;
+const MAX_QUERY_CHARS = 380; // Tavily query upper bound
 
 function buildQuery(question) {
-  return String(question || '').replace(/\s+/g, ' ').trim().slice(0, 380);
+  return String(question || '').replace(/\s+/g, ' ').trim().slice(0, MAX_QUERY_CHARS);
 }
 
 // Citable only if it carries a real source URL AND non-trivial content (mandatory-citation gate).

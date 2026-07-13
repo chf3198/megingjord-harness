@@ -216,8 +216,8 @@ async function resolveGrounding(question, opts) {
   if (opts.groundingContext) return opts.groundingContext;
   try {
     const produce = opts.produceGrounding || require('./adjudication-grounding').produceGrounding;
-    const g = await produce(question, opts.groundingOpts || {});
-    return g && g.grounding ? g.grounding : null;
+    const produced = await produce(question, opts.groundingOpts || {});
+    return produced && produced.grounding ? produced.grounding : null;
   } catch { return null; }
 }
 
