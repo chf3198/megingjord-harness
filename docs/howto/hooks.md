@@ -81,3 +81,29 @@ It executes `git worktree remove` **without `--force`** — git's own dirty-guar
 final gate, so a worktree with uncommitted or unmerged work is refused, never force-removed. Each
 teardown emits a redacted v3 audit record (decision + `git worktree remove` exit code/stderr) to the
 observability surface. Preview without removing via `npm run worktree:teardown` (dry-run default).
+
+## Stuck-state Stop hook (#3766, live wiring of #3748)
+
+A `Stop` hook `hooks/scripts/stuck_state_gate.py` wires the shipped, ADVISORY stuck-state detector
+(#3748) into production. On each turn-end it derives the available behavioral signals (an explicit
+stuck marker in the assistant text, or pre-computed counters a runtime supplies under `stuck_signals`)
+and delegates detection + carve-out routing to the Node bridge
+`scripts/global/stuck-state-hook-bridge.js`, which reuses `stuck-state-detector.detectStuckState` and
+`adjudication-guardrail.classifyDecision` — no detection logic is duplicated.
+
+- **Advisory, never blocks.** A detected stuck-state emits guidance to route into the cross-model
+  adjudication panel (`adjudication-guardrail.decide()`) **without a client prompt**; the hook always
+  exits 0, independent of replay-eval promotion state (advisory→blocking promotion is deferred per the
+  #3748 panel). The synchronous bridge path (`classifyDecision`) keeps the hook inside its timeout and
+  works offline (G6).
+- **Escalation is carve-out-only.** A genuinely irreversible / high-destructive gate routes to
+  `human-carveout` — the only sanctioned client escalation (the 4 retained touchpoints).
+- **Companion to `client_arbitration_guard.py` (#3749), not a duplicate:** that guards explicit
+  client-defer *language*; this guards *behavioral* stuck-state signals (loop / iteration-cap /
+  token-budget / tool-error burst / self-consistency divergence / explicit signal).
+- **Observability (G8):** each detection appends a schema-v3 event
+  (`event: governance.stuck_state_detected`, `advisory: true`) to the events surface
+  (`MEGINGJORD_STUCK_EVENTS`, default `~/.megingjord/stuck-state-events.jsonl`).
+- Path resolution prefers `MEGINGJORD_REPO_ROOT/scripts/global`, falling back to the deployed
+  `~/.copilot/scripts/global`. Tests: `tests/stuck-state-hook-bridge.spec.js`,
+  `tests/stress-stuck-state-hook-bridge.spec.js`, `tests/test_stuck_state_gate.py`.
