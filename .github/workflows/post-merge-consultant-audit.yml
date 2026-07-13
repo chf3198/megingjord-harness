@@ -46,13 +46,14 @@ jobs:
                 return { number: data.number, url: data.html_url };
               },
             };
-            // Dispatch placeholder — routes through HAMR/fleet in production.
-            // Returns a passing verdict so the workflow is wired but inert
-            // until the dispatch adapter ships.
-            const dispatch = async () => ({
-              verdict: 'ACCEPT', score: 8,
-              reviewer_model_family: 'qwen', findings: [],
-            });
+            // Layer-B dispatch — operationalized (Epic #3251 #3258). The real
+            // cross-model review runs via the composed pipeline and degrades to
+            // an advisory programmatic-only ACCEPT when no model is reachable, so
+            // this advisory workflow never fails.
+            const { makeCrossModelDispatch } = require(
+              './scripts/global/baton-postmerge-audit/cross-model-dispatch-adapter'
+            );
+            const dispatch = makeCrossModelDispatch();
             const authorTeamModel = 'claude-code:opus@claude-code-cli';
             try {
               const result = await runPostMergeAudit(

@@ -100,3 +100,6 @@ inventory/deploy-manifests/
 generated/wiki-drift-gate-state.json
 dashboard/events.jsonl
 .wiki-mirror-cache/
+
+# Baton-back observability ledger (per-ticket, local audit stream; not committed to avoid #3573 monolith conflicts)
+governance/baton-back-events/
