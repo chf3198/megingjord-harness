@@ -208,10 +208,24 @@ async function gatherDiversePanel(prompt, opts) {
   return { panel, families };
 }
 
+// Resolve web-research grounding for a novel/high-stakes decision (R1 of #3059, #3747).
+// Caller-supplied groundingContext wins; else auto-produce via the grounding producer. Fail-safe:
+// any producer failure yields null => the panel runs consensus-without-grounding (never a client prompt).
+async function resolveGrounding(question, opts) {
+  if (!(opts.highStakes || opts.novel)) return null;
+  if (opts.groundingContext) return opts.groundingContext;
+  try {
+    const produce = opts.produceGrounding || require('./adjudication-grounding').produceGrounding;
+    const produced = await produce(question, opts.groundingOpts || {});
+    return produced && produced.grounding ? produced.grounding : null;
+  } catch { return null; }
+}
+
 async function adjudicate(question, options = [], opts = {}) {
   const floor = opts.diversityFloor || DEFAULT_DIVERSITY_FLOOR;
   const timeoutMs = opts.timeoutMs || DEFAULT_PANEL_TIMEOUT_MS;
-  const prompt = buildPanelPrompt(question, options, opts.highStakes || opts.novel ? opts.groundingContext : null);
+  const groundingContext = await resolveGrounding(question, opts);
+  const prompt = buildPanelPrompt(question, options, groundingContext);
   const { panel, families } = await gatherDiversePanel(prompt, { ...opts, floor, timeoutMs });
 
   // G5 minimum-diversity floor — below floor degrades to self-resolution, never a client prompt.
@@ -308,6 +322,6 @@ async function defaultProviderDispatch(name, prompt) {
 
 module.exports = {
   classifyDecision, adjudicate, decide, selfResolve,
-  buildPanelPrompt, parsePanelResponse, aggregate, median,
+  buildPanelPrompt, parsePanelResponse, aggregate, median, resolveGrounding,
   PROVIDER_FAMILY, GOAL_KEYS, MIN_GOAL_FLOOR, DEFAULT_DIVERSITY_FLOOR,
 };
