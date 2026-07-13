@@ -455,6 +455,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress:wiki-mirror` | `node --test tests/stress-wiki-mirror-issue.spec.js` |
 | `stress:wiki-reconcile` | `node --test tests/stress-wiki-reconcile.spec.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
+| `stuck-state:replay-eval` | `node scripts/global/stuck-state-replay-eval.js` |
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |
 | `sync:all:dry` | `bash scripts/sync.sh --dry-run --target all` |
