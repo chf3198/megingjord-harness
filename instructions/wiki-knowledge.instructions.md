@@ -48,12 +48,18 @@ Storage layout: `wiki/{code/symbols, code/concepts, work-log/tickets, work-log/p
 `wiki/wisdom/global/syntheses/` · `wiki/wisdom/global/skills/`
 Physical migration completed by #2098 (`git mv` with full history preservation).
 
-## Frontmatter Contract (schema enforced by #2052)
+## Frontmatter Contract (validator = source of truth — `config/wiki-frontmatter.schema.json`, #2052/#3763)
 
-All wiki pages require: `wiki_type` (code|work-log|wisdom), `content_hash`, `last_updated` (ISO-8601),
-`freshness_window` (7d|14d|30d|none), `content_trust_score`. Wisdom pages add `scope` (project|global).
-Code + work-log pages add `source_path`, `source_sha256`; code pages add `sub_layer` (structural|semantic).
-`freshness_window: none` = intentionally archival (exempt from freshness enforcement).
+All wiki pages **require** (the enforced Ajv contract): `title`, `type`
+(`code|work-log|wisdom-global|wisdom-project`), `content_trust_score` (0–1), `created` (ISO-8601),
+`updated` (ISO-8601). Extra shipped fields are **validated-optional** (`additionalProperties: true`; kept,
+not promoted to required): `content_hash`, `last_updated`, `source_path`, `source_sha256`, `sub_layer`
+(code pages), `scope` (wisdom pages), `tags`, `related`, `status`, `trust_attestation`.
+The retired `wiki_type` / `freshness_window` fields (carried by only 4/2843 pages) are **not** part of the
+contract; `freshness_window` retirement is owned by #3731 (temporal `valid_from`/`valid_to`) — do not
+re-add it here (no field fight). The validator is a **required PR gate on changed wiki pages** via
+`.github/workflows/wiki-frontmatter-gate.yml` (#3763); navigational files (README/index/log/WIKI-*) are
+exempt, and the pre-#3763 historical corpus is grandfathered pending backfill (#3767).
 
 ## Retrieval Routing
 
