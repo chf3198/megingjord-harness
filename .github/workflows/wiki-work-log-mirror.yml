@@ -9,10 +9,10 @@ on:
   issues:
     types: [opened, edited, closed, labeled, reopened]
 
-# Least privilege: write the mirror commit; read issue state. No PR/actions scope.
+# Least privilege: write the mirror commit; read issue state; write issues for the #3759 failure alert. No PR scope.
 permissions:
   contents: write
-  issues: read
+  issues: write
 
 # Debounce bursts (e.g. several labels applied quickly): collapse to the latest run
 # per issue number so the committed page reflects the most recent issue state.
@@ -70,3 +70,21 @@ jobs:
             -m "AI-Role: admin"
           # #3729: push to the non-protected wiki-mirror branch (main ruleset requires status checks; GH013 otherwise).
           git push --no-verify --force origin HEAD:refs/heads/wiki-mirror
+      # #3759 AC1 — generalize the durable failure-alert (proven on wiki-reconcile-cron) to this automation
+      # workflow so an issue-triggered mirror push can never fail silently. Deduped, non-gitignored sink.
+      - name: Alert on mirror failure (durable Tier-1 surface)
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="wiki-work-log-mirror failed — Wiki B ticket mirror frozen"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Recurrence: wiki-work-log-mirror failed again — $RUN_URL"
+          else
+            gh issue create --title "$title" \
+              --label "type:bug,priority:P1,area:knowledge,status:backlog" \
+              --body "$(printf 'wiki-work-log-mirror failed: %s\n\nWiki B ticket-state mirroring did not complete; work-log mirrors will freeze until fixed. Refs #3759 #3719.' "$RUN_URL")"
+          fi
