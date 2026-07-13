@@ -66,6 +66,9 @@ const COLLABORATOR = [
   // is detected structurally regardless of the pasted formatChecks() value.
   f('worktree_branch'),
   f('worktree_behind_main'),
+  // #3795 (Epic #3789 §1.3): the four mock-harness negative results (§2), each
+  // test → PASS|FAIL → transcript_sha256. Block, OPTIONAL (security-lane validator enforces).
+  f('ephemeral_verification_evidence', { block: true }),
   f('Pre-handoff verification', { block: true }),
   // #3428 (Epic #3425 P1-a): see MANAGER spec note. Block, not req (corpus back-compat).
   f('flaws_recognized', { block: true }),
@@ -77,6 +80,13 @@ const ADMIN = [
   f('commit', { req: true }),
   f('signer-independence-check', { req: true }),
   f('deploy-runtime-impact', { req: true }),
+  // #3795 (Epic #3789 §1.3): lane:security-surface flag fields. OPTIONAL here so the six
+  // standard artifacts and the replay corpus are unaffected; requiredness on the security
+  // lane is enforced by the security-surface validator, not the shared schema (#3428 pattern).
+  f('flag_name'),
+  f('flag_default'),
+  f('fail_closed_proof'),
+  f('merge_reversibility'),
   // #3428 (Epic #3425 P1-a): see MANAGER spec note. Block, not req (corpus back-compat).
   f('flaws_recognized', { block: true }),
 ];
@@ -93,10 +103,26 @@ const CONSULTANT = [
   // (none | <details>) on non-lightweight lanes. OPTIONAL for back-compat; ALLOWED
   // so the builder can emit it unaided.
   f('worktree_residual_risk'),
+  // #3795 (Epic #3789 §1.3): security-lane closeout fields. OPTIONAL; the security-surface
+  // validator enforces them when lane:security-surface.
+  f('residual_risk_after_dark'),
+  f('flip_decision_owner'),
   // #3428 (Epic #3425 P1-a): the Consultant gains `flaws_recognized` as the
   // per-review-point SUPERSET of its existing `mid_flight_flaws` (which stays the
   // required closeout-aggregation field). Block, not req (corpus back-compat).
   f('flaws_recognized', { block: true }),
+];
+
+// CANARY_REPORT (#3795, Epic #3789 §1.3) — post-merge canary evidence. A NEW artifact
+// (all fields req within it) that does not touch the six standard artifacts.
+const CANARY_REPORT = [
+  f('flag_name', { req: true }),
+  f('canary_scope', { req: true }),
+  f('window', { req: true }),
+  f('metrics_observed', { req: true, block: true }),
+  f('regression_signal', { req: true }),
+  f('auto_rollback_fired', { req: true }),
+  f('verdict', { req: true }),
 ];
 
 // EPIC_RESCOPE — single narrative synthesis slot (irreducible per #2038).
@@ -116,6 +142,7 @@ const ARTIFACT_SPECS = {
   COLLABORATOR_HANDOFF: { fields: COLLABORATOR, ticket: true },
   ADMIN_HANDOFF: { fields: ADMIN, ticket: true },
   CONSULTANT_CLOSEOUT: { fields: CONSULTANT, ticket: true },
+  CANARY_REPORT: { fields: CANARY_REPORT, ticket: true },
   EPIC_RESCOPE: { fields: EPIC_RESCOPE, ticket: false },
   BLOCKER_NOTE: { fields: BLOCKER, ticket: true },
 };

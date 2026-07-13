@@ -71,6 +71,8 @@ jobs:
         run: npm run lint:md
       - name: Changelog fragment validation (#2128)
         run: node scripts/global/changelog-aggregate.js --validate-only
+      - name: Flag lifecycle lint (#3795 — dark-launch flag retirement)
+        run: node scripts/global/megalint/flag-lifecycle-lint.js
       - name: Vale prose lint
         # Advisory (vale-action fail_on_error defaults false). reviewdog github-pr-check
         # fetches the PR diff, which GitHub caps at 300 files — a >300-file PR (e.g. the
