@@ -69,3 +69,26 @@ test('routeStuckState: stuck+irreversible routes decide() toward the human carve
   const out = await D.routeStuckState({ explicit: 'novel-failure', reversibility: 'irreversible' }, { decide: fakeDecide });
   assert.equal(out.decision.flags.irreversible, true);
 });
+
+test('routeStuckState propagates the detection error flag (G8 observability) when not stuck', async () => {
+  // A malformed signal that trips detectStuckState's catch → error:true, stuck:false.
+  const out = await D.routeStuckState({ get invocations() { throw new Error('boom'); } }, { decide: async () => ({}) });
+  assert.equal(out.detected, false);
+  assert.equal(out.error, true);
+});
+
+test('routeStuckState is fail-safe when decide() throws — degrades to self-resolve, never a client prompt', async () => {
+  const boom = async () => { throw new Error('panel exploded'); };
+  const out = await D.routeStuckState({ explicit: 'stuck-pr' }, { decide: boom });
+  assert.equal(out.detected, true);
+  assert.equal(out.decision.route, 'self-resolve');
+  assert.equal(out.decision.degraded, true);
+  assert.notEqual(out.decision.route, 'human-carveout');
+});
+
+test('divergence trigger now has hysteresis (clears at the lower floor)', () => {
+  // ratio 0.4 (2 of 5 disagree → 0.4) is below fire 0.5 but above clear 0.34: fires only when prior-active.
+  const s = { sampledResolutions: ['A', 'A', 'A', 'B', 'C'] };
+  assert.equal(D.detectStuckState(s).triggers.includes('self-consistency-divergence'), false);
+  assert.equal(D.detectStuckState(s, { prior: { divergence: true } }).triggers.includes('self-consistency-divergence'), true);
+});

@@ -27,13 +27,13 @@ test('G6: adversarial + malformed signals never throw and never fabricate a stuc
 
 test('G6: routeStuckState degrades safely when decide() explodes — never throws, never prompts client', async () => {
   const boom = async () => { throw new Error('panel exploded'); };
-  await assert.rejects(async () => { throw new Error('sanity'); }); // guard: assert.rejects available
-  let threw = false;
-  try {
-    // routeStuckState awaits decide(); a throwing decide surfaces as a rejected promise the caller owns.
-    await D.routeStuckState({ explicit: 'stuck-pr' }, { decide: boom }).catch(() => { threw = true; });
-  } catch { threw = true; }
-  assert.equal(threw, true, 'router surfaces decide() failure to the caller rather than swallowing it silently');
+  // A stuck route with a hostile decide() must NOT reject — it degrades to a fail-safe self-resolve
+  // (Consultant fix, #3748): a broken panel never escapes to prompt the client for a non-carve-out.
+  const stuck = await D.routeStuckState({ explicit: 'stuck-pr' }, { decide: boom });
+  assert.equal(stuck.detected, true);
+  assert.equal(stuck.decision.route, 'self-resolve');
+  assert.equal(stuck.decision.degraded, true);
+  assert.notEqual(stuck.decision.route, 'human-carveout');
   // A not-stuck route must resolve cleanly even with a hostile decide injected.
   const clean = await D.routeStuckState({ iterationCount: 0 }, { decide: boom });
   assert.equal(clean.detected, false);

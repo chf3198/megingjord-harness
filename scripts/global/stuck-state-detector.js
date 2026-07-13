@@ -3,15 +3,15 @@
 // stuck-PR / ambiguous-gate / novel-failure into the shipped adjudication-guardrail.decide() cross-model
 // panel — NEVER a client prompt. REUSES the friction-sensors loop-fingerprint primitive and adds the
 // triggers it lacks (iteration/token-budget cap, tool-error burst, self-consistency divergence, explicit
-// signal). Escalate-vs-resolve is gated on REVERSIBILITY / BLAST-RADIUS, never self-reported confidence
-// (#3059 §3). Ships ADVISORY; promotion is replay-eval-gated (precision >=0.85), never calendar. The pure
-// core (detectStuckState) is disk/network-free and NEVER throws; routeStuckState is the thin router.
+// signal). Escalate-vs-resolve is gated on REVERSIBILITY / BLAST-RADIUS, never confidence (#3059 §3).
+// Ships ADVISORY; promotion is replay-eval-gated (precision >=0.85). detectStuckState NEVER throws;
+// routeStuckState is fail-safe (a broken decide() degrades to self-resolve, never a client prompt).
 const { detectRetries } = require('./friction-sensors');
 
 // Fire thresholds are strictly greater than clear thresholds → hysteresis (no single-blip flapping).
 const DEFAULTS = {
   loopThreshold: 3, loopClear: 1, iterationCap: 25, iterationClear: 20, tokenBudgetCap: 1.0,
-  tokenBudgetClear: 0.8, toolErrorBurst: 3, toolErrorClear: 1, divergenceFloor: 0.5,
+  tokenBudgetClear: 0.8, toolErrorBurst: 3, toolErrorClear: 1, divergenceFloor: 0.5, divergenceClear: 0.34,
 };
 const EXPLICIT_SIGNALS = new Set(['stuck-pr', 'ambiguous-gate', 'novel-failure']);
 
@@ -45,20 +45,21 @@ function divergenceRatio(samples) {
  * Pure stuck-state detection over a signal bundle. NEVER throws. `signals.confidence` is deliberately
  * ignored — the axis is reversibility/blast-radius, not self-reported confidence.
  * @param {object} signals {invocations,iterationCount,tokenBudgetFraction,toolErrorCount,sampledResolutions,explicit,reversibility,blastRadius}
- * @param {object} [opts] threshold overrides + {prior:{iteration,token,toolError}} hysteresis state
- * @returns {{stuck:boolean, triggers:string[], gate:{reversibility:string, blastRadius:string}}} detection result
+ * @param {object} [opts] threshold overrides + {prior:{iteration,token,toolError,divergence}} hysteresis state
+ * @returns {{stuck:boolean, triggers:string[], gate:object, error?:boolean}} detection result
  */
 function detectStuckState(signals = {}, opts = {}) {
   try {
     const cfg = { ...DEFAULTS, ...opts };
     const prior = opts.prior || {};
     const sig = signals;
+    const divergence = divergenceRatio(sig.sampledResolutions) * 100;
     const checks = [
       ['loop-fingerprint', detectRetries(sig.invocations, { threshold: cfg.loopThreshold }).length > 0],
       ['iteration-cap', hyst(sig.iterationCount, cfg.iterationCap, cfg.iterationClear, prior.iteration)],
       ['token-budget-cap', hyst(sig.tokenBudgetFraction, cfg.tokenBudgetCap, cfg.tokenBudgetClear, prior.token)],
       ['tool-error-burst', hyst(sig.toolErrorCount, cfg.toolErrorBurst, cfg.toolErrorClear, prior.toolError)],
-      ['self-consistency-divergence', divergenceRatio(sig.sampledResolutions) >= cfg.divergenceFloor],
+      ['self-consistency-divergence', hyst(divergence, cfg.divergenceFloor * 100, cfg.divergenceClear * 100, prior.divergence)],
       [String(sig.explicit), EXPLICIT_SIGNALS.has(sig.explicit)],
     ];
     const triggers = checks.filter(([, fired]) => fired).map(([name]) => name);
@@ -79,20 +80,23 @@ function gateToFlags(gate) {
 
 /**
  * Route a detected stuck-state into the cross-model adjudication guardrail (ADVISORY). Returns
- * {detected:false} when not stuck; otherwise the decide() record. NEVER prompts the client directly —
- * decide()'s classifyDecision owns the 4 carve-outs; below the diversity floor it self-resolves.
+ * {detected:false} when not stuck (propagating any detection `error` for G8 observability); otherwise the
+ * decide() record. NEVER prompts the client: classifyDecision owns the 4 carve-outs, and a broken/throwing
+ * decide() degrades to a fail-safe self-resolve record rather than escaping.
  * @param {object} signals detection signal bundle (see detectStuckState)
  * @param {object} [opts] {decide, question, options, flags, ...decideOpts}
- * @returns {Promise<object>} {detected, advisory, triggers, gate?, decision?}
+ * @returns {Promise<object>} {detected, advisory, triggers, gate?, decision?, error?}
  */
 async function routeStuckState(signals = {}, opts = {}) {
   const det = detectStuckState(signals, opts);
-  if (!det.stuck) return { detected: false, advisory: true, triggers: [] };
+  if (!det.stuck) return { detected: false, advisory: true, triggers: [], error: Boolean(det.error) };
   const decide = opts.decide || require('./adjudication-guardrail').decide;
   const question = opts.question
     || `Stuck-state detected (${det.triggers.join(', ')}); how should the operator resolve it autonomously?`;
   const decision = { question, options: opts.options || [], flags: { ...gateToFlags(det.gate), ...(opts.flags || {}) } };
-  const record = await decide(decision, opts);
+  let record;
+  try { record = await decide(decision, opts); }
+  catch { record = { route: 'self-resolve', degraded: true, chosen: null, rationale: 'decide() failed; fail-safe self-resolve, no client prompt' }; }
   return { detected: true, advisory: true, triggers: det.triggers, gate: det.gate, decision: record };
 }
 
