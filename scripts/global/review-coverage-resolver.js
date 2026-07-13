@@ -26,10 +26,10 @@ function gradeCoverage({ authorFamily, reviewerFamily, tier, reachable, grounded
 // Cached reachability probe (injectable). TTL default 300s; `now`/`prober` injected for tests.
 function probeReachable(provider, { now = Date.now, ttlMs = DEFAULT_TTL_MS, prober } = {}) {
   const cached = _reach.get(provider);
-  const t = now();
-  if (cached && t - cached.ts < ttlMs) return cached.reachable;
+  const nowMs = now();
+  if (cached && nowMs - cached.ts < ttlMs) return cached.reachable;
   const reachable = prober ? Boolean(prober(provider)) : true;
-  _reach.set(provider, { ts: t, reachable });
+  _reach.set(provider, { ts: nowMs, reachable });
   return reachable;
 }
 
