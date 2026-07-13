@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Guardrail for client-arbitration leakage and internal conflict policy."""
+"""Guardrail for client-arbitration leakage and internal conflict policy.
+
+#3749 (R3 of #3059): the guard no longer merely DETECTS + LOGS a narrow
+conflict-keyworded client-defer — it recognizes ANY non-carve-out deferral of an
+internal decision to the client and ACTIVELY redirects the operator into the
+shipped free cross-model panel `adjudication-guardrail.decide()` (never a client
+prompt). The 4 human carve-outs (design/UAT, irreversible, security-weakening)
+remain the sole sanctioned client-escalation path. Mirrors the in-process
+adjudicate-first precedent in `pretool_guard.py` S6/S7 (#3403) — a fast,
+deterministic Python decision, no synchronous network panel inside the Stop hook
+(G7); cross-model consensus (llama+mistral, unanimous, median 85) selected this
+over a synchronous node-CLI panel.
+"""
 from __future__ import annotations
 
 import json
@@ -9,6 +21,8 @@ import re
 
 INCIDENTS_LOG = Path.home() / ".megingjord" / "incidents.jsonl"
 
+# Higher-severity subclass tag only — no longer a precondition for detection
+# (#3749 broadened detection beyond conflict-keyworded prose).
 CONFLICT_CONTEXT_RE = re.compile(
     r"\b(governance|worktree|branch|drift|conflict|lease|sync(?:\s|-)?residue|team)\b",
     re.IGNORECASE,
@@ -21,8 +35,20 @@ FORBIDDEN_ASK_RE = re.compile(
     r"what\s+should\s+i\s+do\s+next)\b",
     re.IGNORECASE,
 )
+# --- 4 human carve-outs (mirror adjudication-guardrail.js HUMAN_CARVEOUT) ---
 DESIGN_UAT_RE = re.compile(
-    r"\b(design|layout|theme|color|typography|ux|ui|uat|visual\s+confirmation|look\s+and\s+feel)\b",
+    r"\b(design\s+direction|visual\s+design|design|layout|theme|colou?r|typography|"
+    r"ux|ui|uat|user\s+acceptance|visual\s+confirmation|look\s+and\s+feel|brand|aesthetic)\b",
+    re.IGNORECASE,
+)
+IRREVERSIBLE_RE = re.compile(
+    r"\b(irreversible|destroy|permanently\s+delete|wipe|unrecoverable|"
+    r"force[- ]push\s+to\s+main|drop\s+(?:database|table))\b",
+    re.IGNORECASE,
+)
+SECURITY_WEAKENING_RE = re.compile(
+    r"\b(disable|weaken|remove|broaden|widen|bypass)\b[\w\s]{0,40}"
+    r"\b(guard|gate|check|protection|control|enforcement|security|governance|permissions?)\b",
     re.IGNORECASE,
 )
 
@@ -48,13 +74,60 @@ def extract_assistant_text(payload: dict) -> str:
     return ""
 
 
+def human_carveout(text: str) -> str | None:
+    """Return the carve-out tier if `text` is one of the 4 sanctioned client
+    touchpoints, else None. These — and ONLY these — legitimately reach the client.
+    """
+    if DESIGN_UAT_RE.search(text):
+        return "design-uat"
+    if IRREVERSIBLE_RE.search(text):
+        return "irreversible"
+    if SECURITY_WEAKENING_RE.search(text):
+        return "security-weakening"
+    return None
+
+
 def detect_client_arbitration(text: str) -> list[str]:
-    """Return violations when assistant delegates internal conflict decisions."""
-    if not text or DESIGN_UAT_RE.search(text):
-        return []
-    if FORBIDDEN_ASK_RE.search(text) and CONFLICT_CONTEXT_RE.search(text):
+    """Return a violation when the assistant defers a NON-carve-out internal decision
+    to the client. #3749: broadened from the old FORBIDDEN_ASK AND CONFLICT_CONTEXT
+    conjunction to `FORBIDDEN_ASK AND NOT human_carveout` — any deferral phrasing that
+    is not a design/UAT/irreversible/security-weakening carve-out is flagged, so the
+    conflict-keyword narrowness no longer lets non-conflict defers slip through.
+    Fail-safe: never raises (a crash would break the Stop hook).
+    """
+    try:
+        if not text or not FORBIDDEN_ASK_RE.search(text):
+            return []
+        if human_carveout(text):
+            return []
         return ["delegated-internal-conflict-decision-to-client"]
-    return []
+    except Exception:
+        return []
+
+
+def adjudication_redirect(text: str, violations: list[str] | None = None) -> dict:
+    """Build the ACTIVE redirect record for a detected non-carve-out client-defer.
+    Returns the routing directive (naming the exact decide() invocation) plus a
+    structured record for the G8 routing incident. NEVER a client prompt: the
+    operator runs the free cross-model panel and executes its verdict.
+    """
+    subclass = "internal-conflict" if CONFLICT_CONTEXT_RE.search(text or "") else "general-decision"
+    directive = (
+        "ROUTE TO ADJUDICATION — do NOT defer this decision to the client. Resolve it "
+        "autonomously via the free cross-model panel:\n"
+        "  node -e \"require('./scripts/global/adjudication-guardrail')"
+        ".decide({question:'<the decision>', options:['<opt-a>','<opt-b>'], flags:{needsOpinion:true}})"
+        ".then(r=>console.log(r.route, r.chosenLabel||r.rationale))\"\n"
+        "Then execute the returned option. The 4 human carve-outs "
+        "(design/UAT, irreversible, security-weakening) are the ONLY sanctioned client escalation."
+    )
+    return {
+        "route": "adjudicate",
+        "carveout": False,
+        "subclass": subclass,
+        "violations": violations or ["delegated-internal-conflict-decision-to-client"],
+        "directive": directive,
+    }
 
 
 def classify_internal_conflict(uncommitted: list[str]) -> dict:

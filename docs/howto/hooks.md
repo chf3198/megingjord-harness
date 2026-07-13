@@ -27,8 +27,23 @@ Stale historical handoffs without `worktree_branch:` no longer satisfy the gate.
 | `manager_ticket_gate.py` | Ticket-first on Manager scope |
 | `userprompt_gate.py` | Finish-intent and baton phase promotion |
 | `baton_handoff_checks.py` | Branch-scoped MANAGER_HANDOFF authority |
+| `client_arbitration_guard.py` | Detects a non-carve-out client-defer and builds the adjudication-redirect |
+| `stop_reminder.py` | Stop hook — blocks + actively redirects a client-defer into the cross-model panel |
 
 See [pre-push-gates.md](pre-push-gates.md) for push/merge gate ordering.
+
+### Client-defer → adjudication redirect (#3749)
+
+The Stop hook does not merely detect a client-defer — it **actively redirects** it.
+`client_arbitration_guard.detect_client_arbitration` flags **any** non-carve-out deferral
+of an internal decision to the client (broadened in #3749 beyond the old conflict-keyword
+regex: `FORBIDDEN_ASK AND NOT human_carveout`). On a hit, `stop_reminder.py` blocks the stop,
+emits a `client-defer-routed-to-adjudication` incident (G8), and prints the exact
+`adjudication-guardrail.decide()` invocation the operator must run — routing the decision to
+the **free cross-model panel**, never the client. The 4 human carve-outs (design/UAT,
+irreversible, security-weakening) are the sole sanctioned client escalation and are never
+redirected. Complements `stuck-state-detector.js` (#3748), which routes execution-state
+stuck triggers into the same panel.
 
 ## Merge gate — real-PR verification (#3344)
 
