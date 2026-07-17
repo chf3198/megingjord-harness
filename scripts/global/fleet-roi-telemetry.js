@@ -18,7 +18,7 @@ const os = require('node:os');
 let redact;
 try {
   const { redactEvent } = require('./log-redaction');
-  redact = (e) => { const r = redactEvent(e); return (r && r.event) ? r.event : e; };
+  redact = (event) => { const scrubbed = redactEvent(event); return (scrubbed && scrubbed.event) ? scrubbed.event : event; };
 } catch { redact = (e) => e; }
 
 const SERVICE = 'fleet-dispatch';
@@ -35,8 +35,8 @@ function logPath() {
 }
 
 function paidCostPer1k() {
-  const v = Number(process.env.MEGINGJORD_PAID_COST_PER_1K);
-  return Number.isFinite(v) && v > 0 ? v : DEFAULT_PAID_COST_PER_1K;
+  const configured = Number(process.env.MEGINGJORD_PAID_COST_PER_1K);
+  return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_PAID_COST_PER_1K;
 }
 
 // Cost avoided = the paid calls we did NOT make because a $0 resource served them.

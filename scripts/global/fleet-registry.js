@@ -13,6 +13,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+// Budget for a model with no capability row: the 7b-class default (see DEFAULT_PROFILE).
+const UNKNOWN_MODEL_TIMEOUT_MS = 120_000;
 const HOSTS_FILE = 'fleet-hosts.json';
 const CAPS_FILE = 'model-capability-registry.json';
 
@@ -82,7 +84,7 @@ function loadCapabilities() {
 // a G2 risk, and declaring a model is one JSON row. Fail-open on availability, fail-closed on authority.
 const DEFAULT_PROFILE = {
   family: 'unknown', params_b: 7, thinking: false, tok_per_s: 8,
-  cold_load_s: 20, timeout_ms: 120000, quality: 0.5, judge_eligible: false,
+  cold_load_s: 20, timeout_ms: UNKNOWN_MODEL_TIMEOUT_MS, quality: 0.5, judge_eligible: false,
 };
 
 // Capability lookup for a model id. Unknown ids resolve to the default profile so the
@@ -104,5 +106,5 @@ function hostsForFamily(family, hosts = loadHosts()) {
 
 module.exports = {
   loadHosts, loadCapabilities, capabilityFor, hostsForFamily,
-  DEFAULT_PROFILE, normalizeHost, isValidHost,
+  DEFAULT_PROFILE, normalizeHost, isValidHost, UNKNOWN_MODEL_TIMEOUT_MS,
 };

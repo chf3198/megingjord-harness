@@ -43,18 +43,37 @@ async function probeHost(host, fetchImpl = globalThis.fetch, timeoutMs = PROBE_T
 
 // Cheap: no inference, no tokens. Key presence is a boolean — the value never leaves env (G4).
 function probeCloudRaters(env = process.env, raters = CLOUD_RATERS) {
-  return raters.map((r) => ({
-    provider: r.provider,
-    family: r.family,
-    tier: 'free-cloud',
-    key_present: Boolean(env[r.envKey] && String(env[r.envKey]).trim()),
-    reason: env[r.envKey] && String(env[r.envKey]).trim() ? 'ok' : 'no_key',
-  }));
+  return raters.map((rater) => {
+    const present = Boolean(env[rater.envKey] && String(env[rater.envKey]).trim());
+    return {
+      provider: rater.provider,
+      family: rater.family,
+      tier: 'free-cloud',
+      key_present: present,
+      reason: present ? 'ok' : 'no_key',
+    };
+  });
 }
 
-// The usable panel = every fleet model actually served by a reachable host, plus every
-// free-cloud rater holding a key. Each entry carries its capability profile so the caller
-// can size timeouts / set think:false without a second lookup.
+// Every model served by a reachable host, carrying its capability profile so the caller can
+// size timeouts / set think:false without a second lookup.
+function buildFleetPanel(probedHosts, caps) {
+  const panel = [];
+  for (const host of probedHosts.filter((probe) => probe.reachable)) {
+    for (const model of host.models) {
+      const cap = capabilityFor(model, caps);
+      panel.push({
+        provider: `ollama:${host.id}`, host_id: host.id, host_url: host.url, model,
+        tier: 'local', family: cap.family, quality: cap.quality,
+        judge_eligible: cap.judge_eligible, thinking: cap.thinking, timeout_ms: cap.timeout_ms,
+      });
+    }
+  }
+  return panel;
+}
+
+// The usable panel = every fleet model on a reachable host, plus every free-cloud rater
+// holding a key.
 async function fleetPreflight(opts = {}) {
   const hosts = opts.hosts || loadHosts();
   const caps = opts.caps || loadCapabilities();
@@ -62,22 +81,13 @@ async function fleetPreflight(opts = {}) {
   const probed = [];
   // Sequential: probes are cheap, and serial keeps a down host from stalling the others
   // behind a shared connection pool.
-  for (const h of hosts) probed.push(await probeHost(h, fetchImpl, opts.timeoutMs));
+  for (const host of hosts) probed.push(await probeHost(host, fetchImpl, opts.timeoutMs));
 
-  const fleetPanel = [];
-  for (const h of probed.filter((p) => p.reachable)) {
-    for (const model of h.models) {
-      const cap = capabilityFor(model, caps);
-      fleetPanel.push({
-        provider: `ollama:${h.id}`, host_id: h.id, host_url: h.url, model,
-        tier: 'local', family: cap.family, quality: cap.quality,
-        judge_eligible: cap.judge_eligible, thinking: cap.thinking, timeout_ms: cap.timeout_ms,
-      });
-    }
-  }
+  const fleetPanel = buildFleetPanel(probed, caps);
   const cloudPanel = probeCloudRaters(opts.env || process.env, opts.raters);
-  const usableCloud = cloudPanel.filter((c) => c.key_present);
-  const families = [...new Set([...fleetPanel.map((f) => f.family), ...usableCloud.map((c) => c.family)])];
+  const usableCloud = cloudPanel.filter((rater) => rater.key_present);
+  const families = [...new Set([...fleetPanel.map((entry) => entry.family),
+    ...usableCloud.map((rater) => rater.family)])];
 
   return {
     hosts: probed,
@@ -85,9 +95,12 @@ async function fleetPreflight(opts = {}) {
     cloud_panel: cloudPanel,
     usable: [...fleetPanel, ...usableCloud],
     families,
-    unreachable_hosts: probed.filter((p) => !p.reachable).map((p) => ({ id: p.id, reason: p.reason })),
-    no_key_providers: cloudPanel.filter((c) => !c.key_present).map((c) => c.provider),
+    unreachable_hosts: probed.filter((probe) => !probe.reachable)
+      .map((probe) => ({ id: probe.id, reason: probe.reason })),
+    no_key_providers: cloudPanel.filter((rater) => !rater.key_present).map((rater) => rater.provider),
   };
 }
 
-module.exports = { fleetPreflight, probeHost, probeCloudRaters, CLOUD_RATERS, PROBE_TIMEOUT_MS };
+module.exports = {
+  fleetPreflight, probeHost, probeCloudRaters, buildFleetPanel, CLOUD_RATERS, PROBE_TIMEOUT_MS,
+};

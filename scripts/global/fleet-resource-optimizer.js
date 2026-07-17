@@ -11,7 +11,14 @@
 // dominates. Ordering: adequate -> free-before-paid -> quality -> speed.
 'use strict';
 
-const { capabilityFor, loadCapabilities } = require('./fleet-registry');
+const { capabilityFor, loadCapabilities, UNKNOWN_MODEL_TIMEOUT_MS } = require('./fleet-registry');
+
+// Quality assumed for a candidate that declares none — mid-scale, so an undeclared model is
+// neither trusted nor dismissed on a guess.
+const ASSUMED_QUALITY = 0.5;
+// Latency normalizer: a candidate whose budget equals this scores 0.5, so speed stays a
+// bounded 0..1 tie-breaker that can never outweigh cost.
+const SPEED_HALF_LIFE_MS = 60_000;
 
 // $0 tiers. Anything else is paid (G3).
 const FREE_TIERS = new Set(['local', 'free-cloud']);
@@ -25,14 +32,14 @@ function isFree(candidate) {
 }
 
 function qualityScore(candidate) {
-  const q = Number(candidate.quality);
-  return Number.isFinite(q) ? Math.max(0, Math.min(1, q)) : 0.5;
+  const quality = Number(candidate.quality);
+  return Number.isFinite(quality) ? Math.max(0, Math.min(1, quality)) : ASSUMED_QUALITY;
 }
 
 // Normalize latency into 0..1 (higher = faster). Tie-breaker only — never outranks cost.
 function speedScore(candidate) {
-  const t = Number(candidate.timeout_ms) || 120000;
-  return 1 / (1 + t / 60000);
+  const budgetMs = Number(candidate.timeout_ms) || UNKNOWN_MODEL_TIMEOUT_MS;
+  return 1 / (1 + budgetMs / SPEED_HALF_LIFE_MS);
 }
 
 function qualityBarFor(taskClass) {
@@ -40,15 +47,16 @@ function qualityBarFor(taskClass) {
 }
 
 function enrich(panel, caps) {
-  return (Array.isArray(panel) ? panel : []).map((c) => {
-    const cap = c.model ? capabilityFor(c.model, caps) : {};
+  return (Array.isArray(panel) ? panel : []).map((candidate) => {
+    const cap = candidate.model ? capabilityFor(candidate.model, caps) : {};
     return {
-      ...c,
-      family: c.family || cap.family || 'unknown',
-      quality: c.quality != null ? c.quality : cap.quality,
-      judge_eligible: c.judge_eligible != null ? c.judge_eligible : (cap.judge_eligible !== false),
-      timeout_ms: c.timeout_ms || cap.timeout_ms || 120000,
-      free: isFree(c),
+      ...candidate,
+      family: candidate.family || cap.family || 'unknown',
+      quality: candidate.quality != null ? candidate.quality : cap.quality,
+      judge_eligible: candidate.judge_eligible != null
+        ? candidate.judge_eligible : (cap.judge_eligible !== false),
+      timeout_ms: candidate.timeout_ms || cap.timeout_ms || UNKNOWN_MODEL_TIMEOUT_MS,
+      free: isFree(candidate),
     };
   });
 }
@@ -111,16 +119,16 @@ function selectDiversePanel(panel, size = 3, opts = {}) {
   const ranked = rankResources(panel, { ...opts, requireJudge: opts.requireJudge !== false });
   const picked = [];
   const usedFamilies = new Set();
-  for (const c of ranked) {
+  for (const candidate of ranked) {
     if (picked.length >= size) break;
-    if (usedFamilies.has(c.family)) continue;
-    picked.push(c);
-    usedFamilies.add(c.family);
+    if (usedFamilies.has(candidate.family)) continue;
+    picked.push(candidate);
+    usedFamilies.add(candidate.family);
   }
   if (picked.length < size) {
-    for (const c of ranked) {
+    for (const candidate of ranked) {
       if (picked.length >= size) break;
-      if (!picked.includes(c)) picked.push(c);
+      if (!picked.includes(candidate)) picked.push(candidate);
     }
   }
   return picked;

@@ -10,6 +10,7 @@ const path = require('node:path');
 // last-resort default so existing callers/tests keep working when no config is present.
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5:7b-instruct';
+const DEFAULT_NUM_PREDICT = 512;
 
 // #3126 AC2/AC3: registry is optional — a missing module must never break direct dispatch (G6).
 let registry = null;
@@ -56,6 +57,10 @@ function loadBasicTimeout(policyPath = DEFAULT_TIMEOUT_POLICY, fallbackMs = 120_
 }
 const TIMEOUT_MS = loadBasicTimeout();
 
+// A host that does not serve the model answers 404 / "model not found"; that is the only
+// error worth failing over on. Any other error IS the answer and must surface.
+const MODEL_NOT_FOUND_RE = /404|not found|model .*not/i;
+
 // #3126 AC2: try each candidate host in sequence (Ollama serializes per host, so parallel
 // fan-out just aborts) and fail over on "model not found" — the defect that made host B's
 // deepseek/granite (the only non-Qwen local families) structurally unreachable.
@@ -68,24 +73,29 @@ async function chatComplete(prompt, opts = {}) {
     if (res.ok) return res;
     last = res;
     // Only a missing-model/not-found is worth failing over; a real error is the answer.
-    if (!/404|not found|model .*not/i.test(String(res.error || ''))) return res;
+    if (!MODEL_NOT_FOUND_RE.test(String(res.error || ''))) return res;
   }
   return last;
+}
+
+function buildChatBody(prompt, model, capOpts, opts) {
+  return JSON.stringify({
+    model,
+    messages: [{ role: 'user', content: prompt }],
+    stream: false,
+    // #3126 AC3: a thinking model returns EMPTY content at low num_predict unless disabled.
+    ...(capOpts.think === false ? { think: false } : {}),
+    options: { num_predict: opts.maxTokens || DEFAULT_NUM_PREDICT },
+    // #3484: pin a hot model resident (keep_alive) so the common path isn't a cold load.
+    ...(opts.keepAlive ? { keep_alive: opts.keepAlive } : {}),
+  });
 }
 
 async function chatCompleteOnHost(prompt, opts = {}) {
   const model = opts.model || DEFAULT_MODEL;
   const base = opts.ollamaUrl || OLLAMA_URL;
   const capOpts = optionsForModel(model);
-  const body = JSON.stringify({
-    model,
-    messages: [{ role: 'user', content: prompt }],
-    stream: false,
-    ...(capOpts.think === false ? { think: false } : {}),
-    options: { num_predict: opts.maxTokens || 512 },
-    // #3484: pin a hot model resident (keep_alive) so the common path isn't a cold load.
-    ...(opts.keepAlive ? { keep_alive: opts.keepAlive } : {}),
-  });
+  const body = buildChatBody(prompt, model, capOpts, opts);
   const ac = new AbortController();
   // #3126 AC3: size the budget from the model's capability row (a 32B thinking model needs
   // ~600s incl. cold load), not the fixed 7b-class default that aborted qwen3:32b at 306s.
@@ -139,6 +149,6 @@ if (require.main === module) {
 }
 
 module.exports = {
-  chatComplete, chatCompleteOnHost, healthCheck, resolveHostsForModel, optionsForModel,
+  chatComplete, chatCompleteOnHost, healthCheck, resolveHostsForModel, optionsForModel, buildChatBody,
   OLLAMA_URL, DEFAULT_MODEL, loadBasicTimeout, TIMEOUT_MS,
 };
