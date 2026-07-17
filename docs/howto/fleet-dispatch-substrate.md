@@ -13,7 +13,7 @@ actually net-positive.
 | Defect | Effect | Fix |
 |---|---|---|
 | `ollama-direct.js` hardcoded ONE host | Host B (`100.78.22.13`) — the only source of the non-Qwen **deepseek** + **granite** families — 404'd and fell through to cloud. Local cross-family diversity was dead. | AC2: settings-driven host list + model-aware host resolution with failover |
-| No model-capability data | `qwen3:32b` (a *thinking* model at ~1.5 tok/s + 64s cold load) returned empty / timed out at 306s against a 7b-class budget | AC3: capability registry sets `think:false` and sizes the timeout |
+| No model-capability data | `qwen3:32b` (a _thinking_ model at ~1.5 tok/s + 64s cold load) returned empty / timed out at 306s against a 7b-class budget | AC3: capability registry sets `think:false` and sizes the timeout |
 | Raters failed mid-run | `unknown_provider` / `no_key` / `429` discovered only after spending the run | AC1: preflight reports reachability + key presence + family first |
 | Correlated panel | A same-family trio anchors near 82, so a `>93` gate is unreachable — and the loop iterated forever | AC4: `consensus-max` honest stop |
 | ROI unfalsifiable | "Overhead exceeds savings" could not be checked | AC5: per-run ROI event |
@@ -57,10 +57,10 @@ recordRun({ free_calls: 3, failed_dispatches: 0, families: gate.families, ticket
 
 ## How the optimizer decides (AC6)
 
-**Not** a weighted sum. A linear `quality*w1 + cost*w2 + speed*w3` lets a marginal quality gain
+**Not** a weighted sum. A linear `quality_w1 + cost_w2 + speed*w3` lets a marginal quality gain
 buy a paid escalation, silently defeating G3 (this was caught in development: a 0.82-quality $0
 local model lost to a 0.95-quality paid one). Instead it is the harness's cost-ascending
-mandate — *"start in the lowest **adequate** lane"* — as a lexicographic rule:
+mandate — _"start in the lowest **adequate** lane"_ — as a lexicographic rule:
 
 1. **Adequacy threshold** — drop candidates below the task's quality bar (`routine` 0.4 /
    `standard` 0.55 / `high-stakes` 0.7). Below the bar is a G2 failure dressed as a G3 win.
@@ -91,4 +91,4 @@ the signal. A telemetry write failure never breaks a governed run.
 ## Boundary
 
 This is the **substrate** layer only. Epic #3069 (review-workflow) and #3576/#3585
-(policy/activation) *consume* these modules — they do not re-implement them.
+(policy/activation) _consume_ these modules — they do not re-implement them.
