@@ -1,0 +1,20 @@
+{
+  "_comment": "Epic #3126 AC2 / G5: settings-driven fleet host list. No hardcoded IP in code. Override with MEGINGJORD_FLEET_HOSTS (JSON array) or FLEET_HOSTS_PATH. Absent/malformed config degrades to an empty list -> callers fall back per G6.",
+  "schema": "fleet-hosts-v1",
+  "hosts": [
+    {
+      "id": "winresource-36gb",
+      "url": "http://100.91.113.16:11434",
+      "families": ["qwen", "llama"],
+      "max_concurrency": 1,
+      "notes": "Primary. Ollama serializes per host -> max_concurrency 1 (AC2 sequential scheduling)."
+    },
+    {
+      "id": "windows-laptop",
+      "url": "http://100.78.22.13:11434",
+      "families": ["deepseek", "granite", "qwen", "starcoder"],
+      "max_concurrency": 1,
+      "notes": "Secondary. Sole source of non-Qwen local families (deepseek, granite) -> required for local cross-family diversity."
+    }
+  ]
+}
