@@ -6,8 +6,44 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+// #3126 AC2: the host list is CONFIG, not code. This legacy constant stays only as the
+// last-resort default so existing callers/tests keep working when no config is present.
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://100.91.113.16:11434';
 const DEFAULT_MODEL = 'qwen2.5:7b-instruct';
+
+// #3126 AC2/AC3: registry is optional — a missing module must never break direct dispatch (G6).
+let registry = null;
+try { registry = require('./fleet-registry'); } catch { registry = null; }
+
+// Ordered hosts that could serve `model`, best-guess first.
+// Precedence: explicit opts.ollamaUrl > OLLAMA_URL env (back-compat) > family-matched
+// configured hosts > all configured hosts > legacy default.
+function resolveHostsForModel(model, opts = {}) {
+  if (opts.ollamaUrl) return [opts.ollamaUrl];
+  if (process.env.OLLAMA_URL) return [process.env.OLLAMA_URL];
+  if (!registry) return [OLLAMA_URL];
+  let hosts = [];
+  try { hosts = registry.loadHosts(); } catch { hosts = []; }
+  if (!hosts.length) return [OLLAMA_URL];
+  let family = null;
+  try { family = registry.capabilityFor(model).family; } catch { family = null; }
+  const matched = family ? hosts.filter((h) => h.families.includes(family)) : [];
+  const rest = hosts.filter((h) => !matched.includes(h));
+  // A family match is a hint, not a guarantee — keep the others as failover so a stale
+  // `families` entry degrades to "try everything" rather than a hard 404 (G6).
+  return [...matched, ...rest].map((h) => h.url);
+}
+
+// #3126 AC3: registry-implied dispatch options. A "thinking" model returns EMPTY content at
+// low num_predict unless think:false, and a 32B cold load needs a far larger budget than the
+// 7b-class default — the pair that produced the observed 306s qwen3:32b timeout.
+function optionsForModel(model) {
+  if (!registry) return {};
+  try {
+    const cap = registry.capabilityFor(model);
+    return { think: cap.thinking ? false : undefined, timeoutMs: cap.timeout_ms };
+  } catch { return {}; }
+}
 const DEFAULT_TIMEOUT_POLICY = path.join(__dirname, '..', '..', 'config', 'timeout-policy.json');
 // G3 patience: read the fleet-dispatch-basic class (300s for 7b-class models); fall back to the prior 120s
 // on a missing/malformed policy. Path-injectable for tests.
@@ -20,19 +56,42 @@ function loadBasicTimeout(policyPath = DEFAULT_TIMEOUT_POLICY, fallbackMs = 120_
 }
 const TIMEOUT_MS = loadBasicTimeout();
 
+// #3126 AC2: try each candidate host in sequence (Ollama serializes per host, so parallel
+// fan-out just aborts) and fail over on "model not found" — the defect that made host B's
+// deepseek/granite (the only non-Qwen local families) structurally unreachable.
 async function chatComplete(prompt, opts = {}) {
   const model = opts.model || DEFAULT_MODEL;
+  const hosts = resolveHostsForModel(model, opts);
+  let last = { ok: false, error: 'no_host_configured' };
+  for (const host of hosts) {
+    const res = await chatCompleteOnHost(prompt, { ...opts, ollamaUrl: host });
+    if (res.ok) return res;
+    last = res;
+    // Only a missing-model/not-found is worth failing over; a real error is the answer.
+    if (!/404|not found|model .*not/i.test(String(res.error || ''))) return res;
+  }
+  return last;
+}
+
+async function chatCompleteOnHost(prompt, opts = {}) {
+  const model = opts.model || DEFAULT_MODEL;
   const base = opts.ollamaUrl || OLLAMA_URL;
+  const capOpts = optionsForModel(model);
   const body = JSON.stringify({
     model,
     messages: [{ role: 'user', content: prompt }],
     stream: false,
+    ...(capOpts.think === false ? { think: false } : {}),
     options: { num_predict: opts.maxTokens || 512 },
     // #3484: pin a hot model resident (keep_alive) so the common path isn't a cold load.
     ...(opts.keepAlive ? { keep_alive: opts.keepAlive } : {}),
   });
   const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(new Error('ollama timeout')), TIMEOUT_MS);
+  // #3126 AC3: size the budget from the model's capability row (a 32B thinking model needs
+  // ~600s incl. cold load), not the fixed 7b-class default that aborted qwen3:32b at 306s.
+  // Explicit opts.timeoutMs still wins; TIMEOUT_MS remains the floor for unknown models.
+  const budgetMs = opts.timeoutMs || capOpts.timeoutMs || TIMEOUT_MS;
+  const timer = setTimeout(() => ac.abort(new Error('ollama timeout')), budgetMs);
   try {
     const res = await fetch(`${base}/api/chat`, {
       method: 'POST',
@@ -79,4 +138,7 @@ if (require.main === module) {
   }).catch(e => { console.error(e.message); process.exit(1); });
 }
 
-module.exports = { chatComplete, healthCheck, OLLAMA_URL, DEFAULT_MODEL, loadBasicTimeout, TIMEOUT_MS };
+module.exports = {
+  chatComplete, chatCompleteOnHost, healthCheck, resolveHostsForModel, optionsForModel,
+  OLLAMA_URL, DEFAULT_MODEL, loadBasicTimeout, TIMEOUT_MS,
+};

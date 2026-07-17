@@ -1,0 +1,17 @@
+{
+  "_comment": "Epic #3126 AC3: declarative model-capability registry. Consumed by the dispatcher to set think:false on thinking models, size timeouts from tok/s + cold-load, and discount small models as judges. quality 0-1 (judge trustworthiness). Unknown models fall back to `default`, which is dispatchable but NOT judge_eligible: an undeclared model may run, but may not be a final judge (G2). Declaring a model is one row.",
+  "schema": "model-capability-v1",
+  "default": {"family": "unknown", "params_b": 7, "thinking": false, "tok_per_s": 8, "cold_load_s": 20, "timeout_ms": 120000, "quality": 0.5, "judge_eligible": false},
+  "models": {
+    "qwen3:32b": {"family": "qwen", "params_b": 32, "thinking": true, "tok_per_s": 1.5, "cold_load_s": 64, "timeout_ms": 600000, "quality": 0.85, "judge_eligible": true, "notes": "Thinking model: emits empty content at low num_predict unless think:false. ~1.5 tok/s + 64s cold load -> 306s observed timeout under the old 120s budget (#3126 evidence)."},
+    "qwen2.5-coder:32b": {"family": "qwen", "params_b": 32, "thinking": false, "tok_per_s": 4, "cold_load_s": 40, "timeout_ms": 420000, "quality": 0.82, "judge_eligible": true},
+    "deepseek-coder-v2:lite": {"family": "deepseek", "params_b": 16, "thinking": false, "tok_per_s": 10, "cold_load_s": 25, "timeout_ms": 180000, "quality": 0.74, "judge_eligible": true, "notes": "Host B only. Non-Qwen family -> carries local cross-family diversity."},
+    "granite-code:20b": {"family": "granite", "params_b": 20, "thinking": false, "tok_per_s": 7, "cold_load_s": 30, "timeout_ms": 240000, "quality": 0.7, "judge_eligible": true, "notes": "Host B only. Non-Qwen family."},
+    "llama3.1:8b": {"family": "llama", "params_b": 8, "thinking": false, "tok_per_s": 18, "cold_load_s": 12, "timeout_ms": 90000, "quality": 0.6, "judge_eligible": true},
+    "qwen2.5:7b-instruct": {"family": "qwen", "params_b": 7, "thinking": false, "tok_per_s": 20, "cold_load_s": 10, "timeout_ms": 90000, "quality": 0.55, "judge_eligible": true},
+    "qwen2.5-coder:7b": {"family": "qwen", "params_b": 7, "thinking": false, "tok_per_s": 20, "cold_load_s": 10, "timeout_ms": 90000, "quality": 0.55, "judge_eligible": true},
+    "granite-code:3b": {"family": "granite", "params_b": 3, "thinking": false, "tok_per_s": 35, "cold_load_s": 5, "timeout_ms": 60000, "quality": 0.3, "judge_eligible": false, "notes": "Too weak to be a final judge (falsely-inflated early scores, Epic #3069 evidence)."},
+    "starcoder2:3b": {"family": "starcoder", "params_b": 3, "thinking": false, "tok_per_s": 35, "cold_load_s": 5, "timeout_ms": 60000, "quality": 0.28, "judge_eligible": false},
+    "qwen2.5-coder:1.5b": {"family": "qwen", "params_b": 1.5, "thinking": false, "tok_per_s": 45, "cold_load_s": 4, "timeout_ms": 60000, "quality": 0.2, "judge_eligible": false}
+  }
+}

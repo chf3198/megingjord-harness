@@ -556,3 +556,5 @@ See [docs/howto/cross-team-rd-synthesis.md](docs/howto/cross-team-rd-synthesis.m
 ## Cross-team R&D synthesis
 
 For Epics that benefit from multi-team independent perspectives, see [How-to: Run a cross-team R&D synthesis](docs/howto/cross-team-rd-synthesis.md). One-line kickoff: `npm run synthesis:init -- --epic <N>`. Canonical protocol at [instructions/cross-team-rd-synthesis.instructions.md](instructions/cross-team-rd-synthesis.instructions.md). Tier-1 by default; HAMR R2 mailbox is the Tier-2 optimization.
+
+- Fleet dispatch substrate (multi-host $0 routing, capability registry, ROI): [docs/howto/fleet-dispatch-substrate.md](docs/howto/fleet-dispatch-substrate.md)
