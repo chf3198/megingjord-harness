@@ -70,13 +70,24 @@ function censusValidators(files) {
 // Distinct env-var flags used as bypass / override / disable / advisory switches across the
 // governed surface. Names only — never values (G4). De-duplicated.
 const FLAG_RE = /\b(MEGINGJORD_[A-Z0-9_]+|[A-Z][A-Z0-9]*_(?:BYPASS|DISABLED|OVERRIDE|ADVISORY|SKIP|ENABLE|ENABLED)|SKIP_[A-Z0-9_]+)\b/g;
+// Strip line/block comments so a flag NAME merely mentioned in prose or a comment does not
+// inflate the count (cross-family review finding, #3808 — the harness's prose-collision class).
+// Over-counting would be safe-side for a net-negative invariant, but the scoreboard must be
+// accurate, so we scan code/config, not commentary.
+function stripComments(text) {
+  return String(text || '')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ') // block comments
+    .replace(/(^|\s)\/\/[^\n]*/g, ' ') // JS line comments
+    .replace(/(^|\s)#[^\n]*/g, ' ');   // shell/py/yaml line comments
+}
 function censusFlags(files) {
   const scan = files.filter((f) => /^(scripts\/global\/.*\.js|hooks\/scripts\/.*\.py|instructions\/.*\.md|\.github\/workflows\/.*\.yml)$/.test(f));
   const set = new Set();
   for (const f of scan) {
-    const m = readSafe(f).match(FLAG_RE);
+    const m = stripComments(readSafe(f)).match(FLAG_RE);
     if (m) for (const x of m) set.add(x);
   }
+  // Names only, never values (G4): FLAG_RE captures the identifier token, not any assignment.
   return { distinct: set.size, sample: [...set].sort().slice(0, 30) };
 }
 
@@ -177,4 +188,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { census, delta, censusValidators, censusFlags, ADVISORY_RE };
+module.exports = { census, delta, censusValidators, censusFlags, stripComments, ADVISORY_RE };

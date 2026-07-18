@@ -75,3 +75,11 @@ test('snapshot round-trips through delta for a re-run scoreboard', () => {
   assert.strictEqual(census.delta(c, reloaded).surface_units, 0, 'self-delta is zero');
   assert.strictEqual(census.delta(c, reloaded).net_negative, true);
 });
+
+test('flag scan ignores flag-names inside comments/prose (precision, xfam finding)', () => {
+  // stripComments removes commentary so a mentioned flag name does not inflate the count.
+  const code = "const a = process.env.MEGINGJORD_REAL_FLAG; // mentions MEGINGJORD_FAKE_FLAG in a comment";
+  const cleaned = census.stripComments(code);
+  assert.ok(cleaned.includes('MEGINGJORD_REAL_FLAG'), 'real code reference survives');
+  assert.ok(!cleaned.includes('MEGINGJORD_FAKE_FLAG'), 'commented mention is stripped');
+});
