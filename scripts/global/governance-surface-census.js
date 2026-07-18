@@ -37,9 +37,9 @@ function walk(dir, acc = [], depth = 0) {
   try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return acc; }
   for (const e of ents) {
     if (e.name === 'node_modules' || e.name === '.git' || e.name === 'dist') continue;
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) walk(p, acc, depth + 1);
-    else acc.push(p);
+    const entryPath = path.join(dir, e.name);
+    if (e.isDirectory()) walk(entryPath, acc, depth + 1);
+    else acc.push(entryPath);
   }
   return acc;
 }
@@ -48,8 +48,8 @@ function readSafe(rel) {
   try { return fs.readFileSync(path.join(REPO, rel), 'utf8'); } catch { return ''; }
 }
 function countLines(rel) {
-  const t = readSafe(rel);
-  return t ? t.split('\n').length : 0;
+  const text = readSafe(rel);
+  return text ? text.split('\n').length : 0;
 }
 
 // A validator is advisory if its source signals non-blocking disposition. This mirrors the
@@ -58,13 +58,13 @@ function countLines(rel) {
 const ADVISORY_RE = /advisory|warns?\s*\(never blocks|does not block|pending-enforcement|promotion (?:is )?(?:replay-eval-)?gated|ships?\s+advisory/i;
 
 function censusValidators(files) {
-  const v = files.filter((f) => /^scripts\/global\/megalint\/.*\.js$/.test(f) && !/\.spec\./.test(f));
+  const validatorFiles = files.filter((f) => /^scripts\/global\/megalint\/.*\.js$/.test(f) && !/\.spec\./.test(f));
   let advisory = 0;
   const advisoryList = [];
-  for (const f of v) {
-    if (ADVISORY_RE.test(readSafe(f))) { advisory += 1; advisoryList.push(f.replace('scripts/global/megalint/', '')); }
+  for (const file of validatorFiles) {
+    if (ADVISORY_RE.test(readSafe(file))) { advisory += 1; advisoryList.push(file.replace('scripts/global/megalint/', '')); }
   }
-  return { total: v.length, advisory, blocking: v.length - advisory, advisoryList };
+  return { total: validatorFiles.length, advisory, blocking: validatorFiles.length - advisory, advisoryList };
 }
 
 // Distinct env-var flags used as bypass / override / disable / advisory switches across the
@@ -83,77 +83,69 @@ function stripComments(text) {
 function censusFlags(files) {
   const scan = files.filter((f) => /^(scripts\/global\/.*\.js|hooks\/scripts\/.*\.py|instructions\/.*\.md|\.github\/workflows\/.*\.yml)$/.test(f));
   const set = new Set();
-  for (const f of scan) {
-    const m = stripComments(readSafe(f)).match(FLAG_RE);
-    if (m) for (const x of m) set.add(x);
+  for (const file of scan) {
+    const matches = stripComments(readSafe(file)).match(FLAG_RE);
+    if (matches) for (const flag of matches) set.add(flag);
   }
   // Names only, never values (G4): FLAG_RE captures the identifier token, not any assignment.
   return { distinct: set.size, sample: [...set].sort().slice(0, 30) };
 }
 
+// Resident-instruction load: the always-on set is CLAUDE.md + every instructions/*.md it
+// @-imports (NOT the on-demand ones). The rest of instructions/ is on-demand.
+function censusResident(instructionFiles) {
+  const claudeMd = readSafe('CLAUDE.md');
+  const residentRefs = [...claudeMd.matchAll(/@instructions\/([\w.-]+\.md)/g)].map((match) => `instructions/${match[1]}`);
+  const residentFiles = ['CLAUDE.md', ...residentRefs];
+  return {
+    files: residentFiles.length,
+    loc: residentFiles.reduce((total, file) => total + countLines(file), 0),
+    list: residentFiles,
+    instruction_files_total: instructionFiles.length,
+    instruction_loc_total: instructionFiles.reduce((total, file) => total + countLines(file), 0),
+    on_demand_files: instructionFiles.length - residentFiles.filter((file) => file.startsWith('instructions/')).length,
+  };
+}
+
 function census() {
   const files = trackedFiles();
-  const has = (re) => files.filter((f) => re.test(f));
-
+  const has = (re) => files.filter((file) => re.test(file));
   const validators = censusValidators(files);
-  const workflows = has(/^\.github\/workflows\/.*\.yml$/).length;
-  const hooks = has(/^hooks\/scripts\/.*\.py$/).length;
-  const skills = new Set(has(/^skills\/[^/]+\//).map((f) => f.split('/')[1])).size;
-  const globalScripts = has(/^scripts\/global\/.*\.js$/).filter((f) => !/\.spec\./.test(f)).length;
-  const tests = has(/^tests\/.*\.spec\.js$/).length;
-
-  // Resident-instruction LOC: the always-on set is CLAUDE.md + the @-referenced always-resident
-  // instruction files (NOT the on-demand ones). We count CLAUDE.md + every instructions/*.md it
-  // @-imports as resident; the rest of instructions/ is on-demand.
-  const claudeMd = readSafe('CLAUDE.md');
-  const residentRefs = [...claudeMd.matchAll(/@instructions\/([\w.-]+\.md)/g)].map((m) => `instructions/${m[1]}`);
-  const residentFiles = ['CLAUDE.md', ...residentRefs];
-  const residentLoc = residentFiles.reduce((n, f) => n + countLines(f), 0);
-  const instructionFilesTotal = has(/^instructions\/.*\.md$/).length;
-  const instructionLocTotal = has(/^instructions\/.*\.md$/).reduce((n, f) => n + countLines(f), 0);
-
+  const resident = censusResident(has(/^instructions\/.*\.md$/));
   const flags = censusFlags(files);
-
-  // The single headline number the invariant tracks. Weighted equally: one validator, one
-  // resident-instruction *file*, and one bypass flag each count as one unit of surface. LOC is
-  // reported separately (finer-grained) but the invariant uses the coarse count to avoid noise.
-  const surfaceUnits = validators.total + residentFiles.length + flags.distinct;
-
+  // Headline the invariant tracks: one validator, one resident-instruction file, and one bypass
+  // flag each count as one unit of surface. LOC is reported separately (finer-grained).
   return {
     schema: 'governance-surface-census-v1',
     generated_note: 'READ-ONLY census; counts + paths only, no secret values (G4).',
-    surface_units: surfaceUnits,
+    surface_units: validators.total + resident.files + flags.distinct,
     validators,
-    workflows,
-    hooks,
-    skills,
-    global_scripts: globalScripts,
-    tests,
-    resident_instructions: {
-      files: residentFiles.length, loc: residentLoc, list: residentFiles,
-      instruction_files_total: instructionFilesTotal, instruction_loc_total: instructionLocTotal,
-      on_demand_files: instructionFilesTotal - residentFiles.filter((f) => f.startsWith('instructions/')).length,
-    },
+    workflows: has(/^\.github\/workflows\/.*\.yml$/).length,
+    hooks: has(/^hooks\/scripts\/.*\.py$/).length,
+    skills: new Set(has(/^skills\/[^/]+\//).map((file) => file.split('/')[1])).size,
+    global_scripts: has(/^scripts\/global\/.*\.js$/).filter((file) => !/\.spec\./.test(file)).length,
+    tests: has(/^tests\/.*\.spec\.js$/).length,
+    resident_instructions: resident,
     bypass_flags: flags,
   };
 }
 
 // Δ vs a prior snapshot: negative on surface_units means the surface shrank (invariant target).
 function delta(current, baseline) {
-  const d = (a, b) => (a || 0) - (b || 0);
+  const sub = (now, base) => (now || 0) - (base || 0);
   return {
-    surface_units: d(current.surface_units, baseline.surface_units),
-    validators: d(current.validators.total, baseline.validators.total),
-    validators_advisory: d(current.validators.advisory, baseline.validators.advisory),
-    resident_files: d(current.resident_instructions.files, baseline.resident_instructions.files),
-    resident_loc: d(current.resident_instructions.loc, baseline.resident_instructions.loc),
-    bypass_flags: d(current.bypass_flags.distinct, baseline.bypass_flags.distinct),
-    net_negative: d(current.surface_units, baseline.surface_units) <= 0,
+    surface_units: sub(current.surface_units, baseline.surface_units),
+    validators: sub(current.validators.total, baseline.validators.total),
+    validators_advisory: sub(current.validators.advisory, baseline.validators.advisory),
+    resident_files: sub(current.resident_instructions.files, baseline.resident_instructions.files),
+    resident_loc: sub(current.resident_instructions.loc, baseline.resident_instructions.loc),
+    bypass_flags: sub(current.bypass_flags.distinct, baseline.bypass_flags.distinct),
+    net_negative: sub(current.surface_units, baseline.surface_units) <= 0,
   };
 }
 
 function fmt(c) {
-  const r = c.resident_instructions;
+  const resident = c.resident_instructions;
   return [
     '── Governance-surface census ─────────────────────────',
     `  surface units (validators+resident-files+flags) : ${c.surface_units}`,
@@ -163,7 +155,7 @@ function fmt(c) {
     `  skills                : ${c.skills}`,
     `  global scripts        : ${c.global_scripts}`,
     `  tests                 : ${c.tests}`,
-    `  resident instructions : ${r.files} files, ${r.loc} LOC   (of ${r.instruction_files_total} total, ${r.instruction_loc_total} LOC)`,
+    `  resident instructions : ${resident.files} files, ${resident.loc} LOC   (of ${resident.instruction_files_total} total, ${resident.instruction_loc_total} LOC)`,
     `  bypass/override flags : ${c.bypass_flags.distinct}`,
     '──────────────────────────────────────────────────────',
   ].join('\n');
@@ -171,20 +163,20 @@ function fmt(c) {
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const c = census();
+  const snapshot = census();
   const snapIdx = args.indexOf('--snapshot');
   if (snapIdx >= 0 && args[snapIdx + 1]) {
-    fs.writeFileSync(args[snapIdx + 1], JSON.stringify(c) + '\n'); // compact: machine snapshot
+    fs.writeFileSync(args[snapIdx + 1], JSON.stringify(snapshot) + '\n'); // compact: machine snapshot
     process.stderr.write(`snapshot written: ${args[snapIdx + 1]}\n`);
   }
   const baseIdx = args.indexOf('--baseline');
   if (baseIdx >= 0 && args[baseIdx + 1]) {
     const base = JSON.parse(fs.readFileSync(args[baseIdx + 1], 'utf8'));
-    console.log(JSON.stringify({ current: c.surface_units, baseline: base.surface_units, delta: delta(c, base) }, null, 2));
+    console.log(JSON.stringify({ current: snapshot.surface_units, baseline: base.surface_units, delta: delta(snapshot, base) }, null, 2));
   } else if (args.includes('--json')) {
-    console.log(JSON.stringify(c, null, 2));
+    console.log(JSON.stringify(snapshot, null, 2));
   } else {
-    console.log(fmt(c));
+    console.log(fmt(snapshot));
   }
 }
 
