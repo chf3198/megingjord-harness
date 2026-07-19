@@ -5,7 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const { auditStashes, scanAbandonedWorktrees, emitAdvisories, MAX_STASHES } = require('../scripts/global/worktree-hygiene');
-const { classifyBranch, lintBranchName } = require('../scripts/global/megalint/worktree-naming-advisory');
+// Branch-naming coverage moved out with the retirement of worktree-naming-advisory (#3811, Epic
+// #3807 C3); branch-name enforcement now lives solely in the blocking validate-branch-name.sh +
+// branch-name.yml gates, exercised by their own specs.
 
 const NOW = 1_800_000_000;
 test('auditStashes: <=2 fresh stashes → no advisory', () => {
@@ -37,13 +39,3 @@ test('emitAdvisories: appends schema-v3 lines to target file', () => {
   fs.unlinkSync(tmp);
 });
 
-test('naming: flat + namespace shapes conform; protected ok; bad → advisory (never blocks)', () => {
-  assert.strictEqual(classifyBranch('fix/2075-worktree-hygiene').conforms, true);
-  assert.strictEqual(classifyBranch('cc/fix/2075-worktree-hygiene').shape, 'per-team-namespace');
-  assert.strictEqual(classifyBranch('main').conforms, true);
-  const bad = classifyBranch('random-branch');
-  assert.strictEqual(bad.conforms, false);
-  assert.match(bad.advisory, /advisory only, not blocked/);
-  assert.strictEqual(lintBranchName('random-branch').ok, true); // advisory never blocks
-  assert.strictEqual(lintBranchName('random-branch').advisories.length, 1);
-});

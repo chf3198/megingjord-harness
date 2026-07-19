@@ -17,11 +17,12 @@ const {
 } = require('../scripts/global/validator-dispatch-contract.js');
 
 const REPO_ROOT = path.join(__dirname, '..');
+// worktree-naming-advisory was in this set until #3811 retired it (Epic #3807 C3) — its property
+// is strictly dominated by the blocking validate-branch-name.sh + branch-name.yml gates.
 const PREVIOUSLY_ORPHANED = [
   'fleet-review-required',
   'registry-tuple-coverage',
   'sub-issue-preference',
-  'worktree-naming-advisory',
 ];
 
 describe('validator-dispatch-contract', () => {

@@ -407,15 +407,6 @@
     "ci:actionlint.yml",
     "lefthook:pre-push:megalint"
    ]
-  },
-  {
-   "validator": "worktree-naming-advisory",
-   "file": "scripts/global/megalint/worktree-naming-advisory.js",
-   "dispatchedBy": [
-    "megalint-runAll",
-    "lefthook:pre-push:worktree-naming-advisory",
-    "lefthook:pre-push:megalint"
-   ]
   }
  ]
 }

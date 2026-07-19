@@ -40,7 +40,8 @@ const flawsRecognized = require('./flaws-recognized.js');
 const fleetReviewRequired = require('./fleet-review-required.js');
 const registryTupleCoverage = require('./registry-tuple-coverage.js');
 const subIssuePreference = require('./sub-issue-preference.js');
-const worktreeNamingAdvisory = require('./worktree-naming-advisory.js');
+// worktree-naming-advisory retired (Epic #3807 C3, #3811): advisory-only branch-name warner whose
+// property is strictly dominated by the BLOCKING validate-branch-name.sh + branch-name.yml gates.
 
 // parity-validator exposes run() not validate(); wrap to standard interface.
 const parityValidatorAdapter = {
@@ -90,16 +91,6 @@ const subIssueAdapter = {
   },
 };
 
-// worktree-naming-advisory exposes lintBranchName() not validate(); wrap to standard interface.
-// Always advisory (never blocking) per the validator's own contract.
-const worktreeNamingAdapter = {
-  validate: (input) => {
-    const branch = String((input || {}).branch || '');
-    const result = worktreeNamingAdvisory.lintBranchName(branch);
-    return { ok: true, violations: (result.advisories || []) };
-  },
-};
-
 const VALIDATORS = {
   'manager-handoff': manager,
   'collaborator-handoff': collaborator,
@@ -134,7 +125,6 @@ const VALIDATORS = {
   'fleet-review-required': fleetReviewRequired,
   'registry-tuple-coverage': registryTupleAdapter,
   'sub-issue-preference': subIssueAdapter,
-  'worktree-naming-advisory': worktreeNamingAdapter,
 };
 
 function runAll(input) {
