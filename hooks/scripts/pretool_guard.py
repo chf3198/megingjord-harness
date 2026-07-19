@@ -353,6 +353,18 @@ def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
 # hardening): a curl command line longer than this never legitimately targets a fleet host.
 RE_FLEET_CURL = re.compile(r"curl\b[^\n|]{0,512}(?::11434\b|/api/(?:generate|tags|chat)\b)")
 
+# Epic #3807 C2 (#3810) — affordance-first golden path. The raw-fleet-curl class was the harness's
+# #1 recurrence (1,615 incidents) because the correct path was never made the *default*. This
+# redirect names the exact copy-pasteable golden-path command, so the right move is a copy-paste
+# (poka-yoke), not something to recall. The DENY, the bypass-incident, and the '# hamr-bypass-ok:'
+# carve-out are all PRESERVED — this only lowers the friction of doing the right thing.
+FLEET_CURL_REDIRECT_MSG = (
+    "Raw fleet/ollama curl (#2192 vector 2). Use the golden-path default instead: "
+    "`npm run fleet -- --prompt \"<your prompt>\"` (free-fleet $0 cascade; HAMR records "
+    "cost+observability). For an audited diagnostic, add '# hamr-bypass-ok: <reason>'. "
+    "Operator-resolvable — no client prompt."
+)
+
 def is_raw_fleet_curl(joined: str) -> bool:
     """True when a raw curl targets a fleet/ollama endpoint outside the dispatch
     wrappers without the documented carve-out (#2192 vector #2 - raw curl bypasses
@@ -470,13 +482,11 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if is_raw_fleet_curl(joined):
         _emit_fleet_bypass_incident(cwd)
-        # Epic #3392 AC2 (S1): self-resolvable REDIRECT, not a client prompt. The operator
-        # uses the dispatch wrappers (cascade-dispatch / free-cloud-dispatch) so HAMR records
-        # cost+observability, or adds the documented '# hamr-bypass-ok: <reason>' carve-out for an
-        # audited diagnostic. The deny + bypass-incident are PRESERVED (anti-goal §6) — only ask->deny.
-        return emit("deny", "Raw fleet/ollama curl (#2192 vector 2): use cascade-dispatch or "
-                    "free-cloud-dispatch (HAMR cost+observability), or add '# hamr-bypass-ok: <reason>' "
-                    "for an audited diagnostic bypass. Operator-resolvable — no client prompt.")
+        # Epic #3392 AC2 (S1): self-resolvable REDIRECT, not a client prompt. Epic #3807 C2
+        # (#3810): the redirect now names the `npm run fleet` golden-path default so the right
+        # move is a copy-paste (affordance-first, poka-yoke). The deny + bypass-incident +
+        # '# hamr-bypass-ok:' carve-out are all PRESERVED (anti-goal §6) — friction lowered, not gate.
+        return emit("deny", FLEET_CURL_REDIRECT_MSG)
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     if is_main_checkout(cwd):
         sw = RE_BRANCH_SWITCH.search(joined)
