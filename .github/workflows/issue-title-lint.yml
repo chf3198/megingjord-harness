@@ -1,0 +1,59 @@
+name: Issue Title Lint
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: issue-title-lint-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  lint-title:
+    name: lint-title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue.title;
+            const violations = [];
+
+            if (title.length > 72) {
+              violations.push(`Title is ${title.length} characters (limit: 72)`);
+            }
+
+            if (/^(feat|fix|chore|refactor|docs|style|test|perf|content)\s*(\([^)]*\))?\s*:/i.test(title)) {
+              violations.push('Conventional Commits format is forbidden on issue titles (`feat(scope):` belongs on commits/PRs)');
+            }
+
+            if (/^\[(BUG|FEATURE|EPIC|TASK|DOC|RESEARCH|STORY)\]/i.test(title)) {
+              violations.push('Bracket type tags are forbidden (`[BUG]`, `[EPIC]`, etc.) — use `type:*` labels instead');
+            }
+
+            if (violations.length === 0) {
+              core.info('Issue title format is valid');
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.payload.issue.number,
+              body: [
+                '⚠️ **Issue Title Governance Violation**',
+                '',
+                violations.map(v => `- ${v}`).join('\n'),
+                '',
+                '**Required format**: Plain imperative sentence ≤72 characters',
+                '> ✅ `Fix header nav contrast on dark backgrounds`',
+                '> ❌ `feat(nav): fix header nav contrast #123`',
+                '> ❌ `[BUG] Header nav contrast broken`',
+                '',
+                'Edit the issue title to resolve this check.'
+              ].join('\n')
+            });
+
+            core.setFailed(`Issue title violations: ${violations.join('; ')}`);
