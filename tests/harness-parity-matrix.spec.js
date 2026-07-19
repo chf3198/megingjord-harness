@@ -355,7 +355,7 @@ test('VERDICT.UNVERIFIED_ADVISORY is exported and has correct string value', () 
 test('probeCell treats brace-expansion ssotFile as non-probeable and returns unverified-advisory', () => {
   const feature = makeFeature({
     id: 'brace-expansion-test',
-    ssotFiles: ['scripts/global/megalint/{fleet-review-required,worktree-naming-advisory}.js'],
+    ssotFiles: ['scripts/global/megalint/{fleet-review-required,registry-tuple-coverage}.js'],
     perRuntime: { 'claude-code': { status: 'unverified' } },
   });
   const result = probeCell(feature, 'claude-code', REPO_ROOT);
