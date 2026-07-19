@@ -403,7 +403,7 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.93.0",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.60.0",
     "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^50.8.0",
     "globals": "^17.5.0",
