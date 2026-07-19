@@ -25,7 +25,7 @@ an advisor, not a gate.
 ## Binding safety properties
 
 - **Read-only.** The evaluator FLAGS candidates; it never deletes or edits a validator.
-- **Fail-safe.** A validator is `retain` unless *positive* evidence says otherwise. Missing replay data
+- **Fail-safe.** A validator is `retain` unless _positive_ evidence says otherwise. Missing replay data
   never produces a retirement-candidate.
 - **Blocking gates are out of scope.** The evaluator only ever considers advisory validators. Retiring a
   live blocking control is the `security-policy-weakening` retained human touchpoint, never autonomous.
