@@ -240,6 +240,7 @@
     "readability:snapshot": "bash scripts/readability-snapshot.sh",
     "repo:scope": "node scripts/global/repo-scope.js",
     "rotation:check": "node scripts/global/hamr-rotation-check.js",
+    "fleet": "node scripts/global/cascade-dispatch.js",
     "router:cascade": "node scripts/global/cascade-dispatch.js",
     "router:dispatch": "node scripts/global/task-router-dispatch.js",
     "router:free": "node scripts/global/free-router.js",

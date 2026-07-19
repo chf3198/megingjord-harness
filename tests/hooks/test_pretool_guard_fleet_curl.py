@@ -41,6 +41,30 @@ class FleetCurlIntercept(unittest.TestCase):
         self.assertFalse(pretool_guard.is_raw_fleet_curl(None))
 
 
+class FleetCurlGoldenPathRedirect(unittest.TestCase):
+    """Epic #3807 C2 (#3810): the redirect is now affordance-first — it names the
+    `npm run fleet` golden-path default so the right move is a copy-paste (poka-yoke).
+    These assert the affordance is present AND that no control was loosened."""
+
+    def test_redirect_names_golden_path_default(self):
+        # AC2: the affordance — the exact copy-pasteable golden-path command is named.
+        self.assertIn("npm run fleet", pretool_guard.FLEET_CURL_REDIRECT_MSG)
+
+    def test_redirect_preserves_diagnostic_carve_out(self):
+        # Control preserved: the audited-diagnostic carve-out is still advertised.
+        self.assertIn("hamr-bypass-ok", pretool_guard.FLEET_CURL_REDIRECT_MSG)
+
+    def test_redirect_remains_self_resolvable_no_client_prompt(self):
+        # Operator-identity contract preserved: still operator-resolvable, not a client prompt.
+        self.assertIn("no client prompt", pretool_guard.FLEET_CURL_REDIRECT_MSG.lower())
+
+    def test_detection_control_unchanged_still_flags_raw_fleet_curl(self):
+        # Control preserved: the DENY predicate still fires on a raw fleet curl (affordance
+        # lowers friction of the right move; it does NOT weaken the gate).
+        self.assertTrue(pretool_guard.is_raw_fleet_curl(
+            "curl http://100.91.113.16:11434/api/generate -d @req.json"))
+
+
 class EmitFleetBypassIncident(unittest.TestCase):
     """Verify _emit_fleet_bypass_incident writes correct JSONL (#2782 AC2-AC4)."""
 
