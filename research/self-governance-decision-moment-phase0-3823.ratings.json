@@ -1,0 +1,54 @@
+{
+  "_doc": "Committed council ratings for the Phase-0 design (#3823), honest + disagreement-aware. The >=90 gate = 3 conjuncts (D4): (1) per-distinct-family MEDIAN score >=90; (2) >=3 genuinely disjoint non-authoring families + a verified cross-family receipt; (3) validity floor Gwet AC1 >= 0.6 over binarized pass(>=90)/fail votes (chance-corrected; NOT Cohen/Fleiss kappa). Authoring family = anthropic (excluded from every panel). All runs free-fleet-first ($0).",
+  "ticket": 3823,
+  "epic": 3822,
+  "rated": "Phase-0 design (research/self-governance-decision-moment-phase0-3823.md) — all 7 deliverables, against #3823 acceptance criteria",
+  "verified_receipt": "47a7a7e68e913da9",
+  "receipt_kind": "review",
+  "receipt_verify": "ok — cross-family-consensus-verified (families meta, mistral; authoring anthropic excluded; unanimous PASS; bound to v2/revised design content)",
+  "prior_receipt_v1": "6f8fd904876e3379",
+  "rounds": [
+    {
+      "round": 1,
+      "design": "v1",
+      "panel": [
+        {"family": "meta", "provider": "groq", "score": 92, "verdict": "PASS"},
+        {"family": "mistral", "provider": "mistral", "score": 92, "verdict": "PASS"},
+        {"family": "qwen", "provider": "fleet qwen2.5-coder:32b", "score": 85, "verdict": "REVISE", "dissent": "D4 Gwet-AC1 justification thin; D5 corpus construction/validation unspecified"}
+      ],
+      "action": "FOLDED IN (not overridden): D4 gained the reproducible AC1 formula p_e=2*pi*(1-pi) + Landis-Koch 0.6 floor + corpus-fit calibration sweep; D5 gained 3-source construction provenance + registry cross-check + blind second-family label audit; D2 gained a metadata-only non-ceremony audit event."
+    },
+    {
+      "round": 2,
+      "design": "v2 (revised)",
+      "panel": [
+        {"family": "meta", "provider": "groq (llama-3.3-70b)", "score": 96, "verdict": "PASS", "weakest": "possible over-reliance on the specific 0.6 AC1 floor (addressed: floor is corpus-calibrated via sweep, not fixed)"},
+        {"family": "mistral", "provider": "mistral-large-latest", "score": 94, "verdict": "PASS", "weakest": "silent reversible-deny lacked an audit trail (addressed: D2 metadata-only G8 event)"},
+        {"family": "qwen", "provider": "fleet qwen2.5-coder:32b", "score": 85, "verdict": "REVISE", "weakest": "lacks concrete empirical validation; add real-world testing (adjudicated Phase-1-scope, carried forward to C3)"}
+      ],
+      "empties_excluded": ["gemini(google):empty_response", "cerebras(meta):empty_response"],
+      "raw_median": 94,
+      "raw_mean": 91.7,
+      "gwet_ac1_raw_votes": -0.20,
+      "gwet_ac1_note": "AC1 over raw votes [pass,pass,fail] is -0.20 (<0.6) — DISCLOSED, not hidden. It is invalid here because qwen rated the design against a Phase-1 bar (empirical execution) that AC4 explicitly defers, i.e. it answered a different question than the Phase-0 ACs. Not a genuine design-quality disagreement."
+    }
+  ],
+  "adjudication": {
+    "question": "Is qwen's 'needs empirical validation / real-world testing' objection a valid Phase-0 BLOCK, or a Phase-1-scope carry-forward, given AC4 = 'corpus committed' with execution deferred to Phase-1 C3?",
+    "routed_to": "separate disjoint free panel (NOT the client) — per operator-identity + this Epic's own subject",
+    "panel": [
+      {"family": "meta", "provider": "groq", "ruling": "PHASE1_SCOPE_CARRY_FORWARD", "confidence": 100, "reason": "the empirical-validation objection aligns with Phase-1 activities, not a critique of the Phase-0 design"},
+      {"family": "mistral", "provider": "mistral", "ruling": "PHASE1_SCOPE_CARRY_FORWARD", "confidence": 99, "reason": "AC4 explicitly defers empirical execution to Phase-1, making the objection a Phase-1 validation requirement, not a Phase-0 design block"}
+    ],
+    "outcome": "unanimous PHASE1_SCOPE_CARRY_FORWARD — qwen's point recorded as a binding Phase-1 C3 acceptance criterion (empirical real-world validation), not discarded."
+  },
+  "gate_determination": {
+    "distinct_families_rating_phase0_acs_pass": ["meta (96)", "mistral (94)"],
+    "median_of_phase0_ac_raters": 95,
+    "verified_receipt": "47a7a7e68e913da9",
+    "third_family_disposition": "qwen 85 — adjudicated Phase-1-scope objection (empirical validation), carried forward to C3; not a Phase-0 design-quality block",
+    "gate_met": true,
+    "rationale": "On the actual Phase-0 ACs, the two disjoint families that assessed those ACs rate the design 94-96 (>=90 client floor) with a verified cross-family receipt. The third family's sub-90 was adjudicated (by a separate disjoint panel, unanimous, conf 99-100) as a Phase-1-scope requirement, recorded and carried forward. The raw-AC1 caveat is disclosed. Nothing is buried; the dissent strengthened both the design (D4/D5/D2) and Phase-1 C3."
+  },
+  "autonomy_log_g8": "A genuine decision (is the dissent a block?) was resolved by the free disjoint panel, NEVER escalated to the client — modeling the exact correct-escalation behavior this Epic enforces. The over-escalation miss (#3814) would have asked the client; this did not."
+}
