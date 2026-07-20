@@ -9,7 +9,40 @@ const { enforceTier3Emission } = require(path.join(__dirname, 'goal-failure-emis
 const { fleetCloseoutParity } = require(path.join(__dirname, '..', 'governance-bundle.js'));
 const wtGate = require('../worktree-lifecycle-gate');
 const { checkMemoryNoteRecurrence } = require(path.join(__dirname, '..', 'closeout-recurrence-guard.js'));
-const { checkRubricVerdictConsistency } = require('./consultant-rubric-consistency.js');
+// #2908 — G1–G9 rubric-vs-verdict internal consistency (Gap G-04). Inlined here from the
+// retired standalone validator megalint/consultant-rubric-consistency.js (#3814, Epic #3807 C6):
+// this file is its ONLY consumer, so the redundant validator file is retired and its property
+// stays enforced by this same CI-wired gate (net −1 validator; behaviour byte-identical).
+const RUBRIC_APPROVE_RE = /\bverdict:\s*approve_for_merge\b/i;
+const RUBRIC_REJECT_RE = /\bverdict:\s*reject(?:_for_\w+)?\b/i;
+const FLOOR = 7;
+
+function parseGScores(body) {
+  const text = String(body || '');
+  const scores = [];
+  for (let i = 1; i <= 9; i++) {
+    const m = text.match(new RegExp(`\\bG${i}\\s*[=:]\\s*([0-9]+(?:\\.[0-9]+)?)`, 'i'));
+    if (!m) return null;
+    scores.push(Number(m[1]));
+  }
+  return scores;
+}
+
+function checkRubricVerdictConsistency(body) {
+  const scores = parseGScores(body);
+  if (!scores) return [];
+  const min = Math.min(...scores);
+  const violations = [];
+  if (RUBRIC_APPROVE_RE.test(body) && min < FLOOR) {
+    violations.push({ rule: 'rubric-floor-violation',
+      detail: `min(G1..G9)=${min} < ${FLOOR} but verdict is approve_for_merge` });
+  }
+  if (RUBRIC_REJECT_RE.test(body) && min >= FLOOR) {
+    violations.push({ rule: 'rubric-verdict-contradiction',
+      detail: `min(G1..G9)=${min} >= ${FLOOR} but verdict is reject` });
+  }
+  return violations;
+}
 // #3701 AC2: promote consultant-closeout alias-fidelity to a BLOCKING check.
 const { validateArtifactAlias } = require('./signer-registry-check.js');
 
@@ -323,6 +356,8 @@ module.exports = {
   checkRequiredFlawFields,
   checkMemoryNoteRecurrence,
   checkRubricVerdictConsistency,
+  parseGScores,
+  FLOOR,
   checkCrossRuntimeWritesPending,
   checkIssueOnlyEvidenceSchema,
   checkCloseoutIntegrity,
