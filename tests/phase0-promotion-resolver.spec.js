@@ -4,7 +4,7 @@
 // mis-counted as Phase-0/Phase-1 children.
 const { test, expect } = require('@playwright/test');
 const resolver = require('../scripts/global/phase0-promotion-resolver');
-const { makeGithub } = require('./phase0-github-mock');
+const { makeGithub, validPlanRating } = require('./phase0-github-mock');
 
 test('parseRefs dedupes and parses #N', () => {
   expect(resolver.parseRefs('see #2680 and #2680 plus #2681')).toEqual([2680, 2681]);
@@ -23,6 +23,7 @@ test('childBackrefsEpic matches #N ref and Parent: form', () => {
 });
 
 test('resolve classifies only true children and ignores polluting refs', async () => {
+  const pr = validPlanRating(500); // #3826: green now needs a verified plan-rating
   const { github } = makeGithub({
     issues: {
       500: { state: 'open', labels: ['type:epic', 'phase-gate:research-first'], body: 'kids #501 #502; see also #3256' },
@@ -32,13 +33,14 @@ test('resolve classifies only true children and ignores polluting refs', async (
       3256: { state: 'open', labels: ['phase-gate:research-first'], body: 'Parent: #3251' },
     },
     commentsByIssue: {
-      500: [{ body: '## EPIC_RESCOPE done' }],
+      500: [{ body: '## EPIC_RESCOPE done' }, pr.comment],
       501: [{ body: '## CONSULTANT_CLOSEOUT rubric 8/10' }],
     },
   });
-  const r = await resolver.resolve({ github, owner: 'o', repo: 'r', epicNumber: 500 });
+  const r = await resolver.resolve({ github, owner: 'o', repo: 'r', epicNumber: 500, ledger: pr.ledger });
   expect(r.phase0Count).toBe(1);   // only #501, not the polluting #3256
   expect(r.phase1Count).toBe(1);   // #502
   expect(r.complete).toBe(true);
+  expect(r.planRating.ok).toBe(true);
   expect(r.missingPhase1Children).toBe(false);
 });

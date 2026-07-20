@@ -45,8 +45,11 @@ function classifyChildren(children) {
 
 /**
  * @param {{labels?: string[], comments?: Array<{body?: string}>,
- *          children?: Array<{number, state, labels, comments}>}} input
+ *          children?: Array<{number, state, labels, comments}>,
+ *          planRating?: {ok: boolean, reason?: string}}} input
+ *          planRating is injected by the resolver (I/O layer); absent => fail-closed (#3826).
  * @returns {{applicable: boolean, complete: boolean, missingPhase1Children: boolean,
+ *            unratedPlan: boolean, phase0SubstantiallyDone: boolean, planRating: object,
  *            details: string, pattern_id: string, phase0Count: number, phase1Count: number}}
  */
 function phase0GreenComplete(input) {
@@ -62,19 +65,29 @@ function phase0GreenComplete(input) {
   const allPhase0Closed = phase0.length > 0 && phase0.every(isClosed);
   const anyCloseout = phase0.some(childHasCloseout);
   const rescope = hasRescope(input.comments);
-  const complete = allPhase0Closed && anyCloseout && rescope;
+  // #3826 (Epic #3822 C2, Gap B): closeout + rescope are NECESSARY but no longer
+  // SUFFICIENT — the Phase-0 plan must carry a verified cross-family rating receipt.
+  // The resolver (I/O layer) injects planRating so this predicate stays pure; absent
+  // => fail-closed, so a caller that omits it can never silently skip the gate.
+  const planRating = (input && input.planRating) || { ok: false, reason: 'plan-rating-missing' };
+  const phase0SubstantiallyDone = allPhase0Closed && anyCloseout && rescope;
+  const complete = phase0SubstantiallyDone && planRating.ok;
   const missingPhase1Children = complete && phase1.length === 0;
+  // unratedPlan is the Gap-B defect: Phase-0 is substantively done but its plan was
+  // never cross-family rated (the real #3808 miss). It blocks promotion AND close.
+  const unratedPlan = phase0SubstantiallyDone && !planRating.ok;
   const reasons = [];
   if (phase0.length === 0) reasons.push('no Phase-0 children found');
   if (phase0.length > 0 && !allPhase0Closed) reasons.push('not all Phase-0 children closed');
   if (!anyCloseout) reasons.push('no Phase-0 child carries CONSULTANT_CLOSEOUT');
   if (!rescope) reasons.push('Epic missing EPIC_RESCOPE comment');
+  if (unratedPlan) reasons.push(`Phase-0 plan un-rated (${planRating.reason})`);
   const details = complete
     ? (missingPhase1Children ? 'Phase-0 green; Phase-1 children ABSENT' : 'Phase-0 green; Phase-1 children present')
     : `Phase-0 not green: ${reasons.join('; ')}`;
   return {
-    applicable: true, complete, missingPhase1Children, details,
-    pattern_id: PATTERN_ID, phase0Count: phase0.length, phase1Count: phase1.length,
+    applicable: true, complete, missingPhase1Children, unratedPlan, phase0SubstantiallyDone,
+    planRating, details, pattern_id: PATTERN_ID, phase0Count: phase0.length, phase1Count: phase1.length,
   };
 }
 

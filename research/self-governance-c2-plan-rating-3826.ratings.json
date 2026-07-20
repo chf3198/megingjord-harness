@@ -1,0 +1,45 @@
+{
+  "_doc": "Committed >=90 council rating for #3826 (Epic #3822 C2, Gap B -- plan-rating promotion gate). The Epic does not mark its own homework: the design+diff were rated by a cross-family council of genuinely DISJOINT non-Anthropic families, web-grounded, against #3826's ACs, via the free-fleet-first ($0) substrate. Disagreement-aware (a lone model's 92 is not a gate; three disjoint families converged). The verified kind:review receipt independently confirms >=2 distinct non-authoring PASS.",
+  "ticket": 3826,
+  "epic": 3822,
+  "phase": "phase-1 C2 (Gap B)",
+  "gate": ">=90 goal-lens council, >=3 genuinely disjoint non-Anthropic families, chance-corrected (D4 Gwet AC1 >= 0.6)",
+  "verified_receipt": {
+    "cross_family_receipt": "1080b609a4db4185",
+    "kind": "review",
+    "ledger": "governance/cross-family-consensus.jsonl",
+    "panel": [
+      { "provider": "groq", "family": "meta", "verdict": "PASS" },
+      { "provider": "mistral", "family": "mistral", "verdict": "PASS" }
+    ],
+    "note": "The un-forgeable independence proof: >=2 distinct non-authoring (non-anthropic) families PASS over the hash-chained committed ledger. Disjoint from the numeric design council below (which adds fleet-qwen as a third family)."
+  },
+  "web_grounding": [
+    "Human-in-the-loop escalation 2026 (reversibility-tiered oversight): reversible/normal work runs uninterrupted; only genuine plan->impl promotion needs the gate -- the gate must not over-block.",
+    "Approval fatigue is an agent security bug (ATR-2026-00118): a gate that fires on non-carve-out work trains click-through; the plan-rating gate fires ONLY on the Phase-0->Phase-1 promotion boundary.",
+    "An in-context instruction cannot self-police: the bypass-resistant control is a hash-chained cross-family receipt independent of the authoring model (cross-family-receipt.verifyReceipt), not operator free-text.",
+    "PoLL (Verga et al. 2024): a diverse jury of small models beats one large judge at >7x lower cost -- hence >=3 disjoint families, not one big rater.",
+    "Judge-reliability 2026 (Norman et al.; Yang et al.): raw agreement overstates validity by 33-41 pts and same-vendor raters carry self-preference; use chance-corrected Gwet AC1 (NOT Cohen/Fleiss kappa, which paradox-collapses on high-agreement panels)."
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "distinct_families": ["meta", "mistral", "qwen"],
+      "per_family": [
+        { "family": "meta", "provider": "groq", "score": 92, "vote": "PASS", "why": "AC3 corpus replay blocks invalid/forged/single-family/below-90 and promotes valid; enforced at the decision point, not advisory." },
+        { "family": "mistral", "provider": "mistral", "score": 94, "vote": "PASS", "why": "verifyReceipt + the planRating.ok conjunct structurally enforce AC1/AC3 without over-blocking; reversible work passes silently." },
+        { "family": "qwen", "provider": "fleet-qwen2.5-coder-32b", "score": 92, "vote": "PASS", "why": "phase0GreenComplete correctly extended with the conjunct + helper; structural verifyReceipt then semantic committed-score read is offline-deterministic." }
+      ],
+      "median_score": 92,
+      "raw_mean": 92.67,
+      "gwet_ac1": 1.0,
+      "gwet_note": "Unanimous PASS across 3 genuinely disjoint families (meta/mistral/qwen) -> chance-corrected Gwet AC1 = 1.0, well above the 0.6 D4 floor. Kappa would paradox-collapse here; Gwet does not. gemini (google) returned empty_response -- an availability miss, NOT a dissent, so it is not counted as a rater.",
+      "disagreement_note": "No dissent to fold: three disjoint vendors independently cleared >=90 with tight scores (92/94/92). Convergence is meaningful because the families are genuinely disjoint (not correlated same-family raters), so this is not the popularity trap."
+    }
+  ],
+  "verdict": "PASS",
+  "median_score": 92,
+  "threshold": 90,
+  "families_distinct": 3,
+  "gwet_ac1": 1.0
+}

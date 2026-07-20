@@ -11,6 +11,10 @@ const closedP0 = (n, withCloseout = true) => ({
 });
 const phase1Child = (n) => ({ number: n, state: 'open', labels: ['type:task', 'phase-gate:phase-1'], comments: [] });
 const epicLabels = ['type:epic', 'phase-gate:research-first'];
+// #3826: the plan-rating conjunct is now required for green — supply a verified fact
+// for tests exercising the OTHER dimensions (children/closeout/rescope). The receipt
+// verification itself is covered by phase0-plan-rating-gate-3826.spec.js.
+const RATED = { ok: true, reason: 'plan-rating-verified' };
 
 test('AC1: non-epic / non-research-first is not applicable', () => {
   expect(gate.phase0GreenComplete({ labels: ['type:task'] }).applicable).toBe(false);
@@ -39,14 +43,14 @@ test('AC1: green Phase-0 without EPIC_RESCOPE is not complete', () => {
 });
 
 test('AC1: green Phase-0 WITH Phase-1 children is complete and not missing', () => {
-  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [closedP0(2), phase1Child(3)] });
+  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [closedP0(2), phase1Child(3)], planRating: RATED });
   expect(r.complete).toBe(true);
   expect(r.missingPhase1Children).toBe(false);
   expect(r.phase1Count).toBe(1);
 });
 
 test('AC1: green Phase-0 with ZERO Phase-1 children is the blockable defect (#2661)', () => {
-  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [closedP0(2)] });
+  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [closedP0(2)], planRating: RATED });
   expect(r.complete).toBe(true);
   expect(r.missingPhase1Children).toBe(true);
   expect(r.details).toContain('ABSENT');
@@ -62,7 +66,7 @@ test('AC1: classifyChildren splits by label and ignores untagged children', () =
 
 test('AC1: status:done label counts as closed even if state field missing', () => {
   const child = { number: 2, labels: ['phase-gate:research-first', 'status:done'], comments: [{ body: 'CONSULTANT_CLOSEOUT' }] };
-  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [child] });
+  const r = gate.phase0GreenComplete({ labels: epicLabels, comments: [RESCOPE], children: [child], planRating: RATED });
   expect(r.complete).toBe(true);
 });
 
