@@ -101,11 +101,11 @@ test('execute routes to CLI when MEGINGJORD_MCP_DISABLED=1', async () => {
   expect(result.provider).toBe('gh-cli');
 });
 
-test('execute routes to MCP when MEGINGJORD_MCP_FORCE_AVAILABLE=1', async () => {
+test('execute routes to MCP when MEGINGJORD_MCP_AVAILABLE=1', async () => {
   let mcpCalled = false;
   const fakeMcp = { invoke: async () => { mcpCalled = true; return { number: 7 }; } };
   const result = await execute('create-issue', { title: 'T' }, {
-    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    env: { MEGINGJORD_MCP_AVAILABLE: '1' },
     mcpClient: fakeMcp,
   });
   expect(mcpCalled).toBe(true);
@@ -117,7 +117,7 @@ test('execute falls back to CLI when MCP fails', async () => {
   let cliCalled = false;
   const fakeCli = async () => { cliCalled = true; return { stdout: 'OK', stderr: '' }; };
   const result = await execute('create-issue', { title: 'T' }, {
-    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    env: { MEGINGJORD_MCP_AVAILABLE: '1' },
     mcpClient: fakeMcp,
     cliRunner: fakeCli,
   });
@@ -137,7 +137,7 @@ test('execute with MCP forced but no client returns CLI fallback', async () => {
   let cliCalled = false;
   const fakeCli = async () => { cliCalled = true; return { stdout: '', stderr: '' }; };
   const result = await execute('create-issue', {}, {
-    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    env: { MEGINGJORD_MCP_AVAILABLE: '1' },
     mcpClient: null,
     cliRunner: fakeCli,
   });

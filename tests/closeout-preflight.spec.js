@@ -161,7 +161,7 @@ test('closeout-preflight skips when SKIP_CLOSEOUT_PREFLIGHT=1', () => {
 test('readIssue supports MCP path when forced', async () => {
   let tool = '';
   const issue = await preflight.readIssue(1995, {
-    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    env: { MEGINGJORD_MCP_AVAILABLE: '1' },
     mcpClient: { invoke: async (name) => { tool = name; return { issue: { title: 'T', body: '', comments: [], labels: [], state: 'open' } }; } },
   });
   expect(tool).toBe('mcp__github__get_issue');
@@ -171,7 +171,7 @@ test('readIssue supports MCP path when forced', async () => {
 test('fetchPrBody supports MCP path when forced', async () => {
   let tool = '';
   const body = await preflight.fetchPrBody('fix/1995-closeout-preflight-mcp', {
-    env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+    env: { MEGINGJORD_MCP_AVAILABLE: '1' },
     mcpClient: { invoke: async (name) => { tool = name; return { pullRequest: { body: 'hello from mcp' } }; } },
   });
   expect(tool).toBe('mcp__github__get_pull_request');
