@@ -1,0 +1,39 @@
+name: Self-Governance Replay-Eval
+# Epic #3822 C3 / #3827 — the EXTERNAL judge for the two enforced self-governance interceptors.
+# Replays the labeled seed corpus (tests/fixtures/self-governance-decision-corpus.json) through the
+# SHIPPED artifacts — Gap A: hooks/scripts/ask_reference_monitor.py (#3825); Gap B:
+# scripts/global/phase0-promotion-resolver.js (#3826) — and FAILS the check on any regression:
+# a missed catch (#3814/#3808 must be caught), any false-escalation on a reversible decision
+# (confirmation fatigue is a security bug), or a carve-out-recall gap.
+#
+# Day-0 enforced (new surface): the seed corpus already scores 6/6 catch / 0 false-escalation /
+# 5/5 recall, so this ships REQUIRED, not advisory. Promotion is replay-eval-gated on corpus
+# precision (the committed data trigger in self-governance-replay-eval.js#promotionState) — NEVER
+# a calendar threshold (test-methodology-matrix.instructions.md; Epic #1771/#1827).
+
+on:
+  pull_request:
+    paths:
+      - 'hooks/scripts/ask_reference_monitor.py'
+      - 'scripts/global/phase0-promotion-resolver.js'
+      - 'scripts/global/megalint/phase0-promotion-gate.js'
+      - 'scripts/global/self-governance-replay-eval.js'
+      - 'tests/fixtures/self-governance-decision-corpus.json'
+      - '.github/workflows/self-governance-replay-eval.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  replay-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+        with:
+          python-version: '3.11'
+      - name: Replay the seed corpus through the shipped interceptors
+        run: node scripts/global/self-governance-replay-eval.js --strict
