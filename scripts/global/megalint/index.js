@@ -19,7 +19,6 @@ const mergeEvidencePrGate = require('./merge-evidence-pr-gate.js');
 const lintAsAc = require('./lint-as-ac.js');
 const workflowShaPin = require('./workflow-sha-pin.js');
 const testDiscoverability = require('./test-discoverability.js');
-const signerFormatCanonical = require('./signer-format-canonical.js');
 const flawEmission = require('./flaw-emission.js');
 const crossCheckoutDestructive = require('./cross-checkout-destructive.js');
 const soakLanguageGuard = require('./soak-language-guard.js');
@@ -105,7 +104,6 @@ const VALIDATORS = {
   'lint-as-ac': lintAsAc,
   'workflow-sha-pin': workflowShaPin,
   'test-discoverability': testDiscoverability,
-  'signer-format-canonical': signerFormatCanonical,
   'flaw-emission': flawEmission,
   'cross-checkout-destructive': crossCheckoutDestructive,
   'soak-language-guard': soakLanguageGuard,

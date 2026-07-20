@@ -7,6 +7,54 @@ const { validateArtifactAlias, loadRegistry, parseTeamModel, extractArtifactFiel
 
 const CLIENT_IDENTITIES = ['Curtis Franks'];
 
+// #3820 (Epic #3807 C6 Option B) — two checks relocated here from the retired,
+// CI-dormant signer-format-canonical.js (#1536). They ship ADVISORY: a dormant
+// validator moving into this CI-wired gate is a strict reachability strengthening,
+// and advisory-first keeps any previously-passing artifact from being newly blocked
+// (promotion to blocking is replay-eval-gated, mirroring signer-lint.yml's posture).
+//
+// role-prefix-as-provenance: a line beginning with a capital role-as-key plus at
+// least one pipe separator is the Copilot "Manager: <name> | <agent> | <date>"
+// anti-pattern from Epic #1526. A lowercase "manager:" in prose, or a "## Manager"
+// heading, does NOT match (false-positive guards preserved).
+const ROLE_PREFIX_PROVENANCE_RE =
+  /^\s*(Manager|Collaborator|Admin|Consultant):\s+\S+(\s+\|\s+|\s+\|$)/m;
+
+// Canonical Team&Model: <team>:<model>@<substrate>[/<device>]
+const TEAM_MODEL_CANONICAL_RE =
+  /Team&Model:\s*([a-z][a-z0-9-]*):([\w.+-]+)@([a-z][a-z0-9-]*)(?:\/([a-z0-9-]+))?/i;
+
+const PROVENANCE_LINE_PREVIEW_LEN = 80;
+
+function checkRolePrefixProvenance(body) {
+  const violations = [];
+  for (const line of (body || '').split('\n')) {
+    if (!ROLE_PREFIX_PROVENANCE_RE.test(line)) continue;
+    violations.push({
+      rule: 'role-prefix-as-provenance',
+      severity: 'advisory',
+      detail: `Non-canonical provenance line: "${line.trim().slice(0, PROVENANCE_LINE_PREVIEW_LEN)}". `
+        + 'Use the canonical 3-line block (Signed-by / Team&Model / Role) per '
+        + 'instructions/team-model-signing.instructions.md.',
+    });
+  }
+  return violations;
+}
+
+function checkTeamModelCanonical(body) {
+  const hasSignedBy = /^[ \t]*Signed-by:\s*\S+/im.test(body || '');
+  const hasCanonicalTeamModel = TEAM_MODEL_CANONICAL_RE.test(body || '');
+  if (hasSignedBy && !hasCanonicalTeamModel) {
+    return [{
+      rule: 'team-model-not-canonical',
+      severity: 'advisory',
+      detail: 'Body contains Signed-by but Team&Model line is missing or malformed. '
+        + 'Expected: Team&Model: <team>:<model>@<substrate>[/<device>].',
+    }];
+  }
+  return [];
+}
+
 function findSignerField(body, fieldName = 'Signed-by') {
   const pattern = new RegExp(`${fieldName}\\s*:\\s*([^\\n·,]+?)(?=\\s*[·,\\n]|$)`, 'i');
   const match = (body || '').match(pattern);
@@ -146,6 +194,8 @@ function validate(input) {
   violations.push(...checkRegistryAlias(body, { device: input.device, registryOverride: input.registryOverride }));
   violations.push(...checkSubstrateMixing(body, input.registryOverride));
   violations.push(...checkConsultantFamilyIndependence(body));
+  violations.push(...checkRolePrefixProvenance(body));
+  violations.push(...checkTeamModelCanonical(body));
   const unique = dedupe(violations);
   return { ok: unique.filter(v => v.severity !== 'advisory').length === 0, violations: unique };
 }
@@ -164,4 +214,6 @@ const normalizeFamily = s => { const n = (s || '').toLowerCase().trim(); return 
 
 module.exports = { validate, isClientIdentity, findSignerField, extractAIFamily,
   checkConsultantFamilyIndependence, checkSubstrateMixing, seedOwnerTeams,
+  checkRolePrefixProvenance, checkTeamModelCanonical,
+  ROLE_PREFIX_PROVENANCE_RE, TEAM_MODEL_CANONICAL_RE,
   CLIENT_IDENTITIES, KNOWN_FAMILIES, normalizeFamily };
