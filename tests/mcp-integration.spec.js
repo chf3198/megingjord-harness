@@ -7,12 +7,19 @@ test('provider falls back to gh-cli when MEGINGJORD_MCP_DISABLED=1', () => {
   expect(provider({ MEGINGJORD_MCP_DISABLED: '1' })).toBe('gh-cli');
 });
 
-test('provider uses mcp when MEGINGJORD_MCP_FORCE_AVAILABLE=1', () => {
-  expect(provider({ MEGINGJORD_MCP_FORCE_AVAILABLE: '1' })).toBe('mcp');
+test('provider uses mcp when MEGINGJORD_MCP_AVAILABLE=1', () => {
+  expect(provider({ MEGINGJORD_MCP_AVAILABLE: '1' })).toBe('mcp');
 });
 
 test('provider defaults to gh-cli when no MCP signals set', () => {
   expect(provider({})).toBe('gh-cli');
+});
+
+test('MEGINGJORD_MCP_FORCE_AVAILABLE is retired — no longer forces mcp (Epic #3807 C5)', () => {
+  // The redundant "force MCP" knob that asserted availability without ever probing it is retired;
+  // only the explicit MEGINGJORD_MCP_AVAILABLE assertion routes to MCP now (honest availability
+  // default — degrade to the always-reachable gh-CLI unless availability is asserted).
+  expect(provider({ MEGINGJORD_MCP_FORCE_AVAILABLE: '1' })).toBe('gh-cli');
 });
 
 test('toolName maps create-issue to MCP tool when provider=mcp', () => {
@@ -32,7 +39,7 @@ test('toolName maps update-project-v2-item-field to GraphQL CLI fallback', () =>
 });
 
 test('dispatch returns provider + tool for known operation', () => {
-  const result = dispatch('add-comment', { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' });
+  const result = dispatch('add-comment', { MEGINGJORD_MCP_AVAILABLE: '1' });
   expect(result.ok).toBe(true);
   expect(result.provider).toBe('mcp');
   expect(result.tool).toBe('mcp__github__create_issue_comment');
@@ -47,13 +54,13 @@ test('dispatch returns ok=false for unknown operation', () => {
 test('dispatch with MCP-disabled chooses gh-cli regardless of force flag', () => {
   const result = dispatch('get-issue', {
     MEGINGJORD_MCP_DISABLED: '1',
-    MEGINGJORD_MCP_FORCE_AVAILABLE: '1',
+    MEGINGJORD_MCP_AVAILABLE: '1',
   });
   expect(result.provider).toBe('gh-cli');
 });
 
 test('dispatch list-issues works on both providers', () => {
-  expect(dispatch('list-issues', { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' }).tool)
+  expect(dispatch('list-issues', { MEGINGJORD_MCP_AVAILABLE: '1' }).tool)
     .toBe('mcp__github__list_issues');
   expect(dispatch('list-issues', { MEGINGJORD_MCP_DISABLED: '1' }).tool)
     .toBe('gh issue list');
