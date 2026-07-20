@@ -25,8 +25,8 @@ const PLAN_RATING_GWET_RE = /plan_rating_gwet_ac1\s*:\s*(-?\d*\.?\d+)/i;
 
 // Parse the FIRST committed PLAN_RATING / EPIC_RESCOPE block carrying a receipt.
 function parsePlanRating(comments) {
-  for (const c of comments || []) {
-    const body = (c && c.body) || '';
+  for (const comment of comments || []) {
+    const body = (comment && comment.body) || '';
     const rm = body.match(PLAN_RATING_RECEIPT_RE);
     if (!rm) continue;
     const num = (re) => { const m = body.match(re); return m ? Number(m[1]) : NaN; };
