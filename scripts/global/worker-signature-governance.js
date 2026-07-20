@@ -1,14 +1,15 @@
 'use strict';
 
-const signerFormatCanonical = require('./megalint/signer-format-canonical');
 const signerFidelity = require('./megalint/signer-fidelity');
 
+// #3820: signer-format-canonical's two checks (role-prefix-as-provenance,
+// team-model-not-canonical) were relocated into signer-fidelity.validate, so a
+// single call now carries both the fidelity and the format-canonical properties.
 function inspectBody(body) {
-  const format = signerFormatCanonical.validate({ body });
   const fidelity = signerFidelity.validate({ body });
   return {
-    ok: format.ok && fidelity.ok,
-    violations: [...(format.violations || []), ...(fidelity.violations || [])],
+    ok: fidelity.ok,
+    violations: [...(fidelity.violations || [])],
   };
 }
 
