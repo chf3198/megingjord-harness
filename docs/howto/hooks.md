@@ -107,3 +107,33 @@ and delegates detection + carve-out routing to the Node bridge
 - Path resolution prefers `MEGINGJORD_REPO_ROOT/scripts/global`, falling back to the deployed
   `~/.copilot/scripts/global`. Tests: `tests/stuck-state-hook-bridge.spec.js`,
   `tests/stress-stuck-state-hook-bridge.spec.js`, `tests/test_stuck_state_gate.py`.
+
+## Ask-time reference monitor (#3825, Epic #3822 C1 — Gap A)
+
+A deterministic `PreToolUse` branch in `pretool_guard.py` (right after `tool = ...`)
+intercepts the operator's **own** `AskUserQuestion` tool call **before** the client is
+prompted — the enforced fix for the over-escalation class (#3814: the operator asked the
+client A/B/C on a *reversible* decision when only the security-weakening branch was a
+genuine carve-out). It reuses the in-process classifier `hooks/scripts/ask_reference_monitor.py`
+(regex/string only, ≤~50 ms — no node/network in the hook) to route on **reversibility vs
+the 4 retained carve-outs** (`config/retained-human-touchpoints.json`):
+
+- **genuine carve-out** (design / UAT / irreversible / security-weakening) → `emit("ask")`
+  — the client is the correct authority (unchanged behavior).
+- **reversible, non-carve-out** → `emit("deny")` + redirect to the free cross-model panel
+  (`adjudication-guardrail.js` `decide()` / `fleet-decision-oracle.js`) — **silent, zero
+  client ceremony** (anti-confirmation-fatigue; approval fatigue is a security bug).
+- **unknown / ambiguous** → fail-safe `emit("deny")` + adjudicate to the panel (never a
+  silent allow, never a bare client prompt).
+- **classifier error** → fail-closed `emit("ask")` (reach the human), mirroring the S6/S7 posture.
+
+**Anti-drift:** a config-parity test asserts every `retained-human-touchpoints.json`
+carve-out id has a monitor pattern. **Registration:** the new `emit("ask")` reasons are
+listed in `sanctioned_ask_surfaces` so `client-prompt-surface-check.js` recognizes them and
+flags any *future* unregistered ask surface. **Observability (G8):** a single metadata-only,
+redacted telemetry line (route + carve-out-class-or-null + prompt-sha256 — **never** raw
+text) is appended to `~/.megingjord/ask-redirect.jsonl`. Tests:
+`tests/hooks/test_ask_reference_monitor_3825.py` (unit + committed-corpus replay + end-to-end
+enforcement), `tests/hooks/stress_ask_reference_monitor_3825.py` (fault-injection + p99 budget),
+with JS harnesses `tests/pretool-guard-ask-monitor-3825.spec.js` +
+`tests/stress-ask-reference-monitor-3825.spec.js`.

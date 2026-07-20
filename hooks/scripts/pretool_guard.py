@@ -651,6 +651,31 @@ def main() -> int:
     try: payload = json.load(sys.stdin)
     except Exception: return 0
     tool = str(payload.get("tool_name",""))
+    # #3825 (Epic #3822 C1, Gap A): ask-time reference monitor. Intercept the operator's
+    # OWN AskUserQuestion path BEFORE the client is prompted (the class #3392 left open).
+    # Reversible / non-carve-out decisions route to the free cross-model panel (deny, SILENT
+    # -- the #3814 over-escalation fix); genuine carve-outs (design/UAT/irreversible/security-
+    # weakening) reach the client (ask, unchanged). Fail-closed to `ask` on any classifier
+    # error (reach the human; never a silent allow), mirroring the S6/S7 posture below.
+    if tool == "AskUserQuestion":
+        try:
+            from ask_reference_monitor import classify_ask_route, extract_ask_text, emit_ask_redirect_telemetry
+            _route, _carveout_id, _carveout_class = classify_ask_route(payload.get("tool_input", {}))
+        except Exception:
+            return emit("ask", "Ask-time reference monitor fail-closed: classifier error - reaching "
+                        "the client (never a silent allow) (#3822 C1).")
+        if _route == "human-carveout":
+            return emit("ask", "Retained human carve-out (ask-time reference monitor): a retained "
+                        "human touchpoint (design/UAT/irreversible/security-weakening) - the client "
+                        "is the correct authority (#3822 C1).", _carveout_class)
+        try:
+            emit_ask_redirect_telemetry(_route, _carveout_class, extract_ask_text(payload.get("tool_input", {})))
+        except Exception:
+            pass  # G6: telemetry never breaks the gate
+        return emit("deny", "Reversible/non-carve-out decision - route to the FREE cross-model panel "
+                    "(scripts/global/adjudication-guardrail.js decide() / fleet-decision-oracle.js), "
+                    "NOT a client prompt (#3822 C1 ask-time reference monitor). The client is "
+                    "design + UAT only.")
     values = list(iter_strings(payload.get("tool_input",{})))
     cwd = str(payload.get("cwd","")) or str(Path.cwd())
     state = ensure_state(cwd)

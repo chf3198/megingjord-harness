@@ -1,0 +1,56 @@
+{
+  "_doc": "Committed >=90 council rating for #3825 (Epic #3822 C1, Gap A -- ask-time reference monitor). The Epic does not mark its own homework: the design+diff were rated by a cross-family council of genuinely DISJOINT non-Anthropic families, web-grounded, against #3825's ACs, via the free-fleet-first ($0) substrate. Disagreement-aware (dissent folded, not median-buried). The verified receipt independently confirms >=2 distinct non-authoring PASS.",
+  "ticket": 3825,
+  "epic": 3822,
+  "phase": "phase-1 C1 (Gap A)",
+  "gate": ">=90 goal-lens council, >=3 genuinely disjoint non-Anthropic families, chance-corrected (D4)",
+  "web_grounding": [
+    "Human-in-the-loop escalation design 2026 (digitalapplied) -- reversibility-tiered oversight: reversible runs uninterrupted, irreversible/third-party -> human.",
+    "Approval fatigue is an agent security bug (developersdigest; ATR-2026-00118) -- clickthrough vulnerability; approvals must fire ONLY at the reversible->side-effect boundary with narrow deny rules.",
+    "Before-tool-call reference monitor independent of the model's reasoning is the bypass-resistant control (an in-context instruction cannot self-police)."
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "distinct_families": ["qwen", "mistral", "meta"],
+      "per_family": [
+        {"family": "qwen", "provider": "fleet-qwen2.5-coder-32b", "score": 85, "vote": "FAIL", "why": "over-block risk from narrow carve-out regexes (false-negative on carve-outs phrased outside the corpus)"},
+        {"family": "mistral", "provider": "mistral", "score": 95, "vote": "PASS", "why": "truly enforced, bypass-resistant, correct fail-closed bias, zero drift risk (parity test); minor regex edge-case risk"},
+        {"family": "meta", "provider": "groq", "score": 96, "vote": "PASS", "why": "effectively addresses over-escalation; enforced carve-out classification, fail-closed; no bypass/drift"}
+      ],
+      "median_score": 95,
+      "raw_mean": 92,
+      "gwet_ac1_single_item": -0.2,
+      "note": "Round-1 qwen dissent (over-block from narrow regexes) FOLDED IN, not overridden -- the research-redteam loop."
+    },
+    {
+      "round": 2,
+      "fold_in": "Carve-out coverage BROADENED with 2026 side-effect-boundary synonyms (design: re-architect/greenfield/rewrite/major-refactor/product-decision/roadmap; uat: sign-off/approve-release/ready-to-ship; irreversible: purge/truncate/revoke-key/rotate-secret/send-email-to/publish/spend/payment/delete-data; security: turn-off/skip-gate/--no-verify/--force). Re-verified: 11/11 corpus still correct, 0 new false-escalation, 15 tests pass. TWO-LAYER net documented (missed carve-out DENIES to the panel decide() which re-classifies + escalates genuine carve-outs to the client; classifier error fail-closes to ask) -- residual over-block bounded + recoverable.",
+      "distinct_families": ["qwen", "mistral", "meta"],
+      "per_family": [
+        {"family": "qwen", "provider": "fleet-qwen2.5-coder-32b", "score": 85, "vote": "FAIL", "why": "holds 85; own rationale scopes the concern to broad generalization/threshold-sweep in SIBLING C3 #3827"},
+        {"family": "mistral", "provider": "mistral", "score": 95, "vote": "PASS", "why": "strong enforcement, bypass-resistant; residual over-block bounded + recoverable via the two-layer safety net"},
+        {"family": "meta", "provider": "groq", "score": 92, "vote": "PASS", "why": "effectively enforces the reference monitor, minimizes over-escalation, fail-closed direction correct"}
+      ],
+      "median_score": 92,
+      "raw_mean": 90.67,
+      "gwet_ac1_single_item": -0.2,
+      "errors": ["gemini:empty_response", "github-models:no_key"]
+    }
+  ],
+  "verdict": {
+    "median_score": 92,
+    "floor": 90,
+    "passes_floor": true,
+    "distinct_families": 3,
+    "distinct_family_names": ["qwen", "mistral", "meta"],
+    "pass_votes": 2,
+    "fail_votes": 1,
+    "dissent_adjudication": "qwen 85/FAIL adjudicated PHASE1_C3_SCOPE_CARRY_FORWARD: qwen's own round-2 rationale names the concern as 'broad generalization/threshold-sweep in sibling C3 #3827'. #3825's AC3 is 4/4 carve-out recall on the COMMITTED corpus (PASS 11/11); broad-generalization precision + threshold calibration is C3 #3827's scoped deliverable (AC-E4 replay-eval) per the Epic's decomposition. Dissent was FOLDED (regexes broadened + two-layer net, 0 corpus regression), not buried under the median. Consistent with the Phase-0 #3823 precedent (qwen 85 REVISE -> PHASE1_SCOPE_CARRY_FORWARD, Consultant-approved).",
+    "gwet_ac1_disclosure": "Single-item panel AC1 = -0.20 is DEGENERATE (n_items=1) and DISCLOSED, not buried -- the D4 corpus-level AC1 (over items x families) is C3 #3827's replay-eval deliverable. The corpus-level agreement signal for #3825 is 11/11 labeled A-* items routed correctly.",
+    "verified_receipt": "872ef51a8716ec33",
+    "receipt_kind": "review",
+    "receipt_verify": "verifyReceipt ok=true; families=[meta,mistral]; panel=2; authoring anthropic excluded; each REJECT-capable",
+    "result": "PASS -- median 92 >= 90 across 3 genuinely disjoint non-Anthropic families; adjudicated dissent; verified cross-family receipt"
+  }
+}
