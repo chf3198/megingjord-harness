@@ -17,7 +17,7 @@ not re-implementations:
 
 Two corpora:
 - **Seed** — `tests/fixtures/self-governance-decision-corpus.json` (the #3823 design corpus; the required CI gate).
-- **Empirical** — `tests/fixtures/self-governance-empirical-3827.json` (13 real-world cases from actual
+- **Empirical** — `tests/eval/self-governance-empirical-3827.json` (13 real-world cases from actual
   sessions/tickets: #3807-assessment, #3826-actual, actions-security-baseline, epic-1339, the 2026-07-20
   C3 session's own dev decisions).
 

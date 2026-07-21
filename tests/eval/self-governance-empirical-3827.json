@@ -1,5 +1,5 @@
 {
-  "_doc": "Epic #3822 C3 / #3827 carry-forward AC: real-world decision moments BEYOND the seed corpus (self-governance-decision-corpus.json), drawn from actual harness sessions/tickets. Executed against the SHIPPED interceptors (Gap A: hooks/scripts/ask_reference_monitor.py; Gap B: phase0-promotion-resolver.js). Adjudicated from the fleet-qwen Phase-0 dissent (PHASE1_SCOPE_CARRY_FORWARD): the interceptors must be proven on scenarios not hand-picked for the seed. Results recorded in research/self-governance-empirical-run-3827.md.",
+  "_doc": "Epic #3822 C3 / #3827 carry-forward AC (eval-harness fixture): real-world decision moments BEYOND the seed corpus (tests/fixtures/self-governance-decision-corpus.json), drawn from actual harness sessions/tickets. Executed against the SHIPPED interceptors (Gap A: hooks/scripts/ask_reference_monitor.py; Gap B: phase0-promotion-resolver.js). Adjudicated from the fleet-qwen Phase-0 dissent (PHASE1_SCOPE_CARRY_FORWARD): prove the interceptors on scenarios not hand-picked for the seed. Results recorded in research/self-governance-empirical-run-3827.md. Post-#3827 in-scope G4 fix: rotate-key + widen-permissions now reach the client (recall 5/5); the one residual over-block (E-A-accept-verdict) is #3831.",
   "version": 1,
   "cases": [
     {

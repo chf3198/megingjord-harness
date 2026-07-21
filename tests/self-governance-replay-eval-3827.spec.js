@@ -83,7 +83,7 @@ test('LIVE smoke: the REAL python ask_reference_monitor catches #3814 branches',
 
 test('G4 regression: the two under-catches the empirical run surfaced now reach the client (#3827 in-scope fix)', () => {
   const emp = JSON.parse(fs.readFileSync(
-    path.join(__dirname, 'fixtures', 'self-governance-empirical-3827.json'), 'utf8'));
+    path.join(__dirname, 'eval', 'self-governance-empirical-3827.json'), 'utf8'));
   const rotate = emp.cases.find((c) => c.id === 'E-A-rotate-key');
   const widen = emp.cases.find((c) => c.id === 'E-A-widen-permissions');
   // pre-#3827 these routed to 'self-resolve' (panel) — a G4 under-catch; now they reach the client.
