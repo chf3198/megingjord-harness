@@ -1,0 +1,81 @@
+{
+  "_doc": "Committed >=90 council rating for the Epic #3822 CLOSE step (the Epic does not mark its own homework). Rated by 3 GENUINELY DISJOINT non-Anthropic families, web-grounded, citing the shipped files, against AC-E1..E6 + goal-lens. Chance-corrected (Gwet AC1 over the binary meets-bar(>=90) decision, NOT a bare mean). Two verified cross-family receipts (kind:review for plan-rating gate #3826; kind:merge-consensus for Admin signer-independence #3532/#3672) bind the panel in the hash-chained ledger. Free-fleet-first ($0); fleet host down so the qwen run failed over to meta and was DISCARDED to preserve family-disjointness (arXiv:2605.29800 correlated-family trap).",
+  "ticket": 3822,
+  "epic": 3822,
+  "phase": "epic-close-verification",
+  "gate": ">=90 goal-lens council, >=3 genuinely disjoint non-Anthropic families, chance-corrected (Gwet AC1>=0.6), rated against AC-E1..E6",
+  "council": [
+    {
+      "family": "mistral",
+      "provider": "mistral",
+      "model": "mistral-large-latest",
+      "score": 98,
+      "verdict": "PASS",
+      "grounded": true
+    },
+    {
+      "family": "meta",
+      "provider": "groq",
+      "model": "llama-3.3-70b-versatile",
+      "score": 100,
+      "verdict": "PASS",
+      "grounded": true
+    },
+    {
+      "family": "deepseek",
+      "provider": "nvidia",
+      "model": "deepseek-ai/deepseek-v4-pro",
+      "score": 98,
+      "verdict": "PASS",
+      "grounded": true
+    }
+  ],
+  "aggregate": {
+    "distinct_families": 3,
+    "median": 98,
+    "min": 98,
+    "all_pass": true,
+    "gwet_ac1": 1,
+    "gwet_basis": "binary meets-bar(>=90) per distinct family; unanimous => AC1=1.0 (Landis-Koch almost-perfect)",
+    "disagreement_note": "3 non-correlated families converged high (98/100/98); not a lone-model 92."
+  },
+  "receipts": {
+    "plan_rating_review_receipt": "801bc76e8f12f16b",
+    "merge_consensus_receipt": "71695ffe7e79ded4",
+    "ledger": "governance/cross-family-consensus.jsonl",
+    "verify": "verifyReceipt(3822,<id>,anthropic,{kind,minFamilies:2}) => ok, families [meta,mistral]"
+  },
+  "empirical_ac_e4": {
+    "corpus": "tests/fixtures/self-governance-decision-corpus.json",
+    "n": 16,
+    "catch": "6/6 (incl #3814 over-escalation + #3808 un-rated-plan)",
+    "false_escalation": "0/16",
+    "carve_out_recall": "5/5",
+    "gwet_ac1": 1,
+    "calibration_band": [
+      88,
+      93
+    ],
+    "chosen_threshold": 90,
+    "judge_exit": 0,
+    "judge": "scripts/global/self-governance-replay-eval.js --strict (REQUIRED CI gate)"
+  },
+  "census": {
+    "script": "scripts/global/governance-surface-census.js",
+    "current": 153,
+    "baseline": 158,
+    "surface_units_delta": -5,
+    "net_negative": true,
+    "g1_g4_weakened": false
+  },
+  "web_grounding": [
+    "arXiv:2606.19544 (exact-match overstates chance-corrected reliability 33-41pts)",
+    "arXiv:2605.29800 Nine Judges Two Effective Votes",
+    "orq.ai LLM juries (diverse imperfect > correlated perfect)"
+  ],
+  "rationale_excerpts": {
+    "mistral": "and the census shows a net governance surface reduction (-5 units). All six acceptance criteria are met: AC-E1–E6 are satisfied by committed ratings, enforced gates, replay proof, no G1/G4 weakening, and alignment between shipped code and AC wording. Child ratings (≥90 from ≥3 disjoint families) and the Gwet AC1 floor (0.6) ensure reliability grounding.\n\nSCORE: 98\nVERDICT: PASS",
+    "meta": "ed. All six acceptance criteria have been met, with each child carrying a committed >=90 council rating and a verified receipt. The files cited, including hooks/scripts/ask_reference_monitor.py, scripts/global/phase0-promotion-resolver.js, and scripts/global/self-governance-replay-eval.js, demonstrate that the mechanisms are enforced and not advisory.\n\nSCORE: 100\n\nVERDICT: PASS",
+    "deepseek": "(1) The shipped artifacts directly wire enforcement at the decision moment: `hooks/scripts/pretool_guard.py` (~line 662) intercepts non-carve-out `AskUserQuestion` calls before client interruption using `classify_text` against `config/retained-human-touchpoints.json`, while `scripts/global/phase0-closure-guard.js` and the `.github/workflows/phase0-promotion-gate.yml` CI gate bl"
+  }
+}
