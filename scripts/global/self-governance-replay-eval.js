@@ -68,9 +68,13 @@ function planRatingComment(receipt, o) {
     + `plan_rating_gwet_ac1: ${o.gwet}` };
 }
 
+// A syntactically-valid 16-hex receipt id that is NOT backed by the committed hash chain — the
+// forged-receipt case: verifyReceipt must reject it on receipt-mismatch.
+const FORGED_RECEIPT = '0000000000000000';
+
 function materializeGapB(input, threshold) {
   if (!input.plan_rating_receipt) return { comments: [{ body: '## EPIC_RESCOPE only' }], ledger: [] };
-  const o = {
+  const fields = {
     median: input.median_score ?? 93,
     families: input.distinct_families ?? 3,
     gwet: input.gwet_ac1 ?? 0.71,
@@ -83,7 +87,7 @@ function materializeGapB(input, threshold) {
       { ...base, provider: 'groq', family: 'meta', response_sha256: rc.sha('a') },
       { ...base, provider: 'cerebras', family: 'meta', response_sha256: rc.sha('b') },
     ]);
-    return { comments: [planRatingComment(rc.computeReceipt(ledger), { ...o, families: 1 })], ledger };
+    return { comments: [planRatingComment(rc.computeReceipt(ledger), { ...fields, families: 1 })], ledger };
   }
   const ledger = buildLedger([
     { ...base, provider: 'groq', family: 'meta', response_sha256: rc.sha(`meta-${EPIC}`) },
@@ -91,10 +95,9 @@ function materializeGapB(input, threshold) {
   ]);
   const receipt = rc.computeReceipt(ledger);
   if (input.verify_receipt === 'receipt-mismatch') {
-    // forged: a receipt id not backed by the committed chain.
-    return { comments: [planRatingComment('0000000000000000', o)], ledger };
+    return { comments: [planRatingComment(FORGED_RECEIPT, fields)], ledger };
   }
-  return { comments: [planRatingComment(receipt, o)], ledger, receipt };
+  return { comments: [planRatingComment(receipt, fields)], ledger, receipt };
 }
 
 function scoreGapB(input, threshold) {
@@ -147,28 +150,28 @@ function evaluate(corpus, opts = {}) {
 // P_e  = 1/(q-1) * sum_k pi_k(1-pi_k)           (Gwet chance term, q = #categories)
 // AC1  = (P_o - P_e) / (1 - P_e)
 function gwetAC1(items) {
-  const rows = (items || []).filter((r) => Array.isArray(r) && r.length >= 2);
+  const rows = (items || []).filter((row) => Array.isArray(row) && row.length >= 2);
   if (!rows.length) return null;
   const cats = [...new Set(rows.flat())];
-  const q = cats.length;
-  if (q < 2) return 1; // all raters, all items, one category -> perfect agreement
+  const numCategories = cats.length;
+  if (numCategories < 2) return 1; // all raters, all items, one category -> perfect agreement
   let po = 0;
-  const piSum = Object.fromEntries(cats.map((k) => [k, 0]));
+  const piSum = Object.fromEntries(cats.map((cat) => [cat, 0]));
   for (const row of rows) {
-    const r = row.length;
-    const counts = Object.fromEntries(cats.map((k) => [k, row.filter((x) => x === k).length]));
+    const numRaters = row.length;
+    const counts = Object.fromEntries(cats.map((cat) => [cat, row.filter((x) => x === cat).length]));
     let agree = 0;
-    for (const k of cats) {
-      agree += counts[k] * (counts[k] - 1);
-      piSum[k] += counts[k] / r;
+    for (const cat of cats) {
+      agree += counts[cat] * (counts[cat] - 1);
+      piSum[cat] += counts[cat] / numRaters;
     }
-    po += agree / (r * (r - 1));
+    po += agree / (numRaters * (numRaters - 1));
   }
   po /= rows.length;
-  const pe = cats.reduce((s, k) => {
-    const pi = piSum[k] / rows.length;
-    return s + pi * (1 - pi);
-  }, 0) / (q - 1);
+  const pe = cats.reduce((sum, cat) => {
+    const pi = piSum[cat] / rows.length;
+    return sum + pi * (1 - pi);
+  }, 0) / (numCategories - 1);
   return pe === 1 ? 1 : (po - pe) / (1 - pe);
 }
 
@@ -196,10 +199,10 @@ function calibrateThreshold(corpus, thresholds) {
   const rows = sweep.map((T) => {
     let promoteBelow = 0; // below-bar cases wrongly promoted at T (want block)
     let blockAbove = 0;   // at/above-bar cases wrongly blocked at T (want complete)
-    for (const c of numeric) {
-      const promoted = c.input.median_score >= T;
-      if (c.expected_route === 'complete' && !promoted) blockAbove += 1;
-      if (c.expected_route === 'block' && promoted) promoteBelow += 1;
+    for (const bCase of numeric) {
+      const promoted = bCase.input.median_score >= T;
+      if (bCase.expected_route === 'complete' && !promoted) blockAbove += 1;
+      if (bCase.expected_route === 'block' && promoted) promoteBelow += 1;
     }
     return { threshold: T, valid: promoteBelow === 0 && blockAbove === 0, promoteBelow, blockAbove };
   });
