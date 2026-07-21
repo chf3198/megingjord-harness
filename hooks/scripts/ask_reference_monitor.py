@@ -70,8 +70,15 @@ CARVEOUT_PATTERNS = [
             r"\b(?:irreversible|unrecoverable|permanently\s+delete|\bwipe\b|\bpurge\b|"
             r"\btruncate\b|force[- ]push(?:\s+to\s+main)?|hard\s+reset|rm\s+-rf|"
             r"drop\s+(?:database|table)|destroy\b|"
-            r"revoke\b[\w\s-]{0,15}?\b(?:key|credential|access|token)\b|"
-            r"rotate\b[\w\s-]{0,15}?\b(?:key|secret|credential)\b|"
+            # #3827 (C3 empirical run): windows widened 15->40 and an all-caps secret-token
+            # name (OPERATOR_KEY, GITHUB_TOKEN, ...) added, so "rotate the OPERATOR_KEY signing
+            # credential" reaches the client instead of the panel (a G4 under-catch the external
+            # judge surfaced). Action-anchored (rotate/revoke), so a bare token mention does not
+            # over-block a reversible question.
+            r"revoke\b[\w\s-]{0,40}?\b(?:key|credential|access|token|secret|password|"
+            r"[A-Z][A-Z0-9]{2,}_(?:KEY|TOKEN|SECRET|CREDENTIAL|PASSWORD|PAT))\b|"
+            r"rotate\b[\w\s-]{0,40}?\b(?:key|secret|credential|token|password|"
+            r"[A-Z][A-Z0-9]{2,}_(?:KEY|TOKEN|SECRET|CREDENTIAL|PASSWORD|PAT))\b|"
             r"send\b[\w\s-]{0,20}?\b(?:email|message|notification)\b[\w\s-]{0,10}?\bto\b|"
             r"\bpublish\b|\bspend\b|\bpayment\b|\bcharge\b[\w\s-]{0,15}?\b(?:card|account)\b|"
             r"overwrite\b[\w\s]{0,30}?\b(?:commit|commits|history|main|branch)\b|"
@@ -92,7 +99,10 @@ CARVEOUT_PATTERNS = [
             r"\bauthorize\s+weakening\b|--no-verify\b|--force\b|"
             r"\bremove\b[\w\s-]{0,30}?\b(?:security|governance)\b[\w\s-]{0,20}?"
             r"\b(?:control|gate|guard|policy)\b|"
-            r"\b(?:broaden|widen)\b[\w\s-]{0,15}?\bpermissions?\b|"
+            # #3827 (C3 empirical run): window widened 15->40 so "broaden the GITHUB_TOKEN
+            # workflow permissions to write-all" reaches the client (a G4 under-catch surfaced
+            # by the external judge's empirical run).
+            r"\b(?:broaden|widen)\b[\w\s-]{0,40}?\bpermissions?\b|"
             r"\bgrant\b[\w\s-]{0,15}?\bbypass\b|"
             r"\bbypass\b[\w\s-]{0,20}?\b(?:gate|guard|check|control|enforcement)\b",
             re.IGNORECASE,
