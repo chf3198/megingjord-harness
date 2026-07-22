@@ -1,0 +1,51 @@
+{
+  "_doc": "Committed >=90 council rating for Epic #2892 Phase-0 (per-repo override contract synthesis). 3 GENUINELY DISJOINT non-Anthropic families, cited the tiers/ACs, chance-corrected (Gwet AC1 over binary meets-bar>=90). Free-fleet-first ($0). Verified kind:review receipt 05d025333e5c1886 (meta+mistral); merge-consensus d92195f76ead5356 for the Phase-0 child PR.",
+  "ticket": 2892,
+  "phase0_child": 3845,
+  "phase": "phase-0 research-first",
+  "council": [
+    {
+      "family": "mistral",
+      "model": "mistral-large-latest",
+      "score": 98,
+      "verdict": "PASS"
+    },
+    {
+      "family": "meta",
+      "provider": "groq",
+      "model": "llama-3.3-70b",
+      "score": 96,
+      "verdict": "PASS"
+    },
+    {
+      "family": "deepseek",
+      "provider": "nvidia",
+      "model": "deepseek-v4-flash",
+      "score": 98,
+      "verdict": "PASS"
+    }
+  ],
+  "aggregate": {
+    "distinct_families": 3,
+    "median": 98,
+    "min": 96,
+    "all_pass": true,
+    "gwet_ac1": 1
+  },
+  "receipts": {
+    "plan_rating_review_receipt": "05d025333e5c1886",
+    "merge_consensus_receipt": "d92195f76ead5356",
+    "ledger": "governance/cross-family-consensus.jsonl"
+  },
+  "key_findings": [
+    "premise drift: ~40+ existing override flags, not greenfield",
+    "3-tier: hard-floor(never)/overridable-with-audit/freely-configurable",
+    "net-positive tightening — hard-floor DEFENDS the security-weakening carve-out",
+    "no new weakening surface added (#3807 net-negative preserved)"
+  ],
+  "disposition": {
+    "phase0": "autonomous-complete",
+    "phase1": "net-positive tightening (hard-floor validator + audit) — autonomous",
+    "security_weakening_requests": "escalate (never self-serve Tier-H override)"
+  }
+}
