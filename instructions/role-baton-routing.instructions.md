@@ -139,11 +139,43 @@ Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:
 | Lane         | Work type                      | Role sequence                     | N/A markers                    |
 |--------------|--------------------------------|-----------------------------------|--------------------------------|
 | code-change  | Code, infra, deploy (default)  | Manager→Collab→Admin→Consultant   | none                           |
-| research     | Analysis, wiki — no git branch | Manager→Collab(analyst)→Admin→Consultant | Admin = doc reviewer, not CI |
+| research     | Analysis, wiki synthesis — PR optional | Manager→Collab(synthesis)→Consultant | ADMIN_HANDOFF: N/A unless PR |
 | config-only  | Single-value config, no design | Manager→Admin→Consultant          | COLLABORATOR_HANDOFF: N/A      |
 | no-code-remediation | Issue-only drift normalization (no repo edits) | Manager→Consultant | COLLABORATOR_HANDOFF: N/A, ADMIN_HANDOFF: N/A |
 
 Lane set at ticket creation via `lane:*` label and `Lane` Project field. Default: **code-change**.
+
+### Research lane contract (Refs #2263)
+
+Chosen shape **H3-prime** (Epic #2263 Phase-0, ≥90 cross-family council): the research/docs lane runs
+`Manager → Collaborator(synthesis) → Consultant`. Admin is dropped by default — CI
+(`baton-gates.yml`) already skips the collaborator/admin/consultant gates for the lightweight lanes,
+and the 20-ticket audit found Admin artifacts are ceremonial (N/A) for research while Collaborator
+synthesis carries the substance.
+
+Eligibility:
+- Deliverable is analysis, wiki synthesis, or a research artifact (`research/*.md`), no source/CI change.
+- Collaborator produces substantive synthesis (deliverable path cited in COLLABORATOR_HANDOFF).
+
+Role sequence:
+- Manager scopes AC + `test_strategy` (typically `peer-review`).
+- Collaborator authors the synthesis; COLLABORATOR_HANDOFF cites the deliverable path.
+- Consultant peer-reviews via CONSULTANT_CLOSEOUT rubric — the **substantive** quality gate (its CI
+  gate is skipped for lightweight lanes, but the Consultant rubric review is still required by the lane).
+
+N/A markers:
+- `ADMIN_HANDOFF: N/A — lane:docs-research; no PR` when the deliverable closes issue/wiki-only.
+- When research ships **via a PR**, the Admin git facts (branch, commit, signer-independence) apply to
+  that PR even though the `admin-gate` CI check is lightweight-skipped.
+
+Enforcement alignment:
+- Source of truth is the `baton-gates.yml` lightweight-lane list (Epic #2261; NOT an OPA rule). This
+  contract matches CI — no ceremony beyond enforcement.
+
+Escalation:
+- Tracked-file edits beyond the research deliverable → reclassify to `lane:code-change`.
+- Issue-only metadata fixes → `lane:no-code-remediation` (Manager→Consultant).
+
 
 ### No-code remediation lane contract (Refs #2258 #2268)
 
