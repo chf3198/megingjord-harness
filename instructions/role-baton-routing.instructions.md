@@ -176,7 +176,6 @@ Escalation:
 - Tracked-file edits beyond the research deliverable → reclassify to `lane:code-change`.
 - Issue-only metadata fixes → `lane:no-code-remediation` (Manager→Consultant).
 
-
 ### No-code remediation lane contract (Refs #2258 #2268)
 
 Eligibility:
