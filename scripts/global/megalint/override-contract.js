@@ -66,4 +66,29 @@ function validate(input = {}) {
   return { ok, violations, found: Object.keys(input.repoOverrides || {}).length > 0 };
 }
 
-module.exports = { validate, checkOverrides, isHardFloor, loadHardFloor, norm };
+/** Load a repo-local override map from .megingjord/overrides.{yml,yaml,json}; {} if absent. */
+function loadRepoOverrides(cwd = process.cwd()) {
+  for (const name of ["overrides.yml", "overrides.yaml", "overrides.json"]) {
+    const fp = path.join(cwd, ".megingjord", name);
+    if (!fs.existsSync(fp)) continue;
+    try {
+      const raw = fs.readFileSync(fp, "utf8");
+      const data = name.endsWith(".json") ? JSON.parse(raw) : require("js-yaml").load(raw);
+      return (data && typeof data === "object") ? (data.overrides || data) : {};
+    } catch { return {}; }
+  }
+  return {};
+}
+
+module.exports = { validate, checkOverrides, isHardFloor, loadHardFloor, loadRepoOverrides, norm };
+
+// CLI dispatch surface (ci:override-contract.yml): fail-closed on a hard-floor override.
+if (require.main === module) {
+  const { ok, violations } = checkOverrides(loadRepoOverrides());
+  if (!ok) {
+    process.stderr.write("override-contract: hard-floor override rejected:\n");
+    for (const v of violations) process.stderr.write("  - " + v.detail + "\n");
+    process.exit(1);
+  }
+  process.stdout.write("override-contract: OK (no hard-floor override)\n");
+}
