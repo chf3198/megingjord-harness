@@ -21,7 +21,7 @@ function loadHardFloor(floorPath = HARD_FLOOR_PATH) {
     for (const entry of data.hard_floor) {
       if (!entry || !entry.id) continue;
       map.set(norm(entry.id), entry.id);
-      for (const a of entry.aliases || []) map.set(norm(a), entry.id);
+      for (const alias of entry.aliases || []) map.set(norm(alias), entry.id);
     }
     return map;
   } catch {
@@ -87,7 +87,7 @@ if (require.main === module) {
   const { ok, violations } = checkOverrides(loadRepoOverrides());
   if (!ok) {
     process.stderr.write("override-contract: hard-floor override rejected:\n");
-    for (const v of violations) process.stderr.write("  - " + v.detail + "\n");
+    for (const viol of violations) process.stderr.write("  - " + viol.detail + "\n");
     process.exit(1);
   }
   process.stdout.write("override-contract: OK (no hard-floor override)\n");
