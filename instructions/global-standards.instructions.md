@@ -52,6 +52,17 @@ with `bypass_reason:` and `approver:` fields. Enforced post-merge by `merge-bypa
 any issue **as cancelled** requires a per-issue `CANCELLATION: <reason>` comment
 (`batch-cancel-evidence.js`); batch completions keep the `resolved as part of batch with #N` form.
 
+## Per-repo guardrail overrides (Epic #2892)
+
+A repository may adjust guardrails for one repo via a repo-local `.megingjord/overrides.{yml,json}`
+(never by editing harness source). Overrides fall in three tiers: **Tier-H hard-floor** (security /
+provenance / privacy — **never overridable**, listed in `config/override-hard-floor.json`, enforced
+fail-closed by `scripts/global/megalint/override-contract.js` + the required `override-contract.yml`
+CI), **Tier-A overridable-with-audit** (ceremony/process gates — self-serve but logged via
+`scripts/global/override-resolver.js` G8 `override-applied` events), and **Tier-C freely-configurable**
+(infra/availability). A request to make a Tier-H control overridable is a security-weakening carve-out
+— escalate to the client, never self-serve. Operator guide: `docs/howto/repo-overrides.md`.
+
 ## Goal-lens decision lint (required)
 
 - Apply this priority order to all governed decisions:
