@@ -161,3 +161,21 @@ A deterministic `PreToolUse` branch in `pretool_guard.py` (`check_worktree_add`,
 error — a freshness/branch signal must never brick the hook. Tests:
 `tests/hooks/test_pretool_guard_worktree_add.py` (GAP-A stale/fresh, GAP-E branch-name +
 detached, valid attach, agent-worktree style, fail-open).
+
+## Hook-install path portability + dangling-path self-heal (#3860, Epic #3854 — GAP-D)
+
+`install-hooks.sh` resolves `hooks_src` against the **canonical** checkout via
+`git rev-parse --git-common-dir` (whose parent is the main worktree) rather than
+`--show-toplevel` (the *current* worktree). This stops it baking a worktree-absolute path
+into a symlink target or an appended `"<abs>/scripts/hooks/x.sh" "$@"` line — the #2508 trap
+where deleting that worktree makes every push die `pre-push: <path>: No such file or directory`.
+It fails open to the current root when the common-dir is unresolvable.
+
+`hook-symlink-health.js` covers the complementary detection: `classifyPath` only sees broken
+*symlinks*, but a hook FILE that exists and is readable can still invoke a **dangling absolute
+path in its content**. `scanAppendedPaths()` reads the hook text and flags embedded
+`…/scripts/hooks/*.sh` invocations whose target is gone; `healAppendedPath()` repoints such a ref
+to the canonical checkout's script — **fail-closed** (only when a real canonical target exists) —
+and emits a schema-v3 G8 `governance.hook-path-self-heal` event. Tests:
+`tests/hook-install-portability-3860.spec.js` (detect, live-path no-false-positive, heal, fail-closed,
++ an install-hooks.sh temp-worktree smoke asserting the canonical path).
