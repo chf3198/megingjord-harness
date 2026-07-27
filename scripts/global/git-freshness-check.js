@@ -30,6 +30,20 @@ function behindCount(branch, base = 'origin/main') {
   return Number.isFinite(behind) ? behind : null;
 }
 
+function fetchBase(base = 'origin/main') {
+  // GAP-B (Epic #3854): make `behind` trustworthy — fetch the remote-tracking base
+  // BEFORE counting so a `behind=0` reflects real remote state, not a stale local ref.
+  // Fail-open: offline / no-remote is a silent no-op (git() already swallows errors).
+  const remote = base.includes('/') ? base.split('/')[0] : 'origin';
+  const ref = base.includes('/') ? base.split('/').slice(1).join('/') : base;
+  git(`git fetch ${remote} ${ref}`);
+}
+
+function behindCountFresh(branch, base = 'origin/main') {
+  fetchBase(base);
+  return behindCount(branch, base);
+}
+
 function commitsOnBranch(branch, base = 'origin/main') {
   const out = git(`git rev-list --left-right --count ${branch}...${base}`);
   if (!out) return null;
@@ -61,7 +75,7 @@ function evaluate(opts = {}) {
   if (branch === 'main' || branch === 'HEAD') {
     return { tier: 'ok', skipped: 'on-main-or-detached', branch };
   }
-  const behind = opts.behind ?? behindCount(branch);
+  const behind = opts.behind ?? (opts.fetch ? behindCountFresh(branch) : behindCount(branch));
   const branchCommits = opts.branchCommits ?? commitsOnBranch(branch);
   const velocity = opts.velocity ?? trunkVelocity();
   if (behind == null) return { tier: 'unknown', reason: 'cannot-compute-behind', branch };
@@ -92,5 +106,5 @@ if (require.main === module) {
   process.exit(exitCodeFor(result.tier));
 }
 
-module.exports = { evaluate, classifyTier, behindCount, commitsOnBranch, trunkVelocity,
+module.exports = { evaluate, classifyTier, behindCount, behindCountFresh, fetchBase, commitsOnBranch, trunkVelocity,
   exitCodeFor, TIERS, ADAPTIVE_THRESHOLD };
