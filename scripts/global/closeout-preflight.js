@@ -145,7 +145,7 @@ function signerParityBlocks(comments, issueNum) {
     const blocking = (res.violations || []).filter((v) => v.severity !== 'advisory' && !CI_OWNED_RULES.has(v.rule));
     if (!blocking.length) continue;
     blocked = true; console.error(`closeout-preflight: FAIL [signer-fidelity] #${issueNum}`);
-    for (const v of blocking) console.error(`  - ${v.rule}: ${v.detail}`);
+    for (const violation of blocking) console.error(`  - ${violation.rule}: ${violation.detail}`);
   }
   return blocked;
 }
@@ -158,6 +158,26 @@ function batonBackGateBlocks(comments, closeoutDeferred, issueNum) {
   if (closeoutDeferred || !batonBack.anyOpen(comments)) return false;
   console.error(`closeout-preflight: FAIL [baton-back-close-gate] #${issueNum} — open baton-back marker; remediate + clear before close`);
   return true;
+}
+
+// Run the selected shared-input validators plus the #3657 tailored-input parity
+// checks; print every blocking violation. Returns true if any blocked. The parity
+// checks gate on a posted COLLABORATOR_HANDOFF — the lifecycle point the changelog
+// fragment / signer set is required — so pre-artifact pushes are never false-failed.
+function evaluateValidators(validators, input, issueNum, prBody, collaboratorHandoffPosted) {
+  let failed = false;
+  for (const name of validators) {
+    const result = megalint.run(name, { ...input, issueNumber: issueNum });
+    // #3657: filter CI-owned anti-forgery rules from the LOCAL verdict (still hard at CI).
+    const blocking = (result.violations || [])
+      .filter((violation) => !CI_OWNED_RULES.has(violation.rule) && violation.severity !== 'advisory');
+    if (!blocking.length) continue;
+    failed = true; console.error(`closeout-preflight: FAIL [${name}] #${issueNum}`);
+    for (const violation of blocking) console.error(`  - ${violation.rule}: ${violation.detail}`);
+  }
+  if (collaboratorHandoffPosted && changelogParityBlocks(input, prBody, issueNum)) failed = true;
+  if (collaboratorHandoffPosted && signerParityBlocks(input.comments, issueNum)) failed = true;
+  return failed;
 }
 
 async function run(opts = {}) {
@@ -178,22 +198,9 @@ async function run(opts = {}) {
   if (closeoutDeferred) {
     console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
   }
-  let failed = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
-  for (const name of validators) {
-    const result = megalint.run(name, { ...input, issueNumber: issueNum });
-    // #3657: filter CI-owned anti-forgery rules from the LOCAL verdict (still hard at CI).
-    const violations = (result.violations || []).filter((v) => !CI_OWNED_RULES.has(v.rule));
-    const blocking = violations.filter((v) => v.severity !== 'advisory');
-    if (!blocking.length) continue;
-    failed = true; console.error(`closeout-preflight: FAIL [${name}] #${issueNum}`);
-    for (const violation of blocking) console.error(`  - ${violation.rule}: ${violation.detail}`);
-  }
-  // #3657: parity checks that need tailored inputs (not the shared issue input).
-  // Both gate on a posted COLLABORATOR_HANDOFF — the lifecycle point the fragment /
-  // signer set is required — so pre-artifact pushes are never false-failed.
-  if (collaboratorHandoffPosted && changelogParityBlocks(input, prBody, issueNum)) failed = true;
-  if (collaboratorHandoffPosted && signerParityBlocks(input.comments, issueNum)) failed = true;
-  if (failed) return 1;
+  const batonBackFail = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
+  const validatorFail = evaluateValidators(validators, input, issueNum, prBody, collaboratorHandoffPosted);
+  if (batonBackFail || validatorFail) return 1;
   console.log(`closeout-preflight: PASS #${issueNum}`);
   return 0;
 }
