@@ -17,6 +17,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
+const { assertMeasuringOriginMain } = require('./measurement-base');
 
 const REPO = path.resolve(__dirname, '..', '..');
 
@@ -107,7 +108,10 @@ function censusResident(instructionFiles) {
   };
 }
 
-function census() {
+function census(opts = {}) {
+  // GAP-C (Epic #3854): annotate the base this census was taken against so a stale local
+  // canonical checkout can never masquerade as an origin/main measurement. Fail-open (G6).
+  const measurement_base = assertMeasuringOriginMain({ cwd: REPO, quiet: opts.quiet });
   const files = trackedFiles();
   const has = (re) => files.filter((file) => re.test(file));
   const validators = censusValidators(files);
@@ -117,6 +121,7 @@ function census() {
   // flag each count as one unit of surface. LOC is reported separately (finer-grained).
   return {
     schema: 'governance-surface-census-v1',
+    measurement_base,
     generated_note: 'READ-ONLY census; counts + paths only, no secret values (G4).',
     surface_units: validators.total + resident.files + flags.distinct,
     validators,
@@ -164,6 +169,9 @@ function fmt(c) {
 if (require.main === module) {
   const args = process.argv.slice(2);
   const snapshot = census();
+  if (snapshot.measurement_base && snapshot.measurement_base.behind > 0) {
+    process.stderr.write(`[census] ${snapshot.measurement_base.note}\n`);
+  }
   const snapIdx = args.indexOf('--snapshot');
   if (snapIdx >= 0 && args[snapIdx + 1]) {
     fs.writeFileSync(args[snapIdx + 1], JSON.stringify(snapshot) + '\n'); // compact: machine snapshot
