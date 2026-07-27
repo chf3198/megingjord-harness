@@ -42,5 +42,55 @@
     "B verified-freshness (declared-not-verified)",
     "C measurement-base (stale local checkout)",
     "D hook-path portability"
-  ]
+  ],
+  "hardening_3861": {
+    "_doc": "Grounded-expert-panel hardening (web-RAG + worktree access) + refreshed cross-family receipt on the CORRECTED deliverable.",
+    "grounded_expert_panel": [
+      {
+        "lens": "accuracy-auditor",
+        "model": "opus",
+        "verdict": "PASS",
+        "score": 92
+      },
+      {
+        "lens": "web-best-practices",
+        "model": "sonnet",
+        "verdict": "PASS",
+        "score": 88
+      },
+      {
+        "lens": "adversarial-refuter",
+        "model": "opus",
+        "verdict": "PASS",
+        "score": 90
+      }
+    ],
+    "grounded_median": 90,
+    "corrected_crossfamily": [
+      {
+        "family": "mistral",
+        "score": 95,
+        "verdict": "PASS"
+      },
+      {
+        "family": "meta",
+        "provider": "groq",
+        "score": 96,
+        "verdict": "PASS"
+      }
+    ],
+    "corrected_receipts": {
+      "review": "b63b221a7ffa6487",
+      "merge_consensus": "900ed5d2ac4137e5"
+    },
+    "findings_folded_in": [
+      "GAP-B tier-gated (not >0; #1771 ban)",
+      "NEW GAP-E detached-HEAD + branch-name bypass",
+      "AC-R5 receipt=derived digest",
+      "GAP-D sink=.git/hooks config-dependent + G8 self-heal event",
+      "GAP-C offline fallback G6",
+      "strict:true softened",
+      "stash-global + worktree-abspath omissions noted"
+    ]
+  }
 }
