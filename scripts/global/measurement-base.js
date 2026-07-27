@@ -49,9 +49,9 @@ function assertMeasuringOriginMain(opts = {}) {
 }
 
 if (require.main === module) {
-  const r = assertMeasuringOriginMain({ force: true });
-  process.stdout.write(JSON.stringify(r, null, 2) + '\n');
-  process.exit(r.behind && r.behind > 0 ? 0 : 0); // advisory: never non-zero (measuring != gating)
+  const result = assertMeasuringOriginMain({ force: true });
+  process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+  process.exit(0); // advisory: measuring is never a gate (always zero-exit)
 }
 
 module.exports = { assertMeasuringOriginMain, resolveMeasurementBase, _reset: () => { CACHE = null; } };
