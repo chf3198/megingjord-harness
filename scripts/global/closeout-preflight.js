@@ -50,6 +50,25 @@ async function fetchPrBody(branch, opts = {}) {
   } catch { return null; }
 }
 
+// #3636: is the PR in an active-review rework state? True when the latest review decision
+// is CHANGES_REQUESTED or the PR is a draft — the two states in which a rework push
+// legitimately lacks a CONSULTANT_CLOSEOUT. Best-effort/fail-open: any lookup error returns
+// false (enforce as before), so a gh outage never silently drops the closeout requirement.
+// Env override CLOSEOUT_PREFLIGHT_PR_REWORK ('1'|'0') keeps the check deterministic in tests.
+async function fetchPrReworkInReview(branch, opts = {}) {
+  if (process.env.CLOSEOUT_PREFLIGHT_PR_REWORK !== undefined) {
+    return process.env.CLOSEOUT_PREFLIGHT_PR_REWORK === '1';
+  }
+  try {
+    const res = await execute('get-pull-request', { issue: branch, json: 'reviewDecision,isDraft' }, opts);
+    if (!res.ok) return false;
+    const payload = res.provider === 'gh-cli'
+      ? JSON.parse(res.stdout || '{}')
+      : (res.result?.pullRequest || res.result || {});
+    return payload.isDraft === true || payload.reviewDecision === 'CHANGES_REQUESTED';
+  } catch { return false; }
+}
+
 // #3657: local changed-file set — the pre-push analogue of CI's pulls.listFiles.
 // Feeds collaborator-handoff doc-coverage diff-verify + changelog-fragment-presence
 // so both run at the SAME strictness CI uses. Best-effort: [] (or the env override,
@@ -104,10 +123,18 @@ function hasCollaboratorHandoff(comments) {
 // the merge FSM, so deferring them LOCALLY scopes the shift-left gate to the format
 // class and is NOT parity-lowering of the anti-forgery gate.
 const CI_OWNED_RULES = new Set(['cross-family-receipt-unledgered', 'cross-family-receipt-ledger-tampered']);
-function selectPreflightValidators(prExists, closeoutAlreadyPosted, collaboratorHandoffPosted) {
+// #3636: during ACTIVE review a rework push legitimately has NO consultant-closeout yet —
+// after a cross-family REQUEST-CHANGES (or on a draft PR) the closeout is CORRECTLY absent
+// (review not re-approved). Enforcing it at pre-push inverts the baton and pushes operators
+// toward bypass envs. Exempt the closeout requirement while the PR review is CHANGES_REQUESTED
+// or the PR is a draft; a closeout that IS already posted stays validated (deferral relaxes
+// ordering, never un-checks a present closeout). Close-time enforcement is unchanged: the CI
+// consultant-gate, merge-evidence-pr-gate, and pretool_guard close gate still block at
+// merge/close, so this relaxes ordering, never enforcement.
+function selectPreflightValidators(prExists, closeoutAlreadyPosted, collaboratorHandoffPosted, reworkInReview) {
   const validators = ['manager-handoff'];
   if (collaboratorHandoffPosted) validators.push('doc-coverage', 'collaborator-handoff');
-  const enforceCloseoutNow = prExists || closeoutAlreadyPosted;
+  const enforceCloseoutNow = (prExists && !reworkInReview) || closeoutAlreadyPosted;
   if (enforceCloseoutNow) validators.push('consultant-closeout');
   if (prExists) validators.push('merge-evidence-pr-gate');
   return { validators, closeoutDeferred: !enforceCloseoutNow };
@@ -193,10 +220,14 @@ async function run(opts = {}) {
   const prBody = await fetchPrBody(branch, opts);
   if (prBody !== null) input.prBody = prBody;
   const collaboratorHandoffPosted = hasCollaboratorHandoff(input.comments);
+  // #3636: only worth the review-state lookup once a PR exists.
+  const reworkInReview = prBody !== null && await fetchPrReworkInReview(branch, opts);
   const { validators, closeoutDeferred } = selectPreflightValidators(
-    prBody !== null, hasCloseoutComment(input.comments), collaboratorHandoffPosted);
+    prBody !== null, hasCloseoutComment(input.comments), collaboratorHandoffPosted, reworkInReview);
   if (closeoutDeferred) {
-    console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
+    const why = reworkInReview ? 'active-review rework (CHANGES_REQUESTED / draft); closeout not yet due'
+      : 'deferred-final flow; no PR yet';
+    console.log(`closeout-preflight: consultant-closeout deferred (${why}) #${issueNum}`);
   }
   const batonBackFail = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
   const validatorFail = evaluateValidators(validators, input, issueNum, prBody, collaboratorHandoffPosted);
@@ -209,4 +240,5 @@ if (require.main === module) run().then((code) => process.exit(code));
 
 module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run,
   hasCloseoutComment, hasCollaboratorHandoff, selectPreflightValidators, batonBackGateBlocks,
-  localChangedFiles, changelogParityBlocks, signerParityBlocks, CI_OWNED_RULES };
+  localChangedFiles, changelogParityBlocks, signerParityBlocks, CI_OWNED_RULES,
+  fetchPrReworkInReview };
