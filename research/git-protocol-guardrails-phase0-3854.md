@@ -33,6 +33,7 @@ existing surface.
 | 11 | **Worktree freshness (`worktree_behind_main` / `behind_at_handoff`)** | `worktree-lifecycle-gate.checkCollaborator` + `collab-handoff-rebase-freshness.js` **read the declared number; never recompute** | ❌ **GAP-B** (declared-not-verified) |
 | 12 | **`git-freshness-check` counts `behind`** | `git-freshness-check.js` counts vs `origin/main` **without fetching first** → `behind=0` false-negative | ❌ **GAP-B** (same class) |
 | 13 | **Governance measurement base** | `governance-surface-census.js` (+ audits) read the **local canonical checkout** (deliberately behind), not `origin/main` | ❌ **GAP-C** (wrong base) |
+| 15 | **Worktree branch/ticket invariant via detached HEAD** | `worktree_ticket.py:18` treats a detached-HEAD worktree as "no ticket → graceful fallback"; `git worktree add -b` also escapes `pretool_guard.py` `BRANCH_VALID` | ❌ **GAP-E** (bypass at the git-add moment) |
 | 14 | **Deployed hook-path portability** | `hook-symlink-health.js` covers *symlinks*; `install-hooks.sh` can hardcode a **worktree absolute path** into `~/.copilot/hooks/pre-push` → dangling after that worktree is deleted → every push fails | ❌ **GAP-D** (install-path) |
 
 ## AC-R2 — Gap → owning Agile role → decision moment
@@ -52,7 +53,7 @@ existing surface.
   (which fetches) or `git fetch origin main` first. Emits a `worktree.stale-base-denied` v3 event (G8).
 - **GAP-B — verify freshness, don't trust it (validator).** Upgrade `worktree-lifecycle-gate.checkCollaborator`
   and `collab-handoff-rebase-freshness.js` to **recompute** `behind` via `git-freshness-check.behindCount()`
-  (after a fetch) and **reject** if declared ≠ actual, or actual > 0 on a `lane:code-change` handoff. Fix
+  (after a fetch) and **reject** if declared ≠ actual (the sound verify-don`t-trust half). Gate the *magnitude* on the EXISTING velocity-relative tiers (`ok ≤ 3` / `advisory ≤ 10` / `MAX_BEHIND_AT_HANDOFF = 30`) — **never a bare `> 0`** (that reintroduces the #1771/#1827-banned absolute-threshold anti-pattern). Fix
   `git-freshness-check.js` to **fetch before counting** so `behind=0` is trustworthy.
 - **GAP-C — measurement base guard (shared shim).** A `assertMeasuringOriginMain()` / auto-`git fetch`
   helper that governance-measurement scripts (`governance-surface-census.js`, audit) call so reads resolve
@@ -84,3 +85,40 @@ absent (fail-closed on `lane:code-change`).
 Ship GAP-A first (the PreToolUse hook is the highest-leverage prevention — it stops the stale-base defect
 at the git moment). GAP-B/C/D are verifier/shim upgrades to existing surfaces. All are net-positive
 tightening reusing existing scripts; no new bypass surface.
+
+## Expert-panel hardening (grounded web-RAG + worktree review — #3861)
+
+Phase-0 was re-validated by 3 tool-equipped experts (each with web-RAG + worktree access, verifying
+against the actual files): accuracy-auditor (opus, PASS 92), web-best-practices (sonnet, PASS 88),
+adversarial-refuter (opus, PASS 90) — **median 90, all PASS**. Independence remains carried by the
+committed non-Anthropic cross-family `kind:review` receipt (meta + mistral). Their material findings are
+folded in above and below.
+
+### GAP-E — worktree branch/ticket invariant via detached HEAD (AC-R2/R3)
+
+- **Role/moment:** Collaborator, at `git worktree add` (same interception point as GAP-A → folded into P1-a #3857).
+- **Design (prevention-first, fail-open on network):** the GAP-A PreToolUse hook also (a) denies/redirects a
+  detached-HEAD `git worktree add <path> <sha>` (require `-b <type>/<N>-slug` from a fresh base, or an
+  explicit sanctioned detached use), and (b) runs branch-name validation on the `-b` form (which today
+  escapes `BRANCH_VALID`). Evidence: `worktree_ticket.py:18`, `pretool_guard.py` `RE_BRANCH_CREATE` (no
+  worktree-add regex). External corroboration: `anthropics/claude-code#28958`.
+
+### Strengthening notes (from the panel)
+
+- **GAP-C offline (G6):** the `origin/main` measurement shim MUST fall back to the local tree on fetch
+  failure (as `trackedFiles()` already does) — graceful, never a hard block offline.
+- **GAP-D observability (G8) + sink path:** the dangling-hook self-heal MUST emit an audited G8 event (not
+  silent), since it mutates the integrity-sensitive hook surface. Note: the default installer sink is
+  `.git/hooks` (via `git rev-parse --git-path hooks`); the `~/.copilot/hooks/` path applies only via
+  `core.hooksPath` (`worktree-session-start.sh`). The abs-path-embedding mechanism + remedy are unchanged.
+- **Row 7 (merge freshness / `strict:true`):** correct and actively verified by
+  `.github/workflows/branch-protection-canary.yml` — but scope it "sufficient for the current
+  low-concurrency single-admin merge cadence; re-evaluate (GitHub Merge Queue) if concurrent-PR volume grows."
+- **Inventory completeness (non-blocking):** `git stash` is **global across worktrees** and worktrees store
+  **absolute paths** (moving the main checkout breaks refs) — lower-severity than A–E and partly mitigated by
+  the canonical-main stash-rejection policy; listed here for a complete audit. No submodules/LFS in this repo.
+
+### Revised Phase-1 slate
+
+P1-a (#3857) now also covers **GAP-E**; P1-b (#3858) uses the **tier-gated** reject (not `> 0`). P1-c/P1-d
+add the explicit offline-fallback (G6) and G8 self-heal event respectively.
