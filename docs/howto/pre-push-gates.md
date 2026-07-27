@@ -62,6 +62,18 @@ Enforcement is preserved downstream regardless: the required CI `consultant-gate
 recorded before `gh issue close`) keep the closeout mandatory **before merge and before issue
 close**. The pre-push deferral only removes the baton-inverting pre-PR requirement.
 
+## Command-context gates ignore quoted prose (#3661)
+
+The command-CONTEXT gates (create-PR, `gh issue close`, `gh pr merge`, checks,
+publish/release, epic-close, no-code-admin) answer "was this Admin/close **command**
+actually invoked?". They therefore scan the **#3471-sanitized** command — quoted spans
+masked and here-doc bodies stripped — so a command *mentioned* inside a `--body`/here-doc
+of a `gh issue comment` or artifact-posting call (e.g. a `MANAGER_HANDOFF` describing the
+create-PR path, or a `CONSULTANT_CLOSEOUT` citing the issue-close command) does **not**
+false-block the enclosing tool call. Unquoted **real** commands still fire the gate.
+Safety/content scans (dangerous-command, secret, fleet-curl, redirect) intentionally keep
+the **raw** command so a real command hidden in a here-doc is still caught.
+
 ## Merge gate: required checks only (#3664)
 
 The `pretool_guard` merge gate classifies PR CI via

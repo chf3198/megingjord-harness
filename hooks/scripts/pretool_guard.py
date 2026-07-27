@@ -554,13 +554,21 @@ def check_worktree_add(joined: str, cwd: str):
 
 
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
+    # #3661: command-CONTEXT gates (was an Admin/close COMMAND actually invoked?) must
+    # ignore the same command STRING quoted inside a `--body`/here-doc of an issue-comment
+    # or artifact-posting call — a prose mention (e.g. a MANAGER_HANDOFF describing the
+    # create-PR path, or a CONSULTANT_CLOSEOUT citing the issue-close command) must never
+    # trip the gate (the #3631 false-block, twice). Reuse the #3471 quote/here-doc masking
+    # so unquoted REAL commands still fire while quoted prose is masked out. Safety/content
+    # scans (dangerous-cmd, secret, fleet-curl, redirect) intentionally keep the RAW `joined`.
+    cmd = _sanitize_for_redirect_scan(joined)
     auth_result = _check_auth_profile(joined)
     if auth_result is not None:
         return auth_result
     role_result = _check_role_tool_allowlist(joined, state)
     if role_result is not None:
         return role_result
-    epic_close_result = _check_epic_close_guard(joined, cwd)
+    epic_close_result = _check_epic_close_guard(cmd, cwd)
     if epic_close_result is not None:
         return epic_close_result
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
@@ -574,7 +582,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     no_code_lane = active_ticket_is_no_code_lane(state, cwd)
     research_lane = active_ticket_is_research_lane(state, cwd)  # #3266
     docs_lane = active_ticket_is_docs_lane(state, cwd)  # #3569
-    if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
+    if no_code_lane and NO_CODE_ADMIN_RE.search(cmd):
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if is_raw_fleet_curl(joined):
         _emit_fleet_bypass_incident(cwd)
@@ -650,7 +658,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
                 return emit("deny", "Push blocked: commit step first (Admin sequencing).")
             if used_worktree:
                 _emit_worktree_push_desync(cwd)
-    if RE_PR_MERGE.search(joined):
+    if RE_PR_MERGE.search(cmd):
         override = require_bypass_exception(joined, state, cwd)
         if override:
             return emit("deny", "Admin-override merge blocked (#2706): record the Epic #2517 exception "
@@ -675,11 +683,11 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
                 return emit("deny", "Merge blocked: required CI checks are not fully green (live API check).")
         elif not pr_m and not ops.get("ci_green"):
             return emit("deny","Merge blocked: CI-green not recorded.")
-    if RE_VSCE_PUBLISH.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
+    if RE_VSCE_PUBLISH.search(cmd) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("merge"): return emit("deny","Publish blocked: merge not recorded.")
-    if RE_GH_RELEASE_CREATE.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
+    if RE_GH_RELEASE_CREATE.search(cmd) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("publish"): return emit("deny","Release blocked: publish not recorded.")
-    if RE_GH_ISSUE_CLOSE.search(joined):
+    if RE_GH_ISSUE_CLOSE.search(cmd):
         # #3266/#3569: report-only lanes (research, docs-research, docs-only, no-code-remediation)
         # are PR-less and merge-less BY DESIGN. When the tree is clean there is genuinely nothing
         # to merge, so the merge-precondition is skipped. But a REAL repo diff means there IS
@@ -705,14 +713,14 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if not report_only_clean_exempt and flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
-        if "gh issue edit" not in joined and "--remove-label" not in joined:
+        if "gh issue edit" not in cmd and "--remove-label" not in cmd:
             # Epic #3392 AC2 (S2): self-resolvable REDIRECT, not a client prompt. Normalize the
             # execution-role labels first, then close — fully operator-automatable. The
             # label-normalization governance intent is PRESERVED (anti-goal §6); only ask->deny.
             return emit("deny", "Issue close: remove execution role labels first "
                         "(gh issue edit #N --remove-label role:<X>), then close. "
                         "Operator-resolvable — no client prompt.")
-    if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined) and not ops.get("commit"):
+    if RE_PR_CREATE.search(cmd) and not RE_GIT_COMMIT.search(cmd) and not ops.get("commit"):
         if not linked_issue_has_collab_handoff(cwd):
             return emit("deny","PR creation blocked: COLLABORATOR_HANDOFF not found on linked issue.")
         # Epic #3392 AC2 (S3): state-derive instead of prompting. The session admin_ops.commit flag
@@ -722,11 +730,11 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if branch_has_commit_ahead(resolve_push_cwd(joined, cwd)):
             return emit("allow", "PR creation: a real commit exists ahead of base (state-derived; no client prompt).")
         return emit("deny", "PR creation: commit step first (Admin sequencing). Operator-resolvable — no client prompt.")
-    if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):
+    if RE_PR_CHECKS.search(cmd) and not ops.get("pr_create"):
         # Epic #3392 AC2 (S4): checking CI status is READ-ONLY and harmless before PR creation (the
         # operator routinely polls checks on an existing PR). Allow with an advisory; no client prompt.
         return emit("allow", "CI checks before PR creation: read-only status poll — proceeding (no client prompt).")
-    if RE_RELEASE_INTEGRITY.search(joined) and repo_type == "vscode-extension" and not ops.get("publish"):
+    if RE_RELEASE_INTEGRITY.search(cmd) and repo_type == "vscode-extension" and not ops.get("publish"):
         # Epic #3392 AC2 (S5): a release-integrity check is READ-ONLY verification; running it before
         # publish is a harmless precondition check. Allow with an advisory; no client prompt.
         return emit("allow", "Integrity check before publish: read-only verification — proceeding (no client prompt).")
