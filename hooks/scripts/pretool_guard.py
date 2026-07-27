@@ -26,6 +26,8 @@ RE_BRANCH_SWITCH = re.compile(
     re.MULTILINE,
 )
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
+# Epic #3854 P1-a — guard `git worktree add` (GAP-A fetch-before-branch + GAP-E detached/branch-name).
+RE_WORKTREE_ADD = re.compile(r"git\s+worktree\s+add\b")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 IT_OPS_MARKERS_RE = re.compile(r"\[it-ops\]|chore\(it-ops\)\s*:", re.IGNORECASE)
 NO_CODE_ADMIN_RE = re.compile(
@@ -457,6 +459,100 @@ def _check_epic_close_guard(joined: str, cwd: str) -> int | None:
     return None
 
 
+def _fetch_is_recent(cwd: str, max_age_sec: int = 300) -> bool:
+    """True if a `git fetch` landed within max_age_sec (local FETCH_HEAD mtime).
+    GAP-A (Epic #3854): a LOCAL freshness proxy — never a network probe. Fail-OPEN:
+    any error (or unresolved FETCH_HEAD) returns True so the hook is never bricked.
+    A never-fetched repo (no FETCH_HEAD) returns False (treat as stale).
+    """
+    try:
+        import time
+        res = subprocess.run(["git", "rev-parse", "--git-path", "FETCH_HEAD"], cwd=cwd,
+                             capture_output=True, text=True, timeout=10, check=False)
+        rel = (res.stdout or "").strip()
+        if not rel:
+            return True
+        fp = rel if os.path.isabs(rel) else os.path.join(cwd, rel)
+        if not os.path.exists(fp):
+            return False
+        return (time.time() - os.path.getmtime(fp)) <= max_age_sec
+    except Exception:
+        return True  # fail-open: freshness signal must never brick the hook
+
+
+def _emit_worktree_stale_denied(cwd: str, base: str) -> None:
+    """G8 (Epic #3854 GAP-A): record a stale-base worktree-add denial. Never raises."""
+    try:
+        path = os.path.join(os.path.expanduser("~"), ".megingjord", "incidents.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        event = {"version": 3, "service": "pretool-guard-worktree-add",
+                 "env": "local", "event": "governance.worktree-stale-base-denied",
+                 "pattern_id": "worktree-add-stale-base", "severity": "low",
+                 "base": base, "cwd": cwd}
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+    except Exception:
+        pass  # telemetry failure must not affect the hook decision
+
+
+def _is_attachable_branch(base: str, cwd: str) -> bool:
+    """True if `base` is a LOCAL branch (so `git worktree add <path> <base>` attaches it,
+    not detached). Fail-OPEN: git error => True (never block a legitimate attach).
+    """
+    try:
+        res = subprocess.run(["git", "rev-parse", "--verify", "--quiet", "refs/heads/" + base],
+                             cwd=cwd, capture_output=True, text=True, timeout=10, check=False)
+        return res.returncode == 0
+    except Exception:
+        return True
+
+
+def check_worktree_add(joined: str, cwd: str):
+    """GAP-A + GAP-E (Epic #3854): guard `git worktree add`. Returns an emit()-args
+    tuple (decision, reason, extra) or None to proceed. Fail-OPEN on any error.
+    """
+    try:
+        if not RE_WORKTREE_ADD.search(joined):
+            return None
+        seg = joined.split("worktree add", 1)[1]
+        toks = seg.split()
+        bflag = None
+        positionals = []
+        i = 0
+        while i < len(toks):
+            tok = toks[i]
+            if tok in ("-b", "-B"):
+                bflag = toks[i + 1] if i + 1 < len(toks) else None
+                i += 2
+                continue
+            if tok.startswith("-"):
+                i += 1
+                continue
+            positionals.append(tok)
+            i += 1
+        # GAP-E: branch name on -b escapes RE_BRANCH_CREATE — validate it here.
+        if bflag and not BRANCH_VALID.match(bflag):
+            return ("deny", f"Branch '{bflag}' violates naming. Use feat/<ticket#>-desc. "
+                    "(Epic #3854 GAP-E — worktree-add branch-name bypass)", None)
+        # GAP-E: no -b + a base that is NOT a local branch => detached HEAD (no ticket branch).
+        # Attaching an existing local branch (`git worktree add <path> <branch>`) is fine.
+        if not bflag and len(positionals) >= 2 and not _is_attachable_branch(positionals[1], cwd):
+            return ("deny", "`git worktree add` with a non-branch base creates a detached HEAD "
+                    "(no ticket branch — bypasses one-worktree-per-ticket). Use `-b <type>/<N>-slug`, "
+                    "or `scripts/agent-worktree.sh <branch>`. (Epic #3854 GAP-E)", None)
+        # GAP-A: fetch-before-branch — base is a remote-tracking ref and no recent fetch.
+        base = positionals[1] if len(positionals) >= 2 else None
+        if base and base.startswith("origin/") and not _fetch_is_recent(cwd):
+            _emit_worktree_stale_denied(cwd, base)
+            return ("deny", f"Worktree base '{base}' without a recent `git fetch` may be stale "
+                    "(you could branch off an outdated origin/main). Run `git fetch origin main` "
+                    "first, or use `scripts/agent-worktree.sh <branch>` (fetches first). "
+                    "(Fetch-before-branch, Epic #3854 GAP-A)", None)
+        return None
+    except Exception:
+        return None  # fail-open
+
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     auth_result = _check_auth_profile(joined)
     if auth_result is not None:
@@ -507,6 +603,9 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
+    _wt = check_worktree_add(joined, cwd)
+    if _wt:
+        return emit(*_wt)
     if any(marker in joined for marker in runtime_hook_paths()):
         # Epic #3392 #3403 (S6): adjudicate-first. Benign hook read / governed deploy → fall
         # through (proceed); only a direct ungoverned hook MUTATION reaches the human carve-out.
