@@ -56,6 +56,11 @@ To support it, the consultant-closeout check is **deferred to PR-open**:
   ordering, it never silently un-checks a closeout that is present.
 - **The PR exists** (`prBody` resolvable): the consultant-closeout check and
   `merge-evidence-pr-gate` run as before.
+- **Active-review rework** (#3636): when the PR's latest review decision is
+  `CHANGES_REQUESTED` or the PR is a **draft**, the consultant-closeout check is exempted —
+  a rework push after a cross-family REQUEST-CHANGES legitimately has no closeout yet (review
+  not re-approved), so demanding it inverts the baton. A closeout that IS already posted is
+  still validated. `merge-evidence-pr-gate` still runs; close-time enforcement is unchanged.
 
 Enforcement is preserved downstream regardless: the required CI `consultant-gate`,
 `merge-evidence-pr-gate`, and the `pretool_guard` close gate (which requires the merge to be
