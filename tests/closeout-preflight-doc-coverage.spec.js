@@ -16,8 +16,12 @@ const preflight = require('../scripts/global/closeout-preflight.js');
 const megalint = require('../scripts/global/megalint');
 const collaboratorHandoff = require('../scripts/global/megalint/collaborator-handoff.js');
 
-const BRANCH = 'fix/3328-local-preflight-doc-coverage';
+// #3657: a synthetic branch with no real PR keeps the run deterministic (the old
+// `fix/3328-...` name matched a merged PR, so fetchPrBody pulled live gh state and
+// flipped closeout enforcement — a pre-existing flaky dependence this spec now avoids).
+const BRANCH = 'fix/3328-doccov-parity-spec-fixture';
 const LABELS = ['lane:code-change', 'area:scripts'];
+const FRAGMENT = '.changes/unreleased/3328.md';
 
 // A schema-valid MANAGER_HANDOFF with `acceptance:` content on its own (block) line —
 // the canonical baton-builder form, which extractField parses correctly.
@@ -57,8 +61,17 @@ const DOC_BLOCK_BAD_NA =
   + '  README.md: N/A: README.md — repeated path not an enum reason\n'
   + '  docs/howto/: N/A: out-of-scope — no operator-runbook change';
 
+// #3657: a COMPLETE, CI-valid COLLABORATOR_HANDOFF (all lane:code-change fields), so
+// the local gate now runs the FULL collaborator-handoff validator at CI strictness —
+// not only the doc-coverage slice. The doc block under test is swapped in; every other
+// field stays valid so a defect isolates to the doc block (or MANAGER_HANDOFF).
 const collabHandoff = (docBlock) =>
   `## COLLABORATOR_HANDOFF\nticket: #3328\n${docBlock}\n`
+  + 'cross_family_reviewer: qwen2.5-coder:32b@100.91.113.16:11434\n'
+  + 'cross_family_rating: 92/100\ncross_family_findings: none blocking\n'
+  + 'cross_family_receipt: 0123456789abcdef\n'
+  + `worktree_branch: ${BRANCH}\nworktree_behind_main: 0\n`
+  + 'Pre-handoff verification (PASS)\n- [x] lint\n- [x] tests\n'
   + 'Signed-by: Orla Harper\nTeam&Model: claude-code:claude-opus-4-8@local\nRole: collaborator';
 
 function runPreflight(managerBody, docBlock) {
@@ -73,6 +86,9 @@ function runPreflight(managerBody, docBlock) {
       ...process.env,
       CLOSEOUT_PREFLIGHT_BRANCH: BRANCH,
       CLOSEOUT_PREFLIGHT_ISSUE_JSON: JSON.stringify(issue),
+      // #3657: the changelog fragment + a source file, so changelog-fragment-presence
+      // and doc-coverage diff-verify run at CI strictness against a known file set.
+      CLOSEOUT_PREFLIGHT_PR_FILES: `${FRAGMENT},scripts/global/closeout-preflight.js`,
     },
     encoding: 'utf8',
   });
