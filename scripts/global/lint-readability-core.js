@@ -122,6 +122,15 @@ function verifyRef(ref, root = ROOT) {
 }
 
 function resolveBaseRef(explicitBase, root = ROOT) {
+  // GAP-C (Epic #3854 #3859): refresh the remote base BEFORE diffing so a stale/shallow CI
+  // checkout can't resolve an OLD origin/main and sweep unrelated files (their pre-existing
+  // warnings would count as net-new). Fail-open — offline / no-remote is a silent no-op.
+  for (const ref of (explicitBase ? [explicitBase] : BASE_REF_CANDIDATES)) {
+    if (!ref.includes('/')) continue;
+    const [remote, ...rest] = ref.split('/');
+    try { execFileSync('git', ['fetch', remote, rest.join('/')], { cwd: root, stdio: 'ignore' }); }
+    catch { /* fail-open: base freshness must never brick the gate */ }
+  }
   const candidates = explicitBase ? [explicitBase] : BASE_REF_CANDIDATES;
   for (const ref of candidates) {
     if (verifyRef(ref, root)) return ref;
