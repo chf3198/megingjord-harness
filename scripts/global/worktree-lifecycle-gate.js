@@ -44,6 +44,16 @@ function checkManager(body, input = {}) {
   }
   return out;
 }
+// GAP-B (Epic #3854) verify-don't-trust: recompute actual `behind` (fetch-then-count).
+// Fail-open — offline / no-git / branch-absent (e.g. CI detached checkout) => null => skip.
+function recomputeBehind(branch, input = {}) {
+  if (input.actualBehind != null) return input.actualBehind;
+  try {
+    const fresh = require('./git-freshness-check');
+    return fresh.behindCountFresh(branch, input.base || 'origin/main');
+  } catch { return null; }
+}
+
 function checkCollaborator(body, input = {}) {
   const lane = input.lane || '';
   if (skipLane(lane) || lane !== 'lane:code-change') return [];
@@ -54,6 +64,23 @@ function checkCollaborator(body, input = {}) {
   if (behind == null) out.push({ rule: 'missing-worktree-behind', detail: 'COLLABORATOR_HANDOFF requires worktree_behind_main:' });
   if (branch && input.branch && branch !== input.branch) {
     out.push({ rule: 'worktree-branch-mismatch', detail: `handoff worktree_branch '${branch}' != PR branch '${input.branch}'` });
+  }
+  // GAP-B: recompute + verify. Magnitude gates ONLY on the existing velocity-relative tier
+  // ceiling (git-freshness-check pre-handoff-block maxBehind=30) — NEVER a bare `actual>0`
+  // (Epic #1771/#1827 absolute-threshold ban). Fail-open when recompute is unavailable.
+  const TIER_CEILING = 30;
+  if (branch && behind != null) {
+    const actual = recomputeBehind(branch, input);
+    if (actual != null) {
+      if (Number(behind) !== actual) {
+        out.push({ rule: 'worktree-behind-declared-mismatch',
+          detail: `declared worktree_behind_main=${behind} but recomputed actual=${actual} (verify-don't-trust, Epic #3854 GAP-B)` });
+      }
+      if (actual > TIER_CEILING) {
+        out.push({ rule: 'worktree-behind-exceeds-tier',
+          detail: `recomputed behind=${actual} exceeds pre-handoff-block tier ceiling ${TIER_CEILING} — rebase onto origin/main first` });
+      }
+    }
   }
   return out;
 }
@@ -90,4 +117,4 @@ if (require.main === module) {
   process.stdout.write('Usage: worktree-lifecycle-gate.js --session-diagnosis\n');
 }
 
-module.exports = { sessionDiagnosis, summarize, checkManager, checkCollaborator, checkAdmin, checkConsultant, staleSafeCleanup, isUnsafeBranch, skipLane, extractField, COUNT_KEYS };
+module.exports = { sessionDiagnosis, summarize, checkManager, checkCollaborator, checkAdmin, checkConsultant, recomputeBehind, staleSafeCleanup, isUnsafeBranch, skipLane, extractField, COUNT_KEYS };

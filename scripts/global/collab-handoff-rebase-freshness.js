@@ -35,6 +35,14 @@ function validate(body, opts = {}) {
     violations.push({ rule: 'behind-at-handoff-exceeds-rescope-tier',
       value: fields.behind_at_handoff, limit: MAX_BEHIND_AT_HANDOFF });
   }
+  // GAP-B (Epic #3854) verify-don't-trust: when the caller supplies a recomputed actual,
+  // reject a declared value that disagrees. Magnitude stays tier-gated above (MAX=30) —
+  // this is the declared!=actual half, NOT a bare `>0` reject (Epic #1771 ban).
+  if (opts.actualBehind != null && fields.behind_at_handoff != null
+      && Number(fields.behind_at_handoff) !== Number(opts.actualBehind)) {
+    violations.push({ rule: 'behind-at-handoff-declared-mismatch',
+      declared: fields.behind_at_handoff, actual: Number(opts.actualBehind) });
+  }
   if (fields.rebase_freshness == null) {
     advisories.push('missing-rebase-freshness');
   } else {
