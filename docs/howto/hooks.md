@@ -177,5 +177,5 @@ path in its content**. `scanAppendedPaths()` reads the hook text and flags embed
 `…/scripts/hooks/*.sh` invocations whose target is gone; `healAppendedPath()` repoints such a ref
 to the canonical checkout's script — **fail-closed** (only when a real canonical target exists) —
 and emits a schema-v3 G8 `governance.hook-path-self-heal` event. Tests:
-`tests/hook-install-portability-3860.spec.js` (detect, live-path no-false-positive, heal, fail-closed,
-+ an install-hooks.sh temp-worktree smoke asserting the canonical path).
+`tests/hook-install-portability-3860.spec.js` (detect, live-path no-false-positive, heal, fail-closed, and an
+install-hooks.sh temp-worktree smoke asserting the canonical path).
