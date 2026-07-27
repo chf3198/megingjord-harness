@@ -137,3 +137,27 @@ text) is appended to `~/.megingjord/ask-redirect.jsonl`. Tests:
 enforcement), `tests/hooks/stress_ask_reference_monitor_3825.py` (fault-injection + p99 budget),
 with JS harnesses `tests/pretool-guard-ask-monitor-3825.spec.js` +
 `tests/stress-ask-reference-monitor-3825.spec.js`.
+
+## Worktree-add fetch-before-branch guard (#3857, Epic #3854 — GAP-A + GAP-E)
+
+A deterministic `PreToolUse` branch in `pretool_guard.py` (`check_worktree_add`, wired into
+`check_terminal` right after the `RE_BRANCH_CREATE` name check) intercepts raw
+`git worktree add` **before** it runs, closing two footguns the branch-name gate could not see:
+
+- **GAP-A — fetch-before-branch.** A worktree based on a remote-tracking ref (`origin/*`)
+  without a recent `git fetch` may branch off a **stale** `origin/main`. When the base is
+  `origin/*` and no fetch landed within 300 s (`_fetch_is_recent` — a **local** `FETCH_HEAD`
+  mtime proxy, never a network probe), the add is denied and redirected to
+  `scripts/agent-worktree.sh` (which fetches first). A stale-base denial emits a redacted
+  schema-v3 G8 event (`governance.worktree-stale-base-denied`, pattern_id
+  `worktree-add-stale-base`) to `~/.megingjord/incidents.jsonl`.
+- **GAP-E — detached-HEAD + branch-name bypass.** `git worktree add -b <name>` escapes
+  `RE_BRANCH_CREATE`, so the `-b` name is re-validated against `BRANCH_VALID`. And
+  `git worktree add <path> <sha-or-tag>` (no `-b`, base is **not** a local branch per
+  `_is_attachable_branch`) creates a detached HEAD with no ticket branch — denied. Attaching an
+  existing local branch (`git worktree add <path> <branch>`) is still allowed.
+
+**Fail-open:** every helper and `check_worktree_add` itself returns `None` (proceed) on any
+error — a freshness/branch signal must never brick the hook. Tests:
+`tests/hooks/test_pretool_guard_worktree_add.py` (GAP-A stale/fresh, GAP-E branch-name +
+detached, valid attach, agent-worktree style, fail-open).
