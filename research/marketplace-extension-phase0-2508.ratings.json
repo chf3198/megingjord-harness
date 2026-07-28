@@ -1,0 +1,52 @@
+{
+  "_doc": "Committed >=90 council rating for Epic #2508 Phase-0 (marketplace-extension synthesis). 3 GENUINELY DISJOINT non-Anthropic families, web-grounded, cited the AC content, chance-corrected (Gwet AC1 over binary meets-bar>=90). Free-fleet-first ($0). Verified kind:review receipt 22fbbc2cd2b8975e (meta+mistral) binds the panel; merge-consensus 8e5a4fea56942134 for the Phase-0 child PR Admin independence.",
+  "ticket": 2508,
+  "phase0_child": 3837,
+  "phase": "phase-0 research-first",
+  "council": [
+    {
+      "family": "mistral",
+      "model": "mistral-large-latest",
+      "score": 97,
+      "verdict": "PASS"
+    },
+    {
+      "family": "meta",
+      "provider": "groq",
+      "model": "llama-3.3-70b",
+      "score": 95,
+      "verdict": "PASS"
+    },
+    {
+      "family": "deepseek",
+      "provider": "nvidia",
+      "model": "deepseek-v4-flash",
+      "score": 98,
+      "verdict": "PASS"
+    }
+  ],
+  "aggregate": {
+    "distinct_families": 3,
+    "median": 97,
+    "min": 95,
+    "all_pass": true,
+    "gwet_ac1": 1,
+    "gwet_basis": "binary meets-bar(>=90) per family; unanimous => AC1=1.0"
+  },
+  "receipts": {
+    "plan_rating_review_receipt": "22fbbc2cd2b8975e",
+    "merge_consensus_receipt": "8e5a4fea56942134",
+    "ledger": "governance/cross-family-consensus.jsonl"
+  },
+  "web_grounding": [
+    "code.visualstudio.com/api publishing + inter-extension API (activate exports/getExtension/extensionDependencies)",
+    "MS Marketplace signing + secret-scan (2026)",
+    "Open VSX default for Cursor/Antigravity (Eclipse); MS ToS forbids forks",
+    "dual-publish vsce+ovsx via CI; monorepo pure-core pattern"
+  ],
+  "disposition": {
+    "phase0": "autonomous-complete",
+    "phase1_publish": "client-carve-out (irreversible + design go/no-go)",
+    "epic_next": "deferred pending client publish authorization"
+  }
+}

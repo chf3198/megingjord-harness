@@ -1,7 +1,9 @@
 'use strict';
 const { test, expect } = require('@playwright/test');
+// #3814 (Epic #3807 C6): rubric-consistency logic consolidated into its only consumer,
+// consultant-closeout.js; the standalone validator file was retired. Property unchanged.
 const { checkRubricVerdictConsistency, parseGScores, FLOOR } =
-  require('../scripts/global/megalint/consultant-rubric-consistency.js');
+  require('../scripts/global/megalint/consultant-closeout.js');
 
 const HIGH = 'G1: 8 G2: 8 G3: 8 G4: 8 G5: 8 G6: 8 G7: 8 G8: 8 G9: 8';
 const LOW = 'G1: 2 G2: 8 G3: 8 G4: 8 G5: 8 G6: 8 G7: 8 G8: 8 G9: 8';

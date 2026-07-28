@@ -1,0 +1,38 @@
+# wiki-reconcile-liveness.yml — liveness SLO monitor for the wiki reconcile (#3759, Epic #3719).
+# Enforces "≥1 successful wiki-reconcile-cron run per 24h" by reading the Actions run-history (a DURABLE,
+# non-gitignored source of truth — the #3718 alarm self-silenced by writing to gitignored state). On breach
+# it files a deduped durable GitHub-issue alert AND HARD-FAILS (a required signal, no precision/corpus
+# dependency, unlike the advisory drift-gate). Runs every 6h so a freeze is caught within a fraction of the
+# 24h window. Never silent.
+name: wiki-reconcile-liveness
+
+on:
+  schedule:
+    - cron: '15 */6 * * *' # every 6h
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: wiki-reconcile-liveness
+  cancel-in-progress: false
+
+jobs:
+  liveness:
+    name: reconcile-liveness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up Node.js
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4
+        with:
+          node-version: '20'
+      - name: Assert ≥1 successful reconcile in 24h (hard-fail + durable alert on breach)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/wiki/reconcile-liveness.js

@@ -23,13 +23,17 @@ test('admin gate fails when collaborator and admin use same Team&Model', () => {
   expect(result.reason).toBe('same-team-no-valid-receipt');
 });
 
-test('admin gate passes when collaborator and admin use different teams', () => {
+test('a BARE different-team claim NO LONGER passes — it is forgeable (#3672 F3)', () => {
+  // Pre-#3672 this returned independent-team PASS. A single agent can mint a foreign-team
+  // signer (the #3673/PR#3677 forgery), so a different-team claim now requires a verified
+  // cross-family receipt or a cryptographic authorship attestation. Genuine-cross-team
+  // WITH proof still passes — see tests/baton-independence-self-waive.spec.js.
   const result = gate.checkAdminIndependence([
     { body: 'COLLABORATOR_HANDOFF\nAI-Team-Model: claude-code:opus@anthropic' },
     { body: 'ADMIN_HANDOFF\nAI-Team-Model: codex:gpt-5@openai' },
   ]);
-  expect(result.ok).toBe(true);
-  expect(result.reason).toBe('independent-team');
+  expect(result.ok).toBe(false);
+  expect(result.reason).toBe('unattested-cross-team-claim');
 });
 
 test('persona-surname difference alone NO LONGER satisfies independence (#3518)', () => {

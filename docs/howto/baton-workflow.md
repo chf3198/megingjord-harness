@@ -196,10 +196,15 @@ gh issue close N
 
 ## Reduced Lanes
 
-### docs/research lane (Manager → Collaborator → Admin → Consultant)
+### docs/research lane (Manager → Collaborator(synthesis) → Consultant)
 
-Docs/research changes still follow the four-role baton unless the ticket is explicitly
-classified as no-code remediation.
+Per the H3-prime shape (Epic #2263), the research/docs lane runs
+Manager → Collaborator(synthesis) → Consultant. Admin is dropped by default —
+`baton-gates.yml` already skips the collaborator/admin/consultant gates for lightweight
+lanes. The Collaborator remains the substantive synthesis author and the Consultant retains
+independent rubric authority. `ADMIN_HANDOFF: N/A unless a PR exists`; when research ships via a
+PR the Admin git facts (branch, commit, signer-independence) apply to that PR. See the
+**Research lane contract** in `instructions/role-baton-routing.instructions.md`.
 
 ### no-code remediation lane (Manager → Consultant)
 

@@ -11,18 +11,19 @@ process.env.HOME = TMP_HOME;
 const gate = require('../scripts/global/megalint/phase0-promotion-gate');
 const resolver = require('../scripts/global/phase0-promotion-resolver');
 const guard = require('../scripts/global/phase0-closure-guard');
-const { makeGithub, makeCore } = require('./phase0-github-mock');
+const { makeGithub, makeCore, validPlanRating } = require('./phase0-github-mock');
 
 test('G6 chaos: resolve survives a faulting child issues.get (skips it, no throw)', async () => {
+  const pr = validPlanRating(500); // #3826: green now needs a verified plan-rating
   const { github } = makeGithub({
     issues: {
       500: { state: 'open', labels: ['type:epic', 'phase-gate:research-first'], body: 'kids #501 #502' },
       501: { state: 'closed', labels: ['phase-gate:research-first'], body: 'Parent: #500' },
     },
-    commentsByIssue: { 500: [{ body: 'EPIC_RESCOPE' }], 501: [{ body: 'CONSULTANT_CLOSEOUT' }] },
+    commentsByIssue: { 500: [{ body: 'EPIC_RESCOPE' }, pr.comment], 501: [{ body: 'CONSULTANT_CLOSEOUT' }] },
     failGetFor: new Set([502]), // #502 fetch faults — must be skipped, not fatal
   });
-  const r = await resolver.resolve({ github, owner: 'o', repo: 'r', epicNumber: 500 });
+  const r = await resolver.resolve({ github, owner: 'o', repo: 'r', epicNumber: 500, ledger: pr.ledger });
   expect(r.phase0Count).toBe(1);
   expect(r.missingPhase1Children).toBe(true);
 });

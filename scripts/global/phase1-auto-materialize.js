@@ -38,8 +38,8 @@ function buildPhase1Seed(epic) {
   return { title, body, labels: ['type:task', 'status:backlog', priority, area, 'phase-gate:phase-1', 'lane:code-change'] };
 }
 
-async function materialize({ github, owner, repo, epicNumber, dryRun = false, triggerRole = 'system' }) {
-  const state = await resolve({ github, owner, repo, epicNumber });
+async function materialize({ github, owner, repo, epicNumber, dryRun = false, triggerRole = 'system', ledger, ledgerPath }) {
+  const state = await resolve({ github, owner, repo, epicNumber, ledger, ledgerPath });
   if (!state.applicable || !state.complete || !state.missingPhase1Children) {
     return { created: false, reason: state.details, state };
   }

@@ -3,9 +3,57 @@
 // Epic #1407 AC4. Extended in #1451 with registry-derived alias check.
 
 const path = require('path');
-const { validateArtifactAlias } = require(path.join(__dirname, 'signer-registry-check.js'));
+const { validateArtifactAlias, loadRegistry, parseTeamModel, extractArtifactFields } = require(path.join(__dirname, 'signer-registry-check.js'));
 
 const CLIENT_IDENTITIES = ['Curtis Franks'];
+
+// #3820 (Epic #3807 C6 Option B) — two checks relocated here from the retired,
+// CI-dormant signer-format-canonical.js (#1536). They ship ADVISORY: a dormant
+// validator moving into this CI-wired gate is a strict reachability strengthening,
+// and advisory-first keeps any previously-passing artifact from being newly blocked
+// (promotion to blocking is replay-eval-gated, mirroring signer-lint.yml's posture).
+//
+// role-prefix-as-provenance: a line beginning with a capital role-as-key plus at
+// least one pipe separator is the Copilot "Manager: <name> | <agent> | <date>"
+// anti-pattern from Epic #1526. A lowercase "manager:" in prose, or a "## Manager"
+// heading, does NOT match (false-positive guards preserved).
+const ROLE_PREFIX_PROVENANCE_RE =
+  /^\s*(Manager|Collaborator|Admin|Consultant):\s+\S+(\s+\|\s+|\s+\|$)/m;
+
+// Canonical Team&Model: <team>:<model>@<substrate>[/<device>]
+const TEAM_MODEL_CANONICAL_RE =
+  /Team&Model:\s*([a-z][a-z0-9-]*):([\w.+-]+)@([a-z][a-z0-9-]*)(?:\/([a-z0-9-]+))?/i;
+
+const PROVENANCE_LINE_PREVIEW_LEN = 80;
+
+function checkRolePrefixProvenance(body) {
+  const violations = [];
+  for (const line of (body || '').split('\n')) {
+    if (!ROLE_PREFIX_PROVENANCE_RE.test(line)) continue;
+    violations.push({
+      rule: 'role-prefix-as-provenance',
+      severity: 'advisory',
+      detail: `Non-canonical provenance line: "${line.trim().slice(0, PROVENANCE_LINE_PREVIEW_LEN)}". `
+        + 'Use the canonical 3-line block (Signed-by / Team&Model / Role) per '
+        + 'instructions/team-model-signing.instructions.md.',
+    });
+  }
+  return violations;
+}
+
+function checkTeamModelCanonical(body) {
+  const hasSignedBy = /^[ \t]*Signed-by:\s*\S+/im.test(body || '');
+  const hasCanonicalTeamModel = TEAM_MODEL_CANONICAL_RE.test(body || '');
+  if (hasSignedBy && !hasCanonicalTeamModel) {
+    return [{
+      rule: 'team-model-not-canonical',
+      severity: 'advisory',
+      detail: 'Body contains Signed-by but Team&Model line is missing or malformed. '
+        + 'Expected: Team&Model: <team>:<model>@<substrate>[/<device>].',
+    }];
+  }
+  return [];
+}
 
 function findSignerField(body, fieldName = 'Signed-by') {
   const pattern = new RegExp(`${fieldName}\\s*:\\s*([^\\n·,]+?)(?=\\s*[·,\\n]|$)`, 'i');
@@ -79,6 +127,64 @@ function checkConsultantFamilyIndependence(body) {
     detail: `Consultant+Collaborator same AI family (${cf}); cross-family review required (#2511)` }];
 }
 
+// Substrate-mixing guard (#3671 AC5) — a runtime cannot wear another team's
+// Team&Model. Two registry-driven checks, both deterministic:
+//   1. substrate-team-mismatch: the substrate resolves (via substrateTeamMap)
+//      to team S, but the declared Team&Model team is not S. This catches
+//      `codex:gpt-5@cursor-ide` (substrate cursor ⇒ team codex leak).
+//   2. signer-seed-team-mismatch: the Signed-by alias seed is uniquely owned by
+//      one concrete team T in the registry (e.g. Cyrus ⇒ cursor), but the
+//      declared team is not T. This catches a Cursor-derived signer stamped onto
+//      a non-cursor Team&Model — the #1591 codex:gpt-5 leak root cause.
+function substrateTeamFor(registry, substrate) {
+  if (!substrate) return null;
+  const map = registry.substrateTeamMap || {};
+  const base = String(substrate).toLowerCase().replace(/\/.*$/, '');
+  return map[base] || null;
+}
+
+function seedOwnerTeams(registry, seed) {
+  const wanted = String(seed || '').toLowerCase();
+  if (!wanted) return [];
+  const teams = new Set();
+  for (const entry of registry.registry || []) {
+    if (entry.team === '*') continue; // wildcard seeds are shared, not team-unique
+    if (String(entry.aliasSeed || '').toLowerCase() === wanted) teams.add(entry.team);
+  }
+  return [...teams];
+}
+
+function checkSubstrateMixing(body, registryOverride) {
+  if (!body) return [];
+  const registry = loadRegistry(registryOverride);
+  if (!registry) return [];
+  const { signedBy, teamModel } = extractArtifactFields(body);
+  if (!teamModel) return [];
+  const parsed = parseTeamModel(teamModel);
+  if (!parsed || !parsed.team) return [];
+  const violations = [];
+  const substrateTeam = substrateTeamFor(registry, parsed.substrate);
+  if (substrateTeam && substrateTeam !== parsed.team) {
+    violations.push({
+      rule: 'substrate-team-mismatch',
+      detail: `Team&Model "${teamModel}" declares team=${parsed.team} but substrate `
+        + `"${parsed.substrate}" maps to team=${substrateTeam}. A runtime must not sign `
+        + `another team's Team&Model (substrate-mixing, #3671 AC5).`,
+    });
+  }
+  const seed = String(signedBy || '').trim().split(/\s+/)[0];
+  const owners = seedOwnerTeams(registry, seed);
+  if (owners.length === 1 && owners[0] !== parsed.team) {
+    violations.push({
+      rule: 'signer-seed-team-mismatch',
+      detail: `Signed-by seed "${seed}" is registry-unique to team=${owners[0]} but the `
+        + `Team&Model declares team=${parsed.team}. A ${owners[0]}-derived signer cannot `
+        + `sign a non-${owners[0]} Team&Model (substrate-mixing, #3671 AC5).`,
+    });
+  }
+  return violations;
+}
+
 function validate(input) {
   const body = input.body || '';
   const violations = checkSignedBy(body);
@@ -86,13 +192,28 @@ function validate(input) {
   if (isClientIdentity(aiSig)) violations.push({ rule: 'client-identity-as-ai-signature',
     detail: `Issue body uses client identity "${aiSig}" as AI-Signature trailer` });
   violations.push(...checkRegistryAlias(body, { device: input.device, registryOverride: input.registryOverride }));
+  violations.push(...checkSubstrateMixing(body, input.registryOverride));
   violations.push(...checkConsultantFamilyIndependence(body));
+  violations.push(...checkRolePrefixProvenance(body));
+  violations.push(...checkTeamModelCanonical(body));
   const unique = dedupe(violations);
   return { ok: unique.filter(v => v.severity !== 'advisory').length === 0, violations: unique };
 }
 
-const KNOWN_FAMILIES = ['anthropic', 'openai', 'qwen', 'deepseek', 'granite', 'unknown'];
+// #3688: derive from the cross-family receipt SSoT so the $0 free-cloud panel families
+// (meta = groq/llama/cerebras/nvidia/sambanova/openrouter-free, mistral, google = gemini)
+// are recognized — a genuine reviewer_family must not trip unknown-reviewer-family.
+const { PROVIDER_FAMILY, TEAM_FAMILY } = require(path.join(__dirname, '..', 'cross-family-receipt.js'));
+const KNOWN_FAMILIES = [...new Set([
+  ...Object.values(PROVIDER_FAMILY), // meta, mistral, google, openai
+  ...Object.values(TEAM_FAMILY),     // anthropic, openai, google
+  'qwen', 'deepseek', 'granite',     // model-heuristic families (extractAIFamily)
+  'unknown',
+])];
 const normalizeFamily = s => { const n = (s || '').toLowerCase().trim(); return KNOWN_FAMILIES.includes(n) ? n : 'unknown'; };
 
 module.exports = { validate, isClientIdentity, findSignerField, extractAIFamily,
-  checkConsultantFamilyIndependence, CLIENT_IDENTITIES, KNOWN_FAMILIES, normalizeFamily };
+  checkConsultantFamilyIndependence, checkSubstrateMixing, seedOwnerTeams,
+  checkRolePrefixProvenance, checkTeamModelCanonical,
+  ROLE_PREFIX_PROVENANCE_RE, TEAM_MODEL_CANONICAL_RE,
+  CLIENT_IDENTITIES, KNOWN_FAMILIES, normalizeFamily };

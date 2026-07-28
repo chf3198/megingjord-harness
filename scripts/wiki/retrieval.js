@@ -3,6 +3,7 @@
 
 const fs = require('node:fs');
 const { listPages, parseFrontmatter } = require('./wiki-io');
+const { listMirrorWorkLogPages } = require('./mirror-source');
 
 const RRF_K = 60;
 const TOP_N = 5;
@@ -69,8 +70,19 @@ function rrf(rankings) {
   }
   return scores;
 }
+// #3779: the retrieval read surface. Prefer FRESH work-log mirrors from the wiki-mirror branch (the reconcile
+// #3729 lands there; main's copy is frozen); gracefully fall back to local work-log when wiki-mirror is
+// unavailable (Tier-0 air-gapped / fresh clone). Wisdom + code pages are always read from the local tree.
+function loadRetrievalPages() {
+  const local = listPages();
+  const mirrorWorkLog = listMirrorWorkLogPages();
+  if (!mirrorWorkLog) return local; // graceful fallback
+  const nonWorkLog = local.filter((page) => page.type !== 'ticket' && page.type !== 'pr');
+  return nonWorkLog.concat(mirrorWorkLog);
+}
+
 function hybridSearch(query, pages = null) {
-  pages = pages || listPages();
+  pages = pages || loadRetrievalPages();
   const qTokens = tokenize(query);
   if (qTokens.length === 0) return [];
   const docs = pages.map(p => {
@@ -95,5 +107,5 @@ function hybridSearch(query, pages = null) {
     parentChunks: chunkPage(d.body).slice(0, 3) }));
 }
 
-module.exports = { hybridSearch, chunkPage, tokenize, bm25Score, denseScore, rrf,
+module.exports = { hybridSearch, loadRetrievalPages, chunkPage, tokenize, bm25Score, denseScore, rrf,
   titleScore, RRF_K, TOP_N, PARENT_CONTEXT_LINES, TITLE_BOOST };

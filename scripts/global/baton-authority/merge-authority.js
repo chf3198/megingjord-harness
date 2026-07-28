@@ -6,6 +6,8 @@
 
 const { deriveTrailFromGitHub, buildEvidenceMask } = require('./evidence-loader');
 const { verifyDigest } = require('./merkle');
+// #3699: exclude the self-reporting merge-gate context(s) from the CI_GREEN rollup.
+const { KNOWN_REPORTING_CONTEXTS } = require('./ruleset-config');
 const { STATES, EVENTS } = require('../baton-fsm/transitions');
 const kernel = require('../baton-fsm/kernel');
 
@@ -106,8 +108,13 @@ async function enrichWithPRData(facts, prNumber, ghClient) {
     try {
       const checks = await ghClient.listChecks(prNumber);
       if (checks && Array.isArray(checks)) {
-        const hasChecks = checks.length !== 0;
-        const allPassed = hasChecks && checks.every(
+        // #3699: the merge-gate context(s) are in_progress while this evaluator runs,
+        // so counting them makes CI_GREEN unsatisfiable (self-referential deadlock).
+        const gatingChecks = checks.filter(
+          (chk) => !KNOWN_REPORTING_CONTEXTS.includes(chk.name)
+        );
+        const hasChecks = gatingChecks.length !== 0;
+        const allPassed = hasChecks && gatingChecks.every(
           (chk) => chk.conclusion === 'success'
         );
         if (allPassed) facts.ciGreen = true;
@@ -126,12 +133,15 @@ async function enrichWithPRData(facts, prNumber, ghClient) {
  * @param {number} prNumber - The PR number.
  * @param {object} ghClient - Injected GitHub client interface.
  * @param {string} claimedDigest - Agent-submitted evidence digest.
+ * @param {object} [opts] - Optional trail-derivation seam (#3672). Production passes
+ *   nothing so the committed cross-family ledger is read; tests inject `ledger` /
+ *   `verifyReceipt` / `verifyAttestation`. Never changes production behavior.
  * @returns {Promise<object>} Structured merge authority result.
  */
-async function evaluateMergeAuthority(issueNumber, prNumber, ghClient, claimedDigest) {
+async function evaluateMergeAuthority(issueNumber, prNumber, ghClient, claimedDigest, opts = {}) {
   let trail;
   try {
-    trail = await deriveTrailFromGitHub(issueNumber, ghClient);
+    trail = await deriveTrailFromGitHub(issueNumber, ghClient, opts);
   } catch (loadError) {
     return buildDenial(
       'github-load-failed: ' + (loadError.message || 'unknown'),

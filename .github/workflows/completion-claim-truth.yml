@@ -1,0 +1,31 @@
+name: Completion Claim Truth
+# #1889 / Epic #3398 — advisory validator. On every issue/PR comment, detect
+# completion CLAIMS whose cited artifacts (file paths / PR #N) are not actually
+# on the default branch HEAD, and post one structured advisory comment.
+# Non-blocking; #1612 advisory→required promotion path.
+on:
+  issue_comment:
+    types: [created, edited]
+
+concurrency:
+  group: completion-claim-truth-${{ github.event.issue.number }}-${{ github.event.comment.id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  check:
+    # Skip bot-authored comments (incl. our own advisory) to avoid a feedback loop.
+    if: github.event.comment.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const path = require('path');
+            const v = require(path.join(process.env.GITHUB_WORKSPACE, 'scripts/global/megalint/completion-claim-truth.js'));
+            await v.run({ github, context, core });

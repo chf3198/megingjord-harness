@@ -1,0 +1,44 @@
+name: cross-team-auto-apply
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auto-apply:
+    name: cross-team-auto-apply
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request == null
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const A = require('./scripts/global/cross-team-auto-apply.js');
+            const commentBody = (context.payload.comment && context.payload.comment.body) || '';
+            const labels = (context.payload.issue.labels || []).map(l => l.name);
+            const issueNumber = context.payload.issue.number;
+            const decision = A.decideApply({ commentBody, labels });
+            console.log(`#${issueNumber}: cross-team-auto-apply decision=${JSON.stringify(decision)}`);
+            await core.summary.addRaw(
+              `### Cross-team auto-apply\n\n#${issueNumber}: apply=${decision.apply} ` +
+              `reason=${decision.reason}\n`,
+            ).write();
+            if (!decision.apply) return;
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: issueNumber, labels: [decision.label],
+            }).catch(error => {
+              console.log(`#${issueNumber}: addLabels failed: ${error.message}`);
+            });
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: '<!-- cross-team-auto-apply -->\n' +
+                    `Auto-applied label \`${decision.label}\` per #1590. ` +
+                    `Receiving teams can claim via the \`cross-team-consult-pickup\` skill ` +
+                    `(see \`instructions/cross-team-consultant.instructions.md\`).`,
+            }).catch(() => {}); // catch-empty: best-effort notification; comment failure is non-critical

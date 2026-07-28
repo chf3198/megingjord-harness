@@ -18,22 +18,34 @@ const MARKER = '<!-- phase0-closure-guard -->';
 
 /** Pure: should this resolver result block an Epic close? */
 function evaluateClosure(result) {
-  const block = !!(result && result.applicable && result.complete && result.missingPhase1Children);
-  return { block, reason: result && result.details };
+  const applicable = !!(result && result.applicable);
+  // #2661 gap: Phase-0 green (now incl. a verified plan-rating) but zero Phase-1 children.
+  const missingP1 = !!(applicable && result.complete && result.missingPhase1Children);
+  // #3826 Gap B: Phase-0 substantively done but its plan was never cross-family rated
+  // (the #3808 class) — block close so an un-rated Epic cannot terminate around the gate.
+  const unrated = !!(applicable && result.unratedPlan);
+  return { block: missingP1 || unrated, reason: result && result.details, missingP1, unrated };
 }
 
 /** Pure: build the BLOCKER_NOTE / EPIC_PHASE_GATE_PAUSE comment body. */
 function buildBlockerNote(epicNumber, result) {
+  const unrated = !!(result && result.unratedPlan);
+  const headline = unrated
+    ? `**BLOCKER_NOTE** — Epic #${epicNumber} cannot close: its Phase-0 plan carries **no verified cross-family rating receipt** (Gap B, #3826).`
+    : `**BLOCKER_NOTE** — Epic #${epicNumber} cannot close: Phase-0 is green-complete but it has **zero Phase-1 children**.`;
+  const unblock = unrated
+    ? `unblock_condition: commit a verified plan-rating (a PLAN_RATING/EPIC_RESCOPE block with plan_rating_receipt:<16-hex>, plan_rating_median>=90, plan_rating_distinct_families>=3, plan_rating_gwet_ac1>=0.6, receipt kind:review in governance/cross-family-consensus.jsonl) — OR set the audited PHASE0_GATE_BYPASS=1`
+    : `unblock_condition: author at least one phase-gate:phase-1 child (or let phase1-auto-materialize seed one), then progress it through the baton`;
   return [
     MARKER, '',
     '## EPIC_PHASE_GATE_PAUSE', '',
-    `**BLOCKER_NOTE** — Epic #${epicNumber} cannot close: Phase-0 is green-complete but it has **zero Phase-1 children**.`, '',
+    headline, '',
     `owner: Manager (role-manager)`,
-    `unblock_condition: author at least one phase-gate:phase-1 child (or let phase1-auto-materialize seed one), then progress it through the baton`,
+    unblock,
     `eta_or_review_time: next Manager pickup`, '',
     `detail: ${result.details}`,
     `pattern_id: ${result.pattern_id}`, '',
-    '_Posted by phase0-closure-guard (Epic #2678). Set PHASE0_GATE_BYPASS=1 to downgrade to advisory with an audit trail._',
+    '_Posted by phase0-closure-guard (Epic #2678 + #3826). Set PHASE0_GATE_BYPASS=1 to downgrade to advisory with an audit trail._',
   ].join('\n');
 }
 
@@ -51,11 +63,11 @@ async function upsertComment(github, owner, repo, epicNumber, body) {
   }
 }
 
-async function run({ github, context, core }) {
+async function run({ github, context, core, ledger, ledgerPath }) {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
   const epicNumber = context.payload.issue.number;
-  const result = await resolve({ github, owner, repo, epicNumber });
+  const result = await resolve({ github, owner, repo, epicNumber, ledger, ledgerPath });
   const { block } = evaluateClosure(result);
   if (!block) {
     core.notice && core.notice(`phase0-closure-guard #${epicNumber}: ${result.details}`);

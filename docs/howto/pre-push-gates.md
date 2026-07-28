@@ -56,11 +56,40 @@ To support it, the consultant-closeout check is **deferred to PR-open**:
   ordering, it never silently un-checks a closeout that is present.
 - **The PR exists** (`prBody` resolvable): the consultant-closeout check and
   `merge-evidence-pr-gate` run as before.
+- **Active-review rework** (#3636): when the PR's latest review decision is
+  `CHANGES_REQUESTED` or the PR is a **draft**, the consultant-closeout check is exempted —
+  a rework push after a cross-family REQUEST-CHANGES legitimately has no closeout yet (review
+  not re-approved), so demanding it inverts the baton. A closeout that IS already posted is
+  still validated. `merge-evidence-pr-gate` still runs; close-time enforcement is unchanged.
 
 Enforcement is preserved downstream regardless: the required CI `consultant-gate`,
 `merge-evidence-pr-gate`, and the `pretool_guard` close gate (which requires the merge to be
 recorded before `gh issue close`) keep the closeout mandatory **before merge and before issue
 close**. The pre-push deferral only removes the baton-inverting pre-PR requirement.
+
+## Command-context gates ignore quoted prose (#3661)
+
+The command-CONTEXT gates (create-PR, `gh issue close`, `gh pr merge`, checks,
+publish/release, epic-close, no-code-admin) answer "was this Admin/close **command**
+actually invoked?". They therefore scan the **#3471-sanitized** command — quoted spans
+masked and here-doc bodies stripped — so a command *mentioned* inside a `--body`/here-doc
+of a `gh issue comment` or artifact-posting call (e.g. a `MANAGER_HANDOFF` describing the
+create-PR path, or a `CONSULTANT_CLOSEOUT` citing the issue-close command) does **not**
+false-block the enclosing tool call. Unquoted **real** commands still fire the gate.
+Safety/content scans (dangerous-command, secret, fleet-curl, redirect) intentionally keep
+the **raw** command so a real command hidden in a here-doc is still caught.
+
+## Merge gate: required checks only (#3664)
+
+The `pretool_guard` merge gate classifies PR CI via
+`hooks/scripts/live_checks.py` `ci_gate_status()`. It fails a merge **only** on
+red checks in the base branch's branch-protection
+`required_status_checks/contexts` set — non-required advisory checks (e.g.
+`worktree-governance-required`, `Doc update required`) no longer block
+`gh pr merge`. The required set is resolved live from branch protection
+(`gh pr checks --json` exposes `name,state` only — no `isRequired` field); when
+it cannot be resolved the gate falls back to the legacy all-checks behavior
+(fail-closed), so required checks always stay enforced.
 
 ## Manual run
 

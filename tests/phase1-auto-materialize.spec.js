@@ -8,8 +8,9 @@ const path = require('path');
 const TMP_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'phase0-mat-'));
 process.env.HOME = TMP_HOME;
 const mat = require('../scripts/global/phase1-auto-materialize');
-const { makeGithub } = require('./phase0-github-mock');
+const { makeGithub, validPlanRating } = require('./phase0-github-mock');
 const INCIDENTS = path.join(TMP_HOME, '.megingjord', 'incidents.jsonl');
+const PR500 = validPlanRating(500); // #3826: green now requires a verified plan-rating
 
 const epicObj = { number: 500, labels: ['type:epic', 'phase-gate:research-first', 'area:governance', 'priority:P1'] };
 
@@ -35,7 +36,7 @@ function greenMissingFixture() {
       500: { state: 'open', labels: ['type:epic', 'phase-gate:research-first', 'area:governance'], body: 'child #501' },
       501: { state: 'closed', labels: ['phase-gate:research-first'], body: 'Parent: #500' },
     },
-    commentsByIssue: { 500: [{ body: 'EPIC_RESCOPE' }], 501: [{ body: 'CONSULTANT_CLOSEOUT 8/10' }] },
+    commentsByIssue: { 500: [{ body: 'EPIC_RESCOPE' }, PR500.comment], 501: [{ body: 'CONSULTANT_CLOSEOUT 8/10' }] },
   });
 }
 
@@ -51,7 +52,7 @@ test('AC2: materialize is a no-op when Phase-0 is not green/missing', async () =
 
 test('AC2: dry-run builds the seed but creates nothing', async () => {
   const { github, created } = greenMissingFixture();
-  const r = await mat.materialize({ github, owner: 'o', repo: 'r', epicNumber: 500, dryRun: true });
+  const r = await mat.materialize({ github, owner: 'o', repo: 'r', epicNumber: 500, dryRun: true, ledger: PR500.ledger });
   expect(r.dryRun).toBe(true);
   expect(r.seed.labels).toContain('phase-gate:phase-1');
   expect(created.length).toBe(0);
@@ -59,7 +60,7 @@ test('AC2: dry-run builds the seed but creates nothing', async () => {
 
 test('AC2+AC5: green+missing creates a seed child, posts Epic comment, and emits an incident', async () => {
   const { github, created, postedComments } = greenMissingFixture();
-  const r = await mat.materialize({ github, owner: 'o', repo: 'r', epicNumber: 500 });
+  const r = await mat.materialize({ github, owner: 'o', repo: 'r', epicNumber: 500, ledger: PR500.ledger });
   expect(r.created).toBe(true);
   expect(created.length).toBe(1);
   expect(created[0].labels).toContain('phase-gate:phase-1');

@@ -101,3 +101,46 @@ test('batchCancelCheck: heading-form `## CANCELLATION (reason)` (no colon) is ac
 test('batch validate(): closingIssues input', () => {
   assert.strictEqual(bce.validate({ closingIssues: [{ number: 1, cancelled: true, comments: [] }, { number: 2 }] }).ok, false);
 });
+
+// #3681 (Epic #3679): a required context with NO green run (missing / pending / never
+// reported) must count as NOT green — the old filter-over-runs returned true for an absent
+// context ([].every===true), so a genuine --admin bypass on a never-green check reported PASS.
+test('#3681 computeRequiredChecksGreen: absent required context is NOT green', () => {
+  assert.strictEqual(ame.computeRequiredChecksGreen([], ['baton-authority/merge']), false);
+});
+test('#3681 computeRequiredChecksGreen: pending required context is NOT green', () => {
+  assert.strictEqual(ame.computeRequiredChecksGreen(
+    [{ name: 'baton-authority/merge', conclusion: null }], ['baton-authority/merge']), false);
+});
+test('#3681 computeRequiredChecksGreen: all required contexts green → true', () => {
+  assert.strictEqual(ame.computeRequiredChecksGreen(
+    [{ name: 'ci', conclusion: 'success' }, { name: 'lint', conclusion: 'skipped' }], ['ci', 'lint']), true);
+});
+test('#3681 no false positive: no required contexts → green (nothing to bypass)', () => {
+  assert.strictEqual(ame.computeRequiredChecksGreen([{ name: 'x', conclusion: 'failure' }], []), true);
+});
+
+// #3701 AC1: an excepted bypass whose approver resolves to the merging admin is a self-approval.
+test('#3701 approverIsIndependent: approver == merger → NOT independent', () => {
+  assert.strictEqual(ame.approverIsIndependent('BLOCKER_NOTE\napprover: Cyrus Reyes', 'Cyrus Reyes'), false);
+});
+test('#3701 approverIsIndependent: distinct approver → independent', () => {
+  assert.strictEqual(ame.approverIsIndependent('BLOCKER_NOTE\napprover: Nia Vale', 'Cyrus Reyes'), true);
+});
+test('#3701 self-approved excepted bypass is BLOCKING (admin-bypass-self-approved)', () => {
+  const r = ame.adminMergeExceptionCheck({
+    bypassDetected: true,
+    prBody: 'BLOCKER_NOTE\nbypass_reason: gate flake\napprover: Cyrus Reyes',
+    mergedBy: 'Cyrus Reyes',
+  });
+  assert.strictEqual(r.ok, false);
+  assert.ok(r.violations.map((v) => v.rule).includes('admin-bypass-self-approved'));
+});
+test('#3701 independent-approver excepted bypass passes (no false positive)', () => {
+  const r = ame.adminMergeExceptionCheck({
+    bypassDetected: true,
+    prBody: 'BLOCKER_NOTE\nbypass_reason: gate flake\napprover: Nia Vale',
+    mergedBy: 'Cyrus Reyes',
+  });
+  assert.strictEqual(r.ok, true);
+});

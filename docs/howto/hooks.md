@@ -27,8 +27,23 @@ Stale historical handoffs without `worktree_branch:` no longer satisfy the gate.
 | `manager_ticket_gate.py` | Ticket-first on Manager scope |
 | `userprompt_gate.py` | Finish-intent and baton phase promotion |
 | `baton_handoff_checks.py` | Branch-scoped MANAGER_HANDOFF authority |
+| `client_arbitration_guard.py` | Detects a non-carve-out client-defer and builds the adjudication-redirect |
+| `stop_reminder.py` | Stop hook — blocks + actively redirects a client-defer into the cross-model panel |
 
 See [pre-push-gates.md](pre-push-gates.md) for push/merge gate ordering.
+
+### Client-defer → adjudication redirect (#3749)
+
+The Stop hook does not merely detect a client-defer — it **actively redirects** it.
+`client_arbitration_guard.detect_client_arbitration` flags **any** non-carve-out deferral
+of an internal decision to the client (broadened in #3749 beyond the old conflict-keyword
+regex: `FORBIDDEN_ASK AND NOT human_carveout`). On a hit, `stop_reminder.py` blocks the stop,
+emits a `client-defer-routed-to-adjudication` incident (G8), and prints the exact
+`adjudication-guardrail.decide()` invocation the operator must run — routing the decision to
+the **free cross-model panel**, never the client. The 4 human carve-outs (design/UAT,
+irreversible, security-weakening) are the sole sanctioned client escalation and are never
+redirected. Complements `stuck-state-detector.js` (#3748), which routes execution-state
+stuck triggers into the same panel.
 
 ## Merge gate — real-PR verification (#3344)
 
@@ -66,3 +81,101 @@ It executes `git worktree remove` **without `--force`** — git's own dirty-guar
 final gate, so a worktree with uncommitted or unmerged work is refused, never force-removed. Each
 teardown emits a redacted v3 audit record (decision + `git worktree remove` exit code/stderr) to the
 observability surface. Preview without removing via `npm run worktree:teardown` (dry-run default).
+
+## Stuck-state Stop hook (#3766, live wiring of #3748)
+
+A `Stop` hook `hooks/scripts/stuck_state_gate.py` wires the shipped, ADVISORY stuck-state detector
+(#3748) into production. On each turn-end it derives the available behavioral signals (an explicit
+stuck marker in the assistant text, or pre-computed counters a runtime supplies under `stuck_signals`)
+and delegates detection + carve-out routing to the Node bridge
+`scripts/global/stuck-state-hook-bridge.js`, which reuses `stuck-state-detector.detectStuckState` and
+`adjudication-guardrail.classifyDecision` — no detection logic is duplicated.
+
+- **Advisory, never blocks.** A detected stuck-state emits guidance to route into the cross-model
+  adjudication panel (`adjudication-guardrail.decide()`) **without a client prompt**; the hook always
+  exits 0, independent of replay-eval promotion state (advisory→blocking promotion is deferred per the
+  #3748 panel). The synchronous bridge path (`classifyDecision`) keeps the hook inside its timeout and
+  works offline (G6).
+- **Escalation is carve-out-only.** A genuinely irreversible / high-destructive gate routes to
+  `human-carveout` — the only sanctioned client escalation (the 4 retained touchpoints).
+- **Companion to `client_arbitration_guard.py` (#3749), not a duplicate:** that guards explicit
+  client-defer *language*; this guards *behavioral* stuck-state signals (loop / iteration-cap /
+  token-budget / tool-error burst / self-consistency divergence / explicit signal).
+- **Observability (G8):** each detection appends a schema-v3 event
+  (`event: governance.stuck_state_detected`, `advisory: true`) to the events surface
+  (`MEGINGJORD_STUCK_EVENTS`, default `~/.megingjord/stuck-state-events.jsonl`).
+- Path resolution prefers `MEGINGJORD_REPO_ROOT/scripts/global`, falling back to the deployed
+  `~/.copilot/scripts/global`. Tests: `tests/stuck-state-hook-bridge.spec.js`,
+  `tests/stress-stuck-state-hook-bridge.spec.js`, `tests/test_stuck_state_gate.py`.
+
+## Ask-time reference monitor (#3825, Epic #3822 C1 — Gap A)
+
+A deterministic `PreToolUse` branch in `pretool_guard.py` (right after `tool = ...`)
+intercepts the operator's **own** `AskUserQuestion` tool call **before** the client is
+prompted — the enforced fix for the over-escalation class (#3814: the operator asked the
+client A/B/C on a *reversible* decision when only the security-weakening branch was a
+genuine carve-out). It reuses the in-process classifier `hooks/scripts/ask_reference_monitor.py`
+(regex/string only, ≤~50 ms — no node/network in the hook) to route on **reversibility vs
+the 4 retained carve-outs** (`config/retained-human-touchpoints.json`):
+
+- **genuine carve-out** (design / UAT / irreversible / security-weakening) → `emit("ask")`
+  — the client is the correct authority (unchanged behavior).
+- **reversible, non-carve-out** → `emit("deny")` + redirect to the free cross-model panel
+  (`adjudication-guardrail.js` `decide()` / `fleet-decision-oracle.js`) — **silent, zero
+  client ceremony** (anti-confirmation-fatigue; approval fatigue is a security bug).
+- **unknown / ambiguous** → fail-safe `emit("deny")` + adjudicate to the panel (never a
+  silent allow, never a bare client prompt).
+- **classifier error** → fail-closed `emit("ask")` (reach the human), mirroring the S6/S7 posture.
+
+**Anti-drift:** a config-parity test asserts every `retained-human-touchpoints.json`
+carve-out id has a monitor pattern. **Registration:** the new `emit("ask")` reasons are
+listed in `sanctioned_ask_surfaces` so `client-prompt-surface-check.js` recognizes them and
+flags any *future* unregistered ask surface. **Observability (G8):** a single metadata-only,
+redacted telemetry line (route + carve-out-class-or-null + prompt-sha256 — **never** raw
+text) is appended to `~/.megingjord/ask-redirect.jsonl`. Tests:
+`tests/hooks/test_ask_reference_monitor_3825.py` (unit + committed-corpus replay + end-to-end
+enforcement), `tests/hooks/stress_ask_reference_monitor_3825.py` (fault-injection + p99 budget),
+with JS harnesses `tests/pretool-guard-ask-monitor-3825.spec.js` +
+`tests/stress-ask-reference-monitor-3825.spec.js`.
+
+## Worktree-add fetch-before-branch guard (#3857, Epic #3854 — GAP-A + GAP-E)
+
+A deterministic `PreToolUse` branch in `pretool_guard.py` (`check_worktree_add`, wired into
+`check_terminal` right after the `RE_BRANCH_CREATE` name check) intercepts raw
+`git worktree add` **before** it runs, closing two footguns the branch-name gate could not see:
+
+- **GAP-A — fetch-before-branch.** A worktree based on a remote-tracking ref (`origin/*`)
+  without a recent `git fetch` may branch off a **stale** `origin/main`. When the base is
+  `origin/*` and no fetch landed within 300 s (`_fetch_is_recent` — a **local** `FETCH_HEAD`
+  mtime proxy, never a network probe), the add is denied and redirected to
+  `scripts/agent-worktree.sh` (which fetches first). A stale-base denial emits a redacted
+  schema-v3 G8 event (`governance.worktree-stale-base-denied`, pattern_id
+  `worktree-add-stale-base`) to `~/.megingjord/incidents.jsonl`.
+- **GAP-E — detached-HEAD + branch-name bypass.** `git worktree add -b <name>` escapes
+  `RE_BRANCH_CREATE`, so the `-b` name is re-validated against `BRANCH_VALID`. And
+  `git worktree add <path> <sha-or-tag>` (no `-b`, base is **not** a local branch per
+  `_is_attachable_branch`) creates a detached HEAD with no ticket branch — denied. Attaching an
+  existing local branch (`git worktree add <path> <branch>`) is still allowed.
+
+**Fail-open:** every helper and `check_worktree_add` itself returns `None` (proceed) on any
+error — a freshness/branch signal must never brick the hook. Tests:
+`tests/hooks/test_pretool_guard_worktree_add.py` (GAP-A stale/fresh, GAP-E branch-name +
+detached, valid attach, agent-worktree style, fail-open).
+
+## Hook-install path portability + dangling-path self-heal (#3860, Epic #3854 — GAP-D)
+
+`install-hooks.sh` resolves `hooks_src` against the **canonical** checkout via
+`git rev-parse --git-common-dir` (whose parent is the main worktree) rather than
+`--show-toplevel` (the *current* worktree). This stops it baking a worktree-absolute path
+into a symlink target or an appended `"<abs>/scripts/hooks/x.sh" "$@"` line — the #2508 trap
+where deleting that worktree makes every push die `pre-push: <path>: No such file or directory`.
+It fails open to the current root when the common-dir is unresolvable.
+
+`hook-symlink-health.js` covers the complementary detection: `classifyPath` only sees broken
+*symlinks*, but a hook FILE that exists and is readable can still invoke a **dangling absolute
+path in its content**. `scanAppendedPaths()` reads the hook text and flags embedded
+`…/scripts/hooks/*.sh` invocations whose target is gone; `healAppendedPath()` repoints such a ref
+to the canonical checkout's script — **fail-closed** (only when a real canonical target exists) —
+and emits a schema-v3 G8 `governance.hook-path-self-heal` event. Tests:
+`tests/hook-install-portability-3860.spec.js` (detect, live-path no-false-positive, heal, fail-closed, and an
+install-hooks.sh temp-worktree smoke asserting the canonical path).

@@ -3,12 +3,14 @@
 // Refs #2302: LIGHTWEIGHT imported from lane-enum.js (single source of truth).
 // Updated to include lane:config-only and lane:research (were missing vs canonical set).
 // #2510: cross-family independence check using COLLABORATOR_HANDOFF fields.
+// #3053: merge-before-handoff predicate (extracted to admin-merge-precondition.js).
 
 const path = require('path');
 const { roleIdentity, checkAdminIndependence } = require(path.join(__dirname, '..', 'baton-independence.js'));
 const { LIGHTWEIGHT, laneSeverity } = require(path.join(__dirname, '..', 'lane-enum.js'));
 const { extractAIFamily } = require('./signer-fidelity.js');
 const wtGate = require('../worktree-lifecycle-gate');
+const { checkMergePrecondition } = require('./admin-merge-precondition');
 
 function findAdminHandoff(comments) {
   const headerRe = /(^|\n)\s*(?:\*\*|##\s+)?ADMIN_HANDOFF\b/;
@@ -93,6 +95,8 @@ function validate(input) {
   if (input.lane === 'lane:code-change') {
     violations.push(...checkCrossFamily(handoff.body || '', collabHandoff));
     violations.push(...wtGate.checkAdmin(handoff.body || '', input));
+    // #3053: merge-before-handoff — CI-green + rated(>=93) + unmerged → violation
+    violations.push(...checkMergePrecondition(handoff.body || '', input));
   }
   const signer = roleIdentity({ body: handoff.body, author: handoff.user && handoff.user.login });
   const blocking = violations.filter(v => v.severity !== 'advisory');

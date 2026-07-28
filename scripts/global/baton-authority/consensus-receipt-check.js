@@ -3,9 +3,12 @@
 // consensus-receipt-check.js (#3532) — CI validator: re-verify the cross-family
 // consensus receipt PURELY from committed evidence (the hash-chained ledger) plus
 // the receipt cited in ADMIN_HANDOFF. Enforces: chain integrity, sha256 match,
-// >=2 distinct families all != authoring family, unanimous PASS. When the Admin
-// and Collaborator Team&Model TEAM segments already differ, independence is met
-// by genuine cross-team signing and no receipt is required (PASS).
+// >=2 distinct families all != authoring family, unanimous PASS.
+// #3672 (F2+F3, Epic #3679): a bare "different team" claim is FORGEABLE (a single agent
+// can mint a foreign-team signer — #3673 / PR#3677), so it is NO LONGER an auto-pass; and
+// a self-waived disposition is explicitly rejected. Independence here now requires the
+// SAME operative proof as the merge FSM — a verified receipt (or a reserved authorship
+// attestation) — so the CI gate and baton-authority/merge can never diverge.
 // Env: ISSUE_NUMBER. Called by baton-authority-merge.yml before the merge eval.
 const { execSync } = require('node:child_process');
 const rc = require('../cross-family-receipt');
@@ -32,16 +35,25 @@ function evaluate(issue, bodies, opts = {}) {
   const collabTM = teamModelForRole(bodies, 'collaborator');
   const adminTeam = rc.teamSegmentOf(adminTM);
   const collabTeam = rc.teamSegmentOf(collabTM);
-  if (adminTeam && collabTeam && adminTeam !== collabTeam) {
-    return { ok: true, path: 'independent-team', adminTeam, collabTeam };
-  }
-  const adminBody = [...bodies].reverse().find((x) => /##\s*ADMIN_HANDOFF|ADMIN_HANDOFF/.test(x)
+  const teamsDiffer = Boolean(adminTeam && collabTeam && adminTeam !== collabTeam);
+  const adminFull = [...bodies].reverse().find((x) => /##\s*ADMIN_HANDOFF|ADMIN_HANDOFF/.test(x)) || '';
+  // (attestation) reserved unforgeable path — fail-closed today (#3682), injectable.
+  const att = rc.verifyAuthorshipAttestation(adminFull, opts);
+  if (att.ok) return { ok: true, path: 'authorship-attested', adminTeam, collabTeam };
+  const receiptBody = [...bodies].reverse().find((x) => /##\s*ADMIN_HANDOFF|ADMIN_HANDOFF/.test(x)
     && /cross_family_receipt/i.test(x));
-  const receipt = adminBody ? (adminBody.match(/cross_family_receipt\s*:\s*([0-9a-f]{16})/i) || [])[1] : null;
+  const receipt = receiptBody ? (receiptBody.match(/cross_family_receipt\s*:\s*([0-9a-f]{16})/i) || [])[1] : null;
   const authoringFamily = rc.familyOfModel(adminTM);
   const res = rc.verifyReceipt(issue, receipt, authoringFamily, { kind: 'merge-consensus', ledger: opts.ledger });
-  return { ok: res.ok, path: 'cross-family-consensus', reason: res.reason,
-    receipt, authoringFamily, families: res.families };
+  if (res.ok) {
+    return { ok: true, path: 'cross-family-consensus', reason: res.reason, receipt, authoringFamily, families: res.families };
+  }
+  // FAIL — bare team-difference / self-waive / same-team never passes without proof (F2+F3).
+  const reason = rc.detectSelfWaive(adminFull) ? 'independence-self-waived'
+    : teamsDiffer ? 'unattested-cross-team-claim'
+      : res.reason;
+  return { ok: false, path: 'cross-family-consensus', reason, receipt, authoringFamily,
+    families: res.families, adminTeam, collabTeam };
 }
 
 function main() {

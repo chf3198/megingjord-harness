@@ -1,0 +1,15 @@
+{
+  "name": "@megingjord/core",
+  "version": "0.0.1",
+  "description": "Megingjord governance core — pure, dependency-free primitives shared by the VS Code / Cursor / Antigravity extension host and companions (Hybrid Option C, Epic #2508).",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "types": "index.d.ts",
+  "files": ["src", "index.d.ts", "README.md"],
+  "engines": { "node": ">=18" },
+  "keywords": ["megingjord", "governance", "goal-lens", "carve-out"],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}

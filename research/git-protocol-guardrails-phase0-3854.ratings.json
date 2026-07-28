@@ -1,0 +1,96 @@
+{
+  "_doc": "Committed >=90 council for Epic #3854 Phase-0 (git-protocol guardrail synthesis). 3 disjoint non-Anthropic families, chance-corrected (Gwet AC1). Free-fleet-first. review receipt a281f6c3df23a545; merge-consensus 7e0fd01d7a565f4e.",
+  "ticket": 3854,
+  "phase0_child": 3855,
+  "phase": "phase-0 research-first",
+  "council": [
+    {
+      "family": "mistral",
+      "model": "mistral-large-latest",
+      "score": 95,
+      "verdict": "PASS"
+    },
+    {
+      "family": "meta",
+      "provider": "groq",
+      "model": "llama-3.3-70b",
+      "score": 97,
+      "verdict": "PASS"
+    },
+    {
+      "family": "google",
+      "provider": "nvidia",
+      "model": "gemma-4-31b",
+      "score": 98,
+      "verdict": "PASS"
+    }
+  ],
+  "aggregate": {
+    "distinct_families": 3,
+    "median": 97,
+    "min": 95,
+    "all_pass": true,
+    "gwet_ac1": 1
+  },
+  "receipts": {
+    "plan_rating_review_receipt": "a281f6c3df23a545",
+    "merge_consensus_receipt": "7e0fd01d7a565f4e",
+    "ledger": "governance/cross-family-consensus.jsonl"
+  },
+  "gaps": [
+    "A fetch-before-branch",
+    "B verified-freshness (declared-not-verified)",
+    "C measurement-base (stale local checkout)",
+    "D hook-path portability"
+  ],
+  "hardening_3861": {
+    "_doc": "Grounded-expert-panel hardening (web-RAG + worktree access) + refreshed cross-family receipt on the CORRECTED deliverable.",
+    "grounded_expert_panel": [
+      {
+        "lens": "accuracy-auditor",
+        "model": "opus",
+        "verdict": "PASS",
+        "score": 92
+      },
+      {
+        "lens": "web-best-practices",
+        "model": "sonnet",
+        "verdict": "PASS",
+        "score": 88
+      },
+      {
+        "lens": "adversarial-refuter",
+        "model": "opus",
+        "verdict": "PASS",
+        "score": 90
+      }
+    ],
+    "grounded_median": 90,
+    "corrected_crossfamily": [
+      {
+        "family": "mistral",
+        "score": 95,
+        "verdict": "PASS"
+      },
+      {
+        "family": "meta",
+        "provider": "groq",
+        "score": 96,
+        "verdict": "PASS"
+      }
+    ],
+    "corrected_receipts": {
+      "review": "b63b221a7ffa6487",
+      "merge_consensus": "900ed5d2ac4137e5"
+    },
+    "findings_folded_in": [
+      "GAP-B tier-gated (not >0; #1771 ban)",
+      "NEW GAP-E detached-HEAD + branch-name bypass",
+      "AC-R5 receipt=derived digest",
+      "GAP-D sink=.git/hooks config-dependent + G8 self-heal event",
+      "GAP-C offline fallback G6",
+      "strict:true softened",
+      "stash-global + worktree-abspath omissions noted"
+    ]
+  }
+}

@@ -14,6 +14,7 @@ const CONTRACT_PATH = path.join(__dirname, '../../inventory/validator-dispatch-c
 // Helpers lack a validate() export and are not expected in the contract.
 const HELPER_BASENAMES = new Set([
   'index.js',
+  'admin-merge-precondition.js',
   'artifact-field-extract.js',
   'doc-coverage-diff-replay-eval.js',
   'doc-coverage-diff-verify.js',

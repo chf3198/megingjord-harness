@@ -14,8 +14,8 @@
     },
     "type": {
       "type": "string",
-      "enum": ["code", "work-log", "wisdom-global", "wisdom-project"],
-      "description": "Wiki typology class (Three-Wiki typology, Epic #1942)."
+      "enum": ["code", "work-log", "wisdom-global", "wisdom-project", "source", "concept", "entity", "synthesis", "skill"],
+      "description": "Wiki class (code/work-log) or wisdom page category (wisdom-global/project or source/concept/entity/synthesis/skill). Enum matches shipped frontmatter; #3763."
     },
     "content_trust_score": {
       "type": "number",

@@ -26,6 +26,8 @@ RE_BRANCH_SWITCH = re.compile(
     re.MULTILINE,
 )
 BRANCH_VALID = re.compile(r"^(feat|fix|hotfix)/\d+-|^(chore|skill)/[a-z0-9]|^main$|^develop$")
+# Epic #3854 P1-a — guard `git worktree add` (GAP-A fetch-before-branch + GAP-E detached/branch-name).
+RE_WORKTREE_ADD = re.compile(r"git\s+worktree\s+add\b")
 RE_PR_REF = re.compile(r"gh\s+pr\s+merge\s+(\S+)")
 IT_OPS_MARKERS_RE = re.compile(r"\[it-ops\]|chore\(it-ops\)\s*:", re.IGNORECASE)
 NO_CODE_ADMIN_RE = re.compile(
@@ -268,6 +270,19 @@ def active_ticket_is_research_lane(state: dict, cwd: str) -> bool:
     """
     return "lane:research" in _active_ticket_labels(state, cwd)
 
+DOCS_LANE_LABELS = ("lane:docs-research", "lane:docs-only")
+
+def active_ticket_is_docs_lane(state: dict, cwd: str) -> bool:
+    """#3569: True when the active ticket is lane:docs-research or lane:docs-only — report-only
+    "Manager+Consultant" reduced batons that are PR-less/merge-less by design. Sibling to
+    active_ticket_is_research_lane (left unchanged per #3569 D1); consumed by the same issue-close
+    carve-out here and the Stop-hook Admin-op gate. NOTE: the caller's clean-tree condition is
+    load-bearing for docs lanes — docs work often DOES produce a tracked docs diff, and such a
+    real diff must still deny + re-route to lane:code-change; only a genuinely-empty tree is exempt.
+    """
+    labels = _active_ticket_labels(state, cwd)
+    return any(label in labels for label in DOCS_LANE_LABELS)
+
 CONSENSUS_OVERRIDE_ENV = "MEGINGJORD_PLANNING_CONSENSUS_OVERRIDE"
 
 def _emit_planning_consensus_override_incident(cwd: str, ticket: int | None) -> None:
@@ -339,6 +354,18 @@ def require_bypass_exception(joined: str, state: dict, cwd: str) -> bool:
 # Bounded {0,512} quantifier caps the backtracking window (#2739 cross-family review
 # hardening): a curl command line longer than this never legitimately targets a fleet host.
 RE_FLEET_CURL = re.compile(r"curl\b[^\n|]{0,512}(?::11434\b|/api/(?:generate|tags|chat)\b)")
+
+# Epic #3807 C2 (#3810) — affordance-first golden path. The raw-fleet-curl class was the harness's
+# #1 recurrence (1,615 incidents) because the correct path was never made the *default*. This
+# redirect names the exact copy-pasteable golden-path command, so the right move is a copy-paste
+# (poka-yoke), not something to recall. The DENY, the bypass-incident, and the '# hamr-bypass-ok:'
+# carve-out are all PRESERVED — this only lowers the friction of doing the right thing.
+FLEET_CURL_REDIRECT_MSG = (
+    "Raw fleet/ollama curl (#2192 vector 2). Use the golden-path default instead: "
+    "`npm run fleet -- --prompt \"<your prompt>\"` (free-fleet $0 cascade; HAMR records "
+    "cost+observability). For an audited diagnostic, add '# hamr-bypass-ok: <reason>'. "
+    "Operator-resolvable — no client prompt."
+)
 
 def is_raw_fleet_curl(joined: str) -> bool:
     """True when a raw curl targets a fleet/ollama endpoint outside the dispatch
@@ -432,14 +459,116 @@ def _check_epic_close_guard(joined: str, cwd: str) -> int | None:
     return None
 
 
+def _fetch_is_recent(cwd: str, max_age_sec: int = 300) -> bool:
+    """True if a `git fetch` landed within max_age_sec (local FETCH_HEAD mtime).
+    GAP-A (Epic #3854): a LOCAL freshness proxy — never a network probe. Fail-OPEN:
+    any error (or unresolved FETCH_HEAD) returns True so the hook is never bricked.
+    A never-fetched repo (no FETCH_HEAD) returns False (treat as stale).
+    """
+    try:
+        import time
+        res = subprocess.run(["git", "rev-parse", "--git-path", "FETCH_HEAD"], cwd=cwd,
+                             capture_output=True, text=True, timeout=10, check=False)
+        rel = (res.stdout or "").strip()
+        if not rel:
+            return True
+        fp = rel if os.path.isabs(rel) else os.path.join(cwd, rel)
+        if not os.path.exists(fp):
+            return False
+        return (time.time() - os.path.getmtime(fp)) <= max_age_sec
+    except Exception:
+        return True  # fail-open: freshness signal must never brick the hook
+
+
+def _emit_worktree_stale_denied(cwd: str, base: str) -> None:
+    """G8 (Epic #3854 GAP-A): record a stale-base worktree-add denial. Never raises."""
+    try:
+        path = os.path.join(os.path.expanduser("~"), ".megingjord", "incidents.jsonl")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        event = {"version": 3, "service": "pretool-guard-worktree-add",
+                 "env": "local", "event": "governance.worktree-stale-base-denied",
+                 "pattern_id": "worktree-add-stale-base", "severity": "low",
+                 "base": base, "cwd": cwd}
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+    except Exception:
+        pass  # telemetry failure must not affect the hook decision
+
+
+def _is_attachable_branch(base: str, cwd: str) -> bool:
+    """True if `base` is a LOCAL branch (so `git worktree add <path> <base>` attaches it,
+    not detached). Fail-OPEN: git error => True (never block a legitimate attach).
+    """
+    try:
+        res = subprocess.run(["git", "rev-parse", "--verify", "--quiet", "refs/heads/" + base],
+                             cwd=cwd, capture_output=True, text=True, timeout=10, check=False)
+        return res.returncode == 0
+    except Exception:
+        return True
+
+
+def check_worktree_add(joined: str, cwd: str):
+    """GAP-A + GAP-E (Epic #3854): guard `git worktree add`. Returns an emit()-args
+    tuple (decision, reason, extra) or None to proceed. Fail-OPEN on any error.
+    """
+    try:
+        if not RE_WORKTREE_ADD.search(joined):
+            return None
+        seg = joined.split("worktree add", 1)[1]
+        toks = seg.split()
+        bflag = None
+        positionals = []
+        i = 0
+        while i < len(toks):
+            tok = toks[i]
+            if tok in ("-b", "-B"):
+                bflag = toks[i + 1] if i + 1 < len(toks) else None
+                i += 2
+                continue
+            if tok.startswith("-"):
+                i += 1
+                continue
+            positionals.append(tok)
+            i += 1
+        # GAP-E: branch name on -b escapes RE_BRANCH_CREATE — validate it here.
+        if bflag and not BRANCH_VALID.match(bflag):
+            return ("deny", f"Branch '{bflag}' violates naming. Use feat/<ticket#>-desc. "
+                    "(Epic #3854 GAP-E — worktree-add branch-name bypass)", None)
+        # GAP-E: no -b + a base that is NOT a local branch => detached HEAD (no ticket branch).
+        # Attaching an existing local branch (`git worktree add <path> <branch>`) is fine.
+        if not bflag and len(positionals) >= 2 and not _is_attachable_branch(positionals[1], cwd):
+            return ("deny", "`git worktree add` with a non-branch base creates a detached HEAD "
+                    "(no ticket branch — bypasses one-worktree-per-ticket). Use `-b <type>/<N>-slug`, "
+                    "or `scripts/agent-worktree.sh <branch>`. (Epic #3854 GAP-E)", None)
+        # GAP-A: fetch-before-branch — base is a remote-tracking ref and no recent fetch.
+        base = positionals[1] if len(positionals) >= 2 else None
+        if base and base.startswith("origin/") and not _fetch_is_recent(cwd):
+            _emit_worktree_stale_denied(cwd, base)
+            return ("deny", f"Worktree base '{base}' without a recent `git fetch` may be stale "
+                    "(you could branch off an outdated origin/main). Run `git fetch origin main` "
+                    "first, or use `scripts/agent-worktree.sh <branch>` (fetches first). "
+                    "(Fetch-before-branch, Epic #3854 GAP-A)", None)
+        return None
+    except Exception:
+        return None  # fail-open
+
+
 def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
+    # #3661: command-CONTEXT gates (was an Admin/close COMMAND actually invoked?) must
+    # ignore the same command STRING quoted inside a `--body`/here-doc of an issue-comment
+    # or artifact-posting call — a prose mention (e.g. a MANAGER_HANDOFF describing the
+    # create-PR path, or a CONSULTANT_CLOSEOUT citing the issue-close command) must never
+    # trip the gate (the #3631 false-block, twice). Reuse the #3471 quote/here-doc masking
+    # so unquoted REAL commands still fire while quoted prose is masked out. Safety/content
+    # scans (dangerous-cmd, secret, fleet-curl, redirect) intentionally keep the RAW `joined`.
+    cmd = _sanitize_for_redirect_scan(joined)
     auth_result = _check_auth_profile(joined)
     if auth_result is not None:
         return auth_result
     role_result = _check_role_tool_allowlist(joined, state)
     if role_result is not None:
         return role_result
-    epic_close_result = _check_epic_close_guard(joined, cwd)
+    epic_close_result = _check_epic_close_guard(cmd, cwd)
     if epic_close_result is not None:
         return epic_close_result
     flags, ops = state.get("flags", {}), state.get("admin_ops", {})
@@ -452,17 +581,16 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         return emit("deny", one_ticket_deny)
     no_code_lane = active_ticket_is_no_code_lane(state, cwd)
     research_lane = active_ticket_is_research_lane(state, cwd)  # #3266
-    if no_code_lane and NO_CODE_ADMIN_RE.search(joined):
+    docs_lane = active_ticket_is_docs_lane(state, cwd)  # #3569
+    if no_code_lane and NO_CODE_ADMIN_RE.search(cmd):
         return emit("deny", "No-code remediation lane is issue-only. Admin/implementation commands are blocked; re-route to lane:code-change.")
     if is_raw_fleet_curl(joined):
         _emit_fleet_bypass_incident(cwd)
-        # Epic #3392 AC2 (S1): self-resolvable REDIRECT, not a client prompt. The operator
-        # uses the dispatch wrappers (cascade-dispatch / free-cloud-dispatch) so HAMR records
-        # cost+observability, or adds the documented '# hamr-bypass-ok: <reason>' carve-out for an
-        # audited diagnostic. The deny + bypass-incident are PRESERVED (anti-goal §6) — only ask->deny.
-        return emit("deny", "Raw fleet/ollama curl (#2192 vector 2): use cascade-dispatch or "
-                    "free-cloud-dispatch (HAMR cost+observability), or add '# hamr-bypass-ok: <reason>' "
-                    "for an audited diagnostic bypass. Operator-resolvable — no client prompt.")
+        # Epic #3392 AC2 (S1): self-resolvable REDIRECT, not a client prompt. Epic #3807 C2
+        # (#3810): the redirect now names the `npm run fleet` golden-path default so the right
+        # move is a copy-paste (affordance-first, poka-yoke). The deny + bypass-incident +
+        # '# hamr-bypass-ok:' carve-out are all PRESERVED (anti-goal §6) — friction lowered, not gate.
+        return emit("deny", FLEET_CURL_REDIRECT_MSG)
     if DANGEROUS_CMD_RE.search(joined): return emit("deny","Blocked dangerous terminal command.")
     if is_main_checkout(cwd):
         sw = RE_BRANCH_SWITCH.search(joined)
@@ -483,6 +611,9 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
     m = RE_BRANCH_CREATE.search(joined)
     if m and not BRANCH_VALID.match(m.group(1)):
         return emit("deny",f"Branch '{m.group(1)}' violates naming. Use feat/<ticket#>-desc.")
+    _wt = check_worktree_add(joined, cwd)
+    if _wt:
+        return emit(*_wt)
     if any(marker in joined for marker in runtime_hook_paths()):
         # Epic #3392 #3403 (S6): adjudicate-first. Benign hook read / governed deploy → fall
         # through (proceed); only a direct ungoverned hook MUTATION reaches the human carve-out.
@@ -527,7 +658,7 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
                 return emit("deny", "Push blocked: commit step first (Admin sequencing).")
             if used_worktree:
                 _emit_worktree_push_desync(cwd)
-    if RE_PR_MERGE.search(joined):
+    if RE_PR_MERGE.search(cmd):
         override = require_bypass_exception(joined, state, cwd)
         if override:
             return emit("deny", "Admin-override merge blocked (#2706): record the Epic #2517 exception "
@@ -552,39 +683,44 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
                 return emit("deny", "Merge blocked: required CI checks are not fully green (live API check).")
         elif not pr_m and not ops.get("ci_green"):
             return emit("deny","Merge blocked: CI-green not recorded.")
-    if RE_VSCE_PUBLISH.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
+    if RE_VSCE_PUBLISH.search(cmd) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("merge"): return emit("deny","Publish blocked: merge not recorded.")
-    if RE_GH_RELEASE_CREATE.search(joined) and repo_type == "vscode-extension" and flags.get("extension_touched"):
+    if RE_GH_RELEASE_CREATE.search(cmd) and repo_type == "vscode-extension" and flags.get("extension_touched"):
         if not ops.get("publish"): return emit("deny","Release blocked: publish not recorded.")
-    if RE_GH_ISSUE_CLOSE.search(joined):
-        # #3266: research/no-code lanes are PR-less and merge-less BY DESIGN. When the tree is
-        # clean there is genuinely nothing to merge, so the merge-precondition is skipped. But a
-        # REAL repo diff means there IS something to merge — do NOT exempt; re-route to the full
-        # code-change baton (anti-abuse guardrail C, mirrors the no-code-remediation diff-guard).
-        research_clean_exempt = False
-        if no_code_lane or research_lane:
+    if RE_GH_ISSUE_CLOSE.search(cmd):
+        # #3266/#3569: report-only lanes (research, docs-research, docs-only, no-code-remediation)
+        # are PR-less and merge-less BY DESIGN. When the tree is clean there is genuinely nothing
+        # to merge, so the merge-precondition is skipped. But a REAL repo diff means there IS
+        # something to merge — do NOT exempt; re-route to the full code-change baton (anti-abuse
+        # guardrail C, mirrors the no-code-remediation diff-guard). The clean-tree condition is
+        # load-bearing for docs lanes, which often DO produce a legitimate tracked docs diff.
+        report_only_clean_exempt = False
+        if no_code_lane or research_lane or docs_lane:
             dirty = subprocess.run(
                 ["git", "status", "--porcelain"],
                 cwd=cwd, check=False, capture_output=True, text=True,
             ).stdout.strip()
             if dirty:
-                if research_lane and not no_code_lane:
+                if no_code_lane:
+                    return emit("deny", "No-code remediation lane invalid: repository diff detected. Move ticket to lane:code-change before closeout.")
+                if research_lane:
                     return emit("deny", "lane:research invalid: repository diff detected. "
                                 "Re-route ticket to lane:code-change before closeout.")
-                return emit("deny", "No-code remediation lane invalid: repository diff detected. Move ticket to lane:code-change before closeout.")
-            if research_lane:
-                research_clean_exempt = True  # #3266: clean lane:research — nothing to merge
-        if not research_clean_exempt and flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
+                return emit("deny", "lane:docs-research/lane:docs-only invalid: repository diff "
+                            "detected. Re-route ticket to lane:code-change before closeout.")
+            if research_lane or docs_lane:
+                report_only_clean_exempt = True  # #3266/#3569: clean report-only lane — nothing to merge
+        if not report_only_clean_exempt and flags.get("code_touched") and not ops.get("merge"): return emit("deny","Issue close blocked: merge not recorded.")
         if repo_type == "vscode-extension" and flags.get("extension_touched") and not ops.get("release_integrity"):
             return emit("deny","Issue close blocked: integrity check not recorded.")
-        if "gh issue edit" not in joined and "--remove-label" not in joined:
+        if "gh issue edit" not in cmd and "--remove-label" not in cmd:
             # Epic #3392 AC2 (S2): self-resolvable REDIRECT, not a client prompt. Normalize the
             # execution-role labels first, then close — fully operator-automatable. The
             # label-normalization governance intent is PRESERVED (anti-goal §6); only ask->deny.
             return emit("deny", "Issue close: remove execution role labels first "
                         "(gh issue edit #N --remove-label role:<X>), then close. "
                         "Operator-resolvable — no client prompt.")
-    if RE_PR_CREATE.search(joined) and not RE_GIT_COMMIT.search(joined) and not ops.get("commit"):
+    if RE_PR_CREATE.search(cmd) and not RE_GIT_COMMIT.search(cmd) and not ops.get("commit"):
         if not linked_issue_has_collab_handoff(cwd):
             return emit("deny","PR creation blocked: COLLABORATOR_HANDOFF not found on linked issue.")
         # Epic #3392 AC2 (S3): state-derive instead of prompting. The session admin_ops.commit flag
@@ -594,11 +730,11 @@ def check_terminal(joined: str, state: dict, cwd: str) -> int | None:
         if branch_has_commit_ahead(resolve_push_cwd(joined, cwd)):
             return emit("allow", "PR creation: a real commit exists ahead of base (state-derived; no client prompt).")
         return emit("deny", "PR creation: commit step first (Admin sequencing). Operator-resolvable — no client prompt.")
-    if RE_PR_CHECKS.search(joined) and not ops.get("pr_create"):
+    if RE_PR_CHECKS.search(cmd) and not ops.get("pr_create"):
         # Epic #3392 AC2 (S4): checking CI status is READ-ONLY and harmless before PR creation (the
         # operator routinely polls checks on an existing PR). Allow with an advisory; no client prompt.
         return emit("allow", "CI checks before PR creation: read-only status poll — proceeding (no client prompt).")
-    if RE_RELEASE_INTEGRITY.search(joined) and repo_type == "vscode-extension" and not ops.get("publish"):
+    if RE_RELEASE_INTEGRITY.search(cmd) and repo_type == "vscode-extension" and not ops.get("publish"):
         # Epic #3392 AC2 (S5): a release-integrity check is READ-ONLY verification; running it before
         # publish is a harmless precondition check. Allow with an advisory; no client prompt.
         return emit("allow", "Integrity check before publish: read-only verification — proceeding (no client prompt).")
@@ -622,6 +758,31 @@ def main() -> int:
     try: payload = json.load(sys.stdin)
     except Exception: return 0
     tool = str(payload.get("tool_name",""))
+    # #3825 (Epic #3822 C1, Gap A): ask-time reference monitor. Intercept the operator's
+    # OWN AskUserQuestion path BEFORE the client is prompted (the class #3392 left open).
+    # Reversible / non-carve-out decisions route to the free cross-model panel (deny, SILENT
+    # -- the #3814 over-escalation fix); genuine carve-outs (design/UAT/irreversible/security-
+    # weakening) reach the client (ask, unchanged). Fail-closed to `ask` on any classifier
+    # error (reach the human; never a silent allow), mirroring the S6/S7 posture below.
+    if tool == "AskUserQuestion":
+        try:
+            from ask_reference_monitor import classify_ask_route, extract_ask_text, emit_ask_redirect_telemetry
+            _route, _carveout_id, _carveout_class = classify_ask_route(payload.get("tool_input", {}))
+        except Exception:
+            return emit("ask", "Ask-time reference monitor fail-closed: classifier error - reaching "
+                        "the client (never a silent allow) (#3822 C1).")
+        if _route == "human-carveout":
+            return emit("ask", "Retained human carve-out (ask-time reference monitor): a retained "
+                        "human touchpoint (design/UAT/irreversible/security-weakening) - the client "
+                        "is the correct authority (#3822 C1).", _carveout_class)
+        try:
+            emit_ask_redirect_telemetry(_route, _carveout_class, extract_ask_text(payload.get("tool_input", {})))
+        except Exception:
+            pass  # G6: telemetry never breaks the gate
+        return emit("deny", "Reversible/non-carve-out decision - route to the FREE cross-model panel "
+                    "(scripts/global/adjudication-guardrail.js decide() / fleet-decision-oracle.js), "
+                    "NOT a client prompt (#3822 C1 ask-time reference monitor). The client is "
+                    "design + UAT only.")
     values = list(iter_strings(payload.get("tool_input",{})))
     cwd = str(payload.get("cwd","")) or str(Path.cwd())
     state = ensure_state(cwd)

@@ -50,6 +50,41 @@ async function fetchPrBody(branch, opts = {}) {
   } catch { return null; }
 }
 
+// #3636: is the PR in an active-review rework state? True when the latest review decision
+// is CHANGES_REQUESTED or the PR is a draft — the two states in which a rework push
+// legitimately lacks a CONSULTANT_CLOSEOUT. Best-effort/fail-open: any lookup error returns
+// false (enforce as before), so a gh outage never silently drops the closeout requirement.
+// Env override CLOSEOUT_PREFLIGHT_PR_REWORK ('1'|'0') keeps the check deterministic in tests.
+async function fetchPrReworkInReview(branch, opts = {}) {
+  if (process.env.CLOSEOUT_PREFLIGHT_PR_REWORK !== undefined) {
+    return process.env.CLOSEOUT_PREFLIGHT_PR_REWORK === '1';
+  }
+  try {
+    const res = await execute('get-pull-request', { issue: branch, json: 'reviewDecision,isDraft' }, opts);
+    if (!res.ok) return false;
+    const payload = res.provider === 'gh-cli'
+      ? JSON.parse(res.stdout || '{}')
+      : (res.result?.pullRequest || res.result || {});
+    return payload.isDraft === true || payload.reviewDecision === 'CHANGES_REQUESTED';
+  } catch { return false; }
+}
+
+// #3657: local changed-file set — the pre-push analogue of CI's pulls.listFiles.
+// Feeds collaborator-handoff doc-coverage diff-verify + changelog-fragment-presence
+// so both run at the SAME strictness CI uses. Best-effort: [] (or the env override,
+// for tests) on any git error; downstream diff-verify is advisory so [] never
+// false-blocks a legitimate push.
+function localChangedFiles() {
+  if (process.env.CLOSEOUT_PREFLIGHT_PR_FILES !== undefined) {
+    return process.env.CLOSEOUT_PREFLIGHT_PR_FILES.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+  try {
+    const base = execFileSync('git', ['merge-base', 'HEAD', 'origin/main'], { encoding: 'utf8' }).trim();
+    return execFileSync('git', ['diff', '--name-only', '--diff-filter=ACMR', base, 'HEAD'], { encoding: 'utf8' })
+      .split('\n').map((s) => s.trim()).filter(Boolean);
+  } catch { return []; }
+}
+
 // #3169: deferred-final flow — the CONSULTANT_CLOSEOUT is meant to cite the PR,
 // which does not exist at first push. Forcing the consultant-closeout check at
 // pre-push inverts the baton (teams post the closeout before the PR). Defer the
@@ -75,19 +110,71 @@ function hasCollaboratorHandoff(comments) {
   return (comments || []).some((c) => COLLAB_HANDOFF_ARTIFACT_RE.test(c.body || ''));
 }
 
-// #3328: the local pre-push preflight now runs `doc-coverage` with the SAME strictness
-// as CI's collaborator-gate — but ONLY once a COLLABORATOR_HANDOFF is actually posted.
-// The doc-coverage validator falls back to the issue body when no handoff is present,
-// which would false-fail every legitimate pre-handoff push ("missing doc-coverage
-// block"). Gating on handoff presence keeps ordering relaxed while closing the
-// format-parity gap (#3315 recurrence) the moment the artifact exists.
-function selectPreflightValidators(prExists, closeoutAlreadyPosted, collaboratorHandoffPosted) {
+// #3657 shift-left CI parity: the automatic pre-push gate now runs the SAME
+// baton-artifact validators CI's baton-gates runs, at the SAME strictness, gated on
+// the same artifact-presence conditions — so artifact-FORMAT errors (the #3631
+// cascade: cross_family_receipt underscore, worktree_behind_main, missing changelog
+// fragment, per-AC/verification block, doc-coverage surface-as-key) fail BEFORE
+// PR-open instead of one-by-one at CI. Once a COLLABORATOR_HANDOFF is posted the
+// full collaborator-handoff validator runs (superset of the #3328 doc-coverage
+// slice); doc-coverage is retained for its granular message. CI-OWNED rules below
+// are the cross-family ledger-membership ANTI-FORGERY checks (#3678 F1) that need
+// the merge-time consensus evidence bundle — they remain hard-blocking at CI and
+// the merge FSM, so deferring them LOCALLY scopes the shift-left gate to the format
+// class and is NOT parity-lowering of the anti-forgery gate.
+const CI_OWNED_RULES = new Set(['cross-family-receipt-unledgered', 'cross-family-receipt-ledger-tampered']);
+// #3636: during ACTIVE review a rework push legitimately has NO consultant-closeout yet —
+// after a cross-family REQUEST-CHANGES (or on a draft PR) the closeout is CORRECTLY absent
+// (review not re-approved). Enforcing it at pre-push inverts the baton and pushes operators
+// toward bypass envs. Exempt the closeout requirement while the PR review is CHANGES_REQUESTED
+// or the PR is a draft; a closeout that IS already posted stays validated (deferral relaxes
+// ordering, never un-checks a present closeout). Close-time enforcement is unchanged: the CI
+// consultant-gate, merge-evidence-pr-gate, and pretool_guard close gate still block at
+// merge/close, so this relaxes ordering, never enforcement.
+function selectPreflightValidators(prExists, closeoutAlreadyPosted, collaboratorHandoffPosted, reworkInReview) {
   const validators = ['manager-handoff'];
-  if (collaboratorHandoffPosted) validators.push('doc-coverage');
-  const enforceCloseoutNow = prExists || closeoutAlreadyPosted;
+  if (collaboratorHandoffPosted) validators.push('doc-coverage', 'collaborator-handoff');
+  const enforceCloseoutNow = (prExists && !reworkInReview) || closeoutAlreadyPosted;
   if (enforceCloseoutNow) validators.push('consultant-closeout');
   if (prExists) validators.push('merge-evidence-pr-gate');
   return { validators, closeoutDeferred: !enforceCloseoutNow };
+}
+
+// #3657: changelog-fragment-presence is a hard CI gate for lane:code-change with no
+// local pre-push parity (the #3691 named instance: a bad fragment shipped and
+// surfaced only at CI). Run the SAME validator once the collaborator handoff is
+// posted — the point the fragment is required (collaborator-preflight enforces it
+// before COLLABORATOR_HANDOFF), and earlier than CI's PR-open check — resolving the
+// ticket from the branch when no PR body exists yet. Returns true when it blocks.
+function changelogParityBlocks(input, prBody, issueNum) {
+  const res = megalint.run('changelog-fragment-presence',
+    { labels: input.labels, prBody: prBody || `Refs #${issueNum}`, prFiles: input.prFiles });
+  if (res.ok) return false;
+  console.error(`closeout-preflight: FAIL [changelog-fragment] #${issueNum} — ${res.reason}`);
+  return true;
+}
+
+// #3657: signer-fidelity is a per-artifact hard CI check; run it locally over each
+// posted baton artifact body so alias / Team&Model / role defects fail before
+// PR-open. Only posted artifacts are checked, so pre-artifact pushes never false-fail.
+const ARTIFACT_RES = [
+  /(?:^|\n)\s*(?:\*\*|##\s*)?MANAGER_HANDOFF\b/i,
+  COLLAB_HANDOFF_ARTIFACT_RE,
+  /(?:^|\n)\s*(?:\*\*|##\s*)?ADMIN_HANDOFF\b/i,
+  CLOSEOUT_ARTIFACT_RE,
+];
+function signerParityBlocks(comments, issueNum) {
+  let blocked = false;
+  for (const re of ARTIFACT_RES) {
+    const hit = (comments || []).find((c) => re.test(c.body || ''));
+    if (!hit) continue;
+    const res = megalint.run('signer-fidelity', { body: hit.body });
+    const blocking = (res.violations || []).filter((v) => v.severity !== 'advisory' && !CI_OWNED_RULES.has(v.rule));
+    if (!blocking.length) continue;
+    blocked = true; console.error(`closeout-preflight: FAIL [signer-fidelity] #${issueNum}`);
+    for (const violation of blocking) console.error(`  - ${violation.rule}: ${violation.detail}`);
+  }
+  return blocked;
 }
 
 // Baton-back close-gate invariant (#3257): a ticket may not close while a
@@ -100,6 +187,26 @@ function batonBackGateBlocks(comments, closeoutDeferred, issueNum) {
   return true;
 }
 
+// Run the selected shared-input validators plus the #3657 tailored-input parity
+// checks; print every blocking violation. Returns true if any blocked. The parity
+// checks gate on a posted COLLABORATOR_HANDOFF — the lifecycle point the changelog
+// fragment / signer set is required — so pre-artifact pushes are never false-failed.
+function evaluateValidators(validators, input, issueNum, prBody, collaboratorHandoffPosted) {
+  let failed = false;
+  for (const name of validators) {
+    const result = megalint.run(name, { ...input, issueNumber: issueNum });
+    // #3657: filter CI-owned anti-forgery rules from the LOCAL verdict (still hard at CI).
+    const blocking = (result.violations || [])
+      .filter((violation) => !CI_OWNED_RULES.has(violation.rule) && violation.severity !== 'advisory');
+    if (!blocking.length) continue;
+    failed = true; console.error(`closeout-preflight: FAIL [${name}] #${issueNum}`);
+    for (const violation of blocking) console.error(`  - ${violation.rule}: ${violation.detail}`);
+  }
+  if (collaboratorHandoffPosted && changelogParityBlocks(input, prBody, issueNum)) failed = true;
+  if (collaboratorHandoffPosted && signerParityBlocks(input.comments, issueNum)) failed = true;
+  return failed;
+}
+
 async function run(opts = {}) {
   if (process.env.SKIP_CLOSEOUT_PREFLIGHT === '1') { console.log('closeout-preflight: skipped (SKIP_CLOSEOUT_PREFLIGHT=1)'); return 0; }
   const branch = currentBranch();
@@ -109,22 +216,22 @@ async function run(opts = {}) {
   try { issue = await readIssue(issueNum, opts); }
   catch (error) { console.error(`closeout-preflight: unable to load issue #${issueNum}: ${error.message}`); return 1; }
   const input = toValidatorInput(issue, issueNum, branch);
+  input.prFiles = localChangedFiles();
   const prBody = await fetchPrBody(branch, opts);
   if (prBody !== null) input.prBody = prBody;
+  const collaboratorHandoffPosted = hasCollaboratorHandoff(input.comments);
+  // #3636: only worth the review-state lookup once a PR exists.
+  const reworkInReview = prBody !== null && await fetchPrReworkInReview(branch, opts);
   const { validators, closeoutDeferred } = selectPreflightValidators(
-    prBody !== null, hasCloseoutComment(input.comments),
-    hasCollaboratorHandoff(input.comments));
+    prBody !== null, hasCloseoutComment(input.comments), collaboratorHandoffPosted, reworkInReview);
   if (closeoutDeferred) {
-    console.log(`closeout-preflight: consultant-closeout deferred to PR-open (deferred-final flow; no PR yet) #${issueNum}`);
+    const why = reworkInReview ? 'active-review rework (CHANGES_REQUESTED / draft); closeout not yet due'
+      : 'deferred-final flow; no PR yet';
+    console.log(`closeout-preflight: consultant-closeout deferred (${why}) #${issueNum}`);
   }
-  let failed = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
-  for (const name of validators) {
-    const result = megalint.run(name, { ...input, issueNumber: issueNum });
-    if (result.ok) continue;
-    failed = true; console.error(`closeout-preflight: FAIL [${name}] #${issueNum}`);
-    for (const violation of result.violations || []) console.error(`  - ${violation.rule}: ${violation.detail}`);
-  }
-  if (failed) return 1;
+  const batonBackFail = batonBackGateBlocks(input.comments, closeoutDeferred, issueNum);
+  const validatorFail = evaluateValidators(validators, input, issueNum, prBody, collaboratorHandoffPosted);
+  if (batonBackFail || validatorFail) return 1;
   console.log(`closeout-preflight: PASS #${issueNum}`);
   return 0;
 }
@@ -132,4 +239,6 @@ async function run(opts = {}) {
 if (require.main === module) run().then((code) => process.exit(code));
 
 module.exports = { extractIssueFromBranch, readIssue, fetchPrBody, toValidatorInput, run,
-  hasCloseoutComment, hasCollaboratorHandoff, selectPreflightValidators, batonBackGateBlocks };
+  hasCloseoutComment, hasCollaboratorHandoff, selectPreflightValidators, batonBackGateBlocks,
+  localChangedFiles, changelogParityBlocks, signerParityBlocks, CI_OWNED_RULES,
+  fetchPrReworkInReview };

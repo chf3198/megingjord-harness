@@ -113,7 +113,18 @@ ADVISORY in first ship (Epic #2148 C1 #2154); the-collaborator-handoff validator
 | Trigger artifact | `ADMIN_HANDOFF` comment posted on the linked issue. Must carry signing fields with `Role: admin`, plus `branch:`, `commit:`, `signer-independence-check: PASS`, and `deploy-runtime-impact:` (or `sync-verification: N/A` per `feature-completion-governance.instructions.md`). Validator: `scripts/global/megalint/admin-handoff.js`. |
 | Role-label transition | Remove `role:admin`; add `role:consultant`. |
 | Status-label transition | Remove `status:testing`; add `status:review`. |
-| Preconditions | (a) Signer-independence: Admin signer alias MUST differ from Collaborator signer alias — validator `scripts/global/megalint/signer-fidelity.js`. (b) ALL required CI checks PASS on the linked PR — observed via `gh pr checks <PR#>` or `live_checks.ci_all_pass()`; pre-merge gate `merge-evidence-pr-gate.js` enforces. (c) PR merged OR merge-evidence-override-approved label present on the linked issue per the merge-evidence batch contract. (d) For lane:code-change touching deployed runtime artifacts: `npm run sync:codex` + `npm run sync:claude` + `npm run hamr:sync-verify` outputs cited per `feature-completion-governance.instructions.md`. |
+| Preconditions | (a) Signer-independence: Admin signer alias MUST differ from Collaborator signer alias — validator `scripts/global/megalint/signer-fidelity.js`. (b) ALL required CI checks PASS on the linked PR — observed via `gh pr checks <PR#>` or `live_checks.ci_all_pass()`; pre-merge gate `merge-evidence-pr-gate.js` enforces. (c) PR merged OR merge-evidence-override-approved label present on the linked issue per the merge-evidence batch contract. (d) For lane:code-change touching deployed runtime artifacts: `npm run sync:codex` + `npm run sync:claude` + `npm run hamr:sync-verify` outputs cited per `feature-completion-governance.instructions.md`. (e) **Merge-before-handoff** (#3053, Epic #3051): for lane:code-change, when CI is green and `admin_review_rating >= 93`, the PR MUST be merged before ADMIN_HANDOFF — validator `scripts/global/megalint/admin-merge-precondition.js`. |
+
+### Merge-before-handoff predicate (Epic #3051, Refs #3053)
+
+For `lane:code-change`, when the linked PR is CI-green, the Admin `admin_review_rating` field is present and >= 93, and the PR is NOT yet merged, the `admin-handoff-without-merge` violation fires. Carve-outs:
+
+- **Red CI never bypassed**: a genuinely RED required-CI PR is NEVER flagged — the authoritative CI gate blocks independently; this predicate does not force a bypass.
+- **Baseline-drift override**: an explicit `baseline_drift_override` in admin_ops stays labelled and honoured (per Epic #2517).
+- **Merge-evidence-override**: the `merge-evidence-override-approved` label satisfies the merge step (backward-compat with the merge-evidence batch contract).
+- **Deferred-final honoured**: the deferred-final merge-evidence contract (Epic #2295) is compatible — the predicate checks the prMerged fact, which reflects actual merge state.
+- **Admin owns the merge**: merge authorization is NEVER routed to the client (principle #2578 / AC8). The Admin baton role and close authority are AI-agent roles.
+- **Offline-graceful**: when merge/CI facts are unavailable (GitHub unreachable), the finding degrades to `severity:'advisory'` — the authoritative CI gate blocks when online.
 
 ### Validation evidence — recent practice (memory-codified)
 
@@ -128,11 +139,42 @@ Per v1.1 taxonomy, the active label is `role:collaborator` (not the older `role:
 | Lane         | Work type                      | Role sequence                     | N/A markers                    |
 |--------------|--------------------------------|-----------------------------------|--------------------------------|
 | code-change  | Code, infra, deploy (default)  | Manager→Collab→Admin→Consultant   | none                           |
-| research     | Analysis, wiki — no git branch | Manager→Collab(analyst)→Admin→Consultant | Admin = doc reviewer, not CI |
+| research     | Analysis, wiki synthesis — PR optional | Manager→Collab(synthesis)→Consultant | ADMIN_HANDOFF: N/A unless PR |
 | config-only  | Single-value config, no design | Manager→Admin→Consultant          | COLLABORATOR_HANDOFF: N/A      |
 | no-code-remediation | Issue-only drift normalization (no repo edits) | Manager→Consultant | COLLABORATOR_HANDOFF: N/A, ADMIN_HANDOFF: N/A |
 
 Lane set at ticket creation via `lane:*` label and `Lane` Project field. Default: **code-change**.
+
+### Research lane contract (Refs #2263)
+
+Chosen shape **H3-prime** (Epic #2263 Phase-0, ≥90 cross-family council): the research/docs lane runs
+`Manager → Collaborator(synthesis) → Consultant`. Admin is dropped by default — CI
+(`baton-gates.yml`) already skips the collaborator/admin/consultant gates for the lightweight lanes,
+and the 20-ticket audit found Admin artifacts are ceremonial (N/A) for research while Collaborator
+synthesis carries the substance.
+
+Eligibility:
+- Deliverable is analysis, wiki synthesis, or a research artifact (`research/*.md`), no source/CI change.
+- Collaborator produces substantive synthesis (deliverable path cited in COLLABORATOR_HANDOFF).
+
+Role sequence:
+- Manager scopes AC + `test_strategy` (typically `peer-review`).
+- Collaborator authors the synthesis; COLLABORATOR_HANDOFF cites the deliverable path.
+- Consultant peer-reviews via CONSULTANT_CLOSEOUT rubric — the **substantive** quality gate (its CI
+  gate is skipped for lightweight lanes, but the Consultant rubric review is still required by the lane).
+
+N/A markers:
+- `ADMIN_HANDOFF: N/A — lane:docs-research; no PR` when the deliverable closes issue/wiki-only.
+- When research ships **via a PR**, the Admin git facts (branch, commit, signer-independence) apply to
+  that PR even though the `admin-gate` CI check is lightweight-skipped.
+
+Enforcement alignment:
+- Source of truth is the `baton-gates.yml` lightweight-lane list (Epic #2261; NOT an OPA rule). This
+  contract matches CI — no ceremony beyond enforcement.
+
+Escalation:
+- Tracked-file edits beyond the research deliverable → reclassify to `lane:code-change`.
+- Issue-only metadata fixes → `lane:no-code-remediation` (Manager→Consultant).
 
 ### No-code remediation lane contract (Refs #2258 #2268)
 
@@ -187,7 +229,7 @@ See `docs/howto/accountable-team-schema.md`.
 - Terminal and waiting states (`backlog`, `queued`, `ready`, `done`, `cancelled`) carry no execution `role:*` label, except Epic role exceptions documented in this file.
 - No concurrent role execution on a single ticket.
 - Emit the named handoff artifact before transitioning to the next role.
-- `ADMIN_HANDOFF` must be **independent** of `COLLABORATOR_HANDOFF` (#3532, Client design decision): independence PASSES iff EITHER (a) the two sign under different `Team&Model` **TEAM segments** (genuine cross-team signing), OR (b) the `ADMIN_HANDOFF` cites a **VERIFIED cross-family consensus receipt** (`cross_family_receipt:`). A same-team persona-split (differing surnames, one agent) with **no** valid receipt **FAILS** — persona-surname difference alone is no longer independence. Enforced by `baton-independence.checkAdminIndependence`, `baton-authority/evidence-loader.checkSignerIndependence`, and the `consensus-receipt-check` CI validator (receipt = sha256 over provider responses in the append-only hash-chained ledger `governance/cross-family-consensus.jsonl`; panel ≥2 families distinct from the authoring family, each able to REJECT). See `docs/howto/cross-family-consensus-independence.md`.
+- `ADMIN_HANDOFF` must be **independent** of `COLLABORATOR_HANDOFF`. #3532 established the base rule; #3672 (Epic #3679 F2+F3) hardened it against manufactured/forged evidence: independence PASSES **only** via (b) a **VERIFIED cross-family consensus receipt** (`cross_family_receipt:`) OR (c) a cryptographic **authorship attestation**. Everything that is mere prose **FAILS**: (F2) a same-team persona/role-surname split, and a self-asserted `signer-independence-check:` disposition that is **waived / N/A** (reason `independence-self-waived`); (F3) a **bare "different `Team&Model` TEAM"** claim — it is forgeable (a single agent can mint a foreign-team signer, the #3673/PR#3677 "perfect forgery"), so a different team is **no longer** an auto-pass and now ALSO needs a receipt/attestation (reason `unattested-cross-team-claim`). Enforced consistently across `baton-independence.checkAdminIndependence`, `baton-authority/evidence-loader.deriveTrailFromGitHub` (the merge FSM), and the `consensus-receipt-check` CI validator (receipt = sha256 over provider responses in the append-only hash-chained ledger `governance/cross-family-consensus.jsonl`; panel ≥2 families distinct from the authoring family, each able to REJECT). The authorship-attestation mechanism (a committed per-team public-key registry + ed25519 verify) is fail-closed today and tracked by research child #3682. See `docs/howto/cross-family-consensus-independence.md`.
 - All governed work requires a GitHub issue and `Refs #N` in the PR body; workflow identity resolution follows `instructions/team-model-in-workflows.instructions.md`.
 - Skip baton only for: single Q&A, read-only lookup, no file edits, no state-changing tool calls.
 
@@ -231,11 +273,44 @@ replay-eval promotion gate (#3434) flips it. The field is `block` (not required)
 | Test strategy declared per matrix | `test-evidence.yml` gate consumes `test_strategy` from `MANAGER_HANDOFF` |
 | `roles.admin` auto-emission on full baton (#2444) | `hooks/scripts/tool_activity.py` `mark_tool_activity` flips `roles["admin"] = True` when every key returned by `admin_patterns.required_admin_ops(flags, repo_type)` is set in `admin_ops`. Stop-hook `check_admin_ops` consumes the same helper. No manual state patching required. |
 
+## Baton-back review→remediation guardrail (Epic #3251 — enforced in code)
+
+When any review phase surfaces a blocking issue, the baton does not stall waiting for a
+human: it routes the issue to the remediating role and re-advances to closure
+**programmatically**. The rule lives in code (zero-token to enforce, context-loss-proof);
+this section only *describes* it (G8) — it does not carry the rule.
+
+- **Two-layer discovery, one router.** Layer A (≈40 validators + gate hooks) and Layer B
+  (a cross-model review that emits machine-readable findings) both terminate in the same
+  deterministic router. Layer B findings are parsed by
+  `scripts/global/cross-model-finding-router.js` and dispatched by
+  `scripts/global/cross-model-review-dispatch.js` (the operationalized
+  `post-merge-consultant-audit.yml` Layer-B Action); the router itself is the shipped
+  `scripts/global/baton-back.js#routeRemediation` (#3257) — no LLM, no prose.
+- **Deterministic routing rule.** Fix touches a tracked file → **Collaborator** (baton-back);
+  fix is the current role's own artifact/git-op → **current role** (block-in-place); fix is
+  issue-only governance metadata → **Manager** (hold); environmental → **override** (no
+  baton-back). Fault-owner is recorded separately from the file-editor (accountability, G8).
+- **Close-gate invariant.** A ticket cannot reach done/closed while a `## BATON_BACK` marker
+  is open on the timeline — enforced by `scripts/global/closeout-preflight.js`
+  (`batonBackGateBlocks` → `baton-back.anyOpen`), so an Epic cannot close around an open child
+  remediation. The marker also carries the finding as an actionable lesson and a bounded
+  cycle counter (default 3) that escalates to a non-blocking Tier-2 anneal.
+- **Marker persistence + disclosure labels.** `scripts/global/baton-back-set.js` posts the
+  authoritative `## BATON_BACK` timeline comment, applies the `baton-back:open` label, and a
+  metadata-only observability event is written per-ticket by
+  `scripts/global/baton-back-ledger.js` (redacted; not the consensus ledger).
+- **Graded review-coverage disclosure (G2>G3 floor).** Each review point resolves a coverage
+  rung via `scripts/global/review-coverage-resolver.js` and surfaces it as a
+  `review-coverage:{cross-family-free|cross-family-paid|same-family-paid|same-model-grounded-paid|programmatic-only}`
+  label + closeout field. `programmatic-only` (no semantic reviewer reachable) raises a client
+  UAT warning; it is the floor only under a free-only budget / no-network, never a silent skip.
+
 ## MANAGER_HANDOFF schema (with test_strategy)
 
 Required fields on every `MANAGER_HANDOFF` comment:
 - `scope:` — what changes
-- `lane:` — `lane:code-change | lane:docs-research | lane:config-only | lane:no-code-remediation | lane:trivial`
+- `lane:` — `lane:code-change | lane:security-surface | lane:docs-research | lane:config-only | lane:no-code-remediation | lane:trivial`
 - `test_strategy:` — one of `tdd-pyramid | tdd-trophy | contract-test | golden-file | eval-harness | visual-regression | drift-lint | peer-review | manual-verify | none`
 - `acceptance:` — AC checklist
 - `gates:` — CI/governance gates that must pass

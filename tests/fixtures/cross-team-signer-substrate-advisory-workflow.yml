@@ -1,0 +1,66 @@
+name: cross-team-signer-substrate-advisory
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  advisory:
+    name: cross-team-signer-substrate-advisory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const X = require('./scripts/global/cross-team-signer-substrate.js');
+            const registry = JSON.parse(fs.readFileSync(
+              path.join(process.env.GITHUB_WORKSPACE, 'inventory', 'team-model-signatures.json'),
+              'utf8'));
+            const body = context.payload.pull_request.body || '';
+            const refsMatch = body.match(/Refs\s+#(\d+)/i);
+            if (!refsMatch) { console.log('No Refs #N; skipping.'); return; }
+            const linkedIssue = parseInt(refsMatch[1]);
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: linkedIssue,
+            });
+            const labels = issue.labels.map(l => l.name);
+            if (!labels.includes('consultant:cross-team-in-progress')) {
+              console.log('Not a cross-team-claimed Epic; skipping.');
+              return;
+            }
+            const prLabels = context.payload.pull_request.labels.map(l => l.name);
+            if (X.shouldSkip(prLabels) || X.shouldSkip(labels)) {
+              console.log('cross-team-signer-substrate: SKIPPED (waiver label)');
+              return;
+            }
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: linkedIssue, per_page: 100,
+            });
+            const claim = X.activeClaim(comments, registry);
+            const closeoutTeam = X.extractCloseoutTeam(X.findCloseoutBody(comments));
+            const result = X.enforceSubstrateMatch({
+              closeoutTeam, activeClaim: claim, labels: [],
+            });
+            const status = result.ok ? `PASS (skipped: ${result.skipped || 'none'})` : 'ADVISORY-VIOLATION';
+            console.log(`cross-team-signer-substrate: ${status}`);
+            await core.summary.addRaw(`### Cross-team signer-substrate advisory\n\n${status}\n`).write();
+            if (!result.ok) {
+              const detail = result.violations.map(v => `- \`${v.rule}\`: ${v.detail}`).join('\n');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: '<!-- cross-team-signer-substrate-advisory -->\n' +
+                      '## Cross-team signer-substrate advisory (#1334 AC1)\n\n' +
+                      detail + '\n\nWaive with label `signer-substrate:waived` + rationale comment. ' +
+                      'Does not block merge during soak window.',
+              });
+            }

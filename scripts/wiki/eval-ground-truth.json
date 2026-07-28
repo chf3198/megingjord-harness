@@ -1,37 +1,115 @@
 {
-  "_note": "Ground-truth queries for wiki retrieval eval harness (#872). expected = slugs that MUST appear in top-K.",
+  "_note": "Labeled retrieval-eval corpus (#3760, Epic #3719 P1-b). wiki: A=code B=work-log C=wisdom. Consumed by eval-harness.js.",
+  "quality_floor": 0.4,
   "queries": [
     {
       "q": "HAMR cache adapters per provider",
-      "expected": ["cache-adapters", "token-provider-adapters", "hamr-core-worker"]
+      "expected": [
+        "cache-adapters",
+        "token-provider-adapters",
+        "hamr-core-worker"
+      ],
+      "wiki": "C"
     },
     {
       "q": "header-driven spillover when rate limited",
-      "expected": ["header-spillover", "model-routing", "cache-adapters"]
+      "expected": [
+        "header-spillover",
+        "model-routing",
+        "cache-adapters"
+      ],
+      "wiki": "C"
     },
     {
       "q": "fleet portable config for new operators",
-      "expected": ["fleet-portable-config", "fleet-config", "devenv-fleet-topology"]
+      "expected": [
+        "fleet-portable-config",
+        "fleet-config",
+        "devenv-fleet-topology"
+      ],
+      "wiki": "C"
     },
     {
       "q": "Anthropic batch API for time-elastic work",
-      "expected": ["anthropic-batch-routing", "anthropic-prompt-cache", "header-spillover"]
+      "expected": [
+        "anthropic-batch-routing",
+        "anthropic-prompt-cache",
+        "header-spillover"
+      ],
+      "wiki": "C"
     },
     {
       "q": "ide proxy classifier complexity score",
-      "expected": ["ide-proxy", "ide-proxy-shim-2026-05-06", "context-flow"]
+      "expected": [
+        "ide-proxy",
+        "ide-proxy-shim-2026-05-06",
+        "context-flow"
+      ],
+      "wiki": "C"
     },
     {
       "q": "epic governance lifecycle and terminal conditions",
-      "expected": ["epic-governance", "copilot-governance-actions", "agent-drift-governance"]
+      "expected": [
+        "epic-governance",
+        "copilot-governance-actions",
+        "agent-drift-governance"
+      ],
+      "wiki": "C"
     },
     {
       "q": "fleet architecture and topology configuration",
-      "expected": ["fleet-architecture", "fleet-config", "devenv-fleet-topology"]
+      "expected": [
+        "fleet-architecture",
+        "fleet-config",
+        "devenv-fleet-topology"
+      ],
+      "wiki": "C"
     },
     {
       "q": "anthropic batch routing and prompt cache",
-      "expected": ["anthropic-batch-routing", "anthropic-prompt-cache", "header-spillover"]
+      "expected": [
+        "anthropic-batch-routing",
+        "anthropic-prompt-cache",
+        "header-spillover"
+      ],
+      "wiki": "C"
+    },
+    {
+      "q": "restore continuous wiki auto-update reconcile catch-all",
+      "expected": [
+        "3063",
+        "3067"
+      ],
+      "wiki": "B"
+    },
+    {
+      "q": "wiki health detector store empty or stale",
+      "expected": [
+        "3068"
+      ],
+      "wiki": "B"
+    },
+    {
+      "q": "concurrent agent worktree isolation safety",
+      "expected": [
+        "1856"
+      ],
+      "wiki": "B"
+    },
+    {
+      "q": "three wiki typology synthesis code work-log wisdom",
+      "expected": [
+        "1943",
+        "baton-authority-plane-fsm"
+      ],
+      "wiki": "C"
+    },
+    {
+      "q": "retrieval ranking bm25 rrf dense fusion code",
+      "expected": [
+        "retrieval-rank"
+      ],
+      "wiki": "A"
     }
   ]
 }

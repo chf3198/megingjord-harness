@@ -96,10 +96,86 @@ function hookHealthRemediations(result) {
   }));
 }
 
+// ── Dangling appended-path detection + self-heal (#3860, Epic #3854 GAP-D) ──────────
+// classifyPath is blind to the #2508 trap: a hook FILE that itself exists + is readable but
+// whose CONTENT invokes an absolute `"<checkout>/scripts/hooks/<x>.sh" "$@"` line pointing at a
+// deleted worktree. Every git op that fires the hook then dies with "<abs>: No such file". We
+// must read the hook file's text, not just lstat it.
+const ABS_HOOK_INVOKE_RE = /(\/[^\s"']+\/scripts\/hooks\/[A-Za-z0-9._-]+\.sh)/g;
+
+// Deployed hook FILES (not the scripts dir) that install-hooks.sh appends into.
+function defaultHookFiles(home = homedir()) {
+  const names = ['pre-push', 'post-checkout', 'post-commit'];
+  const dirs = [
+    path.join(home, '.copilot', 'hooks', 'scripts'),
+    path.join(home, '.copilot', 'hooks'),
+    path.join(home, '.claude', 'hooks', 'scripts'),
+    path.join(home, '.codex', 'hooks', 'scripts'),
+  ];
+  const files = [];
+  for (const dir of dirs) for (const name of names) files.push(path.join(dir, name));
+  return files;
+}
+
+// Read each hook file and flag embedded absolute hook-script paths whose target is gone.
+function scanAppendedPaths(files = defaultHookFiles()) {
+  const dangling = [];
+  for (const file of files) {
+    let text;
+    try { text = fs.readFileSync(file, 'utf8'); } catch { continue; } // absent/unreadable → skip
+    const seen = new Set();
+    let match;
+    ABS_HOOK_INVOKE_RE.lastIndex = 0;
+    while ((match = ABS_HOOK_INVOKE_RE.exec(text)) !== null) {
+      const ref = match[1];
+      if (seen.has(ref)) continue;
+      seen.add(ref);
+      if (!fs.existsSync(ref)) dangling.push({ file, ref });
+    }
+  }
+  return { dangling };
+}
+
+// The canonical-checkout equivalent of a dangling ref (same trailing scripts/hooks/<name>.sh).
+function canonicalScriptFor(ref, canonicalRoot) {
+  const tail = ref.split('/scripts/hooks/')[1];
+  return tail ? path.join(canonicalRoot, 'scripts', 'hooks', tail) : null;
+}
+
+function emitHealEvent(file, ref, replacement) {
+  try {
+    const dir = path.join(homedir(), '.megingjord');
+    fs.mkdirSync(dir, { recursive: true });
+    const event = { version: 3, service: 'hook-symlink-health', env: 'local',
+      event: 'governance.hook-path-self-heal', pattern_id: 'dangling-appended-hook-path',
+      severity: 'medium', file, from: ref, to: replacement };
+    fs.appendFileSync(path.join(dir, 'incidents.jsonl'), JSON.stringify(event) + '\n');
+  } catch { /* telemetry must never affect the heal decision */ }
+}
+
+// Self-heal: repoint a dangling embedded ref to the canonical checkout's script. Fail-CLOSED:
+// only rewrites when the canonical replacement actually exists (never points at another ghost).
+function healAppendedPath(file, ref, canonicalRoot) {
+  const replacement = canonicalScriptFor(ref, canonicalRoot);
+  if (!replacement || !fs.existsSync(replacement)) return false;
+  try {
+    const text = fs.readFileSync(file, 'utf8');
+    const healed = text.split(ref).join(replacement);
+    if (healed === text) return false;
+    fs.writeFileSync(file, healed);
+    emitHealEvent(file, ref, replacement);
+    return true;
+  } catch { return false; }
+}
+
 module.exports = {
   defaultHookRoots,
+  defaultHookFiles,
   classifyPath,
   scanHookHealth,
+  scanAppendedPaths,
+  canonicalScriptFor,
+  healAppendedPath,
   repairBrokenLink,
   hookHealthRemediations,
 };

@@ -1,14 +1,21 @@
 'use strict';
 // baton-independence.js — signer-independence for the Admin merge gate.
-// #3532 (Client design decision): independence PASSES iff EITHER (a) Admin vs
-// Collaborator differ by Team&Model TEAM segment (genuine cross-team signing),
-// OR (b) a VERIFIED cross-family consensus receipt is present. A same-team
-// persona-split (differing surnames, one agent) with NO valid receipt FAILS —
-// closing the #3518/#3521 self-satisfiable loophole. roleIdentity is retained
-// for signer-display only; it no longer decides independence.
+// #3532 established: independence PASSES iff EITHER (a) Admin vs Collaborator differ by
+// Team&Model TEAM segment, OR (b) a VERIFIED cross-family consensus receipt. #3672 (F2+F3,
+// Epic #3679) HARDENS both paths against manufactured/forged evidence surfaced live on
+// #3673 / PR#3677:
+//   F2 — a same-team persona/role-surname split, AND a self-asserted "waived"/"N/A"
+//        disposition, are NEVER independence (`independence-self-waived` when self-waived).
+//   F3 — a BARE "different team" claim is forgeable (a single agent can mint a foreign-team
+//        signer), so path (a) alone NO LONGER passes: a genuinely-different team now ALSO
+//        requires a verified cross-family receipt (b) OR a cryptographic authorship
+//        attestation. Bare team-difference => `unattested-cross-team-claim` (FAIL).
+// The unforgeable proof is therefore a verified receipt or an attestation — never prose.
+// roleIdentity is retained for signer-display only; it does not decide independence.
 
 const fs = require('fs');
-const { teamSegmentOf, familyOfModel, verifyReceipt, RECEIPT_FIELD_RE } = require('./cross-family-receipt');
+const { teamSegmentOf, familyOfModel, verifyReceipt, RECEIPT_FIELD_RE,
+  detectSelfWaive, verifyAuthorshipAttestation } = require('./cross-family-receipt');
 
 /**
  * Return the best available signer identity from a baton comment (display only).
@@ -29,7 +36,13 @@ function roleIdentity(comment) {
 }
 
 function findRoleComment(comments, marker) {
-  const roleLine = new RegExp(`(^|\\n)\\s*${marker}\\s*(\\n|$)`);
+  // #3672 (AC3 root cause): real baton artifacts head their marker with `## ` (see
+  // baton-comment-build.js) — the previous `\s*${marker}\s*(\n|$)` did NOT match a
+  // `## ADMIN_HANDOFF` header (## is not whitespace), so checkAdminIndependence silently
+  // returned `missing-role-comment` (a skip/pass) on every real handoff, defeating the
+  // #1591 admin-gate. Align to the canonical grammar (optional `## ` / `**` prefix, then
+  // a word boundary) — the same tolerant anchor megalint's findAdminHandoff uses.
+  const roleLine = new RegExp(`(^|\\n)\\s*(?:\\*\\*|##\\s+)?${marker}\\b`);
   return [...comments].reverse().find(comment => roleLine.test(comment.body || ''));
 }
 
@@ -51,29 +64,67 @@ function checkAdminIndependence(comments, opts = {}) {
   const admin = findRoleComment(comments, 'ADMIN_HANDOFF');
   if (!collaborator || !admin) return { ok: true, reason: 'missing-role-comment' };
 
+  const adminBody = admin.body || '';
   const collabTeam = teamSegmentOf(teamModelOf(collaborator));
   const adminTeam = teamSegmentOf(teamModelOf(admin));
-  // (a) genuine cross-team signing — independent by construction.
-  if (collabTeam && adminTeam && collabTeam !== adminTeam) {
-    return { ok: true, reason: 'independent-team', collabTeam, adminTeam };
-  }
-  // (b) same team (or unparseable) — require a VERIFIED cross-family consensus receipt.
-  const receipt = ((admin.body || '').match(RECEIPT_FIELD_RE) || [])[1] || null;
+  const teamsDiffer = Boolean(collabTeam && adminTeam && collabTeam !== adminTeam);
+
+  // Independence PASSES only via an unforgeable proof (attestation or verified receipt).
+  const proof = independenceProof(adminBody, teamModelOf(admin), opts);
+  if (proof.ok) return { ok: true, reason: proof.reason, receipt: proof.receipt, families: proof.families };
+
+  // FAIL — a bare team-difference, persona-surname, or "waived"/"N/A" disposition never
+  // passes; report the most-specific reason so the operator sees exactly WHY.
+  const reason = classifyIndependenceFailure(detectSelfWaive(adminBody), teamsDiffer, collabTeam, adminTeam);
+  const ctx = { collabTeam, adminTeam, receiptReason: proof.reason };
+  return { ok: false, reason, collabTeam, adminTeam, receiptReason: proof.reason,
+    message: independenceFailMessage(reason, ctx) };
+}
+
+// The two unforgeable PASS paths (#3672): a cryptographic authorship attestation (reserved,
+// mechanism deferred to #3682, injectable via opts.verifyAttestation) OR a VERIFIED
+// cross-family consensus receipt — required for BOTH same- and different-team (F3). On
+// failure, `reason` carries the receipt-verification reason for actionable messaging.
+function independenceProof(adminBody, adminTeamModel, opts) {
+  const att = verifyAuthorshipAttestation(adminBody, opts);
+  if (att.ok) return { ok: true, reason: 'authorship-attested' };
+  const receipt = (adminBody.match(RECEIPT_FIELD_RE) || [])[1] || null;
   const verify = opts.verify || verifyReceipt;
   const res = receipt
-    ? verify(opts.issueNumber, receipt, familyOfModel(teamModelOf(admin)),
+    ? verify(opts.issueNumber, receipt, familyOfModel(adminTeamModel),
         { kind: 'merge-consensus', ledger: opts.ledger })
     : { ok: false, reason: 'no-receipt' };
   if (res.ok) return { ok: true, reason: 'cross-family-consensus', receipt, families: res.families };
-  return {
-    ok: false,
-    reason: collabTeam && adminTeam ? 'same-team-no-valid-receipt' : 'no-independent-team-no-receipt',
-    collabTeam, adminTeam, receiptReason: res.reason,
-    message:
-      `Admin and Collaborator share Team&Model team segment (${adminTeam || 'unparseable'}); ` +
-      'independence requires a genuinely different signing TEAM or a verified cross-family ' +
-      `consensus receipt (receipt: ${res.reason}). Persona-surname difference alone is insufficient.`,
-  };
+  return { ok: false, reason: res.reason };
+}
+
+// Most-specific denial reason (#3672). Precedence: self-waive > forged cross-team > same-team.
+function classifyIndependenceFailure(selfWaived, teamsDiffer, collabTeam, adminTeam) {
+  if (selfWaived) return 'independence-self-waived';
+  if (teamsDiffer) return 'unattested-cross-team-claim';
+  if (collabTeam && adminTeam) return 'same-team-no-valid-receipt';
+  return 'no-independent-team-no-receipt';
+}
+
+// Human-readable, actionable denial per failure reason (#3672).
+function independenceFailMessage(reason, ctx) {
+  const need = 'independence requires a verified cross-family consensus receipt (or a ' +
+    'cryptographic authorship attestation)';
+  switch (reason) {
+    case 'independence-self-waived':
+      return 'signer-independence-check is self-waived (waived/N/A); a signer cannot waive ' +
+        `its own independence check — ${need}.`;
+    case 'unattested-cross-team-claim':
+      return `Admin team "${ctx.adminTeam}" differs from Collaborator team "${ctx.collabTeam}", ` +
+        'but a bare different-team claim is forgeable (a single agent can mint a foreign-team ' +
+        `signer) — ${need} (receipt: ${ctx.receiptReason}).`;
+    case 'same-team-no-valid-receipt':
+      return `Admin and Collaborator share Team&Model team segment (${ctx.adminTeam}); ` +
+        `${need} (receipt: ${ctx.receiptReason}). Persona-surname difference alone is insufficient.`;
+    default:
+      return `No parseable independent signing team and no valid receipt — ${need} ` +
+        `(receipt: ${ctx.receiptReason}).`;
+  }
 }
 
 function main() {

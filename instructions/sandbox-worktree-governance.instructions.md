@@ -78,3 +78,45 @@ branches or draft PRs before any deletion.
 - Before edits, run the conflict gate for intended paths. Exact branch and
   same-ticket path collisions block unless Manager override is present; adjacent
   governance surfaces warn and should be coordinated in the issue thread.
+
+## Session-Lock Trust Model & Telemetry (#1860)
+
+The active-session lock (`scripts/global/worktree-active-session-lock.js`,
+`.megingjord/active-session.lock`) is a **cooperative-agent** guard, not an
+adversarial-host defence. It assumes every agent sharing the checkout honours
+the lock protocol. Threat model and the mitigations that DO apply:
+
+- **In scope (honest-mistake / stale-state):** two well-behaved agents racing
+  for the same checkout. Mitigated by atomic `writeFile→linkSync` single-winner
+  acquisition (#1871), PID-liveness + heartbeat staleness (`STALE_MS`,
+  `DEAD_PID_GRACE_MS`), and lock-file mode `0o600` (owner-only) so another OS
+  user cannot read/alter it.
+- **Out of scope (adversarial-host):** a malicious local process can still spoof
+  a PID or forge a heartbeat timestamp — `0o600` and PID checks do not stop a
+  same-user attacker. Optional env-gated HMAC signing of lock content was
+  considered and **deferred** (#1860): it does not fit the cooperative-agent
+  model and adds key-management cost for no realistic single-user threat. Revisit
+  only if the checkout is ever shared across trust boundaries.
+
+### Lifecycle telemetry (G8 observability)
+
+Lock transitions emit best-effort event-schema-v3 records via
+`scripts/global/worktree-lock-telemetry.js`:
+
+- Events: `worktree.lock.acquire`, `worktree.lock.refuse` (contention — the
+  highest-signal event), `worktree.lock.replace_stale`, `worktree.lock.release`,
+  and `worktree.lock.lease_expire` (from the lease-heartbeat sweep).
+- Sink: `~/.megingjord/incidents.jsonl` by default; override with
+  `MEGINGJORD_LOCK_TELEMETRY_FILE`; disable with
+  `MEGINGJORD_LOCK_TELEMETRY_DISABLED=1`.
+- Emission is **never-throwing and never-blocking** — the lock result is
+  identical whether or not telemetry succeeds (G6). Correctness/stress specs run
+  with telemetry disabled so the acquire p99<50ms budget is unaffected.
+
+### Cross-platform note (deferred → #3637)
+
+The lock primitives (`process.kill(pid, 0)`, `fs.chmodSync`, `fs.unlinkSync`)
+have Windows-divergent semantics. A `windows-latest`/`macos-latest` CI matrix is
+intentionally **not** run today: the fleet and all operators are Linux, so it
+would spend CI minutes (G3) on speculative portability (G5). Deferred to #3637;
+action only when a non-Linux operator materialises.

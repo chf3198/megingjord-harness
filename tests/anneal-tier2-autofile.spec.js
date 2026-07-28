@@ -17,7 +17,7 @@ test('maybeCreateTicket uses MCP path when forced', async () => {
   const ref = await maybeCreateTicket(candidate, meta, '2026-05-26T00:00:00Z', true, {
     dedupeLookup: () => '',
     dispatcherOpts: {
-      env: { MEGINGJORD_MCP_FORCE_AVAILABLE: '1' },
+      env: { MEGINGJORD_MCP_AVAILABLE: '1' },
       mcpClient: {
         invoke: async (tool, params) => {
           seenTool = tool;

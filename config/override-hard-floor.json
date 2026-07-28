@@ -1,0 +1,16 @@
+{
+  "_doc": "Tier-H HARD-FLOOR controls (Epic #2892). A per-repo override that names any of these is REJECTED fail-closed by scripts/global/megalint/override-contract.js — there is no self-serve OR approval path. Security / provenance / privacy controls only. Any request to make one overridable is a security-weakening carve-out (escalate, never self-serve).",
+  "version": "1.0.0",
+  "hard_floor": [
+    { "id": "signer-independence", "aliases": ["signer_independence", "signer-fidelity", "signer_fidelity", "baton-independence", "signer_independent"] },
+    { "id": "cross-family-consensus-receipt", "aliases": ["cross_family_receipt", "consensus-receipt", "cross-family-receipt"] },
+    { "id": "secret-scan", "aliases": ["secret_scan", "secret-scanning", "wiki-secret-scan"] },
+    { "id": "log-redaction", "aliases": ["log_redaction", "redaction", "pii-redaction"] },
+    { "id": "credential-prompt-guard", "aliases": ["credential_prompt_guard", "credential-guard"] },
+    { "id": "prompt-injection-defense", "aliases": ["prompt_injection_defense", "injection-defense"] },
+    { "id": "merge-authority-fsm", "aliases": ["merge_authority", "baton-authority-merge", "merge-authority", "merge_fsm"] },
+    { "id": "ticket-first-provenance", "aliases": ["ticket_first", "ticket-first", "refs-required"] },
+    { "id": "team-model-signing", "aliases": ["team_model_signing", "team-model-signing", "signing"] },
+    { "id": "retained-human-touchpoints", "aliases": ["retained_human_touchpoints", "retained-touchpoints", "human-touchpoints"] }
+  ]
+}

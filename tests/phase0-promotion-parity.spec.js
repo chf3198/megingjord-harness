@@ -16,6 +16,7 @@ test('AC4: predicate is runtime-agnostic — identical verdict for every runtime
     labels: ['type:epic', 'phase-gate:research-first'],
     comments: [{ body: 'EPIC_RESCOPE' }],
     children: [{ number: 2, state: 'closed', labels: ['phase-gate:research-first'], comments: [{ body: 'CONSULTANT_CLOSEOUT' }] }],
+    planRating: { ok: true }, // #3826: green now requires a verified plan-rating (runtime-agnostic conjunct)
   };
   const verdicts = RUNTIMES.map((runtime) => gate.phase0GreenComplete({ ...base, runtime }));
   for (const v of verdicts) {

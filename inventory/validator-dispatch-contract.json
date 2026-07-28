@@ -3,13 +3,14 @@
   "_version": "1.0.0",
   "_validator_dir": "scripts/global/megalint",
   "_helper_files": [
-    "scripts/global/megalint/doc-coverage-helpers.js",
-    "scripts/global/megalint/work-log-sync-helpers.js",
+    "scripts/global/megalint/admin-merge-precondition.js",
     "scripts/global/megalint/artifact-field-extract.js",
-    "scripts/global/megalint/epic-parent-resolve.js",
     "scripts/global/megalint/doc-coverage-diff-replay-eval.js",
     "scripts/global/megalint/doc-coverage-diff-verify.js",
-    "scripts/global/megalint/signer-registry-check.js"
+    "scripts/global/megalint/doc-coverage-helpers.js",
+    "scripts/global/megalint/epic-parent-resolve.js",
+    "scripts/global/megalint/signer-registry-check.js",
+    "scripts/global/megalint/work-log-sync-helpers.js"
   ],
   "validators": [
     {
@@ -106,6 +107,13 @@
       ]
     },
     {
+      "validator": "completion-claim-truth",
+      "file": "scripts/global/megalint/completion-claim-truth.js",
+      "dispatchedBy": [
+        "ci:completion-claim-truth.yml:check"
+      ]
+    },
+    {
       "validator": "consultant-closeout",
       "file": "scripts/global/megalint/consultant-closeout.js",
       "dispatchedBy": [
@@ -184,6 +192,13 @@
         "megalint-runAll",
         "ci:closeout-lint.yml",
         "lefthook:pre-push:megalint"
+      ]
+    },
+    {
+      "validator": "flag-lifecycle-lint",
+      "file": "scripts/global/megalint/flag-lifecycle-lint.js",
+      "dispatchedBy": [
+        "ci:lint.yml:lint-required"
       ]
     },
     {
@@ -394,12 +409,11 @@
       ]
     },
     {
-      "validator": "worktree-naming-advisory",
-      "file": "scripts/global/megalint/worktree-naming-advisory.js",
+      "validator": "override-contract",
+      "file": "scripts/global/megalint/override-contract.js",
       "dispatchedBy": [
-        "megalint-runAll",
-        "lefthook:pre-push:worktree-naming-advisory",
-        "lefthook:pre-push:megalint"
+        "ci:override-contract.yml",
+        "cli:override-contract.js"
       ]
     }
   ]

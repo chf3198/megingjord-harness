@@ -23,6 +23,68 @@ class TestClientArbitrationGuard(unittest.TestCase):
         text = "For design direction, which color palette do you prefer for this UI?"
         self.assertEqual(guard.detect_client_arbitration(text), [])
 
+    # --- #3749 AC1: broadened detection beyond the conflict-keyword regex ---
+    def test_broadened_flags_non_conflict_defer(self):
+        # No governance/worktree/team/conflict keyword — the OLD narrow guard missed this.
+        text = "I've found two viable implementations here. What should I do next?"
+        self.assertEqual(
+            guard.detect_client_arbitration(text),
+            ["delegated-internal-conflict-decision-to-client"],
+        )
+
+    # --- #3749 AC3: the 4 carve-outs remain the sole escalation path ---
+    def test_allows_irreversible_carveout(self):
+        text = "This will permanently delete the production database. Which option should I take?"
+        self.assertEqual(guard.detect_client_arbitration(text), [])
+
+    def test_allows_security_weakening_carveout(self):
+        text = "To unblock, I'd disable the merge gate protection. How would you like me to proceed?"
+        self.assertEqual(guard.detect_client_arbitration(text), [])
+
+    # --- #3749 AC4: anti-over-block — a routine non-decision clarification is not flagged ---
+    def test_no_flag_on_routine_clarification(self):
+        self.assertEqual(guard.detect_client_arbitration("Which file did you mean, a.js or b.js?"), [])
+
+    # --- #3749 cross-family critique fix: a dev "software design" defer must ADJUDICATE, ---
+    # --- not be waved through as a visual-design client carve-out (tightened DESIGN_UAT_RE). ---
+    def test_dev_design_defer_is_flagged_not_carveout(self):
+        text = "Two ways to design the retry policy. What should I do next?"
+        self.assertEqual(
+            guard.detect_client_arbitration(text),
+            ["delegated-internal-conflict-decision-to-client"],
+        )
+        self.assertIsNone(guard.human_carveout("design the retry policy"))
+
+    def test_visual_design_direction_still_carveout(self):
+        self.assertEqual(guard.human_carveout("we need a design direction here"), "design-uat")
+        self.assertEqual(guard.human_carveout("which color palette"), "design-uat")
+
+    # --- #3749 AC5: fail-safe — never raises, even on non-string / empty input ---
+    def test_failsafe_on_bad_input(self):
+        self.assertEqual(guard.detect_client_arbitration(""), [])
+        self.assertEqual(guard.detect_client_arbitration(None), [])  # type: ignore[arg-type]
+
+    # --- #3749 AC2: active redirect record names the decide() panel invocation ---
+    def test_adjudication_redirect_record(self):
+        text = "Governance conflict in worktree drift. How would you like me to proceed?"
+        violations = guard.detect_client_arbitration(text)
+        rec = guard.adjudication_redirect(text, violations)
+        self.assertEqual(rec["route"], "adjudicate")
+        self.assertFalse(rec["carveout"])
+        self.assertEqual(rec["subclass"], "internal-conflict")
+        self.assertIn("adjudication-guardrail", rec["directive"])
+        self.assertIn(".decide(", rec["directive"])
+
+    def test_redirect_subclass_general_for_non_conflict(self):
+        text = "I've found two viable implementations here. What should I do next?"
+        rec = guard.adjudication_redirect(text)
+        self.assertEqual(rec["subclass"], "general-decision")
+
+    def test_human_carveout_tiers(self):
+        self.assertEqual(guard.human_carveout("pick the brand color"), "design-uat")
+        self.assertEqual(guard.human_carveout("this is irreversible"), "irreversible")
+        self.assertIsNone(guard.human_carveout("refactor the parser"))
+
     def test_classifies_sync_residue(self):
         conflict = guard.classify_internal_conflict([
             "scripts/global/post-merge-sweep.js",

@@ -1,0 +1,62 @@
+name: cross-team-claim-reaper
+on:
+  schedule:
+    - cron: '17 6 * * *'  # daily at 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  reaper:
+    name: cross-team-claim-reaper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const X = require('./scripts/global/cross-team-signer-substrate.js');
+            const R = require('./scripts/global/cross-team-claim-reaper.js');
+            const registry = JSON.parse(fs.readFileSync(
+              path.join(process.env.GITHUB_WORKSPACE, 'inventory', 'team-model-signatures.json'),
+              'utf8'));
+            const { data: epics } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'consultant:cross-team-in-progress',
+              state: 'open', per_page: 100,
+            });
+            const nowMs = Date.now();
+            const nowIso = new Date(nowMs).toISOString();
+            const expired = [];
+            for (const epic of epics) {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: epic.number, per_page: 100,
+              });
+              const claim = X.activeClaim(comments, registry);
+              if (!claim) continue;
+              if (R.isClaimExpired(claim, nowMs) === true) {
+                expired.push({ epic, claim });
+              }
+            }
+            for (const { epic, claim } of expired) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: epic.number, body: R.buildExpiredComment(claim, nowIso),
+              });
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: epic.number, name: 'consultant:cross-team-in-progress',
+              }).catch((err) => { if (err?.status !== 404) throw err; });
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: epic.number, labels: ['consultant:cross-team-needed'],
+              }).catch((err) => { if (err?.status !== 422) throw err; });
+            }
+            const summary = `Scanned ${epics.length} cross-team-in-progress Epics; expired ${expired.length} claim(s)`;
+            console.log(`cross-team-claim-reaper: ${summary}`);
+            await core.summary.addRaw(`### Cross-team claim reaper\n\n${summary}\n`).write();

@@ -2,11 +2,20 @@
 // MCP-vs-gh-CLI dispatcher. Falls back to gh CLI when MCP is unavailable.
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
+const { degradeDefault } = require('./honest-degradation');
 const execFileAsync = promisify(execFile);
 function provider(env = process.env) {
-  if (env.MEGINGJORD_MCP_DISABLED === '1') return 'gh-cli';
-  if (env.MEGINGJORD_MCP_FORCE_AVAILABLE === '1') return 'mcp';
-  return env.MEGINGJORD_MCP_AVAILABLE === '1' ? 'mcp' : 'gh-cli';
+  // Honest availability default (Epic #3807 C5): route to the externally-coupled MCP transport only
+  // when its availability is EXPLICITLY asserted; otherwise degrade to the always-reachable gh-CLI.
+  // The retired MEGINGJORD_MCP_FORCE_AVAILABLE was a redundant "force MCP" knob that asserted
+  // availability without ever probing it — the correctness-vs-reachability anti-pattern — and was
+  // semantically identical to MEGINGJORD_MCP_AVAILABLE. Both transports emit identical governance
+  // artifacts, so this is transport interop (G9), not a G1/G4 control.
+  return degradeDefault('mcp', {
+    asserted: env.MEGINGJORD_MCP_AVAILABLE === '1',
+    disabled: env.MEGINGJORD_MCP_DISABLED === '1',
+    fallback: 'gh-cli',
+  });
 }
 const TOOL_MAP = {
   'create-issue': { mcp: 'mcp__github__create_issue', cli: 'gh issue create' },

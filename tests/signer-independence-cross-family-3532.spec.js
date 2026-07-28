@@ -42,10 +42,13 @@ describe('#3532 baton-independence — team segment + receipt', () => {
     assert.equal(res.reason, 'same-team-no-valid-receipt');
   });
 
-  it('(a) genuinely different signing TEAM PASSES with no receipt', () => {
+  it('(a) a BARE different signing TEAM no longer passes without proof (#3672 F3)', () => {
+    // #3672 hardening: bare team-difference is forgeable (a single agent can mint a
+    // foreign-team signer), so it now requires a verified receipt or attestation. Genuine
+    // cross-team WITH a receipt still passes (see the receipt cases below).
     const res = bi.checkAdminIndependence([collab, adminDiffTeam]);
-    assert.equal(res.ok, true);
-    assert.equal(res.reason, 'independent-team');
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'unattested-cross-team-claim');
   });
 
   it('(b) same team + VERIFIED cross-family receipt PASSES', () => {
@@ -126,10 +129,10 @@ describe('#3532 evidence-loader.checkSignerIndependence (server-side bit)', () =
 
 describe('#3532 consensus-receipt-check CI evaluator', () => {
   const bodies = (adminExtra) => [collab.body, `ADMIN_HANDOFF\nTeam&Model: ${TM}\nRole: admin${adminExtra}`];
-  it('independent-team path passes without a receipt', () => {
+  it('a BARE different-team claim no longer auto-passes (no ledger receipt) (#3672 F3)', () => {
     const res = crc.evaluate(3532, [collab.body, adminDiffTeam.body], { ledger: [] });
-    assert.equal(res.ok, true);
-    assert.equal(res.path, 'independent-team');
+    assert.equal(res.ok, false);
+    assert.equal(res.reason, 'unattested-cross-team-claim');
   });
   it('same-team no receipt fails', () => {
     const res = crc.evaluate(3532, bodies(''), { ledger: [] });

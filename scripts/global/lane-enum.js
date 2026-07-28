@@ -14,6 +14,7 @@
 /** @type {ReadonlyArray<string>} Canonical set of lane labels. */
 const LANES = Object.freeze([
   'lane:code-change',
+  'lane:security-surface',
   'lane:docs-research',
   'lane:docs-only',
   'lane:config-only',
@@ -28,6 +29,7 @@ const LANES = Object.freeze([
  */
 const LANE_META = Object.freeze({
   'lane:code-change':         { severity: 'full',       collab: true,  admin: true  },
+  'lane:security-surface':    { severity: 'full',       collab: true,  admin: true  },
   'lane:docs-research':       { severity: 'lightweight', collab: false, admin: false },
   'lane:docs-only':           { severity: 'lightweight', collab: false, admin: false },
   'lane:config-only':         { severity: 'lightweight', collab: false, admin: true  },

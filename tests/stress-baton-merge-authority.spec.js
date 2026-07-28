@@ -172,3 +172,32 @@ describe('G7 p95 latency under heavy rate-limiting', () => {
     );
   });
 });
+
+// #3699: the self-context CI_GREEN filter must never throw on adversarial check
+// shapes (missing names, only-self-context, huge lists) and must not authorize on
+// an incomplete trail regardless of check-list contents.
+describe('G6 chaos: #3699 self-context filter tolerates adversarial check lists', () => {
+  it('never throws and never allows on incomplete trail across adversarial check shapes', async () => {
+    const shapes = [
+      [{ conclusion: 'success' }], // no name field
+      [{ name: 'baton-authority/merge', conclusion: null }], // only self-context, pending
+      [{ name: null, conclusion: 'success' }, { name: 'baton-authority/merge', conclusion: 'in_progress' }],
+      Array.from({ length: 500 }, (_, i) => ({ name: 'chk-' + i, conclusion: i % 2 ? 'success' : 'failure' })),
+    ];
+    for (let i = 0; i < shapes.length; i += 1) {
+      const client = {
+        async getIssue() { return { number: i, labels: [] }; },
+        async listComments() { return []; }, // incomplete trail (no handoffs)
+        async getPR() { return { merged: false }; },
+        async listChecks() { return shapes[i]; },
+      };
+      let result;
+      await assert.doesNotReject(async () => {
+        const trail = await deriveTrailFromGitHub(i, client);
+        const digest = buildEvidenceDigest(buildEvidenceMask(trail));
+        result = await evaluateMergeAuthority(i, i + 2000, client, digest);
+      }, 'adversarial check shape ' + i + ' must not throw');
+      assert.equal(result.allowed, false, 'incomplete trail must never be allowed (shape ' + i + ')');
+    }
+  });
+});

@@ -19,6 +19,7 @@ from stop_checks import (
     check_admin_ops, check_uncommitted, post_merge_messages, wiki_pending_message,
 )
 from client_arbitration_guard import (
+    adjudication_redirect,
     classify_internal_conflict,
     detect_client_arbitration,
     emit_incident,
@@ -57,12 +58,17 @@ def main() -> int:
     assistant_text = extract_assistant_text(payload)
     violations = detect_client_arbitration(assistant_text)
     if violations:
-        emit_incident("client-arbitration-output-leak", evidence=violations)
-        block_reason = "Stop blocked: client-arbitration leakage detected."
-        messages.append(
-            "CLIENT-ARBITRATION GUARDRAIL BLOCK — internal governance/worktree/team "
-            "conflicts must be resolved by the operator, not delegated to the client."
+        # #3749: ACTIVELY redirect a non-carve-out client-defer into the free
+        # cross-model panel instead of only logging a passive block.
+        redirect = adjudication_redirect(assistant_text, violations)
+        emit_incident(
+            "client-defer-routed-to-adjudication",
+            evidence=[redirect["subclass"], *violations],
         )
+        block_reason = (
+            "Stop blocked: non-carve-out client-defer — route to cross-model adjudication."
+        )
+        messages.append("CLIENT-DEFER GUARDRAIL — " + redirect["directive"])
 
     if not block_reason:
         block_reason, msg = check_uncommitted(uncommitted, roles)
@@ -86,18 +92,22 @@ def main() -> int:
         )
 
     if not block_reason:
-        # #3266: a clean lane:research session is PR-less/merge-less by design — require ZERO
-        # Admin ops so a lingering code_touched flag cannot manufacture a phantom Admin nag.
-        # A dirty tree removes the exemption (nothing-to-merge is the whole justification).
-        research_clean_exempt = False
+        # #3266/#3569: a clean report-only session (lane:research / lane:docs-research /
+        # lane:docs-only) is PR-less/merge-less by design — require ZERO Admin ops so a lingering
+        # code_touched flag cannot manufacture a phantom Admin nag. A dirty tree removes the
+        # exemption (nothing-to-merge is the whole justification).
+        report_only_clean_exempt = False
         try:
-            from pretool_guard import active_ticket_is_research_lane
-            research_clean_exempt = (
-                bool(active_ticket_is_research_lane(state, cwd)) and not uncommitted)
+            from pretool_guard import (
+                active_ticket_is_research_lane, active_ticket_is_docs_lane)
+            report_only_lane = (
+                bool(active_ticket_is_research_lane(state, cwd))
+                or bool(active_ticket_is_docs_lane(state, cwd)))  # #3569
+            report_only_clean_exempt = report_only_lane and not uncommitted
         except Exception:
-            research_clean_exempt = False  # fail-safe: fall back to the standard Admin-op gate
+            report_only_clean_exempt = False  # fail-safe: fall back to the standard Admin-op gate
         block_reason, msg = check_admin_ops(
-            flags, ops, roles, repo_type, uncommitted, research_clean_exempt)
+            flags, ops, roles, repo_type, uncommitted, report_only_clean_exempt)
         if msg:
             messages.append(msg)
 

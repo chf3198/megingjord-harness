@@ -1,0 +1,20 @@
+{
+  "_doc": "Epic #3822 C3 / #3827 — the committed >=90 council rating for THIS deliverable (AC-E2). Three GENUINELY DISJOINT non-Anthropic families rated the design+diff against #3827's ACs and the goal-lens, web-research-grounded, citing the actual files. The binding cross-family receipt (kind:review) is 26cc921fc28188c8 in governance/cross-family-consensus.jsonl (meta+mistral PASS, >=2 non-authoring families, un-forgeable hash chain). rater_categories = the binary meets-bar (>=90) decision per family, consumed by self-governance-replay-eval.js#gwetAC1 -> 1.0 (chance-corrected, Landis-Koch almost-perfect; robust to the high-agreement skew that collapses Cohen/Fleiss kappa). Two raters of the SAME family would not count as two; these three are mistral / meta / qwen.",
+  "ticket": 3827,
+  "kind": "review",
+  "receipt": "26cc921fc28188c8",
+  "median": 94,
+  "min": 92,
+  "distinct_families": 3,
+  "gwet_ac1": 1.0,
+  "iteration_history": [
+    {"round": 1, "note": "pre-fix diff: mistral 94, meta(groq) 85, qwen-slot(fleet down->free-cloud meta) 88; median 88 < 90. Disagreement-aware signal: all raters flagged deferral of the two G4 under-catches to a follow-on as the score-limiting weakness (G4 lens).", "median": 88},
+    {"round": 2, "note": "folded the weakness in (research-redteam loop): closed both G4 under-catches in-scope in hooks/scripts/ask_reference_monitor.py; empirical carve-out recall 3/5 -> 5/5. Re-rated on 3 genuinely disjoint families.", "median": 94}
+  ],
+  "scores": [
+    {"family": "mistral", "provider": "mistral-large-latest", "score": 94, "verdict": "PASS"},
+    {"family": "meta", "provider": "groq:llama-3.3-70b-versatile", "score": 92, "verdict": "PASS"},
+    {"family": "qwen", "provider": "fleet:qwen3:32b@100.91.113.16", "score": 94, "verdict": "PASS"}
+  ],
+  "rater_categories": [["meets-bar", "meets-bar", "meets-bar"]]
+}

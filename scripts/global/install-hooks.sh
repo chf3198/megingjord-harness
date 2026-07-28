@@ -5,7 +5,19 @@
 set -euo pipefail
 
 repo_root=$(git rev-parse --show-toplevel)
-hooks_src="$repo_root/scripts/hooks"
+# GAP-D (Epic #3854 #3860): resolve hooks_src against the CANONICAL checkout, not the
+# current worktree. `git rev-parse --show-toplevel` is the worktree that ran this script;
+# baking its absolute path into a symlink target or an appended `"<abs>/...sh" "$@"` line
+# dangles the moment that worktree is deleted (#2508 — every push then dies "not found").
+# --git-common-dir points at the MAIN repo's .git for both the primary and any linked
+# worktree; its parent is the canonical checkout. Fail-open to repo_root if unresolvable.
+git_common=$(git -C "$repo_root" rev-parse --git-common-dir 2>/dev/null || echo "")
+case "$git_common" in
+  "") canonical_root="$repo_root" ;;
+  /*) canonical_root=$(cd "$(dirname "$git_common")" 2>/dev/null && pwd || echo "$repo_root") ;;
+  *)  canonical_root=$(cd "$repo_root/$(dirname "$git_common")" 2>/dev/null && pwd || echo "$repo_root") ;;
+esac
+hooks_src="$canonical_root/scripts/hooks"
 git_hooks_path=$(git -C "$repo_root" rev-parse --git-path hooks)
 case "$git_hooks_path" in
   /*) hooks_dst="$git_hooks_path" ;;

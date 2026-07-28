@@ -15,11 +15,17 @@ cross_family_reviewer: qwen2.5-coder:7b@fleet-tailscale
 cross_family_rating: 82/100
 cross_family_findings: ok`;
 
+// #3672: this same-team (copilot) fixture targets only the #2510 cross-family-REVIEWER
+// check, so it cites a cross_family_receipt to satisfy signer-independence (which #3672
+// now actively enforces on `## ADMIN_HANDOFF` headers). At posting time the megalint has
+// no issue context to ledger-verify the receipt, so independence is advisory here — the
+// CI consensus-receipt-check + merge gate do the blocking verification.
 const adminBody = `## ADMIN_HANDOFF
 Signed-by: Soren Reyes
 Team&Model: copilot:claude-sonnet-4-6@github
 Role: admin
-reviewer_family_verified: pass`;
+reviewer_family_verified: pass
+cross_family_receipt: 0123456789abcdef`;
 
 const makeInput = (aBody, cBody) => ({
   lane: 'lane:code-change',

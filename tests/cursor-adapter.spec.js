@@ -80,3 +80,60 @@ test('regression: the four existing runtimes remain registered in adapter-emit +
     expect(deploySh).toContain(t);
   }
 });
+
+// Cursor baton fixture — Refs #3673, Epic #3669.
+const { validate: collabValidate } = require('../scripts/global/megalint/collaborator-handoff.js');
+const { validate: eddValidate } = require('../scripts/global/megalint/edd-required.js');
+const CURSOR_FIXTURE = JSON.parse(fs.readFileSync(
+  path.join(ROOT, 'tests', 'fixtures', 'cursor-baton.json'), 'utf8'));
+
+test('cursor baton-handoff.mdc adapter exists with EDD + COLLABORATOR schema', () => {
+  const rule = fs.readFileSync(path.join(ROOT, '.cursor', 'rules', 'baton-handoff.mdc'), 'utf8');
+  expect(rule).toMatch(/## EDD/);
+  expect(rule).toContain('cross_family_receipt:');
+  expect(rule).toContain('worktree_behind_main:');
+  expect(rule).toMatch(/Pre-handoff verification/);
+  expect(rule).toMatch(/doc[-_]coverage/);
+});
+
+test('cursor fixture COLLABORATOR_HANDOFF passes collaborator-handoff gate', () => {
+  // #3678 (F1): a cited cross_family_receipt is ledger-verified. Build a genuine
+  // 2-family fixture ledger, cite its receipt in the fixture body, and inject it.
+  const rc = require(path.join(__dirname, '..', 'scripts', 'global', 'cross-family-receipt.js'));
+  const lp = path.join(os.tmpdir(), `xfr-cursor-${process.pid}-${Date.now()}.jsonl`);
+  const b = { prompt_sha256: 'p'.repeat(64), response_sha256: 'r'.repeat(64) };
+  rc.appendEntry({ ticket: 3673, kind: 'review', provider: 'groq', family: 'meta', verdict: 'PASS', ts: '2026-07-11T00:00:00Z', ...b }, lp);
+  rc.appendEntry({ ticket: 3673, kind: 'review', provider: 'mistral', family: 'mistral', verdict: 'PASS', ts: '2026-07-11T00:00:01Z', ...b }, lp);
+  const ledger = rc.readLedger(lp);
+  fs.unlinkSync(lp);
+  const genuine = rc.computeReceipt(ledger.filter((e) => e.ticket === 3673 && e.kind === 'review'));
+  const body = CURSOR_FIXTURE.COLLABORATOR_HANDOFF.replace(/cross_family_receipt: [0-9a-f]{16}/, `cross_family_receipt: ${genuine}`);
+  const result = collabValidate({
+    lane: 'lane:code-change',
+    labels: CURSOR_FIXTURE.labels,
+    branch: 'feat/3673-cursor-baton-parity',
+    comments: [{ body, user: { login: 'cursor' } }],
+    ledger,
+  });
+  const blocking = (result.violations || []).filter((v) => v.severity !== 'advisory');
+  expect(blocking, JSON.stringify(blocking)).toHaveLength(0);
+  expect(result.ok).toBe(true);
+});
+
+test('cursor fixture EDD passes edd-required gate', () => {
+  const result = eddValidate({
+    labels: CURSOR_FIXTURE.labels,
+    comments: [{ body: CURSOR_FIXTURE.EDD }],
+  });
+  expect(result.ok, JSON.stringify(result.violations)).toBe(true);
+});
+
+test('cursor registry derives Cyrus Harper for composer-2.5 role=collaborator', () => {
+  const REGISTRY = JSON.parse(fs.readFileSync(
+    path.join(ROOT, 'inventory', 'team-model-signatures.json'), 'utf8'));
+  const entry = REGISTRY.registry.find(
+    (e) => e.team === CURSOR_FIXTURE.team && new RegExp(e.modelPattern, 'i').test(CURSOR_FIXTURE.model),
+  );
+  const alias = `${entry?.aliasSeed || REGISTRY.defaultAliasSeed} ${REGISTRY.roleSurnames.collaborator}`;
+  expect(alias).toBe(CURSOR_FIXTURE.expectedAlias);
+});

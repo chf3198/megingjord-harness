@@ -156,20 +156,25 @@ function buildBreakGlassClient() {
 
 // --- Helper to derive digest from a client ---
 
-async function deriveDigest(issueNumber, client) {
-  const trail = await deriveTrailFromGitHub(issueNumber, client);
+async function deriveDigest(issueNumber, client, opts = {}) {
+  const trail = await deriveTrailFromGitHub(issueNumber, client, opts);
   if (trail.error) return { trail, digest: 'invalid' };
   return { trail, digest: buildEvidenceDigest(trail.facts) };
 }
+
+// #3672 (F3): a bare different-team admin no longer confers independence. This complete
+// trail proves independence via a cryptographic authorship attestation (injected here;
+// the registry-backed verifier is the #3682 deliverable) rather than by prose alone.
+const ATTESTED = { verifyAttestation: () => ({ ok: true, reason: 'test-authorship-attested' }) };
 
 // --- Tests ---
 
 describe('Merge Authority - complete trail allows merge (AC1)', () => {
   it('allows merge when all GitHub-derived evidence is present', async () => {
     const client = buildCompleteTrailClient();
-    const { trail, digest } = await deriveDigest(100, client);
+    const { trail, digest } = await deriveDigest(100, client, ATTESTED);
     assert.ok(!trail.error, 'trail should not have error');
-    const result = await evaluateMergeAuthority(100, 200, client, digest);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
     assert.equal(result.allowed, true, 'should be allowed with complete trail');
     assert.equal(result.reason, 'all-evidence-present-and-verified');
     assert.deepEqual(result.missing, []);
@@ -264,5 +269,35 @@ describe('Merge Authority - result structure', () => {
     assert.ok(result.fsm_version, 'must have fsm_version');
     assert.ok(result.authority_version, 'must have authority_version');
     assert.ok(Array.isArray(result.missing), 'missing must be an array');
+  });
+});
+
+// #3699 (Epic #3679): the CI_GREEN rollup must EXCLUDE the self-reporting merge-gate
+// context(s) — they are in_progress while this evaluator runs, so counting them makes
+// CI_GREEN unsatisfiable (self-referential deadlock that manufactured bypass need).
+describe('Merge Authority - CI_GREEN excludes self-reporting context (#3699)', () => {
+  it('authorizes when only the baton-authority/merge self-context is non-terminal', async () => {
+    const client = buildCompleteTrailClient();
+    client.listChecks = async () => [
+      { name: 'unit-tests', conclusion: 'success' },
+      { name: 'lint-required', conclusion: 'success' },
+      { name: 'baton-authority/merge', conclusion: null }, // in_progress self-context
+    ];
+    const { digest } = await deriveDigest(100, client, ATTESTED);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
+    assert.equal(result.allowed, true, 'self-context must not block CI_GREEN');
+    assert.deepEqual(result.missing, []);
+  });
+
+  it('does not over-exclude: a normal all-green named check list still authorizes', async () => {
+    const client = buildCompleteTrailClient();
+    client.listChecks = async () => [
+      { name: 'unit-tests', conclusion: 'success' },
+      { name: 'lint-required', conclusion: 'success' },
+    ];
+    const { digest } = await deriveDigest(100, client, ATTESTED);
+    const result = await evaluateMergeAuthority(100, 200, client, digest, ATTESTED);
+    assert.equal(result.allowed, true, 'normal green checks authorize');
+    assert.deepEqual(result.missing, []);
   });
 });

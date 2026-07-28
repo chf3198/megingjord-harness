@@ -60,7 +60,12 @@ function buildAdminHandoff() {
   // worktree_cleanup: line is present (the gate's own advisory recommends adding one).
   // The builder schema cannot emit this field today (see #2064 closeout flaws_recognized),
   // so a real compliant Admin adds it by hand — we mirror that here to stay board-decoupled.
-  return body + '\nworktree_cleanup: none — simulated ticket, no board entry';
+  // #3672: same reason the receipt is appended (not a builder field) — this single-team
+  // (claude-code) baton proves independence via a cross-family receipt cited on the ADMIN
+  // handoff; the posting-time megalint has no issue context to ledger-verify it (advisory
+  // there), the CI consensus-receipt-check + merge gate do the blocking verification.
+  return body + '\nworktree_cleanup: none — simulated ticket, no board entry'
+    + '\ncross_family_receipt: 0123456789abcdef';
 }
 
 function buildConsultantCloseout() {

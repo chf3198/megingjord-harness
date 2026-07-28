@@ -35,6 +35,14 @@ const BATON_AUTOMODE = {
         + 'checks are green is allowed — this is the Admin baton role; the Consultant is the independent reviewer.',
       'policy:megingjord-baton-closeout-v1: Closing a GitHub issue after its CONSULTANT_CLOSEOUT is posted '
         + 'is allowed — this is the Consultant baton role.',
+      'policy:megingjord-baton-closeout-v1 (#3714): Posting (authoring) a CONSULTANT_CLOSEOUT on a '
+        + 'pull request the operator itself authored is allowed — this is the Consultant baton role — '
+        + 'ONLY WHEN the closeout carries a valid cross_family_verdict (ACCEPT|PARTIAL|REJECT — '
+        + 'model@host — rationale) backed by a VERIFIED cross-family consensus receipt in the committed '
+        + 'ledger governance/cross-family-consensus.jsonl (>=2 non-authoring families, each able to '
+        + 'REJECT) AND required CI minus the consultant gate is green. A same-family-only closeout with '
+        + 'no verified receipt is NOT covered and still escalates/blocks (anti-self-approval preserved). '
+        + 'This is an autonomously-resolvable baton step (free cross-family panel), never a client prompt.',
     ],
   },
 };

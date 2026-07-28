@@ -33,6 +33,38 @@ function makeGithub({ issues = {}, commentsByIssue = {}, failGetFor = new Set() 
   return { github, created, postedComments, updates };
 }
 
+// #3826: build a VALID plan-rating fixture — a real 2-family PASS receipt over an
+// in-memory hash-chained ledger + the committed PLAN_RATING comment that binds it.
+// Green-path specs attach `.comment` to the Epic and pass `.ledger` to resolve().
+const rc = require('../scripts/global/cross-family-receipt');
+function buildLedger(entries) {
+  let prev = '';
+  const all = [];
+  for (const e of entries) {
+    const seq = all.filter((x) => x.ticket === e.ticket && x.kind === e.kind).length;
+    const full = { ...e, seq };
+    full.chain = rc.chainHash(prev, full);
+    prev = full.chain;
+    all.push(full);
+  }
+  return all;
+}
+function validPlanRating(epicNumber, o = {}) {
+  const median = o.median ?? 93;
+  const families = o.families ?? 3;
+  const gwet = o.gwet ?? 0.71;
+  const base = { ticket: epicNumber, kind: 'review', verdict: 'PASS', ts: '2026-01-01T00:00:00Z',
+    prompt_sha256: rc.sha(`plan-rating-${epicNumber}`) };
+  const ledger = buildLedger([
+    { ...base, provider: 'groq', family: 'meta', response_sha256: rc.sha(`meta-${epicNumber}`) },
+    { ...base, provider: 'mistral', family: 'mistral', response_sha256: rc.sha(`mistral-${epicNumber}`) },
+  ]);
+  const receipt = rc.computeReceipt(ledger.filter((e) => e.ticket === epicNumber && e.kind === 'review'));
+  const comment = { body: `## PLAN_RATING\nplan_rating_receipt: ${receipt}\nplan_rating_median: ${median}\n`
+    + `plan_rating_distinct_families: ${families}\nplan_rating_gwet_ac1: ${gwet}` };
+  return { comment, ledger, receipt };
+}
+
 function makeCore() {
   const calls = { setFailed: [], warning: [], notice: [] };
   return {
@@ -45,4 +77,4 @@ function makeCore() {
   };
 }
 
-module.exports = { makeGithub, makeCore };
+module.exports = { makeGithub, makeCore, validPlanRating, buildLedger };

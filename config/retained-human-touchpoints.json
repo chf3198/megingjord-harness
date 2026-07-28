@@ -35,6 +35,18 @@
       "marker": "Sensitive (tracked/committable) secret-file path",
       "carve_out": "security-policy-weakening",
       "ticket": "#3403"
+    },
+    {
+      "file": "hooks/scripts/pretool_guard.py",
+      "marker": "Retained human carve-out (ask-time reference monitor)",
+      "carve_out": "design-direction|uat-confirmation|irreversible-destruction|security-policy-weakening",
+      "ticket": "#3825"
+    },
+    {
+      "file": "hooks/scripts/pretool_guard.py",
+      "marker": "Ask-time reference monitor fail-closed",
+      "carve_out": "security-policy-weakening",
+      "ticket": "#3825"
     }
   ]
 }

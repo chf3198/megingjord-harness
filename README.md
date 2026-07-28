@@ -199,6 +199,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `epic:sync` | `node scripts/global/actuator-epic-sync.js` |
 | `fixtures:regen:cursor` | `node scripts/global/fixtures-regen-cursor.js` |
 | `flaw-capture:replay-eval` | `node scripts/global/flaw-capture-replay-eval.js` |
+| `fleet` | `node scripts/global/cascade-dispatch.js` |
 | `fleet-advisor:contract:test` | `node --test tests/fleet-advisor-report.spec.js tests/fleet-advisor-report-contract.spec.js` |
 | `fleet-advisor:lint:test` | `node --test tests/fleet-advisor-lint.spec.js tests/fleet-advisor-rule-coverage.spec.js` |
 | `fleet-advisor:obs:test` | `node --test tests/fleet-advisor-observability.spec.js tests/fleet-advisor-throughput-contract.spec.js` |
@@ -236,6 +237,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `governance:baton-latency:test` | `node --test tests/baton-latency-report.spec.js` |
 | `governance:collab-handoff-rebase:test` | `node --test tests/collab-handoff-rebase-freshness.spec.js` |
 | `governance:compatibility:matrix` | `node scripts/global/governance-compatibility-matrix.js` |
+| `governance:completion-claim-truth:test` | `node --test tests/completion-claim-truth.spec.js` |
 | `governance:coordinator-cleanup` | `node scripts/global/coordinator-label-cleanup.js` |
 | `governance:credentials-env` | `node scripts/global/credentials-env-guard.js` |
 | `governance:cross-team-check` | `node scripts/global/cross-team-contract-check.js` |
@@ -437,6 +439,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress:anneal` | `node --test tests/stress-anneal-decision.spec.js` |
 | `stress:baton-e2e` | `node --test tests/baton-e2e.spec.js` |
 | `stress:bounded` | `MEGINGJORD_STRESS_TIER=C node scripts/global/stress-orchestrator.js` |
+| `stress:completion-claim-truth` | `node --test tests/stress-completion-claim-truth.spec.js` |
 | `stress:epic-close` | `node --test tests/stress-epic-close-guard.spec.js` |
 | `stress:evidence-check` | `node scripts/global/stress-evidence-check.js` |
 | `stress:evidence-check:test` | `node --test tests/stress-evidence-check.spec.js` |
@@ -453,6 +456,7 @@ the Worker: add `MEGINGJORD_HAMR_ENABLED=1` to your `.env`.
 | `stress:wiki-mirror` | `node --test tests/stress-wiki-mirror-issue.spec.js` |
 | `stress:wiki-reconcile` | `node --test tests/stress-wiki-reconcile.spec.js` |
 | `stress:worktree` | `node --test tests/stress-worktree-isolation.spec.js` |
+| `stuck-state:replay-eval` | `node scripts/global/stuck-state-replay-eval.js` |
 | `sync` | `bash scripts/sync.sh` |
 | `sync:all` | `bash scripts/sync.sh --target all` |
 | `sync:all:dry` | `bash scripts/sync.sh --dry-run --target all` |
@@ -553,3 +557,5 @@ See [docs/howto/cross-team-rd-synthesis.md](docs/howto/cross-team-rd-synthesis.m
 ## Cross-team R&D synthesis
 
 For Epics that benefit from multi-team independent perspectives, see [How-to: Run a cross-team R&D synthesis](docs/howto/cross-team-rd-synthesis.md). One-line kickoff: `npm run synthesis:init -- --epic <N>`. Canonical protocol at [instructions/cross-team-rd-synthesis.instructions.md](instructions/cross-team-rd-synthesis.instructions.md). Tier-1 by default; HAMR R2 mailbox is the Tier-2 optimization.
+
+- Fleet dispatch substrate (multi-host $0 routing, capability registry, ROI): [docs/howto/fleet-dispatch-substrate.md](docs/howto/fleet-dispatch-substrate.md)

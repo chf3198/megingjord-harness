@@ -48,12 +48,18 @@ Storage layout: `wiki/{code/symbols, code/concepts, work-log/tickets, work-log/p
 `wiki/wisdom/global/syntheses/` · `wiki/wisdom/global/skills/`
 Physical migration completed by #2098 (`git mv` with full history preservation).
 
-## Frontmatter Contract (schema enforced by #2052)
+## Frontmatter Contract (validator = source of truth — `config/wiki-frontmatter.schema.json`, #2052/#3763)
 
-All wiki pages require: `wiki_type` (code|work-log|wisdom), `content_hash`, `last_updated` (ISO-8601),
-`freshness_window` (7d|14d|30d|none), `content_trust_score`. Wisdom pages add `scope` (project|global).
-Code + work-log pages add `source_path`, `source_sha256`; code pages add `sub_layer` (structural|semantic).
-`freshness_window: none` = intentionally archival (exempt from freshness enforcement).
+All wiki pages **require** (the enforced Ajv contract): `title`, `type`
+(`code|work-log|wisdom-global|wisdom-project`), `content_trust_score` (0–1), `created` (ISO-8601),
+`updated` (ISO-8601). Extra shipped fields are **validated-optional** (`additionalProperties: true`; kept,
+not promoted to required): `content_hash`, `last_updated`, `source_path`, `source_sha256`, `sub_layer`
+(code pages), `scope` (wisdom pages), `tags`, `related`, `status`, `trust_attestation`.
+The retired `wiki_type` / `freshness_window` fields (carried by only 4/2843 pages) are **not** part of the
+contract; `freshness_window` retirement is owned by #3731 (temporal `valid_from`/`valid_to`) — do not
+re-add it here (no field fight). The validator is a **required PR gate on changed wiki pages** via
+`.github/workflows/wiki-frontmatter-gate.yml` (#3763); navigational files (README/index/log/WIKI-*) are
+exempt, and the pre-#3763 historical corpus is grandfathered pending backfill (#3767).
 
 ## Retrieval Routing
 
@@ -91,6 +97,22 @@ impossible to miss (the 2026-06-16 both-stores-empty meta-failure). It computes 
 (`pattern_id: wiki-store-empty-or-stale`). The Drift Gate's advisory→required promotion is
 gated by replay-eval precision ≥ 0.85 against the historical-PR corpus (auto-revoking, NOT
 calendar) — the gate stays advisory until calibrated.
+
+## Secret Redaction on the Write-Path (ENFORCED — #3772)
+
+Credential-class secrets **cannot** be committed to the wiki. Two enforced layers (the contract the
+mirror headers long *claimed* but did not apply):
+- **Prevent-at-write:** `scripts/wiki/wiki-io.js#writePage`/`updateIndex` run `redactSecrets()`
+  (`scripts/wiki/wiki-secret-scan.js`) — any anthropic/openai/github-pat/github-fine-grained-pat/aws/jwt/
+  bearer token is scrubbed to a `<REDACTED>` placeholder before `writeFileSync`, with a G8 signal (pattern
+  ids + path, no values).
+- **Required CI backstop:** `.github/workflows/wiki-secret-scan.yml` scans changed `wiki/**/*.md` on every
+  PR (no-op green on non-wiki PRs) and **fails** on any credential-class secret — catching edits that bypass
+  `writePage`.
+- **Scope:** credential-class only. `email`/`ipv4` (PII) stay **advisory** so legitimate technical wiki
+  content (example IPs, contact addresses) is not corrupted. Project-specific confidential content is separately
+  protected by A4 isolation (`wiki/wisdom/project/` never distributed) and the path-guard (#3064, writes
+  confined to `wiki/**`).
 
 ## Rules
 

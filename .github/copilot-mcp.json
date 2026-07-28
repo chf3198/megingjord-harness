@@ -1,0 +1,13 @@
+{
+  "_doc": "Per-repo MCP server registration for VS Code Copilot Agent mode. Registers the HAMR MCP adapter (scripts/global/hamr-mcp-adapter.js). Refs #3043; landed dark by #3796 (Epic #3789).",
+  "_note": "User-level config: ~/.config/Code/User/mcp.json. This file is the per-repo override.",
+  "_default_off": "DARK: MEGINGJORD_MCP_ADAPTER_ENABLED is unset here, so the adapter is fail-closed (default-OFF) and refuses to serve until an explicit, evidence-gated flip to '1'. See scripts/global/mcp-adapter-gate.js.",
+  "servers": {
+    "megingjord-hamr": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/global/hamr-mcp-adapter.js"],
+      "env": {}
+    }
+  }
+}
