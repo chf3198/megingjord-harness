@@ -1,0 +1,4 @@
+{
+  "_doc": "Monotonic ruleset version for W-G profile pinning (Epic #3576 #3581). Bump when a new BLOCKING validation rule lands. MANAGER_HANDOFF pins ruleset_version at ticket start so newer blocking rules do not retroactively invalidate in-flight artifacts (the #3532 -> 2x ADMIN_HANDOFF re-issue class). Security-critical rules (config/override-hard-floor.json) are immediate-effect and exempt from the freeze (G4 carve-out).",
+  "version": 1
+}

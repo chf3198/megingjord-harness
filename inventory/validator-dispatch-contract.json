@@ -321,6 +321,11 @@
       "validator": "credit-observability",
       "file": "scripts/global/megalint/credit-observability.js",
       "dispatchedBy": ["megalint-runAll"]
+    },
+    {
+      "validator": "ruleset-pin",
+      "file": "scripts/global/megalint/ruleset-pin.js",
+      "dispatchedBy": ["megalint-runAll"]
     }
   ]
 }
