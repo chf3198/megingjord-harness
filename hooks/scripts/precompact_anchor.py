@@ -21,7 +21,7 @@ ANCHOR = (
     "1) One ticket per branch — feat/<N>-desc or fix/<N>-desc. "
     "2) Manager scope comment BEFORE any file edits. "
     "3) Commits MUST reference ticket (#N) — deny on missing. "
-    "4) One branch = one ticket = one PR. No bundling. "
+    "4) One branch = one ticket = one PR by default; multi-close batching per the #1714 Multi-Close contract. "
     "5) Baton: Manager→Collaborator→Admin→Consultant."
 )
 
