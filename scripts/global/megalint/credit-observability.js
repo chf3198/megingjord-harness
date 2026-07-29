@@ -9,7 +9,7 @@ function findArtifact(comments, re) {
   return [...(comments || [])].reverse().find((c) => re.test((c && c.body) || ''));
 }
 
-function check(input = {}) {
+function validate(input = {}) {
   const labels = input.labels || [];
   const comments = input.comments || [];
   const violations = [];
@@ -17,14 +17,20 @@ function check(input = {}) {
   const mgr = findArtifact(comments, /##\s*MANAGER_HANDOFF/i);
   const closeout = findArtifact(comments, /##\s*CONSULTANT_CLOSEOUT/i);
   if (mgr && !/credit_budget\s*:/i.test(mgr.body || '')) {
-    violations.push({ rule: 'credit-budget-missing', severity: ADVISORY,
-      detail: 'MANAGER_HANDOFF lacks credit_budget: (Epic #3576 W-F) — advisory' });
+    violations.push({
+      rule: 'credit-budget-missing',
+      severity: ADVISORY,
+      detail: 'MANAGER_HANDOFF lacks credit_budget: (Epic #3576 W-F) — advisory',
+    });
   }
   if (closeout && !/free_tier_utilization\s*:/i.test(closeout.body || '')) {
-    violations.push({ rule: 'free-tier-utilization-missing', severity: ADVISORY,
-      detail: 'CONSULTANT_CLOSEOUT lacks free_tier_utilization: (Epic #3576 W-F) — advisory' });
+    violations.push({
+      rule: 'free-tier-utilization-missing',
+      severity: ADVISORY,
+      detail: 'CONSULTANT_CLOSEOUT lacks free_tier_utilization: (Epic #3576 W-F) — advisory',
+    });
   }
   return { ok: violations.length === 0, violations };
 }
 
-module.exports = { check };
+module.exports = { validate, check: validate };

@@ -25,10 +25,10 @@ test('ticketCreditSummary: filters by ticket', () => {
   expect(s.samples).toBe(1); expect(s.total_tokens).toBe(100); expect(s.free_tier_utilization).toBe(1);
 });
 test('validator: flags missing credit_budget, always advisory', () => {
-  const r = val.check({ labels: ['lane:code-change'], comments: [{ body: '## MANAGER_HANDOFF\nscope: x' }] });
+  const r = val.validate({ labels: ['lane:code-change'], comments: [{ body: '## MANAGER_HANDOFF\nscope: x' }] });
   expect(r.violations.some((v) => v.rule === 'credit-budget-missing')).toBe(true);
   expect(r.violations.every((v) => v.severity === 'advisory')).toBe(true);
 });
 test('validator: non-code-change lane skipped', () => {
-  expect(val.check({ labels: ['lane:docs-research'], comments: [] }).ok).toBe(true);
+  expect(val.validate({ labels: ['lane:docs-research'], comments: [] }).ok).toBe(true);
 });
