@@ -35,6 +35,9 @@ const MANAGER = [
   // #3586 (Epic #3576 W-F): per-ticket credit budget. Optional (corpus back-compat);
   // advisory validator megalint/credit-observability.js is the enforcement surface.
   f('credit_budget'),
+  // #3581 (Epic #3576 W-G): ruleset-version pin (profile freeze) + opt-in uplift. Optional.
+  f('ruleset_version'),
+  f('ruleset_uplift'),
   // #3428 (Epic #3425 P1-a): per-review-point flaw capture. `flaws_recognized`
   // generalizes the Consultant-only `mid_flight_flaws` to every role. It is a
   // `block` field (multi-line per-candidate list OR bare `none`) but DELIBERATELY

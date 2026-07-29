@@ -37,6 +37,8 @@ const epicAcDisposition = require('./epic-ac-disposition-check.js');
 const flawsRecognized = require('./flaws-recognized.js');
 // #3586 (Epic #3576 W-F): per-ticket credit observability validator (advisory).
 const creditObservability = require('./credit-observability.js');
+// #3581 (Epic #3576 W-G): ruleset-version pin advisory validator.
+const rulesetPin = require('./ruleset-pin.js');
 // #3456: wire previously-orphaned validators into runAll dispatch set.
 const fleetReviewRequired = require('./fleet-review-required.js');
 const registryTupleCoverage = require('./registry-tuple-coverage.js');
@@ -140,6 +142,7 @@ const VALIDATORS = {
   'epic-ac-disposition-check': epicAcDisposition,
   'flaws-recognized': flawsRecognized,
   'credit-observability': creditObservability,
+  'ruleset-pin': rulesetPin,
   // #3456: previously-orphaned validators now wired to megalint-runAll dispatch surface.
   'fleet-review-required': fleetReviewRequired,
   'registry-tuple-coverage': registryTupleAdapter,
