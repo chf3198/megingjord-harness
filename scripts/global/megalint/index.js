@@ -39,6 +39,8 @@ const flawsRecognized = require('./flaws-recognized.js');
 const creditObservability = require('./credit-observability.js');
 // #3581 (Epic #3576 W-G): ruleset-version pin advisory validator.
 const rulesetPin = require('./ruleset-pin.js');
+// #3582 (Epic #3576 W-C): close-atomicity advisory validator (E10).
+const closeAtomicity = require('./close-atomicity.js');
 // #3456: wire previously-orphaned validators into runAll dispatch set.
 const fleetReviewRequired = require('./fleet-review-required.js');
 const registryTupleCoverage = require('./registry-tuple-coverage.js');
@@ -143,6 +145,7 @@ const VALIDATORS = {
   'flaws-recognized': flawsRecognized,
   'credit-observability': creditObservability,
   'ruleset-pin': rulesetPin,
+  'close-atomicity': closeAtomicity,
   // #3456: previously-orphaned validators now wired to megalint-runAll dispatch surface.
   'fleet-review-required': fleetReviewRequired,
   'registry-tuple-coverage': registryTupleAdapter,

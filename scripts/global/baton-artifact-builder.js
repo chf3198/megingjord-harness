@@ -96,4 +96,16 @@ function emitBuildDecision(input = {}, file, now) {
   return { ...event, checkpoint };
 }
 
-module.exports = { buildArtifact, deriveSigner, emitBuildDecision };
+
+// Batched: build multiple artifacts in one call — the "single command emits all required
+// artifacts" path (Epic #3576 W-C, #3582). Pure: maps each input through buildArtifact so
+// the render path stays deterministic and replay-byte-identical.
+function buildArtifactSet(inputs = []) {
+  if (!Array.isArray(inputs)) throw new Error('buildArtifactSet expects an array of build inputs');
+  return inputs.map((input) => ({
+    artifact: String(input.artifact || '').toUpperCase(),
+    body: buildArtifact(input),
+  }));
+}
+
+module.exports = { buildArtifact, buildArtifactSet, deriveSigner, emitBuildDecision };

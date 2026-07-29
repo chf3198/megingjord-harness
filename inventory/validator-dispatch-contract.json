@@ -326,6 +326,11 @@
       "validator": "ruleset-pin",
       "file": "scripts/global/megalint/ruleset-pin.js",
       "dispatchedBy": ["megalint-runAll"]
+    },
+    {
+      "validator": "close-atomicity",
+      "file": "scripts/global/megalint/close-atomicity.js",
+      "dispatchedBy": ["megalint-runAll"]
     }
   ]
 }
