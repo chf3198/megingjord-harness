@@ -16,9 +16,9 @@ function freeTierUtilization(entries) {
 }
 
 function costPerNetLine(costUsd, netLines) {
-  const n = Number(netLines);
-  if (!n || !Number.isFinite(n)) return null;
-  return +(Number(costUsd || 0) / n).toFixed(4);
+  const lines = Number(netLines);
+  if (!lines || !Number.isFinite(lines)) return null;
+  return +(Number(costUsd || 0) / lines).toFixed(4);
 }
 
 // Governance artifacts are re-read by every downstream role on paid models, so free
@@ -40,7 +40,7 @@ function ticketCreditSummary(ticket, opts = {}) {
 module.exports = { freeTierUtilization, costPerNetLine, readCostProxy, ticketCreditSummary, FREE_LANES, PAID_LANES };
 
 if (require.main === module) {
-  const arg = (k) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : undefined; };
+  const arg = (k) => { const idx = process.argv.indexOf('--' + k); return idx > -1 ? process.argv[idx + 1] : undefined; };
   let entries = [];
   try { entries = require('./model-routing-telemetry').readTelemetry(Number(arg('days')) || 30); } catch { /* telemetry optional */ }
   console.log(JSON.stringify(ticketCreditSummary(arg('ticket'), { entries }), null, 2));
