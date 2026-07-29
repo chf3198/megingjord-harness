@@ -32,6 +32,9 @@ const MANAGER = [
   f('phase_gate_satisfied'),
   f('phase_0_sources'),
   f('goal_lens'),
+  // #3586 (Epic #3576 W-F): per-ticket credit budget. Optional (corpus back-compat);
+  // advisory validator megalint/credit-observability.js is the enforcement surface.
+  f('credit_budget'),
   // #3428 (Epic #3425 P1-a): per-review-point flaw capture. `flaws_recognized`
   // generalizes the Consultant-only `mid_flight_flaws` to every role. It is a
   // `block` field (multi-line per-candidate list OR bare `none`) but DELIBERATELY
@@ -103,6 +106,10 @@ const CONSULTANT = [
   // (none | <details>) on non-lightweight lanes. OPTIONAL for back-compat; ALLOWED
   // so the builder can emit it unaided.
   f('worktree_residual_risk'),
+  // #3586 (Epic #3576 W-F): credit actuals + free-tier utilization + read-cost. Optional.
+  f('credit_actuals', { block: true }),
+  f('free_tier_utilization'),
+  f('read_cost'),
   // #3795 (Epic #3789 §1.3): security-lane closeout fields. OPTIONAL; the security-surface
   // validator enforces them when lane:security-surface.
   f('residual_risk_after_dark'),

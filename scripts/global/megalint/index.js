@@ -35,6 +35,8 @@ const authorTeam = require('./author-team-check.js');
 const epicAcDisposition = require('./epic-ac-disposition-check.js');
 // flaws-recognized: per-review-point flaw-capture validator (advisory). Epic #3425 P1-a.
 const flawsRecognized = require('./flaws-recognized.js');
+// #3586 (Epic #3576 W-F): per-ticket credit observability validator (advisory).
+const creditObservability = require('./credit-observability.js');
 // #3456: wire previously-orphaned validators into runAll dispatch set.
 const fleetReviewRequired = require('./fleet-review-required.js');
 const registryTupleCoverage = require('./registry-tuple-coverage.js');
@@ -46,7 +48,7 @@ const subIssuePreference = require('./sub-issue-preference.js');
 const parityValidatorAdapter = {
   validate: (input) => {
     const result = parityValidator.run(Object.assign({ backfill: false }, input || {}));
-    const violations = (result.conflicts || []).map(c => ({
+    const violations = (result.conflicts || []).map((c) => ({
       rule: `parity-${c.class}`,
       detail: `${c.rule_id}: ${c.id} [${c.severity}]`,
     }));
@@ -61,14 +63,23 @@ const registryTupleAdapter = {
     const registryOverride = (input || {}).registry;
     const result = registryTupleCoverage.checkCoverage(registryOverride);
     if (!result.ok && result.reason === 'registry-unreadable') {
-      return { ok: true, violations: [{ rule: 'registry-unreadable', severity: 'advisory',
-        detail: 'registry-tuple-coverage: registry unreadable; skipping' }] };
+      return {
+        ok: true,
+        violations: [
+          {
+            rule: 'registry-unreadable',
+            severity: 'advisory',
+            detail: 'registry-tuple-coverage: registry unreadable; skipping',
+          },
+        ],
+      };
     }
-    const violations = (result.unmapped || []).map(unmapped => ({
+    const violations = (result.unmapped || []).map((unmapped) => ({
       rule: 'registry-tuple-unmapped',
       severity: 'advisory',
-      detail: `${unmapped.team}:${unmapped.model} resolves to ${unmapped.resolvedTo}`
-        + (unmapped.wildcardSeed ? ` (${unmapped.wildcardSeed})` : ''),
+      detail:
+        `${unmapped.team}:${unmapped.model} resolves to ${unmapped.resolvedTo}` +
+        (unmapped.wildcardSeed ? ` (${unmapped.wildcardSeed})` : ''),
     }));
     return { ok: true, violations };
   },
@@ -82,9 +93,18 @@ const subIssueAdapter = {
     if (!body) return { ok: true, violations: [] };
     const detected = subIssuePreference.detectParent(body);
     if (detected.source === 'prose-refs') {
-      return { ok: true, violations: [{ rule: 'sub-issue-prefer-marker', severity: 'advisory',
-        detail: `parent #${detected.parent} detected via prose Refs; `
-          + 'prefer Sub-issue native link (<!-- sub-issue-linked: parent=N -->)' }] };
+      return {
+        ok: true,
+        violations: [
+          {
+            rule: 'sub-issue-prefer-marker',
+            severity: 'advisory',
+            detail:
+              `parent #${detected.parent} detected via prose Refs; ` +
+              'prefer Sub-issue native link (<!-- sub-issue-linked: parent=N -->)',
+          },
+        ],
+      };
     }
     return { ok: true, violations: [] };
   },
@@ -119,6 +139,7 @@ const VALIDATORS = {
   'author-team-check': authorTeam,
   'epic-ac-disposition-check': epicAcDisposition,
   'flaws-recognized': flawsRecognized,
+  'credit-observability': creditObservability,
   // #3456: previously-orphaned validators now wired to megalint-runAll dispatch surface.
   'fleet-review-required': fleetReviewRequired,
   'registry-tuple-coverage': registryTupleAdapter,
@@ -131,13 +152,15 @@ function runAll(input) {
     try {
       results[name] = validator.validate(input);
     } catch (err) {
-      results[name] = { ok: false, violations: [{ rule: 'validator-error',
-        detail: `${name} threw: ${err.message}` }] };
+      results[name] = {
+        ok: false,
+        violations: [{ rule: 'validator-error', detail: `${name} threw: ${err.message}` }],
+      };
     }
   }
   const allViolations = [];
   for (const [name, result] of Object.entries(results)) {
-    for (const violation of (result.violations || [])) {
+    for (const violation of result.violations || []) {
       allViolations.push({ validator: name, ...violation });
     }
   }
@@ -147,7 +170,8 @@ function runAll(input) {
 function run(validatorName, input) {
   if (!VALIDATORS[validatorName]) {
     throw new Error(
-      `Unknown validator: ${validatorName}. Known: ${Object.keys(VALIDATORS).join(', ')}`);
+      `Unknown validator: ${validatorName}. Known: ${Object.keys(VALIDATORS).join(', ')}`
+    );
   }
   return VALIDATORS[validatorName].validate(input);
 }
