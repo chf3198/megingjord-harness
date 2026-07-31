@@ -1,0 +1,38 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    name: stale
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-label: 'status:stale'
+          exempt-issue-labels: >-
+            status:in-progress,status:review,status:testing,
+            status:done,status:cancelled
+          days-before-issue-stale: 30
+          days-before-issue-close: -1
+          stale-issue-message: |
+            ⏰ **Stale Issue Detected**
+
+            This issue has had no activity for 30 days and has been labeled
+            `status:stale`. It will not be auto-closed — governance requires
+            explicit Consultant closeout before an issue can be closed.
+
+            To remove the stale label:
+            - Add a comment with a status update, or
+            - Transition to an active status label (`status:in-progress`, etc.)
+
+            See `instructions/ticket-driven-work.instructions.md` for the
+            full ticket lifecycle.
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
