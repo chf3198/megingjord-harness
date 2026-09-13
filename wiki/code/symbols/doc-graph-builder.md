@@ -3,16 +3,16 @@ title: "Doc Graph Builder"
 type: code
 sub_layer: structural
 content_trust_score: 0.77
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/doc-graph-builder.js"
 source_path: "scripts/global/doc-graph-builder.js"
 source_sha256: b3aef97e990fdabf306a5ca7268f73e405133106a8177c8cdc07745f6720ff15
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Doc Graph Builder

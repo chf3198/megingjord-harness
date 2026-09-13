@@ -3,16 +3,16 @@ title: "Github Governance.Instructions"
 type: code
 sub_layer: semantic
 content_trust_score: 0.5
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [instruction, wiki-a]
 related: []
 status: generated
 source_file: "instructions/github-governance.instructions.md"
 source_path: "instructions/github-governance.instructions.md"
-source_sha256: 329e8189eb2f69f1c4baa692e7f747d297e9be8af9c28500c262299c205d3810
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: a9c3573513a566e68ef4ac79f77e988da8528831dc282dcd559ff04eb898bd6b
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Github Governance.Instructions

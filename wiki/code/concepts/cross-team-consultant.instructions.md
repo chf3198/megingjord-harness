@@ -3,16 +3,16 @@ title: "Cross Team Consultant.Instructions"
 type: code
 sub_layer: semantic
 content_trust_score: 0.5
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [instruction, wiki-a]
 related: []
 status: generated
 source_file: "instructions/cross-team-consultant.instructions.md"
 source_path: "instructions/cross-team-consultant.instructions.md"
 source_sha256: 6f32890db2f7fe19e847b458e265ac99f091f4e85270be66aa3a32efb11a1f94
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Cross Team Consultant.Instructions

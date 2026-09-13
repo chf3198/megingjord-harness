@@ -3,16 +3,16 @@ title: "Worktree Governance Audit"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/worktree-governance-audit.js"
 source_path: "scripts/global/worktree-governance-audit.js"
-source_sha256: 606173268dfbcf80c7d37eab3b918583f4e9b9353456554d5d55db43abefa9de
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: c66e6c97755b452db8f65cf89ef0afba1319fe79db040972e7890e91d6591fa9
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Worktree Governance Audit

@@ -3,16 +3,16 @@ title: "Operator Identity Context.Instructions"
 type: code
 sub_layer: semantic
 content_trust_score: 0.5
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [instruction, wiki-a]
 related: []
 status: generated
 source_file: "instructions/operator-identity-context.instructions.md"
 source_path: "instructions/operator-identity-context.instructions.md"
-source_sha256: 5d767d7985f129c7af5bfce1c5c241e337640050abc8244d7e5797ebc0cebe2a
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: afae1ca360eda3d90f3cda7761ea803e252c9d7fd9a75f8ba7c4132e276d36d1
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Operator Identity Context.Instructions

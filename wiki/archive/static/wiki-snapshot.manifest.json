@@ -1,0 +1,19 @@
+{
+  "schema": "tier0-archive/1",
+  "generated_at": "2026-09-13T07:44:06.330Z",
+  "algorithm": "ed25519",
+  "ephemeral_key": true,
+  "public_key_hex": "34b7e65c0d6618493cc3c05c617a5a93151915123a2c7ba42d40daa2bb32c4c6",
+  "files": [
+    {
+      "path": "wiki-snapshot.zip",
+      "sha256": "93b712266323b0739d8f6891dc66ff2a9ad9b8840ec4fad64512fb39a0de2500"
+    }
+  ],
+  "attestation": {
+    "algorithm": "ed25519",
+    "signer": "wiki-archive-ephemeral",
+    "signature_b64": "ArsATIj5SAOa7fqnxK5jy6pegJKv80zLiDbAbeFCG3CjM/mwcEiMx4gV600QCE4lTQ9UyW2m51TqOEQUO6nyDg==",
+    "signed_payload_hash": "93b712266323b0739d8f6891dc66ff2a9ad9b8840ec4fad64512fb39a0de2500"
+  }
+}

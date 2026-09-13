@@ -3,16 +3,16 @@ title: "Wiki Knowledge.Instructions"
 type: code
 sub_layer: semantic
 content_trust_score: 0.57
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [instruction, wiki-a]
 related: []
 status: generated
 source_file: "instructions/wiki-knowledge.instructions.md"
 source_path: "instructions/wiki-knowledge.instructions.md"
-source_sha256: 5b8926c7ae1ea5b3e9054cfebf42460bbdacc56ff442a935a6210c6aa5225470
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: 1e763c78ccc6cf008226772690e4e79f4a4cda02a20d9740016cb964ded7036d
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Wiki Knowledge.Instructions

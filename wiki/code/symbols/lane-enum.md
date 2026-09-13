@@ -3,16 +3,16 @@ title: "Lane Enum"
 type: code
 sub_layer: structural
 content_trust_score: 0.77
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/lane-enum.js"
 source_path: "scripts/global/lane-enum.js"
-source_sha256: 4f92a00e5ef2f856281136276a2fcf4909d65b0e55749a46295eb3937701e626
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: cf76c27c533029d001648133749b7bb1a60642221e371fa3b535e4f7fd03c47a
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Lane Enum

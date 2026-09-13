@@ -3,16 +3,16 @@ title: "Fleet Router"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/fleet-router.js"
 source_path: "scripts/global/fleet-router.js"
-source_sha256: 85c93defdfa1403a8c9b9380a94768dc81e614b31f863c92e46b5308eb3c1702
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: 2bdd36806646468c2e3cc09acc0149190ae2196c0548e0ae6d34e4e0307938a3
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Fleet Router

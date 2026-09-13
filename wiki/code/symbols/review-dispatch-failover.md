@@ -3,16 +3,16 @@ title: "Review Dispatch Failover"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/review-dispatch-failover.js"
 source_path: "scripts/global/review-dispatch-failover.js"
-source_sha256: 50cb6bedf2ea1adc23d88c7ae426089ce3f560f435869f28b4408e8ddfbf0944
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: c4e9a504da794027da33f20d6802276299b9adc4576c5955501cff85990e8fb1
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Review Dispatch Failover

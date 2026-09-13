@@ -3,16 +3,16 @@ title: "Governance Rule Parity"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/governance-rule-parity.js"
 source_path: "scripts/global/governance-rule-parity.js"
 source_sha256: 446de806105e94e0ccc1d699d3bda58c64f38248c21bbd8c63c43fa4f001fd65
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Governance Rule Parity

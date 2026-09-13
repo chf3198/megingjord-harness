@@ -3,16 +3,16 @@ title: "Split Test Runner"
 type: code
 sub_layer: structural
 content_trust_score: 0.77
-created: "2026-06-28"
-updated: "2026-06-28"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/split-test-runner.js"
 source_path: "scripts/global/split-test-runner.js"
 source_sha256: 7d84149fe69d5580ff3e82d695c866be76e66d81fee5aba0b4b79ba66a4a124c
-last_updated: "2026-06-28"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Split Test Runner

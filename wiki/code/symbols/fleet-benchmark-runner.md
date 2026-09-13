@@ -3,16 +3,16 @@ title: "Fleet Benchmark Runner"
 type: code
 sub_layer: structural
 content_trust_score: 0.5
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/fleet-benchmark-runner.js"
 source_path: "scripts/global/fleet-benchmark-runner.js"
-source_sha256: 4c3998a739057366aae7365d59a96ba49d4f10a7fe4b0d4770a6b8a7bfbb6370
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: 369662365a75de9536425fe459faf4f3e99bfe42bcaa8dcdb47d537aadc169c4
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Fleet Benchmark Runner

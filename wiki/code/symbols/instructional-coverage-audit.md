@@ -3,16 +3,16 @@ title: "Instructional Coverage Audit"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/instructional-coverage-audit.js"
 source_path: "scripts/global/instructional-coverage-audit.js"
 source_sha256: 01601f41994314bc6d939837367b697ff0c369e85063e8ab27151fadb7eb6f16
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Instructional Coverage Audit

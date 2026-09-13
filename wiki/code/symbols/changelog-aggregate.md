@@ -3,16 +3,16 @@ title: "Changelog Aggregate"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/changelog-aggregate.js"
 source_path: "scripts/global/changelog-aggregate.js"
 source_sha256: f0b7805d1db3f83a9f513999731c9de1230464fcb877cbaa177cf58708324410
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Changelog Aggregate

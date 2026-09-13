@@ -3,16 +3,16 @@ title: "Detect Runtime"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/detect-runtime.js"
 source_path: "scripts/global/detect-runtime.js"
-source_sha256: 5d575e466392024053942af51b7159da034d6db57b081d8028d6120356246325
-last_updated: "2026-06-17"
-generated_by_run: local
+source_sha256: 9fd7255996f599b519cbebe4e8b6b88315f4a952706bf595d089ebdf30d53e26
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Detect Runtime

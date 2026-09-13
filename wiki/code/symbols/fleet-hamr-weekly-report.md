@@ -3,16 +3,16 @@ title: "Fleet Hamr Weekly Report"
 type: code
 sub_layer: structural
 content_trust_score: 0.5
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/fleet-hamr-weekly-report.js"
 source_path: "scripts/global/fleet-hamr-weekly-report.js"
 source_sha256: 56eec1f4c624e50b95eda98da09ebacbe6f777cd525236b38be2ea689cd1b398
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Fleet Hamr Weekly Report

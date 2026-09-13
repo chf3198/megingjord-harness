@@ -3,16 +3,16 @@ title: "Fleet Profile Bench"
 type: code
 sub_layer: structural
 content_trust_score: 0.7
-created: "2026-06-17"
-updated: "2026-06-17"
+created: "2026-09-13"
+updated: "2026-09-13"
 tags: [script, wiki-a]
 related: []
 status: generated
 source_file: "scripts/global/fleet-profile-bench.js"
 source_path: "scripts/global/fleet-profile-bench.js"
 source_sha256: 0fa41acd63051a432ac09b9492a4c722eafdd28cb3b9dca4ceecfe94ccd65e2a
-last_updated: "2026-06-17"
-generated_by_run: local
+last_updated: "2026-09-13"
+generated_by_run: reconcile
 ---
 
 # Fleet Profile Bench
