@@ -31,7 +31,12 @@ jobs:
         id: review
         run: |
           RESULT=$(node scripts/global/consultant-checks.js --dry-run 2>/dev/null || echo '{"skipped":true}')
-          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+          # RESULT can span several lines; use the delimiter form for multi-line outputs
+          {
+            echo "result<<__REVIEW_RESULT_EOF__"
+            echo "$RESULT"
+            echo "__REVIEW_RESULT_EOF__"
+          } >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
