@@ -79,3 +79,16 @@ test('routing-refresh stampMatrixHeader rewrites Date + adds Last refreshed', ()
   const after = fs.readFileSync(p, 'utf-8');
   expect(after).toContain(`**Last refreshed:** ${today}`);
 });
+
+test('routing-refresh stampHeaderText is idempotent (no duplicate header lines)', () => {
+  delete require.cache[require.resolve(REFRESH)];
+  const { stampHeaderText } = require(REFRESH);
+  const base = '# Matrix\n\n**Date:** 2025-01-01\n**Last refreshed:** 2025-01-01\n**Snapshot:** `x`\n**Last refreshed:** 2025-01-01\nbody\n';
+  const once = stampHeaderText(base, '2026-10-02');
+  const twice = stampHeaderText(once, '2026-10-03');
+  expect(once.match(/\*\*Last refreshed:\*\*/g)).toHaveLength(1);
+  expect(twice.match(/\*\*Last refreshed:\*\*/g)).toHaveLength(1);
+  expect(twice.match(/\*\*Snapshot:\*\*/g)).toHaveLength(1);
+  expect(twice).toContain('**Date:** 2026-10-03\n**Last refreshed:** 2026-10-03');
+  expect(twice).toContain('body');
+});
