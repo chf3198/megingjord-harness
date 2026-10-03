@@ -7,7 +7,7 @@ on:
 
 permissions:
   issues: write
-  contents: write
+  contents: read
 
 jobs:
   check-trend:
@@ -123,10 +123,14 @@ jobs:
               ], check=False)
           PYEOF
 
-      - name: Persist state file
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/antigravity-trend-state.json
-          git diff --cached --quiet || git commit -m "chore(it-ops): update antigravity trend state [skip ci]"
-          git push
+      # main is ruleset-protected (required checks), so CI cannot push the state
+      # file. Publish it as an artifact. NOTE: state is still not carried between
+      # runs (it never was: every push since the ruleset was rejected), so behavior
+      # is unchanged; restoring cross-run state is a separate design decision.
+      - name: Upload state file
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        with:
+          name: antigravity-trend-state
+          path: .github/antigravity-trend-state.json
+          if-no-files-found: warn
+          retention-days: 90
