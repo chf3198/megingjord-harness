@@ -98,5 +98,5 @@ async function run() {
   process.exit(report.totalDrift ? 1 : 0);
 }
 
-module.exports = { classify, classifyIssue };
+module.exports = { classify, classifyIssue, buildReport };
 if (require.main === module) run().catch(e => { console.error(e); process.exit(1); });
