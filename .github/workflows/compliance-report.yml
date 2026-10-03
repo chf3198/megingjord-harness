@@ -9,7 +9,7 @@ jobs:
     name: compliance-report
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       issues: write
       pull-requests: read
       checks: read
@@ -65,10 +65,12 @@ jobs:
             ].join('\n');
             core.summary.addRaw(summary);
             await core.summary.write();
-      - name: Commit report
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/compliance-report.json
-          git diff --cached --quiet || git commit -m "chore(governance): update compliance report"
-          git push
+      # main is ruleset-protected (required checks), so CI cannot push the report.
+      # The table is already in the job summary; the JSON is published as an artifact.
+      - name: Upload compliance report
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        with:
+          name: compliance-report
+          path: .github/compliance-report.json
+          if-no-files-found: warn
+          retention-days: 30

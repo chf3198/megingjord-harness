@@ -9,7 +9,8 @@ jobs:
     name: governance-drift-detection
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      issues: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -46,10 +47,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: node scripts/global/epic-close-validator.js || true
-      - name: Commit drift report
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add logs/governance-drift.json
-          git diff --cached --quiet || git commit -m "chore(governance): update drift detection report"
-          git push
+      # logs/ is gitignored and main is ruleset-protected (required checks), so the
+      # report cannot be committed from CI. Publish it as a run artifact instead.
+      - name: Upload drift report
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        with:
+          name: governance-drift-report
+          path: logs/governance-drift.json
+          if-no-files-found: warn
+          retention-days: 30
