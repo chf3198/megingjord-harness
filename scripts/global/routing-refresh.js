@@ -64,13 +64,18 @@ async function snapshot() {
   };
 }
 
+// Pure header rewrite. Drops any existing Last refreshed/Snapshot lines first so
+// repeated refreshes do not stack duplicate header lines.
+function stampHeaderText(txt, today) {
+  let out = txt.replace(/> ⚠️ \*\*STALE[\s\S]*?Use the routing tier definitions[^\n]*\n/, '');
+  out = out.replace(/^\*\*(Last refreshed|Snapshot):\*\*[^\n]*\n/gm, '');
+  return out.replace(/^\*\*Date:\*\*[^\n]*/m, `**Date:** ${today}\n**Last refreshed:** ${today}\n**Snapshot:** \`.dashboard/routing-snapshot.json\``);
+}
+
 function stampMatrixHeader(snap) {
   if (!fs.existsSync(MATRIX)) return false;
   const today = snap.generatedAt.slice(0, 10);
-  let txt = fs.readFileSync(MATRIX, 'utf-8');
-  txt = txt.replace(/> ⚠️ \*\*STALE[\s\S]*?Use the routing tier definitions[^\n]*\n/, '');
-  txt = txt.replace(/^\*\*Date:\*\*[^\n]*/m, `**Date:** ${today}\n**Last refreshed:** ${today}\n**Snapshot:** \`.dashboard/routing-snapshot.json\``);
-  fs.writeFileSync(MATRIX, txt);
+  fs.writeFileSync(MATRIX, stampHeaderText(fs.readFileSync(MATRIX, 'utf-8'), today));
   return true;
 }
 
@@ -87,4 +92,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch(e => { process.stderr.write(`❌ ${e.message}\n`); process.exit(1); });
-module.exports = { snapshot, stampMatrixHeader };
+module.exports = { snapshot, stampMatrixHeader, stampHeaderText };
